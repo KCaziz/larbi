@@ -12,11 +12,16 @@ export default function ArticlePage() {
   const { t } = useTranslation();
 
   return (
-    <section className="page-section page-status">
-      <p className="code">{t('article.label')}</p>
+    <section className="status-hero">
+      <div className="status-emoji" aria-hidden="true">
+        📝
+      </div>
+      <span className="status-label">{t('article.label')}</span>
       <h1>{t('article.notFoundTitle', { slug })}</h1>
       <Notice variant="info">{t('article.notice')}</Notice>
-      <Button to="/blog">{t('article.back')}</Button>
+      <Button to="/blog" className="btn-lg">
+        {t('article.back')}
+      </Button>
     </section>
   );
 }

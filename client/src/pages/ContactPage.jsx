@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import PageHeader from '../components/layout/PageHeader.jsx';
 import Button from '../components/ui/Button.jsx';
 import Notice from '../components/ui/Notice.jsx';
+import Section from '../components/ui/Section.jsx';
 import './Pages.css';
 
 const initialForm = { name: '', email: '', message: '' };
@@ -31,45 +33,62 @@ export default function ContactPage() {
   };
 
   return (
-    <section className="page-section contact-layout">
-      <div className="contact-details">
-        <h1>{t('contact.title')}</h1>
-        <p>{t('contact.intro')}</p>
-        <Notice variant="action-needed">{t('contact.notice')}</Notice>
-      </div>
+    <>
+      <PageHeader icon="✉️" title={t('contact.title')} subtitle={t('contact.intro')} />
 
-      <form className="form-stack" onSubmit={handleSubmit} noValidate>
-        <div className="form-field">
-          <label htmlFor="name">{t('contact.form.name')}</label>
-          <input id="name" name="name" type="text" value={form.name} onChange={handleChange} />
+      <Section>
+        <div className="contact-layout">
+          <article className="feature-card tone-blue">
+            <span className="icon-badge" aria-hidden="true">
+              💬
+            </span>
+            <h3>{t('contact.asideTitle')}</h3>
+            <Notice variant="action-needed">{t('contact.notice')}</Notice>
+          </article>
+
+          <div className="form-card">
+            <h2>{t('contact.formTitle')}</h2>
+            <form className="form-stack" onSubmit={handleSubmit} noValidate>
+              <div className="form-field">
+                <label htmlFor="name">{t('contact.form.name')}</label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={form.name}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="form-field">
+                <label htmlFor="email">{t('contact.form.email')}</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="form-field">
+                <label htmlFor="message">{t('contact.form.message')}</label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows={6}
+                  value={form.message}
+                  onChange={handleChange}
+                />
+              </div>
+              {status && (
+                <p className="form-status" role="status">
+                  {status.text}
+                </p>
+              )}
+              <Button type="submit">{t('contact.form.submit')}</Button>
+            </form>
+          </div>
         </div>
-        <div className="form-field">
-          <label htmlFor="email">{t('contact.form.email')}</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="form-field">
-          <label htmlFor="message">{t('contact.form.message')}</label>
-          <textarea
-            id="message"
-            name="message"
-            rows={6}
-            value={form.message}
-            onChange={handleChange}
-          />
-        </div>
-        {status && (
-          <p className="form-status" role="status">
-            {status.text}
-          </p>
-        )}
-        <Button type="submit">{t('contact.form.submit')}</Button>
-      </form>
-    </section>
+      </Section>
+    </>
   );
 }

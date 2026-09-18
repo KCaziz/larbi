@@ -11,13 +11,29 @@ export const mainNavLinks = [
   { labelKey: 'nav.contact', to: '/contact' },
 ];
 
-export const authNavLinks = [
-  { labelKey: 'nav.login', to: '/connexion' },
-  { labelKey: 'nav.register', to: '/inscription' },
-];
-
-export const footerLinks = [
-  { labelKey: 'nav.faq', to: '/faq' },
-  { labelKey: 'nav.legalNotice', to: '/mentions-legales' },
-  { labelKey: 'nav.privacy', to: '/confidentialite' },
+export const footerColumns = [
+  {
+    titleKey: 'footer.columns.platform',
+    links: [
+      { labelKey: 'nav.formations', to: '/formations' },
+      { labelKey: 'nav.tools', to: '/outils' },
+      { labelKey: 'nav.blog', to: '/blog' },
+    ],
+  },
+  {
+    titleKey: 'footer.columns.company',
+    links: [
+      { labelKey: 'nav.about', to: '/a-propos' },
+      { labelKey: 'nav.services', to: '/services' },
+      { labelKey: 'nav.contact', to: '/contact' },
+    ],
+  },
+  {
+    titleKey: 'footer.columns.info',
+    links: [
+      { labelKey: 'nav.faq', to: '/faq' },
+      { labelKey: 'nav.legalNotice', to: '/mentions-legales' },
+      { labelKey: 'nav.privacy', to: '/confidentialite' },
+    ],
+  },
 ];

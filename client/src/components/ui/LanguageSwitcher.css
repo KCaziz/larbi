@@ -1,13 +1,16 @@
 .language-switcher {
-  height: 36px;
-  padding: 0 8px;
+  height: 40px;
+  padding: 0 12px;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  background: transparent;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
   color: var(--text-h);
   font: inherit;
   font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: border-color 0.2s;
 }
 
 .language-switcher:hover {

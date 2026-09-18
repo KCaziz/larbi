@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import AuthAside from '../../components/layout/AuthAside.jsx';
 import Button from '../../components/ui/Button.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import '../Pages.css';
@@ -31,60 +32,79 @@ export default function RegisterPage() {
 
   return (
     <section className="auth-page">
-      <h1>{t('auth.register.title')}</h1>
-      <p>{t('auth.register.intro')}</p>
+      <div className="auth-split">
+        <AuthAside icon="✨" />
 
-      <form className="form-stack" onSubmit={handleSubmit} noValidate>
-        <div className="form-field">
-          <label htmlFor="name">{t('auth.register.nameLabel')}</label>
-          <input id="name" name="name" type="text" value={form.name} onChange={handleChange} />
-        </div>
-        <div className="form-field">
-          <label htmlFor="email">{t('auth.register.emailLabel')}</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            value={form.email}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="form-field">
-          <label htmlFor="password">{t('auth.register.passwordLabel')}</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            value={form.password}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="form-field">
-          <label htmlFor="accountType">{t('auth.register.accountTypeLabel')}</label>
-          <select id="accountType" name="accountType" value={form.accountType} onChange={handleChange}>
-            <option value="auto-entrepreneur">{t('accountTypes.autoEntrepreneur')}</option>
-            <option value="pme">{t('accountTypes.pme')}</option>
-            <option value="pmi">{t('accountTypes.pmi')}</option>
-          </select>
-        </div>
+        <div className="auth-main">
+          <h1>{t('auth.register.title')}</h1>
+          <p>{t('auth.register.intro')}</p>
 
-        {status && (
-          <p className="form-status" role="status">
-            {status.text}
-          </p>
-        )}
+          <form className="form-stack" onSubmit={handleSubmit} noValidate>
+            <div className="form-field">
+              <label htmlFor="name">{t('auth.register.nameLabel')}</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={form.name}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-field">
+              <label htmlFor="email">{t('auth.register.emailLabel')}</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={form.email}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-field">
+              <label htmlFor="password">{t('auth.register.passwordLabel')}</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                value={form.password}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-field">
+              <label htmlFor="accountType">{t('auth.register.accountTypeLabel')}</label>
+              <select
+                id="accountType"
+                name="accountType"
+                value={form.accountType}
+                onChange={handleChange}
+              >
+                <option value="auto-entrepreneur">{t('accountTypes.autoEntrepreneur')}</option>
+                <option value="pme">{t('accountTypes.pme')}</option>
+                <option value="pmi">{t('accountTypes.pmi')}</option>
+              </select>
+            </div>
 
-        <Button type="submit">{t('auth.register.submit')}</Button>
+            {status && (
+              <p className="form-status" role="status">
+                {status.text}
+              </p>
+            )}
 
-        <div className="form-links">
-          <span>{t('auth.register.alreadyAccount')}</span>
-          <Link to="/connexion">{t('auth.register.login')}</Link>
+            <Button type="submit" className="btn-lg">
+              {t('auth.register.submit')}
+            </Button>
+
+            <div className="form-links">
+              <span>{t('auth.register.alreadyAccount')}</span>
+              <Link to="/connexion">{t('auth.register.login')}</Link>
+            </div>
+          </form>
+
+          <Notice variant="info">{t('auth.register.notice')}</Notice>
         </div>
-      </form>
-
-      <Notice variant="info">{t('auth.register.notice')}</Notice>
+      </div>
     </section>
   );
 }

@@ -1,19 +1,30 @@
 .notice {
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  padding: 16px 20px;
-  font-size: 0.95rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
   margin: 0 0 24px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-inline-start-width: 5px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  font-size: 0.95rem;
+  color: var(--text-h);
+}
+
+.notice-icon {
+  flex: none;
+  font-size: 1.25rem;
+  line-height: 1.4;
 }
 
 .notice-info {
-  background: var(--accent-bg);
   border-color: var(--accent-border);
-  color: var(--text-h);
+  background: var(--accent-bg);
 }
 
 .notice-action-needed {
-  background: var(--bg-alt);
-  border-color: var(--danger);
-  color: var(--text-h);
+  border-color: var(--amber);
+  background: var(--amber-bg);
 }

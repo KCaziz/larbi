@@ -1,0 +1,50 @@
+.section {
+  padding: 72px 20px;
+}
+
+.section-alt {
+  background: var(--bg-alt);
+  border-block: 1px solid var(--border);
+}
+
+.section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-head {
+  max-width: 680px;
+  margin: 0 auto 44px;
+  text-align: center;
+}
+
+.section-head h2 {
+  margin-bottom: 14px;
+  font-size: 2rem;
+}
+
+.section-head h2::after {
+  content: '';
+  display: block;
+  width: 56px;
+  height: 4px;
+  margin: 14px auto 0;
+  border-radius: 4px;
+  background: var(--gradient-brand);
+}
+
+.section-head p {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding: 52px 20px;
+  }
+  .section-head {
+    margin-bottom: 32px;
+  }
+  .section-head h2 {
+    font-size: 1.6rem;
+  }
+}

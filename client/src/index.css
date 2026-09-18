@@ -1,21 +1,52 @@
 :root {
-  --text: #3f3a46;
-  --text-h: #08060d;
-  --bg: #fff;
-  --bg-alt: #f7f6fa;
-  --border: #e5e4e7;
+  /* Text & surfaces */
+  --text: #4b4560;
+  --text-h: #140e2b;
+  --bg: #ffffff;
+  --bg-alt: #f6f3ff;
+  --surface: #ffffff;
+  --border: #e6e1f5;
+
+  /* Brand palette — violet is the primary; each product domain gets its own
+     companion tone (E-Learning = violet, Blog = blue, Tools = amber). */
   --accent: #7c3aed;
   --accent-hover: #6d28d9;
   --accent-bg: rgba(124, 58, 237, 0.1);
   --accent-border: rgba(124, 58, 237, 0.5);
+  --blue: #0369a1;
+  --blue-bg: rgba(3, 105, 161, 0.11);
+  --amber: #b45309;
+  --amber-bg: rgba(217, 119, 6, 0.14);
+  --pink: #be185d;
+  --pink-bg: rgba(219, 39, 119, 0.11);
+  --green: #047857;
+  --green-bg: rgba(5, 150, 105, 0.13);
   --danger: #dc2626;
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, #6d28d9 0%, #c026d3 55%, #ec4899 100%);
+  --gradient-text: linear-gradient(135deg, #6d28d9 0%, #c026d3 55%, #db2777 100%);
+  --gradient-soft:
+    radial-gradient(60% 70% at 15% 0%, rgba(124, 58, 237, 0.16), transparent 70%),
+    radial-gradient(50% 60% at 90% 10%, rgba(236, 72, 153, 0.13), transparent 70%);
+  --dot: rgba(124, 58, 237, 0.16);
+
+  /* Footer band */
+  --footer-bg: #1b1133;
+  --footer-text: #cfc6e8;
+  --footer-heading: #ffffff;
+
+  /* Shape & depth */
+  --radius: 18px;
+  --radius-sm: 10px;
+  --shadow-sm: 0 1px 2px rgba(20, 14, 43, 0.06), 0 2px 8px rgba(20, 14, 43, 0.05);
+  --shadow-md: 0 8px 24px rgba(76, 29, 149, 0.12);
+  --shadow-lg: 0 18px 48px rgba(76, 29, 149, 0.16);
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --header-height: 64px;
+  --header-height: 68px;
 
-  font: 16px/150% var(--sans);
+  font: 16px/160% var(--sans);
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -31,34 +62,70 @@
    and the inline script in index.html that avoids a flash on first paint). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --text: #cbd5e1;
-    --text-h: #f8fafc;
-    --bg: #121218;
-    --bg-alt: #1a1b22;
-    --border: #2e303a;
+    --text: #c4bfd6;
+    --text-h: #f7f5ff;
+    --bg: #100d1a;
+    --bg-alt: #171326;
+    --surface: #1c1730;
+    --border: #2f2946;
     --accent: #a78bfa;
     --accent-hover: #c4b5fd;
-    --accent-bg: rgba(167, 139, 250, 0.15);
+    --accent-bg: rgba(167, 139, 250, 0.16);
     --accent-border: rgba(167, 139, 250, 0.5);
+    --blue: #38bdf8;
+    --blue-bg: rgba(56, 189, 248, 0.15);
+    --amber: #fbbf24;
+    --amber-bg: rgba(251, 191, 36, 0.15);
+    --pink: #f472b6;
+    --pink-bg: rgba(244, 114, 182, 0.15);
+    --green: #34d399;
+    --green-bg: rgba(52, 211, 153, 0.15);
     --danger: #f87171;
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+    --gradient-brand: linear-gradient(135deg, #5b21b6 0%, #a21caf 55%, #be185d 100%);
+    --gradient-text: linear-gradient(135deg, #c4b5fd 0%, #e879f9 55%, #f9a8d4 100%);
+    --gradient-soft:
+      radial-gradient(60% 70% at 15% 0%, rgba(124, 58, 237, 0.28), transparent 70%),
+      radial-gradient(50% 60% at 90% 10%, rgba(236, 72, 153, 0.2), transparent 70%);
+    --dot: rgba(167, 139, 250, 0.16);
+    --footer-bg: #0a0713;
+    --footer-text: #b3aacd;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.55);
   }
 }
 
 :root[data-theme='dark'] {
-  --text: #cbd5e1;
-  --text-h: #f8fafc;
-  --bg: #121218;
-  --bg-alt: #1a1b22;
-  --border: #2e303a;
+  --text: #c4bfd6;
+  --text-h: #f7f5ff;
+  --bg: #100d1a;
+  --bg-alt: #171326;
+  --surface: #1c1730;
+  --border: #2f2946;
   --accent: #a78bfa;
   --accent-hover: #c4b5fd;
-  --accent-bg: rgba(167, 139, 250, 0.15);
+  --accent-bg: rgba(167, 139, 250, 0.16);
   --accent-border: rgba(167, 139, 250, 0.5);
+  --blue: #38bdf8;
+  --blue-bg: rgba(56, 189, 248, 0.15);
+  --amber: #fbbf24;
+  --amber-bg: rgba(251, 191, 36, 0.15);
+  --pink: #f472b6;
+  --pink-bg: rgba(244, 114, 182, 0.15);
+  --green: #34d399;
+  --green-bg: rgba(52, 211, 153, 0.15);
   --danger: #f87171;
-  --shadow:
-    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  --gradient-brand: linear-gradient(135deg, #5b21b6 0%, #a21caf 55%, #be185d 100%);
+  --gradient-text: linear-gradient(135deg, #c4b5fd 0%, #e879f9 55%, #f9a8d4 100%);
+  --gradient-soft:
+    radial-gradient(60% 70% at 15% 0%, rgba(124, 58, 237, 0.28), transparent 70%),
+    radial-gradient(50% 60% at 90% 10%, rgba(236, 72, 153, 0.2), transparent 70%);
+  --dot: rgba(167, 139, 250, 0.16);
+  --footer-bg: #0a0713;
+  --footer-text: #b3aacd;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.55);
 }
 
 *,
@@ -70,6 +137,7 @@
 body {
   margin: 0;
   min-height: 100svh;
+  background: var(--bg);
 }
 
 #root {
@@ -82,18 +150,24 @@ h1,
 h2,
 h3 {
   color: var(--text-h);
-  font-weight: 600;
-  line-height: 1.25;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
 }
 
 h1 {
-  font-size: 2.25rem;
+  font-size: 2.5rem;
   margin: 0 0 16px;
 }
 
 h2 {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   margin: 0 0 12px;
+}
+
+h3 {
+  font-size: 1.15rem;
+  margin: 0 0 8px;
 }
 
 p {
@@ -111,4 +185,52 @@ img {
 
 main {
   flex: 1;
+}
+
+/* Tone modifiers: give any card/icon/chip its own accent colour by adding
+   one of these classes — components read --tone / --tone-bg. */
+.tone-violet {
+  --tone: var(--accent);
+  --tone-bg: var(--accent-bg);
+}
+.tone-blue {
+  --tone: var(--blue);
+  --tone-bg: var(--blue-bg);
+}
+.tone-amber {
+  --tone: var(--amber);
+  --tone-bg: var(--amber-bg);
+}
+.tone-pink {
+  --tone: var(--pink);
+  --tone-bg: var(--pink-bg);
+}
+.tone-green {
+  --tone: var(--green);
+  --tone-bg: var(--green-bg);
+}
+
+.gradient-text {
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (max-width: 640px) {
+  h1 {
+    font-size: 2rem;
+  }
+  h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

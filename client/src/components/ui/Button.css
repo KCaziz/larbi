@@ -3,28 +3,44 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: 11px 24px;
+  border-radius: 999px;
   border: 1px solid transparent;
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    background-color 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--accent-border);
+  outline-offset: 2px;
 }
 
 .btn-primary {
-  background: var(--accent);
+  background: var(--gradient-brand);
   color: #fff;
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.35);
 }
 .btn-primary:hover {
-  background: var(--accent-hover);
+  box-shadow: 0 10px 26px rgba(124, 58, 237, 0.45);
 }
 
 .btn-secondary {
-  background: transparent;
+  background: var(--surface);
   border-color: var(--border);
   color: var(--text-h);
+  box-shadow: var(--shadow-sm);
 }
 .btn-secondary:hover {
   border-color: var(--accent);
@@ -32,9 +48,32 @@
 }
 
 .btn-ghost {
+  padding-inline: 8px;
   background: transparent;
-  color: var(--text-h);
+  color: var(--accent);
 }
 .btn-ghost:hover {
-  color: var(--accent);
+  transform: none;
+  color: var(--accent-hover);
+}
+
+/* For use on the coloured gradient bands (CTA band, page banners). */
+.btn-light {
+  background: #fff;
+  color: #6d28d9;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.btn-outline-light {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.7);
+  color: #fff;
+}
+.btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.btn-lg {
+  padding: 14px 32px;
+  font-size: 1.02rem;
 }

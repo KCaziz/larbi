@@ -28,7 +28,13 @@
     "main": "Navigation principale"
   },
   "footer": {
-    "copyright": "© {{year}} {{brand}}. Tous droits réservés."
+    "copyright": "© {{year}} {{brand}}. Tous droits réservés.",
+    "tagline": "Formations, blog et outils métier pour les indépendants et les entreprises.",
+    "columns": {
+      "platform": "Plateforme",
+      "company": "Entreprise",
+      "info": "Informations"
+    }
   },
   "theme": {
     "toggleToLight": "Passer au mode clair",
@@ -42,7 +48,8 @@
       "title": "Bienvenue sur Larbi",
       "body": "Formations en ligne, blog, outils métier et suivi de progression, réunis sur une seule plateforme, avec un espace adapté à chaque type de compte.",
       "ctaFormations": "Découvrir les formations",
-      "ctaTools": "Voir les outils"
+      "ctaTools": "Voir les outils",
+      "badge": "Formations · Blog · Outils"
     },
     "featuresSectionTitle": "Ce que propose la plateforme",
     "features": {
@@ -66,6 +73,47 @@
       "title": "Un compte adapté à votre profil",
       "body": "Chaque compte est associé à une catégorie et à un niveau d'accès, qui déterminent les contenus et fonctionnalités disponibles.",
       "cta": "Voir le détail des accès par type de compte →"
+    },
+    "featuresSectionSubtitle": "Trois domaines complémentaires, accessibles avec un seul compte.",
+    "stats": {
+      "multilingual": {
+        "title": "Multilingue",
+        "text": "Français, anglais et arabe (RTL)"
+      },
+      "themes": {
+        "title": "Clair & sombre",
+        "text": "Choisissez le thème qui vous convient"
+      },
+      "security": {
+        "title": "Accès sécurisé",
+        "text": "Autorisations vérifiées côté serveur"
+      },
+      "certification": {
+        "title": "Certification",
+        "text": "Délivrée une fois la formation complétée"
+      }
+    },
+    "steps": {
+      "title": "Comment ça marche",
+      "subtitle": "Trois étapes, de l'inscription à la certification.",
+      "items": [
+        {
+          "title": "Créez votre compte",
+          "body": "Choisissez votre catégorie : auto-entrepreneur, PME ou PMI."
+        },
+        {
+          "title": "Explorez la plateforme",
+          "body": "Accédez aux formations, au blog et aux outils selon votre niveau d'accès."
+        },
+        {
+          "title": "Progressez et validez",
+          "body": "Suivez votre progression et obtenez votre certification."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Prêt à commencer ?",
+      "body": "Rejoignez la plateforme et accédez à des contenus adaptés à votre profil."
     }
   },
   "about": {
@@ -74,7 +122,28 @@
     "approachTitle": "Notre approche",
     "approachBody": "Chaque formation est organisée en cours, avec un suivi de progression et une certification délivrée une fois les conditions de complétion remplies. Les contenus du blog sont accessibles publiquement, certains étant réservés aux comptes premium selon le profil de l'utilisateur.",
     "securityTitle": "Sécurité et confidentialité",
-    "securityBody": "La protection des comptes et des contenus (vidéos, images, documents) est une priorité : les autorisations d'accès sont contrôlées côté serveur, et les contenus propriétaires ne sont jamais exposés publiquement sans vérification préalable."
+    "securityBody": "La protection des comptes et des contenus (vidéos, images, documents) est une priorité : les autorisations d'accès sont contrôlées côté serveur, et les contenus propriétaires ne sont jamais exposés publiquement sans vérification préalable.",
+    "values": {
+      "title": "Nos engagements",
+      "items": [
+        {
+          "title": "Accès contrôlé",
+          "body": "Les autorisations sont vérifiées côté serveur, jamais seulement dans l'interface."
+        },
+        {
+          "title": "Contenus protégés",
+          "body": "Vidéos, images et documents propriétaires ne sont jamais exposés sans vérification."
+        },
+        {
+          "title": "Progression suivie",
+          "body": "Votre avancement est enregistré cours par cours et par formation."
+        },
+        {
+          "title": "Certification fiable",
+          "body": "Un certificat n'est délivré que lorsque toutes les conditions sont remplies."
+        }
+      ]
+    }
   },
   "services": {
     "title": "Services & offres",
@@ -94,7 +163,9 @@
       "body": "Simulateur de crédit et générateur de facture PDF/Excel. Accès authentifié et selon les droits.",
       "cta": "Voir les outils →"
     },
-    "detailCta": "Voir le détail des accès par type de compte →"
+    "detailCta": "Voir le détail des accès par type de compte →",
+    "compareTitle": "Quel accès selon votre compte ?",
+    "compareBody": "Consultez le détail des accès par type de compte et niveau d'accès."
   },
   "faq": {
     "title": "Questions fréquentes",
@@ -119,11 +190,17 @@
         "question": "Mes contenus et médias sont-ils protégés ?",
         "answer": "L'accès aux contenus propriétaires (vidéos, images, documents) est contrôlé côté serveur. Aucune solution web ne peut empêcher totalement la copie d'un contenu affiché, mais la plateforme limite fortement les possibilités de récupération directe."
       }
-    ]
+    ],
+    "subtitle": "Les réponses aux questions les plus courantes sur les comptes, l'accès et la certification.",
+    "cta": {
+      "title": "Une autre question ?",
+      "body": "Écrivez-nous via le formulaire de contact.",
+      "button": "Nous contacter"
+    }
   },
   "contact": {
     "title": "Contact",
-    "intro": "Une question sur les formations, le blog ou les outils ? Écrivez-nous via le formulaire ci-contre.",
+    "intro": "Une question sur les formations, le blog ou les outils ? Écrivez-nous via le formulaire ci-dessous.",
     "notice": "Coordonnées de contact (email, téléphone, adresse) à fournir par le client avant mise en ligne — non affichées pour éviter de publier des informations inventées.",
     "form": {
       "name": "Nom",
@@ -136,7 +213,9 @@
     },
     "status": {
       "notWired": "L'envoi de ce formulaire sera activé lors de l'intégration backend (tâche P1-07). Votre message n'a pas encore été transmis."
-    }
+    },
+    "asideTitle": "Une question ?",
+    "formTitle": "Envoyez-nous un message"
   },
   "features": {
     "title": "Fonctionnalités accessibles",
@@ -161,7 +240,25 @@
     "title": "Formations",
     "body": "Chaque formation est composée d'un nombre défini de cours. Votre progression est suivie cours par cours et par formation, et une certification vous est délivrée une fois toutes les conditions de complétion remplies.",
     "accessNote": "L'accès aux formations nécessite d'être connecté et dépend de vos droits.",
-    "notice": "Le catalogue des formations, l'inscription et la lecture des cours seront disponibles à partir de la Phase 2 (E-Learning — tâches P2-01 à P2-07)."
+    "notice": "Le catalogue des formations, l'inscription et la lecture des cours seront disponibles à partir de la Phase 2 (E-Learning — tâches P2-01 à P2-07).",
+    "subtitle": "Des parcours structurés en cours, avec suivi de progression et certification.",
+    "flow": {
+      "title": "Le parcours d'une formation",
+      "items": [
+        {
+          "title": "Des cours",
+          "body": "Chaque formation est composée d'un nombre défini de cours."
+        },
+        {
+          "title": "Une progression suivie",
+          "body": "Votre avancement est enregistré côté serveur, cours par cours."
+        },
+        {
+          "title": "Une certification",
+          "body": "Délivrée une fois toutes les conditions de complétion remplies."
+        }
+      ]
+    }
   },
   "toolsPresentation": {
     "title": "Outils",
@@ -180,7 +277,8 @@
   "blogList": {
     "title": "Blog",
     "intro": "Articles et tutoriels en accès public, avec des contenus premium selon votre profil.",
-    "notice": "Aucun article n'est encore publié : le CMS et la liste réelle des articles arrivent en Phase 3 (tâches P3-01 à P3-03)."
+    "notice": "Aucun article n'est encore publié : le CMS et la liste réelle des articles arrivent en Phase 3 (tâches P3-01 à P3-03).",
+    "emptyTitle": "Aucun article pour le moment"
   },
   "article": {
     "label": "Article",
@@ -204,7 +302,8 @@
     "hostingField": "Hébergeur",
     "toComplete": "[à compléter par le client]",
     "toCompleteShort": "[à compléter]",
-    "toCompleteHosting": "[à compléter une fois l'infrastructure de production choisie — voir P5-06]"
+    "toCompleteHosting": "[à compléter une fois l'infrastructure de production choisie — voir P5-06]",
+    "subtitle": "Informations légales relatives à l'éditeur et à l'hébergement du site."
   },
   "privacy": {
     "title": "Politique de confidentialité",
@@ -215,7 +314,8 @@
     "securityBody": "L'accès aux comptes, aux formations, aux contenus premium et aux médias propriétaires (vidéos, images, documents) est vérifié côté serveur. Les identifiants transmis à l'API sont systématiquement contrôlés vis-à-vis de l'utilisateur connecté et de ses permissions.",
     "rightsTitle": "Vos droits",
     "rightsContact": "Contact pour l'exercice de vos droits",
-    "toComplete": "[à compléter par le client]"
+    "toComplete": "[à compléter par le client]",
+    "subtitle": "Comment la plateforme traite et protège vos données personnelles."
   },
   "auth": {
     "login": {
@@ -253,6 +353,14 @@
       "errorRequired": "Merci de renseigner votre email.",
       "notWired": "L'envoi d'un lien de réinitialisation sera activé avec l'authentification (tâche P1-06).",
       "notice": "Formulaire fonctionnel côté interface, non encore relié à un envoi d'email réel (voir P1-06)."
+    },
+    "panel": {
+      "title": "Votre espace personnel",
+      "points": [
+        "Formations, suivi de progression et certification",
+        "Outils métier : simulateur de crédit et facturation",
+        "Contenus adaptés à votre profil et à votre niveau d'accès"
+      ]
     }
   },
   "account": {
@@ -295,7 +403,9 @@
       "lockedTitle": "Contenu réservé aux comptes premium",
       "lockedBody": "Passez à un compte premium pour débloquer ce contenu.",
       "footNote": "Ce verrouillage est uniquement visuel : l'accès réel est toujours vérifié côté serveur, jamais uniquement dans le frontend."
-    }
+    },
+    "title": "Mon espace",
+    "subtitle": "Profil, tableau de bord, type de compte et contenus premium."
   },
   "notFound": {
     "code": "Erreur 404",

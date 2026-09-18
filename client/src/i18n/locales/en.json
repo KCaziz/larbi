@@ -28,7 +28,13 @@
     "main": "Main navigation"
   },
   "footer": {
-    "copyright": "© {{year}} {{brand}}. All rights reserved."
+    "copyright": "© {{year}} {{brand}}. All rights reserved.",
+    "tagline": "Courses, a blog and business tools for freelancers and companies.",
+    "columns": {
+      "platform": "Platform",
+      "company": "Company",
+      "info": "Information"
+    }
   },
   "theme": {
     "toggleToLight": "Switch to light mode",
@@ -42,7 +48,8 @@
       "title": "Welcome to Larbi",
       "body": "Online courses, a blog, business tools and progress tracking, all on one platform, with a space tailored to each account type.",
       "ctaFormations": "Discover the courses",
-      "ctaTools": "See the tools"
+      "ctaTools": "See the tools",
+      "badge": "Courses · Blog · Tools"
     },
     "featuresSectionTitle": "What the platform offers",
     "features": {
@@ -66,6 +73,47 @@
       "title": "An account tailored to your profile",
       "body": "Each account has a category and an access level, which determine the content and features available.",
       "cta": "See access details by account type →"
+    },
+    "featuresSectionSubtitle": "Three complementary areas, all accessible with a single account.",
+    "stats": {
+      "multilingual": {
+        "title": "Multilingual",
+        "text": "French, English and Arabic (RTL)"
+      },
+      "themes": {
+        "title": "Light & dark",
+        "text": "Pick the theme that suits you"
+      },
+      "security": {
+        "title": "Secure access",
+        "text": "Permissions verified server-side"
+      },
+      "certification": {
+        "title": "Certification",
+        "text": "Issued once the course is completed"
+      }
+    },
+    "steps": {
+      "title": "How it works",
+      "subtitle": "Three steps, from sign-up to certification.",
+      "items": [
+        {
+          "title": "Create your account",
+          "body": "Choose your category: sole trader, SME or industrial SME."
+        },
+        {
+          "title": "Explore the platform",
+          "body": "Access courses, the blog and tools based on your access level."
+        },
+        {
+          "title": "Progress and get certified",
+          "body": "Track your progress and earn your certificate."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready to get started?",
+      "body": "Join the platform and access content tailored to your profile."
     }
   },
   "about": {
@@ -74,7 +122,28 @@
     "approachTitle": "Our approach",
     "approachBody": "Each course is organised into lessons, with progress tracking and a certificate issued once the completion conditions are met. Blog content is publicly accessible, with some of it reserved for premium accounts depending on the user's profile.",
     "securityTitle": "Security and privacy",
-    "securityBody": "Protecting accounts and content (videos, images, documents) is a priority: access permissions are checked server-side, and proprietary content is never exposed publicly without prior verification."
+    "securityBody": "Protecting accounts and content (videos, images, documents) is a priority: access permissions are checked server-side, and proprietary content is never exposed publicly without prior verification.",
+    "values": {
+      "title": "Our commitments",
+      "items": [
+        {
+          "title": "Controlled access",
+          "body": "Permissions are checked server-side, never only in the interface."
+        },
+        {
+          "title": "Protected content",
+          "body": "Proprietary videos, images and documents are never exposed without verification."
+        },
+        {
+          "title": "Tracked progress",
+          "body": "Your progress is recorded lesson by lesson and course by course."
+        },
+        {
+          "title": "Reliable certification",
+          "body": "A certificate is issued only when all conditions are met."
+        }
+      ]
+    }
   },
   "services": {
     "title": "Services & offers",
@@ -94,7 +163,9 @@
       "body": "Credit simulator and PDF/Excel invoice generator. Requires an account and depends on your access rights.",
       "cta": "See the tools →"
     },
-    "detailCta": "See access details by account type →"
+    "detailCta": "See access details by account type →",
+    "compareTitle": "Which access for your account?",
+    "compareBody": "See the detail of access by account type and access level."
   },
   "faq": {
     "title": "Frequently asked questions",
@@ -119,11 +190,17 @@
         "question": "Are my content and media protected?",
         "answer": "Access to proprietary content (videos, images, documents) is controlled server-side. No web solution can fully prevent the copying of content that is displayed, but the platform strongly limits the possibilities for direct retrieval."
       }
-    ]
+    ],
+    "subtitle": "Answers to the most common questions about accounts, access and certification.",
+    "cta": {
+      "title": "Another question?",
+      "body": "Write to us using the contact form.",
+      "button": "Contact us"
+    }
   },
   "contact": {
     "title": "Contact",
-    "intro": "A question about courses, the blog or the tools? Write to us using the form.",
+    "intro": "A question about courses, the blog or the tools? Write to us using the form below.",
     "notice": "Contact details (email, phone, address) must be provided by the client before going live — not shown here to avoid publishing invented information.",
     "form": {
       "name": "Name",
@@ -136,7 +213,9 @@
     },
     "status": {
       "notWired": "Sending this form will be enabled during backend integration (task P1-07). Your message has not been sent yet."
-    }
+    },
+    "asideTitle": "Have a question?",
+    "formTitle": "Send us a message"
   },
   "features": {
     "title": "Accessible features",
@@ -161,7 +240,25 @@
     "title": "Courses",
     "body": "Each course is made up of a defined number of lessons. Your progress is tracked lesson by lesson and course by course, and a certificate is issued once all completion conditions are met.",
     "accessNote": "Accessing courses requires being logged in and depends on your access rights.",
-    "notice": "The course catalogue, enrolment and lesson playback will be available starting in Phase 2 (E-Learning — tasks P2-01 to P2-07)."
+    "notice": "The course catalogue, enrolment and lesson playback will be available starting in Phase 2 (E-Learning — tasks P2-01 to P2-07).",
+    "subtitle": "Structured lesson paths with progress tracking and certification.",
+    "flow": {
+      "title": "How a course works",
+      "items": [
+        {
+          "title": "Lessons",
+          "body": "Each course is made up of a defined number of lessons."
+        },
+        {
+          "title": "Tracked progress",
+          "body": "Your progress is recorded server-side, lesson by lesson."
+        },
+        {
+          "title": "A certificate",
+          "body": "Issued once all completion conditions are met."
+        }
+      ]
+    }
   },
   "toolsPresentation": {
     "title": "Tools",
@@ -180,7 +277,8 @@
   "blogList": {
     "title": "Blog",
     "intro": "Publicly accessible articles and tutorials, with some premium content based on your profile.",
-    "notice": "No articles have been published yet: the CMS and the real article list arrive in Phase 3 (tasks P3-01 to P3-03)."
+    "notice": "No articles have been published yet: the CMS and the real article list arrive in Phase 3 (tasks P3-01 to P3-03).",
+    "emptyTitle": "No articles yet"
   },
   "article": {
     "label": "Article",
@@ -204,7 +302,8 @@
     "hostingField": "Host",
     "toComplete": "[to be completed by the client]",
     "toCompleteShort": "[to be completed]",
-    "toCompleteHosting": "[to be completed once the production infrastructure is chosen — see P5-06]"
+    "toCompleteHosting": "[to be completed once the production infrastructure is chosen — see P5-06]",
+    "subtitle": "Legal information about the site's publisher and hosting."
   },
   "privacy": {
     "title": "Privacy policy",
@@ -215,7 +314,8 @@
     "securityBody": "Access to accounts, courses, premium content and proprietary media (videos, images, documents) is checked server-side. IDs sent to the API are always checked against the logged-in user and their permissions.",
     "rightsTitle": "Your rights",
     "rightsContact": "Contact to exercise your rights",
-    "toComplete": "[to be completed by the client]"
+    "toComplete": "[to be completed by the client]",
+    "subtitle": "How the platform processes and protects your personal data."
   },
   "auth": {
     "login": {
@@ -253,6 +353,14 @@
       "errorRequired": "Please enter your email.",
       "notWired": "Sending a reset link will be enabled with authentication (task P1-06).",
       "notice": "The form works on the interface side but isn't connected to a real email delivery yet (see P1-06)."
+    },
+    "panel": {
+      "title": "Your personal space",
+      "points": [
+        "Courses, progress tracking and certification",
+        "Business tools: credit simulator and invoicing",
+        "Content tailored to your profile and access level"
+      ]
     }
   },
   "account": {
@@ -295,7 +403,9 @@
       "lockedTitle": "Content reserved for premium accounts",
       "lockedBody": "Upgrade to a premium account to unlock this content.",
       "footNote": "This lock is purely visual: the real access check is always enforced server-side, never only in the frontend."
-    }
+    },
+    "title": "My space",
+    "subtitle": "Profile, dashboard, account type and premium content."
   },
   "notFound": {
     "code": "404 error",

@@ -2,17 +2,22 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  background: transparent;
-  font-size: 1rem;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  font-size: 1.05rem;
   line-height: 1;
   cursor: pointer;
+  transition:
+    transform 0.2s,
+    border-color 0.2s;
 }
 
 .theme-toggle:hover {
   border-color: var(--accent);
+  transform: rotate(15deg);
 }

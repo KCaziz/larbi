@@ -1,23 +1,29 @@
 import { useTranslation } from 'react-i18next';
 import '../Pages.css';
 
+const widgets = [
+  { key: 'coursesInProgress', icon: '📚', tone: 'tone-violet' },
+  { key: 'certificates', icon: '🎓', tone: 'tone-amber' },
+  { key: 'recentArticles', icon: '📰', tone: 'tone-blue' },
+];
+
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const widgets = [
-    t('account.dashboard.widgets.coursesInProgress'),
-    t('account.dashboard.widgets.certificates'),
-    t('account.dashboard.widgets.recentArticles'),
-  ];
 
   return (
     <div>
-      <h1>{t('account.dashboard.title')}</h1>
+      <h2 className="account-heading">{t('account.dashboard.title')}</h2>
       <p>{t('account.dashboard.intro')}</p>
       <div className="skeleton-grid">
-        {widgets.map((label) => (
-          <div className="skeleton-item" key={label}>
-            <div className="label">{label}</div>
-            <div className="value">—</div>
+        {widgets.map((widget) => (
+          <div className={`skeleton-item ${widget.tone}`} key={widget.key}>
+            <span className="icon-badge" aria-hidden="true">
+              {widget.icon}
+            </span>
+            <div>
+              <div className="label">{t(`account.dashboard.widgets.${widget.key}`)}</div>
+              <div className="value">—</div>
+            </div>
           </div>
         ))}
       </div>

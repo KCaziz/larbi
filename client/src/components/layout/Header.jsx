@@ -18,6 +18,9 @@ export default function Header() {
     <header className="site-header">
       <div className="site-header-inner">
         <Link to="/" className="brand" onClick={closeMenu}>
+          <span className="brand-mark" aria-hidden="true">
+            L
+          </span>
           {t('common.brand')}
         </Link>
 

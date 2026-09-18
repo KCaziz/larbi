@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import LockedContent from '../../components/ui/LockedContent.jsx';
+import Notice from '../../components/ui/Notice.jsx';
 import '../Pages.css';
 
 export default function PremiumAccessPage() {
@@ -7,12 +8,12 @@ export default function PremiumAccessPage() {
 
   return (
     <div>
-      <h1>{t('account.premium.title')}</h1>
+      <h2 className="account-heading">{t('account.premium.title')}</h2>
       <p>{t('account.premium.intro')}</p>
       <LockedContent title={t('account.premium.lockedTitle')}>
         {t('account.premium.lockedBody')}
       </LockedContent>
-      <p>{t('account.premium.footNote')}</p>
+      <Notice variant="info">{t('account.premium.footNote')}</Notice>
     </div>
   );
 }

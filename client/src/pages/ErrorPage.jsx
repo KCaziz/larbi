@@ -1,6 +1,7 @@
 import { useRouteError, isRouteErrorResponse } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/ui/Button.jsx';
+import NotFoundPage from './NotFoundPage.jsx';
 import './Pages.css';
 
 export default function ErrorPage() {
@@ -8,14 +9,7 @@ export default function ErrorPage() {
   const { t } = useTranslation();
 
   if (isRouteErrorResponse(error) && error.status === 404) {
-    return (
-      <section className="page-status">
-        <p className="code">{t('notFound.code')}</p>
-        <h1>{t('notFound.title')}</h1>
-        <p>{t('notFound.body')}</p>
-        <Button to="/">{t('notFound.back')}</Button>
-      </section>
-    );
+    return <NotFoundPage />;
   }
 
   if (import.meta.env.DEV) {
@@ -23,11 +17,16 @@ export default function ErrorPage() {
   }
 
   return (
-    <section className="page-status">
-      <p className="code">{t('errorPage.code')}</p>
+    <section className="status-hero">
+      <div className="status-emoji" aria-hidden="true">
+        ⚠️
+      </div>
+      <span className="status-label">{t('errorPage.code')}</span>
       <h1>{t('errorPage.title')}</h1>
       <p>{t('errorPage.body')}</p>
-      <Button to="/">{t('notFound.back')}</Button>
+      <Button to="/" className="btn-lg">
+        {t('notFound.back')}
+      </Button>
     </section>
   );
 }

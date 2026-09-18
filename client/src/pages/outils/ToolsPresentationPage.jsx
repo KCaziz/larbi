@@ -1,26 +1,42 @@
 import { useTranslation } from 'react-i18next';
+import PageHeader from '../../components/layout/PageHeader.jsx';
 import Notice from '../../components/ui/Notice.jsx';
+import Section from '../../components/ui/Section.jsx';
 import '../Pages.css';
+
+const tools = [
+  { key: 'credit', icon: '💳', tone: 'tone-amber' },
+  { key: 'invoice', icon: '🧾', tone: 'tone-blue' },
+];
 
 export default function ToolsPresentationPage() {
   const { t } = useTranslation();
 
   return (
-    <section className="page-section">
-      <h1>{t('toolsPresentation.title')}</h1>
-      <p>{t('toolsPresentation.intro')}</p>
-      <div className="feature-grid">
-        <div className="feature-card">
-          <h3>{t('toolsPresentation.credit.title')}</h3>
-          <p>{t('toolsPresentation.credit.body')}</p>
+    <>
+      <PageHeader
+        icon="🛠️"
+        title={t('toolsPresentation.title')}
+        subtitle={t('toolsPresentation.intro')}
+      />
+
+      <Section>
+        <div className="feature-grid feature-grid-2">
+          {tools.map((tool) => (
+            <article className={`feature-card ${tool.tone}`} key={tool.key}>
+              <span className="icon-badge" aria-hidden="true">
+                {tool.icon}
+              </span>
+              <h3>{t(`toolsPresentation.${tool.key}.title`)}</h3>
+              <p>{t(`toolsPresentation.${tool.key}.body`)}</p>
+            </article>
+          ))}
         </div>
-        <div className="feature-card">
-          <h3>{t('toolsPresentation.invoice.title')}</h3>
-          <p>{t('toolsPresentation.invoice.body')}</p>
+        <p className="center mt-lg">{t('toolsPresentation.accessNote')}</p>
+        <div className="narrow">
+          <Notice variant="info">{t('toolsPresentation.notice')}</Notice>
         </div>
-      </div>
-      <p>{t('toolsPresentation.accessNote')}</p>
-      <Notice variant="info">{t('toolsPresentation.notice')}</Notice>
-    </section>
+      </Section>
+    </>
   );
 }
