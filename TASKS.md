@@ -216,7 +216,7 @@ Tests effectués :
 - `docker compose up -d` : conteneur `larbi_postgres_dev` à l'état `healthy`.
 
 ### P1-02 — Architecture frontend
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P1-01`
 - Durée cible : 2 jours
@@ -231,6 +231,25 @@ Tâches :
 - Composants réutilisables.
 - Structure responsive.
 - Gestion de l'état global si nécessaire.
+
+Réalisé :
+- `router/index.jsx` : `createBrowserRouter` avec un layout racine (`MainLayout`), un `errorElement` (`ErrorPage`) et une route `*` (`NotFoundPage`) pour les 404 réelles.
+- `layouts/MainLayout.jsx` : Header + `<Outlet/>` + Footer.
+- `components/layout/Header.jsx` + `Navigation.jsx` : header sticky, navigation principale, menu mobile (burger) avec état local (`useState`), liens Connexion/Inscription.
+- `components/layout/Footer.jsx` : liens légaux, copyright dynamique.
+- `components/ui/Button.jsx`, `Container.jsx` : composants réutilisables (bouton avec variantes, wrapper de largeur max).
+- `pages/PlaceholderPage.jsx` : composant générique réutilisé pour toutes les routes dont le contenu réel appartient à P1-03/P1-04 (Formations, Outils, Blog, À propos, Contact, mentions légales, confidentialité, Connexion, Inscription) — évite les liens de navigation morts sans anticiper le contenu métier de ces tâches.
+- `pages/HomePage.jsx`, `NotFoundPage.jsx`, `ErrorPage.jsx` : pages minimales fonctionnelles.
+- Structure responsive : breakpoint à 860px (nav desktop → menu burger), grilles/flex qui s'adaptent dans header/footer/pages.
+
+Décision technique :
+- Pas de state manager global (Redux/Zustand/Context) introduit à ce stade : aucun état ne traverse encore plusieurs pages indépendantes (le menu mobile est un état local au `Header`). La gestion d'état global réelle (utilisateur connecté, rôle, type de compte) sera mise en place avec l'authentification (P1-06), pas avant, pour éviter un contexte vide/fictif.
+
+Tests effectués :
+- `npm run build` (Vite) : compilation production réussie, aucune erreur d'import/JSX.
+- Serveur de dev lancé, `curl` sur `/` : HTML servi correctement avec le bon `<title>` et point d'entrée `main.jsx`.
+- Relecture du routing : chaque lien de `Header`/`Footer`/`HomePage` correspond à une route déclarée (aucun lien mort, aucune route orpheline).
+- Limite de vérification : aucun outil de navigateur réel n'était disponible dans cet environnement pour cette session ; l'interaction du menu mobile (ouverture/fermeture) et le rendu visuel des breakpoints n'ont donc pas été confirmés visuellement par Claude. À vérifier manuellement en ouvrant `http://localhost:5173` et en réduisant la largeur de fenêtre sous 860px.
 
 ### P1-03 — Pages publiques principales
 - Statut : `❌ todo`
@@ -785,13 +804,16 @@ Une tâche ne peut passer à `✅ done` que si :
 Phase active : `PHASE 1`
 
 Dernière tâche terminée et vérifiée :
-`P1-01 — Initialisation du projet` (✅ done)
+`P1-02 — Architecture frontend` (✅ done)
 
 Prochaines tâches réalisables (dépendances satisfaites) :
-- `P1-02 — Architecture frontend` (dépend de P1-01 ✅)
+- `P1-03 — Pages publiques principales` (dépend de P1-02 ✅)
+- `P1-04 — Pages utilisateurs` (dépend de P1-02 ✅)
 - `P1-05 — Backend minimal et navigation dynamique` (dépend de P1-01 ✅)
 
-Recommandation : traiter `P1-02` en premier (le frontend principal est la priorité de la Phase 1), `P1-05` peut suivre ou être mené en parallèle logique (routes/contrôleurs supplémentaires, modèles initiaux).
+Recommandation : `P1-03` en priorité (contenu public, socle SEO/premiers visiteurs), `P1-04` peut suivre juste après, `P1-05` peut être mené en parallèle logique côté backend.
+
+Point de vérification manuelle recommandé pour l'utilisateur : ouvrir `http://localhost:5173` après `npm run dev` dans `client/` et tester le menu mobile sous 860px de large (non vérifié visuellement par Claude faute d'outil navigateur dans cette session).
 
 Objectif final :
 Livrer un MVP exploitable de la plateforme dans un délai maximal de **8 semaines**, en respectant l'ordre :
