@@ -29,6 +29,13 @@ npm run dev
 
 API disponible sur `http://localhost:4000`. Vérification : `GET /api/health`.
 
+Après un premier `npm install`, ou après avoir modifié `server/prisma/schema.prisma` :
+
+```bash
+npm run prisma:migrate   # applique les migrations sur la base locale
+npm run prisma:generate  # régénère le client Prisma
+```
+
 ### 3. Frontend
 
 ```bash
@@ -45,8 +52,12 @@ Application disponible sur `http://localhost:5173`.
 ```text
 client/    Frontend React (Vite)
 server/    Backend Express
+  prisma/
+    schema.prisma   modèles de données (Prisma ORM)
+    migrations/     historique des migrations SQL
   src/
-    config/       env, connexion DB
+    config/       env, client Prisma
+    constants/    données de référence (ex. types de compte)
     controllers/  logique des routes
     routes/       définition des endpoints (montés sous /api)
     middleware/   gestion des erreurs, 404, etc.
@@ -55,5 +66,5 @@ docker-compose.yml   PostgreSQL de développement
 
 ## Notes techniques importantes
 
-- Aucun ORM n'est encore installé : la connexion PostgreSQL du socle (P1-01) utilise le driver `pg` directement (pool + `SELECT 1`), le temps qu'un besoin réel de modèles apparaisse (P1-06 / P2-01). Ce choix évite de définir des modèles de données prématurés dans le schéma.
+- ORM : Prisma (`prisma-client-js`), introduit en P1-05 avec le premier modèle réel (`User`). P1-01 avait volontairement différé son adoption (Prisma refuse de générer un client sans modèle métier). Prisma 7 nécessite un driver adapter explicite (`@prisma/adapter-pg`) — voir `server/src/config/prisma.js`.
 - Les secrets (chaîne de connexion, etc.) vivent uniquement dans les fichiers `.env` (non versionnés). Voir `.env.example` dans `client/` et `server/`.

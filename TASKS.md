@@ -335,7 +335,7 @@ Tests effectués :
 - Limite de vérification identique aux tâches précédentes : pas d'outil navigateur disponible dans cette session pour confirmer visuellement les formulaires, les onglets du compte et le rendu du tableau des fonctionnalités. À vérifier manuellement via `npm run dev`.
 
 ### P1-05 — Backend minimal et navigation dynamique
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P1-01`
 - Durée cible : 2 jours
@@ -349,6 +349,29 @@ Tâches :
 - Endpoint de santé `/health`.
 - API de lecture minimale pour les contenus nécessaires au frontend.
 - Gestion centralisée des erreurs.
+
+Réalisé :
+- **ORM introduit** : Prisma (`prisma-client-js`), différé depuis P1-01 faute de modèle réel — c'est maintenant le cas.
+- **Modèle initial** : `User` (`prisma/schema.prisma`) — `id`, `email` (unique), `passwordHash`, `name`, `accountType`, `accessLevel` (défaut `standard`), timestamps. `accountType`/`accessLevel` en simples chaînes (pas d'enum Postgres) pour permettre l'ajout de nouvelles catégories sans migration, comme l'exige le cahier des charges (« autres catégories pouvant être ajoutées »).
+- Migration `20260918174952_init_user` appliquée sur la base `larbi_dev` — table `users` créée et vérifiée réellement en base (`\d users` via psql, puis un cycle create/find/delete via Prisma).
+- `config/prisma.js` : client Prisma avec driver adapter `@prisma/adapter-pg` (obligatoire depuis Prisma 7 — voir décision technique).
+- `GET /api/health` migré de `pg` brut vers Prisma (`$queryRaw SELECT 1`), toujours fonctionnel.
+- **API de lecture minimale** : `GET /api/account-types` — renvoie les 3 catégories de compte du cahier des charges, servies depuis une constante (`src/constants/accountTypes.js`), pas depuis une table (cohérent avec le choix ci-dessus). Cet endpoint n'est pas encore appelé par le frontend (le câblage réel est explicitement le rôle de P1-07).
+- `server/.gitignore` (généré par `prisma init`) ignore le client généré (`src/generated/prisma`) ; `prisma/migrations/` est versionné comme il se doit.
+
+Décisions techniques / signalements :
+- **Prisma 7 exige un driver adapter explicite** (`@prisma/adapter-pg`) pour se connecter — ce n'était pas le cas des versions précédentes. Sans lui, `PrismaClient` lève une erreur au démarrage (« A driver adapter is required »). Documenté dans `config/prisma.js` et le README.
+- **Nettoyage** : `npx prisma init` (v7) génère par défaut des dossiers de documentation pour agents IA (`.claude/skills`, `.windsurf/skills`, `.agents/skills`, `skills-lock.json`), sans rapport avec ce projet. Supprimés immédiatement pour ne pas polluer le dépôt ni prêter à confusion avec une vraie configuration Claude Code.
+- **Générateur Prisma** : le nouveau générateur par défaut `prisma-client` (Prisma 7) ne produit que du TypeScript, inutilisable tel quel dans ce serveur Node/ESM sans outillage TS. Utilisation du générateur classique `prisma-client-js` à la place (JS + `.d.ts` prêts à l'emploi).
+- **`prisma7.config.ts`** : fichier de config généré par le CLI Prisma (requiert `dotenv`, déjà présent). Chargé par le CLI lui-même (confirmé via `prisma format`/`migrate`) — n'introduit pas de dépendance TypeScript pour l'application elle-même, qui reste 100 % JS.
+- **Vulnérabilités npm (`prisma audit`)** : 4 vulnérabilités « high » signalées, toutes dans les dépendances de développement du CLI Prisma (`deepmerge-ts` via `@prisma/config`, `mysql2` embarqué par le CLI même si le projet n'utilise que PostgreSQL). `npm audit fix --force` proposerait de revenir à `prisma@6.19.3`, une régression non souhaitée. Aucun impact runtime identifié (uniquement l'outil CLI, pas `@prisma/client`). À surveiller lors d'une future mise à jour de Prisma plutôt qu'à corriger maintenant.
+- **Pas d'endpoint d'écriture ajouté** (pas de `POST /api/users`, pas de route de connexion) : toute logique touchant à la création/authentification d'utilisateurs appartient explicitement à P1-06, pas à P1-05.
+
+Tests effectués :
+- `npx prisma migrate dev` : migration appliquée sans erreur ; `docker exec larbi_postgres_dev psql -U larbi -d larbi_dev -c "\d users"` confirme la table réelle en base.
+- Script Node ponctuel : `prisma.user.create()` → `findUnique()` → `delete()` exécutés avec succès contre la vraie base (puis nettoyage), preuve que la connexion et le modèle fonctionnent de bout en bout, pas seulement au niveau du schéma.
+- Serveur démarré (`node src/server.js`) : `GET /api/health` → `200 {"status":"ok","database":"connected"}` ; `GET /api/account-types` → `200` avec les 3 catégories ; `GET /api/nope` → `404` géré proprement.
+- Pas de linter configuré côté serveur (seul le frontend en a un) — relecture manuelle des fichiers modifiés/ajoutés.
 
 ### P1-06 — Authentification + rôles
 - Statut : `❌ todo`
@@ -853,18 +876,17 @@ Une tâche ne peut passer à `✅ done` que si :
 Phase active : `PHASE 1`
 
 Dernière tâche terminée et vérifiée :
-`P1-04 — Pages utilisateurs` (✅ done)
+`P1-05 — Backend minimal et navigation dynamique` (✅ done)
 
-Toutes les tâches « pages » de la Phase 1 (P1-02, P1-03, P1-04) sont maintenant terminées. Il ne reste, avant la validation de fin de phase (P1-08), que le backend et l'authentification.
+Toutes les tâches de pages (P1-02, P1-03, P1-04) et le socle backend (P1-05) sont terminés. Le modèle `User` existe en base (Prisma).
 
-Prochaine tâche réalisable (dépendance satisfaite) :
-- `P1-05 — Backend minimal et navigation dynamique` (dépend de P1-01 ✅) — seule tâche non bloquée à ce stade.
+Prochaine tâche réalisable (dépendances satisfaites) :
+- `P1-06 — Authentification + rôles` (dépend de `P1-04` ✅ et `P1-05` ✅).
 
-Rappel de dépendances à venir (non réalisables tant que P1-05 n'est pas fait) :
-- `P1-06 — Authentification + rôles` dépend de `P1-04` ✅ et `P1-05` ❌.
-- `P1-07 — Intégration frontend/backend` dépend de `P1-03` ✅, `P1-05` ❌ et `P1-06` ❌.
+Rappel de dépendance à venir :
+- `P1-07 — Intégration frontend/backend` dépend de `P1-03` ✅, `P1-05` ✅ et `P1-06` ❌ — reste bloquée tant que P1-06 n'est pas fait.
 
-Recommandation : `P1-05` est donc la seule voie possible pour continuer à avancer dans la Phase 1.
+Recommandation : `P1-06` est la seule tâche non bloquée pour continuer la Phase 1.
 
 Blocages / informations manquantes signalées (non bloquantes pour continuer, mais à ne pas oublier avant livraison) :
 - Mentions légales et politique de confidentialité : identité légale du client (raison sociale, SIRET, adresse, hébergeur, contact DPO) à fournir avant mise en production (voir notes P1-03).

@@ -1,4 +1,4 @@
-import { checkDatabaseConnection } from '../config/db.js';
+import { checkDatabaseConnection } from '../config/prisma.js';
 
 export async function getHealth(req, res) {
   const health = {

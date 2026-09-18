@@ -1,0 +1,37 @@
+// Prisma schema.
+// Only the models genuinely needed right now are defined here (P1-05
+// "modèles initiaux", ahead of P1-06 authentication). E-Learning, blog and
+// tools models are NOT anticipated — they belong to their own tasks
+// (P2-01, P3-01) per TASKS.md.
+
+// "prisma-client-js" (not the newer "prisma-client" generator) because it
+// outputs plain, ready-to-run JS + .d.ts — this server has no TypeScript
+// build step, so a TS-source-only client wouldn't run under plain Node.
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  // Free-form string, not a DB enum: the cahier des charges explicitly
+  // allows adding new account categories later ("autres catégories
+  // pouvant être ajoutées"), and a Postgres enum would need a migration
+  // for each new one. Allowed values are validated at the application
+  // layer (see P1-06).
+  accountType  String
+  // "standard" | "premium" (see TASKS.md section 1, "Accès aux
+  // fonctionnalités"). Same free-form-string reasoning as accountType.
+  accessLevel  String   @default("standard")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}

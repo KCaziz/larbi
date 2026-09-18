@@ -1,6 +1,6 @@
 import { createApp } from './app.js';
 import { env } from './config/env.js';
-import { pool } from './config/db.js';
+import { prisma } from './config/prisma.js';
 
 const app = createApp();
 
@@ -11,7 +11,7 @@ const server = app.listen(env.port, () => {
 async function shutdown(signal) {
   console.log(`[server] received ${signal}, shutting down...`);
   server.close(async () => {
-    await pool.end();
+    await prisma.$disconnect();
     process.exit(0);
   });
 }
