@@ -25,8 +25,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Dark mode applies either from the OS preference (when the user hasn't
+   picked a theme explicitly) or from the explicit `data-theme` attribute
+   ThemeProvider sets after a manual toggle (see src/theme/ThemeContext.jsx
+   and the inline script in index.html that avoids a flash on first paint). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --text: #cbd5e1;
     --text-h: #f8fafc;
     --bg: #121218;
@@ -40,6 +44,21 @@
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
+}
+
+:root[data-theme='dark'] {
+  --text: #cbd5e1;
+  --text-h: #f8fafc;
+  --bg: #121218;
+  --bg-alt: #1a1b22;
+  --border: #2e303a;
+  --accent: #a78bfa;
+  --accent-hover: #c4b5fd;
+  --accent-bg: rgba(167, 139, 250, 0.15);
+  --accent-border: rgba(167, 139, 250, 0.5);
+  --danger: #f87171;
+  --shadow:
+    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
 }
 
 *,

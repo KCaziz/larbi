@@ -5,6 +5,25 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Larbi</title>
+    <script>
+      // Applied before React mounts, so the page never flashes the wrong
+      // theme while the bundle loads. ThemeProvider (src/theme) takes over
+      // from here and keeps this attribute in sync afterwards.
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          // Storage unavailable: leave the default (light) tokens in place.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

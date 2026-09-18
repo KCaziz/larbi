@@ -1,0 +1,311 @@
+{
+  "common": {
+    "brand": "Larbi"
+  },
+  "accountTypes": {
+    "autoEntrepreneur": "Auto-entrepreneur",
+    "pme": "PME",
+    "pmi": "PMI",
+    "standard": "Standard",
+    "premium": "Premium"
+  },
+  "nav": {
+    "home": "Accueil",
+    "formations": "Formations",
+    "tools": "Outils",
+    "blog": "Blog",
+    "services": "Services",
+    "about": "À propos",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "login": "Connexion",
+    "register": "Inscription",
+    "legalNotice": "Mentions légales",
+    "privacy": "Politique de confidentialité",
+    "menuOpen": "Ouvrir le menu",
+    "menuClose": "Fermer le menu",
+    "accountNav": "Navigation du compte",
+    "main": "Navigation principale"
+  },
+  "footer": {
+    "copyright": "© {{year}} {{brand}}. Tous droits réservés."
+  },
+  "theme": {
+    "toggleToLight": "Passer au mode clair",
+    "toggleToDark": "Passer au mode sombre"
+  },
+  "language": {
+    "label": "Langue"
+  },
+  "home": {
+    "hero": {
+      "title": "Bienvenue sur Larbi",
+      "body": "Formations en ligne, blog, outils métier et suivi de progression, réunis sur une seule plateforme, avec un espace adapté à chaque type de compte.",
+      "ctaFormations": "Découvrir les formations",
+      "ctaTools": "Voir les outils"
+    },
+    "featuresSectionTitle": "Ce que propose la plateforme",
+    "features": {
+      "elearning": {
+        "title": "E-Learning",
+        "body": "Des formations organisées en cours, avec suivi de votre progression et certification à la clé une fois la formation terminée.",
+        "cta": "En savoir plus →"
+      },
+      "blog": {
+        "title": "Blog & tutoriels",
+        "body": "Des articles et tutoriels en accès libre, avec certains contenus réservés aux comptes premium.",
+        "cta": "Lire le blog →"
+      },
+      "tools": {
+        "title": "Outils métier",
+        "body": "Simulateur de crédit et générateur de facture pensés pour les auto-entrepreneurs, PME et PMI.",
+        "cta": "Voir les outils →"
+      }
+    },
+    "accounts": {
+      "title": "Un compte adapté à votre profil",
+      "body": "Chaque compte est associé à une catégorie et à un niveau d'accès, qui déterminent les contenus et fonctionnalités disponibles.",
+      "cta": "Voir le détail des accès par type de compte →"
+    }
+  },
+  "about": {
+    "title": "À propos",
+    "intro": "Larbi réunit sur une seule plateforme les formations en ligne, un blog de tutoriels et des outils métier destinés aux indépendants et aux entreprises (auto-entrepreneurs, PME, PMI).",
+    "approachTitle": "Notre approche",
+    "approachBody": "Chaque formation est organisée en cours, avec un suivi de progression et une certification délivrée une fois les conditions de complétion remplies. Les contenus du blog sont accessibles publiquement, certains étant réservés aux comptes premium selon le profil de l'utilisateur.",
+    "securityTitle": "Sécurité et confidentialité",
+    "securityBody": "La protection des comptes et des contenus (vidéos, images, documents) est une priorité : les autorisations d'accès sont contrôlées côté serveur, et les contenus propriétaires ne sont jamais exposés publiquement sans vérification préalable."
+  },
+  "services": {
+    "title": "Services & offres",
+    "intro": "Trois grands domaines, accessibles selon votre type de compte et votre niveau d'accès (standard ou premium).",
+    "formations": {
+      "title": "Formations",
+      "body": "Parcours structurés en cours, suivi de progression et certification à la fin de la formation. Accès authentifié.",
+      "cta": "Voir les formations →"
+    },
+    "blog": {
+      "title": "Blog & tutoriels",
+      "body": "Articles publics, avec des contenus premium recommandés selon votre profil.",
+      "cta": "Lire le blog →"
+    },
+    "tools": {
+      "title": "Outils métier",
+      "body": "Simulateur de crédit et générateur de facture PDF/Excel. Accès authentifié et selon les droits.",
+      "cta": "Voir les outils →"
+    },
+    "detailCta": "Voir le détail des accès par type de compte →"
+  },
+  "faq": {
+    "title": "Questions fréquentes",
+    "items": [
+      {
+        "question": "Quels types de comptes existent ?",
+        "answer": "La plateforme gère plusieurs profils (auto-entrepreneur, PME, PMI, et d'autres catégories pourront être ajoutées), avec un niveau d'accès standard ou premium selon votre compte."
+      },
+      {
+        "question": "Quelle est la différence entre un compte standard et premium ?",
+        "answer": "Le niveau de votre compte détermine les contenus et fonctionnalités auxquels vous avez accès : certains articles, formations ou outils peuvent être réservés aux comptes premium."
+      },
+      {
+        "question": "Le blog est-il accessible sans compte ?",
+        "answer": "Oui, le blog est en accès public. Les formations et les outils nécessitent en revanche d'être connecté, et sont soumis à vos droits d'accès."
+      },
+      {
+        "question": "Comment fonctionne la certification des formations ?",
+        "answer": "Une certification est délivrée uniquement lorsque toutes les conditions de complétion d'une formation sont remplies, avec vérification effectuée côté serveur."
+      },
+      {
+        "question": "Mes contenus et médias sont-ils protégés ?",
+        "answer": "L'accès aux contenus propriétaires (vidéos, images, documents) est contrôlé côté serveur. Aucune solution web ne peut empêcher totalement la copie d'un contenu affiché, mais la plateforme limite fortement les possibilités de récupération directe."
+      }
+    ]
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "Une question sur les formations, le blog ou les outils ? Écrivez-nous via le formulaire ci-contre.",
+    "notice": "Coordonnées de contact (email, téléphone, adresse) à fournir par le client avant mise en ligne — non affichées pour éviter de publier des informations inventées.",
+    "form": {
+      "name": "Nom",
+      "email": "Email",
+      "message": "Message",
+      "submit": "Envoyer"
+    },
+    "errors": {
+      "required": "Merci de remplir tous les champs."
+    },
+    "status": {
+      "notWired": "L'envoi de ce formulaire sera activé lors de l'intégration backend (tâche P1-07). Votre message n'a pas encore été transmis."
+    }
+  },
+  "features": {
+    "title": "Fonctionnalités accessibles",
+    "intro": "L'accès à chaque domaine dépend du fait d'être connecté et, pour certains contenus, du niveau de votre compte (standard ou premium).",
+    "table": {
+      "domain": "Domaine",
+      "visitor": "Visiteur",
+      "standard": "Compte standard",
+      "premium": "Compte premium",
+      "open": "Accès",
+      "locked": "Restreint"
+    },
+    "domains": {
+      "blog": "Blog & tutoriels",
+      "formations": "Formations",
+      "tools": "Outils (crédit, facture)",
+      "premium": "Contenus premium"
+    },
+    "footNote": "Ce tableau reflète les règles d'accès déjà définies pour le projet. Le contrôle réel est toujours appliqué côté serveur, jamais uniquement dans l'interface."
+  },
+  "formationsPresentation": {
+    "title": "Formations",
+    "body": "Chaque formation est composée d'un nombre défini de cours. Votre progression est suivie cours par cours et par formation, et une certification vous est délivrée une fois toutes les conditions de complétion remplies.",
+    "accessNote": "L'accès aux formations nécessite d'être connecté et dépend de vos droits.",
+    "notice": "Le catalogue des formations, l'inscription et la lecture des cours seront disponibles à partir de la Phase 2 (E-Learning — tâches P2-01 à P2-07)."
+  },
+  "toolsPresentation": {
+    "title": "Outils",
+    "intro": "Deux outils métier sont prévus pour cette première version :",
+    "credit": {
+      "title": "Simulateur de crédit",
+      "body": "Estimation du crédit possible selon votre profil financier, calculée côté serveur à partir de règles bancaires fournies par le client."
+    },
+    "invoice": {
+      "title": "Générateur de facture",
+      "body": "Création de factures (client, prestataire, produits/services, totaux) avec export PDF et Excel."
+    },
+    "accessNote": "L'accès aux outils nécessite d'être connecté et dépend de vos droits.",
+    "notice": "Les outils deviendront utilisables en Phase 4 (tâches P4-01 à P4-05), une fois l'authentification et les rôles en place."
+  },
+  "blogList": {
+    "title": "Blog",
+    "intro": "Articles et tutoriels en accès public, avec des contenus premium selon votre profil.",
+    "notice": "Aucun article n'est encore publié : le CMS et la liste réelle des articles arrivent en Phase 3 (tâches P3-01 à P3-03)."
+  },
+  "article": {
+    "label": "Article",
+    "notFoundTitle": "« {{slug}} » n'est pas encore disponible",
+    "notice": "La lecture d'articles réels sera disponible une fois le CMS du blog livré (Phase 3, tâches P3-01 à P3-03).",
+    "back": "Retour au blog"
+  },
+  "legal": {
+    "title": "Mentions légales",
+    "notice": "Cette page ne peut pas être publiée en l'état : les informations légales ci-dessous doivent être fournies et validées par le client. Aucune valeur n'a été inventée.",
+    "editorTitle": "Éditeur du site",
+    "fields": {
+      "companyName": "Raison sociale",
+      "legalForm": "Forme juridique",
+      "siret": "SIRET",
+      "address": "Adresse du siège",
+      "publisher": "Directeur de la publication",
+      "contact": "Contact"
+    },
+    "hostingTitle": "Hébergement",
+    "hostingField": "Hébergeur",
+    "toComplete": "[à compléter par le client]",
+    "toCompleteShort": "[à compléter]",
+    "toCompleteHosting": "[à compléter une fois l'infrastructure de production choisie — voir P5-06]"
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "notice": "Le détail exact des traitements (finalités précises, durées de conservation, sous-traitants, contact DPO le cas échéant) doit être validé avec le client avant publication. Les principes ci-dessous reflètent uniquement les règles déjà actées dans le cahier des charges du projet.",
+    "dataTitle": "Données collectées",
+    "dataBody": "La plateforme limite les données personnelles collectées aux informations réellement nécessaires à la gestion des comptes (auto-entrepreneur, PME, PMI, etc.), au suivi des formations et à l'usage des outils.",
+    "securityTitle": "Sécurité des comptes et des contenus",
+    "securityBody": "L'accès aux comptes, aux formations, aux contenus premium et aux médias propriétaires (vidéos, images, documents) est vérifié côté serveur. Les identifiants transmis à l'API sont systématiquement contrôlés vis-à-vis de l'utilisateur connecté et de ses permissions.",
+    "rightsTitle": "Vos droits",
+    "rightsContact": "Contact pour l'exercice de vos droits",
+    "toComplete": "[à compléter par le client]"
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "intro": "Accédez à vos formations, outils et contenus premium.",
+      "emailLabel": "Email",
+      "passwordLabel": "Mot de passe",
+      "submit": "Se connecter",
+      "forgot": "Mot de passe oublié ?",
+      "createAccount": "Créer un compte",
+      "errorRequired": "Merci de renseigner votre email et votre mot de passe.",
+      "notWired": "La connexion sera activée avec l'authentification (tâche P1-06) puis son intégration au frontend (P1-07).",
+      "notice": "Formulaire fonctionnel côté interface, non encore relié à un vrai compte (voir P1-06 / P1-07)."
+    },
+    "register": {
+      "title": "Créer un compte",
+      "intro": "Choisissez la catégorie qui correspond à votre activité.",
+      "nameLabel": "Nom",
+      "emailLabel": "Email",
+      "passwordLabel": "Mot de passe",
+      "accountTypeLabel": "Type de compte",
+      "submit": "Créer mon compte",
+      "alreadyAccount": "Déjà un compte ?",
+      "login": "Se connecter",
+      "errorRequired": "Merci de remplir tous les champs.",
+      "notWired": "La création de compte sera activée avec l'authentification (tâche P1-06) puis son intégration au frontend (P1-07).",
+      "notice": "Formulaire fonctionnel côté interface, non encore relié à un vrai compte (voir P1-06 / P1-07)."
+    },
+    "forgot": {
+      "title": "Mot de passe oublié",
+      "intro": "Indiquez votre email pour recevoir un lien de réinitialisation.",
+      "emailLabel": "Email",
+      "submit": "Envoyer le lien",
+      "backToLogin": "Retour à la connexion",
+      "errorRequired": "Merci de renseigner votre email.",
+      "notWired": "L'envoi d'un lien de réinitialisation sera activé avec l'authentification (tâche P1-06).",
+      "notice": "Formulaire fonctionnel côté interface, non encore relié à un envoi d'email réel (voir P1-06)."
+    }
+  },
+  "account": {
+    "layoutNotice": "Espace compte — aperçu structurel. Les données réelles et la protection d'accès arrivent avec l'authentification (P1-06) et son intégration (P1-07).",
+    "nav": {
+      "profile": "Profil",
+      "dashboard": "Tableau de bord",
+      "type": "Type de compte",
+      "premium": "Contenus premium"
+    },
+    "profile": {
+      "title": "Profil",
+      "intro": "Vos informations personnelles apparaîtront ici une fois connecté.",
+      "fields": {
+        "name": "Nom",
+        "email": "Email",
+        "accountType": "Type de compte",
+        "accessLevel": "Niveau d'accès"
+      }
+    },
+    "dashboard": {
+      "title": "Tableau de bord",
+      "intro": "Vue d'ensemble de votre activité une fois vos formations et certifications en place.",
+      "widgets": {
+        "coursesInProgress": "Formations en cours",
+        "certificates": "Certificats obtenus",
+        "recentArticles": "Derniers articles lus"
+      }
+    },
+    "type": {
+      "title": "Type de compte",
+      "intro": "Votre catégorie détermine certains contenus et fonctionnalités accessibles (auto-entrepreneur, PME ou PMI).",
+      "categoryLabel": "Catégorie",
+      "save": "Enregistrer",
+      "status": "L'enregistrement sera activé une fois le backend correspondant en place."
+    },
+    "premium": {
+      "title": "Contenus premium",
+      "intro": "Certains articles, formations ou outils sont réservés aux comptes premium. Voici comment ils apparaîtront pour un compte qui n'y a pas accès :",
+      "lockedTitle": "Contenu réservé aux comptes premium",
+      "lockedBody": "Passez à un compte premium pour débloquer ce contenu.",
+      "footNote": "Ce verrouillage est uniquement visuel : l'accès réel est toujours vérifié côté serveur, jamais uniquement dans le frontend."
+    }
+  },
+  "notFound": {
+    "code": "Erreur 404",
+    "title": "Page introuvable",
+    "body": "La page que vous cherchez n'existe pas ou a été déplacée.",
+    "back": "Retour à l'accueil"
+  },
+  "errorPage": {
+    "code": "Erreur",
+    "title": "Une erreur inattendue est survenue",
+    "body": "Merci de réessayer dans un instant. Si le problème persiste, contactez le support."
+  }
+}

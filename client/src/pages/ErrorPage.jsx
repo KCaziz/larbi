@@ -1,17 +1,19 @@
 import { useRouteError, isRouteErrorResponse } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Button from '../components/ui/Button.jsx';
 import './Pages.css';
 
 export default function ErrorPage() {
   const error = useRouteError();
+  const { t } = useTranslation();
 
   if (isRouteErrorResponse(error) && error.status === 404) {
     return (
       <section className="page-status">
-        <p className="code">Erreur 404</p>
-        <h1>Page introuvable</h1>
-        <p>La page que vous cherchez n'existe pas ou a été déplacée.</p>
-        <Button to="/">Retour à l'accueil</Button>
+        <p className="code">{t('notFound.code')}</p>
+        <h1>{t('notFound.title')}</h1>
+        <p>{t('notFound.body')}</p>
+        <Button to="/">{t('notFound.back')}</Button>
       </section>
     );
   }
@@ -22,10 +24,10 @@ export default function ErrorPage() {
 
   return (
     <section className="page-status">
-      <p className="code">Erreur</p>
-      <h1>Une erreur inattendue est survenue</h1>
-      <p>Merci de réessayer dans un instant. Si le problème persiste, contactez le support.</p>
-      <Button to="/">Retour à l'accueil</Button>
+      <p className="code">{t('errorPage.code')}</p>
+      <h1>{t('errorPage.title')}</h1>
+      <p>{t('errorPage.body')}</p>
+      <Button to="/">{t('notFound.back')}</Button>
     </section>
   );
 }

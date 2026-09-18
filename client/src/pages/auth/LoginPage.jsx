@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Button from '../../components/ui/Button.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import '../Pages.css';
@@ -7,6 +8,7 @@ import '../Pages.css';
 const initialForm = { email: '', password: '' };
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState(null);
 
@@ -19,25 +21,22 @@ export default function LoginPage() {
     event.preventDefault();
 
     if (!form.email || !form.password) {
-      setStatus({ type: 'error', text: 'Merci de renseigner votre email et votre mot de passe.' });
+      setStatus({ type: 'error', text: t('auth.login.errorRequired') });
       return;
     }
 
     // No auth backend exists yet (P1-06). We never fake a successful login.
-    setStatus({
-      type: 'info',
-      text: "La connexion sera activée avec l'authentification (tâche P1-06) puis son intégration au frontend (P1-07).",
-    });
+    setStatus({ type: 'info', text: t('auth.login.notWired') });
   };
 
   return (
     <section className="auth-page">
-      <h1>Connexion</h1>
-      <p>Accédez à vos formations, outils et contenus premium.</p>
+      <h1>{t('auth.login.title')}</h1>
+      <p>{t('auth.login.intro')}</p>
 
       <form className="form-stack" onSubmit={handleSubmit} noValidate>
         <div className="form-field">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{t('auth.login.emailLabel')}</label>
           <input
             id="email"
             name="email"
@@ -48,7 +47,7 @@ export default function LoginPage() {
           />
         </div>
         <div className="form-field">
-          <label htmlFor="password">Mot de passe</label>
+          <label htmlFor="password">{t('auth.login.passwordLabel')}</label>
           <input
             id="password"
             name="password"
@@ -65,18 +64,15 @@ export default function LoginPage() {
           </p>
         )}
 
-        <Button type="submit">Se connecter</Button>
+        <Button type="submit">{t('auth.login.submit')}</Button>
 
         <div className="form-links">
-          <Link to="/mot-de-passe-oublie">Mot de passe oublié ?</Link>
-          <Link to="/inscription">Créer un compte</Link>
+          <Link to="/mot-de-passe-oublie">{t('auth.login.forgot')}</Link>
+          <Link to="/inscription">{t('auth.login.createAccount')}</Link>
         </div>
       </form>
 
-      <Notice variant="info">
-        Formulaire fonctionnel côté interface, non encore relié à un vrai compte (voir
-        P1-06 / P1-07).
-      </Notice>
+      <Notice variant="info">{t('auth.login.notice')}</Notice>
     </section>
   );
 }

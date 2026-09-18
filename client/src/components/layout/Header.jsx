@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Navigation from './Navigation.jsx';
 import Button from '../ui/Button.jsx';
-import { mainNavLinks, authNavLinks } from '../../config/navigation.js';
+import ThemeToggle from '../ui/ThemeToggle.jsx';
+import LanguageSwitcher from '../ui/LanguageSwitcher.jsx';
+import { mainNavLinks } from '../../config/navigation.js';
 import './Header.css';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { t } = useTranslation();
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -14,7 +18,7 @@ export default function Header() {
     <header className="site-header">
       <div className="site-header-inner">
         <Link to="/" className="brand" onClick={closeMenu}>
-          Larbi
+          {t('common.brand')}
         </Link>
 
         <button
@@ -22,7 +26,7 @@ export default function Header() {
           className="menu-toggle"
           aria-expanded={menuOpen}
           aria-controls="primary-navigation"
-          aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+          aria-label={menuOpen ? t('nav.menuClose') : t('nav.menuOpen')}
           onClick={() => setMenuOpen((open) => !open)}
         >
           <span />
@@ -32,13 +36,17 @@ export default function Header() {
 
         <div id="primary-navigation" className={`nav-panel ${menuOpen ? 'open' : ''}`}>
           <Navigation links={mainNavLinks} onLinkClick={closeMenu} />
-          <div className="auth-actions">
-            <Button to="/connexion" variant="secondary" onClick={closeMenu}>
-              {authNavLinks[0].label}
-            </Button>
-            <Button to="/inscription" variant="primary" onClick={closeMenu}>
-              {authNavLinks[1].label}
-            </Button>
+          <div className="header-controls">
+            <LanguageSwitcher />
+            <ThemeToggle />
+            <div className="auth-actions">
+              <Button to="/connexion" variant="secondary" onClick={closeMenu}>
+                {t('nav.login')}
+              </Button>
+              <Button to="/inscription" variant="primary" onClick={closeMenu}>
+                {t('nav.register')}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

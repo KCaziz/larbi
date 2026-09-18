@@ -1,22 +1,24 @@
+import { useTranslation } from 'react-i18next';
 import '../Pages.css';
 
-const fields = [
-  { label: 'Nom', value: '—' },
-  { label: 'Email', value: '—' },
-  { label: 'Type de compte', value: '—' },
-  { label: "Niveau d'accès", value: '—' },
-];
-
 export default function ProfilePage() {
+  const { t } = useTranslation();
+  const fields = [
+    t('account.profile.fields.name'),
+    t('account.profile.fields.email'),
+    t('account.profile.fields.accountType'),
+    t('account.profile.fields.accessLevel'),
+  ];
+
   return (
     <div>
-      <h1>Profil</h1>
-      <p>Vos informations personnelles apparaîtront ici une fois connecté.</p>
+      <h1>{t('account.profile.title')}</h1>
+      <p>{t('account.profile.intro')}</p>
       <div className="skeleton-grid">
-        {fields.map((field) => (
-          <div className="skeleton-item" key={field.label}>
-            <div className="label">{field.label}</div>
-            <div className="value">{field.value}</div>
+        {fields.map((label) => (
+          <div className="skeleton-item" key={label}>
+            <div className="label">{label}</div>
+            <div className="value">—</div>
           </div>
         ))}
       </div>

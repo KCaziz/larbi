@@ -1,9 +1,12 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './Navigation.css';
 
 export default function Navigation({ links, onLinkClick, className = '' }) {
+  const { t } = useTranslation();
+
   return (
-    <nav className={`main-nav ${className}`.trim()} aria-label="Navigation principale">
+    <nav className={`main-nav ${className}`.trim()} aria-label={t('nav.main')}>
       <ul>
         {links.map((link) => (
           <li key={link.to}>
@@ -13,7 +16,7 @@ export default function Navigation({ links, onLinkClick, className = '' }) {
               className={({ isActive }) => (isActive ? 'active' : undefined)}
               onClick={onLinkClick}
             >
-              {link.label}
+              {t(link.labelKey)}
             </NavLink>
           </li>
         ))}

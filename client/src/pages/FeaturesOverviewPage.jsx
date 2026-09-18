@@ -1,35 +1,34 @@
+import { useTranslation } from 'react-i18next';
 import './Pages.css';
 
 const rows = [
-  { domain: 'Blog & tutoriels', visitor: 'open', standard: 'open', premium: 'open' },
-  { domain: 'Formations', visitor: 'locked', standard: 'open', premium: 'open' },
-  { domain: 'Outils (crédit, facture)', visitor: 'locked', standard: 'open', premium: 'open' },
-  { domain: 'Contenus premium', visitor: 'locked', standard: 'locked', premium: 'open' },
+  { domainKey: 'features.domains.blog', visitor: 'open', standard: 'open', premium: 'open' },
+  { domainKey: 'features.domains.formations', visitor: 'locked', standard: 'open', premium: 'open' },
+  { domainKey: 'features.domains.tools', visitor: 'locked', standard: 'open', premium: 'open' },
+  { domainKey: 'features.domains.premium', visitor: 'locked', standard: 'locked', premium: 'open' },
 ];
 
-const stateLabel = { open: 'Accès', locked: 'Restreint' };
-
 export default function FeaturesOverviewPage() {
+  const { t } = useTranslation();
+  const stateLabel = { open: t('features.table.open'), locked: t('features.table.locked') };
+
   return (
     <section className="page-section">
-      <h1>Fonctionnalités accessibles</h1>
-      <p>
-        L'accès à chaque domaine dépend du fait d'être connecté et, pour certains
-        contenus, du niveau de votre compte (standard ou premium).
-      </p>
+      <h1>{t('features.title')}</h1>
+      <p>{t('features.intro')}</p>
       <table className="features-table">
         <thead>
           <tr>
-            <th>Domaine</th>
-            <th>Visiteur</th>
-            <th>Compte standard</th>
-            <th>Compte premium</th>
+            <th>{t('features.table.domain')}</th>
+            <th>{t('features.table.visitor')}</th>
+            <th>{t('features.table.standard')}</th>
+            <th>{t('features.table.premium')}</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.domain}>
-              <td>{row.domain}</td>
+            <tr key={row.domainKey}>
+              <td>{t(row.domainKey)}</td>
               <td data-state={row.visitor}>{stateLabel[row.visitor]}</td>
               <td data-state={row.standard}>{stateLabel[row.standard]}</td>
               <td data-state={row.premium}>{stateLabel[row.premium]}</td>
@@ -37,10 +36,7 @@ export default function FeaturesOverviewPage() {
           ))}
         </tbody>
       </table>
-      <p>
-        Ce tableau reflète les règles d'accès déjà définies pour le projet. Le contrôle
-        réel est toujours appliqué côté serveur, jamais uniquement dans l'interface.
-      </p>
+      <p>{t('features.footNote')}</p>
     </section>
   );
 }

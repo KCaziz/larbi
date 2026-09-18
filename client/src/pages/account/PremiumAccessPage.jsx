@@ -1,21 +1,18 @@
+import { useTranslation } from 'react-i18next';
 import LockedContent from '../../components/ui/LockedContent.jsx';
 import '../Pages.css';
 
 export default function PremiumAccessPage() {
+  const { t } = useTranslation();
+
   return (
     <div>
-      <h1>Contenus premium</h1>
-      <p>
-        Certains articles, formations ou outils sont réservés aux comptes premium.
-        Voici comment ils apparaîtront pour un compte qui n'y a pas accès :
-      </p>
-      <LockedContent title="Contenu réservé aux comptes premium">
-        Passez à un compte premium pour débloquer ce contenu.
+      <h1>{t('account.premium.title')}</h1>
+      <p>{t('account.premium.intro')}</p>
+      <LockedContent title={t('account.premium.lockedTitle')}>
+        {t('account.premium.lockedBody')}
       </LockedContent>
-      <p>
-        Ce verrouillage est uniquement visuel : l'accès réel est toujours vérifié côté
-        serveur, jamais uniquement dans le frontend.
-      </p>
+      <p>{t('account.premium.footNote')}</p>
     </div>
   );
 }

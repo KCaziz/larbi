@@ -32,6 +32,12 @@
   justify-content: flex-end;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .auth-actions {
   display: flex;
   gap: 12px;
@@ -80,9 +86,14 @@
     display: flex;
   }
 
+  .header-controls {
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 16px;
+  }
+
   .auth-actions {
     flex-direction: column;
-    margin-top: 16px;
   }
 
   .auth-actions .btn {

@@ -1,0 +1,311 @@
+{
+  "common": {
+    "brand": "Larbi"
+  },
+  "accountTypes": {
+    "autoEntrepreneur": "Sole trader",
+    "pme": "SME",
+    "pmi": "Industrial SME",
+    "standard": "Standard",
+    "premium": "Premium"
+  },
+  "nav": {
+    "home": "Home",
+    "formations": "Courses",
+    "tools": "Tools",
+    "blog": "Blog",
+    "services": "Services",
+    "about": "About",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "login": "Log in",
+    "register": "Sign up",
+    "legalNotice": "Legal notice",
+    "privacy": "Privacy policy",
+    "menuOpen": "Open menu",
+    "menuClose": "Close menu",
+    "accountNav": "Account navigation",
+    "main": "Main navigation"
+  },
+  "footer": {
+    "copyright": "© {{year}} {{brand}}. All rights reserved."
+  },
+  "theme": {
+    "toggleToLight": "Switch to light mode",
+    "toggleToDark": "Switch to dark mode"
+  },
+  "language": {
+    "label": "Language"
+  },
+  "home": {
+    "hero": {
+      "title": "Welcome to Larbi",
+      "body": "Online courses, a blog, business tools and progress tracking, all on one platform, with a space tailored to each account type.",
+      "ctaFormations": "Discover the courses",
+      "ctaTools": "See the tools"
+    },
+    "featuresSectionTitle": "What the platform offers",
+    "features": {
+      "elearning": {
+        "title": "E-Learning",
+        "body": "Courses organised into lessons, with progress tracking and a certificate once the course is completed.",
+        "cta": "Learn more →"
+      },
+      "blog": {
+        "title": "Blog & tutorials",
+        "body": "Freely accessible articles and tutorials, with some content reserved for premium accounts.",
+        "cta": "Read the blog →"
+      },
+      "tools": {
+        "title": "Business tools",
+        "body": "Credit simulator and invoice generator designed for sole traders and SMEs.",
+        "cta": "See the tools →"
+      }
+    },
+    "accounts": {
+      "title": "An account tailored to your profile",
+      "body": "Each account has a category and an access level, which determine the content and features available.",
+      "cta": "See access details by account type →"
+    }
+  },
+  "about": {
+    "title": "About",
+    "intro": "Larbi brings together online courses, a tutorial blog and business tools for freelancers and companies (sole traders, SMEs) on a single platform.",
+    "approachTitle": "Our approach",
+    "approachBody": "Each course is organised into lessons, with progress tracking and a certificate issued once the completion conditions are met. Blog content is publicly accessible, with some of it reserved for premium accounts depending on the user's profile.",
+    "securityTitle": "Security and privacy",
+    "securityBody": "Protecting accounts and content (videos, images, documents) is a priority: access permissions are checked server-side, and proprietary content is never exposed publicly without prior verification."
+  },
+  "services": {
+    "title": "Services & offers",
+    "intro": "Three main areas, accessible depending on your account type and access level (standard or premium).",
+    "formations": {
+      "title": "Courses",
+      "body": "Structured lesson paths, progress tracking and a certificate at the end of the course. Requires an account.",
+      "cta": "See the courses →"
+    },
+    "blog": {
+      "title": "Blog & tutorials",
+      "body": "Public articles, with premium content recommended based on your profile.",
+      "cta": "Read the blog →"
+    },
+    "tools": {
+      "title": "Business tools",
+      "body": "Credit simulator and PDF/Excel invoice generator. Requires an account and depends on your access rights.",
+      "cta": "See the tools →"
+    },
+    "detailCta": "See access details by account type →"
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "items": [
+      {
+        "question": "What account types exist?",
+        "answer": "The platform manages several profiles (sole trader, SME, industrial SME, with more categories to be added later), each with a standard or premium access level."
+      },
+      {
+        "question": "What's the difference between a standard and a premium account?",
+        "answer": "Your account's level determines which content and features you can access: some articles, courses or tools may be reserved for premium accounts."
+      },
+      {
+        "question": "Is the blog accessible without an account?",
+        "answer": "Yes, the blog is publicly accessible. Courses and tools, on the other hand, require you to be logged in and depend on your access rights."
+      },
+      {
+        "question": "How does course certification work?",
+        "answer": "A certificate is issued only once all of a course's completion conditions are met, with verification performed server-side."
+      },
+      {
+        "question": "Are my content and media protected?",
+        "answer": "Access to proprietary content (videos, images, documents) is controlled server-side. No web solution can fully prevent the copying of content that is displayed, but the platform strongly limits the possibilities for direct retrieval."
+      }
+    ]
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "A question about courses, the blog or the tools? Write to us using the form.",
+    "notice": "Contact details (email, phone, address) must be provided by the client before going live — not shown here to avoid publishing invented information.",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "message": "Message",
+      "submit": "Send"
+    },
+    "errors": {
+      "required": "Please fill in all fields."
+    },
+    "status": {
+      "notWired": "Sending this form will be enabled during backend integration (task P1-07). Your message has not been sent yet."
+    }
+  },
+  "features": {
+    "title": "Accessible features",
+    "intro": "Access to each area depends on being logged in and, for some content, on your account's level (standard or premium).",
+    "table": {
+      "domain": "Area",
+      "visitor": "Visitor",
+      "standard": "Standard account",
+      "premium": "Premium account",
+      "open": "Access",
+      "locked": "Restricted"
+    },
+    "domains": {
+      "blog": "Blog & tutorials",
+      "formations": "Courses",
+      "tools": "Tools (credit, invoicing)",
+      "premium": "Premium content"
+    },
+    "footNote": "This table reflects the access rules already defined for the project. The real check is always enforced server-side, never only in the interface."
+  },
+  "formationsPresentation": {
+    "title": "Courses",
+    "body": "Each course is made up of a defined number of lessons. Your progress is tracked lesson by lesson and course by course, and a certificate is issued once all completion conditions are met.",
+    "accessNote": "Accessing courses requires being logged in and depends on your access rights.",
+    "notice": "The course catalogue, enrolment and lesson playback will be available starting in Phase 2 (E-Learning — tasks P2-01 to P2-07)."
+  },
+  "toolsPresentation": {
+    "title": "Tools",
+    "intro": "Two business tools are planned for this first version:",
+    "credit": {
+      "title": "Credit simulator",
+      "body": "Estimate of the credit you may obtain based on your financial profile, computed server-side from banking rules supplied by the client."
+    },
+    "invoice": {
+      "title": "Invoice generator",
+      "body": "Create invoices (client, provider, products/services, totals) with PDF and Excel export."
+    },
+    "accessNote": "Accessing the tools requires being logged in and depends on your access rights.",
+    "notice": "The tools will become usable in Phase 4 (tasks P4-01 to P4-05), once authentication and roles are in place."
+  },
+  "blogList": {
+    "title": "Blog",
+    "intro": "Publicly accessible articles and tutorials, with some premium content based on your profile.",
+    "notice": "No articles have been published yet: the CMS and the real article list arrive in Phase 3 (tasks P3-01 to P3-03)."
+  },
+  "article": {
+    "label": "Article",
+    "notFoundTitle": "\"{{slug}}\" is not available yet",
+    "notice": "Reading real articles will be available once the blog's CMS is delivered (Phase 3, tasks P3-01 to P3-03).",
+    "back": "Back to the blog"
+  },
+  "legal": {
+    "title": "Legal notice",
+    "notice": "This page cannot be published as is: the legal information below must be supplied and validated by the client. No value has been invented.",
+    "editorTitle": "Site publisher",
+    "fields": {
+      "companyName": "Company name",
+      "legalForm": "Legal form",
+      "siret": "Company registration number",
+      "address": "Registered address",
+      "publisher": "Publication director",
+      "contact": "Contact"
+    },
+    "hostingTitle": "Hosting",
+    "hostingField": "Host",
+    "toComplete": "[to be completed by the client]",
+    "toCompleteShort": "[to be completed]",
+    "toCompleteHosting": "[to be completed once the production infrastructure is chosen — see P5-06]"
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "notice": "The exact details of the processing (precise purposes, retention periods, sub-processors, DPO contact if applicable) must be validated with the client before publication. The principles below only reflect rules already agreed in the project's requirements.",
+    "dataTitle": "Data collected",
+    "dataBody": "The platform limits the personal data collected to what is genuinely necessary to manage accounts (sole trader, SME, industrial SME, etc.), track courses and use the tools.",
+    "securityTitle": "Account and content security",
+    "securityBody": "Access to accounts, courses, premium content and proprietary media (videos, images, documents) is checked server-side. IDs sent to the API are always checked against the logged-in user and their permissions.",
+    "rightsTitle": "Your rights",
+    "rightsContact": "Contact to exercise your rights",
+    "toComplete": "[to be completed by the client]"
+  },
+  "auth": {
+    "login": {
+      "title": "Log in",
+      "intro": "Access your courses, tools and premium content.",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submit": "Log in",
+      "forgot": "Forgot your password?",
+      "createAccount": "Create an account",
+      "errorRequired": "Please enter your email and password.",
+      "notWired": "Login will be enabled with authentication (task P1-06) and its integration into the frontend (P1-07).",
+      "notice": "The form works on the interface side but isn't connected to a real account yet (see P1-06 / P1-07)."
+    },
+    "register": {
+      "title": "Create an account",
+      "intro": "Choose the category that matches your activity.",
+      "nameLabel": "Name",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "accountTypeLabel": "Account type",
+      "submit": "Create my account",
+      "alreadyAccount": "Already have an account?",
+      "login": "Log in",
+      "errorRequired": "Please fill in all fields.",
+      "notWired": "Account creation will be enabled with authentication (task P1-06) and its integration into the frontend (P1-07).",
+      "notice": "The form works on the interface side but isn't connected to a real account yet (see P1-06 / P1-07)."
+    },
+    "forgot": {
+      "title": "Forgot password",
+      "intro": "Enter your email to receive a reset link.",
+      "emailLabel": "Email",
+      "submit": "Send the link",
+      "backToLogin": "Back to login",
+      "errorRequired": "Please enter your email.",
+      "notWired": "Sending a reset link will be enabled with authentication (task P1-06).",
+      "notice": "The form works on the interface side but isn't connected to a real email delivery yet (see P1-06)."
+    }
+  },
+  "account": {
+    "layoutNotice": "Account area — structural preview. Real data and access protection arrive with authentication (P1-06) and its integration (P1-07).",
+    "nav": {
+      "profile": "Profile",
+      "dashboard": "Dashboard",
+      "type": "Account type",
+      "premium": "Premium content"
+    },
+    "profile": {
+      "title": "Profile",
+      "intro": "Your personal information will appear here once logged in.",
+      "fields": {
+        "name": "Name",
+        "email": "Email",
+        "accountType": "Account type",
+        "accessLevel": "Access level"
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "intro": "An overview of your activity once your courses and certificates are in place.",
+      "widgets": {
+        "coursesInProgress": "Courses in progress",
+        "certificates": "Certificates earned",
+        "recentArticles": "Recently read articles"
+      }
+    },
+    "type": {
+      "title": "Account type",
+      "intro": "Your category determines some of the content and features you can access (sole trader, SME or industrial SME).",
+      "categoryLabel": "Category",
+      "save": "Save",
+      "status": "Saving will be enabled once the corresponding backend is in place."
+    },
+    "premium": {
+      "title": "Premium content",
+      "intro": "Some articles, courses or tools are reserved for premium accounts. Here is how they will appear for an account without access:",
+      "lockedTitle": "Content reserved for premium accounts",
+      "lockedBody": "Upgrade to a premium account to unlock this content.",
+      "footNote": "This lock is purely visual: the real access check is always enforced server-side, never only in the frontend."
+    }
+  },
+  "notFound": {
+    "code": "404 error",
+    "title": "Page not found",
+    "body": "The page you're looking for doesn't exist or has been moved.",
+    "back": "Back to home"
+  },
+  "errorPage": {
+    "code": "Error",
+    "title": "An unexpected error occurred",
+    "body": "Please try again in a moment. If the problem persists, contact support."
+  }
+}

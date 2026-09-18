@@ -404,10 +404,76 @@ Tâches :
 - États loading / empty / error.
 - Tests des principaux parcours.
 
+### P1-09 — Mode clair / sombre
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P1-02`
+- Durée cible : 1 jour
+
+Origine : omission signalée par l'utilisateur après coup (2026-09-18) — ajoutée à sa demande, pas une correction de bug. Ne modifie le design d'aucune page (remarques de design à venir de l'utilisateur, hors périmètre ici) : uniquement le mécanisme clair/sombre.
+
+Tâches :
+- Jetons de couleur clair/sombre exploitables partout (déjà en place depuis P1-02 via `prefers-color-scheme`, complétés ici par une bascule manuelle).
+- Bascule manuelle indépendante de la préférence système, avec mémorisation du choix.
+- Application immédiate sans flash de la mauvaise couleur au chargement.
+
+Réalisé :
+- `src/theme/theme-context.js`, `ThemeContext.jsx` (`ThemeProvider`), `useTheme.js` : état `light`/`dark`, initialisé depuis `localStorage` sinon `prefers-color-scheme`, persisté à chaque changement.
+- `index.css` : les variables de thème sombre sont désormais définies à la fois sous `@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) {...} }` (préférence système) et sous `:root[data-theme='dark'] {...}` (bascule manuelle explicite) — les deux mécanismes cohabitent.
+- `index.html` : petit script inline exécuté avant le montage React, qui applique `data-theme` dès le premier paint pour éviter un flash de la mauvaise couleur.
+- `components/ui/ThemeToggle.jsx` : bouton dans le `Header`, alterne clair/sombre.
+
+Décision technique :
+- Bascule à deux états (clair/sombre) plutôt qu'un troisième état « système » explicite dans l'interface : le système est déjà le point de départ par défaut (tant qu'aucun choix n'est mémorisé), ce qui couvre le besoin sans complexifier le composant.
+
+Tests effectués :
+- `npm run build` : compilation réussie.
+- `npm run lint` (oxlint) : aucun avertissement.
+- Limite de vérification identique aux tâches précédentes : pas d'outil navigateur disponible dans cette session pour confirmer visuellement la bascule et l'absence de flash. À vérifier manuellement.
+
+### P1-10 — Internationalisation (i18n)
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Dépendances : `P1-02`
+- Durée cible : 2 jours
+
+Origine : omission signalée par l'utilisateur après coup (2026-09-18) — le projet doit supporter plusieurs langues : français, anglais, arabe et tamazight. Ajoutée à sa demande.
+
+Tâches :
+- Mise en place d'i18next / react-i18next.
+- Traduction réelle en français (langue source), anglais et arabe.
+- Tamazight enregistré comme langue sélectionnable mais **non traduit** : repli automatique (`fallbackLng`) vers le français pour toute clé manquante, conformément à la demande explicite de l'utilisateur.
+- Support RTL (arabe) : bascule de `dir`/`lang` sur `<html>` selon la langue active.
+- Sélecteur de langue accessible depuis le `Header`.
+
+Réalisé :
+- `src/i18n/index.js` : configuration i18next (`fr`, `en`, `ar`, `tzm`), `fallbackLng: 'fr'`, détection via `localStorage` puis `navigator`.
+- `src/i18n/locales/{fr,en,ar}.json` : traductions complètes et vérifiées comme strictement identiques en structure de clés (199 clés dans chacun des 3 fichiers, aucune manquante ni orpheline — vérifié par script).
+- `src/i18n/locales/tzm.json` : fichier volontairement vide (commenté), aucune traduction fournie — tout retombe sur le français.
+- `src/i18n/useSyncHtmlAttributes.js` : synchronise `<html lang>` et `<html dir>` avec la langue active (nécessaire pour un rendu RTL correct en arabe), appelé depuis `App.jsx`.
+- `components/ui/LanguageSwitcher.jsx` : sélecteur des 4 langues, intégré au `Header`.
+- **Toutes** les pages et composants texte existants (Header, Footer, AccountNav, Home, À propos, Services, FAQ, Contact, Fonctionnalités, présentation Formations/Outils, Blog/Article, pages légales, Connexion/Inscription/Mot de passe oublié, Profil/Tableau de bord/Type de compte/Premium, 404/Erreur) migrés vers `useTranslation()` / `t()` — plus aucun texte français en dur dans le JSX (vérifié par recherche des caractères accentués dans les fichiers `.jsx`, seuls des commentaires de code subsistent).
+- `config/navigation.js` : les libellés de navigation sont désormais des clés i18n (`labelKey`), plus du texte littéral.
+- Ajustement CSS minimal pour la compatibilité RTL (`text-align: start` au lieu de `left` dans le tableau des fonctionnalités) — le reste de la mise en page utilise déjà flex/grid avec `gap`, agnostique à la direction. Aucune autre modification de design.
+
+Décisions techniques / signalements :
+- **Pas de redesign** : conformément à la demande explicite de l'utilisateur (remarques de design à venir), seule l'infrastructure clair/sombre et langues a été ajoutée — aucune page n'a été redessinée.
+- **RTL** : le mécanisme (`dir="rtl"` sur `<html>` en arabe) est fonctionnel, mais un passage de polish visuel dédié au RTL (vérifier chaque composant pixel par pixel en arabe) n'a pas été fait — cohérent avec la consigne de ne pas retravailler le design maintenant.
+- **Tamazight** : uniquement « mis en place » comme demandé — sélectionnable dans le switcher, zéro traduction fournie, comportement de repli vérifié par construction (`fallbackLng: 'fr'`).
+
+Règle ajoutée pour la suite du projet (voir aussi section 6) : toute nouvelle page ou tout nouveau composant (Phases 2 à 5) doit utiliser `useTranslation()`/`t()` dès sa création, jamais de texte en dur — les traductions en/ar correspondantes doivent être ajoutées dans le même changement, sauf pour un contenu réellement dynamique (ex. articles de blog, formations) qui suit son propre système de traduction de contenu à définir le moment venu.
+
+Tests effectués :
+- `npm run build` : 104 modules, compilation réussie.
+- `npm run lint` (oxlint) : aucun avertissement.
+- Script de vérification de parité des clés entre `fr.json`, `en.json` et `ar.json` : 199 clés de chaque côté, aucun écart.
+- Recherche de texte français résiduel dans les fichiers `.jsx` (caractères accentués) : uniquement des commentaires de code, aucun texte affiché à l'utilisateur.
+- Limite de vérification identique aux tâches précédentes : pas d'outil navigateur disponible dans cette session pour confirmer visuellement le changement de langue, le rendu RTL réel et l'absence de régression visuelle. À vérifier manuellement via `npm run dev`.
+
 ### P1-08 — Validation de fin de phase
 - Statut : `❌ todo`
 - Priorité : `🔴 high`
-- Dépendances : `P1-07`
+- Dépendances : `P1-07`, `P1-09`, `P1-10`
 - Durée cible : 1 jour
 
 Critères :
@@ -871,20 +937,23 @@ Une tâche ne peut passer à `✅ done` que si :
 - un test manuel ou automatisé pertinent a été effectué ;
 - les fichiers de suivi sont mis à jour.
 
+Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau composant texte, à partir de maintenant, doit utiliser `useTranslation()`/`t()` (i18next) dès sa création — jamais de texte en dur. Les traductions français/anglais/arabe correspondantes doivent être ajoutées dans le même changement (le tamazight reste volontairement en repli vers le français). Les couleurs doivent utiliser les tokens CSS existants (`index.css`), pas de couleurs codées en dur, pour rester compatibles avec le mode clair/sombre.
+
 # 7. État actuel
 
 Phase active : `PHASE 1`
 
-Dernière tâche terminée et vérifiée :
-`P1-05 — Backend minimal et navigation dynamique` (✅ done)
+Dernières tâches terminées et vérifiées :
+`P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
 
-Toutes les tâches de pages (P1-02, P1-03, P1-04) et le socle backend (P1-05) sont terminés. Le modèle `User` existe en base (Prisma).
+Toutes les tâches de pages (P1-02, P1-03, P1-04), le socle backend (P1-05) et les deux ajouts signalés par l'utilisateur (mode clair/sombre, i18n FR/EN/AR + tamazight en repli) sont terminés. Le modèle `User` existe en base (Prisma).
 
 Prochaine tâche réalisable (dépendances satisfaites) :
 - `P1-06 — Authentification + rôles` (dépend de `P1-04` ✅ et `P1-05` ✅).
 
-Rappel de dépendance à venir :
+Rappel de dépendances à venir :
 - `P1-07 — Intégration frontend/backend` dépend de `P1-03` ✅, `P1-05` ✅ et `P1-06` ❌ — reste bloquée tant que P1-06 n'est pas fait.
+- `P1-08 — Validation de fin de phase` dépend désormais de `P1-07` ❌, `P1-09` ✅ et `P1-10` ✅.
 
 Recommandation : `P1-06` est la seule tâche non bloquée pour continuer la Phase 1.
 

@@ -1,48 +1,40 @@
+import { useTranslation } from 'react-i18next';
 import Button from '../components/ui/Button.jsx';
 import './Pages.css';
 
 export default function ServicesPage() {
+  const { t } = useTranslation();
+
   return (
     <section className="page-section">
-      <h1>Services &amp; offres</h1>
-      <p>
-        Trois grands domaines, accessibles selon votre type de compte et votre niveau
-        d'accès (standard ou premium).
-      </p>
+      <h1>{t('services.title')}</h1>
+      <p>{t('services.intro')}</p>
       <div className="feature-grid">
         <div className="feature-card">
-          <h3>Formations</h3>
-          <p>
-            Parcours structurés en cours, suivi de progression et certification à la
-            fin de la formation. Accès authentifié.
-          </p>
+          <h3>{t('services.formations.title')}</h3>
+          <p>{t('services.formations.body')}</p>
           <Button to="/formations" variant="ghost">
-            Voir les formations →
+            {t('services.formations.cta')}
           </Button>
         </div>
         <div className="feature-card">
-          <h3>Blog &amp; tutoriels</h3>
-          <p>
-            Articles publics, avec des contenus premium recommandés selon votre profil.
-          </p>
+          <h3>{t('services.blog.title')}</h3>
+          <p>{t('services.blog.body')}</p>
           <Button to="/blog" variant="ghost">
-            Lire le blog →
+            {t('services.blog.cta')}
           </Button>
         </div>
         <div className="feature-card">
-          <h3>Outils métier</h3>
-          <p>
-            Simulateur de crédit et générateur de facture PDF/Excel. Accès authentifié
-            et selon les droits.
-          </p>
+          <h3>{t('services.tools.title')}</h3>
+          <p>{t('services.tools.body')}</p>
           <Button to="/outils" variant="ghost">
-            Voir les outils →
+            {t('services.tools.cta')}
           </Button>
         </div>
       </div>
       <p>
         <Button to="/fonctionnalites" variant="ghost">
-          Voir le détail des accès par type de compte →
+          {t('services.detailCta')}
         </Button>
       </p>
     </section>

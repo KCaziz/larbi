@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Button from '../../components/ui/Button.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import '../Pages.css';
@@ -7,6 +8,7 @@ import '../Pages.css';
 const initialForm = { name: '', email: '', password: '', accountType: 'auto-entrepreneur' };
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState(null);
 
@@ -19,29 +21,26 @@ export default function RegisterPage() {
     event.preventDefault();
 
     if (!form.name || !form.email || !form.password) {
-      setStatus({ type: 'error', text: 'Merci de remplir tous les champs.' });
+      setStatus({ type: 'error', text: t('auth.register.errorRequired') });
       return;
     }
 
     // No auth backend exists yet (P1-06). We never fake account creation.
-    setStatus({
-      type: 'info',
-      text: "La création de compte sera activée avec l'authentification (tâche P1-06) puis son intégration au frontend (P1-07).",
-    });
+    setStatus({ type: 'info', text: t('auth.register.notWired') });
   };
 
   return (
     <section className="auth-page">
-      <h1>Créer un compte</h1>
-      <p>Choisissez la catégorie qui correspond à votre activité.</p>
+      <h1>{t('auth.register.title')}</h1>
+      <p>{t('auth.register.intro')}</p>
 
       <form className="form-stack" onSubmit={handleSubmit} noValidate>
         <div className="form-field">
-          <label htmlFor="name">Nom</label>
+          <label htmlFor="name">{t('auth.register.nameLabel')}</label>
           <input id="name" name="name" type="text" value={form.name} onChange={handleChange} />
         </div>
         <div className="form-field">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{t('auth.register.emailLabel')}</label>
           <input
             id="email"
             name="email"
@@ -52,7 +51,7 @@ export default function RegisterPage() {
           />
         </div>
         <div className="form-field">
-          <label htmlFor="password">Mot de passe</label>
+          <label htmlFor="password">{t('auth.register.passwordLabel')}</label>
           <input
             id="password"
             name="password"
@@ -63,11 +62,11 @@ export default function RegisterPage() {
           />
         </div>
         <div className="form-field">
-          <label htmlFor="accountType">Type de compte</label>
+          <label htmlFor="accountType">{t('auth.register.accountTypeLabel')}</label>
           <select id="accountType" name="accountType" value={form.accountType} onChange={handleChange}>
-            <option value="auto-entrepreneur">Auto-entrepreneur</option>
-            <option value="pme">PME</option>
-            <option value="pmi">PMI</option>
+            <option value="auto-entrepreneur">{t('accountTypes.autoEntrepreneur')}</option>
+            <option value="pme">{t('accountTypes.pme')}</option>
+            <option value="pmi">{t('accountTypes.pmi')}</option>
           </select>
         </div>
 
@@ -77,18 +76,15 @@ export default function RegisterPage() {
           </p>
         )}
 
-        <Button type="submit">Créer mon compte</Button>
+        <Button type="submit">{t('auth.register.submit')}</Button>
 
         <div className="form-links">
-          <span>Déjà un compte ?</span>
-          <Link to="/connexion">Se connecter</Link>
+          <span>{t('auth.register.alreadyAccount')}</span>
+          <Link to="/connexion">{t('auth.register.login')}</Link>
         </div>
       </form>
 
-      <Notice variant="info">
-        Formulaire fonctionnel côté interface, non encore relié à un vrai compte (voir
-        P1-06 / P1-07).
-      </Notice>
+      <Notice variant="info">{t('auth.register.notice')}</Notice>
     </section>
   );
 }

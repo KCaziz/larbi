@@ -1,0 +1,3 @@
+{
+  "_comment": "Tamazight is registered as a selectable language (see i18n/index.js and LanguageSwitcher) but intentionally not translated yet, per instruction: every key falls back to French (fallbackLng) until real Tamazight content is provided."
+}

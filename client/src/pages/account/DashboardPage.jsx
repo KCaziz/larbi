@@ -1,21 +1,23 @@
+import { useTranslation } from 'react-i18next';
 import '../Pages.css';
 
-const widgets = [
-  { label: 'Formations en cours', value: '—' },
-  { label: 'Certificats obtenus', value: '—' },
-  { label: 'Derniers articles lus', value: '—' },
-];
-
 export default function DashboardPage() {
+  const { t } = useTranslation();
+  const widgets = [
+    t('account.dashboard.widgets.coursesInProgress'),
+    t('account.dashboard.widgets.certificates'),
+    t('account.dashboard.widgets.recentArticles'),
+  ];
+
   return (
     <div>
-      <h1>Tableau de bord</h1>
-      <p>Vue d'ensemble de votre activité une fois vos formations et certifications en place.</p>
+      <h1>{t('account.dashboard.title')}</h1>
+      <p>{t('account.dashboard.intro')}</p>
       <div className="skeleton-grid">
-        {widgets.map((widget) => (
-          <div className="skeleton-item" key={widget.label}>
-            <div className="label">{widget.label}</div>
-            <div className="value">{widget.value}</div>
+        {widgets.map((label) => (
+          <div className="skeleton-item" key={label}>
+            <div className="label">{label}</div>
+            <div className="value">—</div>
           </div>
         ))}
       </div>

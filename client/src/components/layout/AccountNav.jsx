@@ -1,21 +1,24 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './AccountNav.css';
 
 const links = [
-  { label: 'Profil', to: '/compte/profil' },
-  { label: 'Tableau de bord', to: '/compte/tableau-de-bord' },
-  { label: 'Type de compte', to: '/compte/type' },
-  { label: 'Contenus premium', to: '/compte/premium' },
+  { labelKey: 'account.nav.profile', to: '/compte/profil' },
+  { labelKey: 'account.nav.dashboard', to: '/compte/tableau-de-bord' },
+  { labelKey: 'account.nav.type', to: '/compte/type' },
+  { labelKey: 'account.nav.premium', to: '/compte/premium' },
 ];
 
 export default function AccountNav() {
+  const { t } = useTranslation();
+
   return (
-    <nav className="account-nav" aria-label="Navigation du compte">
+    <nav className="account-nav" aria-label={t('nav.accountNav')}>
       <ul>
         {links.map((link) => (
           <li key={link.to}>
             <NavLink to={link.to} className={({ isActive }) => (isActive ? 'active' : undefined)}>
-              {link.label}
+              {t(link.labelKey)}
             </NavLink>
           </li>
         ))}

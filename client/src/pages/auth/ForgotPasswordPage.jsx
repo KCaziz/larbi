@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Button from '../../components/ui/Button.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import '../Pages.css';
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState(null);
 
@@ -12,25 +14,22 @@ export default function ForgotPasswordPage() {
     event.preventDefault();
 
     if (!email) {
-      setStatus({ type: 'error', text: 'Merci de renseigner votre email.' });
+      setStatus({ type: 'error', text: t('auth.forgot.errorRequired') });
       return;
     }
 
     // No auth/email backend exists yet (P1-06). We never fake a "reset link sent" message.
-    setStatus({
-      type: 'info',
-      text: "L'envoi d'un lien de réinitialisation sera activé avec l'authentification (tâche P1-06).",
-    });
+    setStatus({ type: 'info', text: t('auth.forgot.notWired') });
   };
 
   return (
     <section className="auth-page">
-      <h1>Mot de passe oublié</h1>
-      <p>Indiquez votre email pour recevoir un lien de réinitialisation.</p>
+      <h1>{t('auth.forgot.title')}</h1>
+      <p>{t('auth.forgot.intro')}</p>
 
       <form className="form-stack" onSubmit={handleSubmit} noValidate>
         <div className="form-field">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{t('auth.forgot.emailLabel')}</label>
           <input
             id="email"
             name="email"
@@ -47,17 +46,14 @@ export default function ForgotPasswordPage() {
           </p>
         )}
 
-        <Button type="submit">Envoyer le lien</Button>
+        <Button type="submit">{t('auth.forgot.submit')}</Button>
 
         <div className="form-links">
-          <Link to="/connexion">Retour à la connexion</Link>
+          <Link to="/connexion">{t('auth.forgot.backToLogin')}</Link>
         </div>
       </form>
 
-      <Notice variant="info">
-        Formulaire fonctionnel côté interface, non encore relié à un envoi d'email réel
-        (voir P1-06).
-      </Notice>
+      <Notice variant="info">{t('auth.forgot.notice')}</Notice>
     </section>
   );
 }
