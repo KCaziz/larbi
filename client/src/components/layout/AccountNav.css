@@ -1,0 +1,33 @@
+.account-nav {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+
+.account-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+}
+
+.account-nav a {
+  display: block;
+  padding: 12px 16px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+}
+
+.account-nav a:hover,
+.account-nav a.active {
+  color: var(--accent);
+}
+
+.account-nav a.active {
+  border-bottom-color: var(--accent);
+}

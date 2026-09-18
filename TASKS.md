@@ -292,7 +292,7 @@ Tests effectués :
 - Limite de vérification : comme pour P1-02, aucun outil de navigateur réel n'était disponible dans cette session. Le rendu visuel réel de chaque page (FAQ accordéon, formulaire de contact, responsive du `feature-grid`) n'a pas été confirmé visuellement par Claude. Une tentative de test de rendu via SSR (Vite `ssrLoadModule`) a été abandonnée après un conflit d'interopérabilité CJS/ESM avec `react-router-dom` ; ne pas la reprendre sans raison forte, ce n'était pas concluant. À vérifier manuellement via `npm run dev` dans `client/`.
 
 ### P1-04 — Pages utilisateurs
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P1-02`
 - Durée cible : 3 jours
@@ -306,6 +306,33 @@ Pages :
 - Gestion du type de compte.
 - Présentation des fonctionnalités accessibles.
 - Pages premium / accès restreint.
+
+Réalisé :
+- `pages/auth/LoginPage.jsx`, `RegisterPage.jsx`, `ForgotPasswordPage.jsx` : formulaires avec validation côté client, liens croisés (connexion ↔ inscription ↔ mot de passe oublié).
+- `layouts/AccountLayout.jsx` + `components/layout/AccountNav.jsx` : shell commun pour l'espace compte (`/compte/*`), avec onglets Profil / Tableau de bord / Type de compte / Contenus premium.
+- `pages/account/ProfilePage.jsx`, `DashboardPage.jsx`, `AccountTypePage.jsx`, `PremiumAccessPage.jsx`.
+- `pages/FeaturesOverviewPage.jsx` (`/fonctionnalites`) : tableau récapitulatif des accès par domaine et par type de compte, basé uniquement sur les règles déjà actées en section 1 de ce fichier.
+- Nouveau composant réutilisable `components/ui/LockedContent.jsx` (pattern visuel de contenu verrouillé).
+- `router/index.jsx` : routes `/connexion`, `/inscription`, `/mot-de-passe-oublie`, `/compte` (+ 4 sous-routes), `/fonctionnalites`.
+- Suppression de `pages/PlaceholderPage.jsx`, devenu totalement inutilisé une fois `/connexion` et `/inscription` remplacées par de vraies pages.
+- Liens de découverte ajoutés depuis `HomePage` et `ServicesPage` vers `/fonctionnalites` (aucune route orpheline).
+
+Décisions techniques / signalements :
+- **Aucune authentification réelle** : P1-06 (dépendant de P1-04 et P1-05) n'est pas commencée. Les formulaires Connexion/Inscription/Mot de passe oublié valident les champs côté client mais n'envoient rien à un backend — chaque soumission affiche un message honnête plutôt qu'une fausse confirmation.
+- **Espace `/compte/*` sans garde d'accès** : comme il n'existe pas encore de notion de session, je n'ai pas ajouté de redirection « non connecté → /connexion ». En ajouter une maintenant aurait simulé une sécurité qui n'existe pas (contraire à la règle #2 : « ne jamais considérer une restriction React comme une mesure de sécurité »). La vraie protection (côté serveur + garde frontend) arrive avec P1-06/P1-07.
+- **Profil / Tableau de bord** : champs affichés avec des valeurs `—` (aucune donnée utilisateur fictive), en attendant de vraies données après authentification.
+- **Contenus premium** : la page démontre uniquement le *pattern visuel* de verrouillage (`LockedContent`) ; le texte de la page rappelle explicitement que le contrôle réel est côté serveur.
+
+Manquements identifiés (à traiter dans les tâches déjà prévues, pas de nouvelle tâche nécessaire) :
+- L'intégration réelle de ces formulaires à un backend d'authentification dépend de P1-05 (backend minimal) puis P1-06 (auth + rôles) et P1-07 (intégration).
+- La protection effective de `/compte/*` (redirection si non connecté, contenu selon le rôle) doit être ajoutée lors de P1-07, pas avant.
+
+Tests effectués :
+- `npm run build` : 64 modules, compilation réussie, aucune erreur.
+- `npm run lint` (oxlint) : aucun avertissement.
+- Toutes les nouvelles routes testées via `curl` (`/connexion`, `/inscription`, `/mot-de-passe-oublie`, `/compte`, `/compte/profil`, `/compte/tableau-de-bord`, `/compte/type`, `/compte/premium`, `/fonctionnalites`) : `200`.
+- Relecture manuelle : chaque nouveau lien (`form-links`, boutons « voir le détail des accès ») pointe vers une route déclarée ; aucun import mort après suppression de `PlaceholderPage`.
+- Limite de vérification identique aux tâches précédentes : pas d'outil navigateur disponible dans cette session pour confirmer visuellement les formulaires, les onglets du compte et le rendu du tableau des fonctionnalités. À vérifier manuellement via `npm run dev`.
 
 ### P1-05 — Backend minimal et navigation dynamique
 - Statut : `❌ todo`
@@ -826,13 +853,18 @@ Une tâche ne peut passer à `✅ done` que si :
 Phase active : `PHASE 1`
 
 Dernière tâche terminée et vérifiée :
-`P1-03 — Pages publiques principales` (✅ done)
+`P1-04 — Pages utilisateurs` (✅ done)
 
-Prochaines tâches réalisables (dépendances satisfaites) :
-- `P1-04 — Pages utilisateurs` (dépend de P1-02 ✅)
-- `P1-05 — Backend minimal et navigation dynamique` (dépend de P1-01 ✅)
+Toutes les tâches « pages » de la Phase 1 (P1-02, P1-03, P1-04) sont maintenant terminées. Il ne reste, avant la validation de fin de phase (P1-08), que le backend et l'authentification.
 
-Recommandation : `P1-04` ensuite (dernière étape avant P1-06 authentification), `P1-05` peut être mené en parallèle logique côté backend.
+Prochaine tâche réalisable (dépendance satisfaite) :
+- `P1-05 — Backend minimal et navigation dynamique` (dépend de P1-01 ✅) — seule tâche non bloquée à ce stade.
+
+Rappel de dépendances à venir (non réalisables tant que P1-05 n'est pas fait) :
+- `P1-06 — Authentification + rôles` dépend de `P1-04` ✅ et `P1-05` ❌.
+- `P1-07 — Intégration frontend/backend` dépend de `P1-03` ✅, `P1-05` ❌ et `P1-06` ❌.
+
+Recommandation : `P1-05` est donc la seule voie possible pour continuer à avancer dans la Phase 1.
 
 Blocages / informations manquantes signalées (non bloquantes pour continuer, mais à ne pas oublier avant livraison) :
 - Mentions légales et politique de confidentialité : identité légale du client (raison sociale, SIRET, adresse, hébergeur, contact DPO) à fournir avant mise en production (voir notes P1-03).

@@ -46,7 +46,7 @@ export default function ContactPage() {
         </Notice>
       </div>
 
-      <form className="contact-form" onSubmit={handleSubmit} noValidate>
+      <form className="form-stack" onSubmit={handleSubmit} noValidate>
         <div className="form-field">
           <label htmlFor="name">Nom</label>
           <input id="name" name="name" type="text" value={form.name} onChange={handleChange} />

@@ -69,6 +69,9 @@ export default function HomePage() {
           <li>Standard</li>
           <li>Premium</li>
         </ul>
+        <Button to="/fonctionnalites" variant="ghost">
+          Voir le détail des accès par type de compte →
+        </Button>
       </section>
     </>
   );
