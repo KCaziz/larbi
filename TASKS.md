@@ -252,7 +252,7 @@ Tests effectués :
 - Limite de vérification : aucun outil de navigateur réel n'était disponible dans cet environnement pour cette session ; l'interaction du menu mobile (ouverture/fermeture) et le rendu visuel des breakpoints n'ont donc pas été confirmés visuellement par Claude. À vérifier manuellement en ouvrant `http://localhost:5173` et en réduisant la largeur de fenêtre sous 860px.
 
 ### P1-03 — Pages publiques principales
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P1-02`
 - Durée cible : 5 jours
@@ -268,6 +268,28 @@ Pages à implémenter selon les maquettes / cahier des charges :
 - Page blog.
 - Page article.
 - Pages légales nécessaires.
+
+Réalisé :
+- `pages/HomePage.jsx` enrichie (présentation des 3 domaines, types de compte).
+- `pages/AboutPage.jsx`, `ServicesPage.jsx`, `FaqPage.jsx` (FAQ incluse — contenu strictement basé sur les règles déjà actées dans ce fichier : comptes, standard/premium, sécurité, certification).
+- `pages/ContactPage.jsx` : formulaire avec validation côté client, composant `Notice` réutilisable.
+- `pages/formations/FormationsPresentationPage.jsx`, `pages/outils/ToolsPresentationPage.jsx` : pages de présentation (pas de catalogue réel — celui-ci appartient à P2-03/P4-01).
+- `pages/blog/BlogListPage.jsx`, `pages/blog/ArticlePage.jsx` (route `/blog/:slug`) : état vide honnête, pas d'articles fabriqués.
+- `pages/legal/LegalNoticePage.jsx`, `PrivacyPolicyPage.jsx` : structure complète mais avec les informations d'identité légale explicitement marquées `[à compléter par le client]`.
+- Nouveau composant réutilisable `components/ui/Notice.jsx` (variantes `info` / `action-needed`).
+- `router/index.jsx` et `config/navigation.js` mis à jour (routes réelles, ajout Services au menu principal, FAQ au footer).
+
+Décisions techniques / signalements :
+- **Contact** : le formulaire ne transmet rien pour l'instant (aucun endpoint backend n'est prévu avant P1-07 « Intégration frontend/backend »). Le bouton d'envoi affiche un message honnête plutôt qu'une fausse confirmation d'envoi.
+- **Mentions légales / Politique de confidentialité** : information manquante signalée (règle §11 de ce fichier) — raison sociale, SIRET, adresse, hébergeur et contact DPO doivent être fournis par le client avant toute mise en ligne réelle. Rien n'a été inventé.
+- **Formations / Outils / Blog** : ce sont des pages de présentation uniquement (texte descriptif basé sur le cahier des charges). Le catalogue de formations réel, la liste d'articles réelle et les outils fonctionnels appartiennent respectivement à P2-03, P3-03 et P4-01/P4-02/P4-03 — non anticipés ici pour ne pas dupliquer ce travail ni inventer de contenu métier (formations, articles ou tarifs fictifs).
+
+Tests effectués :
+- `npm run build` : compilation production réussie (52 modules), aucune erreur.
+- `npm run lint` (oxlint) : aucun avertissement.
+- Serveur de dev + `curl` sur chaque route (`/`, `/formations`, `/outils`, `/blog`, `/blog/:slug`, `/a-propos`, `/services`, `/faq`, `/contact`, `/mentions-legales`, `/confidentialite`, `/connexion`, `/inscription`, route inconnue) : toutes répondent `200` (SPA — confirme que le serveur sert l'app, pas le rendu du bon composant).
+- Relecture manuelle de chaque page pour la syntaxe JSX et la cohérence des imports.
+- Limite de vérification : comme pour P1-02, aucun outil de navigateur réel n'était disponible dans cette session. Le rendu visuel réel de chaque page (FAQ accordéon, formulaire de contact, responsive du `feature-grid`) n'a pas été confirmé visuellement par Claude. Une tentative de test de rendu via SSR (Vite `ssrLoadModule`) a été abandonnée après un conflit d'interopérabilité CJS/ESM avec `react-router-dom` ; ne pas la reprendre sans raison forte, ce n'était pas concluant. À vérifier manuellement via `npm run dev` dans `client/`.
 
 ### P1-04 — Pages utilisateurs
 - Statut : `❌ todo`
@@ -804,14 +826,18 @@ Une tâche ne peut passer à `✅ done` que si :
 Phase active : `PHASE 1`
 
 Dernière tâche terminée et vérifiée :
-`P1-02 — Architecture frontend` (✅ done)
+`P1-03 — Pages publiques principales` (✅ done)
 
 Prochaines tâches réalisables (dépendances satisfaites) :
-- `P1-03 — Pages publiques principales` (dépend de P1-02 ✅)
 - `P1-04 — Pages utilisateurs` (dépend de P1-02 ✅)
 - `P1-05 — Backend minimal et navigation dynamique` (dépend de P1-01 ✅)
 
-Recommandation : `P1-03` en priorité (contenu public, socle SEO/premiers visiteurs), `P1-04` peut suivre juste après, `P1-05` peut être mené en parallèle logique côté backend.
+Recommandation : `P1-04` ensuite (dernière étape avant P1-06 authentification), `P1-05` peut être mené en parallèle logique côté backend.
+
+Blocages / informations manquantes signalées (non bloquantes pour continuer, mais à ne pas oublier avant livraison) :
+- Mentions légales et politique de confidentialité : identité légale du client (raison sociale, SIRET, adresse, hébergeur, contact DPO) à fournir avant mise en production (voir notes P1-03).
+- Formulaire de contact : aucune coordonnée réelle (email/téléphone/adresse) fournie — non affichée pour éviter de publier une information inventée.
+- Simulateur de crédit (P4-02) : règles bancaires/taux à fournir par le client le moment venu — rappel déjà noté dans la tâche elle-même.
 
 Point de vérification manuelle recommandé pour l'utilisateur : ouvrir `http://localhost:5173` après `npm run dev` dans `client/` et tester le menu mobile sous 860px de large (non vérifié visuellement par Claude faute d'outil navigateur dans cette session).
 

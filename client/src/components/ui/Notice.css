@@ -1,0 +1,19 @@
+.notice {
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  font-size: 0.95rem;
+  margin: 0 0 24px;
+}
+
+.notice-info {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  color: var(--text-h);
+}
+
+.notice-action-needed {
+  background: var(--bg-alt);
+  border-color: var(--danger);
+  color: var(--text-h);
+}
