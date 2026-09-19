@@ -2,10 +2,9 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 4px 20px rgba(76, 29, 149, 0.06);
 }
 
 .site-header-inner {
@@ -23,8 +22,9 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-size: 1.3rem;
-  font-weight: 800;
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--text-h);
   text-decoration: none;
@@ -33,20 +33,21 @@
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 11px;
-  background: var(--gradient-brand);
-  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--serif);
   font-size: 1.1rem;
-  font-weight: 800;
-  box-shadow: 0 6px 14px rgba(124, 58, 237, 0.4);
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .nav-panel {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 12px;
   flex: 1;
   justify-content: flex-end;
 }
@@ -54,41 +55,35 @@
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .auth-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  margin-inline-start: 6px;
 }
 
 .auth-actions .btn {
-  padding: 9px 20px;
+  padding: 8px 14px;
+  white-space: nowrap;
 }
 
 .menu-toggle {
   display: none;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 5px;
   width: 40px;
   height: 40px;
-  padding: 8px;
+  padding: 0;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-h);
   cursor: pointer;
 }
 
-.menu-toggle span {
-  display: block;
-  width: 100%;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--text-h);
-}
-
-@media (max-width: 960px) {
+@media (max-width: 1240px) {
   .menu-toggle {
     display: flex;
   }
@@ -113,16 +108,35 @@
   }
 
   .header-controls {
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: wrap;
     margin-top: 16px;
   }
 
   .auth-actions {
+    width: 100%;
+    margin: 8px 0 0;
     flex-direction: column;
   }
 
   .auth-actions .btn {
     width: 100%;
+  }
+}
+
+.header-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+/* Admins have one more button: on desktop "My account" shows its icon only
+   (tooltip + accessible name stay), the full label appears in the mobile menu. */
+@media (min-width: 1241px) {
+  .auth-actions .btn-collapse .btn-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
   }
 }

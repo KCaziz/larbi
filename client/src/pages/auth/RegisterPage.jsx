@@ -1,39 +1,69 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { UserPlus } from 'lucide-react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../auth/useAuth.js';
+import { errorKey } from '../../lib/api.js';
+import { accountTypeLabel, useAccountTypes } from '../../lib/accountTypes.js';
 import AuthAside from '../../components/layout/AuthAside.jsx';
 import Button from '../../components/ui/Button.jsx';
-import Notice from '../../components/ui/Notice.jsx';
 import '../Pages.css';
 
-const initialForm = { name: '', email: '', password: '', accountType: 'auto-entrepreneur' };
+const initialForm = { name: '', email: '', password: '', accountType: '' };
 
 export default function RegisterPage() {
   const { t } = useTranslation();
+  const { status, register } = useAuth();
+  const navigate = useNavigate();
+  const accountTypes = useAccountTypes();
   const [form, setForm] = useState(initialForm);
-  const [status, setStatus] = useState(null);
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  if (status === 'authenticated' && !submitting) {
+    return <Navigate to="/compte" replace />;
+  }
+
+  // Until the user picks one, default to the first type the API returned.
+  const accountType = form.accountType || accountTypes.types[0]?.value || '';
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!form.name || !form.email || !form.password) {
-      setStatus({ type: 'error', text: t('auth.register.errorRequired') });
+    if (!form.name.trim() || !form.email || !form.password || !accountType) {
+      setError(t('auth.register.errorRequired'));
+      return;
+    }
+    if (form.password.length < 8) {
+      setError(t('auth.register.errorPasswordShort'));
       return;
     }
 
-    // No auth backend exists yet (P1-06). We never fake account creation.
-    setStatus({ type: 'info', text: t('auth.register.notWired') });
+    setError(null);
+    setSubmitting(true);
+    try {
+      await register({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        accountType,
+      });
+      navigate('/compte', { replace: true });
+    } catch (err) {
+      setError(t(errorKey(err, { 409: 'auth.register.emailTaken' })));
+      setSubmitting(false);
+    }
   };
 
   return (
     <section className="auth-page">
       <div className="auth-split">
-        <AuthAside icon="✨" />
+        <AuthAside icon={UserPlus} />
 
         <div className="auth-main">
           <h1>{t('auth.register.title')}</h1>
@@ -46,6 +76,7 @@ export default function RegisterPage() {
                 id="name"
                 name="name"
                 type="text"
+                autoComplete="name"
                 value={form.name}
                 onChange={handleChange}
               />
@@ -68,32 +99,49 @@ export default function RegisterPage() {
                 name="password"
                 type="password"
                 autoComplete="new-password"
+                aria-describedby="password-hint"
                 value={form.password}
                 onChange={handleChange}
               />
+              <small id="password-hint" className="form-hint">
+                {t('auth.register.passwordHint')}
+              </small>
             </div>
             <div className="form-field">
               <label htmlFor="accountType">{t('auth.register.accountTypeLabel')}</label>
               <select
                 id="accountType"
                 name="accountType"
-                value={form.accountType}
+                value={accountType}
                 onChange={handleChange}
+                disabled={accountTypes.status !== 'ready'}
               >
-                <option value="auto-entrepreneur">{t('accountTypes.autoEntrepreneur')}</option>
-                <option value="pme">{t('accountTypes.pme')}</option>
-                <option value="pmi">{t('accountTypes.pmi')}</option>
+                {accountTypes.status === 'loading' && <option>{t('state.loading')}</option>}
+                {accountTypes.types.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {accountTypeLabel(t, type)}
+                  </option>
+                ))}
               </select>
+              {accountTypes.status === 'error' && (
+                <small className="form-hint form-hint-error" role="alert">
+                  {t('auth.register.accountTypesError')}
+                </small>
+              )}
             </div>
 
-            {status && (
-              <p className="form-status" role="status">
-                {status.text}
+            {error && (
+              <p className="form-status form-status-error" role="alert">
+                {error}
               </p>
             )}
 
-            <Button type="submit" className="btn-lg">
-              {t('auth.register.submit')}
+            <Button
+              type="submit"
+              className="btn-lg"
+              disabled={submitting || accountTypes.status !== 'ready'}
+            >
+              {submitting ? t('state.sending') : t('auth.register.submit')}
             </Button>
 
             <div className="form-links">
@@ -101,8 +149,6 @@ export default function RegisterPage() {
               <Link to="/connexion">{t('auth.register.login')}</Link>
             </div>
           </form>
-
-          <Notice variant="info">{t('auth.register.notice')}</Notice>
         </div>
       </div>
     </section>

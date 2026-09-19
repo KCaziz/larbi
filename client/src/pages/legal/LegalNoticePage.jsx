@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Scale } from 'lucide-react';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import Section from '../../components/ui/Section.jsx';
@@ -9,7 +10,7 @@ export default function LegalNoticePage() {
 
   return (
     <>
-      <PageHeader icon="⚖️" title={t('legal.title')} subtitle={t('legal.subtitle')} />
+      <PageHeader icon={Scale} title={t('legal.title')} subtitle={t('legal.subtitle')} />
 
       <Section>
         <div className="legal-card">

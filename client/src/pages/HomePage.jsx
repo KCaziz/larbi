@@ -1,27 +1,43 @@
 import { useTranslation } from 'react-i18next';
+import {
+  ArrowRight,
+  BookOpenText,
+  Building2,
+  Calculator,
+  Factory,
+  GraduationCap,
+  Languages,
+  Layers,
+  Newspaper,
+  ShieldCheck,
+  Sprout,
+  Star,
+  UserRound,
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Button from '../components/ui/Button.jsx';
 import Section from '../components/ui/Section.jsx';
 import './Pages.css';
 
 const stats = [
-  { key: 'multilingual', icon: '🌍', tone: 'tone-violet' },
-  { key: 'themes', icon: '🌓', tone: 'tone-blue' },
-  { key: 'security', icon: '🔒', tone: 'tone-green' },
-  { key: 'certification', icon: '🎓', tone: 'tone-amber' },
+  { key: 'multilingual', icon: Languages, tone: 'tone-primary' },
+  { key: 'themes', icon: Layers, tone: 'tone-blue' },
+  { key: 'security', icon: ShieldCheck, tone: 'tone-green' },
+  { key: 'certification', icon: GraduationCap, tone: 'tone-brass' },
 ];
 
 const features = [
-  { key: 'elearning', icon: '📚', tone: 'tone-violet', to: '/formations' },
-  { key: 'blog', icon: '📝', tone: 'tone-blue', to: '/blog' },
-  { key: 'tools', icon: '🧮', tone: 'tone-amber', to: '/outils' },
+  { key: 'elearning', icon: BookOpenText, tone: 'tone-primary', to: '/formations' },
+  { key: 'blog', icon: Newspaper, tone: 'tone-blue', to: '/blog' },
+  { key: 'tools', icon: Calculator, tone: 'tone-brass', to: '/outils' },
 ];
 
 const accountPills = [
-  { key: 'autoEntrepreneur', icon: '🧑‍💼', tone: 'tone-violet' },
-  { key: 'pme', icon: '🏢', tone: 'tone-blue' },
-  { key: 'pmi', icon: '🏭', tone: 'tone-amber' },
-  { key: 'standard', icon: '🌱', tone: 'tone-green' },
-  { key: 'premium', icon: '⭐', tone: 'tone-pink' },
+  { key: 'autoEntrepreneur', icon: UserRound, tone: 'tone-primary' },
+  { key: 'pme', icon: Building2, tone: 'tone-blue' },
+  { key: 'pmi', icon: Factory, tone: 'tone-brass' },
+  { key: 'standard', icon: Sprout, tone: 'tone-green' },
+  { key: 'premium', icon: Star, tone: 'tone-clay' },
 ];
 
 export default function HomePage() {
@@ -32,33 +48,53 @@ export default function HomePage() {
     <>
       <section className="hero">
         <div className="hero-inner">
-          <span className="hero-badge">✨ {t('home.hero.badge')}</span>
-          <h1 className="gradient-text">{t('home.hero.title')}</h1>
-          <p>{t('home.hero.body')}</p>
-          <div className="hero-actions">
-            <Button to="/formations" variant="primary" className="btn-lg">
-              {t('home.hero.ctaFormations')}
-            </Button>
-            <Button to="/outils" variant="secondary" className="btn-lg">
-              {t('home.hero.ctaTools')}
-            </Button>
+          <div className="hero-copy">
+            <span className="eyebrow">{t('home.hero.badge')}</span>
+            <h1>{t('home.hero.title')}</h1>
+            <p>{t('home.hero.body')}</p>
+            <div className="hero-actions">
+              <Button to="/formations" variant="primary" className="btn-lg" arrow>
+                {t('home.hero.ctaFormations')}
+              </Button>
+              <Button to="/outils" variant="secondary" className="btn-lg">
+                {t('home.hero.ctaTools')}
+              </Button>
+            </div>
           </div>
+
+          <ul className="hero-index">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <li key={feature.key} className={feature.tone}>
+                  <Link to={feature.to}>
+                    <span className="icon-badge" aria-hidden="true">
+                      <Icon size={22} strokeWidth={1.6} />
+                    </span>
+                    <span className="hero-index-title">{t(`home.features.${feature.key}.title`)}</span>
+                    <ArrowRight className="arrow icon-dir" size={18} strokeWidth={1.75} aria-hidden="true" />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </section>
 
       <div className="stats">
         <div className="stats-grid">
-          {stats.map((stat) => (
-            <div className={`stat ${stat.tone}`} key={stat.key}>
-              <span className="stat-icon" aria-hidden="true">
-                {stat.icon}
-              </span>
-              <div>
-                <strong>{t(`home.stats.${stat.key}.title`)}</strong>
-                <span className="stat-text">{t(`home.stats.${stat.key}.text`)}</span>
+          {stats.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <div className={`stat ${stat.tone}`} key={stat.key}>
+                <Icon className="stat-icon" size={22} strokeWidth={1.6} aria-hidden="true" />
+                <div>
+                  <strong>{t(`home.stats.${stat.key}.title`)}</strong>
+                  <span className="stat-text">{t(`home.stats.${stat.key}.text`)}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -67,18 +103,21 @@ export default function HomePage() {
         subtitle={t('home.featuresSectionSubtitle')}
       >
         <div className="feature-grid">
-          {features.map((feature) => (
-            <article className={`feature-card ${feature.tone}`} key={feature.key}>
-              <span className="icon-badge" aria-hidden="true">
-                {feature.icon}
-              </span>
-              <h3>{t(`home.features.${feature.key}.title`)}</h3>
-              <p>{t(`home.features.${feature.key}.body`)}</p>
-              <Button to={feature.to} variant="ghost">
-                {t(`home.features.${feature.key}.cta`)}
-              </Button>
-            </article>
-          ))}
+          {features.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <article className={`feature-card ${feature.tone}`} key={feature.key}>
+                <span className="icon-badge" aria-hidden="true">
+                  <Icon size={22} strokeWidth={1.6} />
+                </span>
+                <h3>{t(`home.features.${feature.key}.title`)}</h3>
+                <p>{t(`home.features.${feature.key}.body`)}</p>
+                <Button to={feature.to} variant="ghost" arrow>
+                  {t(`home.features.${feature.key}.cta`)}
+                </Button>
+              </article>
+            );
+          })}
         </div>
       </Section>
 
@@ -86,7 +125,7 @@ export default function HomePage() {
         <div className="steps">
           {steps.map((step, index) => (
             <div className="step" key={step.title}>
-              <div className="step-number">{index + 1}</div>
+              <div className="step-number">{String(index + 1).padStart(2, '0')}</div>
               <h3>{step.title}</h3>
               <p>{step.body}</p>
             </div>
@@ -96,20 +135,19 @@ export default function HomePage() {
 
       <Section title={t('home.accounts.title')} subtitle={t('home.accounts.body')}>
         <div className="pill-grid">
-          {accountPills.map((pill) => (
-            <div className={`pill ${pill.tone}`} key={pill.key}>
-              <span className="pill-icon" aria-hidden="true">
-                {pill.icon}
-              </span>
-              {t(`accountTypes.${pill.key}`)}
-            </div>
-          ))}
+          {accountPills.map((pill) => {
+            const Icon = pill.icon;
+            return (
+              <div className={`pill ${pill.tone}`} key={pill.key}>
+                <Icon className="pill-icon" size={20} strokeWidth={1.6} aria-hidden="true" />
+                {t(`accountTypes.${pill.key}`)}
+              </div>
+            );
+          })}
         </div>
-        <div className="center">
-          <Button to="/fonctionnalites" variant="secondary">
-            {t('home.accounts.cta')}
-          </Button>
-        </div>
+        <Button to="/fonctionnalites" variant="ghost" arrow>
+          {t('home.accounts.cta')}
+        </Button>
       </Section>
 
       <section className="cta-band">

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { ShieldCheck } from 'lucide-react';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import Section from '../../components/ui/Section.jsx';
@@ -9,7 +10,7 @@ export default function PrivacyPolicyPage() {
 
   return (
     <>
-      <PageHeader icon="🛡️" title={t('privacy.title')} subtitle={t('privacy.subtitle')} />
+      <PageHeader icon={ShieldCheck} title={t('privacy.title')} subtitle={t('privacy.subtitle')} />
 
       <Section>
         <div className="legal-card">

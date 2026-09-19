@@ -1,43 +1,53 @@
 .main-nav ul {
   list-style: none;
   display: flex;
-  gap: 4px;
+  gap: 0;
   margin: 0;
   padding: 0;
 }
 
 .main-nav a {
+  position: relative;
   display: block;
-  padding: 8px 14px;
-  border-radius: 999px;
+  padding: 8px 7px;
+  white-space: nowrap;
   color: var(--text);
   text-decoration: none;
   font-weight: 500;
   font-size: 0.95rem;
-  transition:
-    background-color 0.2s,
-    color 0.2s;
+  transition: color 0.15s;
 }
 
 .main-nav a:hover {
-  background: var(--bg-alt);
-  color: var(--accent);
+  color: var(--text-h);
 }
 
 .main-nav a.active {
-  background: var(--accent-bg);
-  color: var(--accent);
-  font-weight: 600;
+  color: var(--text-h);
 }
 
-@media (max-width: 960px) {
+/* Active marker: a thin accent underline, not a filled pill. */
+.main-nav a.active::after {
+  content: '';
+  position: absolute;
+  inset-inline: 7px;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent);
+}
+
+@media (max-width: 1240px) {
   .main-nav ul {
     flex-direction: column;
-    gap: 2px;
+    gap: 0;
   }
 
   .main-nav a {
-    padding: 12px 14px;
-    border-radius: var(--radius-sm);
+    padding: 13px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .main-nav a.active::after {
+    inset-inline: 0;
   }
 }

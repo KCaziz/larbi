@@ -25,7 +25,10 @@
     "menuOpen": "Open menu",
     "menuClose": "Close menu",
     "accountNav": "Account navigation",
-    "main": "Main navigation"
+    "main": "Main navigation",
+    "account": "My account",
+    "logout": "Log out",
+    "admin": "Administration"
   },
   "footer": {
     "copyright": "© {{year}} {{brand}}. All rights reserved.",
@@ -56,23 +59,23 @@
       "elearning": {
         "title": "E-Learning",
         "body": "Courses organised into lessons, with progress tracking and a certificate once the course is completed.",
-        "cta": "Learn more →"
+        "cta": "Learn more"
       },
       "blog": {
         "title": "Blog & tutorials",
         "body": "Freely accessible articles and tutorials, with some content reserved for premium accounts.",
-        "cta": "Read the blog →"
+        "cta": "Read the blog"
       },
       "tools": {
         "title": "Business tools",
         "body": "Credit simulator and invoice generator designed for sole traders and SMEs.",
-        "cta": "See the tools →"
+        "cta": "See the tools"
       }
     },
     "accounts": {
       "title": "An account tailored to your profile",
       "body": "Each account has a category and an access level, which determine the content and features available.",
-      "cta": "See access details by account type →"
+      "cta": "See access details by account type"
     },
     "featuresSectionSubtitle": "Three complementary areas, all accessible with a single account.",
     "stats": {
@@ -151,19 +154,19 @@
     "formations": {
       "title": "Courses",
       "body": "Structured lesson paths, progress tracking and a certificate at the end of the course. Requires an account.",
-      "cta": "See the courses →"
+      "cta": "See the courses"
     },
     "blog": {
       "title": "Blog & tutorials",
       "body": "Public articles, with premium content recommended based on your profile.",
-      "cta": "Read the blog →"
+      "cta": "Read the blog"
     },
     "tools": {
       "title": "Business tools",
       "body": "Credit simulator and PDF/Excel invoice generator. Requires an account and depends on your access rights.",
-      "cta": "See the tools →"
+      "cta": "See the tools"
     },
-    "detailCta": "See access details by account type →",
+    "detailCta": "See access details by account type",
     "compareTitle": "Which access for your account?",
     "compareBody": "See the detail of access by account type and access level."
   },
@@ -212,7 +215,7 @@
       "required": "Please fill in all fields."
     },
     "status": {
-      "notWired": "Sending this form will be enabled during backend integration (task P1-07). Your message has not been sent yet."
+      "sent": "Thank you, your message has been received."
     },
     "asideTitle": "Have a question?",
     "formTitle": "Send us a message"
@@ -240,7 +243,7 @@
     "title": "Courses",
     "body": "Each course is made up of a defined number of lessons. Your progress is tracked lesson by lesson and course by course, and a certificate is issued once all completion conditions are met.",
     "accessNote": "Accessing courses requires being logged in and depends on your access rights.",
-    "notice": "The course catalogue, enrolment and lesson playback will be available starting in Phase 2 (E-Learning — tasks P2-01 to P2-07).",
+    "notice": "Log in to browse the catalogue and enrol: access to each course depends on your level (standard or premium).",
     "subtitle": "Structured lesson paths with progress tracking and certification.",
     "flow": {
       "title": "How a course works",
@@ -258,7 +261,8 @@
           "body": "Issued once all completion conditions are met."
         }
       ]
-    }
+    },
+    "cta": "Go to the catalogue"
   },
   "toolsPresentation": {
     "title": "Tools",
@@ -327,8 +331,7 @@
       "forgot": "Forgot your password?",
       "createAccount": "Create an account",
       "errorRequired": "Please enter your email and password.",
-      "notWired": "Login will be enabled with authentication (task P1-06) and its integration into the frontend (P1-07).",
-      "notice": "The form works on the interface side but isn't connected to a real account yet (see P1-06 / P1-07)."
+      "invalidCredentials": "Incorrect email or password."
     },
     "register": {
       "title": "Create an account",
@@ -341,8 +344,10 @@
       "alreadyAccount": "Already have an account?",
       "login": "Log in",
       "errorRequired": "Please fill in all fields.",
-      "notWired": "Account creation will be enabled with authentication (task P1-06) and its integration into the frontend (P1-07).",
-      "notice": "The form works on the interface side but isn't connected to a real account yet (see P1-06 / P1-07)."
+      "emailTaken": "An account already exists with this email.",
+      "passwordHint": "At least 8 characters.",
+      "errorPasswordShort": "The password must be at least 8 characters long.",
+      "accountTypesError": "Unable to load the account types."
     },
     "forgot": {
       "title": "Forgot password",
@@ -351,8 +356,8 @@
       "submit": "Send the link",
       "backToLogin": "Back to login",
       "errorRequired": "Please enter your email.",
-      "notWired": "Sending a reset link will be enabled with authentication (task P1-06).",
-      "notice": "The form works on the interface side but isn't connected to a real email delivery yet (see P1-06)."
+      "notWired": "Email password reset is not available yet: it requires an email service, which has not been chosen yet.",
+      "notice": "Inactive feature: no email is sent until an email service is configured."
     },
     "panel": {
       "title": "Your personal space",
@@ -364,16 +369,16 @@
     }
   },
   "account": {
-    "layoutNotice": "Account area — structural preview. Real data and access protection arrive with authentication (P1-06) and its integration (P1-07).",
     "nav": {
       "profile": "Profile",
       "dashboard": "Dashboard",
       "type": "Account type",
-      "premium": "Premium content"
+      "premium": "Premium content",
+      "formations": "My courses"
     },
     "profile": {
       "title": "Profile",
-      "intro": "Your personal information will appear here once logged in.",
+      "intro": "Your personal information.",
       "fields": {
         "name": "Name",
         "email": "Email",
@@ -383,7 +388,7 @@
     },
     "dashboard": {
       "title": "Dashboard",
-      "intro": "An overview of your activity once your courses and certificates are in place.",
+      "intro": "An overview of your learning activity.",
       "widgets": {
         "coursesInProgress": "Courses in progress",
         "certificates": "Certificates earned",
@@ -395,14 +400,16 @@
       "intro": "Your category determines some of the content and features you can access (sole trader, SME or industrial SME).",
       "categoryLabel": "Category",
       "save": "Save",
-      "status": "Saving will be enabled once the corresponding backend is in place."
+      "saved": "Account type updated."
     },
     "premium": {
       "title": "Premium content",
       "intro": "Some articles, courses or tools are reserved for premium accounts. Here is how they will appear for an account without access:",
       "lockedTitle": "Content reserved for premium accounts",
       "lockedBody": "Upgrade to a premium account to unlock this content.",
-      "footNote": "This lock is purely visual: the real access check is always enforced server-side, never only in the frontend."
+      "footNote": "This lock is purely visual: the real access check is always enforced server-side, never only in the frontend.",
+      "activeTitle": "Premium account active.",
+      "activeBody": "Your account has access to premium content. The content itself will arrive with the blog and course modules."
     },
     "title": "My space",
     "subtitle": "Profile, dashboard, account type and premium content."
@@ -417,5 +424,296 @@
     "code": "Error",
     "title": "An unexpected error occurred",
     "body": "Please try again in a moment. If the problem persists, contact support."
+  },
+  "errors": {
+    "network": "Unable to reach the server. Check your connection and try again.",
+    "invalid": "Some information is invalid. Check the form.",
+    "tooMany": "Too many attempts. Please try again in a few minutes.",
+    "generic": "Something went wrong. Please try again later.",
+    "forbidden": "You do not have access to this page.",
+    "notFound": "Item not found.",
+    "fileTooLarge": "This file is too large.",
+    "fileUnsupported": "This file type is not accepted."
+  },
+  "state": {
+    "loading": "Loading…",
+    "sending": "Sending…",
+    "retry": "Retry",
+    "sessionError": "Unable to verify your session: the server is not responding."
+  },
+  "forbidden": {
+    "title": "Access denied"
+  },
+  "admin": {
+    "nav": {
+      "formations": "Courses"
+    },
+    "shell": {
+      "title": "Administration",
+      "menu": "Administration menu"
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published"
+    },
+    "confirm": {
+      "cancel": "Cancel"
+    },
+    "list": {
+      "title": "Courses",
+      "subtitle": "Create and manage the courses offered to learners.",
+      "new": "New course",
+      "edit": "Edit",
+      "columns": {
+        "formation": "Course",
+        "status": "Status",
+        "courses": "Lessons",
+        "access": "Access",
+        "updated": "Last edited",
+        "actions": "Actions"
+      },
+      "access": {
+        "standard": "All accounts",
+        "premium": "Premium accounts"
+      },
+      "emptyTitle": "No courses yet",
+      "emptyBody": "Create your first course: a title is all you need to start.",
+      "loadError": "Unable to load the courses."
+    },
+    "newDialog": {
+      "title": "New course",
+      "body": "Give your course a title. You can then complete it step by step.",
+      "label": "Course title",
+      "placeholder": "E.g. Accounting basics",
+      "create": "Create and continue",
+      "required": "The title is required."
+    },
+    "editor": {
+      "back": "Back to courses",
+      "untitled": "Untitled course",
+      "loadError": "Unable to load this course.",
+      "notFound": "This course does not exist or was deleted."
+    },
+    "steps": {
+      "label": "Course creation steps",
+      "info": "Information",
+      "courses": "Lessons",
+      "certification": "Certification",
+      "publish": "Publishing"
+    },
+    "info": {
+      "title": "Course title",
+      "titleHint": "The name shown in the catalogue.",
+      "titleRequired": "The title is required.",
+      "description": "Description",
+      "descriptionHint": "A few lines to present the course and make people want to take it.",
+      "category": "Category",
+      "categoryNone": "No category",
+      "categoryNew": "Create a new category",
+      "categoryNewLabel": "Category name",
+      "categoryAdd": "Add",
+      "access": "Who can take this course?",
+      "accessStandard": "All accounts (standard and premium)",
+      "accessPremium": "Premium accounts only",
+      "cover": "Cover image",
+      "coverHint": "JPG, PNG or WebP, 5 MB maximum. This image illustrates the course in the catalogue.",
+      "coverAdd": "Choose an image",
+      "coverReplace": "Replace the image",
+      "coverRemove": "Remove the image"
+    },
+    "courses": {
+      "intro": "Add the lessons in the order learners will follow them.",
+      "empty": "No lessons yet. Add the first one below.",
+      "addLabel": "New lesson title",
+      "addPlaceholder": "New lesson title, e.g. Introduction",
+      "add": "Add a lesson",
+      "untitled": "Untitled lesson",
+      "moveUp": "Move this lesson up",
+      "moveDown": "Move this lesson down",
+      "delete": "Delete this lesson",
+      "deleteConfirmTitle": "Delete this lesson?",
+      "deleteConfirmBody": "The lesson “{{title}}” and its files will be permanently deleted.",
+      "deleteConfirm": "Yes, delete"
+    },
+    "course": {
+      "title": "Lesson title",
+      "titleRequired": "The lesson title is required.",
+      "summary": "Summary (optional)",
+      "summaryHint": "One sentence describing the lesson.",
+      "content": "Lesson content",
+      "contentHint": "Write the lesson text here. You can also add videos or documents below.",
+      "files": "Videos and documents",
+      "filesHint": "MP4 or WebM video, PDF or image. Files stay private: only enrolled learners will have access.",
+      "upload": "Add a file",
+      "noFiles": "No files for this lesson.",
+      "removeFile": "Remove the file",
+      "kind": {
+        "video": "Video",
+        "document": "Document",
+        "image": "Image"
+      },
+      "minutes": "Estimated duration (minutes)",
+      "required": "This lesson is required to complete the course",
+      "requiredHint": "Untick for a bonus lesson.",
+      "save": "Save the lesson",
+      "saved": "Lesson saved."
+    },
+    "certification": {
+      "intro": "A certificate can be issued automatically to learners who complete all the required lessons.",
+      "enabled": "Issue a certificate at the end of the course",
+      "name": "Certificate name",
+      "nameHint": "E.g. Basic Accounting Certificate",
+      "description": "Description (optional)",
+      "descriptionHint": "What this certificate attests.",
+      "disabledNote": "No certificate will be issued for this course."
+    },
+    "publish": {
+      "title": "Publishing",
+      "intro": "Check that everything is ready. A published course becomes visible to learners.",
+      "checklist": "To do before publishing",
+      "allDone": "Everything is ready: you can publish.",
+      "statusDraft": "This course is a draft: learners cannot see it.",
+      "statusPublished": "This course has been published since {{date}}.",
+      "publish": "Publish the course",
+      "unpublish": "Unpublish",
+      "unpublishHint": "Learners already enrolled keep their progress.",
+      "published": "Course published.",
+      "unpublished": "Course unpublished.",
+      "notReady": "Some steps are not finished: check the list above.",
+      "unsavedFirst": "Save your changes before publishing.",
+      "goTo": "Complete"
+    },
+    "readiness": {
+      "title": "Give the course a title",
+      "description": "Add a description",
+      "cover": "Add a cover image",
+      "courses": "Add at least one lesson",
+      "coursesContent": "Give every lesson some content (text, video or document)",
+      "certification": "Name the certificate (or turn it off)",
+      "done": "done",
+      "todo": "to do"
+    },
+    "danger": {
+      "title": "Delete the course",
+      "body": "This is permanent: the course, its lessons and their files will be deleted.",
+      "button": "Delete this course",
+      "confirmTitle": "Permanently delete this course?",
+      "confirmBody": "“{{title}}” and all its lessons will be deleted. This cannot be undone.",
+      "confirm": "Yes, delete",
+      "hasLearners": "Learners are enrolled in this course: it cannot be deleted. Unpublish it instead."
+    },
+    "save": {
+      "button": "Save",
+      "discard": "Discard changes",
+      "dirty": "Unsaved changes",
+      "saving": "Saving…",
+      "saved": "Changes saved."
+    },
+    "unsaved": {
+      "title": "Leave without saving?",
+      "body": "You have unsaved changes. If you leave this page they will be lost.",
+      "stay": "Stay on the page",
+      "leave": "Leave without saving"
+    },
+    "upload": {
+      "uploading": "Uploading…"
+    },
+    "rte": {
+      "label": "Text editor",
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "h2": "Large heading",
+      "h3": "Subheading",
+      "bullet": "Bulleted list",
+      "ordered": "Numbered list",
+      "quote": "Quote",
+      "link": "Link",
+      "linkPrompt": "Link address (leave empty to remove the link)",
+      "undo": "Undo",
+      "redo": "Redo"
+    }
+  },
+  "learn": {
+    "catalog": {
+      "title": "Course catalogue",
+      "subtitle": "Pick a course, enrol and follow the lessons at your own pace.",
+      "search": "Search for a course",
+      "searchPlaceholder": "Title or keyword",
+      "category": "Category",
+      "allCategories": "All categories",
+      "emptyTitle": "No courses available yet",
+      "emptyBody": "New courses will be published soon.",
+      "noResults": "No course matches your search.",
+      "loadError": "Unable to load the catalogue."
+    },
+    "card": {
+      "premium": "Premium",
+      "completed": "Completed",
+      "locked": "Reserved for premium accounts"
+    },
+    "progress": {
+      "text": "{{completed}} of {{total}} lessons completed",
+      "aria": "Progress: {{percent}}%"
+    },
+    "detail": {
+      "back": "Back to the catalogue",
+      "loadError": "Unable to load this course.",
+      "notFound": "This course does not exist or is no longer available.",
+      "lessonsTitle": "Course programme",
+      "required": "Required",
+      "bonus": "Bonus",
+      "minutes": "{{count}} min",
+      "lessonDone": "Completed",
+      "lessonTodo": "Not completed",
+      "lockedLessons": "Enrol to access the lesson content.",
+      "unpublishedNote": "This course is no longer offered in the catalogue, but it stays available because you are enrolled.",
+      "enrolled": "You are enrolled",
+      "start": "Start the course",
+      "continue": "Continue the course",
+      "enrollTitle": "Take this course",
+      "enrollBody": "Enrol for free to access every lesson and track your progress.",
+      "enroll": "Enrol in this course",
+      "enrolling": "Enrolling…",
+      "premiumTitle": "Reserved for premium accounts",
+      "premiumBody": "This course is only available with a premium account.",
+      "premiumLink": "See the access levels"
+    },
+    "certification": {
+      "title": "Certificate",
+      "rule": "It is issued automatically once every required lesson is completed.",
+      "disabled": "This course does not issue a certificate.",
+      "remaining": "Required lessons remaining: {{count}}",
+      "earned": "Certificate earned: no. {{number}}, issued on {{date}}."
+    },
+    "course": {
+      "breadcrumb": "Breadcrumb",
+      "listTitle": "Lessons in this course",
+      "files": "Lesson files",
+      "videoLabel": "Video: {{name}}",
+      "download": "Download",
+      "noContent": "This lesson has no content yet.",
+      "previous": "Previous lesson",
+      "next": "Next lesson",
+      "finish": "Back to the course",
+      "goToFormation": "Go to the course",
+      "notEnrolled": "Enrol in the course to access this lesson.",
+      "premiumRequired": "This lesson is reserved for premium accounts.",
+      "notFound": "This lesson does not exist.",
+      "loadError": "Unable to load this lesson.",
+      "progressTitle": "Your progress",
+      "markDone": "Mark as completed",
+      "undo": "Undo completion",
+      "formationDone": "Well done, you have completed every required course of this formation."
+    },
+    "mine": {
+      "title": "My courses",
+      "intro": "The courses you are enrolled in and your progress.",
+      "empty": "You are not enrolled in any course yet.",
+      "browse": "Browse the catalogue",
+      "loadError": "Unable to load your courses."
+    },
+    "lessonCount_one": "{{count}} lesson",
+    "lessonCount_other": "{{count}} lessons"
   }
 }

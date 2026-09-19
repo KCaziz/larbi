@@ -1,4 +1,5 @@
 import { useRouteError, isRouteErrorResponse } from 'react-router-dom';
+import { TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/ui/Button.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
@@ -18,8 +19,8 @@ export default function ErrorPage() {
 
   return (
     <section className="status-hero">
-      <div className="status-emoji" aria-hidden="true">
-        ⚠️
+      <div className="status-icon" aria-hidden="true">
+        <TriangleAlert size={26} strokeWidth={1.6} />
       </div>
       <span className="status-label">{t('errorPage.code')}</span>
       <h1>{t('errorPage.title')}</h1>

@@ -1,41 +1,37 @@
 .account-nav {
   margin-bottom: 32px;
+  border-bottom: 1px solid var(--border);
 }
 
 .account-nav ul {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   margin: 0;
-  padding: 6px;
+  padding: 0;
   list-style: none;
   overflow-x: auto;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
 }
 
 .account-nav a {
   display: block;
-  padding: 10px 20px;
-  border-radius: 999px;
+  padding: 12px 16px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
   color: var(--text);
   text-decoration: none;
   font-weight: 500;
   font-size: 0.95rem;
   white-space: nowrap;
   transition:
-    background-color 0.2s,
-    color 0.2s;
+    color 0.15s,
+    border-color 0.15s;
 }
 
 .account-nav a:hover {
-  background: var(--bg-alt);
-  color: var(--accent);
+  color: var(--text-h);
 }
 
 .account-nav a.active {
-  background: var(--gradient-brand);
-  color: #fff;
-  font-weight: 600;
+  border-bottom-color: var(--accent);
+  color: var(--text-h);
 }

@@ -1,4 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
+import RequireRole from '../components/auth/RequireRole.jsx';
+import RequireAuth from '../components/auth/RequireAuth.jsx';
 import MainLayout from '../layouts/MainLayout.jsx';
 import AccountLayout from '../layouts/AccountLayout.jsx';
 import HomePage from '../pages/HomePage.jsx';
@@ -23,6 +25,10 @@ import PremiumAccessPage from '../pages/account/PremiumAccessPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import ErrorPage from '../pages/ErrorPage.jsx';
 
+// Heavy or role-specific areas are loaded on demand: public visitors never
+// download the CMS (rich-text editor) or the lesson reader.
+const lazyPage = (importer) => async () => ({ Component: (await importer()).default });
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -45,14 +51,48 @@ export const router = createBrowserRouter([
       { path: 'inscription', element: <RegisterPage /> },
       { path: 'mot-de-passe-oublie', element: <ForgotPasswordPage /> },
       {
-        path: 'compte',
-        element: <AccountLayout />,
+        // Everything below needs a session (guard = convenience; the API re-checks).
+        element: <RequireAuth />,
         children: [
-          { index: true, element: <Navigate to="profil" replace /> },
-          { path: 'profil', element: <ProfilePage /> },
-          { path: 'tableau-de-bord', element: <DashboardPage /> },
-          { path: 'type', element: <AccountTypePage /> },
-          { path: 'premium', element: <PremiumAccessPage /> },
+          // E-Learning (learner side): formations are for logged-in users.
+          { path: 'catalogue', lazy: lazyPage(() => import('../pages/learn/CatalogPage.jsx')) },
+          { path: 'catalogue/:slug', lazy: lazyPage(() => import('../pages/learn/FormationPage.jsx')) },
+          {
+            path: 'catalogue/:slug/cours/:courseId',
+            lazy: lazyPage(() => import('../pages/learn/CoursePage.jsx')),
+          },
+          {
+            path: 'compte',
+            element: <AccountLayout />,
+            children: [
+              { index: true, element: <Navigate to="profil" replace /> },
+              { path: 'profil', element: <ProfilePage /> },
+              { path: 'tableau-de-bord', element: <DashboardPage /> },
+              { path: 'formations', lazy: lazyPage(() => import('../pages/account/MyFormationsPage.jsx')) },
+              { path: 'type', element: <AccountTypePage /> },
+              { path: 'premium', element: <PremiumAccessPage /> },
+            ],
+          },
+          {
+            element: <RequireRole role="admin" />,
+            children: [
+              {
+                path: 'admin',
+                lazy: lazyPage(() => import('../pages/admin/AdminLayout.jsx')),
+                children: [
+                  { index: true, element: <Navigate to="formations" replace /> },
+                  {
+                    path: 'formations',
+                    lazy: lazyPage(() => import('../pages/admin/formations/FormationsListPage.jsx')),
+                  },
+                  {
+                    path: 'formations/:id',
+                    lazy: lazyPage(() => import('../pages/admin/formations/FormationEditorPage.jsx')),
+                  },
+                ],
+              },
+            ],
+          },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

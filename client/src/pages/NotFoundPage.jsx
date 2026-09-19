@@ -7,7 +7,7 @@ export default function NotFoundPage() {
 
   return (
     <section className="status-hero">
-      <p className="status-code gradient-text" aria-hidden="true">
+      <p className="status-code" aria-hidden="true">
         404
       </p>
       <span className="status-label">{t('notFound.code')}</span>

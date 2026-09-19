@@ -25,7 +25,10 @@
     "menuOpen": "Ouvrir le menu",
     "menuClose": "Fermer le menu",
     "accountNav": "Navigation du compte",
-    "main": "Navigation principale"
+    "main": "Navigation principale",
+    "account": "Mon espace",
+    "logout": "Déconnexion",
+    "admin": "Administration"
   },
   "footer": {
     "copyright": "© {{year}} {{brand}}. Tous droits réservés.",
@@ -56,23 +59,23 @@
       "elearning": {
         "title": "E-Learning",
         "body": "Des formations organisées en cours, avec suivi de votre progression et certification à la clé une fois la formation terminée.",
-        "cta": "En savoir plus →"
+        "cta": "En savoir plus"
       },
       "blog": {
         "title": "Blog & tutoriels",
         "body": "Des articles et tutoriels en accès libre, avec certains contenus réservés aux comptes premium.",
-        "cta": "Lire le blog →"
+        "cta": "Lire le blog"
       },
       "tools": {
         "title": "Outils métier",
         "body": "Simulateur de crédit et générateur de facture pensés pour les auto-entrepreneurs, PME et PMI.",
-        "cta": "Voir les outils →"
+        "cta": "Voir les outils"
       }
     },
     "accounts": {
       "title": "Un compte adapté à votre profil",
       "body": "Chaque compte est associé à une catégorie et à un niveau d'accès, qui déterminent les contenus et fonctionnalités disponibles.",
-      "cta": "Voir le détail des accès par type de compte →"
+      "cta": "Voir le détail des accès par type de compte"
     },
     "featuresSectionSubtitle": "Trois domaines complémentaires, accessibles avec un seul compte.",
     "stats": {
@@ -151,19 +154,19 @@
     "formations": {
       "title": "Formations",
       "body": "Parcours structurés en cours, suivi de progression et certification à la fin de la formation. Accès authentifié.",
-      "cta": "Voir les formations →"
+      "cta": "Voir les formations"
     },
     "blog": {
       "title": "Blog & tutoriels",
       "body": "Articles publics, avec des contenus premium recommandés selon votre profil.",
-      "cta": "Lire le blog →"
+      "cta": "Lire le blog"
     },
     "tools": {
       "title": "Outils métier",
       "body": "Simulateur de crédit et générateur de facture PDF/Excel. Accès authentifié et selon les droits.",
-      "cta": "Voir les outils →"
+      "cta": "Voir les outils"
     },
-    "detailCta": "Voir le détail des accès par type de compte →",
+    "detailCta": "Voir le détail des accès par type de compte",
     "compareTitle": "Quel accès selon votre compte ?",
     "compareBody": "Consultez le détail des accès par type de compte et niveau d'accès."
   },
@@ -212,7 +215,7 @@
       "required": "Merci de remplir tous les champs."
     },
     "status": {
-      "notWired": "L'envoi de ce formulaire sera activé lors de l'intégration backend (tâche P1-07). Votre message n'a pas encore été transmis."
+      "sent": "Merci, votre message a bien été enregistré."
     },
     "asideTitle": "Une question ?",
     "formTitle": "Envoyez-nous un message"
@@ -240,7 +243,7 @@
     "title": "Formations",
     "body": "Chaque formation est composée d'un nombre défini de cours. Votre progression est suivie cours par cours et par formation, et une certification vous est délivrée une fois toutes les conditions de complétion remplies.",
     "accessNote": "L'accès aux formations nécessite d'être connecté et dépend de vos droits.",
-    "notice": "Le catalogue des formations, l'inscription et la lecture des cours seront disponibles à partir de la Phase 2 (E-Learning — tâches P2-01 à P2-07).",
+    "notice": "Connectez-vous pour parcourir le catalogue et vous inscrire : l'accès à chaque formation dépend de votre niveau (standard ou premium).",
     "subtitle": "Des parcours structurés en cours, avec suivi de progression et certification.",
     "flow": {
       "title": "Le parcours d'une formation",
@@ -258,7 +261,8 @@
           "body": "Délivrée une fois toutes les conditions de complétion remplies."
         }
       ]
-    }
+    },
+    "cta": "Accéder au catalogue"
   },
   "toolsPresentation": {
     "title": "Outils",
@@ -327,8 +331,7 @@
       "forgot": "Mot de passe oublié ?",
       "createAccount": "Créer un compte",
       "errorRequired": "Merci de renseigner votre email et votre mot de passe.",
-      "notWired": "La connexion sera activée avec l'authentification (tâche P1-06) puis son intégration au frontend (P1-07).",
-      "notice": "Formulaire fonctionnel côté interface, non encore relié à un vrai compte (voir P1-06 / P1-07)."
+      "invalidCredentials": "Email ou mot de passe incorrect."
     },
     "register": {
       "title": "Créer un compte",
@@ -341,8 +344,10 @@
       "alreadyAccount": "Déjà un compte ?",
       "login": "Se connecter",
       "errorRequired": "Merci de remplir tous les champs.",
-      "notWired": "La création de compte sera activée avec l'authentification (tâche P1-06) puis son intégration au frontend (P1-07).",
-      "notice": "Formulaire fonctionnel côté interface, non encore relié à un vrai compte (voir P1-06 / P1-07)."
+      "emailTaken": "Un compte existe déjà avec cet email.",
+      "passwordHint": "8 caractères minimum.",
+      "errorPasswordShort": "Le mot de passe doit contenir au moins 8 caractères.",
+      "accountTypesError": "Impossible de charger les types de compte."
     },
     "forgot": {
       "title": "Mot de passe oublié",
@@ -351,8 +356,8 @@
       "submit": "Envoyer le lien",
       "backToLogin": "Retour à la connexion",
       "errorRequired": "Merci de renseigner votre email.",
-      "notWired": "L'envoi d'un lien de réinitialisation sera activé avec l'authentification (tâche P1-06).",
-      "notice": "Formulaire fonctionnel côté interface, non encore relié à un envoi d'email réel (voir P1-06)."
+      "notWired": "La réinitialisation par email n'est pas encore disponible : elle nécessite un service d'envoi d'email, non encore défini.",
+      "notice": "Fonction inactive : aucun email n'est envoyé tant qu'un service d'envoi n'est pas configuré."
     },
     "panel": {
       "title": "Votre espace personnel",
@@ -364,16 +369,16 @@
     }
   },
   "account": {
-    "layoutNotice": "Espace compte — aperçu structurel. Les données réelles et la protection d'accès arrivent avec l'authentification (P1-06) et son intégration (P1-07).",
     "nav": {
       "profile": "Profil",
       "dashboard": "Tableau de bord",
       "type": "Type de compte",
-      "premium": "Contenus premium"
+      "premium": "Contenus premium",
+      "formations": "Mes formations"
     },
     "profile": {
       "title": "Profil",
-      "intro": "Vos informations personnelles apparaîtront ici une fois connecté.",
+      "intro": "Vos informations personnelles.",
       "fields": {
         "name": "Nom",
         "email": "Email",
@@ -383,7 +388,7 @@
     },
     "dashboard": {
       "title": "Tableau de bord",
-      "intro": "Vue d'ensemble de votre activité une fois vos formations et certifications en place.",
+      "intro": "Vue d'ensemble de votre activité de formation.",
       "widgets": {
         "coursesInProgress": "Formations en cours",
         "certificates": "Certificats obtenus",
@@ -395,14 +400,16 @@
       "intro": "Votre catégorie détermine certains contenus et fonctionnalités accessibles (auto-entrepreneur, PME ou PMI).",
       "categoryLabel": "Catégorie",
       "save": "Enregistrer",
-      "status": "L'enregistrement sera activé une fois le backend correspondant en place."
+      "saved": "Type de compte mis à jour."
     },
     "premium": {
       "title": "Contenus premium",
       "intro": "Certains articles, formations ou outils sont réservés aux comptes premium. Voici comment ils apparaîtront pour un compte qui n'y a pas accès :",
       "lockedTitle": "Contenu réservé aux comptes premium",
       "lockedBody": "Passez à un compte premium pour débloquer ce contenu.",
-      "footNote": "Ce verrouillage est uniquement visuel : l'accès réel est toujours vérifié côté serveur, jamais uniquement dans le frontend."
+      "footNote": "Ce verrouillage est uniquement visuel : l'accès réel est toujours vérifié côté serveur, jamais uniquement dans le frontend.",
+      "activeTitle": "Compte premium actif.",
+      "activeBody": "Votre compte a accès aux contenus premium. Les contenus eux-mêmes arriveront avec les modules blog et formations."
     },
     "title": "Mon espace",
     "subtitle": "Profil, tableau de bord, type de compte et contenus premium."
@@ -417,5 +424,297 @@
     "code": "Erreur",
     "title": "Une erreur inattendue est survenue",
     "body": "Merci de réessayer dans un instant. Si le problème persiste, contactez le support."
+  },
+  "errors": {
+    "network": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.",
+    "invalid": "Certaines informations sont invalides. Vérifiez le formulaire.",
+    "tooMany": "Trop de tentatives. Réessayez dans quelques minutes.",
+    "generic": "Une erreur est survenue. Réessayez plus tard.",
+    "forbidden": "Vous n'avez pas accès à cette page.",
+    "notFound": "Élément introuvable.",
+    "fileTooLarge": "Ce fichier est trop volumineux.",
+    "fileUnsupported": "Ce type de fichier n'est pas accepté."
+  },
+  "state": {
+    "loading": "Chargement…",
+    "sending": "Envoi en cours…",
+    "retry": "Réessayer",
+    "sessionError": "Impossible de vérifier votre session : le serveur ne répond pas."
+  },
+  "forbidden": {
+    "title": "Accès refusé"
+  },
+  "admin": {
+    "nav": {
+      "formations": "Formations"
+    },
+    "shell": {
+      "title": "Administration",
+      "menu": "Menu d'administration"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "published": "Publiée"
+    },
+    "confirm": {
+      "cancel": "Annuler"
+    },
+    "list": {
+      "title": "Formations",
+      "subtitle": "Créez et gérez les formations proposées aux apprenants.",
+      "new": "Nouvelle formation",
+      "edit": "Modifier",
+      "columns": {
+        "formation": "Formation",
+        "status": "État",
+        "courses": "Cours",
+        "access": "Accès",
+        "updated": "Modifiée le",
+        "actions": "Actions"
+      },
+      "access": {
+        "standard": "Tous les comptes",
+        "premium": "Comptes premium"
+      },
+      "emptyTitle": "Aucune formation pour l'instant",
+      "emptyBody": "Créez votre première formation : un titre suffit pour commencer.",
+      "loadError": "Impossible de charger les formations."
+    },
+    "newDialog": {
+      "title": "Nouvelle formation",
+      "body": "Donnez un titre à votre formation. Vous pourrez ensuite la compléter étape par étape.",
+      "label": "Titre de la formation",
+      "placeholder": "Ex. : Les bases de la comptabilité",
+      "create": "Créer et continuer",
+      "required": "Le titre est obligatoire."
+    },
+    "editor": {
+      "back": "Retour aux formations",
+      "untitled": "Formation sans titre",
+      "loadError": "Impossible de charger cette formation.",
+      "notFound": "Cette formation n'existe pas ou a été supprimée."
+    },
+    "steps": {
+      "label": "Étapes de création de la formation",
+      "info": "Informations",
+      "courses": "Cours",
+      "certification": "Certification",
+      "publish": "Publication"
+    },
+    "info": {
+      "title": "Titre de la formation",
+      "titleHint": "Le nom affiché dans le catalogue.",
+      "titleRequired": "Le titre est obligatoire.",
+      "description": "Description",
+      "descriptionHint": "Quelques lignes pour présenter la formation et donner envie de la suivre.",
+      "category": "Catégorie",
+      "categoryNone": "Aucune catégorie",
+      "categoryNew": "Créer une nouvelle catégorie",
+      "categoryNewLabel": "Nom de la catégorie",
+      "categoryAdd": "Ajouter",
+      "access": "Qui peut suivre cette formation ?",
+      "accessStandard": "Tous les comptes (standard et premium)",
+      "accessPremium": "Uniquement les comptes premium",
+      "cover": "Image de couverture",
+      "coverHint": "JPG, PNG ou WebP, 5 Mo maximum. Cette image illustre la formation dans le catalogue.",
+      "coverAdd": "Choisir une image",
+      "coverReplace": "Remplacer l'image",
+      "coverRemove": "Supprimer l'image"
+    },
+    "courses": {
+      "intro": "Ajoutez les cours dans l'ordre où les apprenants les suivront.",
+      "empty": "Aucun cours pour l'instant. Ajoutez le premier ci-dessous.",
+      "addLabel": "Titre du nouveau cours",
+      "addPlaceholder": "Titre du nouveau cours, ex. : Introduction",
+      "add": "Ajouter un cours",
+      "untitled": "Cours sans titre",
+      "moveUp": "Monter ce cours",
+      "moveDown": "Descendre ce cours",
+      "delete": "Supprimer ce cours",
+      "deleteConfirmTitle": "Supprimer ce cours ?",
+      "deleteConfirmBody": "Le cours « {{title}} » et ses fichiers seront définitivement supprimés.",
+      "deleteConfirm": "Oui, supprimer"
+    },
+    "course": {
+      "title": "Titre du cours",
+      "titleRequired": "Le titre du cours est obligatoire.",
+      "summary": "Résumé (facultatif)",
+      "summaryHint": "Une phrase qui décrit le cours.",
+      "content": "Contenu du cours",
+      "contentHint": "Écrivez ici le texte du cours. Vous pouvez aussi ajouter des vidéos ou des documents ci-dessous.",
+      "files": "Vidéos et documents",
+      "filesHint": "Vidéo MP4 ou WebM, PDF ou image. Les fichiers restent privés : seuls les apprenants inscrits y auront accès.",
+      "upload": "Ajouter un fichier",
+      "noFiles": "Aucun fichier pour ce cours.",
+      "removeFile": "Supprimer le fichier",
+      "kind": {
+        "video": "Vidéo",
+        "document": "Document",
+        "image": "Image"
+      },
+      "minutes": "Durée estimée (minutes)",
+      "required": "Ce cours est obligatoire pour terminer la formation",
+      "requiredHint": "Décochez pour un cours bonus.",
+      "save": "Enregistrer le cours",
+      "saved": "Cours enregistré."
+    },
+    "certification": {
+      "intro": "Une attestation peut être délivrée automatiquement aux apprenants qui terminent tous les cours obligatoires.",
+      "enabled": "Délivrer une certification à la fin de la formation",
+      "name": "Nom de la certification",
+      "nameHint": "Ex. : Certificat de comptabilité de base",
+      "description": "Description (facultatif)",
+      "descriptionHint": "Ce que valide cette certification.",
+      "disabledNote": "Aucune certification ne sera délivrée pour cette formation."
+    },
+    "publish": {
+      "title": "Publication",
+      "intro": "Vérifiez que tout est prêt. Une formation publiée devient visible pour les apprenants.",
+      "checklist": "À faire avant de publier",
+      "allDone": "Tout est prêt : vous pouvez publier.",
+      "statusDraft": "Cette formation est en brouillon : les apprenants ne la voient pas.",
+      "statusPublished": "Cette formation est publiée depuis le {{date}}.",
+      "publish": "Publier la formation",
+      "unpublish": "Retirer de la publication",
+      "unpublishHint": "Les apprenants déjà inscrits conservent leur progression.",
+      "published": "Formation publiée.",
+      "unpublished": "Formation retirée de la publication.",
+      "notReady": "Certaines étapes ne sont pas terminées : vérifiez la liste ci-dessus.",
+      "unsavedFirst": "Enregistrez vos modifications avant de publier.",
+      "goTo": "Compléter"
+    },
+    "readiness": {
+      "title": "Donner un titre à la formation",
+      "description": "Ajouter une description",
+      "cover": "Ajouter une image de couverture",
+      "courses": "Ajouter au moins un cours",
+      "coursesContent": "Donner du contenu à chaque cours (texte, vidéo ou document)",
+      "certification": "Donner un nom à la certification (ou la désactiver)",
+      "done": "fait",
+      "todo": "à faire"
+    },
+    "danger": {
+      "title": "Supprimer la formation",
+      "body": "Action définitive : la formation, ses cours et leurs fichiers seront supprimés.",
+      "button": "Supprimer cette formation",
+      "confirmTitle": "Supprimer définitivement cette formation ?",
+      "confirmBody": "« {{title}} » et tous ses cours seront supprimés. Cette action est irréversible.",
+      "confirm": "Oui, supprimer",
+      "hasLearners": "Des apprenants sont inscrits à cette formation : elle ne peut pas être supprimée. Retirez-la de la publication à la place."
+    },
+    "save": {
+      "button": "Enregistrer",
+      "discard": "Annuler les modifications",
+      "dirty": "Modifications non enregistrées",
+      "saving": "Enregistrement…",
+      "saved": "Modifications enregistrées."
+    },
+    "unsaved": {
+      "title": "Quitter sans enregistrer ?",
+      "body": "Vous avez des modifications non enregistrées. Si vous quittez cette page, elles seront perdues.",
+      "stay": "Rester sur la page",
+      "leave": "Quitter sans enregistrer"
+    },
+    "upload": {
+      "uploading": "Envoi en cours…"
+    },
+    "rte": {
+      "label": "Éditeur de texte",
+      "bold": "Gras",
+      "italic": "Italique",
+      "underline": "Souligné",
+      "h2": "Grand titre",
+      "h3": "Sous-titre",
+      "bullet": "Liste à puces",
+      "ordered": "Liste numérotée",
+      "quote": "Citation",
+      "link": "Lien",
+      "linkPrompt": "Adresse du lien (laissez vide pour retirer le lien)",
+      "undo": "Annuler",
+      "redo": "Rétablir"
+    }
+  },
+  "learn": {
+    "catalog": {
+      "title": "Catalogue des formations",
+      "subtitle": "Choisissez une formation, inscrivez-vous et suivez les cours à votre rythme.",
+      "search": "Rechercher une formation",
+      "searchPlaceholder": "Titre ou mot-clé",
+      "category": "Catégorie",
+      "allCategories": "Toutes les catégories",
+      "emptyTitle": "Aucune formation disponible pour l'instant",
+      "emptyBody": "De nouvelles formations seront bientôt publiées.",
+      "noResults": "Aucune formation ne correspond à votre recherche.",
+      "loadError": "Impossible de charger le catalogue."
+    },
+    "card": {
+      "premium": "Premium",
+      "completed": "Terminée",
+      "locked": "Réservée aux comptes premium"
+    },
+    "progress": {
+      "text": "{{completed}} sur {{total}} cours terminés",
+      "aria": "Progression : {{percent}} %"
+    },
+    "detail": {
+      "back": "Retour au catalogue",
+      "loadError": "Impossible de charger cette formation.",
+      "notFound": "Cette formation n'existe pas ou n'est plus disponible.",
+      "lessonsTitle": "Programme de la formation",
+      "required": "Obligatoire",
+      "bonus": "Bonus",
+      "minutes": "{{count}} min",
+      "lessonDone": "Terminé",
+      "lessonTodo": "Non terminé",
+      "lockedLessons": "Inscrivez-vous pour accéder au contenu des cours.",
+      "unpublishedNote": "Cette formation n'est plus proposée dans le catalogue, mais elle reste accessible car vous y êtes inscrit(e).",
+      "enrolled": "Vous êtes inscrit(e)",
+      "start": "Commencer la formation",
+      "continue": "Continuer la formation",
+      "enrollTitle": "Suivre cette formation",
+      "enrollBody": "Inscrivez-vous gratuitement pour accéder à l'ensemble des cours et suivre votre progression.",
+      "enroll": "S'inscrire à cette formation",
+      "enrolling": "Inscription en cours…",
+      "premiumTitle": "Réservée aux comptes premium",
+      "premiumBody": "Cette formation n'est accessible qu'avec un compte premium.",
+      "premiumLink": "Voir les niveaux d'accès"
+    },
+    "certification": {
+      "title": "Certification",
+      "rule": "Elle est délivrée automatiquement une fois tous les cours obligatoires terminés.",
+      "disabled": "Cette formation ne délivre pas de certification.",
+      "remaining": "Cours obligatoires restants : {{count}}",
+      "earned": "Certification obtenue : n° {{number}}, délivrée le {{date}}."
+    },
+    "course": {
+      "breadcrumb": "Fil d'Ariane",
+      "listTitle": "Cours de la formation",
+      "files": "Fichiers du cours",
+      "videoLabel": "Vidéo : {{name}}",
+      "download": "Télécharger",
+      "noContent": "Ce cours n'a pas encore de contenu.",
+      "previous": "Cours précédent",
+      "next": "Cours suivant",
+      "finish": "Retour à la formation",
+      "goToFormation": "Aller à la formation",
+      "notEnrolled": "Inscrivez-vous à la formation pour accéder à ce cours.",
+      "premiumRequired": "Ce cours est réservé aux comptes premium.",
+      "notFound": "Ce cours n'existe pas.",
+      "loadError": "Impossible de charger ce cours.",
+      "progressTitle": "Votre progression",
+      "markDone": "Marquer comme terminé",
+      "undo": "Annuler la validation",
+      "formationDone": "Bravo, vous avez terminé tous les cours obligatoires de cette formation."
+    },
+    "mine": {
+      "title": "Mes formations",
+      "intro": "Les formations auxquelles vous êtes inscrit(e) et votre progression.",
+      "empty": "Vous n'êtes inscrit(e) à aucune formation.",
+      "browse": "Parcourir le catalogue",
+      "loadError": "Impossible de charger vos formations."
+    },
+    "lessonCount_one": "{{count}} cours",
+    "lessonCount_many": "{{count}} cours",
+    "lessonCount_other": "{{count}} cours"
   }
 }

@@ -1,14 +1,13 @@
 import './PageHeader.css';
 
-// Coloured banner at the top of every inner page — gives each page a strong
-// identity block that is clearly separated from the content below it.
-export default function PageHeader({ icon, title, subtitle }) {
+// Banner at the top of every inner page. `icon` is a lucide-react component.
+export default function PageHeader({ icon: Icon, title, subtitle }) {
   return (
     <header className="page-header">
       <div className="page-header-inner">
-        {icon && (
+        {Icon && (
           <span className="page-header-icon" aria-hidden="true">
-            {icon}
+            <Icon size={22} strokeWidth={1.6} />
           </span>
         )}
         <h1>{title}</h1>

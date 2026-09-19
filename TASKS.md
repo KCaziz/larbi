@@ -13,6 +13,7 @@ Claude Code doit :
 6. Ajouter une note courte lorsqu'une décision technique importante est prise.
 7. Vérifier le résultat avant de passer à la tâche suivante.
 8. Ne pas élargir le périmètre sans signaler clairement l'impact sur le délai de 2 mois.
+9. **Git : ne jamais commiter, pousser ni gérer le dépôt** (add, commit, push, branches, PR…). L'utilisateur s'en charge lui-même (précision du 2026-09-19). Ne pas non plus proposer de commits ni s'en soucier dans les comptes rendus.
 
 Statuts :
 - `❌ todo` : non commencée
@@ -374,7 +375,7 @@ Tests effectués :
 - Pas de linter configuré côté serveur (seul le frontend en a un) — relecture manuelle des fichiers modifiés/ajoutés.
 
 ### P1-06 — Authentification + rôles
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P1-04`, `P1-05`
 - Durée cible : 2 jours
@@ -390,8 +391,34 @@ Tâches :
 - Types de comptes : auto-entrepreneur, PME, PMI, etc.
 - Niveau standard / premium.
 
+Réalisé (backend uniquement — le câblage React est P1-07) :
+- Endpoints : `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`.
+- Mots de passe hashés avec `bcryptjs` (coût 12) ; comparaison factice quand l'email est inconnu (pas de fuite par timing) ; message d'erreur de login identique pour email inconnu / mauvais mot de passe.
+- Session : JWT (HS256, 7 jours par défaut) dans un cookie `httpOnly`, `SameSite=Lax`, `Secure` en production — jamais lisible par le JS de la page. `JWT_SECRET` obligatoire (≥ 32 caractères), le serveur refuse de démarrer sinon.
+- Validation stricte avec `zod` (`.strict()`) : `role` / `accessLevel` fournis à l'inscription sont **rejetés** (400) — aucune auto-attribution de privilèges ; `accountType` validé contre `constants/accountTypes.js`.
+- RBAC : nouveau champ `User.role` (`user` | `admin`, migration `add_user_role`). Middlewares `requireAuth`, `requireRole(...)`, `requireAccessLevel('premium')`. `requireAuth` recharge l'utilisateur en base à chaque requête : un changement de rôle/niveau ou une suppression de compte est effectif immédiatement.
+- `express-rate-limit` sur register/login (20 tentatives / 15 min / IP, configurable via `AUTH_RATE_LIMIT`).
+- Réponses utilisateur via une liste blanche explicite de champs (`passwordHash` jamais renvoyé).
+
+Décisions techniques / signalements :
+- `role` (ce que l'on peut gérer) est distinct de `accessLevel` (niveau de contenu consommable), conformément à la section 1.
+- **Déconnexion sans révocation serveur** : le JWT est stateless, le logout supprime le cookie mais un token déjà copié reste valide jusqu'à expiration. Acceptable pour le MVP ; une liste de révocation serait à envisager en P5-01 si le client l'exige.
+- **Aucun endpoint de création d'admin** (volontaire) : le premier admin est promu directement en base (`UPDATE users SET role='admin'`). À documenter dans la doc d'exploitation (P5-06).
+- Aucune route métier n'utilise encore `requireRole`/`requireAccessLevel` : ils sont testés mais seront appliqués aux routes E-Learning/blog/outils dans leurs tâches respectives.
+- « Mot de passe oublié » : l'envoi d'email n'est pas dans le périmètre de P1-06 (aucun fournisseur email défini) — la page existe côté front (P1-04), sans endpoint réel pour l'instant.
+- Environnement : `server/.env` créé depuis `.env.example` (non versionné), `docker compose up`, `npm install`.
+
+Tests effectués (serveur réel + PostgreSQL réel, `curl`) :
+- `/me` sans cookie → 401 ; cookie forgé → 401 ; après logout → 401.
+- Register OK → 201 (cookie `HttpOnly`) ; email en doublon → 409 ; `role: "admin"` injecté → 400 ; `accountType` invalide → 400 ; mot de passe court → 400.
+- Login OK → 200 ; mauvais mot de passe et email inconnu → 401 identique.
+- Vérifié en base : `passwordHash` = hash bcrypt (`$2b$12$…`), `role=user`, `accessLevel=standard` par défaut.
+- RBAC via routes de sonde temporaires (supprimées) : user standard → 403 sur route admin et premium ; sans cookie → 401 ; après promotion en base, même session → 200 sur les deux.
+- Rate limit (limite abaissée à 3) : 401, 401, 401, puis 429, 429.
+- Comptes de test supprimés de la base. Pas de suite de tests automatisés (le projet n'en a pas encore ; à traiter en P5-05).
+
 ### P1-07 — Intégration frontend/backend
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P1-03`, `P1-05`, `P1-06`
 - Durée cible : 2 jours
@@ -403,6 +430,35 @@ Tâches :
 - Gestion des erreurs API.
 - États loading / empty / error.
 - Tests des principaux parcours.
+
+Réalisé — frontend :
+- `lib/api.js` : client `fetch` unique (`credentials: 'include'`, erreurs normalisées en `ApiError`, `status 0` = serveur injoignable). `errorKey()` traduit chaque erreur en clé i18n : aucun message serveur (anglais) n'est affiché à l'utilisateur.
+- `auth/` (`AuthContext`, `useAuth`) : état global de session (`loading` / `authenticated` / `anonymous` / `error`), initialisé par `GET /auth/me` ; `login`, `register`, `logout`, `updateAccountType`. Le logout ne vide l'état local qu'après confirmation du serveur.
+- `RequireAuth` protège `/compte/*` (redirection vers `/connexion`, puis retour à la page demandée après connexion) ; états chargement et erreur serveur avec bouton « Réessayer ».
+- Connexion / Inscription branchées à l'API (validation, bouton désactivé pendant l'envoi, messages : identifiants incorrects, email déjà utilisé, mot de passe trop court, serveur injoignable, trop de tentatives). Les types de compte de l'inscription viennent de `GET /api/account-types` (états chargement/erreur gérés).
+- Profil : vraies données (nom, email, type, niveau). Type de compte : modification réelle. Contenus premium : verrou ou message actif selon `accessLevel` renvoyé par le serveur. En-tête : « Mon espace » + « Déconnexion » quand connecté. Formulaire de contact : envoi réel.
+- Point de bascule vers le menu burger relevé à 1180 px (l'en-tête connecté est plus large) ; le dashboard reste en état vide (`—`), il n'y a encore aucune donnée E-Learning.
+- Vite : proxy `/api` → `localhost:4000` (même origine, donc cookie de session « first-party » sans réglage CORS/SameSite). `VITE_API_URL` devient optionnel.
+- i18n : 42 clés ajoutées/mises à jour et 7 obsolètes retirées (textes « pas encore relié »), parité fr/en/ar vérifiée (241 clés chacun).
+
+Réalisé — backend (ajouts minimaux nécessaires) :
+- `POST /api/contact` : validation stricte (zod), limité à 5 messages / heure / IP, stocké dans la nouvelle table `contact_messages` (migration `add_contact_messages`). Aucun email n'est envoyé (pas de fournisseur défini) : les messages sont uniquement en base, une vue admin viendra avec le CMS/admin.
+- `PATCH /api/auth/me` : modification de son propre `accountType` uniquement (`role` et `accessLevel` rejetés en 400 ; requête filtrée sur l'id de la session, donc jamais celui d'un autre utilisateur).
+
+Décisions techniques / signalements :
+- **« Mot de passe oublié » reste inactif** : il exige un service d'envoi d'email, non défini. Le texte de la page le dit honnêtement (aucune fausse confirmation). À traiter quand le fournisseur email sera choisi (utile aussi pour la newsletter P3-05).
+- La protection des routes React est de l'ergonomie, pas de la sécurité : chaque endpoint reste protégé côté serveur (`requireAuth`).
+- Le passage à `premium` n'a pas de parcours (pas de paiement dans le MVP) : pour l'instant seul un admin peut modifier `accessLevel` en base.
+
+Tests effectués (vrai navigateur Edge piloté par puppeteer-core, serveur Express + PostgreSQL réels, 20/20 réussis) :
+- Garde : `/compte/profil` anonyme → `/connexion` ; après connexion retour sur `/compte/profil`.
+- Inscription : types de compte chargés depuis l'API, mot de passe court refusé, création puis redirection, profil avec vraies données ; session conservée après rechargement de la page.
+- Modification du type de compte confirmée puis reflétée dans le profil ; page premium verrouillée pour un compte standard.
+- Contact : message enregistré ; déconnexion → garde de nouveau active ; mauvais mot de passe → erreur générique ; email déjà utilisé → message explicite ; API coupée (requête bloquée) → message « serveur injoignable » ; aucune erreur JS non interceptée.
+- Backend via `curl` : contact 201 / 400 / 429 (limite abaissée pour le test), `PATCH /auth/me` 200 / 400 (role, type invalide) / 401 sans session.
+- `npm run lint` sans avertissement, `npm run build` réussi. Captures visuelles : clair, sombre, arabe (RTL), 820 px et 1200 px.
+- Deux défauts trouvés et corrigés pendant les tests : en-tête connecté qui débordait sous 1180 px, et email long qui sortait de sa carte. Un échec initial du test « connexion » venait de mon script (mot de passe mal saisi), pas de l'application.
+- Limites : pas de test sur vrai téléphone ni Safari/Firefox ; pas de suite de tests automatisés conservée dans le dépôt (le script de test est resté hors du projet ; à formaliser en P5-05).
 
 ### P1-09 — Mode clair / sombre
 - Statut : `✅ done`
@@ -470,8 +526,39 @@ Tests effectués :
 - Recherche de texte français résiduel dans les fichiers `.jsx` (caractères accentués) : uniquement des commentaires de code, aucun texte affiché à l'utilisateur.
 - Limite de vérification identique aux tâches précédentes : pas d'outil navigateur disponible dans cette session pour confirmer visuellement le changement de langue, le rendu RTL réel et l'absence de régression visuelle. À vérifier manuellement via `npm run dev`.
 
+### P1-11 — Refonte visuelle du frontend
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Dépendances : `P1-02`, `P1-09`, `P1-10`
+- Durée cible : 1 jour
+
+Origine : demande explicite de l'utilisateur (2026-09-19), avant P1-07 — le rendu précédent « faisait trop IA ». Tâche ajoutée hors du plan initial : impact délai ≈ 1 jour, absorbé dans la marge de la Phase 1. Aucun changement fonctionnel ni de contenu.
+
+Demandes :
+- Icônes Lucide à la place des emojis et caractères décoratifs.
+- Mode clair / sombre avec de vraies palettes différentes (pas seulement blanc ↔ noir).
+- Meilleure typographie et esthétique générale, moins « générique IA ».
+
+Réalisé :
+- Paquets : `lucide-react`, `@fontsource-variable/fraunces`, `@fontsource/ibm-plex-sans`, `@fontsource/ibm-plex-sans-arabic` (polices auto-hébergées via npm : pas d'appel à un CDN externe, donc pas de fuite d'IP visiteur vers un tiers).
+- Typographie : titres en Fraunces (serif éditorial), texte en IBM Plex Sans ; IBM Plex Sans Arabic en repli pour l'arabe. Interlettrage désactivé en RTL (il casse la liaison des lettres arabes).
+- Palette claire « Papier » : fond papier chaud, texte encre bleu nuit, accent vert profond, laiton en secondaire. Palette sombre « Ardoise » : fond ardoise bleu-vert, accent menthe, laiton clair — ambiance distincte, pas une inversion. Tous les composants lisent des tokens CSS (`index.css`).
+- Supprimé : dégradés violet/rose, texte en dégradé, blobs flous, pastilles arrondies partout, cartes qui « sautent » au survol, barres de couleur en haut des cartes. Remplacé par aplats, filets fins, rayons modestes (8/12 px), grille discrète en fond du hero et des bannières de page.
+- Accueil : hero en deux colonnes avec un index cliquable des trois domaines (contenu réel, rien d'inventé), bande de points clés, étapes numérotées 01/02/03 en serif, bandeau final sombre.
+- Icônes : tous les emojis (pages, en-tête, pied de page, notices, verrou, bascule de thème) et flèches textuelles (→ / ←) remplacés par des composants Lucide. Les flèches sont ajoutées par `Button arrow` et inversées automatiquement en RTL.
+- `PageHeader` et `AuthAside` reçoivent maintenant un composant Lucide (`icon={Landmark}`) au lieu d'un caractère.
+- Classes de ton renommées de façon cohérente avec la nouvelle palette : `tone-violet/amber/pink` → `tone-primary/brass/clay`.
+- i18n : seules les flèches ont été retirées des chaînes fr/en/ar ; aucune clé ajoutée ni supprimée.
+
+Tests effectués :
+- `npm run lint` : aucun avertissement ; `npm run build` : réussi.
+- Recherche d'emojis / flèches / anciens tokens (`gradient-*`, `--pink`, `--amber`) dans `src` : 0 occurrence.
+- Captures réelles avec Edge headless sur le serveur Vite : accueil clair, accueil sombre, connexion sombre, accueil arabe (RTL : mise en page miroir, flèches inversées, police arabe), page Formations en arabe à 500 px de large (aucun débordement horizontal).
+- Un premier test mobile (390 px) semblait rogné : Edge headless impose une largeur minimale ; je ne l'ai pas considéré comme concluant, mais j'ai tout de même remplacé les `1fr` par `minmax(0, 1fr)` (cause classique de débordement de grille), puis re-testé à 500 px.
+- Limites : pas vérifié sur un vrai téléphone ni sous 500 px, ni dans Safari/Firefox ; toutes les pages n'ont pas été capturées une par une (les autres réutilisent les mêmes composants et tokens). Contraste des textes non mesuré avec un outil dédié (palette choisie pour rester lisible, à valider lors de P1-08). À regarder à l'œil : `npm run dev`.
+
 ### P1-08 — Validation de fin de phase
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P1-07`, `P1-09`, `P1-10`
 - Durée cible : 1 jour
@@ -484,6 +571,25 @@ Critères :
 - PostgreSQL est connecté.
 - Aucun blocage majeur ne doit empêcher la Phase 2.
 
+Validation effectuée le 2026-09-19 — **Phase 1 validée** (63 vérifications automatisées + contrôles manuels, tout au vert) :
+
+1. Pages navigables (navigateur Edge réel, 22/22) :
+   - 16 routes publiques × 3 langues (fr / en / ar) : chaque page s'affiche avec son titre, `lang`/`dir` corrects (RTL en arabe), 404 uniquement sur route inconnue, aucune erreur JS/console. Tamazight retombe bien sur le français, aucune clé i18n brute visible.
+   - 14 liens internes distincts explorés depuis toutes les pages : aucun lien mort.
+   - Clair / sombre : palettes réellement différentes (`rgb(247,245,240)` vs `rgb(13,20,23)`) ; aucun débordement horizontal à 500 px dans les deux thèmes.
+2. Authentification (navigateur réel, 20/20 sur le parcours complet + backend) : inscription, connexion, déconnexion, session conservée au rechargement, garde `/compte/*` (les 5 routes redirigent un anonyme vers `/connexion`, puis accessibles une fois connecté), erreurs (mot de passe faux, email en doublon, serveur injoignable).
+3. Rôles reconnus : un compte standard voit le contenu premium verrouillé ; après passage à `premium` en base, la même session voit le changement immédiatement (le serveur reste la source de vérité) ; le rôle `admin` est reconnu par `/auth/me` ; `requireRole` / `requireAccessLevel` testés en P1-06 (403 puis 200). 4 tentatives d'élévation de privilèges (`role`, `accessLevel` via inscription ou `PATCH /auth/me`) rejetées en 400.
+4. Backend (mode `NODE_ENV=production`, 21/21) : `/health` connecté à PostgreSQL, 404 JSON, JSON malformé → 400 sans stack trace, injections SQL/objets rejetées par la validation, en-têtes Helmet, CORS (origine étrangère refusée), cookie de session `HttpOnly` + `Secure` + `SameSite=Lax`, mot de passe stocké en bcrypt coût 12, JWT `alg=none` et JWT signé avec un autre secret refusés, jeton d'un compte supprimé refusé, brute-force limité (429), démarrage refusé sans `JWT_SECRET` valide.
+5. PostgreSQL : les 3 migrations s'appliquent depuis zéro sur une base vierge (`migrate deploy`, schéma « up to date », base temporaire supprimée). Panne simulée (conteneur arrêté) : `/health` → 503 `degraded`, `/auth/login` → 500 « Internal server error » sans détail ; après redémarrage, reprise automatique sans relancer l'API.
+6. Hygiène : aucun `.env` versionné, aucun secret / identifiant DB dans le build client (`dist`), `npm run lint` sans avertissement, `npm run build` réussi, parité i18n 241 clés × 3 langues.
+
+Constats non bloquants (à connaître pour la suite) :
+- **`npm audit` serveur : 4 vulnérabilités « high »**, toutes dans le CLI `prisma` (`deepmerge-ts`, `mysql2` embarqué), jamais chargées par l'API en exécution ; corriger = rétrograder Prisma (régression). Déjà signalé en P1-05 ; à réexaminer en P5-02. `npm audit` client : 0.
+- **Piège Prisma** : après chaque migration (`prisma migrate dev`), lancer aussi `npx prisma generate` — le client généré n'a pas été mis à jour automatiquement ici (rencontré deux fois : `role`, `ContactMessage`). À respecter à partir de P2-01.
+- **Environnement de dev** : Docker Desktop doit être lancé et `docker compose up -d` exécuté avant le serveur ; le port Vite 5173 peut être pris par un autre projet local (utiliser `--port`).
+- Aucune suite de tests automatisés n'est conservée dans le dépôt (les scripts de validation vivent hors projet) : à formaliser en P5-05.
+- Limites : pas de test sur vrai téléphone ni Safari/Firefox ; contrastes non mesurés avec un outil dédié ; pas d'audit d'accessibilité clavier/lecteur d'écran.
+
 ---
 
 # PHASE 2 — E-LEARNING
@@ -493,7 +599,7 @@ Critères :
 Livrer le cœur de la plateforme de formation.
 
 ### P2-01 — Modèle de données E-Learning
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P1-08`
 - Durée cible : 2 jours
@@ -514,23 +620,87 @@ Relations minimales :
 - La progression est suivie par formation et par cours.
 - Une certification est délivrée lorsque les conditions sont remplies.
 
-### P2-02 — Gestion des formations côté client/admin
-- Statut : `❌ todo`
+Réalisé (modèle de données uniquement — aucun endpoint, ils appartiennent à P2-02 et suivantes) :
+- Migration `elearning_model` (Prisma + SQL) : tables `formation_categories`, `formations`, `courses`, `media`, `enrollments`, `course_progress`, `certifications`. Constantes des valeurs autorisées dans `server/src/constants/elearning.js`.
+- Relations : une formation a N cours ; un utilisateur a N inscriptions (unique par couple utilisateur + formation) ; la progression est suivie par inscription **et** par cours ; une seule certification par inscription, associée à l'utilisateur et à la formation via l'inscription.
+- Accès : `formations.requiredAccessLevel` (`standard` / `premium`) pour appliquer le niveau côté serveur ; `courses.isRequired` pour distinguer cours obligatoires et bonus (base du calcul de complétion en P2-04).
+
+Décisions techniques :
+- **Le nombre de cours n'est pas stocké** : c'est `count(courses)`, il ne peut donc jamais diverger de la liste réelle (P2-02 « définir le nombre de cours »).
+- **Intégrité garantie par PostgreSQL, pas seulement par le code** : clés composites `(inscription, formation)` et `(cours, formation)` sur `course_progress` — la base refuse une progression sur un cours d'une autre formation (répond à « empêcher une validation incohérente », P2-04). Contraintes `CHECK` ajoutées à la main dans la migration : statuts autorisés, `published` ⇔ `publishedAt` renseigné, `completed` ⇔ `completedAt` renseigné (inscription et progression), positions et tailles positives. Elles couvrent aussi `users.role` / `users.accessLevel` (jusqu'ici validés seulement par l'application).
+- Statuts en chaînes de caractères plutôt qu'en enums PostgreSQL (même raisonnement que `accountType` : évolutif sans migration), protégés par les `CHECK`.
+- **Suppressions** : supprimer un utilisateur supprime ses inscriptions, progressions et certificats (droit à l'effacement) ; supprimer un cours supprime sa progression et ses médias ; une formation ayant des inscrits **ne peut pas être supprimée** (RESTRICT) — il faut la dépublier ; supprimer l'auteur conserve la formation.
+- **Ordre des cours** : `position` volontairement non unique (une contrainte d'unicité fait échouer un échange de deux cours en cours de transaction) ; P2-02 réordonne dans une transaction et trie par `(position, createdAt)`.
+- **Média** : `media.storageKey` est une clé de stockage interne, jamais à sérialiser ni à exposer en URL (règle de sécurité n°4) ; l'accès se fera par URLs signées/temporaires en P2-06. `sizeBytes` en entier 32 bits (limite ≈ 2 Go par fichier, suffisante pour le MVP).
+- **Certificat** : nom du titulaire et titre de la formation copiés dans la certification (elle reste valide et vérifiable si le compte ou la formation est renommé) ; `certificateNumber` unique, à générer côté application de façon non séquentielle (P2-05).
+- **Limite assumée** : « certification délivrée uniquement quand les conditions sont remplies » ne peut pas être imposé par une contrainte SQL (elle dépend du contenu d'autres lignes) ; ce sera appliqué côté serveur en P2-04/P2-05, avec un test dédié.
+- Catégories : table minimale `formation_categories` (slug + nom) ; les contenus de formation (titre, description) sont en une seule langue pour l'instant — le système de traduction des contenus dynamiques reste à définir (voir règle i18n en section 6).
+
+Tests effectués (PostgreSQL réel, script Prisma jetable puis supprimé, 35/35) :
+- Parcours nominal : formation avec catégorie, couverture et 3 cours ordonnés ; inscription ; progression ; calcul « tous les cours obligatoires terminés » en une requête (bonus ignoré) ; certification retrouvée par utilisateur/formation et par numéro public.
+- 22 violations d'intégrité rejetées : doublons (inscription, progression, certification par inscription, numéro de certificat, slug, clé de stockage), progression sur un cours d'une autre formation, formationId incohérent, chacune des contraintes `CHECK`.
+- Suppressions : formation avec inscrits bloquée ; cascades cours → progression et médias, utilisateur → inscription/progression/certificat ; auteur supprimé → formation conservée ; couverture supprimée → champ mis à `null`.
+- Migrations appliquées depuis une base vierge (4 migrations, 9 tables, schéma « up to date »), puis suppression de la base temporaire. Régression : suite backend production 21/21, aucune donnée de test résiduelle.
+
+### P2-02 — Gestion des formations côté client/admin (CMS)
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P2-01`
-- Durée cible : 2 jours
+- Durée cible : 2 jours → **3 jours** (périmètre élargi le 2026-09-19, voir « Impact délai »)
 
-Fonctionnalités :
-- Créer une formation.
-- Modifier une formation.
-- Définir le nombre de cours.
-- Ajouter / modifier / supprimer les cours.
-- Définir les informations de certification.
-- Publier / dépublier une formation.
-- Organiser l'ordre des cours.
+Décision du client (2026-09-19) : les formations sont créées par un **administrateur** (`role='admin'`) dans un **CMS conçu pour des non-informaticiens**. Ce CMS doit contenir tout ce dont une formation a besoin pour être publiée : informations, cours, images, certification à la fin.
+
+**Exigence structurante : la base du CMS est partagée avec les articles (P3-02).** Ce qui est générique (coquille d'administration, éditeur de texte riche, envoi de médias, liste + éditeur + publication, checklist de publication, sécurité côté serveur) doit être écrit une seule fois dans P2-02 ; P3-02 (articles) ne fera que brancher ses propres champs dessus, sans réécrire ces briques.
+
+Fonctionnalités (formation) :
+- Créer une formation (brouillon) en ne saisissant que son titre, puis la compléter.
+- Modifier une formation : titre, description, catégorie, niveau d'accès (tous les comptes / premium), image de couverture.
+- Ajouter / modifier / supprimer les cours ; contenu en éditeur de texte riche (gras, titres, listes, liens) ; vidéos, documents et images attachés à un cours.
+- Organiser l'ordre des cours (boutons monter / descendre, pas de glisser-déposer).
+- Définir les informations de certification (activée ou non, titre, description).
+- Vérifier que la formation est prête (checklist claire, en langage simple) puis la publier / dépublier.
+- Le « nombre de cours » est simplement le nombre de cours ajoutés (voir P2-01).
+
+Base CMS réutilisable (à construire ici, réutilisée par P3-02) :
+- Côté serveur : préfixe `/api/admin/*` réservé au rôle admin, service de stockage privé + validation des envois (type réel du fichier, taille, nom aléatoire), assainissement du HTML riche, génération de slugs uniques, calcul « prêt à publier », gestion d'erreurs avec détails.
+- Côté React : coquille d'administration (menu latéral), tableau de contenus avec états vide/chargement/erreur, badge de statut, champ avec aide, éditeur de texte riche, champ image / envoi de fichier, boîte de confirmation, barre d'enregistrement avec état, onglets/étapes, checklist de publication, boutons monter/descendre.
+
+Exigences pour les non-informaticiens : vocabulaire simple (aucun terme technique : pas de « slug », « statut », « ID »…), actions confirmées avant toute suppression, message clair après chaque enregistrement, avertissement si on quitte avec des modifications non enregistrées, tout traduit (fr / en / ar).
+
+Impact délai : +1 jour sur P2-02 (éditeur riche, envoi de médias, base partagée). Compensé en P3-02, qui réutilise cette base (–1 jour attendu). Aucun impact sur les 8 semaines tant que P3-02 est bien construit sur la base.
+
+Limites volontaires (renvoyées aux tâches prévues) : lecture des médias par les apprenants et URLs signées → P2-06 ; durcissement complet des uploads (antivirus, watermark) → P5-03.
+
+Réalisé — backend (`/api/admin/*`, tout derrière `requireAuth` + `requireRole('admin')`) :
+- Formations : liste, création (titre seul → brouillon), lecture, modification, publication / dépublication, suppression. Cours : ajout, modification, suppression (positions refermées), réordonnancement transactionnel (la liste envoyée doit être exactement l'ensemble des cours de la formation). Catégories : liste + création. Médias : couverture (remplace et supprime l'ancienne), fichiers de cours (vidéo MP4/WebM, PDF, image), suppression, lecture réservée aux admins.
+- Base partagée (réutilisable par les articles) : `services/storage.service.js` (stockage privé + validation des envois), `middleware/upload.js`, `services/sanitize.service.js` (HTML riche), `services/slug.service.js`, `services/readiness.service.js` (liste « prêt à publier »), `serializers/cms.js`, `utils/asyncRoute.js`, `HttpError` avec `details`, `routes/admin.routes.js`.
+- Publication : refusée côté serveur (422 + liste de ce qui manque) tant que titre, description, image de couverture, au moins un cours, contenu de **chaque** cours (texte, vidéo, document ou image) et nom de la certification (si activée) ne sont pas renseignés — la checklist du navigateur ne peut donc pas être contournée.
+
+Réalisé — frontend (`/admin`, chargé à la demande : le site public ne télécharge jamais l'éditeur) :
+- Base CMS réutilisable dans `components/cms/` : coquille avec menu latéral (`CmsShell`, entrées dans `config/adminNav.js`), barre de titre, badge d'état, tableau, état vide, champ avec aide, **éditeur de texte riche** (TipTap : gras, italique, souligné, 2 niveaux de titre, listes, citation, lien), envoi de fichier, champ image, liste de médias avec lecteur vidéo, boîte de confirmation, barre d'enregistrement (non enregistré / enregistrement / enregistré / erreur), avertissement avant de quitter avec des modifications non enregistrées, étapes numérotées avec coches, checklist de publication, boutons monter / descendre.
+- Parcours de l'admin : liste des formations → « Nouvelle formation » (titre seul) → éditeur en 4 étapes : Informations (titre, description, catégorie créable sur place, niveau d'accès, image de couverture), Cours (ajout, texte riche, vidéos/documents/images, durée, obligatoire ou bonus, ordre, suppression confirmée), Certification (activée, nom, description), Publication (checklist avec bouton « Compléter » vers l'étape concernée, publier / retirer, suppression en zone séparée).
+- Langage simple pour non-informaticiens (aucun terme technique visible), messages clairs après chaque action, tout traduit fr / en / ar (150 clés ajoutées, parité 391 clés), RTL vérifié. Lien « Administration » dans l'en-tête, visible uniquement pour les admins.
+
+Décisions techniques :
+- **Sécurité des textes** : le HTML de l'éditeur est assaini côté serveur à l'enregistrement (liste blanche : pas de script, iframe, image, style, gestionnaires d'événements, liens `javascript:`) ; l'éditeur du navigateur n'est pas la frontière de sécurité. Même règle pour les articles.
+- **Sécurité des fichiers** : le type réel est lu dans le **contenu** du fichier (nom et Content-Type du client ignorés) ; SVG et HTML refusés ; taille limitée par type (image 5 Mo, document 25 Mo, vidéo 300 Mo, réglables par variables d'environnement) ; nom de stockage aléatoire (pas de traversée de dossier) ; dossier `server/storage/` hors de tout accès statique et ignoré par Git ; un envoi refusé ne laisse aucun fichier ; la clé de stockage n'est jamais renvoyée au navigateur (URL d'accès autorisée uniquement). Lecture réservée aux admins pour l'instant.
+- **Cover / suppression** : la couverture n'est pas couverte par la cascade (sa clé étrangère est du côté formation) : suppression explicite. Un `deleteMany` avec `id: undefined` (qui aurait supprimé tous les médias) a été repéré et corrigé avant le premier test.
+- **Édition d'une formation publiée** autorisée ; le statut ne change que par publier / retirer. Retirer de la publication garde les inscriptions et la progression.
+- **Pas de slug ni d'ID visibles** : générés automatiquement à partir du titre (uniques).
+- **Ordre** : boutons monter / descendre plutôt que glisser-déposer (plus simple et accessible).
+- **En-tête admin** : ajout du bouton « Administration » ; « Mon espace » se réduit à son icône (avec info-bulle) pour les admins sur grand écran, point de bascule burger relevé à 1240 px, espacements compactés (mesure : contenu nécessaire 1246 px → 1200 px).
+- Stockage à sauvegarder avec la base (P5-04) ; variable `STORAGE_DIR` documentée dans `.env.example`.
+
+Tests effectués (vrai serveur + PostgreSQL + navigateur Edge piloté, **128/128** au total) :
+- **API admin, 67/67** : anonyme → 401 et non-admin → 403 sur toutes les routes admin ; id mal formé → 404 ; validation stricte (statut, slug, champs inconnus rejetés) ; assainissement HTML (script, iframe, img, `onerror`, `onclick`, `javascript:`, style supprimés ; gras, liens sûrs, titres conservés) ; réordonnancement (permutation valide appliquée ; id manquant / en double / en trop / d'une autre formation refusés, état inchangé) ; envois hostiles (texte renommé `.png`, SVG, HTML, PDF en couverture → 415 ; image de 6 Mo → 413 ; aucun fichier résiduel) ; nom de fichier `../../../evil.png` neutralisé ; clé de stockage jamais exposée ; dossier de stockage non servi ; lecture des fichiers : admin 200, anonyme 401, non-admin 403 ; remplacement de couverture ; règles de publication (422 avec la liste des manques, publication, re-publication refusée si une exigence redevient manquante, dépublication) ; suppressions (cours → positions refermées et médias supprimés ; formation avec inscrits → 409 ; sans inscrits → 204 et fichiers supprimés sans toucher aux autres médias) ; aucun média ni fichier orphelin en fin de test.
+- **Interface CMS, 39/39** (parcours d'une personne non technique, du début à la fin) : non-admin → « Accès refusé » et pas de lien Administration ; création (titre vide refusé) ; checklist et bouton Publier désactivé ; catégorie créée sur place ; faux fichier image refusé en langage simple ; couverture affichée via la route autorisée ; avertissement avant de quitter avec des modifications non enregistrées ; enregistrement confirmé ; texte riche (gras + liste) enregistré proprement ; PDF et vidéo attachés avec lecteur ; réordonnancement persistant ; publication puis liste (badge, nombre de cours, accès premium, miniature) ; dépublication ; suppression confirmée en nommant la formation ; base propre ensuite ; aucune erreur JS.
+- **Non-régression** : suite Phase 1 « pages » 22/22, suite backend production 21/21, `npm run lint` sans avertissement, build réussi (site public 386 Ko, éditeur en chunk séparé).
+- Défauts trouvés et corrigés pendant les tests : `deleteMany` dangereux (ci-dessus) ; barre d'outils de l'éditeur qui faisait perdre le curseur (comportement de la souris) ; en-tête admin trop large en français (bouton Déconnexion coupé) ; lien « Créer une catégorie » mal aligné.
+- Limites : pas de test sur téléphone réel / Safari / Firefox ; vidéo testée avec un fichier MP4 minimal (détection du type et lecteur, pas de lecture d'un vrai film) ; pas de test avec un fichier de 300 Mo (limite configurée mais non éprouvée en charge) ; pas d'audit d'accessibilité au lecteur d'écran ; antivirus non branché (P5-03).
+- `npm audit` : 0 nouvelle vulnérabilité (multer, file-type, sanitize-html, TipTap) ; les 4 « high » restantes sont celles du CLI Prisma (voir P1-08).
 
 ### P2-03 — Interface utilisateur E-Learning
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P2-02`
 - Durée cible : 2 jours
@@ -545,8 +715,39 @@ Pages :
 - État terminé / non terminé.
 - Certification.
 
+Périmètre retenu (frontière avec les tâches voisines) : P2-03 livre **toutes les pages** et les **routes serveur de lecture et d'inscription**. L'enregistrement de la progression (ouvrir / terminer un cours, règles de validation) reste **P2-04** ; la génération du certificat reste **P2-05** ; les URLs signées / durcissement des médias restent **P2-06**. Les pages affichent l'état de progression et de certification **lu en base** (0 % tant que P2-04 n'écrit rien) : aucune donnée fictive, aucun bouton « terminer » factice.
+
+Réalisé — backend (`/api/learn/*`, toutes les routes exigent une session) :
+- `GET /formations` (catalogue : formations **publiées** uniquement, avec indicateur « accessible » selon le niveau du compte et l'inscription éventuelle), `GET /formations/:slug` (détail : liste des cours avec titres, résumés, durées, obligatoire/bonus — **sans** contenu ni fichiers), `POST /formations/:slug/enroll`, `GET /formations/:slug/courses/:courseId` (contenu d'un cours), `GET /formations/:slug/cover`, `GET /media/:id` (fichiers de cours en streaming, Range supporté), `GET /enrollments` (mes formations).
+- Règles d'accès décidées et appliquées **côté serveur** : visible = publiée **ou** déjà inscrit ; s'inscrire = publiée **et** niveau du compte ≥ niveau de la formation ; lire un cours / un fichier = inscrit **et** niveau (re-vérifié à chaque lecture : un compte qui perd le premium perd l'accès aux contenus premium). Une formation cachée ou inconnue répond **404** (jamais 403) pour ne rien révéler ; les 403 portent une raison (`not_enrolled`, `premium_required`) que l'interface traduit.
+- Inscription **idempotente et sûre en concurrence** : 3 clics simultanés → une seule inscription (contrainte unique + relecture).
+- Sérialiseurs à liste blanche (`serializers/learner.js`) : jamais de clé de stockage, d'auteur, ni de données d'un autre apprenant ; le contenu des cours n'apparaît qu'après contrôle d'inscription. `services/progress.service.js` calcule le résumé de progression (terminés / total / % / cours obligatoires restants) à partir des lignes stockées ; `services/mediaResponse.js` (partagé avec l'aperçu admin) envoie les fichiers avec type issu de la base, téléchargement forcé pour les documents et CSP sandbox.
+
+Réalisé — frontend (pages chargées à la demande, derrière la garde de session) :
+- `/catalogue` : cartes (couverture, catégorie, étiquette premium avec cadenas si non accessible, nombre de cours, progression si inscrit), recherche et filtre par catégorie, états chargement / vide / aucun résultat / erreur.
+- `/catalogue/:slug` : détail, programme (numéro, résumé, durée, obligatoire / bonus, **terminé / non terminé**), panneau d'inscription (S'inscrire → Commencer / Continuer, ou explication premium), bloc **certification** (nom, description, règle, cours obligatoires restants, numéro et date une fois délivrée), avertissement si la formation a été retirée du catalogue.
+- `/catalogue/:slug/cours/:courseId` : lecteur de cours (fil d'Ariane, plan latéral avec état de chaque cours, texte riche, lecteur vidéo, documents en téléchargement, images, précédent / suivant), messages clairs si non inscrit / premium requis / introuvable.
+- `/compte/formations` (« Mes formations », nouvel onglet du compte) et tableau de bord alimenté par de vrais chiffres (formations en cours, certificats). Le bouton « Accéder au catalogue » de la page publique `/formations` mène au catalogue (connexion demandée, retour automatique).
+- `RichContent` : affichage du texte riche **re-nettoyé côté navigateur** (DOMPurify, même liste blanche que le serveur) — sécurité en profondeur, réutilisable par les articles. Hook `useApi` (chargement / erreur / rechargement) réutilisable.
+- Traductions fr / en / ar (63 clés + pluriels : deux formes pour fr / en, six formes pour l'arabe), RTL vérifié.
+
+Décisions techniques :
+- **Un apprenant inscrit garde l'accès à une formation retirée du catalogue** (comme annoncé dans le CMS et conservé dans P2-02) ; en revanche personne ne peut s'y inscrire à nouveau.
+- **Formations réservées aux comptes connectés** (règle du cahier des charges) : le catalogue et les cours sont derrière la connexion ; la page publique `/formations` reste la vitrine.
+- **Lecture des fichiers par l'apprenant** : construite ici (sinon le lecteur n'aurait pas de vidéo) avec contrôle d'inscription + niveau à chaque requête. Reste pour **P2-06** : URLs temporaires / signées, limitation d'abus, traçabilité des accès, tests de contournement approfondis. `controlsList="nodownload"` sur la vidéo est un confort d'affichage, **pas** une protection (rappel : un contenu affiché ne peut pas être empêché d'être capturé).
+- Slug d'URL (issu du titre) pour les pages apprenant ; l'ID interne n'est jamais exposé pour les formations.
+- Pourcentage = cours terminés / **tous** les cours (bonus inclus) ; P2-04 pourra affiner cette définition avec « cours obligatoires » (`requiredRemaining` est déjà calculé).
+
+Tests effectués (vrai serveur + PostgreSQL + navigateur Edge piloté ; **97 nouveaux tests**, 246 au total avec la non-régression) :
+- **API apprenant, 50/50** : anonyme → 401 partout ; catalogue sans brouillon ni fuite (contenu, clés de stockage, auteur, autres comptes) ; détail sans contenu avant inscription ; brouillon → 404 ; inscription : premium refusé à un compte standard (403), brouillon refusé, double clic inoffensif, **3 requêtes simultanées → une seule inscription** ; lecture : refusée avant inscription, cours d'une autre formation → 404 ; fichiers : vidéo 200 puis **Range 206**, PDF en téléchargement avec CSP sandbox, refus pour un non-inscrit, la couverture n'est pas un fichier de cours ; **perte du premium → accès premium refusé**, retour du premium → rétabli ; progression calculée depuis la base (1/3 = 33 %, 1 cours obligatoire restant), invisible pour un autre compte ; certificat visible seulement par son titulaire ; formation retirée : disparaît du catalogue, reste accessible aux inscrits, inscription impossible ; aucun résidu.
+- **Parcours apprenant dans le navigateur, 47/47** : de la page publique → connexion demandée → retour au catalogue ; cartes, couvertures chargées, recherche, filtre catégorie ; formation premium et brouillon inaccessibles (message clair) ; détail, inscription, persistance après rechargement ; lecteur (texte riche, vidéo servie avec la session en 206, PDF, plan, précédent / suivant, dernier cours bonus) ; **HTML hostile injecté directement en base : rien ne s'exécute** (ni script, ni `onerror`, ni lien `javascript:`, ni iframe) ; progression 33 % / « Terminé » / « Continuer » ouvre le premier cours non terminé ; Mes formations et tableau de bord (vrais chiffres, états vides) ; formation retirée puis republiée ; arabe en RTL ; aucun débordement à 500 px ; aucune erreur JS.
+- Non-régression : API admin 67/67, interface CMS 39/39, pages Phase 1 22/22, backend production 21/21, `npm run lint` sans avertissement, build réussi.
+- Défauts trouvés et corrigés : styles partagés (lien « Retour », états vides) absents des pages apprenant car chargés seulement dans l'admin → importés par `Learn.css`. (Deux échecs de mon script de test — session partagée entre deux onglets — ne venaient pas de l'application.)
+- Limites : pas de test sur téléphone réel / Safari / Firefox ; vidéo testée avec un MP4 minimal (le lecteur s'affiche et le flux est servi, pas de lecture d'un vrai film) ; la lecture de fichiers volumineux (centaines de Mo) n'est pas éprouvée en charge ; pas d'audit d'accessibilité au lecteur d'écran ; **aucun moyen d'enregistrer une progression n'existe encore** (P2-04) — les états « Terminé » ont été vérifiés en écrivant des lignes de test directement en base.
+- `npm audit` : 0 nouvelle vulnérabilité (DOMPurify) ; les 4 « high » restantes sont celles du CLI Prisma.
+
 ### P2-04 — Suivi de progression
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P2-03`
 - Durée cible : 2 jours
@@ -558,6 +759,26 @@ Tâches :
 - Vérifier que tous les cours requis sont terminés.
 - Empêcher une validation incohérente côté serveur.
 - Afficher la progression à l'utilisateur.
+
+Réalisé (aucune migration : le modèle de P2-01 suffisait) :
+- `PUT /api/learn/formations/:slug/courses/:courseId/completion` (valider) et `DELETE` (annuler une validation faite par erreur). Mêmes règles d'accès que la lecture : inscrit **et** niveau suffisant, revérifié à chaque écriture (formation cachée → 404, non inscrit → 403 `not_enrolled`, premium perdu → 403 `premium_required`). La réponse renvoie l'état recalculé par le serveur (`completed` + résumé d'inscription) : le navigateur n'invente jamais un pourcentage.
+- **Ouverture d'un cours** enregistrée par le serveur dans `getCourse` (au moment où le contenu est réellement servi, donc impossible à sauter ou falsifier) : ligne `course_progress` `in_progress`, idempotente (`createMany skipDuplicates`), ne rétrograde jamais un cours terminé.
+- **Validations incohérentes refusées** : cours jamais ouvert → 409 `not_opened` ; cours d'une autre formation → 404 (et refusé de toute façon par les clés composites SQL) ; utilisateur non inscrit → 403.
+- **Achèvement de la formation** : l'inscription passe à `completed` (avec `completedAt`) quand tous les cours **obligatoires** sont terminés ; les cours bonus comptent dans le pourcentage mais ne bloquent jamais. Annuler un cours obligatoire ramène l'inscription à `active` (date effacée) ; la date d'achèvement d'origine est conservée si on revalide après coup.
+- **Concurrence** : chaque écriture s'exécute dans une transaction qui verrouille la ligne d'inscription (`SELECT … FOR UPDATE`), pour que deux validations simultanées des deux derniers cours ne ratent pas l'achèvement (chacune ne verrait sinon que sa propre modification).
+- Interface : bloc « Votre progression » dans le lecteur (barre, bouton « Marquer comme terminé » / « Annuler la validation », message de félicitations quand la formation est terminée, erreur serveur affichée), plan latéral et pages formation / Mes formations / tableau de bord mis à jour ; textes fr/en/ar.
+
+Décisions :
+- Ouverture enregistrée à la lecture (et non par un appel séparé du navigateur) : c'est la seule preuve fiable que le contenu a été servi.
+- Validation impossible sans ouverture préalable : c'est la règle « incohérente » retenue. Je n'impose **pas** un ordre séquentiel des cours (non demandé ; à discuter avec le client si besoin).
+- Annulation permise tant qu'aucun certificat n'existe ; ensuite 409 `certified` (le certificat de P2-05 reste cohérent). P2-05 devra créer la certification dans la même transaction/verrou que la complétion.
+- Pourcentage inchangé : cours terminés / tous les cours (bonus inclus).
+- Si un administrateur ajoute plus tard un cours obligatoire à une formation déjà terminée par un apprenant, son inscription reste `completed` (il n'est pas dépossédé de son acquis) ; le résumé affichera néanmoins `requiredRemaining > 0`.
+
+Tests effectués (vrai serveur + PostgreSQL + Edge piloté ; 54 nouveaux tests) :
+- API 28/28 : 401 anonyme, ids invalides, non inscrit, cours jamais ouvert (409), cours d'une autre formation, ouverture idempotente, calculs (33 % / 67 % / 100 %), bonus qui ne termine pas la formation, idempotence de la validation, annulation, blocage une fois certifié, perte du premium, 6 paires de validations simultanées sans mise à jour perdue, requête SQL de cohérence (aucune inscription `completed` avec un cours obligatoire manquant), aucune donnée résiduelle.
+- Navigateur 26/26 : inscription → lecteur → validation → 33 % sans rechargement → persistance après rechargement → félicitations → annulation → pages formation / Mes formations, refus serveur affiché (inscription supprimée en coulisse), arabe RTL, mobile 375 px sans débordement, thème sombre, aucune erreur JS.
+- Limites : le test de concurrence n'a pas été rejoué sans le verrou pour prouver qu'il échouerait alors ; pas de test sur téléphone réel / Safari / Firefox.
 
 ### P2-05 — Certification
 - Statut : `❌ todo`
@@ -629,8 +850,10 @@ Entités :
 ### P3-02 — CMS simplifié
 - Statut : `❌ todo`
 - Priorité : `🔴 high`
-- Dépendances : `P3-01`
-- Durée cible : 2 jours
+- Dépendances : `P3-01`, `P2-02`
+- Durée cible : 2 jours (1 jour attendu grâce à la base CMS de P2-02)
+
+**Doit réutiliser la base CMS construite en P2-02** (coquille d'administration, liste de contenus, éditeur riche, envoi de médias, barre d'enregistrement, checklist et publication, routes `/api/admin/*`, assainissement HTML) : ne pas dupliquer ces briques. Seuls les champs propres aux articles (catégories/tags, SEO, prévisualisation publique) sont à ajouter. Si une brique de P2-02 est insuffisante pour les articles, l'améliorer dans la base plutôt que de la copier.
 
 Fonctionnalités :
 - Créer un article.
@@ -937,29 +1160,30 @@ Une tâche ne peut passer à `✅ done` que si :
 - un test manuel ou automatisé pertinent a été effectué ;
 - les fichiers de suivi sont mis à jour.
 
-Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau composant texte, à partir de maintenant, doit utiliser `useTranslation()`/`t()` (i18next) dès sa création — jamais de texte en dur. Les traductions français/anglais/arabe correspondantes doivent être ajoutées dans le même changement (le tamazight reste volontairement en repli vers le français). Les couleurs doivent utiliser les tokens CSS existants (`index.css`), pas de couleurs codées en dur, pour rester compatibles avec le mode clair/sombre.
+Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau composant texte, à partir de maintenant, doit utiliser `useTranslation()`/`t()` (i18next) dès sa création — jamais de texte en dur. Les traductions français/anglais/arabe correspondantes doivent être ajoutées dans le même changement (le tamazight reste volontairement en repli vers le français). Les couleurs doivent utiliser les tokens CSS existants (`index.css`), pas de couleurs codées en dur, pour rester compatibles avec le mode clair/sombre. Les icônes sont des composants `lucide-react` (jamais d'emoji ni de caractère décoratif) ; les flèches directionnelles utilisent la classe `icon-dir` pour s'inverser en RTL.
 
 # 7. État actuel
 
-Phase active : `PHASE 1`
+Phase active : `PHASE 2` (la Phase 1 a été validée le 2026-09-19, voir P1-08)
 
 Dernières tâches terminées et vérifiées :
-`P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
+`P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
 
 Toutes les tâches de pages (P1-02, P1-03, P1-04), le socle backend (P1-05) et les deux ajouts signalés par l'utilisateur (mode clair/sombre, i18n FR/EN/AR + tamazight en repli) sont terminés. Le modèle `User` existe en base (Prisma).
 
-Prochaine tâche réalisable (dépendances satisfaites) :
-- `P1-06 — Authentification + rôles` (dépend de `P1-04` ✅ et `P1-05` ✅).
+Prochaines tâches réalisables (dépendances satisfaites) :
+- `P2-05 — Certification` (dépend de `P2-04` ✅).
+- `P2-06 — Protection des contenus E-Learning` (dépend de `P2-03` ✅ ; peut se faire avant ou après P2-04/P2-05).
 
-Rappel de dépendances à venir :
-- `P1-07 — Intégration frontend/backend` dépend de `P1-03` ✅, `P1-05` ✅ et `P1-06` ❌ — reste bloquée tant que P1-06 n'est pas fait.
-- `P1-08 — Validation de fin de phase` dépend désormais de `P1-07` ❌, `P1-09` ✅ et `P1-10` ✅.
-
-Recommandation : `P1-06` est la seule tâche non bloquée pour continuer la Phase 1.
+Recommandation : `P2-05` (certificat), puis `P2-06` et `P2-07`. Points d'attention :
+- P2-05 : la complétion est déjà détectée (`enrollment.status = completed`, `completedAt`) dans `services/progress.service.js` (`completeCourse`, sous verrou de ligne). Générer la certification (numéro non séquentiel, nom du titulaire et titre copiés) **dans cette même transaction** ; `reopenCourse` refuse déjà (409 `certified`) toute annulation une fois le certificat émis. Afficher/consulter le certificat (le bloc certification de la page formation lit déjà `enrollment.certification`).
+- P2-06 s'appuie sur l'existant : `learn.controller.js#getMedia` contrôle déjà inscription + niveau ; il reste à ajouter URLs temporaires / signées, limitation d'abus, traçabilité et tests de contournement.
+- Rappel : `npx prisma generate` après chaque migration (voir P1-08).
 
 Blocages / informations manquantes signalées (non bloquantes pour continuer, mais à ne pas oublier avant livraison) :
 - Mentions légales et politique de confidentialité : identité légale du client (raison sociale, SIRET, adresse, hébergeur, contact DPO) à fournir avant mise en production (voir notes P1-03).
 - Formulaire de contact : aucune coordonnée réelle (email/téléphone/adresse) fournie — non affichée pour éviter de publier une information inventée.
+- Fournisseur d'email non défini : « mot de passe oublié » reste inactif et les messages du formulaire de contact ne sont que stockés en base (voir P1-07). À choisir avant la newsletter (P3-05) et la mise en production.
 - Simulateur de crédit (P4-02) : règles bancaires/taux à fournir par le client le moment venu — rappel déjà noté dans la tâche elle-même.
 
 Point de vérification manuelle recommandé pour l'utilisateur : ouvrir `http://localhost:5173` après `npm run dev` dans `client/` et tester le menu mobile sous 860px de large (non vérifié visuellement par Claude faute d'outil navigateur dans cette session).

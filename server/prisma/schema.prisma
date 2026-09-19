@@ -30,8 +30,214 @@ model User {
   // "standard" | "premium" (see TASKS.md section 1, "Accès aux
   // fonctionnalités"). Same free-form-string reasoning as accountType.
   accessLevel  String   @default("standard")
+  // "user" | "admin". Orthogonal to accessLevel: role = what you may
+  // manage (RBAC), accessLevel = which content tier you may consume.
+  // Never settable from a public endpoint (see auth.schemas.js).
+  role         String   @default("user")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  // E-Learning (P2-01)
+  formationsCreated Formation[]
+  mediaUploaded     Media[]
+  enrollments       Enrollment[]
+
   @@map("users")
+}
+
+// Messages sent through the public contact form (P1-07). Stored in the DB
+// because no email provider is defined yet; an admin view/notification comes
+// later. Only what the form needs: no IP or other personal data is kept.
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
+}
+
+// ---------------------------------------------------------------------------
+// E-Learning (P2-01)
+//
+// Conventions, same as User:
+// - Status-like fields are plain strings validated in the application layer
+//   (constants in src/constants/elearning.js) AND guarded by CHECK constraints
+//   added by hand in the migration, so no code path can store an invalid value.
+// - Only the model lives here. Endpoints belong to P2-02 (admin) and
+//   P2-03/P2-04 (learner), media handling to P2-06.
+// ---------------------------------------------------------------------------
+
+model FormationCategory {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  formations Formation[]
+
+  @@map("formation_categories")
+}
+
+// A training programme made of an ordered list of courses.
+// The number of courses is NOT stored: it is count(courses), so it can never
+// disagree with the real list (P2-02 "définir le nombre de cours").
+model Formation {
+  id                  String @id @default(uuid())
+  slug                String @unique
+  title               String
+  description         String
+  // "draft" | "published". Only published formations are visible to learners.
+  status              String @default("draft")
+  // "standard" | "premium": lowest access level allowed to enrol.
+  // Checked server-side, never only in the UI (TASKS.md rule 1).
+  requiredAccessLevel String @default("standard")
+
+  categoryId String?
+  category   FormationCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  coverImageId String? @unique
+  coverImage   Media?  @relation("FormationCover", fields: [coverImageId], references: [id], onDelete: SetNull)
+
+  // Certification information (P2-02 / P2-05).
+  certificationEnabled     Boolean @default(true)
+  certificationTitle       String?
+  certificationDescription String?
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  courses     Course[]
+  enrollments Enrollment[]
+
+  @@index([status])
+  @@map("formations")
+}
+
+// One lesson of a formation.
+model Course {
+  id          String    @id @default(uuid())
+  formationId String
+  formation   Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+
+  title            String
+  summary          String?
+  // Text content of the lesson. Videos / documents are Media rows.
+  body             String?
+  // Display order inside the formation (0-based). Not unique on purpose: a
+  // unique constraint makes reordering (swap) fail mid-transaction; the
+  // service reorders in one transaction and lists by (position, createdAt).
+  position         Int
+  // Required courses must all be completed to finish the formation (P2-04).
+  isRequired       Boolean @default(true)
+  estimatedMinutes Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  media    Media[]
+  progress CourseProgress[]
+
+  // Target of the composite foreign key from CourseProgress: guarantees a
+  // progress row can only point to a course of the SAME formation as its
+  // enrollment.
+  @@unique([id, formationId])
+  @@index([formationId, position])
+  @@map("courses")
+}
+
+// A file (video, image, document). The file itself lives in PRIVATE storage:
+// storageKey is an internal key, it must never be serialised to a client or
+// used as a public URL (TASKS.md rule 4, P2-06 signed/temporary access).
+model Media {
+  id           String @id @default(uuid())
+  // "video" | "image" | "document"
+  kind         String
+  storageKey   String @unique
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+
+  courseId String?
+  course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  uploadedById String?
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  coverOf Formation? @relation("FormationCover")
+
+  @@index([courseId])
+  @@map("media")
+}
+
+// A user's enrolment in a formation. One per (user, formation).
+model Enrollment {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Restrict: a formation that has learners cannot be deleted (and their
+  // certificates lost); unpublish it instead.
+  formationId String
+  formation   Formation @relation(fields: [formationId], references: [id], onDelete: Restrict)
+
+  // "active" | "completed"
+  status      String    @default("active")
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+
+  courseProgress CourseProgress[]
+  certification  Certification?
+
+  @@unique([userId, formationId])
+  @@unique([id, formationId])
+  @@index([formationId])
+  @@map("enrollments")
+}
+
+// Progress of one enrolment on one course.
+// formationId is stored on purpose: the two composite foreign keys below make
+// the database itself reject a progress row whose course is not part of the
+// enrolled formation (P2-04 "empêcher une validation incohérente").
+model CourseProgress {
+  id           String @id @default(uuid())
+  enrollmentId String
+  courseId     String
+  formationId  String
+
+  enrollment Enrollment @relation(fields: [enrollmentId, formationId], references: [id, formationId], onDelete: Cascade)
+  course     Course     @relation(fields: [courseId, formationId], references: [id, formationId], onDelete: Cascade)
+
+  // "in_progress" | "completed"
+  status      String    @default("in_progress")
+  openedAt    DateTime  @default(now())
+  completedAt DateTime?
+
+  @@unique([enrollmentId, courseId])
+  @@index([courseId])
+  @@map("course_progress")
+}
+
+// Issued when an enrolment is completed. The holder name and formation title
+// are snapshotted so the certificate stays valid and verifiable even if the
+// account or the formation is later renamed. At most one per enrolment.
+model Certification {
+  id                String     @id @default(uuid())
+  // Public, unguessable identifier used for verification. Generated by the
+  // application (P2-05), never sequential.
+  certificateNumber String     @unique
+  enrollmentId      String     @unique
+  enrollment        Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  holderName     String
+  formationTitle String
+  issuedAt       DateTime @default(now())
+
+  @@map("certifications")
 }

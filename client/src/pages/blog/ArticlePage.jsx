@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import { FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../components/ui/Button.jsx';
 import Notice from '../../components/ui/Notice.jsx';
@@ -13,8 +14,8 @@ export default function ArticlePage() {
 
   return (
     <section className="status-hero">
-      <div className="status-emoji" aria-hidden="true">
-        📝
+      <div className="status-icon" aria-hidden="true">
+        <FileText size={26} strokeWidth={1.6} />
       </div>
       <span className="status-label">{t('article.label')}</span>
       <h1>{t('article.notFoundTitle', { slug })}</h1>

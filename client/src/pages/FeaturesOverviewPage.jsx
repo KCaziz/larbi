@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Check, Lock, Table2 } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader.jsx';
 import Notice from '../components/ui/Notice.jsx';
 import Section from '../components/ui/Section.jsx';
@@ -11,23 +12,27 @@ const rows = [
   { domainKey: 'features.domains.premium', visitor: 'locked', standard: 'locked', premium: 'open' },
 ];
 
-const stateIcon = { open: '✅', locked: '🔒' };
+const stateIcon = { open: Check, locked: Lock };
 
 export default function FeaturesOverviewPage() {
   const { t } = useTranslation();
   const stateLabel = { open: t('features.table.open'), locked: t('features.table.locked') };
 
-  const renderState = (state) => (
-    <td>
-      <span className={`chip chip-${state}`}>
-        <span aria-hidden="true">{stateIcon[state]}</span> {stateLabel[state]}
-      </span>
-    </td>
-  );
+  const renderState = (state) => {
+    const Icon = stateIcon[state];
+    return (
+      <td>
+        <span className={`chip chip-${state}`}>
+          <Icon size={14} strokeWidth={2} aria-hidden="true" />
+          {stateLabel[state]}
+        </span>
+      </td>
+    );
+  };
 
   return (
     <>
-      <PageHeader icon="🗂️" title={t('features.title')} subtitle={t('features.intro')} />
+      <PageHeader icon={Table2} title={t('features.title')} subtitle={t('features.intro')} />
 
       <Section>
         <div className="table-wrap">

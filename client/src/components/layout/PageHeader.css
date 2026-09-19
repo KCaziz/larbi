@@ -1,38 +1,14 @@
 .page-header {
-  position: relative;
-  overflow: hidden;
-  background: var(--gradient-brand);
-  padding: 64px 20px 88px;
-  border-end-start-radius: 50% 44px;
-  border-end-end-radius: 50% 44px;
-}
-
-.page-header::before,
-.page-header::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.page-header::before {
-  width: 320px;
-  height: 320px;
-  inset-block-start: -140px;
-  inset-inline-end: -60px;
-}
-
-.page-header::after {
-  width: 200px;
-  height: 200px;
-  inset-block-end: -110px;
-  inset-inline-start: 8%;
-  background: rgba(255, 255, 255, 0.07);
+  padding: 64px 20px 56px;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--bg-alt);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
 .page-header-inner {
-  position: relative;
-  z-index: 1;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -40,31 +16,28 @@
 .page-header-icon {
   display: grid;
   place-items: center;
-  width: 60px;
-  height: 60px;
-  margin-bottom: 18px;
-  border-radius: 18px;
-  font-size: 1.85rem;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(6px);
+  width: 48px;
+  height: 48px;
+  margin-bottom: 20px;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  background: var(--accent-bg);
+  color: var(--accent);
 }
 
 .page-header h1 {
   margin: 0 0 12px;
-  color: #fff;
-  font-size: clamp(2rem, 4.5vw, 3.1rem);
+  font-size: clamp(2.1rem, 4.5vw, 3.2rem);
 }
 
 .page-header p {
-  max-width: 720px;
+  max-width: 680px;
   margin: 0;
-  color: rgba(255, 255, 255, 0.9);
   font-size: 1.1rem;
 }
 
 @media (max-width: 640px) {
   .page-header {
-    padding: 44px 20px 68px;
+    padding: 44px 20px 40px;
   }
 }

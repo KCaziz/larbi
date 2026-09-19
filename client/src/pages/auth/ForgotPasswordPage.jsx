@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MailQuestion } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import AuthAside from '../../components/layout/AuthAside.jsx';
@@ -26,7 +27,7 @@ export default function ForgotPasswordPage() {
   return (
     <section className="auth-page">
       <div className="auth-split">
-        <AuthAside icon="📧" />
+        <AuthAside icon={MailQuestion} />
 
         <div className="auth-main">
           <h1>{t('auth.forgot.title')}</h1>

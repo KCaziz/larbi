@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Mail, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { api, errorKey } from '../lib/api.js';
 import PageHeader from '../components/layout/PageHeader.jsx';
 import Button from '../components/ui/Button.jsx';
 import Notice from '../components/ui/Notice.jsx';
@@ -12,35 +14,43 @@ export default function ContactPage() {
   const { t } = useTranslation();
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!form.name || !form.email || !form.message) {
+    if (!form.name.trim() || !form.email || !form.message.trim()) {
       setStatus({ type: 'error', text: t('contact.errors.required') });
       return;
     }
 
-    // No backend endpoint exists yet for this form: real submission is
-    // wired up during P1-07 (intégration frontend/backend). We deliberately
-    // do not fake a "message sent" confirmation here.
-    setStatus({ type: 'info', text: t('contact.status.notWired') });
+    setStatus(null);
+    setSubmitting(true);
+    try {
+      await api.post('/contact', form);
+      setForm(initialForm);
+      setStatus({ type: 'success', text: t('contact.status.sent') });
+    } catch (err) {
+      setStatus({ type: 'error', text: t(errorKey(err)) });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <>
-      <PageHeader icon="✉️" title={t('contact.title')} subtitle={t('contact.intro')} />
+      <PageHeader icon={Mail} title={t('contact.title')} subtitle={t('contact.intro')} />
 
       <Section>
         <div className="contact-layout">
           <article className="feature-card tone-blue">
             <span className="icon-badge" aria-hidden="true">
-              💬
+              <MessageSquare size={22} strokeWidth={1.6} />
             </span>
             <h3>{t('contact.asideTitle')}</h3>
             <Notice variant="action-needed">{t('contact.notice')}</Notice>
@@ -80,11 +90,16 @@ export default function ContactPage() {
                 />
               </div>
               {status && (
-                <p className="form-status" role="status">
+                <p
+                  className={`form-status ${status.type === 'error' ? 'form-status-error' : ''}`}
+                  role={status.type === 'error' ? 'alert' : 'status'}
+                >
                   {status.text}
                 </p>
               )}
-              <Button type="submit">{t('contact.form.submit')}</Button>
+              <Button type="submit" disabled={submitting}>
+                {submitting ? t('state.sending') : t('contact.form.submit')}
+              </Button>
             </form>
           </div>
         </div>

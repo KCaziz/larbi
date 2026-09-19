@@ -1,17 +1,31 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../auth/useAuth.js';
+import { errorKey } from '../../lib/api.js';
+import { accountTypeLabel, useAccountTypes } from '../../lib/accountTypes.js';
 import Button from '../../components/ui/Button.jsx';
 import '../Pages.css';
 
 export default function AccountTypePage() {
   const { t } = useTranslation();
-  const [accountType, setAccountType] = useState('auto-entrepreneur');
+  const { user, updateAccountType } = useAuth();
+  const accountTypes = useAccountTypes();
+  const [selected, setSelected] = useState(user.accountType);
   const [status, setStatus] = useState(null);
+  const [saving, setSaving] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // No backend endpoint exists yet to persist this change (see P1-06 / P2-01+).
-    setStatus(t('account.type.status'));
+    setStatus(null);
+    setSaving(true);
+    try {
+      await updateAccountType(selected);
+      setStatus({ type: 'success', text: t('account.type.saved') });
+    } catch (err) {
+      setStatus({ type: 'error', text: t(errorKey(err)) });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -24,20 +38,39 @@ export default function AccountTypePage() {
             <label htmlFor="accountType">{t('account.type.categoryLabel')}</label>
             <select
               id="accountType"
-              value={accountType}
-              onChange={(event) => setAccountType(event.target.value)}
+              value={selected}
+              onChange={(event) => setSelected(event.target.value)}
+              disabled={accountTypes.status !== 'ready'}
             >
-              <option value="auto-entrepreneur">{t('accountTypes.autoEntrepreneur')}</option>
-              <option value="pme">{t('accountTypes.pme')}</option>
-              <option value="pmi">{t('accountTypes.pmi')}</option>
+              {accountTypes.status !== 'ready' && (
+                <option value={user.accountType}>{accountTypeLabel(t, user.accountType)}</option>
+              )}
+              {accountTypes.types.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {accountTypeLabel(t, type)}
+                </option>
+              ))}
             </select>
+            {accountTypes.status === 'error' && (
+              <small className="form-hint form-hint-error" role="alert">
+                {t('auth.register.accountTypesError')}
+              </small>
+            )}
           </div>
           {status && (
-            <p className="form-status" role="status">
-              {status}
+            <p
+              className={`form-status ${status.type === 'error' ? 'form-status-error' : ''}`}
+              role={status.type === 'error' ? 'alert' : 'status'}
+            >
+              {status.text}
             </p>
           )}
-          <Button type="submit">{t('account.type.save')}</Button>
+          <Button
+            type="submit"
+            disabled={saving || accountTypes.status !== 'ready' || selected === user.accountType}
+          >
+            {saving ? t('state.sending') : t('account.type.save')}
+          </Button>
         </form>
       </div>
     </div>
