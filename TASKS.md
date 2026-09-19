@@ -176,6 +176,8 @@ Security Layer
 
 **Total : 8 semaines.**
 
+Note du 2026-09-19 : deux ajouts demandés par le client (assistant guidé `P3-07`, paiement `P3-08` à `P3-10`) allongent la Phase 3 d'environ une semaine si tout est conservé dans le délai initial ; le détail et les arbitrages possibles sont dans « Impact sur le délai », après `P3-10`.
+
 ---
 
 # PHASE 1 — FRONTEND PRINCIPAL + SOCLE TECHNIQUE
@@ -780,8 +782,16 @@ Tests effectués (vrai serveur + PostgreSQL + Edge piloté ; 54 nouveaux tests) 
 - Navigateur 26/26 : inscription → lecteur → validation → 33 % sans rechargement → persistance après rechargement → félicitations → annulation → pages formation / Mes formations, refus serveur affiché (inscription supprimée en coulisse), arabe RTL, mobile 375 px sans débordement, thème sombre, aucune erreur JS.
 - Limites : le test de concurrence n'a pas été rejoué sans le verrou pour prouver qu'il échouerait alors ; pas de test sur téléphone réel / Safari / Firefox.
 
+Vérification complémentaire (2026-09-19, reprise après interruption de la session initiale) — P2-04 confirmée terminée après 2 corrections :
+- **Défaut corrigé 1 — date d'achèvement écrasée** : annuler un cours *bonus* d'une formation déjà terminée remettait `completedAt` à « maintenant » (le recalcul de statut ne conservait pas la date d'origine, contrairement à ce que dit la décision ci-dessus). `syncEnrollmentStatus` conserve désormais la date tant que l'inscription reste terminée.
+- **Défaut corrigé 2 — formation composée uniquement de cours bonus** : elle passait « terminée » dès le premier cours (0 cours obligatoire = « rien à faire »). Règle retenue : sans aucun cours obligatoire, la formation est terminée quand **tous** ses cours le sont. **À valider avec le client** (règle métier non précisée par le cahier des charges) ; en pratique un formateur devrait garder au moins un cours obligatoire.
+- **Message de refus précis** dans le lecteur : refus d'inscription / de niveau premium affichés avec les textes dédiés au lieu du message générique « accès refusé ».
+- **Concurrence prouvée** : verrou `FOR UPDATE` désactivé temporairement → la complétion est perdue **8 fois sur 8** (deux validations simultanées des deux derniers cours) ; avec le verrou → **0 sur 8**. La limite « non rejouée sans le verrou » ci-dessus est donc levée.
+- Nouveaux tests (vrai serveur + PostgreSQL + Chrome piloté par le protocole DevTools) : API progression **45/45**, parcours navigateur **29/29** (fr, sombre, arabe RTL, mobile 375 px, aucune erreur JS), balayage de **192 pages** (16 publiques, 9 apprenant, admin + chaque étape de l'éditeur ; fr / en / ar / tzm ; 1280 px et 375 px) sans erreur JS, débordement, clé de traduction brute ni erreur HTTP inattendue, contrôle d'accès **67/67** (chaque route admin : anonyme 401 / apprenant 403 ; jetons falsifiés, expirés, `alg=none`, compte supprimé ou rétrogradé ; injection de `role` / `accessLevel` refusée ; aucune trace d'erreur en production).
+- Limites : les scripts de test sont jetables (non versionnés) ; Chrome uniquement (pas Safari / Firefox / téléphone réel).
+
 ### P2-05 — Certification
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P2-04`
 - Durée cible : 2 jours
@@ -794,8 +804,33 @@ Tâches :
 - Permettre la consultation du certificat.
 - Préparer une vérification de certificat si nécessaire.
 
+Réalisé (migration `certification_title` : colonne `certificationTitle` nullable dans `certifications`) :
+- **Émission automatique** : `completeCourse` (`services/progress.service.js`) appelle `issueCertificateIfEligible` dans la **même transaction et sous le même verrou de ligne** que le calcul d'achèvement. La certification est créée quand, et seulement quand : la formation délivre une certification (`certificationEnabled`), l'inscription est `completed` et tous les cours obligatoires **actuels** sont terminés (aucun cours obligatoire : tous les cours). Idempotent : un certificat existant est renvoyé tel quel.
+- **Numéro** `LARBI-XXXX-XXXX-XXXX` : 12 caractères tirés avec `crypto.randomInt` dans un alphabet de 32 signes sans ambiguïté (ni 0/O ni 1/I) → 60 bits, non séquentiel, non devinable ; unicité contrôlée avant insertion (une violation d'unicité annulerait la transaction en cours).
+- **Association** : la certification est liée à l'inscription (unique), donc à l'utilisateur et à la formation ; nom du titulaire, titre de la formation et nom de la certification sont **copiés** au moment de l'émission.
+- **API apprenant** (session requise) : `GET /api/learn/formations/:slug/certificate` (mon certificat), `GET /api/learn/certificates` (mes certificats), `POST /api/learn/formations/:slug/certificate` (« obtenir » le certificat d'une formation terminée avant que la certification soit activée ; idempotent, 201 / 200 ; 409 `not_completed` ou `certification_disabled`).
+- **API publique de vérification** : `GET /api/certificates/:number` — sans compte ; le format est contrôlé avant tout accès à la base, un numéro inconnu et un numéro mal formé répondent le même 404 ; limitée à 30 requêtes/minute/IP (`CERTIFICATE_RATE_LIMIT`) ; jamais mise en cache ; ne renvoie que titulaire, certification, formation, date et numéro (liste blanche distincte de la vue du titulaire).
+- **Interface** (fr / en / ar, RTL) : page du certificat `/catalogue/:slug/certificat` (feuille prête à imprimer, bouton « Imprimer ou enregistrer en PDF »), « Mes certificats » `/compte/certificats` (nouvel onglet du compte), vérification publique `/verification` et `/verification/:number` (lien dans le pied de page), boutons « Voir / Obtenir mon certificat » dans la page formation, message + lien dans le lecteur dès l'émission (le bouton « Annuler » est remplacé par une explication), badge « Certificat obtenu » sur les cartes.
+
+Décisions :
+- **Pas de bibliothèque PDF** : le PDF est produit par le navigateur (« Enregistrer au format PDF »), la feuille de style d'impression ne garde que le certificat (A4 paysage). Aucune dépendance ajoutée, texte réel dans le PDF. Limite : rendu dépendant du navigateur, aucune signature numérique (aucune valeur légale n'est revendiquée).
+- **Contenu du certificat** : aucune mention d'organisme émetteur, de signature, de logo ni de texte juridique autre que le nom de la plateforme — ces informations n'ont pas été fournies (à ajouter si le client les donne).
+- **Vérification publique = nom complet du titulaire visible** par toute personne qui détient le numéro (indispensable pour vérifier ; le numéro n'est pas devinable). **À valider avec le client** et à mentionner dans la politique de confidentialité quand les textes légaux seront fournis.
+- **Le certificat reste valide et identique** si le compte ou la formation est renommé, si la certification est désactivée ensuite ou si un cours obligatoire est ajouté. Supprimer le compte supprime le certificat (droit à l'effacement) : il devient invérifiable.
+- **Accès** : émettre un certificat exige le niveau d'accès actuel (comme lire le cours) ; consulter un certificat déjà obtenu n'exige pas le premium (c'est un acquis du titulaire, pas un contenu premium).
+- **Cours obligatoire ajouté après coup** : l'inscription reste `completed` (décision P2-04) mais un certificat pas encore émis ne l'est pas tant que le nouveau cours obligatoire n'est pas terminé.
+- **Pas de révocation** d'un certificat par l'administrateur (non demandée) : à ajouter si le client le souhaite.
+- Couleurs : jetons `--paper-*` (index.css) volontairement **non redéfinis en mode sombre** : la feuille reste claire, elle est faite pour le papier.
+
+Tests effectués (vrai serveur + PostgreSQL + Chrome piloté par le protocole DevTools) :
+- **API 62/62** : format et unicité de 20 000 numéros générés ; anonyme → 401 ; aucune émission avant la fin (409, aucune ligne créée), le bonus seul n'émet pas ; émission à la dernière validation (lignes, copies du nom et des titres, inscription `completed`) ; idempotence (revalider, réclamer) ; annulation refusée une fois certifié ; le titulaire seul lit son certificat (autre utilisateur → 404, aucune fuite d'e-mail ni d'identifiant) ; vérification publique (champs, `no-store`, numéro tapé en minuscules accepté, 7 entrées hostiles ou mal formées → 404 identique) ; renommages, désactivation de la certification et cours obligatoire ajouté après coup sans effet sur un certificat émis ; certification activée après coup → « obtenir » ; formation uniquement bonus ; premium perdu (consultation possible, nouvelle émission refusée) ; suppression du compte → certificat invérifiable ; **concurrence : 8 tours de deux dernières validations simultanées → exactement 1 certificat à chaque fois, 6 demandes simultanées → 1 création + 5 lectures**.
+- **Test témoin** : verrou de ligne désactivé temporairement → les tests de concurrence échouent (8 tours sur 8 faux) ; avec le verrou → 0 échec.
+- **Navigateur 41/41** : parcours complet du lecteur au certificat, contenu de la feuille, numéro identique à la base, rendu d'**impression** (en-tête, pied de page et barre d'actions masqués) et **export PDF réel d'exactement une page**, page formation, « Mes formations », « Mes certificats », vérification publique déconnecté (valide, inconnu, format invalide sans requête, numéro en minuscules), lien du pied de page, formation dont la certification est activée après coup, feuille toujours claire en thème sombre, arabe RTL, mobile 375 px sans débordement, aucune erreur JS.
+- **Balayage de 216 pages** (dont les nouvelles ; fr / en / ar / tzm ; 1280 et 375 px) sans erreur JS, débordement, clé brute ni erreur HTTP inattendue ; **sécurité 67/67** en mode production ; limitation de débit vérifiée sur une instance dédiée (5 requêtes puis 429) ; suite P2-04 45/45 (adaptée : ses formations n'ont pas de certification pour continuer à tester l'annulation) ; lint et build sans erreur, 476 références de traduction sans manque.
+- Limites : Chrome uniquement (impression testée par émulation du média `print` et export PDF, pas d'imprimante réelle) ; les scripts de test sont jetables (non versionnés) ; pas de test de charge sur la vérification publique ; pas de QR code (le lien de vérification est imprimé en toutes lettres).
+
 ### P2-06 — Protection des contenus E-Learning
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P2-03`
 - Durée cible : 1 jour
@@ -809,8 +844,33 @@ Tâches :
 - Protection des endpoints médias.
 - Limitation des accès non autorisés.
 
+Démarche : l'essentiel existait déjà (P2-02 / P2-03 : stockage hors de tout dossier statique, clés jamais sérialisées, contrôle inscription + niveau à chaque requête, type réel lu dans le contenu, limites de taille). P2-06 a donc consisté à **attaquer** ces protections avec un test dédié (87 vérifications sur le vrai serveur, la vraie base et le vrai disque, fichiers envoyés par l'API admin), puis à corriger ce qu'il a révélé.
+
+Réalisé (corrections issues des attaques) :
+- **Existence non révélée** : un fichier d'une formation non publiée, demandé par quelqu'un qui n'y est pas inscrit, répondait 403 (« non inscrit ») donc confirmait l'existence de l'identifiant ; il répond maintenant **404**, comme un identifiant inconnu (même règle que pour les formations).
+- **Plage `Range` impossible** : répondait 404 « fichier introuvable » ; répond maintenant **416** avec la taille réelle (`services/mediaResponse.js`).
+- **Limitation des accès non autorisés** (`middleware/rateLimit.js`, clé = **compte**, pas l'adresse IP, pour ne jamais pénaliser un voisin de réseau) : (1) *refus* — 30 requêtes refusées ou en erreur par 10 minutes → 429 (les requêtes réussies ne comptent pas, un usage normal n'est jamais touché ; `MEDIA_DENIED_LIMIT`) ; (2) *volume* — 300 requêtes/minute sur les fichiers et couvertures → 429, contre le téléchargement en masse par script (`MEDIA_RATE_LIMIT`). Le blocage d'un compte n'affecte pas les autres. Les couvertures (images marketing visibles de tout utilisateur connecté) ne sont soumises qu'à la limite de volume, pour qu'un catalogue avec des images cassées ne bloque jamais la lecture d'un cours.
+- **Traçabilité** (`utils/securityLog.js`) : une ligne JSON par événement sensible — `media_access_denied` (compte, fichier, raison) et `media_probing_blocked` (compte, une fois par blocage). Uniquement des identifiants : ni nom de fichier, ni clé de stockage, ni e-mail.
+
+Constaté déjà correct (aucun changement nécessaire, prouvé par les tests) :
+- **Stockage privé** : noms aléatoires (32 hexadécimaux + extension du type *détecté*), dossier non servi (11 chemins d'accès direct testés, dont `..` et `%2e%2e` → 404), ignoré par Git, aucune clé ni chemin dans **aucune** réponse JSON (catalogue, détail, cours, admin, envois, erreurs).
+- **Permissions à chaque requête** : anonyme 401, non inscrit 403, inscrit 200 avec les octets exacts, autre formation 403, couverture ≠ fichier de cours (404), premium perdu → 403 immédiat puis rétabli → 200, désinscription → 403 à la requête suivante, jeton falsifié / compte inconnu → 401, `HEAD` soumis aux mêmes règles, requête conditionnelle (`If-None-Match`) d'un non autorisé → 403 (jamais 304), route admin réservée aux administrateurs.
+- **Envois hostiles refusés (415/413/400, aucun résidu sur disque)** : texte renommé `.png`, HTML, SVG avec script, exécutable Windows, ZIP renommé `.pdf`, fichier vide, PHP avec type image, PDF comme couverture, mauvais nom de champ, deux fichiers dans une requête, image de 6 Mo, requête sans fichier ; nom `../../evil.png` neutralisé ; un fichier polyglotte (PNG + script) est stocké comme simple image et servi `image/png` + `nosniff` + CSP `sandbox` (il ne peut rien exécuter). Un envoi **interrompu** en cours de route ne laisse aucun fichier temporaire.
+- **En-têtes des fichiers** : type issu de notre base, PDF forcé en téléchargement, `X-Content-Type-Options: nosniff`, CSP `sandbox`, `Cache-Control: private, no-store`, `Cross-Origin-Resource-Policy: same-origin`, aucune autorisation CORS pour une origine étrangère.
+
+Décisions :
+- **URLs signées / temporaires : non nécessaires ici, volontairement non ajoutées.** Le cahier des charges dit « si nécessaire ». Les fichiers sont servis sur la même origine avec le cookie de session (`HttpOnly`, `SameSite=Lax`) : une adresse copiée-collée ne fonctionne pas sans session, ce qui est **plus strict** qu'une adresse signée (utilisable par quiconque la possède pendant sa durée de vie). Une adresse signée ne devient utile qu'avec un CDN ou un stockage objet (S3…) qui ne peut pas recevoir le cookie : à traiter en P5-06 si l'hébergement le impose. Le point d'entrée est unique (`getMedia` + `sendStoredMedia`), le changement sera localisé.
+- **Couvertures mises en cache 5 min** (`private, max-age=300`) : un navigateur peut resservir une couverture (image marketing) pendant 5 minutes après une déconnexion. Accepté (faible sensibilité, gain de performance du catalogue). Les fichiers de cours, eux, sont `no-store`.
+- **Limiteurs en mémoire, par processus** : suffisant pour un seul serveur ; plusieurs instances demanderaient un stockage partagé (à voir en P5-06).
+- **Aucune purge planifiée des fichiers temporaires** : inutile, l'envoi interrompu est nettoyé par le serveur (vérifié : un fichier temporaire existe pendant l'envoi, aucun après).
+- `controlsList="nodownload"` sur la vidéo reste un confort d'affichage, **pas** une protection : un apprenant autorisé peut toujours enregistrer ce qu'il voit.
+
+Tests effectués : **87/87** en développement et **84/84** en mode production (la différence = 3 vérifications de journal) ; limite de volume sur instance dédiée (6 requêtes servies puis 429, un autre apprenant non affecté, les couvertures partagent la limite) ; limites de taille sur instance dédiée à seuils réduits par variables d'environnement (image 1 000 o, document 1 500 o, vidéo 2 500 o → 413 partout, aucun résidu, fichiers juste sous la limite acceptés) ; envoi interrompu ; suites P2-04 (45/45) et P2-05 (62/62) rejouées sans régression.
+- Défauts trouvés par ces tests : 404 au lieu de 416 sur plage impossible, existence des fichiers d'une formation brouillon révélée (403), sondage illimité des identifiants. Les autres écarts observés pendant la mise au point venaient du script de test (trace d'erreur du mode développement, cache navigateur, normalisation d'URL).
+- Limites : fichiers de test très petits (une vidéo de 300 Mo n'a pas été envoyée : la limite est éprouvée avec des seuils réduits) ; pas d'antivirus ni d'analyse du contenu des PDF (P5-03) ; pas de test de montée en charge des limiteurs.
+
 ### P2-07 — Validation de fin de phase
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P2-05`, `P2-06`
 - Durée cible : 1 jour
@@ -824,6 +884,31 @@ Critères :
 - Les contenus protégés ne sont pas publiquement accessibles.
 - Les contrôles d'autorisation sont réalisés côté backend.
 
+Validation effectuée le 2026-09-19 — **Phase 2 validée** (parcours complet dans un vrai Chrome + suites d'API, 477 vérifications automatisées et un balayage de 216 pages, tout au vert). Le parcours de bout en bout ne prépare que le compte administrateur ; **tout le reste passe par l'interface réelle** (formulaires, envois de fichiers), avec lecture de la base pour vérifier ce que le serveur a réellement enregistré.
+
+1. **Le client peut créer une formation** (interface d'administration, 72/72 avec le point 2 à 7) : connexion par le formulaire ; « Nouvelle formation » avec le seul titre (titre vide refusé en langage simple) ; description ; catégorie créée sur place ; **faux fichier image refusé avec un message compréhensible** ; couverture (PNG réel) affichée ; avertissement « modifications non enregistrées » puis confirmation ; nom de la certification ; publication. Une formation incomplète : bouton « Publier » désactivé **et** publication forcée directement auprès du serveur → 422, elle reste brouillon.
+2. **Il peut définir ses cours** : 3 cours (texte riche, résumé, durée, vidéo MP4 et PDF envoyés, un cours facultatif) enregistrés et retrouvés en base ; ordre modifié avec « Monter ce cours » puis rétabli, persistant côté serveur.
+3. **Un utilisateur peut suivre les cours** : création de compte par le formulaire d'inscription (compte simple : rôle `user`, niveau standard) ; catalogue (couverture chargée, brouillon absent) ; inscription ; leçon avec texte, **vidéo servie par la route protégée (200 / 206)** et PDF téléchargeable.
+4. **La progression est enregistrée côté serveur** : ouverture et validation lues en base ; puis **cookies et stockage du navigateur effacés**, nouvelle connexion : la progression (33 %, « 1 sur 3 ») revient du serveur ; annulation refusée (409) une fois certifié.
+5. **La certification n'est délivrée que si les conditions sont remplies** : aucun certificat après 1 cours obligatoire sur 2 (contrôlé en base) ; **exactement un** certificat à la dernière validation obligatoire (le cours facultatif n'est pas exigé), nom du titulaire copié, inscription `completed` ; page du certificat et vérification publique déconnecté. Détail des cas limites en P2-05 (62/62 : concurrence, certification activée après coup, cours ajouté après coup, premium perdu…).
+6. **Les contenus protégés ne sont pas publiquement accessibles** : anonyme → 401 sur la vidéo **et** sur la couverture (requête forcée hors cache navigateur) ; un compte connecté mais **non inscrit** → 403, message clair, aucun lecteur vidéo ; adresse d'un fichier du dossier de stockage → 404 (serveur d'API) et jamais les octets du fichier (serveur de développement du site) ; un anonyme qui ouvre l'adresse d'un cours est renvoyé vers la connexion ; certificat d'un autre utilisateur → 404. En plus, 87 attaques ciblées (P2-06).
+7. **Les contrôles d'autorisation sont faits côté backend** : **audit automatique de toutes les routes réellement enregistrées dans Express (38)** — 7 sont publiques volontairement (santé, inscription, connexion, déconnexion, formulaire de contact, types de compte, vérification d'un certificat), les 31 autres exigent une session (401 sinon), et les 18 routes d'administration répondent 401 à un anonyme, **403 à un apprenant**, 200/4xx métier à un administrateur. Toute route ajoutée plus tard sera contrôlée par le même audit. Dans le navigateur, un non-administrateur voit « Accès refusé » et **5 opérations d'administration tentées directement contre l'API** (lister, retirer de la publication, supprimer, lire un fichier, modifier) sont refusées (403) sans rien modifier. Suite sécurité 67/67 en mode production : jetons falsifiés / expirés / `alg=none`, compte supprimé ou rétrogradé, tentatives d'élévation de privilèges, aucune trace d'erreur.
+
+Autres contrôles :
+- **Migrations depuis une base vierge** : les 5 migrations s'appliquent (`migrate deploy`), schéma « à jour », 10 tables, **aucune dérive** entre l'historique de migrations et `schema.prisma` (`migrate diff` : aucune différence) ; base temporaire supprimée.
+- **Non-régression** : API P2-04 45/45, P2-05 62/62, P2-06 87/87 (84/84 en production) ; navigateur P2-04 29/29, P2-05 41/41 ; balayage de **216 pages** (fr / en / ar / tzm, 1280 et 375 px, anonyme / apprenant / administrateur, chaque étape de l'éditeur) sans erreur JS, débordement, clé de traduction brute ni erreur HTTP inattendue.
+- **Hygiène** : `npm run lint` sans avertissement, build réussi, parité i18n **536 clés × 3 langues**, aucun secret (`JWT_SECRET`, mot de passe de base) dans le build du site, aucun `.env` ni fichier de stockage suivi par Git, `npm audit` client : 0, aucun résidu de test en base ni sur disque.
+
+Défauts trouvés puis corrigés pendant la fin de Phase 2 (déjà détaillés dans P2-04, P2-05, P2-06) : date d'achèvement écrasée à l'annulation d'un cours facultatif ; formation uniquement facultative « terminée » au premier cours ; message de refus trop générique ; existence des fichiers d'une formation brouillon révélée (403 au lieu de 404) ; plage `Range` impossible en 404 au lieu de 416 ; sondage illimité des identifiants de fichiers. Côté environnement de développement : dépendances non installées (police du site, paquets du serveur), base de développement sans les 3 dernières migrations, `JWT_SECRET` absent du `.env` local — le README indique désormais comment générer le secret.
+
+Constats non bloquants et décisions à valider avec le client :
+- **Règle « formation sans cours obligatoire »** : terminée seulement quand tous les cours le sont (règle non précisée par le cahier des charges, voir P2-04).
+- **Vérification publique d'un certificat** : le nom complet du titulaire est visible par qui détient le numéro ; à mentionner dans la politique de confidentialité (textes légaux du client toujours attendus) ; le certificat ne porte ni organisme émetteur, ni signature, ni logo (informations non fournies) ; pas de révocation par l'administrateur (voir P2-05).
+- **Couvertures en cache 5 min**, limiteurs de débit **en mémoire** (un seul serveur), URLs signées non nécessaires en l'état (voir P2-06) : à réexaminer en P5-06 selon l'hébergement retenu (CDN, stockage objet, plusieurs instances).
+- **`npm audit` serveur : 4 « high »** toujours dans le CLI Prisma (jamais chargé par l'API en exécution) ; inchangé depuis P1-08.
+- **Aucune suite de tests automatisés n'est conservée dans le dépôt** (une dizaine de scripts de validation, écrits pour cette phase, vivent hors du projet) : à formaliser en P5-05 ; en attendant, ce rapport est la trace des vérifications.
+- **Non testé** : Safari, Firefox, téléphone réel ; vidéos longues réelles (fichiers de test minuscules, limites de taille éprouvées avec des seuils réduits) ; accessibilité au lecteur d'écran ; montée en charge.
+
 ---
 
 # PHASE 3 — BLOG + CMS CONTENU + NEWSLETTER
@@ -833,7 +918,7 @@ Critères :
 Mettre en place le système de contenus publics et sa gestion.
 
 ### P3-01 — Modèle de données blog
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P2-07`
 - Durée cible : 1 jour
@@ -847,8 +932,21 @@ Entités :
 - Média.
 - Métadonnées SEO si nécessaires.
 
+Réalisé (migration `blog_model` ; modèle uniquement, les routes sont en P3-02 / P3-03) :
+- Tables `articles`, `article_categories`, `tags`, `article_tags` et colonne `articleId` sur `media`. Un article a : titre, adresse publique (slug) unique, résumé, corps HTML assaini, **copie en texte brut** du corps, statut, date de publication, catégorie, image de couverture, auteur, titre et description SEO (facultatifs).
+- Intégrité garantie par PostgreSQL (mêmes principes que P2-01) : statut `draft`/`published` **toujours cohérent avec la date de publication**, titre non vide, adresses (articles, catégories, mots-clés) limitées à `[a-z0-9]` séparés par des tirets et 80 caractères, **un fichier appartient à une leçon OU à un article, jamais aux deux**.
+
+Décisions techniques :
+- **Catégories d'articles séparées de celles des formations** (domaines différents, évolutions indépendantes). Mots-clés (« tags ») partagés entre articles ; identité par adresse : « TVA » et « tva » sont le même mot-clé. Un mot-clé sans lettre latine (arabe…) reçoit une adresse stable `t-<empreinte>` au lieu de fusionner avec tous les autres.
+- **`bodyText`** (texte brut dérivé du corps) sert à la recherche et au temps de lecture : évite d'analyser du HTML à chaque requête. Le test de cohérence vérifie qu'il correspond toujours au corps.
+- **Suppression du compte de l'auteur** : l'article est conservé, sans nom d'auteur (droit à l'effacement). Suppression d'une catégorie / d'un mot-clé / d'une couverture : l'article reste, détaché.
+- **Médias** : même stockage privé que les formations (couverture + fichiers joints). Les images « dans le texte » ne sont pas prévues : l'assainisseur refuse `<img>` par sécurité, les images et vidéos s'affichent **sous le texte** (amélioration possible plus tard avec une liste blanche d'adresses).
+- **Pas de niveau d'accès (premium) ni de langue par article** : le premium est l'objet de P3-04 (migration additive à ce moment-là) ; comme les formations, le contenu est dans une seule langue (règle i18n, section 6).
+
+Tests : contraintes et suppressions vérifiées directement en base (`tests/functional/database.test.js`, 14 vérifications dont les règles du blog) ; migrations rejouées depuis zéro et **aucune dérive** entre `schema.prisma` et l'historique (`tests/consistency/project.test.js`).
+
 ### P3-02 — CMS simplifié
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P3-01`, `P2-02`
 - Durée cible : 2 jours (1 jour attendu grâce à la base CMS de P2-02)
@@ -866,8 +964,29 @@ Fonctionnalités :
 - Ajouter tags.
 - Éditeur riche simple.
 
+Réalisé — backend (`/api/admin/articles…`, tout derrière `requireAuth` + `requireRole('admin')`, sur le routeur admin partagé) :
+- Articles : liste, création (titre seul → brouillon), lecture, modification, publication / retrait, suppression (lignes **et fichiers**). Catégories d'articles (liste + création), suggestions de mots-clés existants, couverture (remplace et supprime l'ancienne) et fichiers joints (image, vidéo, PDF), lecture des fichiers réservée aux admins.
+- Publication refusée côté serveur (422 + liste de ce qui manque) tant que titre, résumé, texte réel et image de couverture ne sont pas renseignés. La date de publication d'origine est conservée si on republie sans retirer.
+- Texte assaini **côté serveur** à chaque enregistrement ; copie texte brut dérivée du texte assaini ; mots-clés nettoyés (espaces, doublons, 10 maximum) et **remplacés** (pas cumulés).
+
+Réalisé — frontend (`/admin/articles`, chargé à la demande) :
+- Liste des articles et éditeur en **5 étapes** : *Contenu* (titre, résumé, texte riche), *Images et médias* (couverture, fichiers), *Classement* (catégorie créable sur place, mots-clés saisis un par un ou collés « a, b, c », titre et description pour les moteurs de recherche), *Aperçu*, *Publication* (checklist, publier / retirer, lien « Voir sur le blog », suppression en zone séparée). Barre d'enregistrement, avertissement avant de quitter avec des modifications non enregistrées, tout traduit fr / en / ar.
+- **Aperçu = le même composant que la page publique** (`ArticleView`), alimenté par ce qui est à l'écran, enregistré ou non : ce que l'éditeur prévisualise EST ce qui sera publié.
+
+**Réutilisation de la base CMS (règle de la tâche)** — aucune brique copiée, quatre briques de P2-02 généralisées et réutilisées par les formations ET les articles :
+- `ContentList` (liste + création par le titre + états chargement / vide / erreur) : `FormationsListPage` en est devenue une simple configuration.
+- `PublishPanel` (checklist, publier / retirer, zone de suppression) : `PublishStep` des formations en est un fin habillage.
+- Serveur : `coverUploader` / `attachmentUploader` (couverture et fichiers joints pour formations, cours et articles) ; `ReadinessChecklist` et `StatusBadge` acceptent leurs propres libellés.
+- Nouveau composant générique `TagInput` (mots-clés) ; styles du texte riche déplacés dans `RichContent.css` (utilisés aussi par le blog public) ; utilitaire `.sr-only` rendu global.
+
+Décisions :
+- **L'adresse publique (slug) est cachée aux éditeurs et ne change plus après la création** : renommer un article ne casse aucun lien partagé.
+- Un article publié peut être modifié sans être retiré (comme les formations) ; les exigences ne sont revérifiées qu'à la prochaine publication.
+- Limite de taille des requêtes d'administration portée à **1 Mo** (le texte accepte 200 000 caractères, jusqu'à 3 octets chacun) ; les routes publiques gardent 100 ko.
+- Pas de planification de publication ni de versions d'un article (non demandé).
+
 ### P3-03 — Frontend blog
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P3-02`
 - Durée cible : 1 jour
@@ -878,6 +997,26 @@ Pages :
 - Article complet.
 - Articles recommandés.
 - Catégories.
+
+Réalisé — API publique (`/api/blog/*`, **sans session**, lecture seule, articles **publiés uniquement**) :
+- Liste paginée (9 par page, 24 maximum) avec recherche et filtres, page d'un article (avec recommandations), catégories et mots-clés (seulement ceux qui ont au moins un article publié, avec leurs compteurs), couverture et fichiers joints (`/api/blog/articles/:slug/cover`, `/api/blog/media/:id`).
+- **Un brouillon est indistinguable d'un article inexistant** (même 404) : page, couverture, fichiers, filtres, mots-clés, recherche, recommandations. Le retrait d'un article le fait disparaître de tout, immédiatement.
+- Listes blanches de champs (`serializers/blog.js`) : ni identifiant, ni statut, ni e-mail de l'auteur (son nom seulement), ni clé de stockage.
+- Limitation de débit 240 lectures/minute/adresse (`PUBLIC_READ_LIMIT`), validation stricte des paramètres (page, taille, filtres, longueur de la recherche : 400 sinon).
+
+Réalisé — pages du site (fr / en / ar, RTL) :
+- `/blog` : recherche, filtres par catégorie et par mot-clé (dans l'adresse : `?q=&category=&tag=&page=`, donc partageables), compteur de résultats, pagination, états chargement / vide / aucun résultat / erreur ; une adresse de filtre mal formée ne casse rien (elle ne renvoie aucun résultat).
+- `/blog/:slug` : couverture, catégorie, auteur, date, temps de lecture, texte, fichiers (image, vidéo, PDF téléchargeable), mots-clés (liens vers la liste filtrée), « À lire aussi » (même catégorie d'abord, puis mots-clés communs, jamais l'article lui-même ni un brouillon, 3 maximum). Titre et description de l'onglet issus des champs SEO (à défaut le titre et le résumé), restaurés en quittant la page.
+
+Décisions :
+- **Recherche** dans le titre, le résumé, le texte et les mots-clés, insensible à la casse. **Prisma n'échappe pas les jokers `%` et `_`** dans `contains` (vérifié) : sans échappement, une recherche « % » aurait renvoyé tous les articles ; le serveur les traite comme des caractères ordinaires.
+- **Fichiers publics mis en cache 5 min** (`public, max-age=300`) : un article retiré peut rester visible dans le cache d'un navigateur jusqu'à 5 minutes (le serveur, lui, répond aussitôt 404). Choix assumé (performance) ; les fichiers de formation, eux, restent `no-store`.
+- **Référencement (SEO)** : le site est une application monopage, les balises sont posées par JavaScript. Les moteurs qui exécutent JavaScript (Google) les voient ; ceux qui ne l'exécutent pas voient les valeurs par défaut. Un rendu côté serveur est hors périmètre du MVP. Pas de plan de site (`sitemap.xml`) ni de balises de partage sociales : à envisager si le blog devient un canal d'acquisition.
+- Pas de page dédiée par catégorie : les catégories et mots-clés sont des filtres de la liste. Tous les articles sont publics (contenus premium : P3-04).
+
+**Tests (P3-02 + P3-03)** : API d'administration 30 vérifications, API publique 23 (dont recherche, pagination, brouillons, jokers, fichiers, retrait) ; parcours **dans un vrai navigateur** (20 vérifications) : un rédacteur se connecte, écrit un article (gras, résumé, couverture, PDF, catégorie créée sur place, mots-clés collés, SEO), vérifie l'aperçu avec ses modifications non enregistrées, publie ; puis un visiteur sans compte lit la liste, cherche, filtre, ouvre l'article (titre et description de l'onglet, téléchargement du PDF, recommandations), constate qu'un brouillon et une adresse inconnue donnent la même page « introuvable » ; une charge XSS enregistrée par un éditeur ne s'exécute pas ; le retrait le fait disparaître ; arabe RTL, mode sombre et mobile 375 px sans débordement ; aucune erreur JS.
+- **Défauts trouvés par ces tests et corrigés** : le texte brut collait les blocs voisins (`<p>A</p><p>B</p>` → « AB », donc recherche et temps de lecture faux) ; il gardait les entités HTML (« R&D » stocké `R&amp;D` : la recherche « R&D » ne trouvait rien) ; un caractère nul dans un champ texte provoquait une **erreur 500** (voir P3-06) ; l'assistant de test a aussi révélé que la liste `/blog` et le titre de la bannière n'étaient pas alignés (corrigé).
+- Limites : Chrome uniquement ; pas de test au lecteur d'écran ; vidéos de test minuscules.
 
 ### P3-04 — Recommandation / visibilité selon profil
 - Statut : `❌ todo`
@@ -903,6 +1042,132 @@ Tâches :
 - Gestion des abonnés.
 - Désinscription.
 - Préparation de l'envoi d'informations/articles.
+
+### P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Dépendances : `P3-03`
+- Durée cible : ajout demandé par le client le 2026-09-19 (hors plan initial ; avance une partie de `P5-05`)
+
+Demande : tests unitaires, fonctionnels et de sécurité, plus un test de cohérence globale de l'ensemble du système. Jusqu'ici les vérifications étaient des scripts jetables hors du dépôt ; elles sont désormais **versionnées** dans `server/tests/`, rejouables par n'importe qui (commandes et prérequis dans le README, section « Tests »).
+
+Réalisé — **374 vérifications automatisées** (`npm test` : 333 en 75 secondes ; navigateur : 41) :
+- **Unitaires, 95** (aucune base, aucun réseau) : slugs, assainissement HTML (23 familles d'attaques XSS), texte brut / temps de lecture / mots-clés, numéros de certificat (20 000 tirages), règles de progression et d'achèvement, niveaux d'accès, checklists de publication, schémas de validation (auth, contact, formations, articles, requêtes publiques), stockage privé (le type est jugé sur le **contenu**, taille, noms hostiles), jeton de session (falsifications), gestion d'erreurs, listes blanches des sérialiseurs.
+- **Fonctionnels, 123** (vraie API, vraie base, vrais fichiers) : authentification, CMS des formations, parcours d'apprentissage complet (inscription → progression → certificat → vérification publique, y compris les accès concurrents), CMS des articles, API publique du blog, intégrité de la base (contraintes CHECK, clés étrangères, règles de suppression).
+- **Sécurité, 79** : **audit automatique de toutes les routes réellement enregistrées** (public déclaré ou 401 ; routes d'administration : 401 anonyme / 403 apprenant / accès administrateur), sessions falsifiées (autre secret, expirée, `alg: none`, charge modifiée, compte supprimé, rôle relu en base), élévation de privilèges, énumération de comptes (temps de réponse compris), XSS enregistré, injections SQL et d'objets, pollution de prototype, corps anormaux, injection d'en-tête par nom de fichier, protection des fichiers privés (matrice complète), limites de débit (instance à seuils bas), et **mode production** : en-têtes, CORS, cookie `Secure`, aucune fuite dans les erreurs — y compris une **vraie panne de base** provoquée pendant le test.
+- **Cohérence globale, 36** : (1) *données* — un historique réaliste (créations, éditions, publications, apprentissage, suppressions) est produit par l'API puis `services/consistency.service.js` contrôle les règles qui traversent tout le système (fichiers ↔ lignes, achèvement ↔ progression, certificats ↔ inscriptions, ordre des cours, HTML stocké déjà assaini, texte brut ↔ corps…) ; **9 tests « témoin » injectent chaque type d'incohérence à la main et vérifient qu'elle est détectée** (sinon « tout est vert » ne prouverait rien) ; la même vérification tourne sur la base réelle : `npm run check:consistency`. (2) *projet* — chaque adresse d'API écrite dans le client existe côté serveur avec la bonne méthode, chaque lien interne mène à une route, chaque entrée de menu aussi, français / anglais / arabe définissent les mêmes textes avec les mêmes variables et les formes plurielles requises, chaque clé demandée existe, `.env.example` ↔ variables réellement lues, aucun secret versionné, migrations ↔ `schema.prisma` sans dérive, aucune fonction de contrôleur oubliée hors routeur, suivi `TASKS.md` (dépendances existantes, rien de fait avant ses dépendances, tâche terminée = documentée, section « état actuel » exacte).
+- **Navigateur, 41** (vrai Chrome piloté par le protocole DevTools, site et API de test) : parcours blog (20), parcours formation de l'administratrice à l'apprenante certifiée et attaques d'accès depuis la page (14), **balayage de 288 pages** (français / anglais / arabe / tamazight, 1280 et 375 px, visiteur / apprenant / administrateur, chaque étape des éditeurs) sans erreur JS, débordement, clé brute, page vide ni erreur HTTP inattendue.
+
+Principes : base **dédiée `larbi_test`** créée et migrée automatiquement, avec garde-fou (le nom doit finir par `_test`, sinon refus) — la base de développement n'est jamais touchée ; stockage temporaire ; exécuteur natif de Node (**aucune dépendance de test ajoutée**) ; le vrai serveur tourne dans le processus de test ; les sessions sont fabriquées comme le fait la connexion ; chaque niveau est indépendant (`test:unit`, `test:functional`, `test:security`, `test:consistency`, `test:e2e`).
+
+Défauts réels trouvés par ces tests et corrigés :
+- **Caractère nul (` `) dans un champ texte → erreur 500** (PostgreSQL le refuse), déclenchable par n'importe quel utilisateur : refusé désormais en 400 par les validateurs, avec une profondeur d'imbrication limitée à 32 niveaux (un JSON de 5 000 niveaux faisait aussi déborder la pile).
+- **Texte brut des articles** : blocs voisins collés et entités HTML conservées (voir P3-03).
+- **La limite de 100 ko d'Express contredisait la validation à 200 000 caractères** : corps longs impossibles à enregistrer ; 1 Mo pour l'administration.
+- **Les messages « route introuvable » reflétaient la méthode et le chemin demandés** : message constant.
+- **Variables d'environnement lues mais non documentées** (`AUTH_RATE_LIMIT`, `CONTACT_RATE_LIMIT`, `PUBLIC_READ_LIMIT`, `LOG_REQUESTS`) : ajoutées à `.env.example`.
+- Le fichier local `client/.env` (`VITE_API_URL`) aurait dirigé le site de test vers l'API de développement : neutralisé dans les tests.
+
+Fiabilité : lors d'une exécution isolée le balayage a passé 7/7 ; une exécution faite pendant qu'un lint et un build tournaient sur la même machine a signalé un problème de rendu non identifié (journal filtré) qui n'est pas revenu à la relance. Le balayage accorde donc désormais une seconde chance (1,5 s) aux seuls états de rendu transitoires (page vide, débordement, clé non traduite, écran d'erreur) ; les erreurs JavaScript et HTTP ne sont **jamais** rejouées. Si le problème revient, le message d'échec donne la page, la langue et la largeur en cause.
+
+Limites : pas de mesure de couverture chiffrée (aucun outil ajouté) ; les composants React ne sont pas testés isolément (aucun framework de test de composants) mais exercés en navigateur réel ; Chrome uniquement, pas de Safari / Firefox / téléphone réel ; pas d'audit d'accessibilité ; pas de test de charge ; newsletter, simulateurs et factures n'existent pas encore.
+
+### P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P1-10`, `P2-02`
+- Durée cible : 1 jour
+- Origine : demande du client du 2026-09-19 (ajout au périmètre initial, voir « Impact sur le délai » après P3-10)
+
+Principe : un **assistant très simple, sans saisie libre et sans intelligence artificielle**. Le visiteur ouvre un panneau, **choisit une question parmi une liste prédéfinie** et obtient une **réponse prédéfinie**. Le contenu est géré par l'administrateur, dans la base CMS existante (P2-02).
+
+Tâches :
+- Modèle de données (migration additive) : questions (texte de la question, réponse, ordre, statut brouillon / publié) et, si utile, un regroupement par thème. Contraintes en base comme pour le blog (longueurs, statut, ordre).
+- Administration (`/api/admin/chatbot/*`, réservée à l'administrateur, entrée dans `config/adminNav.js`) : créer, modifier, réordonner, publier / dépublier, supprimer ; réponse rédigée dans l'éditeur riche existant, **assainie côté serveur** (`sanitizeRichText`) et re-nettoyée à l'affichage (`RichContent`).
+- API publique **en lecture seule** (`/api/chatbot/*`, sans session) : uniquement les entrées publiées, avec la limitation de débit de lecture publique ; à déclarer publique dans l'audit d'autorisation automatique (P2-07).
+- Interface : bouton flottant + panneau accessible (fermeture par Échap, focus géré, `aria-*`), liste de questions cliquables, réponse affichée, retour à la liste, lien « Contacter l'équipe » vers `/contact` quand aucune question ne convient. Textes de l'interface via `t()` (fr / en / ar), couleurs par tokens (mode sombre), propriétés logiques (RTL), icônes `lucide-react`, utilisable sur mobile. Non affiché dans l'administration.
+- Si aucune entrée n'est publiée, le bouton n'apparaît pas (pas de panneau vide).
+- Tests dans `server/tests/` : unitaires (validation), fonctionnels (CRUD, seules les entrées publiées sont publiques), sécurité (routes admin refusées aux non-administrateurs, XSS dans une réponse, audit des routes), cohérence (clés de traduction), navigateur (ouvrir, choisir, lire, RTL, mobile).
+
+Décisions à trancher (valeur par défaut retenue si le client ne précise rien) :
+- Langue du contenu : une seule langue par entrée, comme les formations et les articles (défaut) ; un contenu par langue serait une extension à chiffrer.
+- Enchaînement de questions (arbre de décision « après cette réponse, proposer… ») : **hors périmètre** par défaut ; liste simple.
+- Statistiques sur les questions les plus cliquées : **hors périmètre** par défaut (minimisation des données, règle 10, et pas d'analytics avancées au MVP).
+
+Important :
+- **Les questions et réponses doivent être fournies ou validées par le client.** Ne rien inventer de commercial, juridique, tarifaire ou fiscal ; ne livrer aucun contenu factice publié.
+- Cet assistant ne remplace pas la FAQ (P1-03) : la FAQ reste la page de référence.
+
+### P3-08 — Paiement : décisions à préciser (recherches à mener par le client)
+- Statut : `⛔ blocked`
+- Priorité : `🔴 high`
+- Dépendances : `P1-06`
+- Durée cible : 0 jour de développement (travail de recherche et de décision du client)
+- Origine : demande du client du 2026-09-19
+
+**Le client doit intégrer le paiement, mais son périmètre exact n'est pas encore défini** : type de banque ou de fournisseur, moyens de paiement, devise, ce qui est vendu. **Le client mène ses propres recherches pour préciser ces points ; Claude ne choisit pas de fournisseur, n'invente aucune règle commerciale, légale ou fiscale, et n'invente aucune information bancaire.** Cette tâche reste `⛔ blocked` jusqu'à réception des réponses ; elle débloque `P3-10`.
+
+Points à préciser :
+1. **Ce qui est vendu** : accès premium (abonnement mensuel / annuel ou durée fixe), formation à l'unité, les deux ? Prix, éventuel essai gratuit, promotions.
+2. **Pays et devise(s)** d'encaissement ; clients visés (locaux, étrangers, les deux).
+3. **Moyens de paiement à accepter** : cartes bancaires (locales / internationales), virement, paiement hors ligne avec validation manuelle par l'administrateur, portefeuille électronique… (un paiement hors ligne ajoute une fonction de validation manuelle à prévoir).
+4. **Type de fournisseur** : passerelle proposée par la banque du client, agrégateur / prestataire de paiement, plateforme internationale. Critères à vérifier : disponible pour le pays et la forme juridique du client, frais et commissions, délai de versement, **page de paiement hébergée** (aucune donnée de carte chez nous), documentation d'API et **environnement de test (sandbox)**, notifications serveur (webhooks) signées, remboursements, abonnements récurrents si besoin.
+5. **Entité qui encaisse** : compte bancaire professionnel, pièces demandées par le fournisseur pour l'ouverture.
+6. **Cadre légal et fiscal** (à fournir par le client) : conditions générales de vente, politique de remboursement / rétractation, TVA, mentions à faire figurer sur les reçus.
+7. **Règles de gestion** : remboursements, paiement échoué ou annulé, litiges, expiration d'un abonnement (que devient l'accès ?).
+8. **Reçus et factures** envoyés au client après paiement (lien possible avec le générateur de facture, P4-03).
+9. **Budget** : coûts d'ouverture, abonnement et frais par transaction du fournisseur.
+
+Livrable attendu : une courte note (fournisseur retenu, moyens acceptés, devise, offres et prix, règles de remboursement) et l'accès à un compte de test du fournisseur. Passer alors cette tâche à `✅ done` (décisions reçues) et `P3-10` à `❌ todo`.
+
+### P3-09 — Paiement : socle indépendant du fournisseur
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P3-04`
+- Durée cible : 2 jours
+- Origine : demande du client du 2026-09-19
+
+Objectif : préparer tout ce qui **ne dépend pas du choix du fournisseur**, pour que le branchement final (P3-10) soit court. La logique d'accès est la partie sensible : elle doit être correcte avant qu'un vrai paiement existe.
+
+Tâches :
+- Modèle de données (migration additive) : offres (ce qui est vendu, prix, devise, niveau d'accès accordé), commandes (utilisateur, offre, **montant et devise figés au moment de la commande**, statut en attente / payée / échouée / annulée / remboursée), journal des événements reçus du fournisseur (identifiant externe **unique** pour l'idempotence). Montants en **entiers** (plus petite unité monétaire), jamais en nombre à virgule.
+- Interface « adaptateur de fournisseur » (créer une session de paiement, vérifier la signature d'une notification, interpréter l'événement), plus un **faux fournisseur réservé aux tests et au développement, désactivé en production**.
+- **Attribution de l'accès uniquement à partir d'une notification serveur authentique** (signature vérifiée), dans une transaction, de façon idempotente (une notification rejouée ou concurrente n'accorde pas deux fois). **Le retour du navigateur après paiement n'accorde jamais rien** : la page de retour relit l'état côté serveur. Retrait ou ajustement de l'accès en cas de remboursement selon les règles de P3-08.
+- Le client n'envoie que l'identifiant d'une offre : **le prix vient toujours du serveur** ; une commande n'est lisible que par son propriétaire (règle 6).
+- Route de notification (webhook) publique **déclarée dans l'audit des routes**, corps brut conservé pour la signature, taille limitée, limitation de débit, protection contre le rejeu, réponses génériques.
+- **Aucune donnée de carte ne transite ni n'est stockée** (page de paiement hébergée ou redirection). Secrets du fournisseur uniquement dans les variables d'environnement serveur, documentés dans `.env.example`. Journal de sécurité (`logSecurityEvent`) sans donnée sensible.
+- Interface (i18n fr / en / ar, tokens, RTL) : page des offres, démarrage du paiement, page de retour, « Mes paiements » ; côté administration : liste des commandes en lecture seule.
+- Tests : unitaires (montants, statuts), fonctionnels, **sécurité** (notification falsifiée, rejouée, en double et concurrente ; montant ou offre modifiés ; commande d'un autre utilisateur ; accès accordé une seule fois ; retour navigateur sans effet), cohérence (commande payée ↔ accès accordé, aucune commande payée sans événement), navigateur avec le faux fournisseur.
+
+Important :
+- Ne pas choisir ni annoncer de fournisseur réel ici ; les règles de remboursement et les prix viennent du client (P3-08).
+- Le niveau d'accès premium existe déjà (P1-06, P3-04) : le paiement ne fait que l'accorder ou le retirer, côté serveur.
+
+### P3-10 — Paiement : branchement du fournisseur choisi
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P3-08`, `P3-09`
+- Durée cible : 1 à 2 jours (selon le fournisseur et la qualité de sa documentation)
+- Origine : demande du client du 2026-09-19
+
+Tâches :
+- Adaptateur du fournisseur retenu en P3-08 (création de la session, vérification de signature, événements de succès / échec / remboursement).
+- Configuration par variables d'environnement (clés de test et de production séparées, jamais dans le dépôt ni le frontend).
+- Essais complets dans l'environnement de test du fournisseur : paiement réussi, refusé, abandonné, notification en double, remboursement.
+- Réconciliation : vérification que chaque commande « payée » correspond à un paiement chez le fournisseur.
+- Liste de contrôle avant ouverture : clés de production, adresse de notification en HTTPS, conditions générales de vente affichées, reçus, sauvegardes (P5-04).
+- Ajouter les tests de bout en bout correspondants à `server/tests/` ; `npm test` doit rester vert.
+
+Statut de blocage : ne peut commencer qu'après les décisions de `P3-08`.
+
+### Impact sur le délai (ajouts du 2026-09-19)
+
+Le chatbot et le paiement n'étaient **pas** dans le plan initial de 8 semaines. Estimation, sans compter le temps de recherche du client (P3-08) :
+- `P3-07` chatbot : 1 jour ;
+- `P3-09` socle de paiement : 2 jours ;
+- `P3-10` branchement du fournisseur : 1 à 2 jours, **conditionné par les décisions de `P3-08`**.
+
+Soit environ **4 à 5 jours ouvrés, donc à peu près une semaine de plus** que les 8 semaines prévues. Pour rester à 8 semaines, il faudrait par exemple repousser le simulateur de fiscalité (déjà hors MVP, `P4-04`), simplifier le simulateur de crédit tant que ses règles ne sont pas fournies, ou livrer le paiement dans une seconde livraison. Le client doit arbitrer. Ordre conseillé : `P3-04`, `P3-05`, `P3-07`, `P3-09`, puis Phase 4 ; `P3-10` dès que `P3-08` est levée (le retard des décisions ne doit pas bloquer les outils).
 
 ---
 
@@ -1028,6 +1293,7 @@ Vérifications / mesures :
 - Secrets uniquement via variables d'environnement.
 - Limitation des données retournées par l'API.
 - Protection des endpoints sensibles.
+- Ajout du 2026-09-19 : si le paiement (`P3-09`, `P3-10`) est livré, y inclure la revue de la route de notification du fournisseur (signature, rejeu, doublons concurrents), de l'attribution d'accès et des secrets de paiement ; et l'API publique de l'assistant guidé (`P3-07`).
 
 ### P5-03 — Sécurité des fichiers et contenus
 - Statut : `❌ todo`
@@ -1088,6 +1354,8 @@ Parcours minimum :
 - Upload de fichiers invalides.
 - Tests de validation API.
 
+Avancement (2026-09-19) : la suite de tests versionnée de `P3-06` couvre déjà les parcours formation → certification, création d'article → publication → consultation, tentatives d'accès non autorisé et à un média privé, envois de fichiers invalides, validation API. Restent à couvrir quand ils existeront : newsletter, assistant guidé (`P3-07`), paiement (`P3-09`, `P3-10`), simulateur de crédit, factures PDF / Excel. Cette tâche reste `❌ todo` tant que ces parcours manquent.
+
 ### P5-06 — Préparation production et livraison
 - Statut : `❌ todo`
 - Priorité : `🔴 high`
@@ -1124,6 +1392,8 @@ Ces éléments ne doivent pas être développés avant les fonctionnalités prio
 - Paiement complexe si non indispensable au MVP.
 - Automatisations marketing avancées.
 - Multi-langue avancé si non prévu dans les pages initiales.
+
+Précision du 2026-09-19 (demande du client) : l'intégration d'un paiement **simple** (achat ou abonnement donnant accès au contenu premium) est désormais **dans le périmètre** — voir `P3-08`, `P3-09`, `P3-10`, dont la forme exacte reste à préciser par le client. Ce qui reste hors MVP : marketplace, multi-vendeurs, paiement fractionné, facturation d'abonnement complexe et toute règle non demandée. La ligne « Paiement complexe » ci-dessus est conservée telle quelle.
 
 ---
 
@@ -1164,26 +1434,31 @@ Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau
 
 # 7. État actuel
 
-Phase active : `PHASE 2` (la Phase 1 a été validée le 2026-09-19, voir P1-08)
+Phase active : `PHASE 3` — BLOG + CMS CONTENU + NEWSLETTER (les Phases 1 et 2 ont été validées le 2026-09-19, voir P1-08 et P2-07)
 
 Dernières tâches terminées et vérifiées :
-`P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
+`P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
 
 Toutes les tâches de pages (P1-02, P1-03, P1-04), le socle backend (P1-05) et les deux ajouts signalés par l'utilisateur (mode clair/sombre, i18n FR/EN/AR + tamazight en repli) sont terminés. Le modèle `User` existe en base (Prisma).
 
 Prochaines tâches réalisables (dépendances satisfaites) :
-- `P2-05 — Certification` (dépend de `P2-04` ✅).
-- `P2-06 — Protection des contenus E-Learning` (dépend de `P2-03` ✅ ; peut se faire avant ou après P2-04/P2-05).
+- `P3-04 — Recommandation / visibilité selon profil` (dépend de `P1-06` ✅ et `P3-03` ✅).
+- `P3-05 — Newsletter` (dépend de `P3-02` ✅ ; **fournisseur d'email à choisir avant**, voir blocages ci-dessous).
+- `P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)` (dépend de `P1-10` ✅ et `P2-02` ✅ ; **questions et réponses à fournir par le client**).
 
-Recommandation : `P2-05` (certificat), puis `P2-06` et `P2-07`. Points d'attention :
-- P2-05 : la complétion est déjà détectée (`enrollment.status = completed`, `completedAt`) dans `services/progress.service.js` (`completeCourse`, sous verrou de ligne). Générer la certification (numéro non séquentiel, nom du titulaire et titre copiés) **dans cette même transaction** ; `reopenCourse` refuse déjà (409 `certified`) toute annulation une fois le certificat émis. Afficher/consulter le certificat (le bloc certification de la page formation lit déjà `enrollment.certification`).
-- P2-06 s'appuie sur l'existant : `learn.controller.js#getMedia` contrôle déjà inscription + niveau ; il reste à ajouter URLs temporaires / signées, limitation d'abus, traçabilité et tests de contournement.
-- Rappel : `npx prisma generate` après chaque migration (voir P1-08).
+Recommandation : `P3-04`, puis `P3-05` et `P3-07`, puis `P3-09` (socle de paiement, réalisable une fois `P3-04` terminée). Le client peut mener en parallèle les recherches de `P3-08` (paiement), qui conditionnent `P3-10`. Ajouts du 2026-09-19 : ils allongent le planning d'environ une semaine (voir « Impact sur le délai » après `P3-10`). Points d'attention :
+- **P3-04 : l'API publique du blog renvoie aujourd'hui le corps complet de chaque article publié à tout le monde** (voir P3-03). Verrouiller côté interface ne suffirait pas : il faut un niveau d'accès porté par l'article (migration additive, comme pour les formations) et que `GET /api/blog/articles/:slug` n'envoie **jamais** le corps ni les médias joints à qui n'y a pas droit, avec des tests de sécurité correspondants dans `server/tests/security/`.
+- Chaque nouvelle tâche ajoute ses tests dans `server/tests/` (voir P3-06 et README « Tests ») ; `npm test` doit rester vert, le test de cohérence du projet vérifie aussi ce fichier (statuts, dépendances, tâches terminées documentées, cette section).
+- Toute nouvelle route API : elle sera contrôlée par l'audit d'autorisation automatique (toutes les routes Express, voir P2-07) — la déclarer publique ou la protéger explicitement.
+- Décisions clients encore ouvertes, listées à la fin de P2-07 (règle des formations sans cours obligatoire, visibilité du nom sur la vérification publique, mentions du certificat).
+- Rappel : `npx prisma generate` après chaque migration (voir P1-08) ; sur une machine neuve : `npm install` dans `client/` et `server/`, `prisma migrate deploy`, `JWT_SECRET` dans `server/.env` (voir README).
 
 Blocages / informations manquantes signalées (non bloquantes pour continuer, mais à ne pas oublier avant livraison) :
 - Mentions légales et politique de confidentialité : identité légale du client (raison sociale, SIRET, adresse, hébergeur, contact DPO) à fournir avant mise en production (voir notes P1-03).
 - Formulaire de contact : aucune coordonnée réelle (email/téléphone/adresse) fournie — non affichée pour éviter de publier une information inventée.
 - Fournisseur d'email non défini : « mot de passe oublié » reste inactif et les messages du formulaire de contact ne sont que stockés en base (voir P1-07). À choisir avant la newsletter (P3-05) et la mise en production.
+- Paiement (`P3-08`, `⛔ blocked`) : fournisseur / banque, moyens de paiement, devise, offres et règles de remboursement **non définis** ; le client fait ses propres recherches (liste des points dans `P3-08`). Bloque `P3-10`, pas `P3-09`.
+- Assistant guidé (`P3-07`) : questions et réponses à fournir par le client ; aucun contenu inventé.
 - Simulateur de crédit (P4-02) : règles bancaires/taux à fournir par le client le moment venu — rappel déjà noté dans la tâche elle-même.
 
 Point de vérification manuelle recommandé pour l'utilisateur : ouvrir `http://localhost:5173` après `npm run dev` dans `client/` et tester le menu mobile sous 860px de large (non vérifié visuellement par Claude faute d'outil navigateur dans cette session).

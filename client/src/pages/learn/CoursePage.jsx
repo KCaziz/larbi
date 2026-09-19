@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, CircleCheck, Circle, Clock, Download, FileText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Award, CircleCheck, Circle, Clock, Download, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ApiError, api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
@@ -35,7 +35,9 @@ export default function CoursePage() {
       lesson.setData({ ...lesson.data, completed: res.completed });
       outline.setData({ formation: { ...outline.data.formation, enrollment: res.enrollment } });
     } catch (err) {
-      setActionError(t(errorKey(err)));
+      const why = err instanceof ApiError ? err.details?.reason : null;
+      const specific = { not_enrolled: 'learn.course.notEnrolled', premium_required: 'learn.course.premiumRequired' }[why];
+      setActionError(t(specific ?? errorKey(err)));
     } finally {
       setSaving(false);
     }
@@ -172,13 +174,25 @@ export default function CoursePage() {
                 <CircleCheck size={16} strokeWidth={1.9} aria-hidden="true" /> {t('learn.course.formationDone')}
               </p>
             )}
+            {f.enrollment?.certification && (
+              <div className="learn-complete-row">
+                <p className="cms-inline-message ok" role="status">
+                  <Award size={16} strokeWidth={1.9} aria-hidden="true" /> {t('learn.course.certificateReady')}
+                </p>
+                <Button to={`/catalogue/${slug}/certificat`} variant="secondary">
+                  {t('learn.certification.view')}
+                </Button>
+              </div>
+            )}
             {completed ? (
               <div className="learn-complete-row">
                 <span className="learn-chip learn-chip-done">
                   <CircleCheck size={13} strokeWidth={2} aria-hidden="true" />
                   {t('learn.detail.lessonDone')}
                 </span>
-                {!f.enrollment?.certification && (
+                {f.enrollment?.certification ? (
+                  <p className="cms-muted">{t('learn.course.lockedByCertificate')}</p>
+                ) : (
                   <Button variant="secondary" onClick={() => changeCompletion(false)} disabled={saving}>
                     {t('learn.course.undo')}
                   </Button>

@@ -16,7 +16,27 @@ import {
   updateFormation,
 } from '../controllers/admin/formations.controller.js';
 import { createCourse, deleteCourse, reorderCourses, updateCourse } from '../controllers/admin/courses.controller.js';
-import { deleteMedia, serveMedia, uploadCourseMedia, uploadCover } from '../controllers/admin/media.controller.js';
+import {
+  createArticle,
+  createArticleCategory,
+  deleteArticle,
+  getArticle,
+  listArticleCategories,
+  listArticles,
+  listTags,
+  publishArticle,
+  unpublishArticle,
+  updateArticle,
+} from '../controllers/admin/articles.controller.js';
+import {
+  deleteMedia,
+  serveMedia,
+  uploadArticleCover,
+  uploadArticleMedia,
+  uploadCourseMedia,
+  uploadCover,
+} from '../controllers/admin/media.controller.js';
+import { createArticleSchema, updateArticleSchema } from '../validation/blog.schemas.js';
 import {
   createCategorySchema,
   createCourseSchema,
@@ -49,6 +69,20 @@ router.put('/formations/:id/courses/order', validateBody(reorderCoursesSchema), 
 router.patch('/courses/:id', validateBody(updateCourseSchema), asyncRoute(updateCourse));
 router.delete('/courses/:id', asyncRoute(deleteCourse));
 router.post('/courses/:id/media', receiveFile, asyncRoute(uploadCourseMedia));
+
+// Blog articles (P3-02)
+router.get('/articles', asyncRoute(listArticles));
+router.post('/articles', validateBody(createArticleSchema), asyncRoute(createArticle));
+router.get('/articles/:id', asyncRoute(getArticle));
+router.patch('/articles/:id', validateBody(updateArticleSchema), asyncRoute(updateArticle));
+router.delete('/articles/:id', asyncRoute(deleteArticle));
+router.post('/articles/:id/publish', asyncRoute(publishArticle));
+router.post('/articles/:id/unpublish', asyncRoute(unpublishArticle));
+router.post('/articles/:id/cover', receiveFile, asyncRoute(uploadArticleCover));
+router.post('/articles/:id/media', receiveFile, asyncRoute(uploadArticleMedia));
+router.get('/article-categories', asyncRoute(listArticleCategories));
+router.post('/article-categories', validateBody(createCategorySchema), asyncRoute(createArticleCategory));
+router.get('/tags', asyncRoute(listTags));
 
 // Media
 router.get('/media/:id/file', asyncRoute(serveMedia));

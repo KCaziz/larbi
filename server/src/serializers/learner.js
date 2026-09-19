@@ -25,6 +25,27 @@ export function toEnrollmentSummary(enrollment, courses) {
   };
 }
 
+// Certificate as its owner sees it. The certification name falls back to the
+// formation title when the admin left it empty.
+export const toCertificateView = (c) => ({
+  certificateNumber: c.certificateNumber,
+  holderName: c.holderName,
+  certificationTitle: c.certificationTitle ?? c.formationTitle,
+  formationTitle: c.formationTitle,
+  issuedAt: c.issuedAt,
+});
+
+// What ANYONE holding the number may learn when verifying a certificate:
+// no e-mail, no ids, nothing about the account beyond the printed name.
+// Deliberately its own allow-list, so the owner's view can grow without leaking.
+export const toPublicCertificate = (c) => ({
+  certificateNumber: c.certificateNumber,
+  holderName: c.holderName,
+  certificationTitle: c.certificationTitle ?? c.formationTitle,
+  formationTitle: c.formationTitle,
+  issuedAt: c.issuedAt,
+});
+
 // Card in the catalogue / "my formations".
 export function toCatalogItem(formation, { accessible, enrollment }) {
   return {

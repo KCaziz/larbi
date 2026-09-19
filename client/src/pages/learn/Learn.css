@@ -567,54 +567,6 @@
   border-top: 1px solid var(--border);
 }
 
-/* ---------- Rich text shown to readers ---------- */
-.rich-content {
-  max-width: 760px;
-  color: var(--text-h);
-  font-size: 1.05rem;
-  line-height: 1.75;
-}
-
-.rich-content > *:first-child {
-  margin-top: 0;
-}
-
-.rich-content h2 {
-  margin: 32px 0 12px;
-  font-size: 1.6rem;
-}
-
-.rich-content h3 {
-  margin: 26px 0 10px;
-  font-size: 1.25rem;
-}
-
-.rich-content ul,
-.rich-content ol {
-  margin: 0 0 16px;
-  padding-inline-start: 26px;
-}
-
-.rich-content li {
-  margin-bottom: 6px;
-}
-
-.rich-content li > p {
-  margin: 0;
-}
-
-.rich-content blockquote {
-  margin: 20px 0;
-  padding-inline-start: 18px;
-  border-inline-start: 3px solid var(--accent-border);
-  color: var(--text);
-  font-style: italic;
-}
-
-.rich-content a {
-  color: var(--accent);
-}
-
 /* ---------- Completion block of the reader ---------- */
 .learn-complete {
   display: flex;

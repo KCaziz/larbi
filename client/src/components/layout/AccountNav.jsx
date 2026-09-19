@@ -6,6 +6,7 @@ const links = [
   { labelKey: 'account.nav.profile', to: '/compte/profil' },
   { labelKey: 'account.nav.dashboard', to: '/compte/tableau-de-bord' },
   { labelKey: 'account.nav.formations', to: '/compte/formations' },
+  { labelKey: 'account.nav.certificates', to: '/compte/certificats' },
   { labelKey: 'account.nav.type', to: '/compte/type' },
   { labelKey: 'account.nav.premium', to: '/compte/premium' },
 ];

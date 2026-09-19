@@ -42,6 +42,15 @@
   --shadow-sm: 0 1px 2px rgba(18, 26, 43, 0.05);
   --shadow-md: 0 6px 20px rgba(18, 26, 43, 0.08);
 
+  /* Printed documents (certificate): stay light in BOTH themes, they are meant for paper.
+     Deliberately not redefined in the dark blocks below. */
+  --paper: #fffdf8;
+  --paper-ink: #121a2b;
+  --paper-muted: #5b6170;
+  --paper-line: #c3beae;
+  --paper-accent: #0b5d4b;
+  --paper-brass: #94640f;
+
   --serif: 'Fraunces Variable', 'IBM Plex Sans Arabic', Georgia, 'Times New Roman', serif;
   --sans: 'IBM Plex Sans', 'IBM Plex Sans Arabic', system-ui, 'Segoe UI', sans-serif;
   --header-height: 68px;
@@ -225,6 +234,19 @@ main {
 .tone-green {
   --tone: var(--green);
   --tone-bg: var(--green-bg);
+}
+
+/* Text for screen readers only (global utility: used by public and CMS pages). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Arrows that must point the reading direction. */

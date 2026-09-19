@@ -28,7 +28,8 @@
     "main": "Navigation principale",
     "account": "Mon espace",
     "logout": "Déconnexion",
-    "admin": "Administration"
+    "admin": "Administration",
+    "verifyCertificate": "Vérifier un certificat"
   },
   "footer": {
     "copyright": "© {{year}} {{brand}}. Tous droits réservés.",
@@ -280,15 +281,39 @@
   },
   "blogList": {
     "title": "Blog",
-    "intro": "Articles et tutoriels en accès public, avec des contenus premium selon votre profil.",
-    "notice": "Aucun article n'est encore publié : le CMS et la liste réelle des articles arrivent en Phase 3 (tâches P3-01 à P3-03).",
-    "emptyTitle": "Aucun article pour le moment"
+    "intro": "Articles et conseils pour les indépendants et les entreprises.",
+    "searchLabel": "Rechercher un article",
+    "searchPlaceholder": "Rechercher un article…",
+    "searchButton": "Rechercher",
+    "clear": "Effacer les filtres",
+    "categories": "Catégories",
+    "tags": "Mots-clés",
+    "resultCount_one": "{{count}} article",
+    "resultCount_other": "{{count}} articles",
+    "emptyTitle": "Aucun article pour le moment",
+    "emptyBody": "Les premiers articles arrivent bientôt.",
+    "noResultsTitle": "Aucun article ne correspond",
+    "noResultsBody": "Essayez d'autres mots ou retirez un filtre.",
+    "loadError": "Impossible de charger les articles.",
+    "readingTime": "{{count}} min de lecture",
+    "pagination": "Pagination",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {{page}} sur {{pages}}"
   },
   "article": {
     "label": "Article",
-    "notFoundTitle": "« {{slug}} » n'est pas encore disponible",
-    "notice": "La lecture d'articles réels sera disponible une fois le CMS du blog livré (Phase 3, tâches P3-01 à P3-03).",
-    "back": "Retour au blog"
+    "back": "Retour au blog",
+    "notFoundTitle": "Article introuvable",
+    "notFoundBody": "Cet article n'existe pas ou n'est plus publié.",
+    "loadError": "Impossible de charger cet article.",
+    "by": "Par {{name}}",
+    "publishedOn": "Publié le {{date}}",
+    "related": "À lire aussi",
+    "files": "Fichiers de l'article",
+    "download": "Télécharger",
+    "videoLabel": "Vidéo : {{name}}",
+    "tagsLabel": "Mots-clés"
   },
   "legal": {
     "title": "Mentions légales",
@@ -374,7 +399,8 @@
       "dashboard": "Tableau de bord",
       "type": "Type de compte",
       "premium": "Contenus premium",
-      "formations": "Mes formations"
+      "formations": "Mes formations",
+      "certificates": "Certificats"
     },
     "profile": {
       "title": "Profil",
@@ -446,7 +472,8 @@
   },
   "admin": {
     "nav": {
-      "formations": "Formations"
+      "formations": "Formations",
+      "articles": "Articles"
     },
     "shell": {
       "title": "Administration",
@@ -632,6 +659,115 @@
       "linkPrompt": "Adresse du lien (laissez vide pour retirer le lien)",
       "undo": "Annuler",
       "redo": "Rétablir"
+    },
+    "tagInput": {
+      "remove": "Retirer le mot-clé {{tag}}",
+      "placeholder": "Ajouter un mot-clé, puis Entrée",
+      "limit": "{{count}} mots-clés maximum"
+    },
+    "articles": {
+      "status": {
+        "draft": "Brouillon",
+        "published": "Publié"
+      },
+      "list": {
+        "title": "Articles",
+        "subtitle": "Rédigez et publiez les articles du blog.",
+        "new": "Nouvel article",
+        "emptyTitle": "Aucun article pour l'instant",
+        "emptyBody": "Rédigez votre premier article : un titre suffit pour commencer.",
+        "loadError": "Impossible de charger les articles.",
+        "uncategorized": "Sans catégorie",
+        "columns": {
+          "article": "Article",
+          "status": "État",
+          "category": "Catégorie",
+          "author": "Auteur",
+          "updated": "Modifié le"
+        }
+      },
+      "newDialog": {
+        "title": "Nouvel article",
+        "body": "Donnez un titre à votre article. Vous pourrez ensuite le rédiger étape par étape.",
+        "label": "Titre de l'article",
+        "placeholder": "Ex. : 5 conseils pour bien facturer",
+        "create": "Créer et continuer",
+        "required": "Le titre est obligatoire."
+      },
+      "editor": {
+        "back": "Retour aux articles",
+        "untitled": "Article sans titre",
+        "loadError": "Impossible de charger cet article.",
+        "notFound": "Cet article n'existe pas ou a été supprimé."
+      },
+      "steps": {
+        "label": "Étapes de rédaction de l'article",
+        "content": "Contenu",
+        "media": "Images et médias",
+        "organize": "Classement",
+        "preview": "Aperçu",
+        "publish": "Publication"
+      },
+      "content": {
+        "title": "Titre de l'article",
+        "titleHint": "Le titre affiché en haut de l'article et dans la liste du blog.",
+        "titleRequired": "Le titre est obligatoire.",
+        "excerpt": "Résumé",
+        "excerptHint": "Deux ou trois phrases qui donnent envie de lire. Affiché dans la liste du blog.",
+        "body": "Texte de l'article",
+        "bodyHint": "Écrivez votre article. Utilisez les boutons pour mettre en forme (gras, titres, listes, liens)."
+      },
+      "media": {
+        "cover": "Image de couverture",
+        "coverHint": "JPG, PNG ou WebP, 5 Mo maximum. Elle illustre l'article dans la liste du blog.",
+        "files": "Images, vidéos et documents",
+        "filesHint": "Ces fichiers s'affichent sous le texte de l'article. Ils deviennent publics dès que l'article est publié."
+      },
+      "organize": {
+        "tags": "Mots-clés",
+        "tagsHint": "Quelques mots qui décrivent le sujet (10 maximum). Ils permettent de retrouver l'article.",
+        "seoTitle": "Référencement (facultatif)",
+        "seoIntro": "Ce que voient les moteurs de recherche. Si vous laissez vide, le titre et le résumé de l'article sont utilisés.",
+        "metaTitle": "Titre pour les moteurs de recherche",
+        "metaTitleHint": "70 caractères maximum.",
+        "metaDescription": "Description pour les moteurs de recherche",
+        "metaDescriptionHint": "170 caractères maximum."
+      },
+      "preview": {
+        "intro": "Voici l'article tel que les visiteurs le verront.",
+        "unsaved": "L'aperçu montre vos modifications non enregistrées."
+      },
+      "readiness": {
+        "title": "Donner un titre à l'article",
+        "excerpt": "Écrire un résumé",
+        "content": "Écrire le texte de l'article",
+        "cover": "Ajouter une image de couverture"
+      },
+      "publish": {
+        "title": "Publication",
+        "intro": "Vérifiez que tout est prêt. Un article publié devient visible par tous les visiteurs du blog.",
+        "checklist": "À faire avant de publier",
+        "allDone": "Tout est prêt : vous pouvez publier.",
+        "statusDraft": "Cet article est en brouillon : il n'est pas visible sur le blog.",
+        "statusPublished": "Cet article est publié depuis le {{date}}.",
+        "publish": "Publier l'article",
+        "unpublish": "Retirer de la publication",
+        "unpublishHint": "L'article disparaît immédiatement du blog ; vous pourrez le publier à nouveau.",
+        "published": "Article publié.",
+        "unpublished": "Article retiré de la publication.",
+        "notReady": "Certaines étapes ne sont pas terminées : vérifiez la liste ci-dessus.",
+        "unsavedFirst": "Enregistrez vos modifications avant de publier.",
+        "viewOnBlog": "Voir sur le blog"
+      },
+      "danger": {
+        "title": "Supprimer l'article",
+        "body": "Action définitive : l'article et ses fichiers seront supprimés.",
+        "button": "Supprimer cet article",
+        "confirmTitle": "Supprimer définitivement cet article ?",
+        "confirmBody": "« {{title}} » et ses fichiers seront supprimés. Cette action est irréversible.",
+        "confirm": "Oui, supprimer",
+        "blocked": "Cet article ne peut pas être supprimé pour l'instant."
+      }
     }
   },
   "learn": {
@@ -650,7 +786,8 @@
     "card": {
       "premium": "Premium",
       "completed": "Terminée",
-      "locked": "Réservée aux comptes premium"
+      "locked": "Réservée aux comptes premium",
+      "certified": "Certificat obtenu"
     },
     "progress": {
       "text": "{{completed}} sur {{total}} cours terminés",
@@ -684,7 +821,12 @@
       "rule": "Elle est délivrée automatiquement une fois tous les cours obligatoires terminés.",
       "disabled": "Cette formation ne délivre pas de certification.",
       "remaining": "Cours obligatoires restants : {{count}}",
-      "earned": "Certification obtenue : n° {{number}}, délivrée le {{date}}."
+      "earned": "Certification obtenue : n° {{number}}, délivrée le {{date}}.",
+      "view": "Voir mon certificat",
+      "claim": "Obtenir mon certificat",
+      "claiming": "Délivrance en cours…",
+      "claimReady": "Vous avez terminé tous les cours obligatoires : votre certificat peut être délivré.",
+      "claimError": "Impossible de délivrer le certificat pour le moment."
     },
     "course": {
       "breadcrumb": "Fil d'Ariane",
@@ -704,7 +846,9 @@
       "progressTitle": "Votre progression",
       "markDone": "Marquer comme terminé",
       "undo": "Annuler la validation",
-      "formationDone": "Bravo, vous avez terminé tous les cours obligatoires de cette formation."
+      "formationDone": "Bravo, vous avez terminé tous les cours obligatoires de cette formation.",
+      "certificateReady": "Votre certificat est disponible.",
+      "lockedByCertificate": "Le certificat a été délivré : la validation de ce cours ne peut plus être annulée."
     },
     "mine": {
       "title": "Mes formations",
@@ -716,5 +860,53 @@
     "lessonCount_one": "{{count}} cours",
     "lessonCount_many": "{{count}} cours",
     "lessonCount_other": "{{count}} cours"
+  },
+  "certificate": {
+    "title": "Mon certificat",
+    "back": "Retour à la formation",
+    "loadError": "Impossible de charger ce certificat.",
+    "notFound": "Vous n'avez pas encore obtenu de certificat pour cette formation.",
+    "print": "Imprimer ou enregistrer en PDF",
+    "printHint": "Dans la fenêtre d'impression, choisissez « Enregistrer au format PDF » pour en garder une copie.",
+    "sheet": {
+      "label": "Certificat",
+      "awardedTo": "Décerné à",
+      "body": "pour avoir terminé tous les cours obligatoires de la formation",
+      "issuedOn": "Délivré le {{date}}",
+      "number": "Numéro",
+      "verify": "Authenticité vérifiable sur :"
+    },
+    "mine": {
+      "title": "Mes certificats",
+      "intro": "Les certificats obtenus en terminant vos formations.",
+      "empty": "Vous n'avez pas encore de certificat.",
+      "emptyHint": "Terminez tous les cours obligatoires d'une formation pour obtenir le vôtre.",
+      "browse": "Voir les formations",
+      "loadError": "Impossible de charger vos certificats.",
+      "issuedOn": "Délivré le {{date}}",
+      "view": "Voir le certificat"
+    }
+  },
+  "verify": {
+    "title": "Vérifier un certificat",
+    "intro": "Saisissez le numéro inscrit sur le certificat pour contrôler qu'il est authentique.",
+    "label": "Numéro du certificat",
+    "placeholder": "LARBI-XXXX-XXXX-XXXX",
+    "submit": "Vérifier",
+    "invalid": "Ce numéro n'a pas le bon format. Exemple : LARBI-ABCD-2345-WXYZ.",
+    "checking": "Vérification…",
+    "valid": "Certificat authentique",
+    "validText": "Ce certificat a bien été délivré par la plateforme.",
+    "holder": "Titulaire",
+    "certification": "Certification",
+    "formation": "Formation",
+    "issuedOn": "Délivré le",
+    "number": "Numéro",
+    "unknown": "Aucun certificat ne correspond à ce numéro.",
+    "unknownHint": "Vérifiez le numéro saisi. Un certificat cesse d'exister si son titulaire supprime son compte.",
+    "tooMany": "Trop de vérifications en peu de temps. Réessayez dans une minute.",
+    "loadError": "La vérification est momentanément impossible.",
+    "another": "Vérifier un autre numéro",
+    "privacy": "Seuls le nom du titulaire, la formation et la date sont affichés."
   }
 }

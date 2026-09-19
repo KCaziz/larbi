@@ -24,3 +24,15 @@ export function formationReadiness(formation) {
   ];
   return { ready: items.every((i) => i.ok), items };
 }
+
+// Articles: same shape, their own list. The text must really contain words
+// (an empty editor is "no content"); a summary is needed for the cards.
+export function articleReadiness(article) {
+  const items = [
+    { key: 'title', ok: hasText(article.title) },
+    { key: 'excerpt', ok: hasText(article.excerpt) },
+    { key: 'content', ok: hasText(article.bodyText) },
+    { key: 'cover', ok: Boolean(article.coverImageId) },
+  ];
+  return { ready: items.every((i) => i.ok), items };
+}

@@ -29,6 +29,12 @@ npm run dev
 
 API disponible sur `http://localhost:4000`. Vérification : `GET /api/health`.
 
+`JWT_SECRET` (signature des sessions, 32 caractères minimum) est obligatoire : le serveur refuse de démarrer sans. En local, remplacer la valeur d'exemple de `.env` par une valeur aléatoire :
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+
 Après un premier `npm install`, ou après avoir modifié `server/prisma/schema.prisma` :
 
 ```bash
@@ -46,6 +52,23 @@ npm run dev
 ```
 
 Application disponible sur `http://localhost:5173`.
+
+## Tests
+
+Les tests vivent dans `server/tests/` et utilisent l'exécuteur intégré de Node (aucune dépendance de test à installer). Ils n'utilisent **jamais** la base de développement : une base dédiée `larbi_test` (même serveur PostgreSQL, créée et migrée automatiquement) et un dossier de stockage temporaire. Le nom de la base doit finir par `_test`, sinon les tests refusent de tourner.
+
+```bash
+cd server
+npm run test:unit          # fonctions pures, sans base ni réseau (rapide)
+npm test                   # unitaires + fonctionnels + sécurité + cohérence (base de test)
+npm run test:functional    # API réelle, base réelle, vrais fichiers
+npm run test:security      # autorisations, sessions, injections, fichiers privés, limites de débit, mode production
+npm run test:consistency   # cohérence globale : données, fichiers, client <-> serveur, traductions, migrations, suivi TASKS.md
+npm run test:e2e           # vrai navigateur (Chrome/Chromium/Edge requis, CHROME_PATH pour un chemin non standard)
+npm run check:consistency  # vérifie la base et le stockage COURANTS (lecture seule) ; code 0 = cohérent
+```
+
+Variables utiles : `TEST_DATABASE_URL` (autre serveur PostgreSQL de test), `CHROME_PATH` (navigateur des tests de bout en bout). Les captures d'écran des tests de bout en bout sont écrites dans `server/tests/e2e/screenshots/` (ignoré par Git).
 
 ## Structure
 

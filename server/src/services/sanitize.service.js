@@ -15,9 +15,18 @@ const RICH_TEXT = {
   },
 };
 
+// Visible text of some HTML. The sanitiser returns text with HTML entities
+// (R&D comes back as "R&amp;D"): they are decoded so the result is REAL text, the
+// one people search for ("R&D") and count words in. The result is never rendered
+// as HTML. "&amp;" is decoded last so "&amp;lt;" stays "&lt;".
 export function richTextToPlain(html) {
   return sanitizeHtml(html ?? '', { allowedTags: [], allowedAttributes: {} })
-    .replace(/&nbsp;|&#160;/g, ' ')
+    .replace(/&nbsp;|&#160;| /g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&amp;/g, '&')
     .trim();
 }
 

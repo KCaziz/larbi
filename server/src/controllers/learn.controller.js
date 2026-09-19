@@ -1,10 +1,17 @@
 import { prisma } from '../config/prisma.js';
 import { FORMATION_STATUS } from '../constants/elearning.js';
 import { hasAccessLevel } from '../constants/roles.js';
-import { toCatalogItem, toCourseContent, toEnrollmentSummary, toFormationDetail } from '../serializers/learner.js';
-import { completeCourse, recordCourseOpened, reopenCourse } from '../services/progress.service.js';
+import {
+  toCatalogItem,
+  toCertificateView,
+  toCourseContent,
+  toEnrollmentSummary,
+  toFormationDetail,
+} from '../serializers/learner.js';
+import { claimCertificate, completeCourse, recordCourseOpened, reopenCourse } from '../services/progress.service.js';
 import { sendStoredMedia } from '../services/mediaResponse.js';
 import { HttpError } from '../utils/httpError.js';
+import { logSecurityEvent } from '../utils/securityLog.js';
 
 // Learner-facing E-Learning API (P2-03). Every route requires a logged-in user;
 // every permission decision is made HERE, never in the browser:
@@ -130,7 +137,7 @@ async function changeProgress(req, res, action) {
   const course = formation.courses.find((c) => c.id === req.params.courseId);
   if (!course) throw new HttpError(404, 'Not found');
 
-  await action(enrollment, course, formation.courses);
+  await action(enrollment, course, { user: req.user, formation });
 
   const fresh = await findEnrollment(req.user.id, formation.id);
   const completed = fresh.courseProgress.some((p) => p.courseId === course.id && p.status === 'completed');
@@ -139,6 +146,36 @@ async function changeProgress(req, res, action) {
 
 export const completeLesson = (req, res) => changeProgress(req, res, completeCourse);
 export const reopenLesson = (req, res) => changeProgress(req, res, reopenCourse);
+
+// The certificate is issued automatically when the last required course is
+// completed (progress.service). This route covers a learner who finished before
+// certification was switched on. Idempotent; 409 + reason when conditions are not met.
+export async function claimMyCertificate(req, res) {
+  const { formation, enrollment } = await loadForUser(req.params.slug, req.user);
+  assertCanRead(req.user, formation, enrollment);
+  const { certification, created } = await claimCertificate(enrollment, { user: req.user, formation });
+  res.status(created ? 201 : 200).json({ certificate: toCertificateView(certification) });
+}
+
+// The certificate of the CURRENT user for a formation (owner only: it is looked
+// up through the user's own enrolment). Viewing it needs no premium level — it is
+// a record of what the user achieved, not premium content.
+export async function getFormationCertificate(req, res) {
+  const { enrollment } = await loadForUser(req.params.slug, req.user);
+  if (!enrollment?.certification) throw new HttpError(404, 'Not found');
+  res.json({ certificate: toCertificateView(enrollment.certification) });
+}
+
+export async function listMyCertificates(req, res) {
+  const certifications = await prisma.certification.findMany({
+    where: { enrollment: { userId: req.user.id } },
+    orderBy: { issuedAt: 'desc' },
+    include: { enrollment: { select: { formation: { select: { slug: true } } } } },
+  });
+  res.json({
+    certificates: certifications.map((c) => ({ ...toCertificateView(c), formationSlug: c.enrollment.formation.slug })),
+  });
+}
 
 // Marketing image of a formation, for any logged-in user who can see the formation.
 export async function getCover(req, res) {
@@ -161,6 +198,15 @@ export async function getMedia(req, res) {
 
   const { formation } = media.course;
   const enrollment = await findEnrollment(req.user.id, formation.id);
-  assertCanRead(req.user, formation, enrollment);
+  // A formation this user cannot see (unpublished, not enrolled) does not exist for
+  // them: 404, the same answer as an unknown id, so nothing about it is revealed.
+  if (!enrollment && formation.status !== FORMATION_STATUS.PUBLISHED) throw new HttpError(404, 'Not found');
+  try {
+    assertCanRead(req.user, formation, enrollment);
+  } catch (err) {
+    // Traced by ids only (no file name, no storage key).
+    logSecurityEvent('media_access_denied', { userId: req.user.id, mediaId: media.id, reason: err.details?.reason });
+    throw err;
+  }
   sendStoredMedia(res, media);
 }

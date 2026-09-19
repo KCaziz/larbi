@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { ACCESS_LEVELS } from '../constants/roles.js';
 
 // Optional text field coming from a form: "" means "cleared" -> null.
-const optionalText = (max) =>
+export const optionalText = (max) =>
   z
     .string()
     .trim()

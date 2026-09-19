@@ -1,6 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { ENROLLMENT_STATUS, PROGRESS_STATUS } from '../constants/elearning.js';
 import { HttpError } from '../utils/httpError.js';
+import { createCertificate } from './certificate.service.js';
 
 // Progress tracking (P2-04).
 //
@@ -47,25 +48,53 @@ async function withEnrollmentLock(enrollmentId, work) {
   });
 }
 
-// Recomputes the enrolment status from the stored progress. Returns the new status.
+// A formation is finished when every REQUIRED course is completed. A formation
+// with no required course at all can only be finished by doing every course
+// (otherwise "no required course left" would be true before starting).
+export function isFormationFinished(courses, { completed, total, requiredRemaining }) {
+  if (total === 0) return false;
+  return courses.some((c) => c.isRequired) ? requiredRemaining === 0 : completed === total;
+}
+
+// Recomputes the enrolment status from the stored progress. The original
+// completion date is kept while the enrolment stays completed.
 async function syncEnrollmentStatus(tx, enrollmentId, courses) {
   const rows = await tx.courseProgress.findMany({ where: { enrollmentId } });
-  const { completed, requiredRemaining } = summarizeProgress(courses, rows);
-  const finished = completed > 0 && requiredRemaining === 0;
+  const finished = isFormationFinished(courses, summarizeProgress(courses, rows));
+  const current = await tx.enrollment.findUnique({ where: { id: enrollmentId } });
   await tx.enrollment.update({
     where: { id: enrollmentId },
     data: finished
-      ? { status: ENROLLMENT_STATUS.COMPLETED, completedAt: new Date() }
+      ? { status: ENROLLMENT_STATUS.COMPLETED, completedAt: current.completedAt ?? new Date() }
       : { status: ENROLLMENT_STATUS.ACTIVE, completedAt: null },
   });
-  return finished ? ENROLLMENT_STATUS.COMPLETED : ENROLLMENT_STATUS.ACTIVE;
 }
 
-// Marks a course completed. Refuses an inconsistent validation:
+// Issues the certificate when, and only when, its conditions are met: the
+// formation delivers one, the enrolment is completed and every required course
+// is (still) completed. Idempotent: an existing certificate is returned as is.
+// Must run inside the enrolment lock so two requests cannot both create one.
+async function issueCertificateIfEligible(tx, { user, formation, enrollmentId }) {
+  const existing = await tx.certification.findUnique({ where: { enrollmentId } });
+  if (existing) return { certification: existing, created: false };
+  if (!formation.certificationEnabled) return { certification: null, reason: 'certification_disabled' };
+
+  const enrollment = await tx.enrollment.findUnique({ where: { id: enrollmentId } });
+  const rows = await tx.courseProgress.findMany({ where: { enrollmentId } });
+  const finished = isFormationFinished(formation.courses, summarizeProgress(formation.courses, rows));
+  if (enrollment.status !== ENROLLMENT_STATUS.COMPLETED || !finished) {
+    return { certification: null, reason: 'not_completed' };
+  }
+  return { certification: await createCertificate(tx, { user, formation, enrollmentId }), created: true };
+}
+
+// Marks a course completed and, if that finishes the formation, issues the
+// certificate in the same transaction. Refuses an inconsistent validation:
 //   - the course must have been opened first (409 not_opened);
 //   - the enrolment must be the learner's, the course part of that formation
 //     (checked by the caller, and again by the composite foreign keys).
-export async function completeCourse(enrollment, course, courses) {
+export async function completeCourse(enrollment, course, { user, formation }) {
+  const courses = formation.courses;
   return withEnrollmentLock(enrollment.id, async (tx) => {
     const row = await tx.courseProgress.findUnique({
       where: { enrollmentId_courseId: { enrollmentId: enrollment.id, courseId: course.id } },
@@ -77,16 +106,30 @@ export async function completeCourse(enrollment, course, courses) {
         data: { status: PROGRESS_STATUS.COMPLETED, completedAt: new Date() },
       });
     }
-    // Keeps the original completion date if the enrolment was already completed.
+    // An already completed enrolment stays completed (e.g. an admin added a required course later).
     const before = await tx.enrollment.findUnique({ where: { id: enrollment.id } });
-    if (before.status === ENROLLMENT_STATUS.COMPLETED) return;
-    await syncEnrollmentStatus(tx, enrollment.id, courses);
+    if (before.status !== ENROLLMENT_STATUS.COMPLETED) await syncEnrollmentStatus(tx, enrollment.id, courses);
+    await issueCertificateIfEligible(tx, { user, formation, enrollmentId: enrollment.id });
+  });
+}
+
+// "Get my certificate": for a learner who completed the formation but has no
+// certificate yet (e.g. the admin switched certification on afterwards).
+// Same rules as automatic issuing: 409 with a reason when they are not met.
+export async function claimCertificate(enrollment, { user, formation }) {
+  return withEnrollmentLock(enrollment.id, async (tx) => {
+    const result = await issueCertificateIfEligible(tx, { user, formation, enrollmentId: enrollment.id });
+    if (!result.certification) {
+      throw new HttpError(409, 'The conditions to get a certificate are not met', { reason: result.reason });
+    }
+    return result;
   });
 }
 
 // Undoes a validation ("I clicked by mistake"). Once a certificate exists the
 // learner cannot un-complete anything: the certificate stays valid and consistent.
-export async function reopenCourse(enrollment, course, courses) {
+export async function reopenCourse(enrollment, course, { formation }) {
+  const courses = formation.courses;
   return withEnrollmentLock(enrollment.id, async (tx) => {
     const certification = await tx.certification.findUnique({ where: { enrollmentId: enrollment.id } });
     if (certification) {

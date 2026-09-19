@@ -19,10 +19,14 @@ export function createApp() {
       credentials: true,
     })
   );
+  // Articles and lessons can be long (validation allows 200 000 characters, up to
+  // 3 bytes each): the administration accepts 1 MB, everything else keeps the
+  // 100 kB default so a public route cannot be fed huge bodies.
+  app.use('/api/admin', express.json({ limit: '1mb' }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
-  app.use(morgan(env.isProduction ? 'combined' : 'dev'));
+  if (env.logRequests) app.use(morgan(env.isProduction ? 'combined' : 'dev'));
 
   app.use('/api', routes);
 

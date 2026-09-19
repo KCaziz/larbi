@@ -1,66 +1,15 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { GraduationCap, ImageOff, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { GraduationCap, ImageOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { api, errorKey } from '../../../lib/api.js';
 import { formatDate } from '../../../lib/format.js';
 import Button from '../../../components/ui/Button.jsx';
-import ErrorState from '../../../components/ui/ErrorState.jsx';
-import LoadingState from '../../../components/ui/LoadingState.jsx';
-import ConfirmDialog from '../../../components/cms/ConfirmDialog.jsx';
-import DataTable from '../../../components/cms/DataTable.jsx';
-import EmptyState from '../../../components/cms/EmptyState.jsx';
-import Field from '../../../components/cms/Field.jsx';
-import PageToolbar from '../../../components/cms/PageToolbar.jsx';
+import ContentList from '../../../components/cms/ContentList.jsx';
 import StatusBadge from '../../../components/cms/StatusBadge.jsx';
 
+// List of formations for the administrator. The list / create logic is the
+// shared CMS "content list" (also used by the articles).
 export default function FormationsListPage() {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-  const [state, setState] = useState({ status: 'loading', formations: [] });
-  const [attempt, setAttempt] = useState(0);
-  const [creating, setCreating] = useState(false);
-  const [title, setTitle] = useState('');
-  const [createError, setCreateError] = useState(null);
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    api
-      .get('/admin/formations', { signal: controller.signal })
-      .then((data) => setState({ status: 'ready', formations: data.formations }))
-      .catch((err) => {
-        if (err.name !== 'AbortError') setState({ status: 'error', formations: [] });
-      });
-    return () => controller.abort();
-  }, [attempt]);
-
-  const retry = useCallback(() => {
-    setState({ status: 'loading', formations: [] });
-    setAttempt((n) => n + 1);
-  }, []);
-
-  const openDialog = () => {
-    setTitle('');
-    setCreateError(null);
-    setCreating(true);
-  };
-
-  const create = async () => {
-    if (!title.trim()) {
-      setCreateError(t('admin.newDialog.required'));
-      return;
-    }
-    setBusy(true);
-    setCreateError(null);
-    try {
-      const { formation } = await api.post('/admin/formations', { title });
-      navigate(`/admin/formations/${formation.id}`);
-    } catch (err) {
-      setCreateError(t(errorKey(err)));
-      setBusy(false);
-    }
-  };
 
   const columns = [
     {
@@ -95,45 +44,30 @@ export default function FormationsListPage() {
   ];
 
   return (
-    <>
-      <PageToolbar title={t('admin.list.title')} subtitle={t('admin.list.subtitle')}>
-        <Button onClick={openDialog}>
-          <Plus size={16} strokeWidth={2} aria-hidden="true" />
-          {t('admin.list.new')}
-        </Button>
-      </PageToolbar>
-
-      {state.status === 'loading' && <LoadingState />}
-      {state.status === 'error' && <ErrorState message={t('admin.list.loadError')} onRetry={retry} />}
-      {state.status === 'ready' && state.formations.length === 0 && (
-        <EmptyState icon={GraduationCap} title={t('admin.list.emptyTitle')}>
-          <p>{t('admin.list.emptyBody')}</p>
-          <Button onClick={openDialog}>{t('admin.list.new')}</Button>
-        </EmptyState>
-      )}
-      {state.status === 'ready' && state.formations.length > 0 && <DataTable columns={columns} rows={state.formations} />}
-
-      <ConfirmDialog
-        open={creating}
-        title={t('admin.newDialog.title')}
-        confirmLabel={t('admin.newDialog.create')}
-        busy={busy}
-        onConfirm={create}
-        onCancel={() => !busy && setCreating(false)}
-      >
-        <p>{t('admin.newDialog.body')}</p>
-        <Field label={t('admin.newDialog.label')} htmlFor="new-formation-title" error={createError}>
-          <input
-            id="new-formation-title"
-            type="text"
-            maxLength={150}
-            value={title}
-            placeholder={t('admin.newDialog.placeholder')}
-            onChange={(event) => setTitle(event.target.value)}
-            autoFocus
-          />
-        </Field>
-      </ConfirmDialog>
-    </>
+    <ContentList
+      listPath="/admin/formations"
+      listKey="formations"
+      createPath="/admin/formations"
+      createKey="formation"
+      editPath={(f) => `/admin/formations/${f.id}`}
+      icon={GraduationCap}
+      columns={columns}
+      texts={{
+        title: t('admin.list.title'),
+        subtitle: t('admin.list.subtitle'),
+        newLabel: t('admin.list.new'),
+        emptyTitle: t('admin.list.emptyTitle'),
+        emptyBody: t('admin.list.emptyBody'),
+        loadError: t('admin.list.loadError'),
+        dialog: {
+          title: t('admin.newDialog.title'),
+          body: t('admin.newDialog.body'),
+          label: t('admin.newDialog.label'),
+          placeholder: t('admin.newDialog.placeholder'),
+          create: t('admin.newDialog.create'),
+          required: t('admin.newDialog.required'),
+        },
+      }}
+    />
   );
 }

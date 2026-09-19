@@ -7,13 +7,14 @@ const CONFIG = {
 };
 
 // "Brouillon" / "Publié" — same wording for every kind of content.
-export default function StatusBadge({ status }) {
+// "labelKey" lets a kind of content use its own wording (e.g. "Publié" for an article).
+export default function StatusBadge({ status, labelKey }) {
   const { t } = useTranslation();
   const { icon: Icon, tone } = CONFIG[status] ?? CONFIG.draft;
   return (
     <span className={`cms-badge cms-badge-${tone}`}>
       <Icon size={14} strokeWidth={2} aria-hidden="true" />
-      {t(`admin.status.${status}`)}
+      {t(labelKey ?? `admin.status.${status}`)}
     </span>
   );
 }

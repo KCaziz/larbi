@@ -22,6 +22,8 @@ export const env = {
     .split(',')
     .map((origin) => origin.trim()),
   isProduction: process.env.NODE_ENV === 'production',
+  // One access-log line per request. Off for the automated tests (LOG_REQUESTS=false).
+  logRequests: process.env.LOG_REQUESTS !== 'false' && process.env.NODE_ENV !== 'test',
   // Private storage for uploaded media. Lives OUTSIDE anything served
   // statically: files are only reachable through authorised API routes.
   storageDir: path.resolve(

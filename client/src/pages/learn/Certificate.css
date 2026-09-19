@@ -1,0 +1,315 @@
+/* Certificate pages: owner's certificate sheet, "my certificates" list and the
+   public verification page. Colours come from tokens; the sheet itself uses the
+   --paper-* tokens, which stay light in dark mode because it is a printable document. */
+@import '../../components/cms/cms.css';
+
+/* ---------- Certificate sheet ---------- */
+.certificate-wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 32px 20px 96px;
+}
+
+.certificate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.certificate-actions p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.certificate-sheet {
+  position: relative;
+  padding: 18px;
+  border: 1px solid var(--paper-line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--paper-ink);
+  box-shadow: var(--shadow-md);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.certificate-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  min-height: 520px;
+  padding: 44px 40px 36px;
+  border: 3px solid var(--paper-accent);
+  outline: 1px solid var(--paper-brass);
+  outline-offset: -10px;
+  text-align: center;
+}
+
+.certificate-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--paper-accent);
+  font-family: var(--serif);
+  font-size: 1.35rem;
+}
+
+.certificate-brand .brand-mark {
+  background: var(--paper-accent);
+  color: var(--paper);
+}
+
+.certificate-label {
+  margin: 0;
+  color: var(--paper-brass);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+[dir='rtl'] .certificate-label {
+  letter-spacing: 0;
+}
+
+.certificate-frame h1 {
+  margin: 0;
+  color: var(--paper-ink);
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
+}
+
+.certificate-small {
+  margin: 8px 0 0;
+  color: var(--paper-muted);
+  font-size: 0.95rem;
+}
+
+.certificate-holder {
+  margin: 0;
+  padding: 0 28px 8px;
+  border-bottom: 2px solid var(--paper-brass);
+  color: var(--paper-ink);
+  font-family: var(--serif);
+  font-size: clamp(1.7rem, 4.4vw, 2.7rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.certificate-formation {
+  margin: 0;
+  color: var(--paper-ink);
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  overflow-wrap: anywhere;
+}
+
+.certificate-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 22px;
+  color: var(--paper-muted);
+  font-size: 0.88rem;
+}
+
+.certificate-footer > div {
+  flex: 1 1 220px;
+}
+
+.certificate-footer > div:first-child {
+  text-align: start;
+}
+
+.certificate-footer > div:last-child {
+  text-align: end;
+}
+
+.certificate-footer p {
+  margin: 0 0 4px;
+}
+
+.certificate-number {
+  color: var(--paper-ink);
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.certificate-verify-url {
+  overflow-wrap: anywhere;
+}
+
+.certificate-seal {
+  display: grid;
+  flex: 0 0 auto !important;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border: 2px solid var(--paper-brass);
+  border-radius: 50%;
+  color: var(--paper-brass);
+}
+
+/* ---------- "My certificates" list ---------- */
+.certificate-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 20px;
+}
+
+.certificate-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--brass);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.certificate-card h3 {
+  margin: 0;
+}
+
+.certificate-card p {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.certificate-card .btn {
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+/* ---------- Public verification ---------- */
+.verify-layout {
+  display: grid;
+  gap: 28px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.verify-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.verify-form .form-field {
+  flex: 1 1 260px;
+}
+
+.verify-result {
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--green);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.verify-result.is-unknown {
+  border-top-color: var(--brass);
+}
+
+.verify-result h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  font-size: 1.4rem;
+}
+
+.verify-result.is-valid h2 svg {
+  color: var(--green);
+}
+
+.verify-result.is-unknown h2 svg {
+  color: var(--brass);
+}
+
+.verify-result > p {
+  margin: 0 0 18px;
+}
+
+.verify-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 10px 22px;
+  margin: 0 0 18px;
+}
+
+.verify-facts dt {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.verify-facts dd {
+  margin: 0;
+  color: var(--text-h);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.verify-note {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 560px) {
+  .certificate-frame {
+    padding: 32px 18px 26px;
+  }
+
+  .verify-facts {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .verify-facts dd {
+    margin-bottom: 10px;
+  }
+}
+
+/* ---------- Print: the sheet alone, on paper ---------- */
+@page {
+  size: A4 landscape;
+  margin: 10mm;
+}
+
+@media print {
+  .site-header,
+  .site-footer,
+  .certificate-actions {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: var(--paper) !important;
+  }
+
+  .certificate-wrap {
+    max-width: none;
+    padding: 0;
+  }
+
+  .certificate-sheet {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .certificate-frame {
+    min-height: 168mm;
+  }
+}

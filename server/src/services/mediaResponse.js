@@ -21,7 +21,12 @@ export function sendStoredMedia(res, media, { cache = 'private, no-store' } = {}
       },
     },
     (err) => {
-      if (err && !res.headersSent) res.status(404).json({ error: { message: 'File not found' } });
+      if (!err || res.headersSent) return;
+      // An impossible Range is the client's mistake (416 + the real size), not a missing file.
+      if (err.status === 416) {
+        return res.status(416).set(err.headers ?? {}).json({ error: { message: 'Range not satisfiable' } });
+      }
+      res.status(404).json({ error: { message: 'File not found' } });
     },
   );
 }

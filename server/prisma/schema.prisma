@@ -42,6 +42,9 @@ model User {
   mediaUploaded     Media[]
   enrollments       Enrollment[]
 
+  // Blog (P3-01)
+  articlesAuthored Article[]
+
   @@map("users")
 }
 
@@ -173,7 +176,14 @@ model Media {
 
   coverOf Formation? @relation("FormationCover")
 
+  // Blog (P3-01): a file attached to an article, or the cover of an article.
+  // A file belongs to at most one lesson OR one article (CHECK in the migration).
+  articleId      String?
+  article        Article? @relation("ArticleMedia", fields: [articleId], references: [id], onDelete: Cascade)
+  articleCoverOf Article? @relation("ArticleCover")
+
   @@index([courseId])
+  @@index([articleId])
   @@map("media")
 }
 
@@ -235,9 +245,93 @@ model Certification {
   enrollmentId      String     @unique
   enrollment        Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
 
-  holderName     String
-  formationTitle String
-  issuedAt       DateTime @default(now())
+  holderName         String
+  formationTitle     String
+  // Name of the certification as defined by the admin when it was issued
+  // (nullable: falls back to the formation title when the admin left it empty).
+  certificationTitle String?
+  issuedAt           DateTime @default(now())
 
   @@map("certifications")
+}
+
+// ---------------------------------------------------------------------------
+// Blog (P3-01)
+//
+// Same conventions as E-Learning: string status guarded by CHECK constraints
+// (see the blog_model migration), files live in the shared private Media store,
+// the author is a User whose deletion never deletes the article.
+// ---------------------------------------------------------------------------
+
+model ArticleCategory {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  articles Article[]
+
+  @@map("article_categories")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  articles ArticleTag[]
+
+  @@map("tags")
+}
+
+// One blog article. Only the sanitised HTML "body" is stored for reading;
+// "bodyText" is its plain-text copy, kept in sync by the application, used for
+// search and reading time (parsing HTML on every list request would be wasteful).
+model Article {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  title       String
+  // Short summary shown on cards and used as the default page description.
+  excerpt     String    @default("")
+  body        String?
+  bodyText    String    @default("")
+  // "draft" | "published". Only published articles are public.
+  status      String    @default("draft")
+  publishedAt DateTime?
+
+  categoryId String?
+  category   ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  coverImageId String? @unique
+  coverImage   Media?  @relation("ArticleCover", fields: [coverImageId], references: [id], onDelete: SetNull)
+
+  // Deleting the author's account (right to erasure) keeps the article.
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  // SEO: both optional, the page falls back to the title / excerpt.
+  metaTitle       String?
+  metaDescription String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tags  ArticleTag[]
+  media Media[]      @relation("ArticleMedia")
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+  @@map("articles")
+}
+
+model ArticleTag {
+  articleId String
+  tagId     String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@index([tagId])
+  @@map("article_tags")
 }

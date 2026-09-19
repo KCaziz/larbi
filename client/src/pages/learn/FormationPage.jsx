@@ -18,6 +18,8 @@ export default function FormationPage() {
   const { status, data, error, reload, setData } = useApi(`/learn/formations/${slug}`);
   const [enrolling, setEnrolling] = useState(false);
   const [enrollError, setEnrollError] = useState(null);
+  const [claiming, setClaiming] = useState(false);
+  const [claimError, setClaimError] = useState('');
 
   if (status === 'loading') return <LoadingState />;
   if (status === 'error') {
@@ -46,6 +48,27 @@ export default function FormationPage() {
       setEnrollError(t(errorKey(err, { 403: 'learn.detail.premiumBody' })));
     } finally {
       setEnrolling(false);
+    }
+  };
+
+  // Normally the certificate arrives by itself with the last required course; this
+  // covers a learner who finished before the certification was switched on.
+  const canClaim =
+    enrollment?.status === 'completed' &&
+    enrollment.progress.requiredRemaining === 0 &&
+    f.accessible &&
+    !enrollment.certification;
+
+  const claim = async () => {
+    setClaiming(true);
+    setClaimError('');
+    try {
+      await api.post(`/learn/formations/${slug}/certificate`);
+      setData(await api.get(`/learn/formations/${slug}`));
+    } catch {
+      setClaimError(t('learn.certification.claimError'));
+    } finally {
+      setClaiming(false);
     }
   };
 
@@ -178,12 +201,30 @@ export default function FormationPage() {
                 {f.certification.description && <p>{f.certification.description}</p>}
                 <p className="cms-muted">{t('learn.certification.rule')}</p>
                 {enrollment?.certification ? (
-                  <p className="cms-inline-message ok">
-                    {t('learn.certification.earned', {
-                      number: enrollment.certification.certificateNumber,
-                      date: formatDate(i18n.language, enrollment.certification.issuedAt),
-                    })}
-                  </p>
+                  <>
+                    <p className="cms-inline-message ok">
+                      {t('learn.certification.earned', {
+                        number: enrollment.certification.certificateNumber,
+                        date: formatDate(i18n.language, enrollment.certification.issuedAt),
+                      })}
+                    </p>
+                    <Button to={`/catalogue/${slug}/certificat`} variant="secondary">
+                      <Award size={16} strokeWidth={1.9} aria-hidden="true" />
+                      {t('learn.certification.view')}
+                    </Button>
+                  </>
+                ) : canClaim ? (
+                  <>
+                    <p className="cms-inline-message ok">{t('learn.certification.claimReady')}</p>
+                    {claimError && (
+                      <p className="cms-inline-message error" role="alert">
+                        {claimError}
+                      </p>
+                    )}
+                    <Button onClick={claim} disabled={claiming}>
+                      {claiming ? t('learn.certification.claiming') : t('learn.certification.claim')}
+                    </Button>
+                  </>
                 ) : (
                   enrollment && (
                     <p className="cms-muted">

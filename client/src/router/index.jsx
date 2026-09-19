@@ -50,6 +50,9 @@ export const router = createBrowserRouter([
       { path: 'connexion', element: <LoginPage /> },
       { path: 'inscription', element: <RegisterPage /> },
       { path: 'mot-de-passe-oublie', element: <ForgotPasswordPage /> },
+      // Public: anyone holding a certificate number can check it.
+      { path: 'verification', lazy: lazyPage(() => import('../pages/certificates/VerifyCertificatePage.jsx')) },
+      { path: 'verification/:number', lazy: lazyPage(() => import('../pages/certificates/VerifyCertificatePage.jsx')) },
       {
         // Everything below needs a session (guard = convenience; the API re-checks).
         element: <RequireAuth />,
@@ -62,6 +65,10 @@ export const router = createBrowserRouter([
             lazy: lazyPage(() => import('../pages/learn/CoursePage.jsx')),
           },
           {
+            path: 'catalogue/:slug/certificat',
+            lazy: lazyPage(() => import('../pages/learn/CertificatePage.jsx')),
+          },
+          {
             path: 'compte',
             element: <AccountLayout />,
             children: [
@@ -69,6 +76,7 @@ export const router = createBrowserRouter([
               { path: 'profil', element: <ProfilePage /> },
               { path: 'tableau-de-bord', element: <DashboardPage /> },
               { path: 'formations', lazy: lazyPage(() => import('../pages/account/MyFormationsPage.jsx')) },
+              { path: 'certificats', lazy: lazyPage(() => import('../pages/account/MyCertificatesPage.jsx')) },
               { path: 'type', element: <AccountTypePage /> },
               { path: 'premium', element: <PremiumAccessPage /> },
             ],
@@ -88,6 +96,14 @@ export const router = createBrowserRouter([
                   {
                     path: 'formations/:id',
                     lazy: lazyPage(() => import('../pages/admin/formations/FormationEditorPage.jsx')),
+                  },
+                  {
+                    path: 'articles',
+                    lazy: lazyPage(() => import('../pages/admin/articles/ArticlesListPage.jsx')),
+                  },
+                  {
+                    path: 'articles/:id',
+                    lazy: lazyPage(() => import('../pages/admin/articles/ArticleEditorPage.jsx')),
                   },
                 ],
               },

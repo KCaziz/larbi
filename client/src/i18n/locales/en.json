@@ -28,7 +28,8 @@
     "main": "Main navigation",
     "account": "My account",
     "logout": "Log out",
-    "admin": "Administration"
+    "admin": "Administration",
+    "verifyCertificate": "Verify a certificate"
   },
   "footer": {
     "copyright": "© {{year}} {{brand}}. All rights reserved.",
@@ -280,15 +281,39 @@
   },
   "blogList": {
     "title": "Blog",
-    "intro": "Publicly accessible articles and tutorials, with some premium content based on your profile.",
-    "notice": "No articles have been published yet: the CMS and the real article list arrive in Phase 3 (tasks P3-01 to P3-03).",
-    "emptyTitle": "No articles yet"
+    "intro": "Articles and advice for freelancers and businesses.",
+    "searchLabel": "Search articles",
+    "searchPlaceholder": "Search articles…",
+    "searchButton": "Search",
+    "clear": "Clear filters",
+    "categories": "Categories",
+    "tags": "Keywords",
+    "resultCount_one": "{{count}} article",
+    "resultCount_other": "{{count}} articles",
+    "emptyTitle": "No articles yet",
+    "emptyBody": "The first articles are coming soon.",
+    "noResultsTitle": "No article matches",
+    "noResultsBody": "Try other words or remove a filter.",
+    "loadError": "The articles could not be loaded.",
+    "readingTime": "{{count}} min read",
+    "pagination": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{page}} of {{pages}}"
   },
   "article": {
     "label": "Article",
-    "notFoundTitle": "\"{{slug}}\" is not available yet",
-    "notice": "Reading real articles will be available once the blog's CMS is delivered (Phase 3, tasks P3-01 to P3-03).",
-    "back": "Back to the blog"
+    "back": "Back to the blog",
+    "notFoundTitle": "Article not found",
+    "notFoundBody": "This article does not exist or is no longer published.",
+    "loadError": "This article could not be loaded.",
+    "by": "By {{name}}",
+    "publishedOn": "Published on {{date}}",
+    "related": "Keep reading",
+    "files": "Article files",
+    "download": "Download",
+    "videoLabel": "Video: {{name}}",
+    "tagsLabel": "Keywords"
   },
   "legal": {
     "title": "Legal notice",
@@ -374,7 +399,8 @@
       "dashboard": "Dashboard",
       "type": "Account type",
       "premium": "Premium content",
-      "formations": "My courses"
+      "formations": "My courses",
+      "certificates": "Certificates"
     },
     "profile": {
       "title": "Profile",
@@ -446,7 +472,8 @@
   },
   "admin": {
     "nav": {
-      "formations": "Courses"
+      "formations": "Courses",
+      "articles": "Articles"
     },
     "shell": {
       "title": "Administration",
@@ -632,6 +659,115 @@
       "linkPrompt": "Link address (leave empty to remove the link)",
       "undo": "Undo",
       "redo": "Redo"
+    },
+    "tagInput": {
+      "remove": "Remove the keyword {{tag}}",
+      "placeholder": "Add a keyword, then press Enter",
+      "limit": "{{count}} keywords maximum"
+    },
+    "articles": {
+      "status": {
+        "draft": "Draft",
+        "published": "Published"
+      },
+      "list": {
+        "title": "Articles",
+        "subtitle": "Write and publish the blog articles.",
+        "new": "New article",
+        "emptyTitle": "No articles yet",
+        "emptyBody": "Write your first article: a title is enough to start.",
+        "loadError": "The articles could not be loaded.",
+        "uncategorized": "No category",
+        "columns": {
+          "article": "Article",
+          "status": "Status",
+          "category": "Category",
+          "author": "Author",
+          "updated": "Modified on"
+        }
+      },
+      "newDialog": {
+        "title": "New article",
+        "body": "Give your article a title. You can then write it step by step.",
+        "label": "Article title",
+        "placeholder": "E.g. 5 tips for better invoicing",
+        "create": "Create and continue",
+        "required": "The title is required."
+      },
+      "editor": {
+        "back": "Back to the articles",
+        "untitled": "Untitled article",
+        "loadError": "This article could not be loaded.",
+        "notFound": "This article does not exist or was deleted."
+      },
+      "steps": {
+        "label": "Article writing steps",
+        "content": "Content",
+        "media": "Images and media",
+        "organize": "Organisation",
+        "preview": "Preview",
+        "publish": "Publication"
+      },
+      "content": {
+        "title": "Article title",
+        "titleHint": "The title shown at the top of the article and in the blog list.",
+        "titleRequired": "The title is required.",
+        "excerpt": "Summary",
+        "excerptHint": "Two or three sentences that make people want to read. Shown in the blog list.",
+        "body": "Article text",
+        "bodyHint": "Write your article. Use the buttons to format it (bold, headings, lists, links)."
+      },
+      "media": {
+        "cover": "Cover image",
+        "coverHint": "JPG, PNG or WebP, 5 MB maximum. It illustrates the article in the blog list.",
+        "files": "Images, videos and documents",
+        "filesHint": "These files are shown under the article text. They become public as soon as the article is published."
+      },
+      "organize": {
+        "tags": "Keywords",
+        "tagsHint": "A few words describing the topic (10 maximum). They help people find the article.",
+        "seoTitle": "Search engines (optional)",
+        "seoIntro": "What search engines display. If you leave these empty, the title and the summary of the article are used.",
+        "metaTitle": "Title for search engines",
+        "metaTitleHint": "70 characters maximum.",
+        "metaDescription": "Description for search engines",
+        "metaDescriptionHint": "170 characters maximum."
+      },
+      "preview": {
+        "intro": "This is the article as visitors will see it.",
+        "unsaved": "The preview shows your unsaved changes."
+      },
+      "readiness": {
+        "title": "Give the article a title",
+        "excerpt": "Write a summary",
+        "content": "Write the article text",
+        "cover": "Add a cover image"
+      },
+      "publish": {
+        "title": "Publication",
+        "intro": "Check that everything is ready. A published article is visible to every visitor of the blog.",
+        "checklist": "To do before publishing",
+        "allDone": "Everything is ready: you can publish.",
+        "statusDraft": "This article is a draft: it is not visible on the blog.",
+        "statusPublished": "This article has been published since {{date}}.",
+        "publish": "Publish the article",
+        "unpublish": "Remove from publication",
+        "unpublishHint": "The article disappears from the blog immediately; you can publish it again later.",
+        "published": "Article published.",
+        "unpublished": "Article removed from publication.",
+        "notReady": "Some steps are not finished: check the list above.",
+        "unsavedFirst": "Save your changes before publishing.",
+        "viewOnBlog": "View on the blog"
+      },
+      "danger": {
+        "title": "Delete the article",
+        "body": "This is permanent: the article and its files will be deleted.",
+        "button": "Delete this article",
+        "confirmTitle": "Delete this article permanently?",
+        "confirmBody": "\"{{title}}\" and its files will be deleted. This cannot be undone.",
+        "confirm": "Yes, delete",
+        "blocked": "This article cannot be deleted right now."
+      }
     }
   },
   "learn": {
@@ -650,7 +786,8 @@
     "card": {
       "premium": "Premium",
       "completed": "Completed",
-      "locked": "Reserved for premium accounts"
+      "locked": "Reserved for premium accounts",
+      "certified": "Certificate earned"
     },
     "progress": {
       "text": "{{completed}} of {{total}} lessons completed",
@@ -684,7 +821,12 @@
       "rule": "It is issued automatically once every required lesson is completed.",
       "disabled": "This course does not issue a certificate.",
       "remaining": "Required lessons remaining: {{count}}",
-      "earned": "Certificate earned: no. {{number}}, issued on {{date}}."
+      "earned": "Certificate earned: no. {{number}}, issued on {{date}}.",
+      "view": "View my certificate",
+      "claim": "Get my certificate",
+      "claiming": "Issuing…",
+      "claimReady": "You have completed all the required lessons: your certificate can be issued.",
+      "claimError": "The certificate cannot be issued right now."
     },
     "course": {
       "breadcrumb": "Breadcrumb",
@@ -704,7 +846,9 @@
       "progressTitle": "Your progress",
       "markDone": "Mark as completed",
       "undo": "Undo completion",
-      "formationDone": "Well done, you have completed every required course of this formation."
+      "formationDone": "Well done, you have completed every required course of this formation.",
+      "certificateReady": "Your certificate is available.",
+      "lockedByCertificate": "The certificate has been issued: this lesson can no longer be marked as not completed."
     },
     "mine": {
       "title": "My courses",
@@ -715,5 +859,53 @@
     },
     "lessonCount_one": "{{count}} lesson",
     "lessonCount_other": "{{count}} lessons"
+  },
+  "certificate": {
+    "title": "My certificate",
+    "back": "Back to the course",
+    "loadError": "This certificate could not be loaded.",
+    "notFound": "You have not earned a certificate for this course yet.",
+    "print": "Print or save as PDF",
+    "printHint": "In the print window, choose “Save as PDF” to keep a copy.",
+    "sheet": {
+      "label": "Certificate",
+      "awardedTo": "Awarded to",
+      "body": "for completing all the required lessons of the course",
+      "issuedOn": "Issued on {{date}}",
+      "number": "Number",
+      "verify": "Authenticity can be checked at:"
+    },
+    "mine": {
+      "title": "My certificates",
+      "intro": "The certificates you earned by completing your courses.",
+      "empty": "You do not have any certificate yet.",
+      "emptyHint": "Complete all the required lessons of a course to earn yours.",
+      "browse": "Browse courses",
+      "loadError": "Your certificates could not be loaded.",
+      "issuedOn": "Issued on {{date}}",
+      "view": "View certificate"
+    }
+  },
+  "verify": {
+    "title": "Verify a certificate",
+    "intro": "Enter the number printed on the certificate to check that it is genuine.",
+    "label": "Certificate number",
+    "placeholder": "LARBI-XXXX-XXXX-XXXX",
+    "submit": "Verify",
+    "invalid": "This number does not have the right format. Example: LARBI-ABCD-2345-WXYZ.",
+    "checking": "Checking…",
+    "valid": "Genuine certificate",
+    "validText": "This certificate was issued by the platform.",
+    "holder": "Holder",
+    "certification": "Certification",
+    "formation": "Course",
+    "issuedOn": "Issued on",
+    "number": "Number",
+    "unknown": "No certificate matches this number.",
+    "unknownHint": "Check the number you typed. A certificate ceases to exist if its holder deletes their account.",
+    "tooMany": "Too many checks in a short time. Try again in a minute.",
+    "loadError": "Verification is temporarily unavailable.",
+    "another": "Verify another number",
+    "privacy": "Only the holder's name, the course and the date are shown."
   }
 }

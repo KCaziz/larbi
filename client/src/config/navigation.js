@@ -18,6 +18,7 @@ export const footerColumns = [
       { labelKey: 'nav.formations', to: '/formations' },
       { labelKey: 'nav.tools', to: '/outils' },
       { labelKey: 'nav.blog', to: '/blog' },
+      { labelKey: 'nav.verifyCertificate', to: '/verification' },
     ],
   },
   {

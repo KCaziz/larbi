@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import DOMPurify from 'dompurify';
+import './RichContent.css';
 
 // Shows rich text written in the CMS (lessons now, articles later).
 // The server already sanitises on save; this second pass, with the SAME

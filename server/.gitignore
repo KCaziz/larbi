@@ -6,3 +6,6 @@ node_modules
 
 # Private uploaded media (never versioned, never served statically)
 /storage
+
+# Screenshots written by the end-to-end tests (debugging aid)
+/tests/e2e/screenshots
