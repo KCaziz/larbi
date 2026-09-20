@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Clock, Download, FileText, Tag, User } from 'lucide-react';
+import { Clock, Download, FileText, Lock, Tag, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../../lib/format.js';
 import RichContent from '../ui/RichContent.jsx';
+import ArticleLock from './ArticleLock.jsx';
 import './Blog.css';
 
 function formatSize(bytes) {
@@ -20,7 +21,15 @@ export default function ArticleView({ article, linkTags = true }) {
   return (
     <article className="blog-article">
       <header className="blog-article-head">
-        {article.category && <span className="blog-chip">{article.category.name}</span>}
+        <div className="blog-chips">
+          {article.category && <span className="blog-chip">{article.category.name}</span>}
+          {article.requiredAccessLevel === 'premium' && (
+            <span className="blog-chip blog-chip-premium">
+              <Lock size={12} strokeWidth={2} aria-hidden="true" />
+              {t('blogList.premiumBadge')}
+            </span>
+          )}
+        </div>
         <h1>{article.title}</h1>
         {article.excerpt && <p className="lead">{article.excerpt}</p>}
         <p className="blog-article-meta">
@@ -43,6 +52,9 @@ export default function ArticleView({ article, linkTags = true }) {
       </header>
 
       {article.coverUrl && <img className="blog-article-cover" src={article.coverUrl} alt="" />}
+
+      {/* `locked` is the server's decision: for a locked reader the text and files were never sent. */}
+      {article.locked && <ArticleLock reason={article.lockReason} />}
 
       {article.body ? <RichContent html={article.body} /> : null}
 

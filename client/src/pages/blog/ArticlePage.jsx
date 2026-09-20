@@ -6,6 +6,7 @@ import { useApi } from '../../lib/useApi.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import ArticleCard from '../../components/blog/ArticleCard.jsx';
 import ArticleView from '../../components/blog/ArticleView.jsx';
+import NewsletterForm from '../../components/newsletter/NewsletterForm.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
@@ -59,6 +60,7 @@ export default function ArticlePage() {
           </div>
         </section>
       )}
+      <NewsletterForm />
     </div>
   );
 }

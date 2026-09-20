@@ -7,7 +7,7 @@ import { boot } from '../helpers/server.js';
 // Abuse limits. The application reads its limits when it starts, so this file
 // boots a server with LOW limits (see `extra`) and checks each one.
 
-const LIMITS = { AUTH_RATE_LIMIT: '5', CONTACT_RATE_LIMIT: '3', CERTIFICATE_RATE_LIMIT: '4', MEDIA_RATE_LIMIT: '8', MEDIA_DENIED_LIMIT: '4', PUBLIC_READ_LIMIT: '6' };
+const LIMITS = { AUTH_RATE_LIMIT: '5', CONTACT_RATE_LIMIT: '3', CERTIFICATE_RATE_LIMIT: '4', MEDIA_RATE_LIMIT: '8', MEDIA_DENIED_LIMIT: '4', PUBLIC_READ_LIMIT: '6', NEWSLETTER_RATE_LIMIT: '3', NEWSLETTER_LINK_RATE_LIMIT: '3' };
 
 let t;
 let log;
@@ -110,5 +110,18 @@ describe('protected files', () => {
     assert.deepEqual(blocked.map((e) => e.userId), [B.id], 'traced once per lock-out, not once per blocked request');
     const raw = JSON.stringify(events);
     assert.doesNotMatch(raw, /@test\.local|storage|\.png|originalName/);
+  });
+});
+
+describe('newsletter', () => {
+  test('the subscription form is limited per IP (mail bombing): 3 allowed, then 429', async () => {
+    const seq = await statuses(5, (i) => t.request('POST', '/newsletter/subscribe', { json: { email: `spam${i}@example.com` } }));
+    assert.deepEqual(seq, [202, 202, 202, 429, 429]);
+    assert.equal(await t.prisma.newsletterSubscriber.count(), 3, 'refused requests store nothing');
+  });
+
+  test('confirmation / unsubscription links are limited too', async () => {
+    const seq = await statuses(5, () => t.request('POST', '/newsletter/confirm', { json: { token: 'x'.repeat(40) } }));
+    assert.deepEqual(seq, [400, 400, 400, 429, 429]);
   });
 });

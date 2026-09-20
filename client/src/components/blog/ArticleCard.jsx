@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Clock, ImageOff } from 'lucide-react';
+import { Clock, ImageOff, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../../lib/format.js';
 import './Blog.css';
@@ -15,7 +15,15 @@ export default function ArticleCard({ article }) {
         {article.coverUrl ? <img src={article.coverUrl} alt="" loading="lazy" /> : <ImageOff size={28} strokeWidth={1.4} />}
       </Link>
       <div className="blog-card-body">
-        {article.category && <span className="blog-chip">{article.category.name}</span>}
+        <div className="blog-chips">
+          {article.category && <span className="blog-chip">{article.category.name}</span>}
+          {article.requiredAccessLevel === 'premium' && (
+            <span className="blog-chip blog-chip-premium">
+              <Lock size={12} strokeWidth={2} aria-hidden="true" />
+              {t('blogList.premiumBadge')}
+            </span>
+          )}
+        </div>
         <h3>
           <Link to={href}>{article.title}</Link>
         </h3>

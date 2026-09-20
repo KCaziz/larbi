@@ -13,6 +13,7 @@ import FormationsPresentationPage from '../pages/formations/FormationsPresentati
 import ToolsPresentationPage from '../pages/outils/ToolsPresentationPage.jsx';
 import BlogListPage from '../pages/blog/BlogListPage.jsx';
 import ArticlePage from '../pages/blog/ArticlePage.jsx';
+import NewsletterLinkPage from '../pages/newsletter/NewsletterLinkPage.jsx';
 import LegalNoticePage from '../pages/legal/LegalNoticePage.jsx';
 import PrivacyPolicyPage from '../pages/legal/PrivacyPolicyPage.jsx';
 import LoginPage from '../pages/auth/LoginPage.jsx';
@@ -40,6 +41,8 @@ export const router = createBrowserRouter([
       { path: 'outils', element: <ToolsPresentationPage /> },
       { path: 'blog', element: <BlogListPage /> },
       { path: 'blog/:slug', element: <ArticlePage /> },
+      { path: 'newsletter/confirmer', element: <NewsletterLinkPage mode="confirm" /> },
+      { path: 'newsletter/desinscription', element: <NewsletterLinkPage mode="unsubscribe" /> },
       { path: 'a-propos', element: <AboutPage /> },
       { path: 'services', element: <ServicesPage /> },
       { path: 'faq', element: <FaqPage /> },
@@ -104,6 +107,10 @@ export const router = createBrowserRouter([
                   {
                     path: 'articles/:id',
                     lazy: lazyPage(() => import('../pages/admin/articles/ArticleEditorPage.jsx')),
+                  },
+                  {
+                    path: 'newsletter',
+                    lazy: lazyPage(() => import('../pages/admin/newsletter/NewsletterPage.jsx')),
                   },
                 ],
               },

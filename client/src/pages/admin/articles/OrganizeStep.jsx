@@ -6,6 +6,13 @@ import Button from '../../../components/ui/Button.jsx';
 import Field from '../../../components/cms/Field.jsx';
 import TagInput from '../../../components/cms/TagInput.jsx';
 
+// Account types an article can be aimed at (same values as the server; `key` = i18n key).
+const ACCOUNT_TYPES = [
+  { value: 'auto-entrepreneur', key: 'autoEntrepreneur' },
+  { value: 'pme', key: 'pme' },
+  { value: 'pmi', key: 'pmi' },
+];
+
 // Step 3: where the article is filed (category, keywords) and how search engines
 // present it (optional: without them the title and summary are used).
 export default function OrganizeStep({ draft, setField, categories, suggestions, onCategoryCreated }) {
@@ -73,6 +80,36 @@ export default function OrganizeStep({ draft, setField, categories, suggestions,
       <Field label={t('admin.articles.organize.tags')} htmlFor="a-tags" hint={t('admin.articles.organize.tagsHint')}>
         <TagInput id="a-tags" value={draft.tags} onChange={(tags) => setField('tags', tags)} suggestions={suggestions} describedBy="a-tags-hint" />
       </Field>
+
+      <fieldset className="cms-fieldset">
+        <legend>{t('admin.articles.organize.accessTitle')}</legend>
+        <p className="cms-muted">{t('admin.articles.organize.accessIntro')}</p>
+        <Field label={t('admin.articles.organize.level')} htmlFor="a-level" hint={t('admin.articles.organize.levelHint')}>
+          <select id="a-level" value={draft.requiredAccessLevel} onChange={(e) => setField('requiredAccessLevel', e.target.value)} aria-describedby="a-level-hint">
+            <option value="standard">{t('admin.articles.organize.levelStandard')}</option>
+            <option value="premium">{t('admin.articles.organize.levelPremium')}</option>
+          </select>
+        </Field>
+        <fieldset className="cms-checks">
+          <legend>{t('admin.articles.organize.audience')}</legend>
+          <small className="form-hint">{t('admin.articles.organize.audienceHint')}</small>
+          {ACCOUNT_TYPES.map((type) => (
+            <label key={type.value} className="cms-check">
+              <input
+                type="checkbox"
+                checked={draft.targetAccountTypes.includes(type.value)}
+                onChange={(e) =>
+                  setField(
+                    'targetAccountTypes',
+                    e.target.checked ? [...draft.targetAccountTypes, type.value] : draft.targetAccountTypes.filter((v) => v !== type.value),
+                  )
+                }
+              />
+              {t(`accountTypes.${type.key}`)}
+            </label>
+          ))}
+        </fieldset>
+      </fieldset>
 
       <fieldset className="cms-fieldset">
         <legend>{t('admin.articles.organize.seoTitle')}</legend>

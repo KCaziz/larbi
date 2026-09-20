@@ -61,6 +61,8 @@ export function applyTestEnv({ production = false, extra = {} } = {}) {
     MEDIA_RATE_LIMIT: '100000',
     MEDIA_DENIED_LIMIT: '100000',
     PUBLIC_READ_LIMIT: '100000',
+    NEWSLETTER_RATE_LIMIT: '100000',
+    NEWSLETTER_LINK_RATE_LIMIT: '100000',
     ...extra,
   });
   return process.env;

@@ -29,6 +29,14 @@ import {
   updateArticle,
 } from '../controllers/admin/articles.controller.js';
 import {
+  deleteSubscriber,
+  exportSubscribers,
+  listSubscribers,
+  previewDigest,
+} from '../controllers/admin/newsletter.controller.js';
+import { validateQuery } from '../middleware/validate.js';
+import { digestQuerySchema, subscribersQuerySchema } from '../validation/newsletter.schemas.js';
+import {
   deleteMedia,
   serveMedia,
   uploadArticleCover,
@@ -91,5 +99,11 @@ router.delete('/media/:id', asyncRoute(deleteMedia));
 // Categories
 router.get('/categories', asyncRoute(listCategories));
 router.post('/categories', validateBody(createCategorySchema), asyncRoute(createCategory));
+
+// Newsletter (P3-05)
+router.get('/newsletter/subscribers', validateQuery(subscribersQuerySchema), asyncRoute(listSubscribers));
+router.get('/newsletter/subscribers.csv', validateQuery(subscribersQuerySchema), asyncRoute(exportSubscribers));
+router.delete('/newsletter/subscribers/:id', asyncRoute(deleteSubscriber));
+router.get('/newsletter/digest', validateQuery(digestQuerySchema), asyncRoute(previewDigest));
 
 export default router;

@@ -299,7 +299,10 @@
     "pagination": "Pagination",
     "previous": "Previous",
     "next": "Next",
-    "page": "Page {{page}} of {{pages}}"
+    "page": "Page {{page}} of {{pages}}",
+    "premiumBadge": "Premium",
+    "forYou": "For your profile",
+    "forYouIntro": "Articles picked for your account type."
   },
   "article": {
     "label": "Article",
@@ -313,7 +316,15 @@
     "files": "Article files",
     "download": "Download",
     "videoLabel": "Video: {{name}}",
-    "tagsLabel": "Keywords"
+    "tagsLabel": "Keywords",
+    "lock": {
+      "title": "This article is reserved for premium accounts",
+      "loginBody": "Log in with a premium account to read the rest.",
+      "premiumBody": "Your account is on the standard level. Upgrade to premium to read this article.",
+      "login": "Log in",
+      "register": "Create an account",
+      "upgrade": "See premium access"
+    }
   },
   "legal": {
     "title": "Legal notice",
@@ -473,7 +484,8 @@
   "admin": {
     "nav": {
       "formations": "Courses",
-      "articles": "Articles"
+      "articles": "Articles",
+      "newsletter": "Newsletter"
     },
     "shell": {
       "title": "Administration",
@@ -731,7 +743,15 @@
         "metaTitle": "Title for search engines",
         "metaTitleHint": "70 characters maximum.",
         "metaDescription": "Description for search engines",
-        "metaDescriptionHint": "170 characters maximum."
+        "metaDescriptionHint": "170 characters maximum.",
+        "accessTitle": "Access and audience",
+        "accessIntro": "Choose who can read the article and which profiles it is recommended to.",
+        "level": "Who can read this article?",
+        "levelHint": "The title, summary and image stay visible to everyone: they make people want to subscribe.",
+        "levelStandard": "Everyone",
+        "levelPremium": "Premium accounts only",
+        "audience": "Recommended to",
+        "audienceHint": "Hides nothing: other profiles can still read it, it is just suggested to them less. Tick nothing to suggest it to everyone."
       },
       "preview": {
         "intro": "This is the article as visitors will see it.",
@@ -767,6 +787,54 @@
         "confirmBody": "\"{{title}}\" and its files will be deleted. This cannot be undone.",
         "confirm": "Yes, delete",
         "blocked": "This article cannot be deleted right now."
+      }
+    },
+    "newsletter": {
+      "title": "Newsletter",
+      "subtitle": "The people who signed up and the preparation of the next mailing.",
+      "tabs": {
+        "subscribers": "Subscribers",
+        "digest": "Prepare a mailing"
+      },
+      "status": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "unsubscribed": "Unsubscribed"
+      },
+      "locale": {
+        "fr": "French",
+        "en": "English",
+        "ar": "Arabic"
+      },
+      "columns": {
+        "email": "E-mail address",
+        "status": "Status",
+        "locale": "Language",
+        "since": "Since"
+      },
+      "search": "Search an address",
+      "searchButton": "Search",
+      "filterStatus": "Status",
+      "statusAll": "All",
+      "export": "Export confirmed (CSV)",
+      "delete": "Delete {{email}}",
+      "deleteShort": "Delete",
+      "deleteTitle": "Delete this subscriber?",
+      "deleteBody": "The address {{email}} will be permanently erased from the database.",
+      "deleteConfirm": "Delete",
+      "emptyTitle": "No subscribers yet",
+      "emptyBody": "People who sign up from the blog will appear here.",
+      "loadError": "Unable to load the data.",
+      "digest": {
+        "intro": "The message is built from the latest published articles, in each language. Nothing is sent from this page.",
+        "notSentYet": "Nothing is sent from this page: it is for reading the message and checking the number of recipients.",
+        "noProvider": "The e-mail sending service is not configured yet: no message can go out for now.",
+        "count": "Number of articles",
+        "language": "Language",
+        "subject": "Subject:",
+        "recipients_one": "{{count}} confirmed recipient in total.",
+        "recipients_other": "{{count}} confirmed recipients in total.",
+        "noArticles": "No published article to send."
       }
     }
   },
@@ -907,5 +975,37 @@
     "loadError": "Verification is temporarily unavailable.",
     "another": "Verify another number",
     "privacy": "Only the holder's name, the course and the date are shown."
+  },
+  "newsletter": {
+    "title": "Newsletter",
+    "intro": "Get the latest articles straight to your inbox.",
+    "emailLabel": "Your e-mail address",
+    "placeholder": "you@example.com",
+    "submit": "Subscribe",
+    "hint": "A confirmation e-mail will be sent to you. You can unsubscribe at any time.",
+    "doneTitle": "Check your inbox.",
+    "doneBody": "Click the link in the message to confirm your subscription. Without confirmation, you will receive nothing.",
+    "invalid": "Enter a valid e-mail address.",
+    "tooMany": "Too many attempts. Please try again later.",
+    "unavailable": "The newsletter is not available yet. Please come back soon.",
+    "error": "Something went wrong. Please try again.",
+    "link": {
+      "invalid": "This link is not valid or has expired.",
+      "toBlog": "Go to the blog",
+      "confirm": {
+        "title": "Confirm your subscription",
+        "body": "Click the button to confirm that you want to receive the newsletter.",
+        "button": "Confirm my subscription",
+        "doneTitle": "Subscription confirmed",
+        "doneBody": "Thank you! You will now receive the newsletter."
+      },
+      "unsubscribe": {
+        "title": "Unsubscribe",
+        "body": "Click the button to stop receiving the newsletter.",
+        "button": "Unsubscribe me",
+        "doneTitle": "You are unsubscribed",
+        "doneBody": "You will no longer receive the newsletter."
+      }
+    }
   }
 }

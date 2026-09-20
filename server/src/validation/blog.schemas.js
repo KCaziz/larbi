@@ -1,5 +1,7 @@
 import { z } from 'zod';
+import { ACCOUNT_TYPES } from '../constants/accountTypes.js';
 import { MAX_TAGS_PER_ARTICLE, BLOG_PAGE_SIZE } from '../constants/blog.js';
+import { ACCESS_LEVELS } from '../constants/roles.js';
 import { optionalText } from './cms.schemas.js';
 
 export const createArticleSchema = z.object({ title: z.string().trim().min(1).max(150) }).strict();
@@ -14,6 +16,12 @@ export const updateArticleSchema = z
     body: z.string().max(200_000).nullable(),
     categoryId: z.string().uuid().nullable(),
     tags: z.array(z.string().trim().min(1).max(40)).max(MAX_TAGS_PER_ARTICLE),
+    // Visibility by profile (P3-04).
+    requiredAccessLevel: z.enum(Object.values(ACCESS_LEVELS)),
+    targetAccountTypes: z
+      .array(z.enum(ACCOUNT_TYPES.map((t) => t.value)))
+      .max(ACCOUNT_TYPES.length)
+      .transform((types) => [...new Set(types)]),
     metaTitle: optionalText(70),
     metaDescription: optionalText(170),
   })

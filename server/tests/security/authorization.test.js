@@ -21,6 +21,10 @@ const PUBLIC = new Set([
   'GET /api/blog/categories',
   'GET /api/blog/tags',
   'GET /api/blog/media/:id',
+  'GET /api/blog/recommendations', // public: answers for anonymous visitors too (P3-04)
+  'POST /api/newsletter/subscribe', // public by nature; signed links below (P3-05)
+  'POST /api/newsletter/confirm',
+  'POST /api/newsletter/unsubscribe',
 ]);
 
 const UUID0 = '00000000-0000-4000-8000-000000000000';

@@ -29,10 +29,20 @@ export const env = {
   storageDir: path.resolve(
     process.env.STORAGE_DIR || path.join(path.dirname(fileURLToPath(import.meta.url)), '../../storage'),
   ),
+  // E-mail (newsletter confirmation, later password reset). No provider is chosen
+  // yet: "console" keeps mails in memory / prints them (development and tests only),
+  // "none" refuses to send (the default in production, so nothing is ever faked).
+  mailDriver: process.env.MAIL_DRIVER || (process.env.NODE_ENV === 'production' ? 'none' : 'console'),
+  // Public address of the website, used to build the links written in e-mails.
+  publicUrl: (process.env.PUBLIC_URL || (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',')[0]).trim().replace(/\/+$/, ''),
   maxImageBytes: Number(process.env.MAX_IMAGE_BYTES) || 5 * 1024 * 1024,
   maxDocumentBytes: Number(process.env.MAX_DOCUMENT_BYTES) || 25 * 1024 * 1024,
   maxVideoBytes: Number(process.env.MAX_VIDEO_BYTES) || 300 * 1024 * 1024,
 };
+
+if (!['console', 'none'].includes(env.mailDriver)) {
+  throw new Error('MAIL_DRIVER must be "console" or "none" (no real provider is wired yet)');
+}
 
 if (env.jwtSecret.length < 32) {
   throw new Error('JWT_SECRET must be at least 32 characters');

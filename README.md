@@ -53,6 +53,18 @@ npm run dev
 
 Application disponible sur `http://localhost:5173`.
 
+## Données de démonstration et compte administrateur
+
+```bash
+cd server
+npm run db:seed          # crée des comptes, formations, articles et abonnés de démonstration
+npm run db:seed:clean    # les supprime (seuls les enregistrements de démonstration sont touchés)
+npm run make-admin -- adresse@exemple.com          # donne le rôle administrateur à un compte existant
+npm run make-admin -- adresse@exemple.com --remove # le retire
+```
+
+Comptes créés par `db:seed` (développement uniquement, refusé si `NODE_ENV=production`) : `admin@demo.larbi.test` / `Admin-Demo-2026` (CMS sur `/admin`), `standard@demo.larbi.test` et `premium@demo.larbi.test` / `Learner-Demo-2026`. Le rôle administrateur ne peut jamais être obtenu depuis le site : il faut passer par `make-admin` (accès au serveur requis).
+
 ## Tests
 
 Les tests vivent dans `server/tests/` et utilisent l'exécuteur intégré de Node (aucune dépendance de test à installer). Ils n'utilisent **jamais** la base de développement : une base dédiée `larbi_test` (même serveur PostgreSQL, créée et migrée automatiquement) et un dossier de stockage temporaire. Le nom de la base doit finir par `_test`, sinon les tests refusent de tourner.

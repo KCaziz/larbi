@@ -299,7 +299,10 @@
     "pagination": "Pagination",
     "previous": "Précédent",
     "next": "Suivant",
-    "page": "Page {{page}} sur {{pages}}"
+    "page": "Page {{page}} sur {{pages}}",
+    "premiumBadge": "Premium",
+    "forYou": "Pour votre profil",
+    "forYouIntro": "Des articles choisis selon votre type de compte."
   },
   "article": {
     "label": "Article",
@@ -313,7 +316,15 @@
     "files": "Fichiers de l'article",
     "download": "Télécharger",
     "videoLabel": "Vidéo : {{name}}",
-    "tagsLabel": "Mots-clés"
+    "tagsLabel": "Mots-clés",
+    "lock": {
+      "title": "Cet article est réservé aux comptes premium",
+      "loginBody": "Connectez-vous avec un compte premium pour lire la suite.",
+      "premiumBody": "Votre compte est de niveau standard. Passez en premium pour lire cet article.",
+      "login": "Se connecter",
+      "register": "Créer un compte",
+      "upgrade": "Voir l'accès premium"
+    }
   },
   "legal": {
     "title": "Mentions légales",
@@ -473,7 +484,8 @@
   "admin": {
     "nav": {
       "formations": "Formations",
-      "articles": "Articles"
+      "articles": "Articles",
+      "newsletter": "Newsletter"
     },
     "shell": {
       "title": "Administration",
@@ -731,7 +743,15 @@
         "metaTitle": "Titre pour les moteurs de recherche",
         "metaTitleHint": "70 caractères maximum.",
         "metaDescription": "Description pour les moteurs de recherche",
-        "metaDescriptionHint": "170 caractères maximum."
+        "metaDescriptionHint": "170 caractères maximum.",
+        "accessTitle": "Accès et public",
+        "accessIntro": "Choisissez qui peut lire l'article et à quels profils il est recommandé.",
+        "level": "Qui peut lire cet article ?",
+        "levelHint": "Le titre, le résumé et l'image restent visibles par tous : ils donnent envie de s'abonner.",
+        "levelStandard": "Tout le monde",
+        "levelPremium": "Comptes premium uniquement",
+        "audience": "Article recommandé pour",
+        "audienceHint": "Ne cache rien : les autres profils peuvent le lire, il leur est simplement moins proposé. Ne cochez rien pour le proposer à tous."
       },
       "preview": {
         "intro": "Voici l'article tel que les visiteurs le verront.",
@@ -767,6 +787,54 @@
         "confirmBody": "« {{title}} » et ses fichiers seront supprimés. Cette action est irréversible.",
         "confirm": "Oui, supprimer",
         "blocked": "Cet article ne peut pas être supprimé pour l'instant."
+      }
+    },
+    "newsletter": {
+      "title": "Newsletter",
+      "subtitle": "Les personnes inscrites et la préparation du prochain envoi.",
+      "tabs": {
+        "subscribers": "Abonnés",
+        "digest": "Préparer un envoi"
+      },
+      "status": {
+        "pending": "En attente",
+        "confirmed": "Confirmés",
+        "unsubscribed": "Désabonnés"
+      },
+      "locale": {
+        "fr": "Français",
+        "en": "Anglais",
+        "ar": "Arabe"
+      },
+      "columns": {
+        "email": "Adresse e-mail",
+        "status": "Statut",
+        "locale": "Langue",
+        "since": "Depuis le"
+      },
+      "search": "Rechercher une adresse",
+      "searchButton": "Rechercher",
+      "filterStatus": "Statut",
+      "statusAll": "Tous",
+      "export": "Exporter les confirmés (CSV)",
+      "delete": "Supprimer {{email}}",
+      "deleteShort": "Supprimer",
+      "deleteTitle": "Supprimer cet abonné ?",
+      "deleteBody": "L'adresse {{email}} sera effacée définitivement de la base.",
+      "deleteConfirm": "Supprimer",
+      "emptyTitle": "Aucun abonné pour l'instant",
+      "emptyBody": "Les personnes qui s'inscrivent depuis le blog apparaîtront ici.",
+      "loadError": "Impossible de charger les données.",
+      "digest": {
+        "intro": "Le message est construit à partir des derniers articles publiés, dans chaque langue. Rien n'est envoyé depuis cette page.",
+        "notSentYet": "Aucun envoi n'est déclenché depuis cette page : elle sert à relire le message et à vérifier le nombre de destinataires.",
+        "noProvider": "Le service d'envoi d'e-mails n'est pas encore configuré : aucun message ne peut partir pour l'instant.",
+        "count": "Nombre d'articles",
+        "language": "Langue",
+        "subject": "Objet :",
+        "recipients_one": "{{count}} destinataire confirmé au total.",
+        "recipients_other": "{{count}} destinataires confirmés au total.",
+        "noArticles": "Aucun article publié à envoyer."
       }
     }
   },
@@ -908,5 +976,37 @@
     "loadError": "La vérification est momentanément impossible.",
     "another": "Vérifier un autre numéro",
     "privacy": "Seuls le nom du titulaire, la formation et la date sont affichés."
+  },
+  "newsletter": {
+    "title": "La newsletter",
+    "intro": "Recevez les derniers articles directement dans votre boîte mail.",
+    "emailLabel": "Votre adresse e-mail",
+    "placeholder": "vous@exemple.com",
+    "submit": "S'inscrire",
+    "hint": "Un e-mail de confirmation vous sera envoyé. Vous pouvez vous désinscrire à tout moment.",
+    "doneTitle": "Vérifiez votre boîte mail.",
+    "doneBody": "Cliquez sur le lien du message pour confirmer votre inscription. Sans confirmation, vous ne recevrez rien.",
+    "invalid": "Saisissez une adresse e-mail valide.",
+    "tooMany": "Trop de tentatives. Réessayez plus tard.",
+    "unavailable": "La newsletter n'est pas encore disponible. Revenez bientôt.",
+    "error": "Une erreur s'est produite. Réessayez.",
+    "link": {
+      "invalid": "Ce lien n'est pas valide ou a expiré.",
+      "toBlog": "Aller au blog",
+      "confirm": {
+        "title": "Confirmer votre inscription",
+        "body": "Cliquez sur le bouton pour confirmer que vous souhaitez recevoir la newsletter.",
+        "button": "Confirmer mon inscription",
+        "doneTitle": "Inscription confirmée",
+        "doneBody": "Merci ! Vous recevrez désormais la newsletter."
+      },
+      "unsubscribe": {
+        "title": "Se désabonner",
+        "body": "Cliquez sur le bouton pour ne plus recevoir la newsletter.",
+        "button": "Me désabonner",
+        "doneTitle": "Vous êtes désabonné(e)",
+        "doneBody": "Vous ne recevrez plus la newsletter."
+      }
+    }
   }
 }

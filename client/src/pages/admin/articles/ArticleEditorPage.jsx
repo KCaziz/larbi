@@ -24,6 +24,8 @@ const toDraft = (a) => ({
   body: a.body ?? '',
   categoryId: a.category?.id ?? '',
   tags: a.tags,
+  requiredAccessLevel: a.requiredAccessLevel,
+  targetAccountTypes: a.targetAccountTypes,
   metaTitle: a.metaTitle ?? '',
   metaDescription: a.metaDescription ?? '',
 });

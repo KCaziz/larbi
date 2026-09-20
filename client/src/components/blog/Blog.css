@@ -340,3 +340,41 @@ a.blog-tag:hover {
 .blog-back:hover {
   color: var(--accent);
 }
+
+/* ---------- Access by profile (P3-04) ---------- */
+.blog-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.blog-chip-premium {
+  gap: 4px;
+  background: var(--brass-bg);
+  color: var(--brass);
+}
+
+.blog-lock {
+  margin-block: 24px;
+}
+
+.blog-lock-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-block-start: 18px;
+}
+
+.blog-foryou {
+  margin-block-end: 40px;
+}
+
+.blog-foryou h2 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+}
+
+.blog-foryou > p {
+  margin: 0 0 18px;
+}

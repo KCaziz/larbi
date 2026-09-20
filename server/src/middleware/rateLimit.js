@@ -19,6 +19,25 @@ export const contactLimiter = rateLimit({
   message: { error: { message: 'Too many messages, please try again later' } },
 });
 
+// Newsletter subscription: unauthenticated, writes to the DB and sends an e-mail to an
+// address chosen by the caller, so it is the most abusable public route (mail bombing).
+export const newsletterLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: Number(process.env.NEWSLETTER_RATE_LIMIT) || 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: { message: 'Too many attempts, please try again later' } },
+});
+
+// Confirmation / unsubscription links: cheap, signed, but still public.
+export const newsletterLinkLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: Number(process.env.NEWSLETTER_LINK_RATE_LIMIT) || 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: { message: 'Too many requests, please try again later' } },
+});
+
 // Public certificate verification: the numbers are unguessable (60 bits), the
 // limit protects the database from being hammered by scripts.
 export const certificateVerifyLimiter = rateLimit({

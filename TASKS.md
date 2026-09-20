@@ -1019,7 +1019,7 @@ Décisions :
 - Limites : Chrome uniquement ; pas de test au lecteur d'écran ; vidéos de test minuscules.
 
 ### P3-04 — Recommandation / visibilité selon profil
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P1-06`, `P3-03`
 - Durée cible : 1 jour
@@ -1030,8 +1030,23 @@ Tâches :
 - Masquer ou verrouiller les contenus nécessitant une autorisation.
 - Ne pas se limiter à un contrôle frontend : vérifier les permissions côté serveur.
 
+Réalisé (migration additive `p3_profile_and_newsletter` : `articles.requiredAccessLevel` avec `CHECK`, `articles.targetAccountTypes` ; `prisma generate` fait) :
+- **Contenus premium** : chaque article porte un niveau d'accès (`standard` par défaut, `premium`). Règle appliquée **par le serveur** (`services/blogAccess.js`, une seule source de vérité) : standard → tout le monde ; premium → compte premium (un administrateur lit toujours). Le niveau est relu en base à chaque requête : perdre le premium retire l'accès immédiatement, avec la même session.
+- **Verrouillage** : la liste garde la carte de tout article publié (titre, résumé, image = « teaser ») avec `locked` / `lockReason` (`login_required` ou `premium_required`) ; la page d'un article verrouillé n'envoie **ni le texte ni les fichiers** (`body: null`, `media: []`) — la réponse ne contient pas le moindre extrait du texte, vérifié. Fichiers joints d'un article premium : 401 (anonyme) / 403 (standard), `Cache-Control: private, no-store`. Les articles recommandés (« À lire aussi ») sont eux aussi marqués verrouillés selon le lecteur.
+- **Fuite par la recherche fermée** : chercher un mot présent seulement dans le texte d'un article premium ne le trouve pas pour un lecteur non autorisé (sinon on reconstituerait le texte mot à mot) ; titre, résumé et mots-clés restent cherchables.
+- **Recommandations selon le type de compte** : l'article peut cibler des types de compte (`targetAccountTypes`, vide = tous). `GET /api/blog/recommendations` renvoie ceux qui visent le type de compte du lecteur connecté (repli : les plus récents, `personalised: false`) ; « À lire aussi » place en premier les articles visant le lecteur. Le ciblage **ordonne, il ne cache rien**.
+- Session **facultative** sur les routes publiques du blog (`optionalAuth`) : cookie absent, expiré, falsifié ou compte supprimé = visiteur anonyme, jamais une erreur. Les réponses dépendantes de la session sont `private, no-cache` avec `Vary: Cookie` (ajouté à `Vary: Origin` du CORS, pas à sa place — un premier essai l'écrasait, détecté par le test CORS existant).
+- Interface : pastille « Premium » sur les cartes et la page, bloc cadenas avec les boutons adaptés (se connecter / créer un compte / voir l'accès premium, retour automatique sur l'article après connexion), section « Pour votre profil » en tête du blog quand quelque chose vise le lecteur, champs « Qui peut lire cet article ? » et « Article recommandé pour » dans l'étape *Classement* du CMS ; textes fr / en / ar. Contrôle de cohérence global étendu (types de compte ciblés valides).
+
+Décisions :
+- **La couverture d'un article premium reste publique** (fait partie de l'accroche) ; le texte et les fichiers, non.
+- Un article premium reste visible dans les listes et en accroche pour un compte standard : c'est ce qui donne envie de passer premium (à contester avec le client s'il préfère le masquer entièrement).
+- Pas de notion d'« abonnement payant » ici : le niveau du compte est celui défini en P1-06 ; le paiement (P3-08 à P3-10) viendra le modifier.
+
+Tests (vrai serveur + PostgreSQL de test + Chrome) : 31 tests d'API (`functional/blog-access.test.js` : anonyme / standard / premium / administrateur, brouillon premium, fichiers, recherche, recommandations, éditeur, `CHECK` SQL) et le parcours navigateur (`e2e/profile-newsletter-journey.test.js`, 22 vérifications communes avec P3-05 : le texte n'est nulle part dans le HTML de la page pour un visiteur, retour sur l'article après connexion, section « Pour votre profil », fichier refusé sans session, arabe RTL, 375 px). Suite complète : voir P3-05.
+
 ### P3-05 — Newsletter
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P3-02`
 - Durée cible : 1 jour
@@ -1042,6 +1057,24 @@ Tâches :
 - Gestion des abonnés.
 - Désinscription.
 - Préparation de l'envoi d'informations/articles.
+
+Réalisé :
+- **Double opt-in** : `POST /api/newsletter/subscribe` enregistre l'adresse « en attente » et envoie **un** lien de confirmation ; rien n'est envoyé ensuite tant que la personne n'a pas cliqué. La date de confirmation est la preuve du consentement. Adresses normalisées (minuscules, sans espaces), `CHECK` SQL sur le statut, la casse et la cohérence des dates.
+- **Liens signés sans stockage** : `<id>.<expiration>.<signature HMAC-SHA256>` (clé dérivée de `JWT_SECRET`), un jeton de confirmation ne peut pas servir à se désabonner (ni l'inverse), confirmation valable 7 jours, désinscription sans expiration. Confirmer et se désabonner sont des **POST derrière un bouton** : les scanners de courriel et aperçus de liens ouvrent tous les liens en GET et ne doivent rien confirmer ni résilier à la place de la personne (testé, y compris dans le navigateur).
+- **Pas d'énumération** : la réponse est la même pour une adresse inconnue, en attente ou déjà inscrite. Une adresse en attente ne reçoit pas plus d'un courriel par 5 minutes ; limite par IP (5 inscriptions / heure) et sur les liens ; deux demandes simultanées → une ligne, un courriel.
+- **Désinscription** : un abonné confirmé passe à « désabonné » (adresse et date conservées pour respecter son choix) ; une adresse jamais confirmée est **effacée**. Se réinscrire exige une nouvelle confirmation ; un ancien lien de confirmation ne peut pas ramener quelqu'un qui s'est désabonné.
+- **Gestion des abonnés (administration `/admin/newsletter`)** : compteurs par statut, liste paginée avec recherche et filtre, suppression avec confirmation (droit à l'effacement), export CSV des confirmés (formules de tableur neutralisées), seulement pour un administrateur.
+- **Préparation de l'envoi** (l'onglet « Préparer un envoi ») : construit, **sans rien envoyer**, le message des derniers articles publiés dans les trois langues (texte + HTML échappé, articles premium signalés, aucun extrait de leur texte), avec l'en-tête `List-Unsubscribe` et le nombre de destinataires confirmés par langue ; indique si l'envoi est possible.
+- Formulaire d'inscription en bas du blog et des articles ; pages `/newsletter/confirmer` et `/newsletter/desinscription` ; textes fr / en / ar (les courriels aussi ; le tamazight retombe sur le français).
+- **Fournisseur d'e-mail : toujours non choisi, donc AUCUN courriel réel ne part.** `services/mail.service.js` a deux pilotes : `console` (développement et tests : le message est gardé en mémoire et affiché dans le journal du serveur, rien ne sort) et `none` (**défaut en production**) : l'inscription répond alors 503 « pas encore disponible » et **ne stocke rien**, au lieu de faire semblant. Brancher un vrai fournisseur = ajouter un pilote dans ce fichier + variables d'environnement (documentées dans `server/.env.example` : `MAIL_DRIVER`, `PUBLIC_URL`, limites).
+
+Décisions :
+- Pas de tâche d'envoi en masse : la tâche demande la **préparation** ; l'envoi réel (file d'attente, reprise sur erreur, en-tête `List-Unsubscribe-Post` à un clic) dépend du fournisseur choisi.
+- Adresses en attente jamais confirmées : conservées (elles ne reçoivent rien) ; l'administrateur peut les supprimer. Un nettoyage automatique (par exemple après 30 jours) est à décider avec le client.
+- Sans IP ni journal de consentement détaillé : seule la date de confirmation est gardée (minimisation des données). À revoir avec la politique de confidentialité.
+
+Tests : 33 tests d'API (`functional/newsletter.test.js` : inscription, double confirmation, jetons falsifiés / expirés / croisés, GET refusé, désinscription, réinscription, concurrence, administration, CSV, préparation, `CHECK` SQL), 3 en mode production sans fournisseur (`security/newsletter-production.test.js`), 2 limites de débit (`security/rate-limits.test.js`), le parcours navigateur (22 vérifications). **`npm test` : 402/402** (les 7 échecs du premier essai venaient des garde-fous du projet — audit des routes publiques, contrat client/serveur, variables d'environnement documentées, listes blanches de champs, en-tête CORS — tous traités) ; **`npm run test:e2e` : 63/63** ; `npm run lint` et build du client sans avertissement ; contrôle de cohérence de la base sans violation.
+- Limites : aucun courriel réellement envoyé ni reçu (voir ci-dessus) ; pas de test sur téléphone réel / Safari / Firefox ; pas d'audit lecteur d'écran.
 
 ### P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)
 - Statut : `✅ done`
@@ -1437,17 +1470,17 @@ Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau
 Phase active : `PHASE 3` — BLOG + CMS CONTENU + NEWSLETTER (les Phases 1 et 2 ont été validées le 2026-09-19, voir P1-08 et P2-07)
 
 Dernières tâches terminées et vérifiées :
-`P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
+`P3-05 — Newsletter`, `P3-04 — Recommandation / visibilité selon profil`, `P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
 
 Toutes les tâches de pages (P1-02, P1-03, P1-04), le socle backend (P1-05) et les deux ajouts signalés par l'utilisateur (mode clair/sombre, i18n FR/EN/AR + tamazight en repli) sont terminés. Le modèle `User` existe en base (Prisma).
 
 Prochaines tâches réalisables (dépendances satisfaites) :
-- `P3-04 — Recommandation / visibilité selon profil` (dépend de `P1-06` ✅ et `P3-03` ✅).
-- `P3-05 — Newsletter` (dépend de `P3-02` ✅ ; **fournisseur d'email à choisir avant**, voir blocages ci-dessous).
 - `P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)` (dépend de `P1-10` ✅ et `P2-02` ✅ ; **questions et réponses à fournir par le client**).
+- `P3-09 — Paiement : socle indépendant du fournisseur` (dépend de `P3-04` ✅ ; `P3-08` reste bloquée sur les décisions du client et bloque seulement `P3-10`).
+- Le blog est terminé (P3-01 à P3-06 hors paiement et assistant guidé). La Phase 4 (outils) ne doit commencer qu'après validation de la Phase 3.
 
-Recommandation : `P3-04`, puis `P3-05` et `P3-07`, puis `P3-09` (socle de paiement, réalisable une fois `P3-04` terminée). Le client peut mener en parallèle les recherches de `P3-08` (paiement), qui conditionnent `P3-10`. Ajouts du 2026-09-19 : ils allongent le planning d'environ une semaine (voir « Impact sur le délai » après `P3-10`). Points d'attention :
-- **P3-04 : l'API publique du blog renvoie aujourd'hui le corps complet de chaque article publié à tout le monde** (voir P3-03). Verrouiller côté interface ne suffirait pas : il faut un niveau d'accès porté par l'article (migration additive, comme pour les formations) et que `GET /api/blog/articles/:slug` n'envoie **jamais** le corps ni les médias joints à qui n'y a pas droit, avec des tests de sécurité correspondants dans `server/tests/security/`.
+Recommandation : `P3-07` si le client a fourni les questions / réponses, sinon `P3-09` ; puis la validation de fin de Phase 3. Points d'attention :
+- **Newsletter : aucun courriel réel ne part tant qu'un fournisseur d'e-mail n'est pas choisi** (pilote `none` par défaut en production : l'inscription répond « pas encore disponible »). C'est la décision client la plus urgente pour rendre P3-05 réellement utilisable ; elle débloque aussi « mot de passe oublié ».
 - Chaque nouvelle tâche ajoute ses tests dans `server/tests/` (voir P3-06 et README « Tests ») ; `npm test` doit rester vert, le test de cohérence du projet vérifie aussi ce fichier (statuts, dépendances, tâches terminées documentées, cette section).
 - Toute nouvelle route API : elle sera contrôlée par l'audit d'autorisation automatique (toutes les routes Express, voir P2-07) — la déclarer publique ou la protéger explicitement.
 - Décisions clients encore ouvertes, listées à la fin de P2-07 (règle des formations sans cours obligatoire, visibilité du nom sur la vérification publique, mentions du certificat).
@@ -1456,7 +1489,7 @@ Recommandation : `P3-04`, puis `P3-05` et `P3-07`, puis `P3-09` (socle de paieme
 Blocages / informations manquantes signalées (non bloquantes pour continuer, mais à ne pas oublier avant livraison) :
 - Mentions légales et politique de confidentialité : identité légale du client (raison sociale, SIRET, adresse, hébergeur, contact DPO) à fournir avant mise en production (voir notes P1-03).
 - Formulaire de contact : aucune coordonnée réelle (email/téléphone/adresse) fournie — non affichée pour éviter de publier une information inventée.
-- Fournisseur d'email non défini : « mot de passe oublié » reste inactif et les messages du formulaire de contact ne sont que stockés en base (voir P1-07). À choisir avant la newsletter (P3-05) et la mise en production.
+- Fournisseur d'email non défini : « mot de passe oublié » reste inactif et les messages du formulaire de contact ne sont que stockés en base (voir P1-07). La newsletter (P3-05) est construite mais ne peut rien envoyer tant qu'il n'est pas choisi ; à choisir avant la mise en production.
 - Paiement (`P3-08`, `⛔ blocked`) : fournisseur / banque, moyens de paiement, devise, offres et règles de remboursement **non définis** ; le client fait ses propres recherches (liste des points dans `P3-08`). Bloque `P3-10`, pas `P3-09`.
 - Assistant guidé (`P3-07`) : questions et réponses à fournir par le client ; aucun contenu inventé.
 - Simulateur de crédit (P4-02) : règles bancaires/taux à fournir par le client le moment venu — rappel déjà noté dans la tâche elle-même.

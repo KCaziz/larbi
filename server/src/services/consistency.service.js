@@ -1,5 +1,6 @@
 import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import { ACCOUNT_TYPES } from '../constants/accountTypes.js';
 import { bodyToText } from './article.service.js';
 import { CERTIFICATE_NUMBER_PATTERN } from './certificate.service.js';
 import { sanitizeRichText } from './sanitize.service.js';
@@ -70,8 +71,10 @@ export async function checkConsistency(prisma, { privateDir }) {
   // ---- stored text ----------------------------------------------------------
   // What is stored must already be clean (sanitising it again changes nothing), and the plain-text
   // copy of an article must match its body: a mismatch means some code path wrote one without the other.
-  const articles = await prisma.article.findMany({ select: { id: true, body: true, bodyText: true, excerpt: true } });
+  const articles = await prisma.article.findMany({ select: { id: true, body: true, bodyText: true, excerpt: true, targetAccountTypes: true } });
+  const knownTypes = new Set(ACCOUNT_TYPES.map((t) => t.value));
   for (const a of articles) {
+    if ((a.targetAccountTypes ?? []).some((type) => !knownTypes.has(type))) problems.push(violation('article target account types are known account types', `article ${a.id}`));
     if (a.body !== null && sanitizeRichText(a.body) !== a.body) problems.push(violation('stored article HTML is already sanitised', `article ${a.id}`));
     if ((a.body ? bodyToText(a.body) : '') !== a.bodyText) problems.push(violation('article plain text matches its body', `article ${a.id}`));
   }

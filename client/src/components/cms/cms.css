@@ -937,3 +937,26 @@
     padding: 18px;
   }
 }
+
+/* ---------- Group of checkboxes ---------- */
+.cms-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.cms-checks legend {
+  padding: 0;
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.cms-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}

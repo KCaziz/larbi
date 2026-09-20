@@ -300,6 +300,14 @@ model Article {
   status      String    @default("draft")
   publishedAt DateTime?
 
+  // Visibility by profile (P3-04). "standard" = readable by every visitor,
+  // "premium" = the text and files need a premium account (the card, title and
+  // excerpt stay public as a teaser). Enforced by the server, never only in the UI.
+  requiredAccessLevel String   @default("standard")
+  // Account types this article is recommended to (values of ACCOUNT_TYPES).
+  // Empty = for everybody. It only ORDERS recommendations, it never hides anything.
+  targetAccountTypes  String[] @default([])
+
   categoryId String?
   category   ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
@@ -334,4 +342,29 @@ model ArticleTag {
   @@id([articleId, tagId])
   @@index([tagId])
   @@map("article_tags")
+}
+
+// ---------------------------------------------------------------------------
+// Newsletter (P3-05). Double opt-in: an address is only "confirmed" once its
+// owner clicked the link sent to it; the confirmation date is the proof of
+// consent. Links carry a signed token (HMAC) computed from the row id, so no
+// token is stored. Deleting a row erases the person completely.
+// ---------------------------------------------------------------------------
+model NewsletterSubscriber {
+  id     String @id @default(uuid())
+  // Always stored lower-cased and trimmed (CHECK in the migration).
+  email  String @unique
+  // "pending" | "confirmed" | "unsubscribed"
+  status String @default("pending")
+  // Language of the subscriber's interface, for the language of the e-mails.
+  locale String @default("fr")
+
+  createdAt      DateTime  @default(now())
+  confirmedAt    DateTime?
+  unsubscribedAt DateTime?
+  // Last confirmation e-mail sent: limits how often one address can be mailed.
+  lastEmailAt    DateTime?
+
+  @@index([status])
+  @@map("newsletter_subscribers")
 }

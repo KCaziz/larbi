@@ -7,6 +7,7 @@ import { useApi } from '../../lib/useApi.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ArticleCard from '../../components/blog/ArticleCard.jsx';
+import NewsletterForm from '../../components/newsletter/NewsletterForm.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
@@ -35,6 +36,7 @@ export default function BlogListPage() {
   const list = useApi(`/blog/articles?${apiParams}`);
   const categories = useApi('/blog/categories');
   const tags = useApi('/blog/tags');
+  const recommended = useApi('/blog/recommendations');
 
   const update = (changes) => {
     const next = new URLSearchParams(params);
@@ -120,6 +122,19 @@ export default function BlogListPage() {
           )}
         </div>
 
+        {/* Only when something is really aimed at this account type (the server decides). */}
+        {recommended.status === 'ready' && recommended.data.personalised && !filtered && page === 1 && (
+          <section className="blog-foryou" aria-labelledby="forme-title">
+            <h2 id="forme-title">{t('blogList.forYou')}</h2>
+            <p>{t('blogList.forYouIntro')}</p>
+            <div className="blog-grid">
+              {recommended.data.articles.map((article) => (
+                <ArticleCard key={article.slug} article={article} />
+              ))}
+            </div>
+          </section>
+        )}
+
         {list.status === 'loading' && <LoadingState />}
         {list.status === 'error' && !rejected && <ErrorState message={t('blogList.loadError')} onRetry={list.reload} />}
 
@@ -161,6 +176,8 @@ export default function BlogListPage() {
             )}
           </>
         )}
+
+        <NewsletterForm />
       </div>
     </>
   );
