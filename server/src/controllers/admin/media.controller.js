@@ -2,6 +2,7 @@ import { prisma } from '../../config/prisma.js';
 import { MEDIA_KIND } from '../../constants/elearning.js';
 import { toMedia } from '../../serializers/cms.js';
 import { sendStoredMedia } from '../../services/mediaResponse.js';
+import { BLOCK_FOR_MEDIA_KIND, lockLesson } from '../../services/blocks.service.js';
 import { discardTemp, ingestUpload, removeStored } from '../../services/storage.service.js';
 import { HttpError } from '../../utils/httpError.js';
 
@@ -50,7 +51,7 @@ function coverUploader(delegate) {
 
 // Files attached to a lesson or an article. "ownerField" is the Media column
 // that points to the owner (courseId / articleId).
-function attachmentUploader(delegate, ownerField) {
+function attachmentUploader(delegate, ownerField, afterCreate) {
   return async function uploadAttachmentFor(req, res) {
     const owner = await withCleanup(req.file, async () => {
       const found = await delegate.findUnique({ where: { id: req.params.id }, select: { id: true } });
@@ -63,6 +64,7 @@ function attachmentUploader(delegate, ownerField) {
       const media = await prisma.media.create({
         data: { ...stored, [ownerField]: owner.id, uploadedById: req.user.id },
       });
+      if (afterCreate) await afterCreate(media);
       res.status(201).json({ media: toMedia(media) });
     } catch (err) {
       await removeStored([stored.storageKey]);
@@ -73,7 +75,21 @@ function attachmentUploader(delegate, ownerField) {
 
 export const uploadCover = coverUploader(prisma.formation);
 export const uploadArticleCover = coverUploader(prisma.article);
-export const uploadCourseMedia = attachmentUploader(prisma.course, 'courseId');
+// Older way of attaching a file to a lesson (before blocks): the file now ALSO becomes the
+// last block of the lesson, so it is shown by the reader and by the editor like any other.
+export const uploadCourseMedia = attachmentUploader(prisma.course, 'courseId', async (media) => {
+  const type = BLOCK_FOR_MEDIA_KIND[media.kind];
+  const defaults = {
+    image: { alt: media.originalName, caption: '' },
+    video: { caption: '' },
+    file: { label: media.originalName, description: '' },
+  }[type];
+  await prisma.$transaction(async (tx) => {
+    await lockLesson(tx, media.courseId);
+    const last = await tx.lessonBlock.aggregate({ where: { courseId: media.courseId }, _max: { position: true } });
+    await tx.lessonBlock.create({ data: { courseId: media.courseId, type, position: (last._max.position ?? -1) + 1, data: defaults, mediaId: media.id } });
+  });
+});
 export const uploadArticleMedia = attachmentUploader(prisma.article, 'articleId');
 
 export async function deleteMedia(req, res) {

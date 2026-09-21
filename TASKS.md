@@ -1204,11 +1204,138 @@ Soit environ **4 à 5 jours ouvrés, donc à peu près une semaine de plus** que
 
 ---
 
-# PHASE 4 — OUTILS
-## Durée : 1 semaine
-## Objectif
+### P3-11 — CMS pédagogique, lot A : structure d'une formation
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Dépendances : `P2-02`, `P2-04`
+- Durée cible : 3 à 4 jours
 
-Livrer au minimum deux outils fonctionnels.
+**Contexte (ajout du 2026-09-21, demandé par l'utilisateur)** : le CMS de P2-02 est jugé trop simple (titre + description + un texte + des fichiers) pour l'ambition du projet. Cette évolution (lots A à D, `P3-11` à `P3-14`) le transforme en outil de création pédagogique **sans réécriture** : migrations additives seulement (expand / contract), `Course.id` inchangé (progression, certificats et clés composites SQL intacts), lecture de l'ancien contenu conservée tant que la migration n'est pas validée.
+
+**Vocabulaire retenu (décision 1)** : « Formation » (= « cours » de l'ensemble) → « Chapitre » (table `sections`) → « Leçon » (table `courses`, nom conservé en base). Aucun renommage massif des textes existants.
+
+Décisions par défaut retenues (l'utilisateur a demandé d'avancer sans attendre les réponses ; à confirmer avec le client) :
+- Quiz : obligatoire ou informatif **au choix de l'admin, par quiz** (informatif par défaut) ; réponse libre corrigée **automatiquement** (liste de réponses acceptées) ; pas de correction manuelle dans ce lot.
+- Formation publiée : modification **directe avec historique** (pas de brouillon séparé) ; vidéos **fichiers privés uniquement** (pas d'embarquement YouTube / Vimeo) ; liens externes en simples liens `http(s)`.
+- « En révision » : **statut** seulement (l'administrateur relit puis publie) ; pas de rôle « éditeur » distinct.
+
+Tâches :
+- Champs pédagogiques d'une formation : sous-titre, niveau (débutant / intermédiaire / avancé), objectifs, prérequis ; durée totale **calculée**.
+- Chapitres : créer, renommer, supprimer, réordonner ; leçons rattachées à un chapitre ; migration des leçons existantes dans un chapitre par défaut.
+- Réorganisation du plan par glisser-déposer (chapitres et leçons, y compris d'un chapitre à l'autre), avec boutons monter / descendre conservés comme alternative clavier ; une seule requête serveur atomique.
+- Statuts `draft` / `in_review` / `published` / `archived` (contrainte SQL étendue) ; règles de visibilité côté serveur (archivée = hors catalogue, accès conservé aux inscrits).
+- Tableau de bord de production (compteurs par statut, formations récentes, ce qui reste à compléter) et liste des formations plus riche.
+- Page apprenant : programme organisé par chapitres, niveau, objectifs, prérequis, durée.
+
+Réalisé (migrations additives `cms_structure` + `cms_structure_relation`, `prisma generate` fait) :
+- **Modèle** : `formations` gagne `subtitle`, `level` (`CHECK` beginner / intermediate / advanced), `objectives[]`, `prerequisites[]` ; nouvelle table `sections` (chapitres) ; `courses.sectionId` avec **clé composite** `(sectionId, formationId)` → `sections(id, formationId)` : une leçon ne peut pas être dans le chapitre d'une autre formation, un chapitre qui contient encore des leçons ne peut pas être supprimé (RESTRICT, la progression vit sur les leçons). Statuts `draft` / `in_review` / `published` / `archived` (`CHECK` étendu, `publishedAt` seulement pour « publiée »).
+- **Migration des données, sans perte** : chaque formation qui a des leçons reçoit **un** chapitre « Chapitre 1 » qui les contient toutes ; `Course.id`, l'ordre et tout ce qui les référence (progression, certificats) sont inchangés. Appliquée sur la base de démonstration existante (4 formations, 9 leçons) sans erreur ; **idempotente** (rejouée deux fois : même résultat, testée).
+- **`Course.position` reste l'ordre GLOBAL** (chapitres d'abord, puis l'ordre dans le chapitre) : le lecteur apprenant, précédent / suivant, la progression et le certificat n'ont pas eu à changer.
+- **API** (admin) : `POST/PATCH/DELETE` chapitres ; `PUT /formations/:id/outline` enregistre **tout le plan en une requête atomique** (chapitres dans l'ordre, chacun avec ses leçons ; un plan qui oublie, répète ou invente un chapitre ou une leçon est refusé en 400 et **rien ne change**) ; `PUT /formations/:id/status` (quatre statuts ; publier reste gardé par la checklist serveur, 422 avec ce qui manque) ; `GET /admin/dashboard`. Les anciennes routes (publier, retirer, réordonner les leçons) fonctionnent toujours.
+- **Interface d'administration** : étape « Plan et leçons » avec chapitres et leçons **réordonnables par glisser-déposer** (@dnd-kit : souris, tactile et **clavier** — Espace, flèches, Espace —, annonces lecteur d'écran traduites), déplacement d'une leçon **d'un chapitre à l'autre** (y compris vers un chapitre vide), boutons monter / descendre qui franchissent aussi la limite d'un chapitre, renommage du chapitre sur place, ajout de chapitre et de leçon, suppression confirmée (message clair si le chapitre n'est pas vide). La première leçon crée « Chapitre 1 » toute seule : personne n'a besoin de comprendre les chapitres pour commencer. Étape « Informations » enrichie (sous-titre, niveau, objectifs et prérequis saisis ligne par ligne, durée totale **calculée** = somme des leçons, jamais stockée). Étape « Publication » : circuit brouillon → en révision → publiée → archivée avec les boutons adaptés à l'état. **Tableau de bord** (`/admin`) : compteurs par statut, formations « à relire », récents avec ce qu'il reste à compléter.
+- **Apprenant** : page de la formation avec niveau, durée, sous-titre, objectifs, prérequis et programme **par chapitres** (les titres de chapitre ne s'affichent que s'il y en a plusieurs) ; carte du catalogue enrichie.
+- Contrôle de cohérence global étendu : toute leçon est dans un chapitre et l'ordre global suit l'ordre des chapitres. Seed de démonstration mis à jour (chapitres, niveaux, statuts en révision et archivé).
+
+Décisions :
+- Vocabulaire conservé : Formation → Chapitre → Leçon (la table `courses` garde son nom).
+- Une formation en révision, brouillon ou archivée est **hors catalogue** mais reste lisible par les inscrits (même règle que « retirer » avant) ; s'inscrire n'est possible que pour une formation publiée. « En révision » est un simple statut : pas de rôle « éditeur » distinct (décision par défaut, à confirmer).
+- Supprimer un chapitre non vide est **refusé** plutôt que de supprimer ses leçons en cascade : la progression des apprenants en dépend.
+
+Tests (vrai serveur + PostgreSQL de test + Chrome ; 26 tests d'API, 16 vérifications navigateur) : `functional/formation-structure.test.js` (chapitres, création de leçon dans un chapitre, refus d'un chapitre étranger, plan atomique et ses 8 refus, progression conservée après réorganisation, ancienne route d'ordre, 401 / 403 sur chaque nouvelle route, champs pédagogiques et leurs refus, statuts et catalogue, accès des inscrits à une formation archivée, clés SQL, migration idempotente, tableau de bord) et `e2e/cms-structure-journey.test.js` (glisser-déposer **à la souris et au clavier**, vers un autre chapitre, vers un chapitre vide, réordonner les chapitres, flèches, rechargement, renommage, statuts, tableau de bord, vue apprenant, formation archivée). Les tests existants ont été adaptés là où l'interface a changé (publication par le circuit d'états, première leçon). **`npm test` : 428/428** ; parcours navigateur (blog, structure, formation, profils, balayage du site 7/7 en 4 langues et 375 px) tous verts ; `npm run lint` et build du client sans avertissement ; cohérence de la base sans violation.
+- Limites : le glisser-déposer tactile n'est pas testé sur un vrai téléphone (le capteur tactile est celui de la bibliothèque) ; pas de test au lecteur d'écran (annonces fournies mais non écoutées).
+
+### P3-12 — CMS pédagogique, lot B : blocs de contenu et éditeur avancé
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Dépendances : `P3-11`
+- Durée cible : 5 à 6 jours
+
+Tâches :
+- Modèle de blocs `lesson_blocks` (type avec `CHECK`, position, données JSON **validées par type côté serveur**, référence de média vérifiée : le fichier doit appartenir à la leçon).
+- Types : texte riche, image (légende, texte alternatif), vidéo (fichier privé), fichier à télécharger, code (langage), tableau, citation, encadré (info / astuce / attention), ressources et liens externes.
+- Éditeur de blocs (ajout, réordonnancement par glisser-déposer, duplication, suppression) ; bloc texte = éditeur TipTap existant étendu par **profils d'options** (le blog garde son profil actuel).
+- Assainissement : profil « leçon » plus large (tableaux, code) sans toucher au profil « article » ; jamais de HTML non assaini, coloration du code faite à l'affichage à partir du texte brut.
+- Lecteur apprenant : rendu des blocs ; **double lecture** (blocs s'il y en a, sinon ancien `body` + fichiers).
+- Migration idempotente des leçons existantes (un bloc texte + un bloc par fichier joint, dans l'ordre) avec tests d'intégrité (progression et certificats inchangés).
+- Enregistrement automatique (brouillon local et serveur, indicateur d'état), historique `lesson_revisions` avec restauration.
+- Aperçu « vue étudiant » (même composant que le lecteur).
+
+Réalisé (migration additive `lesson_blocks`, avec **reprise automatique des contenus existants** ; `prisma generate` fait) :
+- **Modèle** : `lesson_blocks` (type avec `CHECK`, position ≥ 0, `data` JSON objet, `mediaId` obligatoire pour image / vidéo / document et interdit pour les autres) et `lesson_revisions` (historique). Un bloc ne peut afficher qu'un fichier **de sa propre leçon** (clé composite `(mediaId, courseId)`) ; supprimer un fichier supprime le bloc qui l'affichait.
+- **Neuf types de blocs** : texte riche, image (texte alternatif, légende), vidéo (fichier privé), document, code (langage, jamais interprété), tableau (grille de cellules en texte simple), citation, encadré (information / astuce / attention), liens et ressources. Le serveur **valide et nettoie chaque bloc selon son type** (`services/blocks.service.js`) : HTML assaini avec la même liste blanche que partout, liens `http(s)` seulement (ni `javascript:`, ni `data:`, ni identifiants dans l'adresse), tailles bornées, champs inconnus refusés, jamais de HTML brut stocké tel quel ; 200 blocs maximum par leçon.
+- **Fichiers** : envoi depuis l'éditeur (`POST /courses/:id/blocks/upload`) = fichier privé + bloc créé en une seule opération ; le type du bloc suit le **vrai type du fichier** (contenu, jamais le nom ni l'en-tête annoncé) ; SVG / HTML / PHP refusés sans aucun résidu sur le disque ; supprimer un bloc supprime aussi le fichier.
+- **API** (admin, chaque opération verrouille la leçon le temps de sa transaction : dix insertions simultanées donnent dix positions distinctes) : créer, modifier (validé selon le type que le bloc a déjà : un bloc ne change pas de type), dupliquer, supprimer, réordonner (liste exacte exigée, sinon 400 et rien ne bouge), historique.
+- **Historique** : la version d'avant une modification est conservée automatiquement (au plus une toutes les 10 minutes), versions nommées à la demande, restauration (l'état d'avant la restauration est lui-même conservé, donc annulable), 30 versions conservées ; un bloc dont le fichier a été supprimé depuis n'est pas restauré.
+- **Éditeur** (dans chaque leçon du plan) : ajout par une palette (icônes) ou « + » entre deux blocs, **enregistrement automatique** bloc par bloc avec état toujours visible (« Tout est enregistré » / « Enregistrement… » / « Échec » + réessayer), ce qui n'est pas encore enregistré est envoyé si l'on quitte la leçon, **glisser-déposer** des blocs (souris, tactile, clavier), duplication, suppression confirmée, **aperçu étudiant** (le même composant que le lecteur), panneau d'historique. Un lien sans adresse valide reste à l'écran mais n'est pas enregistré tant qu'il n'est pas terminé (défaut trouvé par le test : la palette créait un lien vide que le serveur refusait).
+- **Lecteur apprenant** : rendu bloc par bloc (`BlockRenderer`) ; le code reste **de gauche à droite dans une page arabe**, les tableaux défilent sans casser la page (375 px), un bouton copie le code ; seconde assainissement côté navigateur (DOMPurify) : une valeur piégée plantée directement en base ne s'exécute pas (testé).
+- **Double lecture (expand / contract)** : une leçon sans bloc est encore servie à l'ancienne (`body` + fichiers) ; pour une leçon avec blocs, `body` et `media` sont dérivés des blocs pour les anciens clients. Les anciennes requêtes (écrire `body`, joindre un fichier) fonctionnent toujours et **alimentent aussi les blocs** (le texte = premier bloc texte ; un fichier joint = un bloc). La colonne `courses.body` et les fichiers sont conservés (rien n'est perdu).
+- **Migration des données** appliquée à la base de démonstration : chaque texte est devenu un bloc texte, chaque fichier un bloc image / vidéo / document, dans l'ordre de lecture ; **idempotente** (rejouée deux fois : même résultat, testée). Contrôle de cohérence global étendu (positions 0..n-1, contenu valide et déjà propre, bloc-fichier du bon type). Seed de démonstration : une leçon riche (encadré, tableau, code, citation, liens).
+
+Décisions :
+- Le tableau est une **grille de cellules en texte simple** (et non du HTML) : aucune balise à assainir, édition et rendu simples, validation stricte.
+- Pas de coloration syntaxique du code dans ce lot (langage indiqué, monospace, bouton copier) : à ajouter au besoin sans changer le modèle.
+- Pas de vidéo externe (YouTube, Vimeo), conformément à la décision par défaut du lot A.
+- L'historique restaure les blocs et non le titre / résumé / durée de la leçon (ces champs gardent leur bouton « Enregistrer »).
+
+Tests (vrai serveur + PostgreSQL de test + Chrome ; 36 tests d'API, 13 vérifications navigateur) : `functional/lesson-blocks.test.js` (les neuf types et leurs refus, assainissement, ordre et concurrence, fichiers dont hostiles, anciennes routes, historique, droits, vue apprenant, checklist de publication, contraintes SQL, migration) et `e2e/lesson-editor-journey.test.js` (construction d'une leçon de bout en bout, enregistrement automatique, lien inachevé, réordonnancement au clavier, aperçu étudiant, version nommée puis restauration, lecture par un apprenant avec valeur piégée en base, arabe et 375 px). Les tests existants ont été adaptés là où l'interface a changé (leçon écrite avec des blocs). **`npm test` : 464/464** ; parcours navigateur tous verts ; `npm run lint` et build du client sans avertissement ; cohérence de la base sans violation.
+- Limites : le glisser-déposer tactile et la lecture d'écran ne sont pas testés sur de vrais appareils ; le test de réordonnancement au clavier est sensible au timing (il attend désormais entre chaque touche) ; l'image du bloc n'est pas redimensionnée côté serveur.
+
+### P3-13 — CMS pédagogique, lot C : quiz
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Dépendances : `P3-12`
+- Durée cible : 5 à 6 jours
+
+Tâches :
+- Modèles `quizzes`, `quiz_questions`, `quiz_choices`, `quiz_attempts`, `quiz_attempt_answers` (contraintes SQL, clés composites avec la formation).
+- Portée : leçon, chapitre ou fin de formation ; note de réussite, tentatives maximales, ordre mélangé, obligatoire ou informatif.
+- Questions : choix unique, choix multiple, vrai / faux, réponse libre (réponses acceptées, normalisation casse / accents) ; énoncé, explication, score par question.
+- Constructeur de quiz dans le CMS (checklist de publication : au moins une question, une bonne réponse par question, points > 0).
+- Lecteur de quiz apprenant ; **correction faite par le serveur** ; les bonnes réponses et explications ne sont **jamais** envoyées avant la soumission ; limite de tentatives ; note et réussite enregistrées.
+- Intégration à la progression : un quiz **obligatoire** réussi conditionne la fin de la formation et le certificat (à faire dans la même transaction verrouillée que P2-04 / P2-05).
+- Tests de sécurité (fuite des réponses, triche par requêtes directes, concurrence, accès non inscrit).
+
+Réalisé (migrations additives `quizzes`, `quiz_is_complete`, `quiz_target_check` ; `prisma generate` fait) :
+- **Modèle** : `quizzes` (portée leçon / chapitre / fin de formation, **un quiz par cible** garanti par des clés uniques, cible obligatoirement dans la même formation par clés composites, `CHECK` sur la portée, la note de réussite 0 à 100 et le nombre de tentatives), `quiz_questions` (4 types), `quiz_choices`, `quiz_attempts` (ouverte ou corrigée, jamais entre les deux : `CHECK`) et `quiz_attempt_answers`. Colonne `isComplete` dénormalisée, tenue à jour par le CMS et **recalculée par le contrôle de cohérence global**.
+- **Quatre types de questions** : choix unique, choix multiple, vrai / faux, réponse libre (réponses acceptées comparées sans casse, sans accents et sans espaces superflus). Pour chaque question : énoncé, explication affichée après correction, points (1 à 100). Correction « tout ou rien » par question (un choix multiple exige exactement le bon ensemble).
+- **Réglages d'un quiz** : note de réussite, tentatives maximales (illimitées par défaut), ordre des questions mélangé, **obligatoire ou informatif** (informatif par défaut), correction montrée ou non.
+- **Sécurité du contenu** : les bonnes réponses, les explications et les réponses acceptées **ne quittent jamais le serveur avant la soumission** (vérifié : la réponse de « démarrer » ne contient aucun `isCorrect`, aucune explication, aucune réponse acceptée) ; **la correction est faite par le serveur, une seule fois par tentative** (rejouer ou soumettre deux fois en même temps → une seule réussit, 409 pour l'autre) ; les identifiants de choix d'une autre question, les questions inconnues et le texte envoyé pour un choix sont ignorés ; sans correction affichée, l'apprenant n'apprend que sa note (aucun résultat par question) ; reprendre une tentative ouverte ne consomme pas d'essai ; limite de débit par **compte** (40 démarrages / envois par 10 minutes, `QUIZ_RATE_LIMIT`).
+- **Accès** : mêmes règles que la lecture d'une leçon (connecté, inscrit, niveau du compte revérifié) ; un quiz d'une autre formation, d'une formation cachée ou incomplet n'est pas servi (404 / 409).
+- **Lien avec la fin de la formation** : un quiz **obligatoire et complet** réussi conditionne la fin de la formation et le certificat. Le calcul (`progress.service.js`) tient compte des leçons **et** des quiz obligatoires, dans la **même transaction verrouillée** que la validation d'une leçon : réussir le dernier quiz termine la formation et délivre le certificat dans la même requête ; réussir un quiz avant la dernière leçon n'y change rien tant qu'il reste une leçon. Un quiz obligatoire incomplet ne peut pas piéger un apprenant (il n'est pas compté) ; rendre un quiz obligatoire **après** qu'un apprenant a terminé ne lui retire pas son certificat ; un échec ultérieur n'annule pas une formation terminée.
+- **CMS** : un quiz s'ajoute depuis une leçon, un chapitre ou la fin de la formation (zone « Quiz » à chaque endroit) ; éditeur avec réglages, questions réordonnables par glisser-déposer (souris, tactile, clavier), chaque question avec son bouton d'enregistrement et la liste de ce qui manque (« Indiquez la bonne réponse »…), suppression confirmée. **Un quiz incomplet bloque la publication** (nouvelle ligne de la checklist « Terminer ou supprimer les quiz incomplets », refus serveur 422).
+- **Apprenant** : carte du quiz sur la leçon, sur le chapitre et en fin de formation (obligatoire, meilleur score, tentatives restantes) ; page de quiz en trois temps (introduction → questions → résultat avec correction et explications), reprise, « revoir mon dernier résultat », nouvelle tentative directe, mention « quiz obligatoire à réussir » dans le panneau de la formation ; textes fr / en / ar (pluriels arabes compris), arabe RTL et 375 px vérifiés.
+- Seed de démonstration non modifié pour les quiz (aucun contenu pédagogique inventé au-delà des exemples de blocs).
+
+Décisions :
+- Un quiz par cible (leçon, chapitre, formation) : plus simple pour un public non technique ; plusieurs quiz par cible = évolution possible sans changer le reste.
+- Correction « tout ou rien » par question (pas de points partiels) ; réponse libre corrigée automatiquement, sans correction manuelle (décision par défaut du lot A).
+- Modifier un quiz déjà passé par des apprenants ne change pas leurs notes enregistrées ; l'historique de leurs tentatives suit le quiz (supprimer le quiz supprime les tentatives : le CMS le dit avant de confirmer).
+- Le quiz d'une leçon ne conditionne pas le bouton « Marquer comme terminé » de cette leçon : seul le quiz **obligatoire** compte pour la fin de la formation.
+
+Tests (vrai serveur + PostgreSQL de test + Chrome ; 37 tests d'API, 1 de limite de débit, 14 vérifications navigateur) : `functional/quizzes.test.js` (conception : portées, cibles refusées, réglages, formes de chaque type et toutes les manières d'être incomplet, choix conservés par identifiant, réordonnancement, blocage de la publication, 401 / 403 ; côté apprenant : rien de secret avant la soumission, reprise, démarrages simultanés, accès, quiz incomplet, correction de chaque type, tricherie, soumissions invalides, une seule correction, tentatives des autres, sans correction, tentatives limitées ; lien avec la fin de la formation dans les six cas ci-dessus ; suppression ; contraintes SQL), `security/rate-limits.test.js`, `e2e/quiz-journey.test.js` (un administrateur construit un quiz obligatoire avec trois types de questions et le réordonne au clavier ; un apprenant échoue, lit la correction, réussit, obtient le certificat ; arabe, 375 px, apprenant non inscrit). **`npm test` : 502/502** ; parcours navigateur tous verts ; `npm run lint` et build du client sans avertissement ; cohérence de la base sans violation.
+- Limites : pas de correction manuelle des réponses libres ; pas de banque de questions partagée entre quiz ; pas de tirage aléatoire de questions ; lecture d'écran et écrans tactiles réels non testés.
+
+### P3-14 — CMS pédagogique, lot D : finitions
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P3-13`
+- Durée cible : 2 jours
+
+Tâches (périmètre réellement retenu ; ce qui a été écarté est listé dans « Décisions ») :
+- Aperçu étudiant d'une formation entière (présentation, plan, leçons bloc par bloc, quiz).
+- Duplication d'une leçon, d'un chapitre et d'une formation.
+
+Réalisé :
+- **Duplication** (`POST /api/admin/courses/:id/duplicate`, `/sections/:id/duplicate`, `/formations/:id/duplicate`) : copie **indépendante** du contenu — texte, blocs, **fichiers copiés sur le disque sous de nouveaux noms** (supprimer la copie ne touche jamais l'original), couverture, présentation pédagogique, réglages de certification, et, pour une formation, chapitres, leçons et **quiz avec leurs questions et réponses** (chaque quiz suit sa leçon dans la copie). Jamais copiés : inscriptions, progression, certificats, tentatives de quiz, historique des versions ; une formation copiée est un **brouillon** avec une adresse (slug) distincte. La copie d'une leçon ou d'un chapitre se place juste après l'original. **Atomique** : si un fichier manque, la copie échoue (409) et rien ne reste — ni ligne en base, ni fichier orphelin sur le disque (testé).
+- **Interface** : boutons « Dupliquer » dans la liste des formations (ouvre la copie), sur chaque leçon et chaque chapitre du plan ; nouvel onglet **« Aperçu »** de l'éditeur de formation : la formation telle que l'apprenant la voit (niveau, durée, sous-titre, objectifs, prérequis), chapitres, chaque leçon dépliable rendue **bloc par bloc avec le même composant que le lecteur**, emplacement des quiz (obligatoire / incomplet signalés) ; textes fr / en / ar.
+
+Décisions :
+- **Colonne `courses.body` conservée** (et les anciens fichiers joints) : la phase « contract » qui la supprimerait n'apporte rien tant que le double chemin de lecture ne coûte rien, et risquerait de faire perdre du contenu ; à reprendre seulement si le client le demande. Les blocs sont la source de vérité dès qu'une leçon en a.
+- **Écarté de ce lot** : historique consultable pour toute une formation (l'historique reste **par leçon**, avec restauration — lot B) ; aide contextuelle dédiée (chaque champ du CMS porte déjà son texte d'explication) ; duplication d'un quiz seul ; import / export de formation.
+- Une copie de leçon ou de chapitre **ne copie pas les quiz** (un quiz par cible : la copie d'un quiz sur la même formation ne serait pas rattachable) ; la copie d'une formation entière, elle, les copie.
+
+Tests (vrai serveur + PostgreSQL de test + Chrome ; 10 tests d'API, 4 vérifications navigateur) : `functional/duplication.test.js` (copie juste après l'original avec ses blocs et **ses propres** fichiers, indépendance à la suppression, données des apprenants non copiées, échec propre sur fichier manquant sans aucun résidu, droits 401 / 403, chapitre entier, formation entière : brouillon, quiz suivant leur leçon, aucune inscription, copie invisible pour un apprenant et supprimable avec tous ses fichiers, deux copies = deux adresses, cohérence globale) et `e2e/cms-finishing-journey.test.js` (« Dupliquer » depuis la liste, depuis le plan, onglet « Aperçu »). **`npm test` : 512/512** ; parcours navigateur (`npm run test:e2e`) : **110/110** ; `npm run lint` et build du client sans avertissement ; contrôle de cohérence de la base sans violation.
+- Limites : pas de duplication d'un quiz seul ; les très grosses formations (centaines de Mo de vidéos) dupliquent leurs fichiers de façon synchrone dans la requête (timeout de la transaction : 60 s).
 
 ### P4-01 — Architecture commune des outils
 - Statut : `❌ todo`
@@ -1470,7 +1597,7 @@ Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau
 Phase active : `PHASE 3` — BLOG + CMS CONTENU + NEWSLETTER (les Phases 1 et 2 ont été validées le 2026-09-19, voir P1-08 et P2-07)
 
 Dernières tâches terminées et vérifiées :
-`P3-05 — Newsletter`, `P3-04 — Recommandation / visibilité selon profil`, `P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
+`P3-14 — CMS pédagogique, lot D : finitions`, `P3-13 — CMS pédagogique, lot C : quiz`, `P3-12 — CMS pédagogique, lot B : blocs de contenu et éditeur avancé`, `P3-11 — CMS pédagogique, lot A : structure d'une formation`, `P3-05 — Newsletter`, `P3-04 — Recommandation / visibilité selon profil`, `P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
 
 Toutes les tâches de pages (P1-02, P1-03, P1-04), le socle backend (P1-05) et les deux ajouts signalés par l'utilisateur (mode clair/sombre, i18n FR/EN/AR + tamazight en repli) sont terminés. Le modèle `User` existe en base (Prisma).
 

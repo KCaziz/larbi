@@ -1,4 +1,5 @@
 import { readingMinutes } from '../services/article.service.js';
+import { questionProblems, quizProblems } from '../services/quiz.service.js';
 import { articleReadiness, formationReadiness } from '../services/readiness.service.js';
 
 // Explicit allow-lists. In particular Media.storageKey (the internal storage
@@ -17,9 +18,71 @@ export function toMedia(media) {
   };
 }
 
+export function toAdminQuestion(question) {
+  return {
+    id: question.id,
+    type: question.type,
+    position: question.position,
+    prompt: question.prompt,
+    explanation: question.explanation,
+    points: question.points,
+    acceptedAnswers: question.acceptedAnswers ?? [],
+    choices: (question.choices ?? []).map((c) => ({ id: c.id, text: c.text, isCorrect: c.isCorrect, position: c.position })),
+    problems: questionProblems(question),
+  };
+}
+
+const quizTotals = (quiz) => ({
+  questionCount: (quiz.questions ?? []).length,
+  totalPoints: (quiz.questions ?? []).reduce((sum, q) => sum + q.points, 0),
+});
+
+// Row of the list of quizzes of a formation.
+export function toAdminQuizRow(quiz) {
+  return {
+    id: quiz.id,
+    scope: quiz.scope,
+    courseId: quiz.courseId,
+    sectionId: quiz.sectionId,
+    title: quiz.title,
+    isRequired: quiz.isRequired,
+    isComplete: quiz.isComplete,
+    ...quizTotals(quiz),
+  };
+}
+
+// The whole quiz, WITH the right answers (administrators only).
+export function toAdminQuiz(quiz) {
+  return {
+    ...toAdminQuizRow(quiz),
+    instructions: quiz.instructions,
+    passingScore: quiz.passingScore,
+    maxAttempts: quiz.maxAttempts,
+    shuffleQuestions: quiz.shuffleQuestions,
+    showCorrection: quiz.showCorrection,
+    problems: quizProblems(quiz),
+    questions: (quiz.questions ?? []).map(toAdminQuestion),
+  };
+}
+
+export function toAdminBlock(block) {
+  return {
+    id: block.id,
+    type: block.type,
+    position: block.position,
+    data: block.data,
+    media: toMedia(block.media),
+  };
+}
+
+export function toAdminSection(section) {
+  return { id: section.id, title: section.title, description: section.description, position: section.position };
+}
+
 export function toAdminCourse(course) {
   return {
     id: course.id,
+    sectionId: course.sectionId,
     title: course.title,
     summary: course.summary,
     body: course.body,
@@ -27,6 +90,7 @@ export function toAdminCourse(course) {
     isRequired: course.isRequired,
     estimatedMinutes: course.estimatedMinutes,
     media: (course.media ?? []).map(toMedia),
+    blocks: (course.blocks ?? []).map(toAdminBlock),
   };
 }
 
@@ -34,7 +98,13 @@ export function toAdminFormation(formation) {
   return {
     id: formation.id,
     title: formation.title,
+    subtitle: formation.subtitle,
     description: formation.description,
+    level: formation.level,
+    objectives: formation.objectives ?? [],
+    prerequisites: formation.prerequisites ?? [],
+    // Sum of the lessons' estimated minutes: never stored, so never out of date.
+    totalMinutes: (formation.courses ?? []).reduce((sum, c) => sum + (c.estimatedMinutes ?? 0), 0),
     status: formation.status,
     requiredAccessLevel: formation.requiredAccessLevel,
     category: formation.category ? { id: formation.category.id, name: formation.category.name } : null,
@@ -46,6 +116,8 @@ export function toAdminFormation(formation) {
     },
     publishedAt: formation.publishedAt,
     updatedAt: formation.updatedAt,
+    sections: (formation.sections ?? []).map(toAdminSection),
+    quizzes: (formation.quizzes ?? []).map(toAdminQuizRow),
     courses: (formation.courses ?? []).map(toAdminCourse),
     readiness: formationReadiness(formation),
   };

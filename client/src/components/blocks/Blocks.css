@@ -1,0 +1,264 @@
+/* Rendering of the blocks of a lesson (reader and editor preview). Tokens only. */
+.blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 820px;
+}
+
+.block-figure {
+  margin: 0;
+}
+
+.block-figure img,
+.block-figure video {
+  display: block;
+  width: 100%;
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+
+.block-figure video {
+  background: #000;
+}
+
+.blocks figcaption {
+  margin-block-start: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.block-file {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 520px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  text-decoration: none;
+}
+
+.block-file:hover {
+  border-color: var(--accent);
+}
+
+.block-file > span {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.block-file strong {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.block-file small {
+  color: var(--text);
+}
+
+/* Code */
+.block-code {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-alt);
+}
+
+.block-code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-block-end: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.block-code-language {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.block-code-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.block-code-copy:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.block-code pre {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  color: var(--text-h);
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  /* Code and its numbers read left to right, even inside an Arabic page. */
+  direction: ltr;
+  text-align: left;
+}
+
+.block-code figcaption {
+  margin: 0;
+  padding: 8px 12px;
+  border-block-start: 1px solid var(--border);
+}
+
+/* Table */
+.block-table {
+  margin: 0;
+}
+
+.block-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.block-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.block-table th,
+.block-table td {
+  padding: 10px 14px;
+  border-block-end: 1px solid var(--border);
+  text-align: start;
+}
+
+.block-table th {
+  background: var(--bg-alt);
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.block-table tbody tr:last-child td {
+  border-block-end: 0;
+}
+
+/* Quote */
+.block-quote {
+  margin: 0;
+}
+
+.block-quote blockquote {
+  margin: 0;
+  padding-inline-start: 18px;
+  border-inline-start: 3px solid var(--accent-border);
+  color: var(--text-h);
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-style: italic;
+}
+
+.block-quote blockquote p {
+  margin: 0;
+}
+
+/* Callout */
+.block-callout {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-inline-start-width: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.block-callout > svg {
+  flex: none;
+  margin-block-start: 2px;
+}
+
+.block-callout strong {
+  display: block;
+  margin-block-end: 4px;
+  color: var(--text-h);
+}
+
+.block-callout .rich-content {
+  font-size: 1rem;
+}
+
+.block-callout .rich-content > :last-child {
+  margin-block-end: 0;
+}
+
+.block-callout-info {
+  border-inline-start-color: var(--blue);
+  background: var(--blue-bg);
+}
+.block-callout-info > svg {
+  color: var(--blue);
+}
+.block-callout-tip {
+  border-inline-start-color: var(--green);
+  background: var(--green-bg);
+}
+.block-callout-tip > svg {
+  color: var(--green);
+}
+.block-callout-warning {
+  border-inline-start-color: var(--warn);
+  background: var(--warn-bg);
+}
+.block-callout-warning > svg {
+  color: var(--warn);
+}
+
+/* Resources */
+.block-resources h3 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+
+.block-resources ul {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.block-resources li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.block-resources a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  font-weight: 500;
+}
+
+.block-resources small {
+  color: var(--text);
+}

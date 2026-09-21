@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Award, CircleCheck, Circle, Clock, ImageOff, Lock } from 'lucide-react';
+import { ArrowLeft, Award, CircleCheck, Circle, Clock, ImageOff, Layers, Lock, Target } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api, ApiError, errorKey } from '../../lib/api.js';
 import { formatDate } from '../../lib/format.js';
@@ -10,6 +10,7 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import ProgressBar from '../../components/learn/ProgressBar.jsx';
+import QuizCard from '../../components/quiz/QuizCard.jsx';
 import './Learn.css';
 
 export default function FormationPage() {
@@ -53,6 +54,9 @@ export default function FormationPage() {
 
   // Normally the certificate arrives by itself with the last required course; this
   // covers a learner who finished before the certification was switched on.
+  // Chapters are only shown when there is more than one (a single chapter is just "the list").
+  const chapters = f.sections.length > 1 ? f.sections : [{ id: 'all', title: null, courseIds: f.courses.map((c) => c.id) }];
+
   const canClaim =
     enrollment?.status === 'completed' &&
     enrollment.progress.requiredRemaining === 0 &&
@@ -89,8 +93,16 @@ export default function FormationPage() {
                 {t('learn.card.premium')}
               </span>
             )}
+            {f.level && <span className="learn-chip">{t(`learn.level.${f.level}`)}</span>}
+            {f.totalMinutes > 0 && (
+              <span className="learn-chip">
+                <Clock size={13} strokeWidth={2} aria-hidden="true" />
+                {t('learn.detail.totalDuration', { count: f.totalMinutes })}
+              </span>
+            )}
           </div>
           <h1>{f.title}</h1>
+          {f.subtitle && <p className="learn-subtitle">{f.subtitle}</p>}
           {f.description && <p className="lead">{f.description}</p>}
 
           {f.coverUrl ? (
@@ -103,10 +115,50 @@ export default function FormationPage() {
 
           {!f.published && enrollment && <Notice variant="info">{t('learn.detail.unpublishedNote')}</Notice>}
 
+          {(f.objectives.length > 0 || f.prerequisites.length > 0) && (
+            <div className="learn-pedagogy">
+              {f.objectives.length > 0 && (
+                <section aria-labelledby="objectives-title">
+                  <h2 id="objectives-title">
+                    <Target size={20} strokeWidth={1.8} aria-hidden="true" />
+                    {t('learn.detail.objectives')}
+                  </h2>
+                  <ul>
+                    {f.objectives.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+              {f.prerequisites.length > 0 && (
+                <section aria-labelledby="prerequisites-title">
+                  <h2 id="prerequisites-title">
+                    <Layers size={20} strokeWidth={1.8} aria-hidden="true" />
+                    {t('learn.detail.prerequisites')}
+                  </h2>
+                  <ul>
+                    {f.prerequisites.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+            </div>
+          )}
+
           <h2>{t('learn.detail.lessonsTitle')}</h2>
           {!canOpen && !enrollment && f.canEnroll && <p className="cms-muted">{t('learn.detail.lockedLessons')}</p>}
+          {chapters.map((chapter) => (
+          <section key={chapter.id} className="learn-chapter">
+            {chapter.title && (
+              <h3 className="learn-chapter-title">
+                {chapter.title}
+                {chapter.description && <small>{chapter.description}</small>}
+              </h3>
+            )}
           <ol className="learn-lessons">
-            {f.courses.map((course, index) => {
+            {chapter.courseIds.map((lessonId) => f.courses.find((c) => c.id === lessonId)).filter(Boolean).map((course) => {
+              const index = f.courses.indexOf(course);
               const done = completedIds.has(course.id);
               const body = (
                 <>
@@ -149,6 +201,12 @@ export default function FormationPage() {
               );
             })}
           </ol>
+          {chapter.id !== 'all' && f.quizzes.filter((q) => q.scope === 'section' && q.sectionId === chapter.id).map((q) => <QuizCard key={q.id} quiz={q} slug={slug} canOpen={canOpen} />)}
+          </section>
+          ))}
+          {f.quizzes.filter((q) => q.scope === 'formation').map((q) => (
+            <QuizCard key={q.id} quiz={q} slug={slug} canOpen={canOpen} />
+          ))}
         </div>
 
         <aside className="learn-detail-side">
@@ -157,6 +215,9 @@ export default function FormationPage() {
               <>
                 <h2 id="enroll-title">{t('learn.detail.enrolled')}</h2>
                 <ProgressBar progress={enrollment.progress} />
+                {enrollment.progress.requiredQuizzesRemaining > 0 && (
+                  <p className="cms-muted">{t('quiz.requiredLeft', { count: enrollment.progress.requiredQuizzesRemaining })}</p>
+                )}
                 {f.accessible ? (
                   nextLesson && (
                     <Button to={`/catalogue/${slug}/cours/${nextLesson.id}`} className="btn-lg" arrow>

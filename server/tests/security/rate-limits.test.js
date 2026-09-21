@@ -7,7 +7,7 @@ import { boot } from '../helpers/server.js';
 // Abuse limits. The application reads its limits when it starts, so this file
 // boots a server with LOW limits (see `extra`) and checks each one.
 
-const LIMITS = { AUTH_RATE_LIMIT: '5', CONTACT_RATE_LIMIT: '3', CERTIFICATE_RATE_LIMIT: '4', MEDIA_RATE_LIMIT: '8', MEDIA_DENIED_LIMIT: '4', PUBLIC_READ_LIMIT: '6', NEWSLETTER_RATE_LIMIT: '3', NEWSLETTER_LINK_RATE_LIMIT: '3' };
+const LIMITS = { AUTH_RATE_LIMIT: '5', CONTACT_RATE_LIMIT: '3', CERTIFICATE_RATE_LIMIT: '4', MEDIA_RATE_LIMIT: '8', MEDIA_DENIED_LIMIT: '4', PUBLIC_READ_LIMIT: '6', NEWSLETTER_RATE_LIMIT: '3', QUIZ_RATE_LIMIT: '4', NEWSLETTER_LINK_RATE_LIMIT: '3' };
 
 let t;
 let log;
@@ -123,5 +123,19 @@ describe('newsletter', () => {
   test('confirmation / unsubscription links are limited too', async () => {
     const seq = await statuses(5, () => t.request('POST', '/newsletter/confirm', { json: { token: 'x'.repeat(40) } }));
     assert.deepEqual(seq, [400, 400, 400, 429, 429]);
+  });
+});
+
+describe('quizzes', () => {
+  test('starting and submitting attempts is limited per ACCOUNT: 4 allowed, then 429; another account is not affected', async () => {
+    const f = await t.formation({ title: 'Limites', courses: [{ title: 'L' }] });
+    const quiz = await t.prisma.quiz.create({ data: { formationId: f.id, title: 'Q', scope: 'formation', finalFormationId: f.id, isComplete: true } });
+    await t.prisma.quizQuestion.create({ data: { quizId: quiz.id, type: 'true_false', position: 0, prompt: 'Vrai ?', choices: { create: [{ text: 'true', position: 0, isCorrect: true }, { text: 'false', position: 1, isCorrect: false }] } } });
+    const [a, b] = [await t.user(), await t.user()];
+    for (const user of [a, b]) await t.prisma.enrollment.create({ data: { userId: user.id, formationId: f.id } });
+    const attempts = `/learn/formations/${f.slug}/quizzes/${quiz.id}/attempts`;
+    const seq = await statuses(6, () => t.request('POST', attempts, { user: a }));
+    assert.deepEqual(seq, [201, 201, 201, 201, 429, 429]);
+    assert.equal((await t.request('POST', attempts, { user: b })).status, 201, 'the limit is per account, not per address');
   });
 });

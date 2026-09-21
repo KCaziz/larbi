@@ -42,12 +42,18 @@ async function clean() {
 
 const html = (value) => sanitizeRichText(value);
 
-async function createFormation({ slug, title, description, level, status, categoryId, authorId, certification, courses }) {
-  return prisma.formation.create({
+// `chapters`: [{ title, courses: [lesson...] }]. Lessons get their global position (chapters
+// first, then the order inside the chapter), exactly as the CMS writes them.
+async function createFormation({ slug, title, subtitle, description, level, pedagogy, status, categoryId, authorId, certification, chapters }) {
+  const formation = await prisma.formation.create({
     data: {
       slug,
       title,
+      subtitle: subtitle ?? null,
       description,
+      level: pedagogy?.level ?? null,
+      objectives: pedagogy?.objectives ?? [],
+      prerequisites: pedagogy?.prerequisites ?? [],
       status,
       requiredAccessLevel: level,
       categoryId,
@@ -57,17 +63,35 @@ async function createFormation({ slug, title, description, level, status, catego
       certificationDescription: certification?.description ?? null,
       createdAt: daysAgo(21),
       publishedAt: status === 'published' ? daysAgo(20) : null,
-      courses: {
-        create: courses.map((c, position) => ({
-          position,
+    },
+  });
+  let position = 0;
+  for (const [chapterIndex, chapter] of chapters.entries()) {
+    const section = await prisma.section.create({
+      data: { formationId: formation.id, title: chapter.title, description: chapter.description ?? null, position: chapterIndex },
+    });
+    for (const c of chapter.courses) {
+      const course = await prisma.course.create({
+        data: {
+          formationId: formation.id,
+          sectionId: section.id,
+          position: position++,
           title: c.title,
           summary: c.summary,
           body: html(c.body),
           isRequired: c.required !== false,
           estimatedMinutes: c.minutes,
-        })),
-      },
-    },
+        },
+      });
+      // The lesson is written with blocks (P3-12): its text first, then the extra blocks.
+      const blocks = [{ type: 'text', data: { html: html(c.body) } }, ...(c.blocks ?? [])];
+      await prisma.lessonBlock.createMany({
+        data: blocks.map((block, blockPosition) => ({ courseId: course.id, position: blockPosition, type: block.type, data: block.data })),
+      });
+    }
+  }
+  return prisma.formation.findUnique({
+    where: { id: formation.id },
     include: { courses: { orderBy: { position: 'asc' } } },
   });
 }
@@ -99,44 +123,97 @@ async function main() {
   const compta = await createFormation({
     slug: 'demo-comptabilite-de-base',
     title: 'Comptabilité de base',
+    subtitle: 'Tenir les comptes d’une petite entreprise, pas à pas',
     description: 'Comprendre les bases de la comptabilité d’une petite entreprise : journal, bilan et compte de résultat.',
+    pedagogy: {
+      level: 'beginner',
+      objectives: ['Comprendre à quoi sert la comptabilité', 'Enregistrer une opération au journal', 'Lire un bilan et un compte de résultat'],
+      prerequisites: ['Aucun : cette formation s’adresse aux débutants'],
+    },
     level: 'standard',
     status: 'published',
     categoryId: finance.id,
     authorId: admin.id,
     certification: { title: 'Certificat en comptabilité de base', description: 'Atteste que le titulaire a suivi tous les cours obligatoires.' },
-    courses: [
-      { title: 'Introduction à la comptabilité', summary: 'À quoi sert la comptabilité ?', minutes: 15, body: '<h2>Pourquoi tenir une comptabilité ?</h2><p>La comptabilité donne une <strong>image fidèle</strong> de la situation de votre entreprise.</p><ul><li>Suivre les recettes et les dépenses</li><li>Respecter les obligations légales</li><li>Prendre de meilleures décisions</li></ul>' },
-      { title: 'Le journal et le grand livre', summary: 'Enregistrer chaque opération.', minutes: 25, body: '<h2>Le journal</h2><p>Chaque opération est enregistrée <em>chronologiquement</em> avec un débit et un crédit.</p><p>Le grand livre regroupe ensuite ces écritures par compte.</p>' },
-      { title: 'Le bilan et le compte de résultat', summary: 'Lire les deux documents de synthèse.', minutes: 30, body: '<h2>Le bilan</h2><p>Photographie du patrimoine à une date donnée : ce que possède l’entreprise et ce qu’elle doit.</p><h2>Le compte de résultat</h2><p>Il mesure le bénéfice ou la perte sur une période.</p>' },
-      { title: 'Aller plus loin : lectures conseillées', summary: 'Cours bonus, non obligatoire.', minutes: 10, required: false, body: '<p>Quelques pistes pour approfondir : plan comptable, TVA, amortissements.</p>' },
+    chapters: [
+      {
+        title: 'Les fondations',
+        description: 'À quoi sert la comptabilité et comment on enregistre une opération.',
+        courses: [
+          { title: 'Introduction à la comptabilité', summary: 'À quoi sert la comptabilité ?', minutes: 15, body: '<h2>Pourquoi tenir une comptabilité ?</h2><p>La comptabilité donne une <strong>image fidèle</strong> de la situation de votre entreprise.</p><ul><li>Suivre les recettes et les dépenses</li><li>Respecter les obligations légales</li><li>Prendre de meilleures décisions</li></ul>' },
+          { title: 'Le journal et le grand livre', summary: 'Enregistrer chaque opération.', minutes: 25,
+            blocks: [
+              { type: 'callout', data: { variant: 'tip', title: 'À retenir', html: '<p>Chaque écriture a <strong>autant de débit que de crédit</strong>.</p>' } },
+              { type: 'table', data: { headers: ['Compte', 'Débit', 'Crédit'], rows: [['512 Banque', '1 200,00', ''], ['706 Prestations', '', '1 200,00']], caption: 'Exemple : encaissement d’une facture' } },
+              { type: 'code', data: { language: 'sql', code: "SELECT compte, SUM(debit) - SUM(credit) AS solde\nFROM ecritures\nGROUP BY compte;", caption: 'Calculer le solde de chaque compte' } },
+              { type: 'quote', data: { text: 'La comptabilité est le langage des affaires.', author: 'Proverbe' } },
+              { type: 'resources', data: { title: 'Pour aller plus loin', items: [{ label: 'Plan comptable', url: 'https://example.org/plan-comptable', description: 'Liste des comptes' }] } },
+            ],
+            body: '<h2>Le journal</h2><p>Chaque opération est enregistrée <em>chronologiquement</em> avec un débit et un crédit.</p><p>Le grand livre regroupe ensuite ces écritures par compte.</p>' },
+        ],
+      },
+      {
+        title: 'Lire les documents de synthèse',
+        description: 'Le bilan, le compte de résultat et pour aller plus loin.',
+        courses: [
+          { title: 'Le bilan et le compte de résultat', summary: 'Lire les deux documents de synthèse.', minutes: 30, body: '<h2>Le bilan</h2><p>Photographie du patrimoine à une date donnée : ce que possède l’entreprise et ce qu’elle doit.</p><h2>Le compte de résultat</h2><p>Il mesure le bénéfice ou la perte sur une période.</p>' },
+          { title: 'Aller plus loin : lectures conseillées', summary: 'Cours bonus, non obligatoire.', minutes: 10, required: false, body: '<p>Quelques pistes pour approfondir : plan comptable, TVA, amortissements.</p>' },
+        ],
+      },
     ],
   });
   await createFormation({
     slug: 'demo-fiscalite-avancee',
     title: 'Fiscalité avancée pour PME',
+    subtitle: 'Optimiser légalement la fiscalité de son entreprise',
     description: 'Optimiser légalement la fiscalité de son entreprise. Formation réservée aux comptes premium.',
+    pedagogy: {
+      level: 'advanced',
+      objectives: ['Comparer les régimes d’imposition', 'Identifier les charges déductibles', 'Préparer un contrôle fiscal'],
+      prerequisites: ['Connaître les bases de la comptabilité', 'Avoir une entreprise ou un projet de création'],
+    },
     level: 'premium',
     status: 'published',
     categoryId: finance.id,
     authorId: admin.id,
     certification: { title: 'Certificat en fiscalité avancée', description: 'Valide la maîtrise des régimes fiscaux courants.' },
-    courses: [
-      { title: 'Les régimes d’imposition', summary: 'Comparer les régimes.', minutes: 30, body: '<h2>Choisir son régime</h2><p>Le régime dépend de la forme juridique et du chiffre d’affaires.</p>' },
-      { title: 'Charges déductibles', summary: 'Ce que l’on peut déduire.', minutes: 25, body: '<p>Toute dépense engagée dans l’intérêt de l’entreprise et justifiée peut, en principe, être déduite.</p>' },
-      { title: 'Préparer un contrôle', summary: 'Bons réflexes.', minutes: 20, body: '<ol><li>Classer les justificatifs</li><li>Garder les contrats</li><li>Répondre dans les délais</li></ol>' },
+    chapters: [
+      {
+        title: 'Régimes et charges',
+        courses: [
+          { title: 'Les régimes d’imposition', summary: 'Comparer les régimes.', minutes: 30, body: '<h2>Choisir son régime</h2><p>Le régime dépend de la forme juridique et du chiffre d’affaires.</p>' },
+          { title: 'Charges déductibles', summary: 'Ce que l’on peut déduire.', minutes: 25, body: '<p>Toute dépense engagée dans l’intérêt de l’entreprise et justifiée peut, en principe, être déduite.</p>' },
+        ],
+      },
+      {
+        title: 'Contrôle fiscal',
+        courses: [{ title: 'Préparer un contrôle', summary: 'Bons réflexes.', minutes: 20, body: '<ol><li>Classer les justificatifs</li><li>Garder les contrats</li><li>Répondre dans les délais</li></ol>' }],
+      },
     ],
   });
   await createFormation({
     slug: 'demo-brouillon-tresorerie',
-    title: 'Gestion de trésorerie (brouillon)',
-    description: 'Formation en préparation : visible uniquement dans le CMS, pas dans le catalogue.',
+    title: 'Gestion de trésorerie (en révision)',
+    subtitle: 'Prévoir ses encaissements et ses décaissements',
+    description: 'Formation en préparation : en attente de relecture, pas encore dans le catalogue.',
+    pedagogy: { level: 'intermediate', objectives: ['Construire un plan de trésorerie'], prerequisites: [] },
     level: 'standard',
-    status: 'draft',
+    status: 'in_review',
     categoryId: gestion.id,
     authorId: admin.id,
     certification: null,
-    courses: [{ title: 'Prévoir ses encaissements', summary: 'Plan de trésorerie.', minutes: 20, body: '<p>Contenu en cours de rédaction.</p>' }],
+    chapters: [{ title: 'Le plan de trésorerie', courses: [{ title: 'Prévoir ses encaissements', summary: 'Plan de trésorerie.', minutes: 20, body: '<p>Contenu en cours de rédaction.</p>' }] }],
+  });
+  await createFormation({
+    slug: 'demo-ancienne-formation',
+    title: 'Ancienne formation (archivée)',
+    description: 'Retirée du catalogue : les inscrits gardent leur accès.',
+    level: 'standard',
+    status: 'archived',
+    categoryId: gestion.id,
+    authorId: admin.id,
+    certification: null,
+    chapters: [{ title: 'Contenu', courses: [{ title: 'Leçon d’archive', summary: 'Ancien contenu.', minutes: 5, body: '<p>Contenu conservé.</p>' }] }],
   });
 
   // ------------------------------------------------------------ enrolments

@@ -109,19 +109,35 @@ describe('formation: from the client to a certified learner', { skip: findChrome
         { title: 'Pour aller plus loin', text: 'Un cours bonus.', required: false, upload: [] },
       ];
       for (const [n, spec] of specs.entries()) {
-        await b.type('#new-course-title', spec.title);
-        await b.click(fr.admin.courses.add);
+        // the first lesson creates its chapter; the next ones are added inside that chapter
+        if (n === 0) {
+          await b.type('#new-course-title', spec.title);
+          await b.click(fr.admin.courses.add);
+        } else {
+          await b.type("input[id^='new-lesson-']", spec.title);
+          await b.click(fr.admin.outline.addLesson);
+        }
         assert.ok(await b.waitFor(`document.querySelectorAll('.cms-course').length === ${n + 1} && document.querySelectorAll('.cms-course')[${n}].classList.contains('open') && document.querySelectorAll('.cms-course.open').length === 1`), `card ${n + 1} open`);
+        // the lesson is written with blocks: a text block, then the files
+        await b.clickWhere(`e => e.classList.contains('cms-palette-button') && e.closest('.cms-course.open') && e.textContent.trim() === ${JSON.stringify(fr.admin.blocks.types.text)}`);
+        await b.waitFor("!!document.querySelector('.cms-course.open .cms-rte-content')");
         await b.ev("document.querySelector('.cms-course.open .cms-rte-content').focus()");
         await b.send('Input.insertText', { text: spec.text });
-        if (!spec.required) await b.ev("document.querySelector('.cms-course.open .cms-check input[type=checkbox]').click()");
         for (const file of spec.upload) {
-          await b.setFiles('.cms-course.open input[type=file]', file);
-          const name = path.basename(file);
-          assert.ok(await b.waitFor(`document.querySelector('.cms-course.open').innerText.includes(${JSON.stringify(name)})`), name);
+          const accept = file.endsWith('.mp4') ? 'video/mp4' : 'application/pdf';
+          await b.setFiles(`.cms-course.open input[type=file][accept*="${accept}"]`, file);
         }
-        await b.click(fr.admin.course.save);
-        assert.ok(await b.waitText(fr.admin.course.saved));
+        // the text block saves itself: wait until the server has it (and the files)
+        for (let i = 0; i < 40; i += 1) {
+          const lesson = await t.prisma.course.findFirst({ where: { formationId, title: spec.title }, include: { blocks: true } });
+          if (lesson?.blocks.some((x) => x.type === 'text' && x.data.html.includes(spec.text.slice(0, 12))) && lesson.blocks.filter((x) => x.mediaId).length === spec.upload.length) break;
+          await new Promise((r) => setTimeout(r, 200));
+        }
+        if (!spec.required) {
+          await b.ev("document.querySelector('.cms-course.open .cms-check input[type=checkbox]').click()");
+          await b.click(fr.admin.course.save);
+          assert.ok(await b.waitText(fr.admin.course.saved));
+        }
         await new Promise((r) => setTimeout(r, 300));
       }
       const order = async () => (await t.prisma.course.findMany({ where: { formationId }, orderBy: { position: 'asc' } })).map((c) => c.title.split(' ')[0]);
@@ -134,7 +150,9 @@ describe('formation: from the client to a certified learner', { skip: findChrome
       assert.deepEqual(await order(), ['Introduction', 'Facturer', 'Pour']);
       const first = await t.prisma.course.findFirst({ where: { formationId, position: 0 }, include: { media: true } });
       assert.equal(first.media.length, 2);
-      assert.match(first.body, /Bienvenue/);
+      const firstBlocks = await t.prisma.lessonBlock.findMany({ where: { courseId: first.id }, orderBy: { position: 'asc' } });
+      assert.deepEqual(firstBlocks.map((x) => x.type), ['text', 'video', 'file'], 'text first, then the files in the order they were added');
+      assert.match(firstBlocks[0].data.html, /Bienvenue/);
     });
 
     test('certification, publication checklist, publication', async () => {
@@ -145,8 +163,8 @@ describe('formation: from the client to a certified learner', { skip: findChrome
       await b.waitText(fr.admin.save.saved);
       await b.clickTab(fr.admin.steps.publish);
       assert.ok(await b.waitText(fr.admin.publish.allDone));
-      await b.click(fr.admin.publish.publish);
-      assert.ok(await b.waitText(fr.admin.publish.published));
+      await b.click(fr.admin.workflow.action.published);
+      assert.ok(await b.waitText(fr.admin.workflow.done.published));
       const row = await t.prisma.formation.findUnique({ where: { id: formationId } });
       assert.equal(row.status, 'published');
       slug = row.slug;
@@ -163,8 +181,8 @@ describe('formation: from the client to a certified learner', { skip: findChrome
       await b.waitFor('/^\\/admin\\/formations\\/[0-9a-f-]{36}$/.test(location.pathname)');
       const draftId = await b.ev("location.pathname.split('/').pop()");
       await b.clickTab(fr.admin.steps.publish);
-      await b.waitText(fr.admin.publish.publish);
-      assert.equal(await b.ev(`[...document.querySelectorAll('button')].find(x => x.textContent.trim() === ${JSON.stringify(fr.admin.publish.publish)}).disabled`), true);
+      await b.waitText(fr.admin.workflow.action.published);
+      assert.equal(await b.ev(`[...document.querySelectorAll('button')].find(x => x.textContent.trim() === ${JSON.stringify(fr.admin.workflow.action.published)}).disabled`), true);
       assert.equal((await b.fetch(`/api/admin/formations/${draftId}/publish`, { method: 'POST' })).status, 422);
       assert.equal((await t.prisma.formation.findUnique({ where: { id: draftId } })).status, 'draft');
     });
@@ -193,7 +211,7 @@ describe('formation: from the client to a certified learner', { skip: findChrome
       assert.ok(await b.waitFor("!!document.querySelector('video') && document.querySelector('video').src.includes('/api/learn/media/')"));
       await new Promise((r) => setTimeout(r, 800));
       assert.ok(b.responses.some((r) => /^(200|206) \/api\/learn\/media\//.test(r)), 'the video request succeeded with the learner session');
-      const pdf = await b.fetch(await b.ev("document.querySelector('a.learn-doc').getAttribute('href')"));
+      const pdf = await b.fetch(await b.ev("document.querySelector('a.block-file').getAttribute('href')"));
       assert.deepEqual([pdf.status, /attachment/.test(pdf.disposition ?? '')], [200, true]);
       assert.equal((await t.prisma.courseProgress.findFirst({ where: { courseId: lessons[0].id } })).status, 'in_progress', 'the SERVER recorded the opening');
       await b.shot('formation-lesson');

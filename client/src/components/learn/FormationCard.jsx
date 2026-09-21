@@ -40,8 +40,17 @@ export default function FormationCard({ item }) {
         <h3>
           <Link to={`/catalogue/${item.slug}`}>{item.title}</Link>
         </h3>
+        {item.subtitle && <p className="learn-card-subtitle">{item.subtitle}</p>}
         {item.description && <p className="learn-card-text">{item.description}</p>}
-        <p className="learn-card-meta">{t('learn.lessonCount', { count: item.courseCount })}</p>
+        <p className="learn-card-meta">
+          {[
+            item.level ? t(`learn.level.${item.level}`) : null,
+            t('learn.lessonCount', { count: item.courseCount }),
+            item.totalMinutes > 0 ? t('learn.detail.totalDuration', { count: item.totalMinutes }) : null,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+        </p>
         {enrollment ? (
           <ProgressBar progress={enrollment.progress} />
         ) : (

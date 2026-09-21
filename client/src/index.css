@@ -1,55 +1,63 @@
 /* Design tokens.
-   Two genuinely different palettes, not an inversion:
-   - light  "Papier"  : warm paper, ink-navy text, deep green accent, brass secondary.
-   - dark   "Ardoise" : blue-green slate, cool light text, mint accent, warm brass.
+   Palette from the client's references: #055686 deep blue, #10A9B6 teal, #4FE5D3 mint,
+   #FFFFFF white, #102A43 night blue. Two genuinely different themes, not an inversion:
+   - light  "Lagon"   : white and pale aqua paper, night-blue text, deep-blue accent,
+                        teal highlight, mint for success.
+   - dark   "Abysses" : night-blue surfaces, mint accent, teal highlight.
+   The teal #10A9B6 is too light to read as small text on white (2.9:1), so text uses its
+   darker sibling and #10A9B6 itself is used for fills and tints.
+   Functional colours stay recognisable on purpose: red = error, amber = attention / to do.
+   Every text/background pair is at least 4.5:1 (WCAG AA).
    Components only read tokens — never hard-coded colours. */
 :root {
   /* Text & surfaces */
-  --text: #454b59;
-  --text-h: #121a2b;
-  --bg: #f7f5f0;
-  --bg-alt: #eeebe3;
+  --text: #41586d;
+  --text-h: #102A43;
+  --bg: #f4f9fb;
+  --bg-alt: #e7f1f5;
   --surface: #ffffff;
-  --border: #dcd8cb;
-  --border-strong: #c3beae;
+  --border: #d5e3ea;
+  --border-strong: #b7cdd8;
 
   /* Accent + tones (one per product domain) */
-  --accent: #0b5d4b;
-  --accent-hover: #084638;
+  --accent: #055686; /* deep blue: buttons, links */
+  --accent-hover: #044269;
   --on-accent: #ffffff;
-  --accent-bg: rgba(11, 93, 75, 0.08);
-  --accent-border: rgba(11, 93, 75, 0.35);
-  --blue: #2a5a8c;
-  --blue-bg: rgba(42, 90, 140, 0.09);
-  --brass: #94640f;
-  --brass-bg: rgba(148, 100, 15, 0.1);
-  --clay: #a4472e;
-  --clay-bg: rgba(164, 71, 46, 0.09);
-  --green: #2c7a4b;
-  --green-bg: rgba(44, 122, 75, 0.1);
+  --accent-bg: rgba(5, 86, 134, 0.08);
+  --accent-border: rgba(5, 86, 134, 0.36);
+  --blue: #0a70a8; /* deep blue */
+  --blue-bg: rgba(10, 112, 168, 0.09);
+  --brass: #087682; /* teal #10A9B6 family: premium / highlight (token name kept for existing components) */
+  --brass-bg: rgba(16, 169, 182, 0.13);
+  --clay: #3a5f8a; /* ocean, between teal and blue */
+  --clay-bg: rgba(58, 95, 138, 0.09);
+  --green: #0b7a6c; /* success, mint-green */
+  --green-bg: rgba(79, 229, 211, 0.22);
+  --warn: #8a5a00; /* attention / to do / pending */
+  --warn-bg: rgba(200, 138, 0, 0.12);
   --danger: #b42318;
 
   /* Dark band (footer, CTA, auth panel) */
-  --band-bg: #131a2b;
-  --band-text: #b8bfcc;
-  --band-heading: #f7f5f0;
-  --band-line: rgba(247, 245, 240, 0.14);
-  --grid-line: rgba(18, 26, 43, 0.06);
+  --band-bg: #102A43;
+  --band-text: #b4c5d6;
+  --band-heading: #ffffff;
+  --band-line: rgba(255, 255, 255, 0.14);
+  --grid-line: rgba(16, 42, 67, 0.05);
 
   /* Shape & depth */
   --radius: 12px;
   --radius-sm: 8px;
-  --shadow-sm: 0 1px 2px rgba(18, 26, 43, 0.05);
-  --shadow-md: 0 6px 20px rgba(18, 26, 43, 0.08);
+  --shadow-sm: 0 1px 2px rgba(16, 42, 67, 0.06);
+  --shadow-md: 0 6px 20px rgba(16, 42, 67, 0.09);
 
   /* Printed documents (certificate): stay light in BOTH themes, they are meant for paper.
      Deliberately not redefined in the dark blocks below. */
-  --paper: #fffdf8;
-  --paper-ink: #121a2b;
-  --paper-muted: #5b6170;
-  --paper-line: #c3beae;
-  --paper-accent: #0b5d4b;
-  --paper-brass: #94640f;
+  --paper: #fbfefe;
+  --paper-ink: #102A43;
+  --paper-muted: #55707f;
+  --paper-line: #b7cdd8;
+  --paper-accent: #055686;
+  --paper-brass: #087682;
 
   --serif: 'Fraunces Variable', 'IBM Plex Sans Arabic', Georgia, 'Times New Roman', serif;
   --sans: 'IBM Plex Sans', 'IBM Plex Sans Arabic', system-ui, 'Segoe UI', sans-serif;
@@ -71,67 +79,71 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --text: #a7b4b8;
-    --text-h: #eef3f2;
-    --bg: #0d1417;
-    --bg-alt: #111b1f;
-    --surface: #162126;
-    --border: #25363b;
-    --border-strong: #35494f;
-    --accent: #5fd0ae;
-    --accent-hover: #86e0c4;
-    --on-accent: #06231b;
-    --accent-bg: rgba(95, 208, 174, 0.1);
-    --accent-border: rgba(95, 208, 174, 0.4);
-    --blue: #7fb2e5;
-    --blue-bg: rgba(127, 178, 229, 0.12);
-    --brass: #e3b45c;
-    --brass-bg: rgba(227, 180, 92, 0.12);
-    --clay: #e58a70;
-    --clay-bg: rgba(229, 138, 112, 0.12);
-    --green: #6fcb92;
-    --green-bg: rgba(111, 203, 146, 0.12);
+    --text: #a9bccd;
+    --text-h: #f2fbfc;
+    --bg: #0a1e30;
+    --bg-alt: #0d2438;
+    --surface: #102A43;
+    --border: #1f4160;
+    --border-strong: #2d5680;
+    --accent: #4FE5D3;
+    --accent-hover: #8cf0e4;
+    --on-accent: #102A43;
+    --accent-bg: rgba(79, 229, 211, 0.11);
+    --accent-border: rgba(79, 229, 211, 0.42);
+    --blue: #6cb4ea;
+    --blue-bg: rgba(108, 180, 234, 0.13);
+    --brass: #2fc0cc;
+    --brass-bg: rgba(47, 192, 204, 0.13);
+    --clay: #86a6d8;
+    --clay-bg: rgba(134, 166, 216, 0.13);
+    --green: #5ee6a8;
+    --green-bg: rgba(94, 230, 168, 0.12);
+    --warn: #f0b54a;
+    --warn-bg: rgba(240, 181, 74, 0.12);
     --danger: #f28b82;
-    --band-bg: #091013;
-    --band-text: #93a3a8;
-    --band-heading: #eef3f2;
-    --band-line: rgba(238, 243, 242, 0.1);
-    --grid-line: rgba(95, 208, 174, 0.06);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --band-bg: #071726;
+    --band-text: #8ea6bb;
+    --band-heading: #f2fbfc;
+    --band-line: rgba(242, 251, 252, 0.11);
+    --grid-line: rgba(79, 229, 211, 0.06);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --text: #a7b4b8;
-  --text-h: #eef3f2;
-  --bg: #0d1417;
-  --bg-alt: #111b1f;
-  --surface: #162126;
-  --border: #25363b;
-  --border-strong: #35494f;
-  --accent: #5fd0ae;
-  --accent-hover: #86e0c4;
-  --on-accent: #06231b;
-  --accent-bg: rgba(95, 208, 174, 0.1);
-  --accent-border: rgba(95, 208, 174, 0.4);
-  --blue: #7fb2e5;
-  --blue-bg: rgba(127, 178, 229, 0.12);
-  --brass: #e3b45c;
-  --brass-bg: rgba(227, 180, 92, 0.12);
-  --clay: #e58a70;
-  --clay-bg: rgba(229, 138, 112, 0.12);
-  --green: #6fcb92;
-  --green-bg: rgba(111, 203, 146, 0.12);
+  --text: #a9bccd;
+  --text-h: #f2fbfc;
+  --bg: #0a1e30;
+  --bg-alt: #0d2438;
+  --surface: #102A43;
+  --border: #1f4160;
+  --border-strong: #2d5680;
+  --accent: #4FE5D3;
+  --accent-hover: #8cf0e4;
+  --on-accent: #102A43;
+  --accent-bg: rgba(79, 229, 211, 0.11);
+  --accent-border: rgba(79, 229, 211, 0.42);
+  --blue: #6cb4ea;
+  --blue-bg: rgba(108, 180, 234, 0.13);
+  --brass: #2fc0cc;
+  --brass-bg: rgba(47, 192, 204, 0.13);
+  --clay: #86a6d8;
+  --clay-bg: rgba(134, 166, 216, 0.13);
+  --green: #5ee6a8;
+  --green-bg: rgba(94, 230, 168, 0.12);
+  --warn: #f0b54a;
+  --warn-bg: rgba(240, 181, 74, 0.12);
   --danger: #f28b82;
-  --band-bg: #091013;
-  --band-text: #93a3a8;
-  --band-heading: #eef3f2;
-  --band-line: rgba(238, 243, 242, 0.1);
-  --grid-line: rgba(95, 208, 174, 0.06);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --band-bg: #071726;
+  --band-text: #8ea6bb;
+  --band-heading: #f2fbfc;
+  --band-line: rgba(242, 251, 252, 0.11);
+  --grid-line: rgba(79, 229, 211, 0.06);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 *,

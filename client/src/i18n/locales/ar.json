@@ -489,7 +489,8 @@
     "nav": {
       "formations": "التكوينات",
       "articles": "المقالات",
-      "newsletter": "النشرة البريدية"
+      "newsletter": "النشرة البريدية",
+      "dashboard": "لوحة التحكم"
     },
     "shell": {
       "title": "الإدارة",
@@ -497,7 +498,9 @@
     },
     "status": {
       "draft": "مسودة",
-      "published": "منشورة"
+      "published": "منشورة",
+      "in_review": "قيد المراجعة",
+      "archived": "مؤرشفة"
     },
     "confirm": {
       "cancel": "إلغاء"
@@ -521,7 +524,9 @@
       },
       "emptyTitle": "لا توجد تكوينات بعد",
       "emptyBody": "أنشئ أول تكوين لك: يكفي عنوان للبدء.",
-      "loadError": "تعذّر تحميل التكوينات."
+      "loadError": "تعذّر تحميل التكوينات.",
+      "duplicate": "تكرار",
+      "duplicating": "جارٍ التكرار…"
     },
     "newDialog": {
       "title": "تكوين جديد",
@@ -540,9 +545,10 @@
     "steps": {
       "label": "خطوات إنشاء التكوين",
       "info": "المعلومات",
-      "courses": "الدروس",
+      "courses": "الخطة والدروس",
       "certification": "الشهادة",
-      "publish": "النشر"
+      "publish": "النشر",
+      "preview": "معاينة"
     },
     "info": {
       "title": "عنوان التكوين",
@@ -562,7 +568,20 @@
       "coverHint": "JPG أو PNG أو WebP، بحد أقصى 5 ميغابايت. تُبرز هذه الصورة التكوين في الفهرس.",
       "coverAdd": "اختيار صورة",
       "coverReplace": "استبدال الصورة",
-      "coverRemove": "حذف الصورة"
+      "coverRemove": "حذف الصورة",
+      "subtitle": "عنوان فرعي",
+      "subtitleHint": "جملة جذابة تظهر تحت العنوان (اختياري).",
+      "pedagogyTitle": "العرض البيداغوجي",
+      "level": "المستوى",
+      "levelHint": "لمن تُوجَّه الدورة؟",
+      "levelNone": "غير محدد",
+      "objectives": "الأهداف التعليمية",
+      "objectivesHint": "ما سيصبح المتعلم قادرًا على فعله في النهاية. سطر لكل هدف.",
+      "objectivesPlaceholder": "مثال: تسجيل عملية في دفتر اليومية",
+      "prerequisites": "المتطلبات المسبقة",
+      "prerequisitesHint": "ما يجب معرفته أو امتلاكه قبل البدء (اختياري).",
+      "prerequisitesPlaceholder": "مثال: معرفة أساسيات المحاسبة",
+      "duration": "المدة الإجمالية المحسوبة: {{count}} د (مجموع مدة كل درس)."
     },
     "courses": {
       "intro": "أضِف الدروس بالترتيب الذي سيتبعه المتعلمون.",
@@ -576,7 +595,8 @@
       "delete": "حذف هذا الدرس",
       "deleteConfirmTitle": "حذف هذا الدرس؟",
       "deleteConfirmBody": "سيتم حذف الدرس «{{title}}» وملفاته نهائيًا.",
-      "deleteConfirm": "نعم، احذف"
+      "deleteConfirm": "نعم، احذف",
+      "duplicate": "تكرار الدرس"
     },
     "course": {
       "title": "عنوان الدرس",
@@ -584,7 +604,7 @@
       "summary": "ملخص (اختياري)",
       "summaryHint": "جملة واحدة تصف الدرس.",
       "content": "محتوى الدرس",
-      "contentHint": "اكتب نص الدرس هنا. يمكنك أيضًا إضافة مقاطع فيديو أو مستندات أدناه.",
+      "contentHint": "ابنِ الدرس من كتل: نص، صورة، فيديو، مستند، شيفرة، جدول، اقتباس، إطار تنبيه أو روابط. يُحفظ كل شيء تلقائيًا.",
       "files": "مقاطع الفيديو والمستندات",
       "filesHint": "فيديو MP4 أو WebM، أو PDF أو صورة. تبقى الملفات خاصة: فقط المتعلمون المسجّلون يمكنهم الوصول إليها.",
       "upload": "إضافة ملف",
@@ -634,7 +654,8 @@
       "coursesContent": "إضافة محتوى لكل درس (نص أو فيديو أو مستند)",
       "certification": "تسمية الشهادة (أو تعطيلها)",
       "done": "تم",
-      "todo": "مطلوب"
+      "todo": "مطلوب",
+      "quizzes": "إنهاء الاختبارات غير المكتملة أو حذفها"
     },
     "danger": {
       "title": "حذف التكوين",
@@ -844,6 +865,292 @@
         "recipients_other": "{{count}} مستلم مؤكَّد في المجموع.",
         "noArticles": "لا يوجد مقال منشور لإرساله."
       }
+    },
+    "lines": {
+      "add": "إضافة",
+      "remove": "إزالة",
+      "full": "تم بلوغ الحد الأقصى ({{max}} أسطر)."
+    },
+    "outline": {
+      "intro": "نظّم الدورة في فصول ثم دروس. اسحب وأفلت بالمقبض (أو استخدم الأسهم) لتغيير الترتيب؛ يمكن نقل الدرس من فصل إلى آخر.",
+      "empty": "لا يوجد فصل بعد: أضف الأول أدناه.",
+      "dragChapter": "نقل الفصل",
+      "dragLesson": "نقل الدرس",
+      "chapterTitle": "عنوان الفصل",
+      "lessonCount_zero": "لا دروس",
+      "lessonCount_one": "درس واحد",
+      "lessonCount_two": "درسان",
+      "lessonCount_few": "{{count}} دروس",
+      "lessonCount_many": "{{count}} درسًا",
+      "lessonCount_other": "{{count}} درس",
+      "chapterUp": "رفع الفصل",
+      "chapterDown": "خفض الفصل",
+      "deleteChapter": "حذف الفصل",
+      "deleteChapterTitle": "حذف هذا الفصل؟",
+      "deleteChapterBody": "سيُحذف الفصل «{{title}}». لا يمكن حذف فصل ما زال يحتوي على دروس.",
+      "chapterNotEmpty": "ما زال هذا الفصل يحتوي على دروس: انقلها أو احذفها أولًا.",
+      "chapterEmpty": "لا دروس في هذا الفصل. أضف درسًا أو اسحب درسًا إلى هنا.",
+      "addLesson": "إضافة الدرس",
+      "addLessonLabel": "عنوان الدرس الجديد في الفصل {{chapter}}",
+      "addLessonPlaceholder": "عنوان الدرس الجديد",
+      "addChapter": "إضافة الفصل",
+      "addChapterLabel": "عنوان الفصل الجديد",
+      "addChapterPlaceholder": "عنوان الفصل الجديد",
+      "instructions": "للنقل: اضغط مفتاح المسافة، استخدم الأسهم، ثم المسافة للإفلات. Esc للإلغاء.",
+      "announce": {
+        "start": "تم رفع «{{name}}».",
+        "over": "فوق «{{name}}».",
+        "end": "تم إفلات «{{name}}» قرب «{{target}}».",
+        "cancel": "أُلغي النقل."
+      },
+      "duplicateChapter": "تكرار الفصل"
+    },
+    "workflow": {
+      "state": {
+        "draft": "مسودة: الدورة ظاهرة في الإدارة فقط.",
+        "in_review": "قيد المراجعة: بانتظار التدقيق قبل النشر. ليست في الفهرس.",
+        "published": "منشورة منذ {{date}}: هي في الفهرس.",
+        "archived": "مؤرشفة: أُزيلت من الفهرس. يحتفظ المتعلمون المسجلون بالوصول والتقدم."
+      },
+      "action": {
+        "draft": "إعادة إلى مسودة",
+        "in_review": "إرسال للمراجعة",
+        "published": "نشر",
+        "archived": "أرشفة"
+      },
+      "done": {
+        "draft": "الدورة الآن مسودة.",
+        "in_review": "الدورة الآن قيد المراجعة.",
+        "published": "تم نشر الدورة.",
+        "archived": "تمت أرشفة الدورة."
+      }
+    },
+    "dashboard": {
+      "title": "لوحة التحكم",
+      "subtitle": "ما هو موجود، وما ينتظر المراجعة، وما ينقصه شيء.",
+      "newFormation": "الدورات",
+      "newArticle": "المقالات",
+      "formationsPublished": "الدورات المنشورة",
+      "articlesPublished": "المقالات المنشورة",
+      "articlesDraft": "مقالات المسودة",
+      "enrollments": "التسجيلات",
+      "completed": "الدورات المكتملة",
+      "subscribers": "مشتركو النشرة البريدية",
+      "review": "للمراجعة",
+      "reviewEmpty": "لا توجد دورة بانتظار المراجعة.",
+      "recentFormations": "الدورات الأخيرة",
+      "recentArticles": "المقالات الأخيرة",
+      "nothing": "لا شيء حاليًا.",
+      "toComplete": "للإكمال ({{count}})",
+      "loadError": "تعذّر تحميل لوحة التحكم."
+    },
+    "blocks": {
+      "palette": "إضافة كتلة",
+      "types": {
+        "text": "نص",
+        "image": "صورة",
+        "video": "فيديو",
+        "file": "مستند",
+        "code": "شيفرة",
+        "table": "جدول",
+        "quote": "اقتباس",
+        "callout": "إطار تنبيه",
+        "resources": "روابط ومصادر"
+      },
+      "drag": "نقل الكتلة",
+      "duplicate": "تكرار الكتلة",
+      "delete": "حذف الكتلة",
+      "insertBelow": "إدراج كتلة هنا",
+      "empty": "هذا الدرس فارغ حاليًا.",
+      "start": "ابدأ بإضافة كتلة:",
+      "addAtEnd": "أضف في النهاية:",
+      "instructions": "للنقل: اضغط مفتاح المسافة، استخدم الأسهم، ثم المسافة للإفلات. Esc للإلغاء.",
+      "retry": "إعادة المحاولة",
+      "preview": "معاينة الطالب",
+      "edit": "العودة إلى التحرير",
+      "previewLabel": "معاينة الدرس",
+      "previewHint": "هذا ما سيراه الطالب.",
+      "history": "السجل",
+      "status": {
+        "saved": "تم حفظ كل شيء",
+        "saving": "جارٍ الحفظ…",
+        "error": "فشل الحفظ"
+      },
+      "deleteTitle": "حذف هذه الكتلة؟",
+      "deleteBody": "سيُحذف محتوى هذه الكتلة. يمكنك إيجاده في سجل الدرس.",
+      "deleteFileBody": "سيُحذف ملف هذه الكتلة نهائيًا معها.",
+      "caption": "تعليق (اختياري)",
+      "text": {
+        "label": "النص"
+      },
+      "image": {
+        "alt": "وصف الصورة",
+        "altHint": "يقرؤه قارئ الشاشة ويظهر إذا تعذّر تحميل الصورة."
+      },
+      "file": {
+        "label": "الاسم المعروض",
+        "description": "وصف (اختياري)"
+      },
+      "code": {
+        "language": "اللغة",
+        "code": "الشيفرة",
+        "hint": "نص عادي: يُعرض كما هو ولا يُنفَّذ أبدًا."
+      },
+      "table": {
+        "hint": "املأ السطر الأول بعناوين الأعمدة ثم أسطر الجدول.",
+        "header": "عنوان العمود {{n}}",
+        "cell": "السطر {{row}}، العمود {{column}}",
+        "removeColumn": "حذف العمود {{n}}",
+        "removeColumnShort": "حذف العمود",
+        "removeRow": "حذف السطر {{n}}",
+        "removeRowShort": "حذف السطر",
+        "addRow": "إضافة سطر",
+        "addColumn": "إضافة عمود"
+      },
+      "quote": {
+        "text": "الاقتباس",
+        "author": "المؤلف (اختياري)"
+      },
+      "callout": {
+        "variant": "نوع الإطار",
+        "info": "معلومة",
+        "tip": "نصيحة",
+        "warning": "تنبيه",
+        "title": "العنوان (اختياري)",
+        "text": "النص"
+      },
+      "resources": {
+        "title": "عنوان القائمة (اختياري)",
+        "label": "اسم الرابط {{n}}",
+        "labelPlaceholder": "اسم الرابط",
+        "url": "عنوان الرابط {{n}}",
+        "description": "وصف الرابط {{n}}",
+        "descriptionPlaceholder": "وصف (اختياري)",
+        "remove": "إزالة الرابط {{n}}",
+        "removeShort": "إزالة الرابط",
+        "add": "إضافة رابط"
+      },
+      "revision": {
+        "intro": "كل تعديل مهم يحتفظ بالنسخة السابقة. يمكنك أيضًا حفظ نسخة في لحظة معينة ثم العودة إليها.",
+        "labelField": "اسم النسخة",
+        "placeholder": "اسم النسخة (اختياري)",
+        "save": "حفظ نسخة",
+        "saved": "تم حفظ النسخة.",
+        "restored": "تمت استعادة النسخة.",
+        "automatic": "نسخة تلقائية",
+        "beforeRestore": "قبل استعادة",
+        "blocks_zero": "لا كتل",
+        "blocks_one": "كتلة واحدة",
+        "blocks_two": "كتلتان",
+        "blocks_few": "{{count}} كتل",
+        "blocks_many": "{{count}} كتلة",
+        "blocks_other": "{{count}} كتلة",
+        "restore": "استعادة",
+        "restoreTitle": "استعادة هذه النسخة؟",
+        "restoreBody": "سيُستبدل المحتوى الحالي للدرس بهذه النسخة. تُحفظ الحالة الحالية في السجل: يمكنك استرجاعها. لا تعود الملفات المحذوفة.",
+        "empty": "لا توجد نسخة بعد.",
+        "loadError": "تعذّر تحميل السجل."
+      }
+    },
+    "quiz": {
+      "lessonArea": "اختبار الدرس",
+      "finalTitle": "اختبار نهاية الدورة",
+      "finalHint": "اختبار يُقترح بعد متابعة جميع الدروس. يمكن جعله إلزاميًا للحصول على الشهادة.",
+      "add": {
+        "course": "إضافة اختبار لهذا الدرس",
+        "section": "إضافة اختبار لهذا الفصل",
+        "formation": "إضافة اختبار نهاية الدورة"
+      },
+      "defaultTitle": {
+        "course": "اختبار الدرس",
+        "section": "اختبار الفصل",
+        "formation": "الاختبار النهائي"
+      },
+      "rowInfo": "{{questions}} سؤال · {{points}} نقطة",
+      "edit": "تعديل الاختبار",
+      "close": "إغلاق",
+      "requiredBadge": "إلزامي",
+      "complete_zero": "اختبار مكتمل",
+      "complete_one": "اختبار مكتمل (سؤال واحد)",
+      "complete_two": "اختبار مكتمل (سؤالان)",
+      "complete_few": "اختبار مكتمل ({{count}} أسئلة)",
+      "complete_many": "اختبار مكتمل ({{count}} سؤالًا)",
+      "complete_other": "اختبار مكتمل ({{count}} سؤال)",
+      "notComplete": "اختبار غير مكتمل: لا يراه المتعلمون ولا يمكن نشر الدورة.",
+      "loadError": "تعذّر تحميل الاختبار.",
+      "settings": "إعدادات الاختبار",
+      "title": "عنوان الاختبار",
+      "titleRequired": "عنوان الاختبار مطلوب.",
+      "instructions": "تعليمات (اختياري)",
+      "instructionsHint": "كلمات تظهر قبل البدء.",
+      "passingScore": "درجة النجاح (٪)",
+      "passingScoreHint": "النسبة المئوية من النقاط المطلوبة.",
+      "maxAttempts": "عدد المحاولات",
+      "maxAttemptsHint": "اتركه فارغًا لعدد غير محدود.",
+      "unlimited": "غير محدود",
+      "required": "اختبار إلزامي",
+      "requiredHint": "يجب اجتيازه لإنهاء الدورة والحصول على الشهادة.",
+      "showCorrection": "إظهار التصحيح",
+      "showCorrectionHint": "بعد كل محاولة: الإجابات الصحيحة والشروحات. وإلا تظهر الدرجة فقط.",
+      "shuffle": "خلط ترتيب الأسئلة",
+      "saveSettings": "حفظ الإعدادات",
+      "saved": "تم حفظ الإعدادات.",
+      "questions": "الأسئلة",
+      "noQuestions": "لا توجد أسئلة بعد.",
+      "addQuestion": "أضف سؤالًا:",
+      "instructionsDrag": "للنقل: اضغط مفتاح المسافة، استخدم الأسهم، ثم المسافة للإفلات. Esc للإلغاء.",
+      "delete": "حذف هذا الاختبار",
+      "deleteTitle": "حذف هذا الاختبار؟",
+      "deleteBody": "سيُحذف الاختبار وأسئلته ونتائج المتعلمين.",
+      "types": {
+        "single": "اختيار واحد",
+        "multiple": "اختيار متعدد",
+        "true_false": "صح / خطأ",
+        "text": "إجابة حرة"
+      },
+      "problems": {
+        "prompt": "اكتب نص السؤال.",
+        "choices": "أضف إجابتين ممكنتين على الأقل.",
+        "choiceText": "املأ جميع الإجابات الممكنة.",
+        "noCorrect": "حدد الإجابة الصحيحة.",
+        "manyCorrect": "يمكن أن تكون إجابة واحدة فقط صحيحة.",
+        "accepted": "أضف إجابة مقبولة واحدة على الأقل.",
+        "trueFalse": "سؤال صح / خطأ غير سليم: احذفه وأنشئه من جديد.",
+        "noQuestions": "أضف سؤالًا واحدًا على الأقل.",
+        "questions": "بعض الأسئلة غير مكتملة."
+      },
+      "question": {
+        "drag": "نقل السؤال",
+        "delete": "حذف السؤال",
+        "deleteTitle": "حذف هذا السؤال؟",
+        "deleteBody": "سيُحذف السؤال نهائيًا.",
+        "complete": "مكتمل",
+        "incomplete": "للإكمال",
+        "prompt": "نص السؤال",
+        "choicesSingle": "الإجابات الممكنة (حدد الصحيحة)",
+        "choicesMultiple": "الإجابات الممكنة (حدد الصحيحة)",
+        "markCorrect": "الإجابة {{n}} صحيحة",
+        "choicePlaceholder": "الإجابة {{n}}",
+        "choiceText": "نص الإجابة {{n}}",
+        "removeChoice": "إزالة الإجابة {{n}}",
+        "removeChoiceShort": "إزالة الإجابة",
+        "addChoice": "إضافة إجابة",
+        "rightAnswer": "الإجابة الصحيحة",
+        "true": "صحيح",
+        "false": "خطأ",
+        "accepted": "الإجابات المقبولة",
+        "acceptedHint": "تُتجاهل الأحرف الكبيرة والتشكيل والمسافات الزائدة. أضف كل الصيغ الصالحة.",
+        "acceptedPlaceholder": "مثال: باريس",
+        "points": "النقاط",
+        "explanation": "شرح (اختياري)",
+        "explanationHint": "يظهر للمتعلم بعد التصحيح.",
+        "save": "حفظ السؤال",
+        "saved": "تم حفظ السؤال."
+      }
+    },
+    "preview": {
+      "intro": "هذه هي الدورة كما سيراها المتعلمون: العرض، الخطة، كل درس مفتوح كتلة بكتلة، ومواضع الاختبارات. انقر على درس لفتحه.",
+      "unsaved": "بعض التعديلات لم تُحفظ بعد: لا تظهر هنا."
     }
   },
   "learn": {
@@ -890,7 +1197,10 @@
       "enrolling": "جارٍ التسجيل…",
       "premiumTitle": "مخصّص للحسابات المميّزة",
       "premiumBody": "هذا التكوين متاح فقط بحساب مميّز.",
-      "premiumLink": "عرض مستويات الوصول"
+      "premiumLink": "عرض مستويات الوصول",
+      "totalDuration": "{{count}} د",
+      "objectives": "الأهداف",
+      "prerequisites": "المتطلبات المسبقة"
     },
     "certification": {
       "title": "الشهادة",
@@ -938,7 +1248,12 @@
     "lessonCount_two": "درسان",
     "lessonCount_few": "{{count}} دروس",
     "lessonCount_many": "{{count}} درسًا",
-    "lessonCount_other": "{{count}} درس"
+    "lessonCount_other": "{{count}} درس",
+    "level": {
+      "beginner": "مبتدئ",
+      "intermediate": "متوسط",
+      "advanced": "متقدم"
+    }
   },
   "certificate": {
     "title": "شهادتي",
@@ -1019,5 +1334,77 @@
         "doneBody": "لن تتلقى النشرة البريدية بعد الآن."
       }
     }
+  },
+  "blocks": {
+    "copy": "نسخ",
+    "copied": "تم النسخ",
+    "download": "تنزيل",
+    "table": "جدول",
+    "external": "رابط خارجي"
+  },
+  "quiz": {
+    "title": "اختبار",
+    "required": "إلزامي",
+    "passed": "ناجح ({{score}}٪)",
+    "bestScore": "أفضل نتيجة: {{score}}٪",
+    "facts_zero": "لا أسئلة · النجاح عند {{score}}٪",
+    "facts_one": "سؤال واحد · النجاح عند {{score}}٪",
+    "facts_two": "سؤالان · النجاح عند {{score}}٪",
+    "facts_few": "{{count}} أسئلة · النجاح عند {{score}}٪",
+    "facts_many": "{{count}} سؤالًا · النجاح عند {{score}}٪",
+    "facts_other": "{{count}} سؤال · النجاح عند {{score}}٪",
+    "attemptsLeft_zero": "لا محاولات متبقية",
+    "attemptsLeft_one": "محاولة واحدة متبقية",
+    "attemptsLeft_two": "محاولتان متبقيتان",
+    "attemptsLeft_few": "{{count}} محاولات متبقية",
+    "attemptsLeft_many": "{{count}} محاولة متبقية",
+    "attemptsLeft_other": "{{count}} محاولة متبقية",
+    "open": "فتح الاختبار",
+    "start": "ابدأ الاختبار",
+    "resume": "استئناف الاختبار",
+    "retry": "إعادة المحاولة",
+    "seeLast": "عرض آخر نتيجة",
+    "requiredExplain": "هذا الاختبار إلزامي لإنهاء الدورة.",
+    "requiredLeft_zero": "لا اختبارات إلزامية",
+    "requiredLeft_one": "اختبار إلزامي واحد يجب اجتيازه",
+    "requiredLeft_two": "اختباران إلزاميان يجب اجتيازهما",
+    "requiredLeft_few": "{{count}} اختبارات إلزامية يجب اجتيازها",
+    "requiredLeft_many": "{{count}} اختبارًا إلزاميًا يجب اجتيازها",
+    "requiredLeft_other": "{{count}} اختبار إلزامي يجب اجتيازه",
+    "noAttemptsLeft": "لقد استنفدت جميع محاولاتك.",
+    "alreadySubmitted": "سبق إرسال هذه الإجابات.",
+    "unavailable": "هذا الاختبار غير متاح بعد.",
+    "notFound": "هذا الاختبار غير موجود.",
+    "loadError": "تعذّر تحميل هذا الاختبار.",
+    "questionNumber": "السؤال {{n}}",
+    "points_zero": "لا نقاط",
+    "points_one": "نقطة واحدة",
+    "points_two": "نقطتان",
+    "points_few": "{{count}} نقاط",
+    "points_many": "{{count}} نقطة",
+    "points_other": "{{count}} نقطة",
+    "hintSingle": "إجابة واحدة فقط",
+    "hintMultiple": "عدة إجابات ممكنة",
+    "hintText": "اكتب إجابتك",
+    "true": "صحيح",
+    "false": "خطأ",
+    "correct": "إجابة صحيحة",
+    "incorrect": "إجابة خاطئة",
+    "rightAnswer": "الإجابة الصحيحة",
+    "yourWrongAnswer": "إجابتك",
+    "acceptedAnswers": "الإجابات المقبولة: {{answers}}",
+    "answered_zero": "لم تُجب عن أي سؤال من {{total}}",
+    "answered_one": "أجبت عن سؤال واحد من {{total}}",
+    "answered_two": "أجبت عن سؤالين من {{total}}",
+    "answered_few": "أجبت عن {{done}} أسئلة من {{total}}",
+    "answered_many": "أجبت عن {{done}} سؤالًا من {{total}}",
+    "answered_other": "أجبت عن {{done}} سؤال من {{total}}",
+    "submit": "إرسال إجاباتي",
+    "resultPassed": "أحسنت، تم اجتياز الاختبار!",
+    "resultFailed": "لم يتم اجتياز الاختبار: يلزم {{score}}٪ على الأقل.",
+    "pointsEarned": "{{earned}} نقطة من {{total}}",
+    "certified": "تم إصدار الشهادة",
+    "noCorrection": "لا يُعرض التصحيح المفصل لهذا الاختبار.",
+    "backToQuiz": "العودة إلى الاختبار"
   }
 }

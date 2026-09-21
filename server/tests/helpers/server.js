@@ -74,7 +74,7 @@ export async function boot({ production = false, extra = {} } = {}) {
 
   // A formation with real courses. `courses`: [{ title, isRequired, body }].
   async function formation({ title = 'Formation', status = 'published', courses = [{ title: 'Cours 1' }], ...data } = {}) {
-    return prisma.formation.create({
+    const created = await prisma.formation.create({
       data: {
         slug: unique('formation'),
         title,
@@ -95,6 +95,12 @@ export async function boot({ production = false, extra = {} } = {}) {
       },
       include: { courses: { orderBy: { position: 'asc' } } },
     });
+    // Every lesson sits in a chapter (P3-11): one default chapter, like the data migration does.
+    if (created.courses.length) {
+      const section = await prisma.section.create({ data: { formationId: created.id, title: 'Chapitre 1', position: 0 } });
+      await prisma.course.updateMany({ where: { formationId: created.id }, data: { sectionId: section.id } });
+    }
+    return prisma.formation.findUnique({ where: { id: created.id }, include: { courses: { orderBy: { position: 'asc' } } } });
   }
 
   // A blog article straight in the database (already sanitised content).

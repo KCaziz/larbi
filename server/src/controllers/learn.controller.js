@@ -6,6 +6,7 @@ import {
   toCertificateView,
   toCourseContent,
   toEnrollmentSummary,
+  toQuizSummary,
   toFormationDetail,
 } from '../serializers/learner.js';
 import { claimCertificate, completeCourse, recordCourseOpened, reopenCourse } from '../services/progress.service.js';
@@ -21,19 +22,20 @@ import { logSecurityEvent } from '../utils/securityLog.js';
 // Unknown / hidden formations answer 404, never 403, so their existence leaks nothing.
 
 const COURSES_ORDERED = { orderBy: [{ position: 'asc' }, { createdAt: 'asc' }] };
-const FORMATION_INCLUDE = { category: true, courses: COURSES_ORDERED };
-const ENROLLMENT_INCLUDE = { courseProgress: true, certification: true };
+const FORMATION_INCLUDE = { category: true, courses: COURSES_ORDERED, sections: { orderBy: [{ position: 'asc' }, { createdAt: 'asc' }] }, quizzes: { select: { id: true, scope: true, courseId: true, sectionId: true, title: true, isRequired: true, isComplete: true, passingScore: true, maxAttempts: true, _count: { select: { questions: true } } } } };
+// `quizAttempts`: only the PASSED ones matter for the summary (which required quizzes are done).
+const ENROLLMENT_INCLUDE = { courseProgress: true, certification: true, quizAttempts: { where: { submittedAt: { not: null } }, select: { quizId: true, score: true, passed: true, submittedAt: true } } };
 
 const accessibleTo = (user, formation) => hasAccessLevel(user.accessLevel, formation.requiredAccessLevel);
 
-async function findEnrollment(userId, formationId) {
+export async function findEnrollment(userId, formationId) {
   return prisma.enrollment.findUnique({
     where: { userId_formationId: { userId, formationId } },
     include: ENROLLMENT_INCLUDE,
   });
 }
 
-async function loadForUser(slug, user) {
+export async function loadForUser(slug, user) {
   const formation = await prisma.formation.findUnique({ where: { slug }, include: FORMATION_INCLUDE });
   if (!formation) throw new HttpError(404, 'Not found');
   const enrollment = await findEnrollment(user.id, formation.id);
@@ -42,7 +44,7 @@ async function loadForUser(slug, user) {
 }
 
 // Throws the right 403 (with a machine-readable reason the UI can explain).
-function assertCanRead(user, formation, enrollment) {
+export function assertCanRead(user, formation, enrollment) {
   if (!enrollment) throw new HttpError(403, 'You are not enrolled in this formation', { reason: 'not_enrolled' });
   if (!accessibleTo(user, formation)) {
     throw new HttpError(403, 'Premium access required', { reason: 'premium_required' });
@@ -122,11 +124,15 @@ export async function getCourse(req, res) {
   // cannot be skipped or faked from the browser.
   await recordCourseOpened(enrollment, course);
   const media = await prisma.media.findMany({ where: { courseId: course.id }, orderBy: { createdAt: 'asc' } });
+  const blocks = await prisma.lessonBlock.findMany({ where: { courseId: course.id }, orderBy: { position: 'asc' }, include: { media: true } });
+  const lessonQuiz = formation.quizzes.filter((q) => q.isComplete).map((q) => toQuizSummary(q, enrollment)).find((q) => q.scope === 'course' && q.courseId === course.id) ?? null;
   const completed = enrollment.courseProgress.some((p) => p.courseId === course.id && p.status === 'completed');
   res.json({
     formation: { slug: formation.slug, title: formation.title },
-    course: toCourseContent(course, formation, media),
+    course: toCourseContent(course, formation, media, blocks),
     completed,
+    // The quiz of this lesson, if it has a finished one (its questions are served by the quiz routes).
+    quiz: lessonQuiz,
   });
 }
 
@@ -141,7 +147,7 @@ async function changeProgress(req, res, action) {
 
   const fresh = await findEnrollment(req.user.id, formation.id);
   const completed = fresh.courseProgress.some((p) => p.courseId === course.id && p.status === 'completed');
-  res.json({ completed, enrollment: toEnrollmentSummary(fresh, formation.courses) });
+  res.json({ completed, enrollment: toEnrollmentSummary(fresh, formation.courses, formation.quizzes) });
 }
 
 export const completeLesson = (req, res) => changeProgress(req, res, completeCourse);

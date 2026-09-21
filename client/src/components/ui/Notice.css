@@ -19,10 +19,10 @@
 }
 
 .notice-action-needed {
-  border-inline-start-color: var(--brass);
-  background: var(--brass-bg);
+  border-inline-start-color: var(--warn);
+  background: var(--warn-bg);
 }
 
 .notice-action-needed .notice-icon {
-  color: var(--brass);
+  color: var(--warn);
 }

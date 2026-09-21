@@ -5,7 +5,7 @@ import sanitizeHtml from 'sanitize-html';
 // allow-list (no script, style, iframe, images, event handlers, javascript: links).
 // Same rules for formations now and for articles later.
 const RICH_TEXT = {
-  allowedTags: ['p', 'br', 'strong', 'em', 'u', 's', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'hr'],
+  allowedTags: ['p', 'br', 'strong', 'em', 'u', 's', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'hr', 'code'],
   allowedAttributes: { a: ['href', 'target', 'rel'] },
   allowedSchemes: ['http', 'https', 'mailto'],
   allowProtocolRelative: false,

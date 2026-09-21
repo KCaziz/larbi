@@ -63,6 +63,7 @@ export const router = createBrowserRouter([
           // E-Learning (learner side): formations are for logged-in users.
           { path: 'catalogue', lazy: lazyPage(() => import('../pages/learn/CatalogPage.jsx')) },
           { path: 'catalogue/:slug', lazy: lazyPage(() => import('../pages/learn/FormationPage.jsx')) },
+          { path: 'catalogue/:slug/quiz/:quizId', lazy: lazyPage(() => import('../pages/learn/QuizPage.jsx')) },
           {
             path: 'catalogue/:slug/cours/:courseId',
             lazy: lazyPage(() => import('../pages/learn/CoursePage.jsx')),
@@ -91,7 +92,7 @@ export const router = createBrowserRouter([
                 path: 'admin',
                 lazy: lazyPage(() => import('../pages/admin/AdminLayout.jsx')),
                 children: [
-                  { index: true, element: <Navigate to="formations" replace /> },
+                  { index: true, lazy: lazyPage(() => import('../pages/admin/AdminDashboardPage.jsx')) },
                   {
                     path: 'formations',
                     lazy: lazyPage(() => import('../pages/admin/formations/FormationsListPage.jsx')),

@@ -9,6 +9,8 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import ProgressBar from '../../components/learn/ProgressBar.jsx';
+import BlockRenderer from '../../components/blocks/BlockRenderer.jsx';
+import QuizCard from '../../components/quiz/QuizCard.jsx';
 import RichContent from '../../components/ui/RichContent.jsx';
 import './Learn.css';
 
@@ -76,7 +78,9 @@ export default function CoursePage() {
   const { course, formation, completed } = lesson.data;
   const f = outline.data.formation;
   const completedIds = new Set(f.enrollment?.progress.completedCourseIds ?? []);
-  const hasContent = Boolean(course.body) || course.media.length > 0;
+  // A lesson written with blocks is shown block by block; an older one (no blocks) as text + files.
+  const hasBlocks = course.blocks.length > 0;
+  const hasContent = hasBlocks || Boolean(course.body) || course.media.length > 0;
 
   return (
     <div className="learn-page">
@@ -131,9 +135,11 @@ export default function CoursePage() {
           <h1>{course.title}</h1>
           {course.summary && <p className="lead">{course.summary}</p>}
 
-          {course.body && <RichContent html={course.body} />}
+          {hasBlocks && <BlockRenderer blocks={course.blocks} />}
 
-          {course.media.length > 0 && (
+          {!hasBlocks && course.body && <RichContent html={course.body} />}
+
+          {!hasBlocks && course.media.length > 0 && (
             <section className="learn-files" aria-labelledby="files-title">
               <h2 id="files-title">{t('learn.course.files')}</h2>
               {course.media.map((m) => (
@@ -160,6 +166,8 @@ export default function CoursePage() {
           )}
 
           {!hasContent && <Notice variant="info">{t('learn.course.noContent')}</Notice>}
+
+          {lesson.data.quiz && <QuizCard quiz={lesson.data.quiz} slug={slug} canOpen />}
 
           <section className="learn-complete" aria-labelledby="complete-title">
             <h2 id="complete-title">{t('learn.course.progressTitle')}</h2>

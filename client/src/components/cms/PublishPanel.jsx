@@ -14,7 +14,7 @@ import ReadinessChecklist from './ReadinessChecklist.jsx';
 // `i18n`: prefixes of the texts, so each kind of content keeps its own wording:
 //   { publish: 'admin.publish', danger: 'admin.danger', blocked: 'hasLearners' }
 // `extra`: optional node rendered under the status (e.g. "view on the blog").
-export default function PublishPanel({ entity, basePath, listPath, i18n: keys, hasUnsaved, onChanged, onGo, extra }) {
+export default function PublishPanel({ entity, basePath, listPath, i18n: keys, hasUnsaved, onChanged, onGo, extra, statusSection }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -67,6 +67,7 @@ export default function PublishPanel({ entity, basePath, listPath, i18n: keys, h
         {ready && <p className="cms-inline-message ok">{t(`${p}.allDone`)}</p>}
       </section>
 
+      {statusSection ?? (
       <section className="cms-card" aria-labelledby="publish-title">
         <h2 id="publish-title">{t(`${p}.title`)}</h2>
         <p>
@@ -94,6 +95,7 @@ export default function PublishPanel({ entity, basePath, listPath, i18n: keys, h
           </Button>
         )}
       </section>
+      )}
 
       <section className="cms-card cms-danger" aria-labelledby="danger-title">
         <h2 id="danger-title">{t(`${d}.title`)}</h2>

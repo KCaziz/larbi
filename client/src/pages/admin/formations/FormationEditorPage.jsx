@@ -10,15 +10,20 @@ import StatusBadge from '../../../components/cms/StatusBadge.jsx';
 import StepTabs from '../../../components/cms/StepTabs.jsx';
 import UnsavedChangesGuard from '../../../components/cms/UnsavedChangesGuard.jsx';
 import InfoStep from './InfoStep.jsx';
-import CoursesStep from './CoursesStep.jsx';
+import OutlineStep from './OutlineStep.jsx';
 import CertificationStep from './CertificationStep.jsx';
+import PreviewStep from './PreviewStep.jsx';
 import PublishStep from './PublishStep.jsx';
 
 // Fields edited on the "Informations" and "Certification" steps and saved
 // together with the save bar. Courses and files are saved on their own.
 const toDraft = (f) => ({
   title: f.title,
+  subtitle: f.subtitle ?? '',
   description: f.description,
+  level: f.level ?? '',
+  objectives: f.objectives,
+  prerequisites: f.prerequisites,
   categoryId: f.category?.id ?? '',
   requiredAccessLevel: f.requiredAccessLevel,
   certificationEnabled: f.certification.enabled,
@@ -104,6 +109,7 @@ export default function FormationEditorPage() {
     try {
       const { formation: updated } = await api.patch(`/admin/formations/${id}`, {
         ...draft,
+        level: draft.level || null,
         categoryId: draft.categoryId || null,
       });
       setFormation(updated);
@@ -144,6 +150,7 @@ export default function FormationEditorPage() {
     { id: 'info', label: t('admin.steps.info'), done: okOf(formation, ['title', 'description', 'cover']) },
     { id: 'courses', label: t('admin.steps.courses'), done: okOf(formation, ['courses', 'coursesContent']) },
     { id: 'certification', label: t('admin.steps.certification'), done: okOf(formation, ['certification']) },
+    { id: 'preview', label: t('admin.steps.preview'), done: false },
     { id: 'publish', label: t('admin.steps.publish'), done: formation.status === 'published' },
   ];
   const panelProps = (name) => ({
@@ -181,10 +188,13 @@ export default function FormationEditorPage() {
         />
       </div>
       <div {...panelProps('courses')}>
-        <CoursesStep formation={formation} onChanged={refresh} onDirtyChange={markCourseDirty} />
+        <OutlineStep formation={formation} onChanged={refresh} onDirtyChange={markCourseDirty} />
       </div>
       <div {...panelProps('certification')}>
         <CertificationStep draft={draft} setField={setField} />
+      </div>
+      <div {...panelProps('preview')}>
+        {step === 'preview' && <PreviewStep formation={formation} hasUnsaved={anyDirty} />}
       </div>
       <div {...panelProps('publish')}>
         <PublishStep

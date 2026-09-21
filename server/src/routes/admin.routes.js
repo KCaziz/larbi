@@ -12,9 +12,42 @@ import {
   listCategories,
   listFormations,
   publishFormation,
+  setFormationStatus,
   unpublishFormation,
   updateFormation,
 } from '../controllers/admin/formations.controller.js';
+import {
+  createBlock,
+  createRevision,
+  deleteBlock,
+  duplicateBlock,
+  listRevisions,
+  reorderBlocks,
+  restoreRevision,
+  updateBlock,
+  uploadBlockFile,
+} from '../controllers/admin/blocks.controller.js';
+import { createBlockSchema, createRevisionSchema, reorderBlocksSchema, updateBlockSchema } from '../validation/blocks.schemas.js';
+import {
+  createQuestion,
+  createQuiz,
+  deleteQuestion,
+  deleteQuiz,
+  getQuiz,
+  reorderQuestions,
+  updateQuestion,
+  updateQuiz,
+} from '../controllers/admin/quizzes.controller.js';
+import {
+  createQuestionSchema,
+  createQuizSchema,
+  reorderQuestionsSchema,
+  updateQuestionSchema,
+  updateQuizSchema,
+} from '../validation/quiz.schemas.js';
+import { duplicateFormationRoute, duplicateLessonRoute, duplicateSectionRoute } from '../controllers/admin/duplicate.controller.js';
+import { createSection, deleteSection, saveOutline, updateSection } from '../controllers/admin/sections.controller.js';
+import { getDashboard } from '../controllers/admin/dashboard.controller.js';
 import { createCourse, deleteCourse, reorderCourses, updateCourse } from '../controllers/admin/courses.controller.js';
 import {
   createArticle,
@@ -49,6 +82,10 @@ import {
   createCategorySchema,
   createCourseSchema,
   createFormationSchema,
+  createSectionSchema,
+  outlineSchema,
+  statusSchema,
+  updateSectionSchema,
   reorderCoursesSchema,
   updateCourseSchema,
   updateFormationSchema,
@@ -60,6 +97,7 @@ import {
 const router = Router();
 router.use(requireAuth, requireRole(ROLES.ADMIN));
 router.param('id', uuidParam);
+router.param('revisionId', uuidParam);
 
 // Formations
 router.get('/formations', asyncRoute(listFormations));
@@ -72,10 +110,40 @@ router.post('/formations/:id/unpublish', asyncRoute(unpublishFormation));
 router.post('/formations/:id/cover', receiveFile, asyncRoute(uploadCover));
 
 // Courses of a formation
+router.get('/dashboard', asyncRoute(getDashboard));
+// Duplication (P3-14)
+router.post('/formations/:id/duplicate', asyncRoute(duplicateFormationRoute));
+router.post('/sections/:id/duplicate', asyncRoute(duplicateSectionRoute));
+router.post('/courses/:id/duplicate', asyncRoute(duplicateLessonRoute));
+router.put('/formations/:id/status', validateBody(statusSchema), asyncRoute(setFormationStatus));
+router.post('/formations/:id/sections', validateBody(createSectionSchema), asyncRoute(createSection));
+router.put('/formations/:id/outline', validateBody(outlineSchema), asyncRoute(saveOutline));
+router.patch('/sections/:id', validateBody(updateSectionSchema), asyncRoute(updateSection));
+router.delete('/sections/:id', asyncRoute(deleteSection));
 router.post('/formations/:id/courses', validateBody(createCourseSchema), asyncRoute(createCourse));
 router.put('/formations/:id/courses/order', validateBody(reorderCoursesSchema), asyncRoute(reorderCourses));
 router.patch('/courses/:id', validateBody(updateCourseSchema), asyncRoute(updateCourse));
 router.delete('/courses/:id', asyncRoute(deleteCourse));
+// Quizzes (P3-13)
+router.post('/formations/:id/quizzes', validateBody(createQuizSchema), asyncRoute(createQuiz));
+router.get('/quizzes/:id', asyncRoute(getQuiz));
+router.patch('/quizzes/:id', validateBody(updateQuizSchema), asyncRoute(updateQuiz));
+router.delete('/quizzes/:id', asyncRoute(deleteQuiz));
+router.post('/quizzes/:id/questions', validateBody(createQuestionSchema), asyncRoute(createQuestion));
+router.put('/quizzes/:id/questions/order', validateBody(reorderQuestionsSchema), asyncRoute(reorderQuestions));
+router.patch('/questions/:id', validateBody(updateQuestionSchema), asyncRoute(updateQuestion));
+router.delete('/questions/:id', asyncRoute(deleteQuestion));
+
+// Blocks of a lesson (P3-12)
+router.post('/courses/:id/blocks', validateBody(createBlockSchema), asyncRoute(createBlock));
+router.post('/courses/:id/blocks/upload', receiveFile, asyncRoute(uploadBlockFile));
+router.put('/courses/:id/blocks/order', validateBody(reorderBlocksSchema), asyncRoute(reorderBlocks));
+router.patch('/blocks/:id', validateBody(updateBlockSchema), asyncRoute(updateBlock));
+router.post('/blocks/:id/duplicate', asyncRoute(duplicateBlock));
+router.delete('/blocks/:id', asyncRoute(deleteBlock));
+router.get('/courses/:id/revisions', asyncRoute(listRevisions));
+router.post('/courses/:id/revisions', validateBody(createRevisionSchema), asyncRoute(createRevision));
+router.post('/courses/:id/revisions/:revisionId/restore', asyncRoute(restoreRevision));
 router.post('/courses/:id/media', receiveFile, asyncRoute(uploadCourseMedia));
 
 // Blog articles (P3-02)

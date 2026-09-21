@@ -768,7 +768,7 @@
 }
 
 .legal-card dd.todo {
-  color: var(--brass);
+  color: var(--warn);
   font-style: italic;
 }
 

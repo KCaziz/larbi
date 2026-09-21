@@ -1,10 +1,41 @@
-import { Link } from 'react-router-dom';
-import { GraduationCap, ImageOff } from 'lucide-react';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Copy, GraduationCap, ImageOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { api, errorKey } from '../../../lib/api.js';
 import { formatDate } from '../../../lib/format.js';
 import Button from '../../../components/ui/Button.jsx';
 import ContentList from '../../../components/cms/ContentList.jsx';
 import StatusBadge from '../../../components/cms/StatusBadge.jsx';
+
+// Duplicates a formation (content and files, as a draft) and opens the copy.
+function DuplicateButton({ formation }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [state, setState] = useState({ busy: false, error: null });
+  const run = async () => {
+    setState({ busy: true, error: null });
+    try {
+      const { formation: copy } = await api.post(`/admin/formations/${formation.id}/duplicate`);
+      navigate(`/admin/formations/${copy.id}`);
+    } catch (err) {
+      setState({ busy: false, error: t(errorKey(err)) });
+    }
+  };
+  return (
+    <>
+      <Button variant="secondary" onClick={run} disabled={state.busy} aria-label={`${t('admin.list.duplicate')} : ${formation.title}`}>
+        <Copy size={15} strokeWidth={1.9} aria-hidden="true" />
+        {state.busy ? t('admin.list.duplicating') : t('admin.list.duplicate')}
+      </Button>
+      {state.error && (
+        <small className="form-hint form-hint-error" role="alert">
+          {state.error}
+        </small>
+      )}
+    </>
+  );
+}
 
 // List of formations for the administrator. The list / create logic is the
 // shared CMS "content list" (also used by the articles).
@@ -36,9 +67,12 @@ export default function FormationsListPage() {
       key: 'actions',
       header: <span className="sr-only">{t('admin.list.columns.actions')}</span>,
       render: (f) => (
-        <Button to={`/admin/formations/${f.id}`} variant="secondary">
-          {t('admin.list.edit')}
-        </Button>
+        <span className="cms-row-actions">
+          <Button to={`/admin/formations/${f.id}`} variant="secondary">
+            {t('admin.list.edit')}
+          </Button>
+          <DuplicateButton formation={f} />
+        </span>
       ),
     },
   ];

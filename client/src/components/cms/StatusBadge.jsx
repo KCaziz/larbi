@@ -1,9 +1,11 @@
-import { CircleCheck, CircleDashed } from 'lucide-react';
+import { Archive, CircleCheck, CircleDashed, SearchCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const CONFIG = {
   draft: { icon: CircleDashed, tone: 'draft' },
+  in_review: { icon: SearchCheck, tone: 'review' },
   published: { icon: CircleCheck, tone: 'published' },
+  archived: { icon: Archive, tone: 'archived' },
 };
 
 // "Brouillon" / "Publié" — same wording for every kind of content.

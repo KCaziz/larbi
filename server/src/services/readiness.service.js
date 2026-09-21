@@ -1,3 +1,5 @@
+import { blockHasContent } from './blocks.service.js';
+import { isQuizComplete } from './quiz.service.js';
 import { richTextToPlain } from './sanitize.service.js';
 
 // "Is this content ready to be published?" — a list of plain requirements, each
@@ -9,6 +11,8 @@ import { richTextToPlain } from './sanitize.service.js';
 const hasText = (value) => Boolean(value && String(value).trim());
 
 export function courseHasContent(course) {
+  // A lesson written with blocks is judged on its blocks; an older one (no blocks yet) on its text and files.
+  if ((course.blocks?.length ?? 0) > 0) return course.blocks.some(blockHasContent);
   return Boolean(richTextToPlain(course.body)) || (course.media?.length ?? 0) > 0;
 }
 
@@ -21,6 +25,8 @@ export function formationReadiness(formation) {
     { key: 'courses', ok: courses.length > 0 },
     { key: 'coursesContent', ok: courses.length > 0 && courses.every(courseHasContent) },
     { key: 'certification', ok: !formation.certificationEnabled || hasText(formation.certificationTitle) },
+    // A quiz that is not finished (no question, a question without right answer...) blocks publication.
+    { key: 'quizzes', ok: (formation.quizzes ?? []).every(isQuizComplete) },
   ];
   return { ready: items.every((i) => i.ok), items };
 }

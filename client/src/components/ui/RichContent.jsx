@@ -6,7 +6,7 @@ import './RichContent.css';
 // The server already sanitises on save; this second pass, with the SAME
 // allow-list, means a bad value in the database still cannot run script here.
 const OPTIONS = {
-  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 's', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'hr'],
+  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 's', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'hr', 'code'],
   ALLOWED_ATTR: ['href', 'target', 'rel'],
   ALLOWED_URI_REGEXP: /^(?:https?|mailto):/i,
 };

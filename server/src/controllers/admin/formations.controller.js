@@ -9,9 +9,14 @@ import { HttpError } from '../../utils/httpError.js';
 export const FORMATION_INCLUDE = {
   category: true,
   coverImage: true,
+  sections: { orderBy: [{ position: 'asc' }, { createdAt: 'asc' }] },
+  quizzes: { include: { questions: { include: { choices: true } } } },
   courses: {
     orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
-    include: { media: { orderBy: { createdAt: 'asc' } } },
+    include: {
+      media: { orderBy: { createdAt: 'asc' } },
+      blocks: { orderBy: { position: 'asc' }, include: { media: true } },
+    },
   },
 };
 
@@ -34,6 +39,8 @@ export async function listFormations(req, res) {
       requiredAccessLevel: f.requiredAccessLevel,
       category: f.category ? { id: f.category.id, name: f.category.name } : null,
       cover: toMedia(f.coverImage),
+      subtitle: f.subtitle,
+      level: f.level,
       courseCount: f._count.courses,
       enrollmentCount: f._count.enrollments,
       publishedAt: f.publishedAt,
@@ -98,6 +105,21 @@ export async function publishFormation(req, res) {
           include: FORMATION_INCLUDE,
         });
   res.json({ formation: toAdminFormation(updated) });
+}
+
+// Moves a formation to any status (draft, in review, published, archived). Publishing is
+// the same guarded operation as before (422 + the list of what is missing); every other
+// status simply takes the formation out of the catalogue: the learners already enrolled
+// keep their access and their progress.
+export async function setFormationStatus(req, res) {
+  const { status } = req.body;
+  if (status === FORMATION_STATUS.PUBLISHED) return publishFormation(req, res);
+  const updated = await prisma.formation.update({
+    where: { id: req.params.id },
+    data: { status, publishedAt: null },
+    include: FORMATION_INCLUDE,
+  });
+  return res.json({ formation: toAdminFormation(updated) });
 }
 
 export async function unpublishFormation(req, res) {

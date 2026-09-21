@@ -58,6 +58,8 @@ export const api = {
   // Sends one file in the multipart field "file".
   upload: (path, file, options) => {
     const form = new FormData();
+    // Text fields go BEFORE the file (multipart readers see them first).
+    Object.entries(options?.fields ?? {}).forEach(([key, value]) => form.append(key, value));
     form.append('file', file);
     return request(path, { ...options, method: 'POST', body: form });
   },

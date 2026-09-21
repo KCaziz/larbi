@@ -485,7 +485,8 @@
     "nav": {
       "formations": "Courses",
       "articles": "Articles",
-      "newsletter": "Newsletter"
+      "newsletter": "Newsletter",
+      "dashboard": "Dashboard"
     },
     "shell": {
       "title": "Administration",
@@ -493,7 +494,9 @@
     },
     "status": {
       "draft": "Draft",
-      "published": "Published"
+      "published": "Published",
+      "in_review": "In review",
+      "archived": "Archived"
     },
     "confirm": {
       "cancel": "Cancel"
@@ -517,7 +520,9 @@
       },
       "emptyTitle": "No courses yet",
       "emptyBody": "Create your first course: a title is all you need to start.",
-      "loadError": "Unable to load the courses."
+      "loadError": "Unable to load the courses.",
+      "duplicate": "Duplicate",
+      "duplicating": "Duplicating…"
     },
     "newDialog": {
       "title": "New course",
@@ -536,9 +541,10 @@
     "steps": {
       "label": "Course creation steps",
       "info": "Information",
-      "courses": "Lessons",
+      "courses": "Plan and lessons",
       "certification": "Certification",
-      "publish": "Publishing"
+      "publish": "Publishing",
+      "preview": "Preview"
     },
     "info": {
       "title": "Course title",
@@ -558,7 +564,20 @@
       "coverHint": "JPG, PNG or WebP, 5 MB maximum. This image illustrates the course in the catalogue.",
       "coverAdd": "Choose an image",
       "coverReplace": "Replace the image",
-      "coverRemove": "Remove the image"
+      "coverRemove": "Remove the image",
+      "subtitle": "Subtitle",
+      "subtitleHint": "A catchy sentence shown under the title (optional).",
+      "pedagogyTitle": "Teaching presentation",
+      "level": "Level",
+      "levelHint": "Who is the formation for?",
+      "levelNone": "Not specified",
+      "objectives": "Learning objectives",
+      "objectivesHint": "What the learner will be able to do at the end. One line per objective.",
+      "objectivesPlaceholder": "E.g. Record a transaction in the journal",
+      "prerequisites": "Prerequisites",
+      "prerequisitesHint": "What to know or have before starting (optional).",
+      "prerequisitesPlaceholder": "E.g. Know the basics of accounting",
+      "duration": "Total duration (calculated): {{count}} min (sum of each lesson's duration)."
     },
     "courses": {
       "intro": "Add the lessons in the order learners will follow them.",
@@ -572,7 +591,8 @@
       "delete": "Delete this lesson",
       "deleteConfirmTitle": "Delete this lesson?",
       "deleteConfirmBody": "The lesson “{{title}}” and its files will be permanently deleted.",
-      "deleteConfirm": "Yes, delete"
+      "deleteConfirm": "Yes, delete",
+      "duplicate": "Duplicate the lesson"
     },
     "course": {
       "title": "Lesson title",
@@ -580,7 +600,7 @@
       "summary": "Summary (optional)",
       "summaryHint": "One sentence describing the lesson.",
       "content": "Lesson content",
-      "contentHint": "Write the lesson text here. You can also add videos or documents below.",
+      "contentHint": "Build the lesson with blocks: text, image, video, document, code, table, quote, callout or links. Everything is saved automatically.",
       "files": "Videos and documents",
       "filesHint": "MP4 or WebM video, PDF or image. Files stay private: only enrolled learners will have access.",
       "upload": "Add a file",
@@ -630,7 +650,8 @@
       "coursesContent": "Give every lesson some content (text, video or document)",
       "certification": "Name the certificate (or turn it off)",
       "done": "done",
-      "todo": "to do"
+      "todo": "to do",
+      "quizzes": "Finish or delete the incomplete quizzes"
     },
     "danger": {
       "title": "Delete the course",
@@ -836,6 +857,280 @@
         "recipients_other": "{{count}} confirmed recipients in total.",
         "noArticles": "No published article to send."
       }
+    },
+    "lines": {
+      "add": "Add",
+      "remove": "Remove",
+      "full": "Maximum reached ({{max}} lines)."
+    },
+    "outline": {
+      "intro": "Organise the formation into chapters, then lessons. Drag and drop with the handle (or use the arrows) to change the order; a lesson can move from one chapter to another.",
+      "empty": "No chapter yet: add the first one below.",
+      "dragChapter": "Move the chapter",
+      "dragLesson": "Move the lesson",
+      "chapterTitle": "Chapter title",
+      "lessonCount_one": "{{count}} lesson",
+      "lessonCount_other": "{{count}} lessons",
+      "chapterUp": "Move chapter up",
+      "chapterDown": "Move chapter down",
+      "deleteChapter": "Delete the chapter",
+      "deleteChapterTitle": "Delete this chapter?",
+      "deleteChapterBody": "The chapter \"{{title}}\" will be deleted. A chapter that still contains lessons cannot be deleted.",
+      "chapterNotEmpty": "This chapter still contains lessons: move or delete them first.",
+      "chapterEmpty": "No lesson in this chapter. Add one or drag one here.",
+      "addLesson": "Add the lesson",
+      "addLessonLabel": "Title of the new lesson of chapter {{chapter}}",
+      "addLessonPlaceholder": "Title of the new lesson",
+      "addChapter": "Add the chapter",
+      "addChapterLabel": "Title of the new chapter",
+      "addChapterPlaceholder": "Title of the new chapter",
+      "instructions": "To move: press Space, use the arrow keys, then Space to drop. Escape cancels.",
+      "announce": {
+        "start": "\"{{name}}\" picked up.",
+        "over": "Over \"{{name}}\".",
+        "end": "\"{{name}}\" dropped near \"{{target}}\".",
+        "cancel": "Move cancelled."
+      },
+      "duplicateChapter": "Duplicate the chapter"
+    },
+    "workflow": {
+      "state": {
+        "draft": "Draft: the formation is only visible in the administration.",
+        "in_review": "In review: waiting to be proofread before publication. It is not in the catalogue.",
+        "published": "Published on {{date}}: it is in the catalogue.",
+        "archived": "Archived: removed from the catalogue. Learners already enrolled keep their access and progress."
+      },
+      "action": {
+        "draft": "Back to draft",
+        "in_review": "Send to review",
+        "published": "Publish",
+        "archived": "Archive"
+      },
+      "done": {
+        "draft": "The formation is a draft.",
+        "in_review": "The formation is in review.",
+        "published": "The formation is published.",
+        "archived": "The formation is archived."
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "What exists, what is waiting for review and what is still missing.",
+      "newFormation": "Formations",
+      "newArticle": "Articles",
+      "formationsPublished": "Published formations",
+      "articlesPublished": "Published articles",
+      "articlesDraft": "Draft articles",
+      "enrollments": "Enrolments",
+      "completed": "Completed formations",
+      "subscribers": "Newsletter subscribers",
+      "review": "To review",
+      "reviewEmpty": "No formation waiting for review.",
+      "recentFormations": "Recent formations",
+      "recentArticles": "Recent articles",
+      "nothing": "Nothing yet.",
+      "toComplete": "To complete ({{count}})",
+      "loadError": "Unable to load the dashboard."
+    },
+    "blocks": {
+      "palette": "Add a block",
+      "types": {
+        "text": "Text",
+        "image": "Image",
+        "video": "Video",
+        "file": "Document",
+        "code": "Code",
+        "table": "Table",
+        "quote": "Quote",
+        "callout": "Callout",
+        "resources": "Links and resources"
+      },
+      "drag": "Move the block",
+      "duplicate": "Duplicate the block",
+      "delete": "Delete the block",
+      "insertBelow": "Insert a block here",
+      "empty": "This lesson is empty for now.",
+      "start": "Start by adding a block:",
+      "addAtEnd": "Add at the end:",
+      "instructions": "To move: press Space, use the arrow keys, then Space to drop. Escape cancels.",
+      "retry": "Try again",
+      "preview": "Student preview",
+      "edit": "Back to editing",
+      "previewLabel": "Lesson preview",
+      "previewHint": "This is what the student will see.",
+      "history": "History",
+      "status": {
+        "saved": "Everything is saved",
+        "saving": "Saving…",
+        "error": "Saving failed"
+      },
+      "deleteTitle": "Delete this block?",
+      "deleteBody": "The content of this block will be deleted. You can find it again in the lesson history.",
+      "deleteFileBody": "The file of this block will be permanently deleted with it.",
+      "caption": "Caption (optional)",
+      "text": {
+        "label": "Text"
+      },
+      "image": {
+        "alt": "Image description",
+        "altHint": "Read by screen readers and shown if the image does not load."
+      },
+      "file": {
+        "label": "Displayed name",
+        "description": "Description (optional)"
+      },
+      "code": {
+        "language": "Language",
+        "code": "Code",
+        "hint": "Plain text: shown as is, never executed."
+      },
+      "table": {
+        "hint": "Fill in the first row with the column titles, then the rows of the table.",
+        "header": "Title of column {{n}}",
+        "cell": "Row {{row}}, column {{column}}",
+        "removeColumn": "Delete column {{n}}",
+        "removeColumnShort": "Delete the column",
+        "removeRow": "Delete row {{n}}",
+        "removeRowShort": "Delete the row",
+        "addRow": "Add a row",
+        "addColumn": "Add a column"
+      },
+      "quote": {
+        "text": "Quote",
+        "author": "Author (optional)"
+      },
+      "callout": {
+        "variant": "Callout type",
+        "info": "Information",
+        "tip": "Tip",
+        "warning": "Warning",
+        "title": "Title (optional)",
+        "text": "Text"
+      },
+      "resources": {
+        "title": "List title (optional)",
+        "label": "Name of link {{n}}",
+        "labelPlaceholder": "Link name",
+        "url": "Address of link {{n}}",
+        "description": "Description of link {{n}}",
+        "descriptionPlaceholder": "Description (optional)",
+        "remove": "Remove link {{n}}",
+        "removeShort": "Remove the link",
+        "add": "Add a link"
+      },
+      "revision": {
+        "intro": "Every important change keeps the previous version. You can also save a version at a given moment and come back to it.",
+        "labelField": "Version name",
+        "placeholder": "Version name (optional)",
+        "save": "Save a version",
+        "saved": "Version saved.",
+        "restored": "Version restored.",
+        "automatic": "Automatic version",
+        "beforeRestore": "Before a restoration",
+        "blocks_one": "{{count}} block",
+        "blocks_other": "{{count}} blocks",
+        "restore": "Restore",
+        "restoreTitle": "Restore this version?",
+        "restoreBody": "The current content of the lesson will be replaced by this version. The current state is kept in the history: you can get it back. Files deleted since do not come back.",
+        "empty": "No version yet.",
+        "loadError": "Unable to load the history."
+      }
+    },
+    "quiz": {
+      "lessonArea": "Quiz of the lesson",
+      "finalTitle": "End-of-formation quiz",
+      "finalHint": "A quiz offered once all lessons are followed. It can be required to get the certificate.",
+      "add": {
+        "course": "Add a quiz to this lesson",
+        "section": "Add a quiz to this chapter",
+        "formation": "Add an end-of-formation quiz"
+      },
+      "defaultTitle": {
+        "course": "Lesson quiz",
+        "section": "Chapter quiz",
+        "formation": "Final quiz"
+      },
+      "rowInfo": "{{questions}} question(s) · {{points}} point(s)",
+      "edit": "Edit the quiz",
+      "close": "Close",
+      "requiredBadge": "Required",
+      "complete_one": "Complete quiz ({{count}} question)",
+      "complete_other": "Complete quiz ({{count}} questions)",
+      "notComplete": "Incomplete quiz: learners do not see it and the formation cannot be published.",
+      "loadError": "Unable to load the quiz.",
+      "settings": "Quiz settings",
+      "title": "Quiz title",
+      "titleRequired": "The quiz title is required.",
+      "instructions": "Instructions (optional)",
+      "instructionsHint": "A few words shown before starting.",
+      "passingScore": "Pass mark (%)",
+      "passingScoreHint": "Percentage of the points to get.",
+      "maxAttempts": "Number of attempts",
+      "maxAttemptsHint": "Leave empty for unlimited.",
+      "unlimited": "Unlimited",
+      "required": "Required quiz",
+      "requiredHint": "It must be passed to finish the formation and get the certificate.",
+      "showCorrection": "Show the correction",
+      "showCorrectionHint": "After each attempt: the right answers and the explanations. Otherwise only the score is shown.",
+      "shuffle": "Shuffle the order of the questions",
+      "saveSettings": "Save the settings",
+      "saved": "Settings saved.",
+      "questions": "Questions",
+      "noQuestions": "No question yet.",
+      "addQuestion": "Add a question:",
+      "instructionsDrag": "To move: press Space, use the arrow keys, then Space to drop. Escape cancels.",
+      "delete": "Delete this quiz",
+      "deleteTitle": "Delete this quiz?",
+      "deleteBody": "The quiz, its questions and the learners' results will be deleted.",
+      "types": {
+        "single": "Single choice",
+        "multiple": "Multiple choice",
+        "true_false": "True / False",
+        "text": "Free answer"
+      },
+      "problems": {
+        "prompt": "Write the question.",
+        "choices": "Add at least two possible answers.",
+        "choiceText": "Fill in every possible answer.",
+        "noCorrect": "Mark the right answer.",
+        "manyCorrect": "Only one answer can be correct.",
+        "accepted": "Add at least one accepted answer.",
+        "trueFalse": "Malformed true / false question: delete it and create it again.",
+        "noQuestions": "Add at least one question.",
+        "questions": "Some questions are incomplete."
+      },
+      "question": {
+        "drag": "Move the question",
+        "delete": "Delete the question",
+        "deleteTitle": "Delete this question?",
+        "deleteBody": "The question will be permanently deleted.",
+        "complete": "Complete",
+        "incomplete": "To complete",
+        "prompt": "Question",
+        "choicesSingle": "Possible answers (tick the right one)",
+        "choicesMultiple": "Possible answers (tick the right ones)",
+        "markCorrect": "Answer {{n}} is correct",
+        "choicePlaceholder": "Answer {{n}}",
+        "choiceText": "Text of answer {{n}}",
+        "removeChoice": "Remove answer {{n}}",
+        "removeChoiceShort": "Remove the answer",
+        "addChoice": "Add an answer",
+        "rightAnswer": "Right answer",
+        "true": "True",
+        "false": "False",
+        "accepted": "Accepted answers",
+        "acceptedHint": "Capitals, accents and extra spaces are ignored. Add every valid wording.",
+        "acceptedPlaceholder": "E.g. Paris",
+        "points": "Points",
+        "explanation": "Explanation (optional)",
+        "explanationHint": "Shown to the learner after the correction.",
+        "save": "Save the question",
+        "saved": "Question saved."
+      }
+    },
+    "preview": {
+      "intro": "This is the formation as learners will see it: presentation, plan, every lesson opened block by block, and where the quizzes are. Click a lesson to unfold it.",
+      "unsaved": "Some changes are not saved yet: they do not appear here."
     }
   },
   "learn": {
@@ -882,7 +1177,10 @@
       "enrolling": "Enrolling…",
       "premiumTitle": "Reserved for premium accounts",
       "premiumBody": "This course is only available with a premium account.",
-      "premiumLink": "See the access levels"
+      "premiumLink": "See the access levels",
+      "totalDuration": "{{count}} min",
+      "objectives": "Objectives",
+      "prerequisites": "Prerequisites"
     },
     "certification": {
       "title": "Certificate",
@@ -926,7 +1224,12 @@
       "loadError": "Unable to load your courses."
     },
     "lessonCount_one": "{{count}} lesson",
-    "lessonCount_other": "{{count}} lessons"
+    "lessonCount_other": "{{count}} lessons",
+    "level": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    }
   },
   "certificate": {
     "title": "My certificate",
@@ -1007,5 +1310,57 @@
         "doneBody": "You will no longer receive the newsletter."
       }
     }
+  },
+  "blocks": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "download": "Download",
+    "table": "Table",
+    "external": "External link"
+  },
+  "quiz": {
+    "title": "Quiz",
+    "required": "Required",
+    "passed": "Passed ({{score}}%)",
+    "bestScore": "Best score: {{score}}%",
+    "facts_one": "{{count}} question · pass mark {{score}}%",
+    "facts_other": "{{count}} questions · pass mark {{score}}%",
+    "attemptsLeft_one": "{{count}} attempt left",
+    "attemptsLeft_other": "{{count}} attempts left",
+    "open": "Open the quiz",
+    "start": "Start the quiz",
+    "resume": "Resume the quiz",
+    "retry": "Try again",
+    "seeLast": "See my last result",
+    "requiredExplain": "This quiz is required to finish the formation.",
+    "requiredLeft_one": "{{count}} required quiz to pass",
+    "requiredLeft_other": "{{count}} required quizzes to pass",
+    "noAttemptsLeft": "You have used all your attempts.",
+    "alreadySubmitted": "These answers were already sent.",
+    "unavailable": "This quiz is not available yet.",
+    "notFound": "This quiz does not exist.",
+    "loadError": "Unable to load this quiz.",
+    "questionNumber": "Question {{n}}",
+    "points_one": "{{count}} point",
+    "points_other": "{{count}} points",
+    "hintSingle": "One answer only",
+    "hintMultiple": "Several answers possible",
+    "hintText": "Type your answer",
+    "true": "True",
+    "false": "False",
+    "correct": "Correct answer",
+    "incorrect": "Incorrect answer",
+    "rightAnswer": "Correct answer",
+    "yourWrongAnswer": "Your answer",
+    "acceptedAnswers": "Accepted answers: {{answers}}",
+    "answered_one": "{{done}} question answered out of {{total}}",
+    "answered_other": "{{done}} questions answered out of {{total}}",
+    "submit": "Submit my answers",
+    "resultPassed": "Well done, quiz passed!",
+    "resultFailed": "Quiz not passed: at least {{score}}% is needed.",
+    "pointsEarned": "{{earned}} points out of {{total}}",
+    "certified": "Certificate issued",
+    "noCorrection": "The detailed correction is not shown for this quiz.",
+    "backToQuiz": "Back to the quiz"
   }
 }

@@ -45,6 +45,9 @@ model User {
   // Blog (P3-01)
   articlesAuthored Article[]
 
+  // CMS (P3-12)
+  lessonRevisions LessonRevision[]
+
   @@map("users")
 }
 
@@ -108,6 +111,14 @@ model Formation {
   certificationTitle       String?
   certificationDescription String?
 
+  // Pedagogical presentation (P3-11). The total duration is NOT stored: it is the sum
+  // of the lessons' estimated minutes, so it can never disagree with the real plan.
+  subtitle      String?
+  // "beginner" | "intermediate" | "advanced" (CHECK in the migration), null = not set.
+  level         String?
+  objectives    String[] @default([])
+  prerequisites String[] @default([])
+
   createdById String?
   createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
@@ -116,7 +127,12 @@ model Formation {
   updatedAt   DateTime  @updatedAt
 
   courses     Course[]
+  sections    Section[]
   enrollments Enrollment[]
+
+  // Quizzes of the formation (P3-13); `finalQuiz` is the one at the end of the formation.
+  quizzes   Quiz[] @relation("FormationQuizzes")
+  finalQuiz Quiz?  @relation("FinalQuiz")
 
   @@index([status])
   @@map("formations")
@@ -139,12 +155,22 @@ model Course {
   // Required courses must all be completed to finish the formation (P2-04).
   isRequired       Boolean @default(true)
   estimatedMinutes Int?
+  // Chapter of the lesson (P3-11). COMPOSITE foreign key (sectionId, formationId) ->
+  // sections(id, formationId): a lesson can never sit in a chapter of another formation, and
+  // a chapter that still holds lessons cannot be deleted (RESTRICT). `position` stays the
+  // GLOBAL order of the lessons inside the formation (chapters first, then the order in the
+  // chapter): the learner side and the progress code keep reading it unchanged.
+  sectionId        String?
+  section          Section? @relation(fields: [sectionId, formationId], references: [id, formationId], onDelete: Restrict)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   media    Media[]
   progress CourseProgress[]
+  blocks    LessonBlock[]
+  revisions LessonRevision[]
+  quizzes   Quiz[]
 
   // Target of the composite foreign key from CourseProgress: guarantees a
   // progress row can only point to a course of the SAME formation as its
@@ -184,6 +210,13 @@ model Media {
 
   @@index([courseId])
   @@index([articleId])
+  
+  // Blocks of a lesson that show this file (P3-12). Deleting the file deletes those blocks.
+  blocks LessonBlock[]
+
+  // Target of the composite foreign key from lesson_blocks: a block can only show a file
+  // that belongs to ITS OWN lesson.
+  @@unique([id, courseId])
   @@map("media")
 }
 
@@ -204,6 +237,7 @@ model Enrollment {
 
   courseProgress CourseProgress[]
   certification  Certification?
+  quizAttempts   QuizAttempt[]
 
   @@unique([userId, formationId])
   @@unique([id, formationId])
@@ -367,4 +401,198 @@ model NewsletterSubscriber {
 
   @@index([status])
   @@map("newsletter_subscribers")
+}
+
+// A chapter of a formation (P3-11): groups lessons. A chapter that still contains
+// lessons cannot be deleted (RESTRICT): progress lives on the lessons.
+model Section {
+  id          String    @id @default(uuid())
+  formationId String
+  formation   Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  position    Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courses Course[]
+  quizzes Quiz[]
+
+  // Target of the composite foreign key from courses.
+  @@unique([id, formationId])
+  @@index([formationId, position])
+  @@map("sections")
+}
+
+// ---------------------------------------------------------------------------
+// Content of a lesson as an ordered list of typed blocks (P3-12). The server validates
+// `data` for each type (services/blocks.service.js): the browser never sends raw HTML that
+// is stored as is. `courses.body` and the files attached before blocks existed are kept
+// (expand / contract): a lesson WITHOUT blocks is still read the old way.
+// ---------------------------------------------------------------------------
+model LessonBlock {
+  id       String @id @default(uuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // text | image | video | file | code | table | quote | callout | resources (CHECK)
+  type     String
+  position Int
+  data     Json   @default("{}")
+
+  // image / video / file blocks show a file of the same lesson.
+  mediaId String?
+  media   Media?  @relation(fields: [mediaId, courseId], references: [id, courseId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId, position])
+  @@map("lesson_blocks")
+}
+
+// Snapshot of the blocks of a lesson: history with restoration. Taken automatically (at most
+// one every few minutes while editing) and on demand.
+model LessonRevision {
+  id       String @id @default(uuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  blocks Json
+  label  String?
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([courseId, createdAt])
+  @@map("lesson_revisions")
+}
+
+// ---------------------------------------------------------------------------
+// Quizzes (P3-13). A quiz is attached to a lesson, to a chapter or to the END of the
+// formation (at most one per target). Correct answers, explanations and accepted answers
+// NEVER leave the server before a learner has submitted an attempt; grading is done by the
+// server. A REQUIRED quiz must be passed to finish the formation (and get the certificate).
+// ---------------------------------------------------------------------------
+model Quiz {
+  id          String    @id @default(uuid())
+  formationId String
+  formation   Formation @relation("FormationQuizzes", fields: [formationId], references: [id], onDelete: Cascade)
+
+  // "course" (a lesson) | "section" (a chapter) | "formation" (the end of it). CHECK in the migration.
+  scope     String
+  courseId  String?
+  course    Course?  @relation(fields: [courseId, formationId], references: [id, formationId], onDelete: Cascade)
+  sectionId String?
+  section   Section? @relation(fields: [sectionId, formationId], references: [id, formationId], onDelete: Cascade)
+  // Set (to the formation id) only for the final quiz: makes "one final quiz per formation" a unique key.
+  finalFormationId String?    @unique
+  finalOf          Formation? @relation("FinalQuiz", fields: [finalFormationId], references: [id], onDelete: Cascade)
+
+  title            String
+  instructions     String  @default("")
+  // Percentage of the points needed to pass (0..100).
+  passingScore     Int     @default(70)
+  // null = unlimited attempts.
+  maxAttempts      Int?
+  shuffleQuestions Boolean @default(false)
+  // A required quiz must be passed to finish the formation.
+  isRequired       Boolean @default(false)
+  // Show the right answers and the explanations after an attempt.
+  showCorrection   Boolean @default(true)
+  // Denormalised: true when the quiz has questions and every question is well formed (a right
+  // answer, enough choices...). Kept up to date by the CMS at every change; only a complete quiz
+  // is served to learners, and only a complete REQUIRED quiz blocks the end of a formation. The
+  // consistency check recomputes it.
+  isComplete       Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@unique([id, formationId])
+  @@unique([courseId])
+  @@unique([sectionId])
+  @@index([formationId])
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id     String @id @default(uuid())
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  // "single" | "multiple" | "true_false" | "text" (CHECK). true_false has exactly two choices
+  // whose texts are "true" and "false" (the interface translates them).
+  type        String
+  position    Int
+  prompt      String @default("")
+  // Shown after the correction.
+  explanation String @default("")
+  points      Int    @default(1)
+  // "text" questions: the answers accepted (compared without case, accents or extra spaces).
+  acceptedAnswers String[] @default([])
+
+  choices QuizChoice[]
+
+  @@index([quizId, position])
+  @@map("quiz_questions")
+}
+
+model QuizChoice {
+  id         String       @id @default(uuid())
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  position   Int
+  text       String
+  isCorrect  Boolean      @default(false)
+
+  @@index([questionId, position])
+  @@map("quiz_choices")
+}
+
+// One try of a learner. Created when the learner starts (the questions are served then, without
+// the answers), completed when the learner submits (graded by the server, once).
+model QuizAttempt {
+  id           String     @id @default(uuid())
+  quizId       String
+  formationId  String
+  quiz         Quiz       @relation(fields: [quizId, formationId], references: [id, formationId], onDelete: Cascade)
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId, formationId], references: [id, formationId], onDelete: Cascade)
+
+  startedAt     DateTime  @default(now())
+  submittedAt   DateTime?
+  // Order the questions were served in (fixed per attempt, so resuming shows the same order).
+  questionOrder String[]  @default([])
+  score         Int?
+  earnedPoints  Int?
+  totalPoints   Int?
+  passed        Boolean?
+
+  answers QuizAttemptAnswer[]
+
+  @@index([enrollmentId, quizId])
+  @@index([quizId])
+  @@map("quiz_attempts")
+}
+
+model QuizAttemptAnswer {
+  id         String      @id @default(uuid())
+  attemptId  String
+  attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  // No foreign key: the history of a graded attempt outlives an edited question.
+  questionId String
+  choiceIds  String[]    @default([])
+  text       String      @default("")
+  correct    Boolean
+  points     Int
+
+  @@unique([attemptId, questionId])
+  @@map("quiz_attempt_answers")
 }

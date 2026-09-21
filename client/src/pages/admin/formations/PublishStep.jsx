@@ -1,4 +1,5 @@
 import PublishPanel from '../../../components/cms/PublishPanel.jsx';
+import StatusSection from './StatusSection.jsx';
 
 // Publication step of a formation: the shared CMS publish panel with the
 // formation wording (admin.publish.* / admin.danger.*).
@@ -12,6 +13,7 @@ export default function PublishStep({ formation, hasUnsaved, onChanged, onGo }) 
       hasUnsaved={hasUnsaved}
       onChanged={onChanged}
       onGo={onGo}
+      statusSection={<StatusSection formation={formation} hasUnsaved={hasUnsaved} onChanged={onChanged} />}
     />
   );
 }

@@ -1,37 +1,38 @@
 import { useEffect, useState } from 'react';
-import { ChevronDown, Trash2 } from 'lucide-react';
+import { ChevronDown, Copy, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api, errorKey } from '../../../lib/api.js';
 import Button from '../../../components/ui/Button.jsx';
 import Field from '../../../components/cms/Field.jsx';
-import FileUpload from '../../../components/cms/FileUpload.jsx';
-import MediaList from '../../../components/cms/MediaList.jsx';
 import MoveButtons from '../../../components/cms/MoveButtons.jsx';
-import RichTextEditor from '../../../components/cms/RichTextEditor.jsx';
+import BlockEditor from '../../../components/blocks/BlockEditor.jsx';
+import QuizAttach from '../../../components/quiz/QuizAttach.jsx';
 
 const toDraft = (c) => ({
   title: c.title,
   summary: c.summary ?? '',
-  body: c.body ?? '',
   estimatedMinutes: c.estimatedMinutes ?? '',
   isRequired: c.isRequired,
 });
 
 // One course of the formation. It keeps its own unsaved edits, so switching
 // steps or opening another course never loses what was typed.
-export default function CourseCard({ course, index, count, open, onToggle, onMove, onDelete, onChanged, onDirtyChange }) {
+export default function CourseCard({ formation, course, index, count, open, dragHandle, onToggle, onMove, onDelete, onChanged, onDirtyChange }) {
   const { t } = useTranslation();
   const [saved, setSaved] = useState(() => toDraft(course)); // last version stored on the server
   const [draft, setDraft] = useState(() => toDraft(course));
-  const [resetKey, setResetKey] = useState(0); // tells the rich editor to reload its content
+  const [pendingBlocks, setPendingBlocks] = useState(false); // block edits waiting to be saved
+  // The block editor is created the first time the lesson is opened and then kept (its state,
+  // and the unsaved words in it, survive opening another lesson).
+  const [everOpened, setEverOpened] = useState(open);
+  if (open && !everOpened) setEverOpened(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
-  const [removingId, setRemovingId] = useState(null);
 
   const dirty = JSON.stringify(draft) !== JSON.stringify(saved);
   useEffect(() => {
-    onDirtyChange(course.id, dirty);
-  }, [dirty, course.id, onDirtyChange]);
+    onDirtyChange(course.id, dirty || pendingBlocks);
+  }, [dirty, pendingBlocks, course.id, onDirtyChange]);
 
   const setField = (name, value) => {
     setMessage(null);
@@ -49,14 +50,12 @@ export default function CourseCard({ course, index, count, open, onToggle, onMov
       const { course: updated } = await api.patch(`/admin/courses/${course.id}`, {
         title: draft.title,
         summary: draft.summary,
-        body: draft.body || null,
         estimatedMinutes: draft.estimatedMinutes === '' ? null : Number(draft.estimatedMinutes),
         isRequired: draft.isRequired,
       });
       const next = toDraft(updated);
       setSaved(next);
       setDraft(next);
-      setResetKey((k) => k + 1); // show the server-cleaned text
       setMessage({ type: 'ok', text: t('admin.course.saved') });
       await onChanged();
     } catch (err) {
@@ -68,27 +67,25 @@ export default function CourseCard({ course, index, count, open, onToggle, onMov
 
   const discard = () => {
     setDraft(saved);
-    setResetKey((k) => k + 1);
     setMessage(null);
   };
 
-  const removeFile = async (media) => {
-    setRemovingId(media.id);
+  const duplicate = async () => {
+    setMessage(null);
     try {
-      await api.delete(`/admin/media/${media.id}`);
+      await api.post(`/admin/courses/${course.id}/duplicate`);
       await onChanged();
     } catch (err) {
       setMessage({ type: 'error', text: t(errorKey(err)) });
-    } finally {
-      setRemovingId(null);
     }
   };
 
   const panelId = `course-panel-${course.id}`;
 
   return (
-    <li className={`cms-course ${open ? 'open' : ''}`}>
+    <div role="listitem" className={`cms-course ${open ? 'open' : ''}`}>
       <div className="cms-course-head">
+        {dragHandle}
         <span className="cms-course-number" aria-hidden="true">
           {index + 1}
         </span>
@@ -98,6 +95,15 @@ export default function CourseCard({ course, index, count, open, onToggle, onMov
           <ChevronDown className="cms-course-chevron" size={18} strokeWidth={1.9} aria-hidden="true" />
         </button>
         <MoveButtons index={index} count={count} onMove={onMove} />
+        <button
+          type="button"
+          className="cms-icon-button"
+          onClick={duplicate}
+          aria-label={`${t('admin.courses.duplicate')} : ${saved.title}`}
+          title={t('admin.courses.duplicate')}
+        >
+          <Copy size={16} strokeWidth={1.75} aria-hidden="true" />
+        </button>
         <button
           type="button"
           className="cms-icon-button danger"
@@ -132,31 +138,16 @@ export default function CourseCard({ course, index, count, open, onToggle, onMov
         </Field>
 
         <div className="form-field cms-field">
-          <label htmlFor={`course-body-${course.id}`}>{t('admin.course.content')}</label>
-          <small id={`course-body-${course.id}-hint`} className="form-hint">
-            {t('admin.course.contentHint')}
-          </small>
-          <RichTextEditor
-            id={`course-body-${course.id}`}
-            describedBy={`course-body-${course.id}-hint`}
-            value={draft.body}
-            resetKey={resetKey}
-            onChange={(html) => setField('body', html)}
-          />
+          <span className="cms-label" id={`course-content-${course.id}`}>
+            {t('admin.course.content')}
+          </span>
+          <small className="form-hint">{t('admin.course.contentHint')}</small>
+          {everOpened && <BlockEditor course={course} onContentChange={onChanged} onPendingChange={setPendingBlocks} />}
         </div>
 
         <div className="form-field cms-field">
-          <span className="cms-label">{t('admin.course.files')}</span>
-          <small className="form-hint">{t('admin.course.filesHint')}</small>
-          <MediaList items={course.media} onRemove={removeFile} busyId={removingId} />
-          <FileUpload
-            label={t('admin.course.upload')}
-            accept="video/mp4,video/webm,application/pdf,image/png,image/jpeg,image/webp"
-            onUpload={async (file) => {
-              await api.upload(`/admin/courses/${course.id}/media`, file);
-              await onChanged();
-            }}
-          />
+          <span className="cms-label">{t('admin.quiz.lessonArea')}</span>
+          <QuizAttach formation={formation} scope="course" courseId={course.id} onChanged={onChanged} />
         </div>
 
         <div className="cms-course-options">
@@ -194,6 +185,6 @@ export default function CourseCard({ course, index, count, open, onToggle, onMov
           </Button>
         </div>
       </div>
-    </li>
+    </div>
   );
 }

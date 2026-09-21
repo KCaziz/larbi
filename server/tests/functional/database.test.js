@@ -22,8 +22,12 @@ describe('value constraints', () => {
     await rejects(t.user({ accessLevel: 'gold' }), 'accessLevel');
   });
 
-  test('formations and articles: status is draft/published and always agrees with the publication date', async () => {
-    await rejects(t.prisma.formation.create({ data: { slug: t.unique('f'), title: 'x', description: '', status: 'archived' } }), 'formation status');
+  test('formations and articles: status is one of the known values and always agrees with the publication date', async () => {
+    await rejects(t.prisma.formation.create({ data: { slug: t.unique('f'), title: 'x', description: '', status: 'deleted' } }), 'formation status');
+    await rejects(t.prisma.formation.create({ data: { slug: t.unique('f'), title: 'x', description: '', status: 'archived', publishedAt: new Date() } }), 'archived with date');
+    for (const status of ['draft', 'in_review', 'archived']) {
+      await t.prisma.formation.create({ data: { slug: t.unique('f'), title: 'x', description: '', status } }); // accepted: no publication date
+    }
     await rejects(t.prisma.formation.create({ data: { slug: t.unique('f'), title: 'x', description: '', status: 'published' } }), 'published without date');
     await rejects(t.prisma.formation.create({ data: { slug: t.unique('f'), title: 'x', description: '', status: 'draft', publishedAt: new Date() } }), 'draft with date');
     await rejects(t.article({ status: 'archived' }), 'article status');

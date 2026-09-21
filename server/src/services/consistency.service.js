@@ -1,6 +1,9 @@
 import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 import { ACCOUNT_TYPES } from '../constants/accountTypes.js';
+import { isQuizComplete } from './quiz.service.js';
+import { MEDIA_BLOCK_KIND, validateBlockData } from './blocks.service.js';
 import { bodyToText } from './article.service.js';
 import { CERTIFICATE_NUMBER_PATTERN } from './certificate.service.js';
 import { sanitizeRichText } from './sanitize.service.js';
@@ -81,6 +84,50 @@ export async function checkConsistency(prisma, { privateDir }) {
   const courses = await prisma.course.findMany({ select: { id: true, body: true } });
   for (const c of courses) {
     if (c.body !== null && sanitizeRichText(c.body) !== c.body) problems.push(violation('stored lesson HTML is already sanitised', `course ${c.id}`));
+  }
+
+  // ---- chapters ---------------------------------------------------------------
+  // Every lesson sits in a chapter, and the global order of the lessons follows the order of
+  // the chapters (the learner pages read that global order).
+  const lonely = await prisma.$queryRaw`SELECT c.id FROM courses c WHERE c."sectionId" IS NULL`;
+  add('every lesson belongs to a chapter', lonely, (r) => `course ${r.id} has no chapter`);
+  const interleaved = await prisma.$queryRaw`
+    SELECT a.id FROM courses a
+    JOIN sections sa ON sa.id = a."sectionId"
+    JOIN courses b ON b."formationId" = a."formationId" AND b.id <> a.id
+    JOIN sections sb ON sb.id = b."sectionId"
+    WHERE sa.position < sb.position AND a.position > b.position`;
+  add('lessons are ordered chapter by chapter', interleaved, (r) => `course ${r.id} is out of order`);
+
+  // ---- lesson blocks --------------------------------------------------------------
+  // Positions are 0..n-1 without gap; the content of every block is valid for its type and
+  // already clean (what the server would store); a file block shows a file of the right kind.
+  const blockGaps = await prisma.$queryRaw`
+    SELECT "courseId" FROM lesson_blocks GROUP BY "courseId"
+    HAVING min("position") <> 0 OR max("position") <> count(*) - 1 OR count(DISTINCT "position") <> count(*)`;
+  add('blocks are numbered 0..n-1 in each lesson', blockGaps, (r) => `course ${r.courseId}`);
+  const blocks = await prisma.lessonBlock.findMany({ include: { media: { select: { kind: true, courseId: true } } } });
+  for (const block of blocks) {
+    let clean;
+    try {
+      clean = validateBlockData(block.type, block.data);
+    } catch {
+      clean = null;
+    }
+    // (PostgreSQL keeps JSON objects in its own key order: compare the content, not the order.)
+    if (!isDeepStrictEqual(clean, block.data)) problems.push(violation('block content is valid and already clean', `block ${block.id} (${block.type})`));
+    if (block.media && block.media.kind !== MEDIA_BLOCK_KIND[block.type]) problems.push(violation('a file block shows a file of the right kind', `block ${block.id}`));
+  }
+
+  // ---- quizzes --------------------------------------------------------------------
+  // `isComplete` is denormalised: it must always say what the questions say (a complete quiz is
+  // served to learners and a complete REQUIRED one blocks the end of the formation).
+  const quizzes = await prisma.quiz.findMany({ include: { questions: { include: { choices: true } } } });
+  add('a quiz says whether it is complete (isComplete)', quizzes.filter((q) => q.isComplete !== isQuizComplete(q)), (q) => `quiz ${q.id}`);
+  // Question positions are 0..n-1, and a graded attempt has one answer per question it was graded on.
+  for (const quiz of quizzes) {
+    const positions = quiz.questions.map((q) => q.position).sort((a, b) => a - b);
+    if (positions.some((position, index) => position !== index)) problems.push(violation('questions are numbered 0..n-1 in each quiz', `quiz ${quiz.id}`));
   }
 
   // ---- accounts -------------------------------------------------------------

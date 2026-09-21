@@ -5,6 +5,7 @@ import { api, errorKey } from '../../../lib/api.js';
 import Button from '../../../components/ui/Button.jsx';
 import Field from '../../../components/cms/Field.jsx';
 import ImageField from '../../../components/cms/ImageField.jsx';
+import LinesInput from '../../../components/cms/LinesInput.jsx';
 
 export default function InfoStep({ draft, setField, titleError, formation, categories, onCategoryCreated, onChanged }) {
   const { t } = useTranslation();
@@ -47,6 +48,17 @@ export default function InfoStep({ draft, setField, titleError, formation, categ
         />
       </Field>
 
+      <Field label={t('admin.info.subtitle')} htmlFor="f-subtitle" hint={t('admin.info.subtitleHint')}>
+        <input
+          id="f-subtitle"
+          type="text"
+          maxLength={160}
+          value={draft.subtitle}
+          onChange={(e) => setField('subtitle', e.target.value)}
+          aria-describedby="f-subtitle-hint"
+        />
+      </Field>
+
       <Field label={t('admin.info.description')} htmlFor="f-description" hint={t('admin.info.descriptionHint')}>
         <textarea
           id="f-description"
@@ -57,6 +69,27 @@ export default function InfoStep({ draft, setField, titleError, formation, categ
           aria-describedby="f-description-hint"
         />
       </Field>
+
+      <fieldset className="cms-fieldset">
+        <legend>{t('admin.info.pedagogyTitle')}</legend>
+        <Field label={t('admin.info.level')} htmlFor="f-level" hint={t('admin.info.levelHint')}>
+          <select id="f-level" value={draft.level} onChange={(e) => setField('level', e.target.value)} aria-describedby="f-level-hint">
+            <option value="">{t('admin.info.levelNone')}</option>
+            {['beginner', 'intermediate', 'advanced'].map((level) => (
+              <option key={level} value={level}>
+                {t(`learn.level.${level}`)}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label={t('admin.info.objectives')} htmlFor="f-objectives" hint={t('admin.info.objectivesHint')}>
+          <LinesInput id="f-objectives" value={draft.objectives} onChange={(v) => setField('objectives', v)} placeholder={t('admin.info.objectivesPlaceholder')} describedBy="f-objectives-hint" />
+        </Field>
+        <Field label={t('admin.info.prerequisites')} htmlFor="f-prerequisites" hint={t('admin.info.prerequisitesHint')}>
+          <LinesInput id="f-prerequisites" value={draft.prerequisites} onChange={(v) => setField('prerequisites', v)} placeholder={t('admin.info.prerequisitesPlaceholder')} describedBy="f-prerequisites-hint" />
+        </Field>
+        <p className="cms-muted">{t('admin.info.duration', { count: formation.totalMinutes })}</p>
+      </fieldset>
 
       <Field label={t('admin.info.category')} htmlFor="f-category">
         <select id="f-category" value={draft.categoryId} onChange={(e) => setField('categoryId', e.target.value)}>

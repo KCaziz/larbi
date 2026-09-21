@@ -58,8 +58,8 @@
 }
 
 .newsletter-status-pending {
-  background: var(--brass-bg);
-  color: var(--brass);
+  background: var(--warn-bg);
+  color: var(--warn);
 }
 
 .newsletter-status-unsubscribed {

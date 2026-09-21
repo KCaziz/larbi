@@ -38,6 +38,17 @@ export const newsletterLinkLimiter = rateLimit({
   message: { error: { message: 'Too many requests, please try again later' } },
 });
 
+// Quiz attempts (P3-13), per ACCOUNT (the routes are behind requireAuth): a real learner starts
+// and submits a handful of attempts; this only stops scripted guessing of the answers.
+export const quizLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  limit: Number(process.env.QUIZ_RATE_LIMIT) || 40,
+  keyGenerator: (req) => `user:${req.user.id}`,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: { message: 'Too many attempts, please try again later' } },
+});
+
 // Public certificate verification: the numbers are unguessable (60 bits), the
 // limit protects the database from being hammered by scripts.
 export const certificateVerifyLimiter = rateLimit({
