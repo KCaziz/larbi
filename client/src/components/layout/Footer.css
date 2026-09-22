@@ -26,8 +26,56 @@
 
 .footer-brand p {
   max-width: 320px;
-  margin: 0;
+  margin: 0 0 18px;
   font-size: 0.95rem;
+}
+
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-contact li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+}
+
+.footer-contact a,
+.footer-contact span {
+  color: var(--band-text);
+  text-decoration: none;
+}
+
+.footer-contact a:hover {
+  color: var(--band-heading);
+}
+
+.footer-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-social a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--band-text);
+  font-size: 0.92rem;
+  text-decoration: none;
+}
+
+.footer-social a:hover {
+  color: var(--band-heading);
 }
 
 .footer-column h3 {

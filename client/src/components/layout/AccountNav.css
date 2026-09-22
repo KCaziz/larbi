@@ -10,6 +10,7 @@
   padding: 0;
   list-style: none;
   overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .account-nav a {

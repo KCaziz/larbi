@@ -9,6 +9,7 @@ import PageToolbar from '../../../components/cms/PageToolbar.jsx';
 import PublishPanel from '../../../components/cms/PublishPanel.jsx';
 import SaveBar from '../../../components/cms/SaveBar.jsx';
 import StatusBadge from '../../../components/cms/StatusBadge.jsx';
+import StepNav from '../../../components/cms/StepNav.jsx';
 import StepTabs from '../../../components/cms/StepTabs.jsx';
 import UnsavedChangesGuard from '../../../components/cms/UnsavedChangesGuard.jsx';
 import ContentStep from './ContentStep.jsx';
@@ -212,6 +213,8 @@ export default function ArticleEditorPage() {
           }
         />
       </div>
+
+      <StepNav steps={steps} active={step} onChange={setStep} />
 
       {(step === 'content' || step === 'organize') && (
         <SaveBar dirty={dirty} saving={saving} saved={saved && !dirty} error={saveError} onSave={save} onDiscard={discard} />

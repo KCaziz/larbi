@@ -267,6 +267,13 @@ describe('administration of the subscribers', () => {
     assert.ok(!res.text.includes('carol@example.com'), 'pending addresses are not exported');
   });
 
+  test('CSV export: status=all exports everyone, whatever their status', async () => {
+    const res = await admGet('/subscribers.csv?status=all');
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get('content-disposition'), /newsletter-all\.csv/);
+    assert.ok(res.text.includes('carol@example.com'), 'a pending address is exported too');
+  });
+
   test('erasure: deleting a subscriber removes the row; an unknown id is a 404', async () => {
     const carol = await row('carol@example.com');
     const res = await t.request('DELETE', `/admin/newsletter/subscribers/${carol.id}`, { user: admin });

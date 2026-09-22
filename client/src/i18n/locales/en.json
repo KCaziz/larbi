@@ -34,6 +34,7 @@
   "footer": {
     "copyright": "© {{year}} {{brand}}. All rights reserved.",
     "tagline": "Courses, a blog and business tools for freelancers and companies.",
+    "social": "Social media",
     "columns": {
       "platform": "Platform",
       "company": "Company",
@@ -328,7 +329,7 @@
   },
   "legal": {
     "title": "Legal notice",
-    "notice": "This page cannot be published as is: the legal information below must be supplied and validated by the client. No value has been invented.",
+    "notice": "This page cannot be published as is: the legal information below must be supplied and validated by the client.",
     "editorTitle": "Site publisher",
     "fields": {
       "companyName": "Company name",
@@ -837,7 +838,8 @@
       "searchButton": "Search",
       "filterStatus": "Status",
       "statusAll": "All",
-      "export": "Export confirmed (CSV)",
+      "exportConfirmed": "Export confirmed (CSV)",
+      "exportAll": "Export everyone (CSV)",
       "delete": "Delete {{email}}",
       "deleteShort": "Delete",
       "deleteTitle": "Delete this subscriber?",

@@ -18,7 +18,7 @@ const escapeLike = (text) => text.replace(/[\\%_]/g, '\\$&');
 
 function where({ status, query }) {
   return {
-    ...(status ? { status } : {}),
+    ...(status && status !== 'all' ? { status } : {}),
     ...(query ? { email: { contains: escapeLike(query.toLowerCase()) } } : {}),
   };
 }
@@ -61,10 +61,14 @@ const csvCell = (value) => {
   return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 };
 
-// Export of the subscribers that consented (confirmed) unless another status is asked.
+// Export of the subscribers that consented (confirmed) unless another status is asked,
+// or of everyone (pending, confirmed, unsubscribed alike) when `status=all` is passed.
 export async function exportSubscribers(req, res) {
   const status = req.query.status ?? SUBSCRIBER_STATUS.CONFIRMED;
-  const rows = await prisma.newsletterSubscriber.findMany({ where: { status }, orderBy: { createdAt: 'asc' } });
+  const rows = await prisma.newsletterSubscriber.findMany({
+    where: status === 'all' ? {} : { status },
+    orderBy: { createdAt: 'asc' },
+  });
   const lines = [['email', 'status', 'locale', 'confirmedAt'].join(',')];
   rows.forEach((s) =>
     lines.push([s.email, s.status, s.locale, s.confirmedAt?.toISOString() ?? ''].map(csvCell).join(',')),

@@ -120,10 +120,14 @@ function Subscribers() {
           <Search size={16} strokeWidth={1.9} aria-hidden="true" />
           {t('admin.newsletter.searchButton')}
         </Button>
-        {/* Same-origin download: the session cookie authorises it, the server checks the role. */}
-        <Button to="/api/admin/newsletter/subscribers.csv" download variant="secondary" reloadDocument>
+        {/* Same-origin downloads: the session cookie authorises them, the server checks the role. */}
+        <Button to="/api/admin/newsletter/subscribers.csv?status=confirmed" download variant="secondary" reloadDocument>
           <Download size={16} strokeWidth={1.9} aria-hidden="true" />
-          {t('admin.newsletter.export')}
+          {t('admin.newsletter.exportConfirmed')}
+        </Button>
+        <Button to="/api/admin/newsletter/subscribers.csv?status=all" download variant="secondary" reloadDocument>
+          <Download size={16} strokeWidth={1.9} aria-hidden="true" />
+          {t('admin.newsletter.exportAll')}
         </Button>
       </form>
 

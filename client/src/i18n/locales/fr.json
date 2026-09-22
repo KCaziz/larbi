@@ -34,6 +34,7 @@
   "footer": {
     "copyright": "© {{year}} {{brand}}. Tous droits réservés.",
     "tagline": "Formations, blog et outils métier pour les indépendants et les entreprises.",
+    "social": "Réseaux sociaux",
     "columns": {
       "platform": "Plateforme",
       "company": "Entreprise",
@@ -328,7 +329,7 @@
   },
   "legal": {
     "title": "Mentions légales",
-    "notice": "Cette page ne peut pas être publiée en l'état : les informations légales ci-dessous doivent être fournies et validées par le client. Aucune valeur n'a été inventée.",
+    "notice": "Cette page ne peut pas être publiée en l'état : les informations légales ci-dessous doivent être fournies et validées par le client.",
     "editorTitle": "Éditeur du site",
     "fields": {
       "companyName": "Raison sociale",
@@ -837,7 +838,8 @@
       "searchButton": "Rechercher",
       "filterStatus": "Statut",
       "statusAll": "Tous",
-      "export": "Exporter les confirmés (CSV)",
+      "exportConfirmed": "Exporter les confirmés (CSV)",
+      "exportAll": "Exporter tout le monde (CSV)",
       "delete": "Supprimer {{email}}",
       "deleteShort": "Supprimer",
       "deleteTitle": "Supprimer cet abonné ?",

@@ -76,6 +76,7 @@
   .cms-menu ul {
     flex-direction: row;
     overflow-x: auto;
+    overflow-y: hidden;
   }
 }
 
@@ -89,12 +90,18 @@
   align-items: center;
   gap: 6px;
   margin-bottom: 14px;
-  color: var(--text);
+  padding: 7px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
   font-size: 0.9rem;
+  font-weight: 500;
   text-decoration: none;
 }
 
 .cms-back:hover {
+  border-color: var(--accent);
   color: var(--accent);
 }
 
@@ -117,6 +124,17 @@
 
 .cms-toolbar p {
   margin: 0;
+}
+
+.cms-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cms-toolbar-actions > * + * {
+  padding-inline-start: 14px;
+  border-inline-start: 1px solid var(--border-strong);
 }
 
 /* ---------- Badge ---------- */
@@ -254,6 +272,7 @@
   gap: 4px;
   margin-bottom: 28px;
   overflow-x: auto;
+  overflow-y: hidden;
   border-bottom: 1px solid var(--border);
 }
 
@@ -289,7 +308,16 @@
   height: 24px;
   border: 1px solid var(--border-strong);
   border-radius: 50%;
+  background: var(--surface);
+  color: var(--text-h);
+  font-weight: 600;
   font-size: 0.8rem;
+}
+
+.cms-step.active .cms-step-number {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
 }
 
 .cms-step.done .cms-step-number {
@@ -365,7 +393,7 @@
   padding: 11px 14px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  background: var(--bg);
+  background: var(--surface);
   color: var(--text-h);
   font: inherit;
 }
@@ -397,7 +425,7 @@
   overflow: hidden;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  background: var(--bg);
+  background: var(--surface);
 }
 
 .cms-rte:focus-within {
@@ -573,9 +601,9 @@
   width: 34px;
   height: 34px;
   padding: 0;
-  border: 1px solid transparent;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
-  background: transparent;
+  background: var(--surface);
   color: var(--text-h);
   cursor: pointer;
 }
@@ -769,6 +797,17 @@
 
 .cms-checklist li > span {
   flex: 1;
+}
+
+/* ---------- Step navigation (previous/next, bottom of a step) ---------- */
+.cms-step-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
 }
 
 /* ---------- Save bar ---------- */
@@ -1018,7 +1057,7 @@
 .cms-chapter-title:focus {
   outline: none;
   border-color: var(--accent);
-  background: var(--bg);
+  background: var(--surface);
   box-shadow: 0 0 0 3px var(--accent-bg);
 }
 

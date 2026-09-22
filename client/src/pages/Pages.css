@@ -565,7 +565,7 @@
   padding: 11px 14px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  background: var(--bg);
+  background: var(--surface);
   color: var(--text-h);
   font: inherit;
   transition:

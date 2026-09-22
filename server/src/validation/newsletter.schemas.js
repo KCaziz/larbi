@@ -16,7 +16,7 @@ export const tokenSchema = z.object({ token: z.string().min(20).max(200) }).stri
 
 export const subscribersQuerySchema = z
   .object({
-    status: z.enum(['pending', 'confirmed', 'unsubscribed']).optional(),
+    status: z.enum(['pending', 'confirmed', 'unsubscribed', 'all']).optional(),
     query: z.string().trim().max(100).optional(),
     page: z.coerce.number().int().min(1).max(10_000).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(25),

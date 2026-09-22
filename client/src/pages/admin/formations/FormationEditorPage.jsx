@@ -7,6 +7,7 @@ import LoadingState from '../../../components/ui/LoadingState.jsx';
 import PageToolbar from '../../../components/cms/PageToolbar.jsx';
 import SaveBar from '../../../components/cms/SaveBar.jsx';
 import StatusBadge from '../../../components/cms/StatusBadge.jsx';
+import StepNav from '../../../components/cms/StepNav.jsx';
 import StepTabs from '../../../components/cms/StepTabs.jsx';
 import UnsavedChangesGuard from '../../../components/cms/UnsavedChangesGuard.jsx';
 import InfoStep from './InfoStep.jsx';
@@ -204,6 +205,8 @@ export default function FormationEditorPage() {
           onGo={(key) => setStep(STEP_FOR_ITEM[key] ?? 'info')}
         />
       </div>
+
+      <StepNav steps={steps} active={step} onChange={setStep} />
 
       {(step === 'info' || step === 'certification') && (
         <SaveBar dirty={dirty} saving={saving} saved={saved && !dirty} error={saveError} onSave={save} onDiscard={discard} />
