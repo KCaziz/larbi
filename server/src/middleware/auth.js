@@ -18,7 +18,9 @@ export async function requireAuth(req, res, next) {
     }
 
     const user = await prisma.user.findUnique({ where: { id: payload.sub } });
-    if (!user) throw new HttpError(401, 'Invalid or expired session');
+    // A suspended account (P3-16) is treated exactly like a deleted one: the
+    // session dies at once, on every route, without revealing why.
+    if (!user || user.status === 'suspended') throw new HttpError(401, 'Invalid or expired session');
 
     req.user = user;
     next();

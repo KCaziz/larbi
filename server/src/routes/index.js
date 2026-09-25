@@ -8,6 +8,7 @@ import certificatesRoutes from './certificates.routes.js';
 import blogRoutes from './blog.routes.js';
 import newsletterRoutes from './newsletter.routes.js';
 import accountTypesRoutes from './accountTypes.routes.js';
+import settingsRoutes from './settings.routes.js';
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/certificates', certificatesRoutes);
 router.use('/blog', blogRoutes);
 router.use('/newsletter', newsletterRoutes);
 router.use('/account-types', accountTypesRoutes);
+router.use('/settings', settingsRoutes);
 
 export default router;

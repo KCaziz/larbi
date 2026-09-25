@@ -2,21 +2,16 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api, errorKey } from '../../../lib/api.js';
+import { accountTypeLabel, useAccountTypes } from '../../../lib/accountTypes.js';
 import Button from '../../../components/ui/Button.jsx';
 import Field from '../../../components/cms/Field.jsx';
 import TagInput from '../../../components/cms/TagInput.jsx';
-
-// Account types an article can be aimed at (same values as the server; `key` = i18n key).
-const ACCOUNT_TYPES = [
-  { value: 'auto-entrepreneur', key: 'autoEntrepreneur' },
-  { value: 'pme', key: 'pme' },
-  { value: 'pmi', key: 'pmi' },
-];
 
 // Step 3: where the article is filed (category, keywords) and how search engines
 // present it (optional: without them the title and summary are used).
 export default function OrganizeStep({ draft, setField, categories, suggestions, onCategoryCreated }) {
   const { t } = useTranslation();
+  const accountTypes = useAccountTypes();
   const [newCategory, setNewCategory] = useState(null); // null = closed, string = name being typed
   const [categoryError, setCategoryError] = useState(null);
 
@@ -93,7 +88,7 @@ export default function OrganizeStep({ draft, setField, categories, suggestions,
         <fieldset className="cms-checks">
           <legend>{t('admin.articles.organize.audience')}</legend>
           <small className="form-hint">{t('admin.articles.organize.audienceHint')}</small>
-          {ACCOUNT_TYPES.map((type) => (
+          {accountTypes.types.map((type) => (
             <label key={type.value} className="cms-check">
               <input
                 type="checkbox"
@@ -105,7 +100,7 @@ export default function OrganizeStep({ draft, setField, categories, suggestions,
                   )
                 }
               />
-              {t(`accountTypes.${type.key}`)}
+              {accountTypeLabel(type)}
             </label>
           ))}
         </fieldset>

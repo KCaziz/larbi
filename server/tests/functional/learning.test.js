@@ -247,7 +247,7 @@ describe('certificate', () => {
     await finish(f, owner);
     const mine = await get(`/formations/${f.slug}/certificate`, owner);
     assert.equal(mine.status, 200);
-    assert.deepEqual(Object.keys(mine.body.certificate).sort(), ['certificateNumber', 'certificationTitle', 'formationTitle', 'holderName', 'issuedAt']);
+    assert.deepEqual(Object.keys(mine.body.certificate).sort(), ['certificateNumber', 'certificationTitle', 'formationTitle', 'holderName', 'issuedAt', 'revoked', 'revokedAt']);
     assert.equal((await get(`/formations/${f.slug}/certificate`, stranger)).status, 404);
     assert.equal((await get('/certificates', owner)).body.certificates.length, 1);
     assert.equal((await get('/certificates', stranger)).body.certificates.length, 0);

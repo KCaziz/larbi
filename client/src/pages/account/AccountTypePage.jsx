@@ -43,11 +43,11 @@ export default function AccountTypePage() {
               disabled={accountTypes.status !== 'ready'}
             >
               {accountTypes.status !== 'ready' && (
-                <option value={user.accountType}>{accountTypeLabel(t, user.accountType)}</option>
+                <option value={user.accountType}>{accountTypeLabel(user.accountType)}</option>
               )}
               {accountTypes.types.map((type) => (
                 <option key={type.value} value={type.value}>
-                  {accountTypeLabel(t, type)}
+                  {accountTypeLabel(type)}
                 </option>
               ))}
             </select>

@@ -129,7 +129,7 @@ describe('site sweep', { skip: findChrome() ? false : 'no Chrome/Chromium found 
       assert.doesNotMatch(await b.text(), /Formation balayage/, 'a learner must not see the administration');
 
       await setSession(admin);
-      for (const route of ['/admin/formations', `/admin/formations/${data.f.id}`, '/admin/articles', `/admin/articles/${data.article.id}`]) {
+      for (const route of ['/admin/formations', `/admin/formations/${data.f.id}`, '/admin/articles', `/admin/articles/${data.article.id}`, '/admin/media', '/admin/certificates', '/admin/users', '/admin/settings']) {
         await b.goto(site.url + route);
         await sleep(500);
         await audit(`${lang}/${width} admin ${route}`);

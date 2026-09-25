@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
 import { api } from './api.js';
 
-// API value -> key under `accountTypes.*` in the locale files.
-const LABEL_KEYS = { 'auto-entrepreneur': 'autoEntrepreneur', pme: 'pme', pmi: 'pmi' };
-
-// Translated label; unknown (future) categories fall back to the API label.
-export function accountTypeLabel(t, type) {
-  const key = LABEL_KEYS[type.value ?? type];
-  return key ? t(`accountTypes.${key}`) : (type.label ?? type);
+// Account categories are admin-managed content (P3-15), like a formation category
+// or a blog tag: the label IS the text to show, in whichever single language the
+// admin wrote it in — there is no translation key to look up.
+export function accountTypeLabel(type) {
+  return typeof type === 'string' ? type : (type.label ?? type.value);
 }
 
 // Loads the allowed account types from GET /api/account-types.

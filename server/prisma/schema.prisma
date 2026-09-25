@@ -34,6 +34,9 @@ model User {
   // manage (RBAC), accessLevel = which content tier you may consume.
   // Never settable from a public endpoint (see auth.schemas.js).
   role         String   @default("user")
+  // "active" | "suspended" (P3-16). Checked on every request (requireAuth), so
+  // suspending an account takes effect immediately, on the same session.
+  status       String   @default("active")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -62,6 +65,38 @@ model ContactMessage {
   createdAt DateTime @default(now())
 
   @@map("contact_messages")
+}
+
+// Account categories offered at registration (P3-15). A real table, not a
+// hardcoded list: an administrator can add, rename, reorder or deactivate a
+// category from the admin panel, without a code change or a migration. Kept
+// as a soft reference from `User.accountType` (a plain string, unchanged
+// since P1-06) rather than a foreign key: it is validated against this table
+// at the application layer, exactly like the free-form status fields
+// elsewhere in this schema, so no existing relation, index or test fixture
+// had to move.
+model AccountType {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  label     String
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("account_types")
+}
+
+// Small set of platform-wide switches an administrator can change without a
+// deployment (P3-16): maintenance mode, public contact details, and any
+// future key the admin panel adds. Free-form key/value on purpose: adding a
+// new setting never needs a migration.
+model PlatformSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("platform_settings")
 }
 
 // ---------------------------------------------------------------------------
@@ -285,6 +320,12 @@ model Certification {
   // (nullable: falls back to the formation title when the admin left it empty).
   certificationTitle String?
   issuedAt           DateTime @default(now())
+
+  // Revocation (P3-16, admin only): the certificate stays on record (never deleted, the
+  // learner's achievement is not erased) but public verification and the learner's own
+  // page show it as revoked. `revokedReason` implies `revokedAt` (CHECK in the migration).
+  revokedAt     DateTime?
+  revokedReason String?
 
   @@map("certifications")
 }

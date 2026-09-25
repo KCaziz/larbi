@@ -431,7 +431,16 @@
         "coursesInProgress": "Formations en cours",
         "certificates": "Certificats obtenus",
         "recentArticles": "Derniers articles lus"
-      }
+      },
+      "editProfile": "Modifier le profil",
+      "myFormations": "Mes formations",
+      "myCertificates": "Mes certificats",
+      "seeAll": "Tout voir",
+      "forYourProfile": "Pour votre profil",
+      "latestArticles": "Derniers articles",
+      "tools": "Outils",
+      "toolsIntro": "Simulateur de crédit, générateur de facture… les outils métier arrivent en phase 4.",
+      "toolsLink": "Voir les outils"
     },
     "type": {
       "title": "Type de compte",
@@ -487,7 +496,11 @@
       "formations": "Formations",
       "articles": "Articles",
       "newsletter": "Newsletter",
-      "dashboard": "Tableau de bord"
+      "dashboard": "Tableau de bord",
+      "media": "Médiathèque",
+      "certificates": "Certifications",
+      "users": "Utilisateurs",
+      "settings": "Paramètres"
     },
     "shell": {
       "title": "Administration",
@@ -1133,6 +1146,149 @@
     "preview": {
       "intro": "Voici la formation telle que les apprenants la verront : présentation, plan, chaque leçon ouverte bloc par bloc, et l’emplacement des quiz. Cliquez sur une leçon pour la déplier.",
       "unsaved": "Des modifications ne sont pas encore enregistrées : elles n’apparaissent pas ici."
+    },
+    "users": {
+      "title": "Utilisateurs",
+      "subtitle": "Comptes, droits et types de compte.",
+      "tabs": {
+        "accounts": "Comptes",
+        "accountTypes": "Types de compte"
+      },
+      "search": "Rechercher",
+      "searchButton": "Rechercher",
+      "filterRole": "Rôle",
+      "roleAll": "Tous les rôles",
+      "filterStatus": "Statut",
+      "statusAll": "Tous les statuts",
+      "columns": {
+        "name": "Nom",
+        "email": "Email",
+        "accountType": "Type de compte",
+        "accessLevel": "Accès",
+        "role": "Rôle",
+        "status": "Statut",
+        "since": "Inscrit le"
+      },
+      "accessLevel": {
+        "standard": "Standard",
+        "premium": "Premium"
+      },
+      "role": {
+        "user": "Utilisateur",
+        "admin": "Administrateur"
+      },
+      "status": {
+        "active": "Actif",
+        "suspended": "Suspendu"
+      },
+      "suspend": "Suspendre",
+      "reactivate": "Réactiver",
+      "loadError": "Impossible de charger les utilisateurs.",
+      "emptyTitle": "Aucun utilisateur ne correspond à cette recherche"
+    },
+    "accountTypes": {
+      "intro": "Ces catégories sont proposées à l'inscription. Un administrateur peut en ajouter à tout moment, sans intervention technique.",
+      "newLabel": "Nouvelle catégorie",
+      "add": "Ajouter",
+      "columns": {
+        "label": "Libellé",
+        "slug": "Identifiant",
+        "order": "Ordre",
+        "active": "Actif"
+      },
+      "active": "Actif",
+      "inactive": "Inactif",
+      "save": "Enregistrer",
+      "loadError": "Impossible de charger les types de compte.",
+      "deleteTitle": "Supprimer cette catégorie ?",
+      "deleteConfirm": "Supprimer",
+      "deleteBody": "« {{label}} » sera définitivement supprimée. Impossible si un compte l'utilise encore."
+    },
+    "media": {
+      "title": "Médiathèque",
+      "subtitle": "Tous les fichiers envoyés dans les formations et les articles.",
+      "search": "Rechercher",
+      "searchButton": "Rechercher",
+      "filterKind": "Type",
+      "kindAll": "Tous les types",
+      "columns": {
+        "name": "Fichier",
+        "kind": "Type",
+        "size": "Taille",
+        "usage": "Utilisation",
+        "uploadedBy": "Envoyé par",
+        "since": "Envoyé le"
+      },
+      "kind": {
+        "image": "Image",
+        "video": "Vidéo",
+        "document": "Document"
+      },
+      "usage": {
+        "formation-cover": "Couverture de formation",
+        "article-cover": "Couverture d'article",
+        "course": "Leçon",
+        "article": "Article",
+        "orphan": "Aucune"
+      },
+      "size": {
+        "bytes": "{{value}} o",
+        "kb": "{{value}} Ko",
+        "mb": "{{value}} Mo"
+      },
+      "delete": "Supprimer",
+      "loadError": "Impossible de charger la médiathèque.",
+      "emptyTitle": "Aucun fichier pour l’instant",
+      "emptyBody": "Les fichiers envoyés depuis les formations et les articles apparaîtront ici.",
+      "deleteTitle": "Supprimer ce fichier ?",
+      "deleteConfirm": "Supprimer",
+      "deleteBody": "« {{name}} » sera définitivement supprimé, y compris de l'endroit où il est utilisé."
+    },
+    "certificates": {
+      "title": "Certifications",
+      "subtitle": "Certificats délivrés aux apprenants.",
+      "search": "Rechercher",
+      "searchButton": "Rechercher",
+      "filterStatus": "Statut",
+      "statusAll": "Tous",
+      "active": "Valide",
+      "revoked": "Révoqué",
+      "columns": {
+        "number": "Numéro",
+        "holder": "Titulaire",
+        "formation": "Formation",
+        "issuedAt": "Délivré le",
+        "status": "Statut"
+      },
+      "revoke": "Révoquer",
+      "restore": "Rétablir",
+      "loadError": "Impossible de charger les certificats.",
+      "emptyTitle": "Aucun certificat délivré pour l’instant",
+      "revokeTitle": "Révoquer ce certificat ?",
+      "revokeConfirm": "Révoquer",
+      "revokeBody": "Le certificat {{number}} sera marqué comme révoqué : la vérification publique et l'apprenant le verront invalide. Il reste consultable ici.",
+      "revokeReason": "Motif (optionnel, jamais public)"
+    },
+    "settings": {
+      "title": "Paramètres",
+      "subtitle": "Réglages généraux de la plateforme.",
+      "maintenanceMode": "Mode maintenance",
+      "maintenanceModeHint": "Quand il est activé, le site public répond « indisponible » à tout le monde sauf aux administrateurs, qui peuvent continuer à travailler pour résoudre le problème.",
+      "maintenanceModeActive": "Le mode maintenance est actif : les visiteurs ne peuvent plus utiliser le site.",
+      "contactEmail": "Email de contact public",
+      "contactPhone": "Téléphone de contact public",
+      "contactAddress": "Adresse de contact publique",
+      "saved": "Paramètres enregistrés.",
+      "save": "Enregistrer",
+      "loadError": "Impossible de charger les paramètres.",
+      "customIntro": "Paramètres supplémentaires : une clé et une valeur, sans mise à jour du code.",
+      "newKey": "Nouvelle clé",
+      "newValue": "Valeur",
+      "add": "Ajouter",
+      "columns": {
+        "key": "Clé",
+        "value": "Valeur"
+      }
     }
   },
   "learn": {
@@ -1365,5 +1521,8 @@
     "certified": "Certificat délivré",
     "noCorrection": "La correction détaillée n’est pas affichée pour ce quiz.",
     "backToQuiz": "Retour au quiz"
+  },
+  "maintenance": {
+    "banner": "Le site est en maintenance : certaines fonctionnalités peuvent être temporairement indisponibles."
   }
 }

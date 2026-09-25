@@ -196,10 +196,11 @@ describe('serializers expose an explicit allow-list', () => {
   });
 
   test('learner views: certificate fields and lesson list without content', () => {
-    const cert = { certificateNumber: 'LARBI-AAAA-BBBB-CCCC', holderName: 'H', formationTitle: 'F', certificationTitle: null, issuedAt: new Date(), enrollmentId: 'e1', id: 'x' };
+    const cert = { certificateNumber: 'LARBI-AAAA-BBBB-CCCC', holderName: 'H', formationTitle: 'F', certificationTitle: null, issuedAt: new Date(), enrollmentId: 'e1', id: 'x', revokedAt: null, revokedReason: null };
     for (const view of [toCertificateView(cert), toPublicCertificate(cert)]) {
-      assert.deepEqual(Object.keys(view).sort(), ['certificateNumber', 'certificationTitle', 'formationTitle', 'holderName', 'issuedAt']);
+      assert.deepEqual(Object.keys(view).sort(), ['certificateNumber', 'certificationTitle', 'formationTitle', 'holderName', 'issuedAt', 'revoked', 'revokedAt']);
       assert.equal(view.certificationTitle, 'F', 'falls back to the formation title');
+      assert.equal(view.revoked, false);
     }
     const formation = { slug: 's', title: 'F', description: 'd', status: 'published', requiredAccessLevel: 'standard', coverImageId: null, category: null, certificationEnabled: true, certificationTitle: 'C', certificationDescription: null, courses: [{ id: 'c1', position: 0, title: 'A', summary: null, body: '<p>SECRET</p>', estimatedMinutes: null, isRequired: true }] };
     const detail = toFormationDetail(formation, { accessible: true, enrollment: null });

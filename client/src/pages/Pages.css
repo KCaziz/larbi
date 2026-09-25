@@ -720,6 +720,31 @@
   }
 }
 
+.contact-direct {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contact-direct li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contact-direct a,
+.contact-direct span {
+  color: var(--text-h);
+  text-decoration: none;
+}
+
+.contact-direct a:hover {
+  color: var(--accent);
+}
+
 /* ---------- Legal ---------- */
 .legal-card {
   max-width: 860px;
@@ -872,4 +897,54 @@
 .account-heading {
   margin-bottom: 8px;
   font-size: 1.7rem;
+}
+
+/* ---------- Personalised dashboard (P2-03 / P3-16) ---------- */
+.dashboard-profile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin: 20px 0;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.dashboard-profile-name {
+  margin: 0;
+  color: var(--text-h);
+  font-family: var(--serif);
+  font-size: 1.2rem;
+}
+
+.dashboard-profile-email {
+  margin: 2px 0 0;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.dashboard-profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-inline-end: auto;
+}
+
+.dashboard-section {
+  margin-top: 36px;
+}
+
+.dashboard-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dashboard-section-head h3 {
+  margin: 0;
 }

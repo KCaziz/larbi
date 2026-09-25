@@ -60,17 +60,23 @@ export const toCertificateView = (c) => ({
   certificationTitle: c.certificationTitle ?? c.formationTitle,
   formationTitle: c.formationTitle,
   issuedAt: c.issuedAt,
+  revoked: Boolean(c.revokedAt),
+  revokedAt: c.revokedAt,
 });
 
 // What ANYONE holding the number may learn when verifying a certificate:
 // no e-mail, no ids, nothing about the account beyond the printed name.
 // Deliberately its own allow-list, so the owner's view can grow without leaking.
+// A revocation is shown (that is the point of checking), its reason is not
+// (P3-16): that is administrative context, not public information.
 export const toPublicCertificate = (c) => ({
   certificateNumber: c.certificateNumber,
   holderName: c.holderName,
   certificationTitle: c.certificationTitle ?? c.formationTitle,
   formationTitle: c.formationTitle,
   issuedAt: c.issuedAt,
+  revoked: Boolean(c.revokedAt),
+  revokedAt: c.revokedAt,
 });
 
 // Card in the catalogue / "my formations".

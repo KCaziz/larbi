@@ -1,7 +1,6 @@
 import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
-import { ACCOUNT_TYPES } from '../constants/accountTypes.js';
 import { isQuizComplete } from './quiz.service.js';
 import { MEDIA_BLOCK_KIND, validateBlockData } from './blocks.service.js';
 import { bodyToText } from './article.service.js';
@@ -75,12 +74,18 @@ export async function checkConsistency(prisma, { privateDir }) {
   // What is stored must already be clean (sanitising it again changes nothing), and the plain-text
   // copy of an article must match its body: a mismatch means some code path wrote one without the other.
   const articles = await prisma.article.findMany({ select: { id: true, body: true, bodyText: true, excerpt: true, targetAccountTypes: true } });
-  const knownTypes = new Set(ACCOUNT_TYPES.map((t) => t.value));
+  // Account categories (P3-15) are an admin-managed table now, not a fixed list:
+  // "known" means it exists at all (active or not — deactivating one must not
+  // retroactively make an article that targets it "inconsistent").
+  const knownTypes = new Set((await prisma.accountType.findMany({ select: { slug: true } })).map((t) => t.slug));
   for (const a of articles) {
     if ((a.targetAccountTypes ?? []).some((type) => !knownTypes.has(type))) problems.push(violation('article target account types are known account types', `article ${a.id}`));
     if (a.body !== null && sanitizeRichText(a.body) !== a.body) problems.push(violation('stored article HTML is already sanitised', `article ${a.id}`));
     if ((a.body ? bodyToText(a.body) : '') !== a.bodyText) problems.push(violation('article plain text matches its body', `article ${a.id}`));
   }
+
+  const usersAccountTypes = await prisma.user.findMany({ select: { id: true, accountType: true } });
+  add('a user account type is a known account type', usersAccountTypes.filter((u) => !knownTypes.has(u.accountType)), (u) => `user ${u.id}: ${u.accountType}`);
   const courses = await prisma.course.findMany({ select: { id: true, body: true } });
   for (const c of courses) {
     if (c.body !== null && sanitizeRichText(c.body) !== c.body) problems.push(violation('stored lesson HTML is already sanitised', `course ${c.id}`));

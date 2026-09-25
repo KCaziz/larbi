@@ -36,6 +36,7 @@
   --warn: #8a5a00; /* attention / to do / pending */
   --warn-bg: rgba(200, 138, 0, 0.12);
   --danger: #b42318;
+  --danger-bg: rgba(180, 35, 24, 0.09);
 
   /* Dark band (footer, CTA, auth panel) */
   --band-bg: #102A43;
@@ -102,6 +103,7 @@
     --warn: #f0b54a;
     --warn-bg: rgba(240, 181, 74, 0.12);
     --danger: #f28b82;
+    --danger-bg: rgba(242, 139, 130, 0.14);
     --band-bg: #071726;
     --band-text: #8ea6bb;
     --band-heading: #f2fbfc;
@@ -137,6 +139,7 @@
   --warn: #f0b54a;
   --warn-bg: rgba(240, 181, 74, 0.12);
   --danger: #f28b82;
+  --danger-bg: rgba(242, 139, 130, 0.14);
   --band-bg: #071726;
   --band-text: #8ea6bb;
   --band-heading: #f2fbfc;
@@ -162,6 +165,20 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100svh;
+}
+
+/* Shown site-wide (P3-16) while an administrator has turned maintenance mode on. */
+.maintenance-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
 }
 
 h1,

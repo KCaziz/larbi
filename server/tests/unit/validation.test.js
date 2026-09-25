@@ -23,7 +23,10 @@ describe('auth', () => {
   });
 
   test('registration: refuses bad values and every unknown or privileged field', () => {
-    for (const bad of [{ name: '' }, { name: 'x'.repeat(101) }, { email: 'x' }, { email: 'a@b' }, { password: 'short' }, { password: 'x'.repeat(73) }, { accountType: 'admin' }, { role: 'admin' }, { accessLevel: 'premium' }, { id: 'x' }, { name: 42 }, { email: ['a@b.co'] }, { password: { a: 1 } }]) {
+    // accountType is shape-only here (P3-15: a real, admin-managed table, not a fixed
+    // list known at schema-definition time) — whether the value names an existing,
+    // active category is checked against the database by the controller, not here.
+    for (const bad of [{ name: '' }, { name: 'x'.repeat(101) }, { email: 'x' }, { email: 'a@b' }, { password: 'short' }, { password: 'x'.repeat(73) }, { accountType: '' }, { accountType: 'x'.repeat(61) }, { accountType: 42 }, { role: 'admin' }, { accessLevel: 'premium' }, { id: 'x' }, { name: 42 }, { email: ['a@b.co'] }, { password: { a: 1 } }]) {
       ko(registerSchema, { ...user, ...bad });
     }
     ko(registerSchema, {});
@@ -35,7 +38,9 @@ describe('auth', () => {
     ok(loginSchema, { email: 'a@b.co', password: 'x' });
     for (const bad of [{}, { email: 'a@b.co' }, { email: 'a@b.co', password: '' }, { email: 'a@b.co', password: 'x'.repeat(73) }, { email: { $ne: null }, password: 'x' }, { email: 'a@b.co', password: 'x', remember: true }]) ko(loginSchema, bad);
     ok(updateMeSchema, { accountType: 'pmi' });
-    for (const bad of [{}, { accountType: 'x' }, { role: 'admin' }, { accountType: 'pmi', role: 'admin' }]) ko(updateMeSchema, bad);
+    // "x" is a shape-valid category name (the whitelist check is the controller's job,
+    // see auth.controller.js and services/accountTypes.service.js).
+    for (const bad of [{}, { accountType: '' }, { role: 'admin' }, { accountType: 'pmi', role: 'admin' }]) ko(updateMeSchema, bad);
   });
 
   test('contact form', () => {

@@ -173,4 +173,20 @@ describe('the checker detects what it should (negative controls)', () => {
     await t.prisma.user.update({ where: { id: u.id }, data: { email: 'majuscules@example.com' } });
     assert.deepEqual(await check(), []);
   });
+
+  test('a user account type that names no real category (P3-15)', async () => {
+    const u = await t.user();
+    await t.prisma.user.update({ where: { id: u.id }, data: { accountType: 'invente' } });
+    assert.ok((await rules()).includes('a user account type is a known account type'));
+    await t.prisma.user.update({ where: { id: u.id }, data: { accountType: 'pme' } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test('an article targeting a category that names no real category (P3-04 / P3-15)', async () => {
+    const a = (await api('POST', '/admin/articles', { json: { title: 'Ciblage' } })).body.article;
+    await t.prisma.article.update({ where: { id: a.id }, data: { targetAccountTypes: ['invente'] } });
+    assert.ok((await rules()).includes('article target account types are known account types'));
+    await t.prisma.article.delete({ where: { id: a.id } });
+    assert.deepEqual(await check(), []);
+  });
 });

@@ -71,6 +71,7 @@ import { validateQuery } from '../middleware/validate.js';
 import { digestQuerySchema, subscribersQuerySchema } from '../validation/newsletter.schemas.js';
 import {
   deleteMedia,
+  listMedia,
   serveMedia,
   uploadArticleCover,
   uploadArticleMedia,
@@ -90,6 +91,24 @@ import {
   updateCourseSchema,
   updateFormationSchema,
 } from '../validation/cms.schemas.js';
+import { mediaQuerySchema } from '../validation/media.schemas.js';
+import {
+  createAccountType,
+  deleteAccountType,
+  listAccountTypes,
+  updateAccountType,
+} from '../controllers/admin/accountTypes.controller.js';
+import { createAccountTypeSchema, updateAccountTypeSchema } from '../validation/accountTypes.schemas.js';
+import { getUser, listUsers, updateUser } from '../controllers/admin/users.controller.js';
+import { updateUserSchema, usersQuerySchema } from '../validation/users.schemas.js';
+import { deleteSetting, listSettings, upsertSettingRoute } from '../controllers/admin/settings.controller.js';
+import { upsertSettingSchema } from '../validation/settings.schemas.js';
+import {
+  listCertificates,
+  restoreCertificate,
+  revokeCertificate,
+} from '../controllers/admin/certificates.controller.js';
+import { certificatesQuerySchema, revokeCertificateSchema } from '../validation/certificates.schemas.js';
 
 // CMS administration API. EVERY route below requires an authenticated admin,
 // checked here on the server (the React admin area is only a convenience).
@@ -161,6 +180,7 @@ router.post('/article-categories', validateBody(createCategorySchema), asyncRout
 router.get('/tags', asyncRoute(listTags));
 
 // Media
+router.get('/media', validateQuery(mediaQuerySchema), asyncRoute(listMedia));
 router.get('/media/:id/file', asyncRoute(serveMedia));
 router.delete('/media/:id', asyncRoute(deleteMedia));
 
@@ -173,5 +193,26 @@ router.get('/newsletter/subscribers', validateQuery(subscribersQuerySchema), asy
 router.get('/newsletter/subscribers.csv', validateQuery(subscribersQuerySchema), asyncRoute(exportSubscribers));
 router.delete('/newsletter/subscribers/:id', asyncRoute(deleteSubscriber));
 router.get('/newsletter/digest', validateQuery(digestQuerySchema), asyncRoute(previewDigest));
+
+// Account types (P3-15)
+router.get('/account-types', asyncRoute(listAccountTypes));
+router.post('/account-types', validateBody(createAccountTypeSchema), asyncRoute(createAccountType));
+router.patch('/account-types/:id', validateBody(updateAccountTypeSchema), asyncRoute(updateAccountType));
+router.delete('/account-types/:id', asyncRoute(deleteAccountType));
+
+// Users, rights and access (P3-16)
+router.get('/users', validateQuery(usersQuerySchema), asyncRoute(listUsers));
+router.get('/users/:id', asyncRoute(getUser));
+router.patch('/users/:id', validateBody(updateUserSchema), asyncRoute(updateUser));
+
+// Platform settings (P3-16)
+router.get('/settings', asyncRoute(listSettings));
+router.post('/settings', validateBody(upsertSettingSchema), asyncRoute(upsertSettingRoute));
+router.delete('/settings/:key', asyncRoute(deleteSetting));
+
+// Certificates (P3-16)
+router.get('/certificates', validateQuery(certificatesQuerySchema), asyncRoute(listCertificates));
+router.post('/certificates/:id/revoke', validateBody(revokeCertificateSchema), asyncRoute(revokeCertificate));
+router.post('/certificates/:id/restore', asyncRoute(restoreCertificate));
 
 export default router;

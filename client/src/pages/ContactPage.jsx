@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Mail, MessageSquare } from 'lucide-react';
+import { Mail, MapPin, MessageSquare, Phone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api, errorKey } from '../lib/api.js';
+import { usePublicSettings } from '../lib/publicSettings.js';
 import PageHeader from '../components/layout/PageHeader.jsx';
 import Button from '../components/ui/Button.jsx';
 import Notice from '../components/ui/Notice.jsx';
@@ -15,6 +16,11 @@ export default function ContactPage() {
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  // Filled in by the admin panel (P3-16, "Paramètres") once the client provides
+  // real contact details; until then the honest notice below is shown instead.
+  const settings = usePublicSettings();
+  const live = settings.status === 'ready' ? settings.data : null;
+  const hasContact = live && (live.contactPhone || live.contactEmail || live.contactAddress);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -53,7 +59,30 @@ export default function ContactPage() {
               <MessageSquare size={22} strokeWidth={1.6} />
             </span>
             <h3>{t('contact.asideTitle')}</h3>
-            <Notice variant="action-needed">{t('contact.notice')}</Notice>
+            {hasContact ? (
+              <ul className="contact-direct">
+                {live.contactPhone && (
+                  <li>
+                    <Phone size={16} strokeWidth={1.8} aria-hidden="true" />
+                    <a href={`tel:${live.contactPhone.replace(/\s+/g, '')}`}>{live.contactPhone}</a>
+                  </li>
+                )}
+                {live.contactEmail && (
+                  <li>
+                    <Mail size={16} strokeWidth={1.8} aria-hidden="true" />
+                    <a href={`mailto:${live.contactEmail}`}>{live.contactEmail}</a>
+                  </li>
+                )}
+                {live.contactAddress && (
+                  <li>
+                    <MapPin size={16} strokeWidth={1.8} aria-hidden="true" />
+                    <span>{live.contactAddress}</span>
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <Notice variant="action-needed">{t('contact.notice')}</Notice>
+            )}
           </article>
 
           <div className="form-card">

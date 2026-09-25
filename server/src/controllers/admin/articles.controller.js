@@ -1,6 +1,7 @@
 import { prisma } from '../../config/prisma.js';
 import { ARTICLE_STATUS } from '../../constants/blog.js';
 import { toAdminArticle, toAdminArticleRow } from '../../serializers/cms.js';
+import { accountTypeExists } from '../../services/accountTypes.service.js';
 import { bodyToText, normalizeTags } from '../../services/article.service.js';
 import { articleReadiness } from '../../services/readiness.service.js';
 import { sanitizeRichText } from '../../services/sanitize.service.js';
@@ -68,6 +69,11 @@ export async function updateArticle(req, res) {
       if (!category) throw new HttpError(400, 'Unknown category');
     }
     data.categoryId = categoryId;
+  }
+
+  if (rest.targetAccountTypes !== undefined) {
+    const unknown = (await Promise.all(rest.targetAccountTypes.map(async (slug) => ((await accountTypeExists(slug)) ? null : slug)))).filter(Boolean);
+    if (unknown.length) throw new HttpError(400, 'Unknown account type', { types: unknown });
   }
 
   // The slug (public URL) never changes after creation, and the status only

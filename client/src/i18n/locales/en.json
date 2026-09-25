@@ -431,7 +431,16 @@
         "coursesInProgress": "Courses in progress",
         "certificates": "Certificates earned",
         "recentArticles": "Recently read articles"
-      }
+      },
+      "editProfile": "Edit profile",
+      "myFormations": "My formations",
+      "myCertificates": "My certificates",
+      "seeAll": "See all",
+      "forYourProfile": "For your profile",
+      "latestArticles": "Latest articles",
+      "tools": "Tools",
+      "toolsIntro": "Credit simulator, invoice generator… the business tools are coming in phase 4.",
+      "toolsLink": "See the tools"
     },
     "type": {
       "title": "Account type",
@@ -487,7 +496,11 @@
       "formations": "Courses",
       "articles": "Articles",
       "newsletter": "Newsletter",
-      "dashboard": "Dashboard"
+      "dashboard": "Dashboard",
+      "media": "Media library",
+      "certificates": "Certificates",
+      "users": "Users",
+      "settings": "Settings"
     },
     "shell": {
       "title": "Administration",
@@ -1133,6 +1146,149 @@
     "preview": {
       "intro": "This is the formation as learners will see it: presentation, plan, every lesson opened block by block, and where the quizzes are. Click a lesson to unfold it.",
       "unsaved": "Some changes are not saved yet: they do not appear here."
+    },
+    "users": {
+      "title": "Users",
+      "subtitle": "Accounts, rights and account types.",
+      "tabs": {
+        "accounts": "Accounts",
+        "accountTypes": "Account types"
+      },
+      "search": "Search",
+      "searchButton": "Search",
+      "filterRole": "Role",
+      "roleAll": "Every role",
+      "filterStatus": "Status",
+      "statusAll": "Every status",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "accountType": "Account type",
+        "accessLevel": "Access",
+        "role": "Role",
+        "status": "Status",
+        "since": "Joined"
+      },
+      "accessLevel": {
+        "standard": "Standard",
+        "premium": "Premium"
+      },
+      "role": {
+        "user": "User",
+        "admin": "Administrator"
+      },
+      "status": {
+        "active": "Active",
+        "suspended": "Suspended"
+      },
+      "suspend": "Suspend",
+      "reactivate": "Reactivate",
+      "loadError": "Could not load the users.",
+      "emptyTitle": "No user matches this search"
+    },
+    "accountTypes": {
+      "intro": "These categories are offered at registration. An administrator can add one at any time, with no technical work.",
+      "newLabel": "New category",
+      "add": "Add",
+      "columns": {
+        "label": "Label",
+        "slug": "Identifier",
+        "order": "Order",
+        "active": "Active"
+      },
+      "active": "Active",
+      "inactive": "Inactive",
+      "save": "Save",
+      "loadError": "Could not load the account types.",
+      "deleteTitle": "Delete this category?",
+      "deleteConfirm": "Delete",
+      "deleteBody": "\"{{label}}\" will be permanently deleted. Impossible while an account still uses it."
+    },
+    "media": {
+      "title": "Media library",
+      "subtitle": "Every file uploaded from formations and articles.",
+      "search": "Search",
+      "searchButton": "Search",
+      "filterKind": "Kind",
+      "kindAll": "Every kind",
+      "columns": {
+        "name": "File",
+        "kind": "Kind",
+        "size": "Size",
+        "usage": "Usage",
+        "uploadedBy": "Uploaded by",
+        "since": "Uploaded on"
+      },
+      "kind": {
+        "image": "Image",
+        "video": "Video",
+        "document": "Document"
+      },
+      "usage": {
+        "formation-cover": "Formation cover",
+        "article-cover": "Article cover",
+        "course": "Lesson",
+        "article": "Article",
+        "orphan": "None"
+      },
+      "size": {
+        "bytes": "{{value}} B",
+        "kb": "{{value}} KB",
+        "mb": "{{value}} MB"
+      },
+      "delete": "Delete",
+      "loadError": "Could not load the media library.",
+      "emptyTitle": "No file yet",
+      "emptyBody": "Files uploaded from formations and articles will appear here.",
+      "deleteTitle": "Delete this file?",
+      "deleteConfirm": "Delete",
+      "deleteBody": "\"{{name}}\" will be permanently deleted, including wherever it is used."
+    },
+    "certificates": {
+      "title": "Certificates",
+      "subtitle": "Certificates issued to learners.",
+      "search": "Search",
+      "searchButton": "Search",
+      "filterStatus": "Status",
+      "statusAll": "All",
+      "active": "Valid",
+      "revoked": "Revoked",
+      "columns": {
+        "number": "Number",
+        "holder": "Holder",
+        "formation": "Formation",
+        "issuedAt": "Issued on",
+        "status": "Status"
+      },
+      "revoke": "Revoke",
+      "restore": "Restore",
+      "loadError": "Could not load the certificates.",
+      "emptyTitle": "No certificate issued yet",
+      "revokeTitle": "Revoke this certificate?",
+      "revokeConfirm": "Revoke",
+      "revokeBody": "Certificate {{number}} will be marked revoked: public verification and the learner will see it as invalid. It stays visible here.",
+      "revokeReason": "Reason (optional, never public)"
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "General platform settings.",
+      "maintenanceMode": "Maintenance mode",
+      "maintenanceModeHint": "When on, the public site answers \"unavailable\" to everyone except administrators, who can keep working to fix the issue.",
+      "maintenanceModeActive": "Maintenance mode is on: visitors can no longer use the site.",
+      "contactEmail": "Public contact e-mail",
+      "contactPhone": "Public contact phone",
+      "contactAddress": "Public contact address",
+      "saved": "Settings saved.",
+      "save": "Save",
+      "loadError": "Could not load the settings.",
+      "customIntro": "Extra settings: a key and a value, no code change needed.",
+      "newKey": "New key",
+      "newValue": "Value",
+      "add": "Add",
+      "columns": {
+        "key": "Key",
+        "value": "Value"
+      }
     }
   },
   "learn": {
@@ -1364,5 +1520,8 @@
     "certified": "Certificate issued",
     "noCorrection": "The detailed correction is not shown for this quiz.",
     "backToQuiz": "Back to the quiz"
+  },
+  "maintenance": {
+    "banner": "The site is under maintenance: some features may be temporarily unavailable."
   }
 }

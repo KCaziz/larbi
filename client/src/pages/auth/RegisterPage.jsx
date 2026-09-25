@@ -119,7 +119,7 @@ export default function RegisterPage() {
                 {accountTypes.status === 'loading' && <option>{t('state.loading')}</option>}
                 {accountTypes.types.map((type) => (
                   <option key={type.value} value={type.value}>
-                    {accountTypeLabel(t, type)}
+                    {accountTypeLabel(type)}
                   </option>
                 ))}
               </select>

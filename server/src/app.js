@@ -8,6 +8,7 @@ import { env } from './config/env.js';
 import routes from './routes/index.js';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { maintenanceGate } from './middleware/maintenance.js';
 
 export function createApp() {
   const app = express();
@@ -28,6 +29,7 @@ export function createApp() {
   app.use(cookieParser());
   if (env.logRequests) app.use(morgan(env.isProduction ? 'combined' : 'dev'));
 
+  app.use(maintenanceGate);
   app.use('/api', routes);
 
   app.use(notFound);

@@ -14,6 +14,7 @@ const PUBLIC = new Set([
   'POST /api/auth/logout',
   'POST /api/contact',
   'GET /api/account-types',
+  'GET /api/settings/public', // public by nature: maintenance banner and contact details (P3-16)
   'GET /api/certificates/:number',
   'GET /api/blog/articles',
   'GET /api/blog/articles/:slug',

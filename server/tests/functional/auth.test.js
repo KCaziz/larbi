@@ -26,7 +26,7 @@ describe('service', () => {
   test('the account types are served by the API (single source of truth)', async () => {
     const res = await t.request('GET', '/account-types');
     assert.equal(res.status, 200);
-    assert.deepEqual(res.body.map((a) => a.value), ['auto-entrepreneur', 'pme', 'pmi']);
+    assert.deepEqual(res.body.map((a) => a.value), ['auto-entrepreneur', 'pme', 'pmi', 'etudiant', 'lyceen', 'salarie']);
   });
 
   test('an unknown API path answers a JSON 404', async () => {

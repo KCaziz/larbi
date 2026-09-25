@@ -1138,6 +1138,11 @@
   color: var(--text);
 }
 
+.cms-badge-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
 /* ---------- Row actions, whole-formation preview (P3-14) ---------- */
 .cms-row-actions {
   display: inline-flex;

@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../config/prisma.js';
 import { HttpError } from '../utils/httpError.js';
 import { clearSessionCookie, setSessionCookie } from '../services/token.service.js';
+import { isSelectableAccountType } from '../services/accountTypes.service.js';
 
 const BCRYPT_COST = 12;
 // Compared against when the email is unknown so login timing does not reveal
@@ -23,6 +24,7 @@ export function toPublicUser(user) {
 export async function register(req, res, next) {
   try {
     const { name, email, password, accountType } = req.body;
+    if (!(await isSelectableAccountType(accountType))) throw new HttpError(400, 'Unknown account type');
     const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
 
     let user;
@@ -47,6 +49,9 @@ export async function login(req, res, next) {
     const user = await prisma.user.findUnique({ where: { email } });
     const ok = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_HASH);
     if (!user || !ok) throw new HttpError(401, 'Invalid email or password');
+    // Checked after the password (never before): a wrong password must never
+    // reveal that the account exists and is merely suspended.
+    if (user.status === 'suspended') throw new HttpError(403, 'Account suspended');
 
     setSessionCookie(res, user.id);
     res.json({ user: toPublicUser(user) });
@@ -57,6 +62,7 @@ export async function login(req, res, next) {
 
 export async function updateMe(req, res, next) {
   try {
+    if (!(await isSelectableAccountType(req.body.accountType))) throw new HttpError(400, 'Unknown account type');
     // Scoped to req.user.id: a user can only ever modify their own account.
     const user = await prisma.user.update({
       where: { id: req.user.id },

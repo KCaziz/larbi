@@ -1,0 +1,112 @@
+/* Administration: users, account types, settings, media library, certificates.
+   Tokens only, logical properties only (RTL). Structurally the same as the
+   newsletter admin page (filters row, stat cards, pager). */
+
+.admin-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-block-start: 20px;
+}
+
+.admin-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 0;
+}
+
+.admin-stats > div {
+  min-width: 140px;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.admin-stats dt {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.admin-stats dd {
+  margin: 4px 0 0;
+  color: var(--text-h);
+  font-family: var(--serif);
+  font-size: 1.8rem;
+}
+
+.admin-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.admin-filters .cms-field {
+  min-width: 180px;
+}
+
+.admin-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-pager p {
+  margin: 0;
+}
+
+.admin-inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.admin-select {
+  /* Fixed max-width (not %): a <select> otherwise sizes itself to its widest
+     option text, which varies enough between languages (e.g. "Administrateur"
+     vs "مسؤول") to push a dense table like the users list past the viewport. */
+  max-width: 130px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.admin-input-sm {
+  inline-size: 5rem;
+}
+
+.admin-usage {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.admin-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.admin-toggle-row p {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 0.88rem;
+}
+
+.admin-settings-grid {
+  display: grid;
+  gap: 16px;
+  max-width: 520px;
+}

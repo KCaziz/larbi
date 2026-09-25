@@ -50,10 +50,16 @@ export async function boot({ production = false, extra = {} } = {}) {
   }
 
   // ---- database ------------------------------------------------------------
+  // Reference tables (P3-15 / P3-16): seeded once by their migration, like the
+  // account categories every "accountType: 'pme'" fixture relies on. They are
+  // configuration, not per-test content, so they are never wiped here — a test
+  // that adds or removes a category / setting cleans up after itself instead.
+  const KEEP_TABLES = new Set(['_prisma_migrations', 'account_types', 'platform_settings']);
   async function reset() {
-    const tables = await prisma.$queryRaw`SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> '_prisma_migrations'`;
-    if (tables.length) {
-      await prisma.$executeRawUnsafe(`TRUNCATE ${tables.map((r) => `"${r.tablename}"`).join(', ')} RESTART IDENTITY CASCADE`);
+    const tables = await prisma.$queryRaw`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`;
+    const toTruncate = tables.filter((r) => !KEEP_TABLES.has(r.tablename));
+    if (toTruncate.length) {
+      await prisma.$executeRawUnsafe(`TRUNCATE ${toTruncate.map((r) => `"${r.tablename}"`).join(', ')} RESTART IDENTITY CASCADE`);
     }
   }
 

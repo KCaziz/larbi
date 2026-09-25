@@ -113,6 +113,22 @@ export const router = createBrowserRouter([
                     path: 'newsletter',
                     lazy: lazyPage(() => import('../pages/admin/newsletter/NewsletterPage.jsx')),
                   },
+                  {
+                    path: 'media',
+                    lazy: lazyPage(() => import('../pages/admin/platform/MediaLibraryPage.jsx')),
+                  },
+                  {
+                    path: 'certificates',
+                    lazy: lazyPage(() => import('../pages/admin/platform/CertificatesAdminPage.jsx')),
+                  },
+                  {
+                    path: 'users',
+                    lazy: lazyPage(() => import('../pages/admin/platform/UsersPage.jsx')),
+                  },
+                  {
+                    path: 'settings',
+                    lazy: lazyPage(() => import('../pages/admin/platform/SettingsPage.jsx')),
+                  },
                 ],
               },
             ],

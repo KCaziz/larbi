@@ -3,6 +3,7 @@ import { Mail, MessageCircle, Phone, MapPin, Send, Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { footerColumns } from '../../config/navigation.js';
 import { contactInfo, socialLinks } from '../../config/contact.js';
+import { usePublicSettings } from '../../lib/publicSettings.js';
 import './Footer.css';
 
 // lucide-react ships no brand logos: the icon is picked by type of contact, the
@@ -17,7 +18,17 @@ function socialIcon(platform) {
 export default function Footer() {
   const { t } = useTranslation();
   const year = new Date().getFullYear();
-  const hasContact = contactInfo.phone || contactInfo.email || contactInfo.address;
+  // The admin panel (P3-16) is now the source of truth for these three; the
+  // static file (config/contact.js) is only the fallback while settings load
+  // or if none were ever entered.
+  const settings = usePublicSettings();
+  const live = settings.status === 'ready' ? settings.data : null;
+  const contact = {
+    phone: live?.contactPhone || contactInfo.phone,
+    email: live?.contactEmail || contactInfo.email,
+    address: live?.contactAddress || contactInfo.address,
+  };
+  const hasContact = contact.phone || contact.email || contact.address;
 
   return (
     <footer className="site-footer">
@@ -33,22 +44,22 @@ export default function Footer() {
 
           {hasContact && (
             <ul className="footer-contact">
-              {contactInfo.phone && (
+              {contact.phone && (
                 <li>
                   <Phone size={15} strokeWidth={1.8} aria-hidden="true" />
-                  <a href={`tel:${contactInfo.phone.replace(/\s+/g, '')}`}>{contactInfo.phone}</a>
+                  <a href={`tel:${contact.phone.replace(/\s+/g, '')}`}>{contact.phone}</a>
                 </li>
               )}
-              {contactInfo.email && (
+              {contact.email && (
                 <li>
                   <Mail size={15} strokeWidth={1.8} aria-hidden="true" />
-                  <a href={`mailto:${contactInfo.email}`}>{contactInfo.email}</a>
+                  <a href={`mailto:${contact.email}`}>{contact.email}</a>
                 </li>
               )}
-              {contactInfo.address && (
+              {contact.address && (
                 <li>
                   <MapPin size={15} strokeWidth={1.8} aria-hidden="true" />
-                  <span>{contactInfo.address}</span>
+                  <span>{contact.address}</span>
                 </li>
               )}
             </ul>

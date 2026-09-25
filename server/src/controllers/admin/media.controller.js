@@ -92,6 +92,54 @@ export const uploadCourseMedia = attachmentUploader(prisma.course, 'courseId', a
 });
 export const uploadArticleMedia = attachmentUploader(prisma.article, 'articleId');
 
+// Media library (P3-16): every uploaded file, across formations and articles,
+// with what currently uses it — so an admin can find and remove one without
+// having to know which lesson or article it was attached to.
+const usageOf = (m) => {
+  if (m.coverOf) return { kind: 'formation-cover', label: m.coverOf.title };
+  if (m.articleCoverOf) return { kind: 'article-cover', label: m.articleCoverOf.title };
+  if (m.course) return { kind: 'course', label: m.course.title };
+  if (m.article) return { kind: 'article', label: m.article.title };
+  return { kind: 'orphan', label: null };
+};
+
+export async function listMedia(req, res) {
+  const { page, limit, kind, query } = req.query;
+  const filter = {
+    ...(kind ? { kind } : {}),
+    ...(query ? { originalName: { contains: query, mode: 'insensitive' } } : {}),
+  };
+  const [total, rows] = await Promise.all([
+    prisma.media.count({ where: filter }),
+    prisma.media.findMany({
+      where: filter,
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+      include: {
+        uploadedBy: { select: { name: true } },
+        coverOf: { select: { title: true } },
+        articleCoverOf: { select: { title: true } },
+        course: { select: { title: true } },
+        article: { select: { title: true } },
+      },
+    }),
+  ]);
+  res.json({
+    media: rows.map((m) => ({
+      id: m.id,
+      kind: m.kind,
+      originalName: m.originalName,
+      mimeType: m.mimeType,
+      sizeBytes: m.sizeBytes,
+      uploadedBy: m.uploadedBy?.name ?? null,
+      createdAt: m.createdAt,
+      usage: usageOf(m),
+    })),
+    pagination: { page, limit, total, pages: Math.max(1, Math.ceil(total / limit)) },
+  });
+}
+
 export async function deleteMedia(req, res) {
   const media = await prisma.media.findUnique({ where: { id: req.params.id } });
   if (!media) throw new HttpError(404, 'Not found');
