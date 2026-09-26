@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import RequireRole from '../components/auth/RequireRole.jsx';
 import RequireAuth from '../components/auth/RequireAuth.jsx';
+import MaintenanceGate from '../components/auth/MaintenanceGate.jsx';
 import MainLayout from '../layouts/MainLayout.jsx';
 import AccountLayout from '../layouts/AccountLayout.jsx';
 import HomePage from '../pages/HomePage.jsx';
@@ -36,106 +37,113 @@ export const router = createBrowserRouter([
     element: <MainLayout />,
     errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <HomePage /> },
-      { path: 'formations', element: <FormationsPresentationPage /> },
-      { path: 'outils', element: <ToolsPresentationPage /> },
-      { path: 'blog', element: <BlogListPage /> },
-      { path: 'blog/:slug', element: <ArticlePage /> },
-      { path: 'newsletter/confirmer', element: <NewsletterLinkPage mode="confirm" /> },
-      { path: 'newsletter/desinscription', element: <NewsletterLinkPage mode="unsubscribe" /> },
-      { path: 'a-propos', element: <AboutPage /> },
-      { path: 'services', element: <ServicesPage /> },
-      { path: 'faq', element: <FaqPage /> },
-      { path: 'fonctionnalites', element: <FeaturesOverviewPage /> },
-      { path: 'contact', element: <ContactPage /> },
-      { path: 'mentions-legales', element: <LegalNoticePage /> },
-      { path: 'confidentialite', element: <PrivacyPolicyPage /> },
+      // Outside the maintenance gate: an administrator needs a way in even
+      // while the rest of the site is closed.
       { path: 'connexion', element: <LoginPage /> },
-      { path: 'inscription', element: <RegisterPage /> },
-      { path: 'mot-de-passe-oublie', element: <ForgotPasswordPage /> },
-      // Public: anyone holding a certificate number can check it.
-      { path: 'verification', lazy: lazyPage(() => import('../pages/certificates/VerifyCertificatePage.jsx')) },
-      { path: 'verification/:number', lazy: lazyPage(() => import('../pages/certificates/VerifyCertificatePage.jsx')) },
       {
-        // Everything below needs a session (guard = convenience; the API re-checks).
-        element: <RequireAuth />,
+        element: <MaintenanceGate />,
         children: [
-          // E-Learning (learner side): formations are for logged-in users.
-          { path: 'catalogue', lazy: lazyPage(() => import('../pages/learn/CatalogPage.jsx')) },
-          { path: 'catalogue/:slug', lazy: lazyPage(() => import('../pages/learn/FormationPage.jsx')) },
-          { path: 'catalogue/:slug/quiz/:quizId', lazy: lazyPage(() => import('../pages/learn/QuizPage.jsx')) },
+          { index: true, element: <HomePage /> },
+          { path: 'formations', element: <FormationsPresentationPage /> },
+          { path: 'outils', element: <ToolsPresentationPage /> },
+          { path: 'blog', element: <BlogListPage /> },
+          { path: 'blog/:slug', element: <ArticlePage /> },
+          { path: 'newsletter/confirmer', element: <NewsletterLinkPage mode="confirm" /> },
+          { path: 'newsletter/desinscription', element: <NewsletterLinkPage mode="unsubscribe" /> },
+          { path: 'a-propos', element: <AboutPage /> },
+          { path: 'services', element: <ServicesPage /> },
+          { path: 'faq', element: <FaqPage /> },
+          { path: 'fonctionnalites', element: <FeaturesOverviewPage /> },
+          { path: 'contact', element: <ContactPage /> },
+          { path: 'mentions-legales', element: <LegalNoticePage /> },
+          { path: 'confidentialite', element: <PrivacyPolicyPage /> },
+          { path: 'inscription', element: <RegisterPage /> },
+          { path: 'mot-de-passe-oublie', element: <ForgotPasswordPage /> },
+          // Public: anyone holding a certificate number can check it.
+          { path: 'verification', lazy: lazyPage(() => import('../pages/certificates/VerifyCertificatePage.jsx')) },
+          { path: 'verification/:number', lazy: lazyPage(() => import('../pages/certificates/VerifyCertificatePage.jsx')) },
           {
-            path: 'catalogue/:slug/cours/:courseId',
-            lazy: lazyPage(() => import('../pages/learn/CoursePage.jsx')),
-          },
-          {
-            path: 'catalogue/:slug/certificat',
-            lazy: lazyPage(() => import('../pages/learn/CertificatePage.jsx')),
-          },
-          {
-            path: 'compte',
-            element: <AccountLayout />,
+            // Everything below needs a session (guard = convenience; the API re-checks).
+            element: <RequireAuth />,
             children: [
-              { index: true, element: <Navigate to="profil" replace /> },
-              { path: 'profil', element: <ProfilePage /> },
-              { path: 'tableau-de-bord', element: <DashboardPage /> },
-              { path: 'formations', lazy: lazyPage(() => import('../pages/account/MyFormationsPage.jsx')) },
-              { path: 'certificats', lazy: lazyPage(() => import('../pages/account/MyCertificatesPage.jsx')) },
-              { path: 'type', element: <AccountTypePage /> },
-              { path: 'premium', element: <PremiumAccessPage /> },
-            ],
-          },
-          {
-            element: <RequireRole role="admin" />,
-            children: [
+              // E-Learning (learner side): formations are for logged-in users.
+              { path: 'catalogue', lazy: lazyPage(() => import('../pages/learn/CatalogPage.jsx')) },
+              { path: 'catalogue/:slug', lazy: lazyPage(() => import('../pages/learn/FormationPage.jsx')) },
+              { path: 'catalogue/:slug/quiz/:quizId', lazy: lazyPage(() => import('../pages/learn/QuizPage.jsx')) },
               {
-                path: 'admin',
-                lazy: lazyPage(() => import('../pages/admin/AdminLayout.jsx')),
+                path: 'catalogue/:slug/cours/:courseId',
+                lazy: lazyPage(() => import('../pages/learn/CoursePage.jsx')),
+              },
+              {
+                path: 'catalogue/:slug/certificat',
+                lazy: lazyPage(() => import('../pages/learn/CertificatePage.jsx')),
+              },
+              {
+                path: 'compte',
+                element: <AccountLayout />,
                 children: [
-                  { index: true, lazy: lazyPage(() => import('../pages/admin/AdminDashboardPage.jsx')) },
+                  { index: true, element: <Navigate to="profil" replace /> },
+                  { path: 'profil', element: <ProfilePage /> },
+                  { path: 'tableau-de-bord', element: <DashboardPage /> },
+                  { path: 'formations', lazy: lazyPage(() => import('../pages/account/MyFormationsPage.jsx')) },
+                  { path: 'certificats', lazy: lazyPage(() => import('../pages/account/MyCertificatesPage.jsx')) },
+                  { path: 'type', element: <AccountTypePage /> },
+                  { path: 'premium', element: <PremiumAccessPage /> },
+                ],
+              },
+              {
+                element: <RequireRole role="admin" />,
+                children: [
                   {
-                    path: 'formations',
-                    lazy: lazyPage(() => import('../pages/admin/formations/FormationsListPage.jsx')),
-                  },
-                  {
-                    path: 'formations/:id',
-                    lazy: lazyPage(() => import('../pages/admin/formations/FormationEditorPage.jsx')),
-                  },
-                  {
-                    path: 'articles',
-                    lazy: lazyPage(() => import('../pages/admin/articles/ArticlesListPage.jsx')),
-                  },
-                  {
-                    path: 'articles/:id',
-                    lazy: lazyPage(() => import('../pages/admin/articles/ArticleEditorPage.jsx')),
-                  },
-                  {
-                    path: 'newsletter',
-                    lazy: lazyPage(() => import('../pages/admin/newsletter/NewsletterPage.jsx')),
-                  },
-                  {
-                    path: 'media',
-                    lazy: lazyPage(() => import('../pages/admin/platform/MediaLibraryPage.jsx')),
-                  },
-                  {
-                    path: 'certificates',
-                    lazy: lazyPage(() => import('../pages/admin/platform/CertificatesAdminPage.jsx')),
-                  },
-                  {
-                    path: 'users',
-                    lazy: lazyPage(() => import('../pages/admin/platform/UsersPage.jsx')),
-                  },
-                  {
-                    path: 'settings',
-                    lazy: lazyPage(() => import('../pages/admin/platform/SettingsPage.jsx')),
+                    path: 'admin',
+                    lazy: lazyPage(() => import('../pages/admin/AdminLayout.jsx')),
+                    children: [
+                      { index: true, lazy: lazyPage(() => import('../pages/admin/AdminDashboardPage.jsx')) },
+                      {
+                        path: 'formations',
+                        lazy: lazyPage(() => import('../pages/admin/formations/FormationsListPage.jsx')),
+                      },
+                      {
+                        path: 'formations/:id',
+                        lazy: lazyPage(() => import('../pages/admin/formations/FormationEditorPage.jsx')),
+                      },
+                      {
+                        path: 'articles',
+                        lazy: lazyPage(() => import('../pages/admin/articles/ArticlesListPage.jsx')),
+                      },
+                      {
+                        path: 'articles/:id',
+                        lazy: lazyPage(() => import('../pages/admin/articles/ArticleEditorPage.jsx')),
+                      },
+                      {
+                        path: 'newsletter',
+                        lazy: lazyPage(() => import('../pages/admin/newsletter/NewsletterPage.jsx')),
+                      },
+                      {
+                        path: 'media',
+                        lazy: lazyPage(() => import('../pages/admin/platform/MediaLibraryPage.jsx')),
+                      },
+                      {
+                        path: 'certificates',
+                        lazy: lazyPage(() => import('../pages/admin/platform/CertificatesAdminPage.jsx')),
+                      },
+                      {
+                        path: 'users',
+                        lazy: lazyPage(() => import('../pages/admin/platform/UsersPage.jsx')),
+                      },
+                      {
+                        path: 'settings',
+                        lazy: lazyPage(() => import('../pages/admin/platform/SettingsPage.jsx')),
+                      },
+                    ],
                   },
                 ],
               },
             ],
           },
+          { path: '*', element: <NotFoundPage /> },
         ],
       },
-      { path: '*', element: <NotFoundPage /> },
     ],
   },
 ]);

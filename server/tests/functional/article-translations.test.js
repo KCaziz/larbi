@@ -78,6 +78,25 @@ describe('administration', () => {
     await assert.rejects(t.prisma.articleTranslation.create({ data: { articleId: article.id, language: 'zz', title: 'x', bodyText: 'y' } }));
   });
 
+  test('a translation can start from a copy of the article text, from the list, not just the editor', async () => {
+    const copy = await t.article({ title: 'Fiche produit', excerpt: 'Résumé produit', body: '<p>Texte produit avec mangouste</p>' });
+    assert.equal((await t.request('POST', `/admin/articles/${copy.id}/translations/en/duplicate`, { json: {} })).status, 401);
+    assert.equal((await t.request('POST', `/admin/articles/${copy.id}/translations/en/duplicate`, { user: standard, json: {} })).status, 403);
+    assert.equal((await t.request('POST', `/admin/articles/${copy.id}/translations/fr/duplicate`, { user: admin, json: {} })).status, 400, 'the written language itself');
+
+    const dup = await t.request('POST', `/admin/articles/${copy.id}/translations/en/duplicate`, { user: admin, json: {} });
+    assert.equal(dup.status, 201);
+    assert.equal(dup.body.translation.title, 'Fiche produit');
+    assert.match(dup.body.translation.body, /mangouste/);
+
+    // Still one article, one row per language: the list shows both without a second article.
+    const full = await t.request('GET', `/admin/articles/${copy.id}`, { user: admin });
+    assert.deepEqual(full.body.article.translations.map((x) => x.language), ['en']);
+
+    // Never overwrites text that may already have been edited.
+    assert.equal((await t.request('POST', `/admin/articles/${copy.id}/translations/en/duplicate`, { user: admin, json: {} })).status, 409);
+  });
+
   test('deleting a translation, then the article, removes them; unknown ones are a 404', async () => {
     await put(draft, 'ar', { title: 'عنوان', excerpt: '', body: '<p>نص</p>' });
     assert.equal((await t.request('DELETE', `/admin/articles/${draft.id}/translations/ar`, { user: admin })).status, 204);

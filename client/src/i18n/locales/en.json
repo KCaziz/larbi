@@ -747,6 +747,7 @@
         "emptyBody": "Write your first article: a title is enough to start.",
         "loadError": "The articles could not be loaded.",
         "uncategorized": "No category",
+        "addLanguage": "Add a language…",
         "columns": {
           "article": "Article",
           "status": "Status",
@@ -1562,7 +1563,9 @@
     "backToQuiz": "Back to the quiz"
   },
   "maintenance": {
-    "banner": "The site is under maintenance: some features may be temporarily unavailable."
+    "banner": "The site is under maintenance: only administrators can browse it normally.",
+    "title": "Site under maintenance",
+    "body": "The site is temporarily unavailable while maintenance is in progress. Please check back shortly."
   },
   "contentLanguage": {
     "names": {

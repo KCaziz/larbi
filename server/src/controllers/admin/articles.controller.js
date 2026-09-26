@@ -211,3 +211,34 @@ export async function deleteTranslation(req, res) {
   if (!count) throw new HttpError(404, 'Not found');
   res.status(204).end();
 }
+
+// Copies the article's own text into a new language, so there is something to
+// edit right away instead of a blank form. Never overwrites an existing
+// translation (delete it first): that text may already have been worked on.
+export async function duplicateTranslation(req, res) {
+  const article = await prisma.article.findUnique({
+    where: { id: req.params.id },
+    select: { language: true, title: true, excerpt: true, body: true, bodyText: true, metaTitle: true, metaDescription: true },
+  });
+  if (!article) throw new HttpError(404, 'Not found');
+  if (article.language === req.params.lang) throw new HttpError(400, 'This is the language the article is written in');
+  if (!article.body) throw new HttpError(400, 'The article has no text yet');
+
+  const key = { articleId_language: { articleId: req.params.id, language: req.params.lang } };
+  const existing = await prisma.articleTranslation.findUnique({ where: key, select: { id: true } });
+  if (existing) throw new HttpError(409, 'A translation already exists in this language');
+
+  const row = await prisma.articleTranslation.create({
+    data: {
+      articleId: req.params.id,
+      language: req.params.lang,
+      title: article.title,
+      excerpt: article.excerpt,
+      body: article.body,
+      bodyText: article.bodyText,
+      metaTitle: article.metaTitle,
+      metaDescription: article.metaDescription,
+    },
+  });
+  res.status(201).json({ translation: toAdminTranslation(row) });
+}

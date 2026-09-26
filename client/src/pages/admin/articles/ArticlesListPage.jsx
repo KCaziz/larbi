@@ -1,10 +1,69 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ImageOff, Newspaper } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { api, errorKey } from '../../../lib/api.js';
+import { CONTENT_LANGUAGES } from '../../../lib/contentLanguage.js';
 import { formatDate } from '../../../lib/format.js';
 import Button from '../../../components/ui/Button.jsx';
 import ContentList from '../../../components/cms/ContentList.jsx';
 import StatusBadge from '../../../components/cms/StatusBadge.jsx';
+
+// Languages badge + "copy into a new language" shortcut: starts a translation
+// from a copy of the article's own text (P3-16 follow-up) so an admin does not
+// need to open the editor just to get a language added to this row. It is
+// still one article, one row: the new language only grows this cell.
+function LanguageCell({ article }) {
+  const { t } = useTranslation();
+  const [added, setAdded] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const known = [article.language, ...article.translationLanguages, ...added];
+  const missing = CONTENT_LANGUAGES.filter((code) => !known.includes(code));
+
+  const duplicate = async (event) => {
+    const language = event.target.value;
+    event.target.value = '';
+    if (!language) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await api.post(`/admin/articles/${article.id}/translations/${language}/duplicate`);
+      setAdded((list) => [...list, language]);
+    } catch (err) {
+      setError(t(errorKey(err)));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="cms-lang-cell">
+      <span>{known.map((code) => code.toUpperCase()).join(' · ')}</span>
+      {missing.length > 0 && (
+        <select
+          className="cms-lang-select"
+          value=""
+          onChange={duplicate}
+          disabled={busy}
+          aria-label={t('admin.articles.list.addLanguage')}
+        >
+          <option value="">{t('admin.articles.list.addLanguage')}</option>
+          {missing.map((code) => (
+            <option key={code} value={code}>
+              {t(`contentLanguage.names.${code}`)}
+            </option>
+          ))}
+        </select>
+      )}
+      {error && (
+        <p className="cms-inline-message error" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
 
 // List of blog articles for the administrator (shared CMS content list).
 export default function ArticlesListPage() {
@@ -36,7 +95,7 @@ export default function ArticlesListPage() {
     {
       key: 'language',
       header: t('admin.articles.list.columns.languages'),
-      render: (a) => [a.language, ...a.translationLanguages].map((code) => code.toUpperCase()).join(' · '),
+      render: (a) => <LanguageCell article={a} />,
     },
     { key: 'author', header: t('admin.articles.list.columns.author'), render: (a) => a.author?.name ?? '—' },
     { key: 'updated', header: t('admin.articles.list.columns.updated'), render: (a) => formatDate(i18n.language, a.updatedAt) },

@@ -952,3 +952,35 @@
 .account-edit {
   margin-top: 28px;
 }
+
+.account-toggle summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.account-toggle summary::-webkit-details-marker {
+  display: none;
+}
+
+.account-toggle summary h3 {
+  margin: 0;
+}
+
+.account-toggle-chevron {
+  flex: none;
+  color: var(--text);
+  transition: transform 0.2s;
+}
+
+.account-toggle[open] summary {
+  margin-bottom: 22px;
+}
+
+.account-toggle[open] .account-toggle-chevron {
+  transform: rotate(180deg);
+  color: var(--accent);
+}

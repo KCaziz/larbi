@@ -83,6 +83,26 @@ describe('article translations, end to end', { skip: findChrome() ? false : 'no 
     await b.ev("localStorage.setItem('lang', 'fr')");
   });
 
+  test('a third language can be started as a copy of the article text, straight from the articles list', async () => {
+    await b.goto(`${site.url}/admin/articles`);
+    assert.ok(await b.waitText('Titre français'));
+    await b.ev(`(() => {
+      const row = [...document.querySelectorAll('tr')].find((r) => r.textContent.includes('Titre français'));
+      const select = row.querySelector('select');
+      const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
+      set.call(select, 'ar');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    })()`);
+    assert.ok(
+      await b.waitFor(`[...document.querySelectorAll('tr')].some((r) => r.textContent.includes('Titre français') && r.textContent.includes('AR'))`),
+      'the row now shows AR without a second article appearing',
+    );
+    assert.equal(await t.prisma.article.count({ where: { title: 'Titre français' } }), 1, 'still one article');
+    const arTranslation = await t.prisma.articleTranslation.findFirst({ where: { articleId: article.id, language: 'ar' } });
+    assert.equal(arTranslation.title, 'Titre français', 'copied, not blank');
+    assert.match(arTranslation.bodyText, /Texte français/);
+  });
+
   test('no JavaScript error during the whole journey', () => {
     assert.deepEqual(b.jsErrors, []);
   });

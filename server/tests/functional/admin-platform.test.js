@@ -180,7 +180,7 @@ describe('platform settings (P3-16)', () => {
     assert.doesNotMatch(JSON.stringify(pub.body), /must never leak/);
   });
 
-  test('maintenance mode blocks the public API but not health, auth, settings, or the admin panel — and lets an administrator through everywhere', async () => {
+  test('maintenance mode blocks the public API but not health, auth identity, settings, or the admin panel — and lets an administrator through everywhere', async () => {
     await t.request('POST', '/admin/settings', { user: admin, json: { key: 'maintenanceMode', value: 'true' } });
     try {
       assert.equal((await t.request('GET', '/health')).status, 200);
@@ -189,6 +189,16 @@ describe('platform settings (P3-16)', () => {
       assert.equal((await t.request('GET', '/blog/articles')).status, 503);
       assert.equal((await t.request('GET', '/learn/formations', { user: learner })).status, 503);
       assert.equal((await t.request('GET', '/learn/formations', { user: admin })).status, 200, 'an administrator may still browse while fixing the issue');
+
+      // Only what identifies a session stays open: registering, changing a
+      // password or editing a profile are writes the closed site must refuse
+      // to anyone but an administrator, exactly like any other write.
+      assert.equal((await t.request('GET', '/auth/me', { user: learner })).status, 200);
+      assert.equal((await t.request('POST', '/auth/login', { json: { email: 'nobody@example.com', password: 'whatever12' } })).status, 401, 'reaches the controller (a real outage would too)');
+      assert.equal((await t.request('POST', '/auth/logout')).status, 204);
+      assert.equal((await t.request('POST', '/auth/register', { json: { name: 'X', email: `blocked-${Date.now()}@example.com`, password: 'motdepasse-solide', accountType: 'pme' } })).status, 503);
+      assert.equal((await t.request('PATCH', '/auth/me', { user: learner, json: { name: 'Changed' } })).status, 503);
+      assert.equal((await t.request('POST', '/auth/password', { user: learner, json: { currentPassword: 'x', newPassword: 'motdepasse-solide' } })).status, 503);
     } finally {
       await t.request('POST', '/admin/settings', { user: admin, json: { key: 'maintenanceMode', value: 'false' } });
     }

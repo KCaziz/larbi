@@ -83,6 +83,7 @@ describe('profiles and newsletter, end to end', { skip: findChrome() ? false : '
     test('"Se connecter" leads to the login and comes back to the article', async () => {
       await b.click(fr.article.lock.login);
       assert.ok(await b.waitFor("location.pathname === '/connexion'"));
+      await b.waitFor("!!document.querySelector('#email')");
       await b.type('#email', 'standard@example.com');
       await b.type('#password', PASSWORD);
       await b.click(fr.auth.login.submit);
@@ -248,6 +249,33 @@ describe('profiles and newsletter, end to end', { skip: findChrome() ? false : '
       assert.equal(res.status, 403);
       await b.goto(`${site.url}/admin/newsletter`);
       assert.ok(await b.waitFor("!document.body.innerText.includes('confirme@example.com')"));
+    });
+  });
+
+  describe('the profile page (collapsible sections)', () => {
+    test('editing personal info and the password are collapsed by default and expand on demand', async () => {
+      // A collapsed <details> still holds its fields in the DOM (Chrome hides them via
+      // content-visibility, which leaves offsetParent non-null): checkVisibility()
+      // reports what a person would actually see.
+      const visible = (sel) => b.ev(`document.querySelector(${JSON.stringify(sel)})?.checkVisibility() ?? false`);
+
+      await b.goto(`${site.url}/compte/profil`);
+      assert.ok(await b.waitText(fr.account.profile.edit.title));
+      assert.ok(!(await visible('#p-name')), 'the profile form is collapsed at first');
+      assert.ok(!(await visible('#pw-current')), 'the password form is collapsed at first');
+
+      await b.ev(`(() => {
+        const s = [...document.querySelectorAll('.account-toggle summary')].find((e) => e.textContent.includes(${JSON.stringify(fr.account.profile.edit.title)}));
+        s.click();
+      })()`);
+      assert.ok(await b.waitFor("document.querySelector('#p-name')?.checkVisibility()"), 'expands on click');
+      assert.ok(!(await visible('#pw-current')), 'the password section stays collapsed on its own');
+
+      await b.ev(`(() => {
+        const s = [...document.querySelectorAll('.account-toggle summary')].find((e) => e.textContent.includes(${JSON.stringify(fr.account.profile.password.title)}));
+        s.click();
+      })()`);
+      assert.ok(await b.waitFor("document.querySelector('#pw-current')?.checkVisibility()"), 'the password section expands independently');
     });
   });
 

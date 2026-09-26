@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mail, SlidersHorizontal, Tag, UserRound } from 'lucide-react';
+import { ChevronDown, Mail, SlidersHorizontal, Tag, UserRound } from 'lucide-react';
 import { useAuth } from '../../auth/useAuth.js';
 import { ApiError, errorKey } from '../../lib/api.js';
 import { accountTypeLabel, useAccountTypes } from '../../lib/accountTypes.js';
@@ -62,8 +62,11 @@ function EditProfile() {
   };
 
   return (
-    <div className="form-card form-card-sm account-edit">
-      <h3>{t('account.profile.edit.title')}</h3>
+    <details className="form-card form-card-sm account-edit account-toggle">
+      <summary>
+        <h3>{t('account.profile.edit.title')}</h3>
+        <ChevronDown className="account-toggle-chevron" size={18} strokeWidth={1.9} aria-hidden="true" />
+      </summary>
       <form className="form-stack" onSubmit={submit} noValidate>
         <div className="form-field">
           <label htmlFor="p-name">{t('account.profile.fields.name')}</label>
@@ -96,7 +99,7 @@ function EditProfile() {
           {saving ? t('state.sending') : t('account.profile.edit.save')}
         </Button>
       </form>
-    </div>
+    </details>
   );
 }
 
@@ -127,8 +130,11 @@ function ChangePassword() {
   };
 
   return (
-    <div className="form-card form-card-sm account-edit">
-      <h3>{t('account.profile.password.title')}</h3>
+    <details className="form-card form-card-sm account-edit account-toggle">
+      <summary>
+        <h3>{t('account.profile.password.title')}</h3>
+        <ChevronDown className="account-toggle-chevron" size={18} strokeWidth={1.9} aria-hidden="true" />
+      </summary>
       <form className="form-stack" onSubmit={submit} noValidate>
         <div className="form-field">
           <label htmlFor="pw-current">{t('account.profile.edit.currentPassword')}</label>
@@ -148,7 +154,7 @@ function ChangePassword() {
           {saving ? t('state.sending') : t('account.profile.password.save')}
         </Button>
       </form>
-    </div>
+    </details>
   );
 }
 

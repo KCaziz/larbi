@@ -747,6 +747,7 @@
         "emptyBody": "Rédigez votre premier article : un titre suffit pour commencer.",
         "loadError": "Impossible de charger les articles.",
         "uncategorized": "Sans catégorie",
+        "addLanguage": "Ajouter une langue…",
         "columns": {
           "article": "Article",
           "status": "État",
@@ -1563,7 +1564,9 @@
     "backToQuiz": "Retour au quiz"
   },
   "maintenance": {
-    "banner": "Le site est en maintenance : certaines fonctionnalités peuvent être temporairement indisponibles."
+    "banner": "Le site est en maintenance : seuls les administrateurs peuvent le parcourir normalement.",
+    "title": "Site en maintenance",
+    "body": "Le site est temporairement indisponible : une opération de maintenance est en cours. Merci de revenir un peu plus tard."
   },
   "contentLanguage": {
     "names": {

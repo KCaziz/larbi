@@ -65,6 +65,7 @@ import {
   getTranslation,
   saveTranslation,
   deleteTranslation,
+  duplicateTranslation,
 } from '../controllers/admin/articles.controller.js';
 import {
   deleteSubscriber,
@@ -180,6 +181,10 @@ router.delete('/articles/:id', asyncRoute(deleteArticle));
 router.param('lang', (req, res, next, value) => (CONTENT_LANGUAGES.includes(value) ? next() : next(new HttpError(404, 'Not found'))));
 router.get('/articles/:id/translations/:lang', asyncRoute(getTranslation));
 router.put('/articles/:id/translations/:lang', validateBody(translationSchema), asyncRoute(saveTranslation));
+// Starts a translation from a copy of the article's own text, straight from the
+// articles list (no need to open the editor first): still one row per language,
+// just filled in already instead of blank.
+router.post('/articles/:id/translations/:lang/duplicate', asyncRoute(duplicateTranslation));
 router.delete('/articles/:id/translations/:lang', asyncRoute(deleteTranslation));
 router.post('/articles/:id/publish', asyncRoute(publishArticle));
 router.post('/articles/:id/unpublish', asyncRoute(unpublishArticle));
