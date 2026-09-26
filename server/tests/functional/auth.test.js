@@ -138,18 +138,56 @@ describe('login and session', () => {
 });
 
 describe('profile', () => {
-  test('the account type can be changed, and nothing else', async () => {
+  test('the account type can be changed, and no privilege can', async () => {
     const res = await register(valid());
     const token = sessionOf(res);
     const ok = await t.request('PATCH', '/auth/me', { token, json: { accountType: 'pmi' } });
     assert.equal(ok.status, 200);
     assert.equal(ok.body.user.accountType, 'pmi');
-    for (const json of [{ accountType: 'nope' }, { role: 'admin' }, { accessLevel: 'premium' }, { name: 'Autre' }, {}]) {
+    for (const json of [{ accountType: 'nope' }, { role: 'admin' }, { accessLevel: 'premium' }, { name: '' }, {}]) {
       assert.equal((await t.request('PATCH', '/auth/me', { token, json })).status, 400, JSON.stringify(json));
     }
     assert.equal((await t.request('PATCH', '/auth/me', { json: { accountType: 'pme' } })).status, 401);
     const row = await t.prisma.user.findUnique({ where: { id: res.body.user.id } });
     assert.deepEqual([row.role, row.accessLevel], ['user', 'standard']);
+  });
+});
+
+describe('own profile: name, e-mail, password', () => {
+  test('the name changes alone; the e-mail needs the current password, is unique and is normalised', async () => {
+    const res = await register(valid());
+    const token = sessionOf(res);
+    const renamed = await t.request('PATCH', '/auth/me', { token, json: { name: '  Nouveau Nom ' } });
+    assert.equal(renamed.status, 200);
+    assert.equal(renamed.body.user.name, 'Nouveau Nom');
+
+    const noPassword = await t.request('PATCH', '/auth/me', { token, json: { email: 'nouveau@example.com' } });
+    assert.equal(noPassword.status, 400, 'no current password');
+    const wrong = await t.request('PATCH', '/auth/me', { token, json: { email: 'nouveau@example.com', currentPassword: 'not-the-one' } });
+    assert.equal(wrong.status, 403);
+    assert.equal((await t.prisma.user.findUnique({ where: { id: res.body.user.id } })).email, res.body.user.email, 'unchanged');
+
+    await register({ ...valid(), email: 'pris@example.com' });
+    const taken = await t.request('PATCH', '/auth/me', { token, json: { email: 'PRIS@example.com', currentPassword: valid().password } });
+    assert.equal(taken.status, 409);
+
+    const ok = await t.request('PATCH', '/auth/me', { token, json: { email: 'Nouveau@Example.com', currentPassword: valid().password } });
+    assert.equal(ok.status, 200);
+    assert.equal(ok.body.user.email, 'nouveau@example.com');
+    assert.equal((await t.request('POST', '/auth/login', { json: { email: 'nouveau@example.com', password: valid().password } })).status, 200);
+  });
+
+  test('the password changes only with the current one, and the new one works', async () => {
+    const res = await register(valid());
+    const token = sessionOf(res);
+    const good = { currentPassword: valid().password, newPassword: 'Another-Passw0rd!' };
+    assert.equal((await t.request('POST', '/auth/password', { json: good })).status, 401);
+    assert.equal((await t.request('POST', '/auth/password', { token, json: { ...good, currentPassword: 'wrong-one' } })).status, 403);
+    assert.equal((await t.request('POST', '/auth/password', { token, json: { ...good, newPassword: 'short' } })).status, 400);
+    assert.equal((await t.request('POST', '/auth/password', { token, json: { ...good, extra: 1 } })).status, 400);
+    assert.equal((await t.request('POST', '/auth/password', { token, json: good })).status, 204);
+    assert.equal((await t.request('POST', '/auth/login', { json: { email: res.body.user.email, password: valid().password } })).status, 401);
+    assert.equal((await t.request('POST', '/auth/login', { json: { email: res.body.user.email, password: good.newPassword } })).status, 200);
   });
 });
 

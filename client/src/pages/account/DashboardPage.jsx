@@ -2,6 +2,7 @@ import { Award, BookOpenText, GraduationCap, Newspaper } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth.js';
 import { accountTypeLabel, useAccountTypes } from '../../lib/accountTypes.js';
+import { withLang } from '../../lib/contentLanguage.js';
 import { useApi } from '../../lib/useApi.js';
 import Button from '../../components/ui/Button.jsx';
 import FormationCard from '../../components/learn/FormationCard.jsx';
@@ -16,12 +17,12 @@ import '../Pages.css';
 // articles chosen for their account type (P3-04) — everything real, nothing
 // invented; a widget with no data yet simply does not show its section.
 export default function DashboardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const accountTypes = useAccountTypes();
   const enrollments = useApi('/learn/enrollments');
   const certificates = useApi('/learn/certificates');
-  const recommended = useApi('/blog/recommendations');
+  const recommended = useApi(withLang('/blog/recommendations', i18n.language));
 
   const formations = enrollments.status === 'ready' ? enrollments.data.formations : [];
   const inProgress = formations.filter((f) => f.enrollment?.status === 'active');

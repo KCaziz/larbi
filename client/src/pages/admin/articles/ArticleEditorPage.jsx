@@ -16,10 +16,12 @@ import ContentStep from './ContentStep.jsx';
 import MediaStep from './MediaStep.jsx';
 import OrganizeStep from './OrganizeStep.jsx';
 import PreviewStep from './PreviewStep.jsx';
+import TranslationsStep from './TranslationsStep.jsx';
 
 // Fields typed by the author (steps "Contenu" and "Classement"), saved together
 // with the save bar. Cover and files are saved on their own, immediately.
 const toDraft = (a) => ({
+  language: a.language,
   title: a.title,
   excerpt: a.excerpt,
   body: a.body ?? '',
@@ -145,6 +147,7 @@ export default function ArticleEditorPage() {
     { id: 'content', label: t('admin.articles.steps.content'), done: okOf(article, ['title', 'excerpt', 'content']) },
     { id: 'media', label: t('admin.articles.steps.media'), done: okOf(article, ['cover']) },
     { id: 'organize', label: t('admin.articles.steps.organize'), done: Boolean(article.category) },
+    { id: 'translations', label: t('admin.articles.steps.translations'), done: article.translations.length > 0 },
     { id: 'preview', label: t('admin.articles.steps.preview'), done: false },
     { id: 'publish', label: t('admin.articles.steps.publish'), done: article.status === 'published' },
   ];
@@ -185,6 +188,9 @@ export default function ArticleEditorPage() {
             setField('categoryId', category.id);
           }}
         />
+      </div>
+      <div {...panelProps('translations')}>
+        <TranslationsStep article={article} languageUnsaved={draft.language !== article.language} onChanged={refresh} />
       </div>
       <div {...panelProps('preview')}>
         <PreviewStep article={article} draft={draft} categories={categories} dirty={dirty} />

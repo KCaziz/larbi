@@ -3,6 +3,7 @@ import { ArrowLeft, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
+import { withLang } from '../../lib/contentLanguage.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import ArticleCard from '../../components/blog/ArticleCard.jsx';
 import ArticleView from '../../components/blog/ArticleView.jsx';
@@ -17,8 +18,9 @@ import '../Pages.css';
 // same "not found": nothing tells a draft from an article that never existed.
 export default function ArticlePage() {
   const { slug } = useParams();
-  const { t } = useTranslation();
-  const { status, data, error, reload } = useApi(`/blog/articles/${slug}`);
+  const { t, i18n } = useTranslation();
+  // The translation is picked by the language the visitor browses the platform in.
+  const { status, data, error, reload } = useApi(withLang(`/blog/articles/${slug}`, i18n.language));
   const article = status === 'ready' ? data.article : null;
 
   useDocumentMeta(article?.seo.title, article?.seo.description);

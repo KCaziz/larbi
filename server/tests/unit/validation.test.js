@@ -38,6 +38,10 @@ describe('auth', () => {
     ok(loginSchema, { email: 'a@b.co', password: 'x' });
     for (const bad of [{}, { email: 'a@b.co' }, { email: 'a@b.co', password: '' }, { email: 'a@b.co', password: 'x'.repeat(73) }, { email: { $ne: null }, password: 'x' }, { email: 'a@b.co', password: 'x', remember: true }]) ko(loginSchema, bad);
     ok(updateMeSchema, { accountType: 'pmi' });
+    ok(updateMeSchema, { name: 'Camille' });
+    ok(updateMeSchema, { email: 'a@b.co', currentPassword: 'x' });
+    ko(updateMeSchema, { email: 'a@b.co' });
+    ko(updateMeSchema, { name: '' });
     // "x" is a shape-valid category name (the whitelist check is the controller's job,
     // see auth.controller.js and services/accountTypes.service.js).
     for (const bad of [{}, { accountType: '' }, { role: 'admin' }, { accountType: 'pmi', role: 'admin' }]) ko(updateMeSchema, bad);

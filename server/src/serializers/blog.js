@@ -1,4 +1,4 @@
-import { readingMinutes } from '../services/article.service.js';
+import { localizeArticle, readingMinutes } from '../services/article.service.js';
 
 // PUBLIC allow-lists for the blog. Anyone on the internet can call these routes,
 // so nothing is returned that is not meant to be public: no e-mail, no ids of
@@ -11,17 +11,20 @@ const tags = (links) => (links ?? []).map((l) => ({ name: l.tag.name, slug: l.ta
 
 // Card in the list / "related articles". `lock` is what THIS viewer may not read
 // (null = readable): computed by the controller from the session, see blogAccess.
-export function toArticleCard(article, lock = null) {
+export function toArticleCard(article, lock = null, lang = null) {
+  const text = localizeArticle(article, lang);
   return {
     slug: article.slug,
-    title: article.title,
-    excerpt: article.excerpt,
+    language: text.language,
+    availableLanguages: text.availableLanguages,
+    title: text.title,
+    excerpt: text.excerpt,
     category: category(article.category),
     tags: tags(article.tags),
     coverUrl: article.coverImageId ? blogCoverUrl(article.slug) : null,
     author: article.author ? { name: article.author.name } : null,
     publishedAt: article.publishedAt,
-    readingMinutes: readingMinutes(article.bodyText),
+    readingMinutes: readingMinutes(text.bodyText),
     requiredAccessLevel: article.requiredAccessLevel,
     locked: lock !== null,
     lockReason: lock,
@@ -30,14 +33,15 @@ export function toArticleCard(article, lock = null) {
 
 // Full article. `body` was sanitised when the editor saved it.
 // A locked viewer gets the card and the SEO teaser only: no text, no files.
-export function toArticleDetail(article, { lock = null, related = [] } = {}) {
+export function toArticleDetail(article, { lock = null, related = [], lang = null } = {}) {
+  const text = localizeArticle(article, lang);
   return {
-    ...toArticleCard(article, lock),
-    body: lock ? null : article.body,
+    ...toArticleCard(article, lock, lang),
+    body: lock ? null : text.body,
     updatedAt: article.updatedAt,
     seo: {
-      title: article.metaTitle || article.title,
-      description: article.metaDescription || article.excerpt,
+      title: text.metaTitle || text.title,
+      description: text.metaDescription || text.excerpt,
     },
     media: (lock ? [] : article.media ?? []).map((m) => ({
       id: m.id,
@@ -47,6 +51,6 @@ export function toArticleDetail(article, { lock = null, related = [] } = {}) {
       sizeBytes: m.sizeBytes,
       url: blogMediaUrl(m.id),
     })),
-    related: related.map(({ article: a, lock: l }) => toArticleCard(a, l)),
+    related: related.map(({ article: a, lock: l }) => toArticleCard(a, l, lang)),
   };
 }

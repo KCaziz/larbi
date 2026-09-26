@@ -366,6 +366,10 @@ model Tag {
 model Article {
   id          String    @id @default(uuid())
   slug        String    @unique
+  // Language the title / excerpt / body are WRITTEN in (fr | en | ar). Other
+  // languages live in article_translations; a visitor whose language has no
+  // translation simply gets this one.
+  language    String    @default("fr")
   title       String
   // Short summary shown on cards and used as the default page description.
   excerpt     String    @default("")
@@ -400,12 +404,34 @@ model Article {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tags  ArticleTag[]
-  media Media[]      @relation("ArticleMedia")
+  tags         ArticleTag[]
+  media        Media[]              @relation("ArticleMedia")
+  translations ArticleTranslation[]
 
   @@index([status, publishedAt])
   @@index([categoryId])
   @@map("articles")
+}
+
+// The language-dependent part of an article (title, summary, text, SEO) in ONE
+// other language. Everything else (address, cover, files, category, tags,
+// status, access level) stays on the article and is shared by all languages.
+model ArticleTranslation {
+  id              String   @id @default(uuid())
+  articleId       String
+  article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  language        String
+  title           String
+  excerpt         String   @default("")
+  body            String?
+  bodyText        String   @default("")
+  metaTitle       String?
+  metaDescription String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([articleId, language])
+  @@map("article_translations")
 }
 
 model ArticleTag {

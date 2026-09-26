@@ -2,7 +2,9 @@ import { Router } from 'express';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { receiveFile } from '../middleware/upload.js';
 import { validateBody } from '../middleware/validate.js';
+import { CONTENT_LANGUAGES } from '../constants/blog.js';
 import { ROLES } from '../constants/roles.js';
+import { HttpError } from '../utils/httpError.js';
 import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
 import {
   createCategory,
@@ -60,6 +62,9 @@ import {
   publishArticle,
   unpublishArticle,
   updateArticle,
+  getTranslation,
+  saveTranslation,
+  deleteTranslation,
 } from '../controllers/admin/articles.controller.js';
 import {
   deleteSubscriber,
@@ -78,7 +83,7 @@ import {
   uploadCourseMedia,
   uploadCover,
 } from '../controllers/admin/media.controller.js';
-import { createArticleSchema, updateArticleSchema } from '../validation/blog.schemas.js';
+import { createArticleSchema, translationSchema, updateArticleSchema } from '../validation/blog.schemas.js';
 import {
   createCategorySchema,
   createCourseSchema,
@@ -171,6 +176,11 @@ router.post('/articles', validateBody(createArticleSchema), asyncRoute(createArt
 router.get('/articles/:id', asyncRoute(getArticle));
 router.patch('/articles/:id', validateBody(updateArticleSchema), asyncRoute(updateArticle));
 router.delete('/articles/:id', asyncRoute(deleteArticle));
+// Translations of an article (one per language other than its own).
+router.param('lang', (req, res, next, value) => (CONTENT_LANGUAGES.includes(value) ? next() : next(new HttpError(404, 'Not found'))));
+router.get('/articles/:id/translations/:lang', asyncRoute(getTranslation));
+router.put('/articles/:id/translations/:lang', validateBody(translationSchema), asyncRoute(saveTranslation));
+router.delete('/articles/:id/translations/:lang', asyncRoute(deleteTranslation));
 router.post('/articles/:id/publish', asyncRoute(publishArticle));
 router.post('/articles/:id/unpublish', asyncRoute(unpublishArticle));
 router.post('/articles/:id/cover', receiveFile, asyncRoute(uploadArticleCover));

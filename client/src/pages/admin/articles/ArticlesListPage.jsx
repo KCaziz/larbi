@@ -33,6 +33,11 @@ export default function ArticlesListPage() {
       header: t('admin.articles.list.columns.category'),
       render: (a) => a.category?.name ?? t('admin.articles.list.uncategorized'),
     },
+    {
+      key: 'language',
+      header: t('admin.articles.list.columns.languages'),
+      render: (a) => [a.language, ...a.translationLanguages].map((code) => code.toUpperCase()).join(' · '),
+    },
     { key: 'author', header: t('admin.articles.list.columns.author'), render: (a) => a.author?.name ?? '—' },
     { key: 'updated', header: t('admin.articles.list.columns.updated'), render: (a) => formatDate(i18n.language, a.updatedAt) },
     {

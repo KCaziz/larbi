@@ -378,3 +378,28 @@ a.blog-tag:hover {
 .blog-foryou > p {
   margin: 0 0 18px;
 }
+
+/* ---------- Languages an article exists in ---------- */
+.blog-langs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text);
+}
+
+.blog-lang {
+  padding: 1px 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  color: var(--text-h);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: help;
+}
+
+.blog-lang-current {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+}

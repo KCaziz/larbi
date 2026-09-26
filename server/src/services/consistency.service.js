@@ -73,7 +73,7 @@ export async function checkConsistency(prisma, { privateDir }) {
   // ---- stored text ----------------------------------------------------------
   // What is stored must already be clean (sanitising it again changes nothing), and the plain-text
   // copy of an article must match its body: a mismatch means some code path wrote one without the other.
-  const articles = await prisma.article.findMany({ select: { id: true, body: true, bodyText: true, excerpt: true, targetAccountTypes: true } });
+  const articles = await prisma.article.findMany({ select: { id: true, language: true, body: true, bodyText: true, excerpt: true, targetAccountTypes: true, translations: { select: { language: true, body: true, bodyText: true } } } });
   // Account categories (P3-15) are an admin-managed table now, not a fixed list:
   // "known" means it exists at all (active or not — deactivating one must not
   // retroactively make an article that targets it "inconsistent").
@@ -82,6 +82,10 @@ export async function checkConsistency(prisma, { privateDir }) {
     if ((a.targetAccountTypes ?? []).some((type) => !knownTypes.has(type))) problems.push(violation('article target account types are known account types', `article ${a.id}`));
     if (a.body !== null && sanitizeRichText(a.body) !== a.body) problems.push(violation('stored article HTML is already sanitised', `article ${a.id}`));
     if ((a.body ? bodyToText(a.body) : '') !== a.bodyText) problems.push(violation('article plain text matches its body', `article ${a.id}`));
+    for (const tr of a.translations) {
+      if (tr.language === a.language) problems.push(violation('an article is never translated into its own language', `article ${a.id}: ${tr.language}`));
+      if (tr.body === null || sanitizeRichText(tr.body) !== tr.body || bodyToText(tr.body) !== tr.bodyText) problems.push(violation('a translation is sanitised HTML whose plain text matches', `article ${a.id}: ${tr.language}`));
+    }
   }
 
   const usersAccountTypes = await prisma.user.findMany({ select: { id: true, accountType: true } });

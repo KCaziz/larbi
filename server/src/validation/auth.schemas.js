@@ -19,7 +19,26 @@ export const registerSchema = z
   })
   .strict();
 
-// Only accountType is self-editable. accessLevel and role never are.
-export const updateMeSchema = z.object({ accountType }).strict();
+// Self-editable: name, e-mail (which needs the current password) and account
+// type. accessLevel and role never are.
+export const updateMeSchema = z
+  .object({
+    name: z.string().trim().min(1).max(100).optional(),
+    email: email.optional(),
+    accountType: accountType.optional(),
+    currentPassword: z.string().min(1).max(72).optional(),
+  })
+  .strict()
+  .refine((v) => v.name !== undefined || v.email !== undefined || v.accountType !== undefined, {
+    message: 'Nothing to update',
+  })
+  .refine((v) => v.email === undefined || v.currentPassword !== undefined, {
+    message: 'The current password is required to change the e-mail',
+    path: ['currentPassword'],
+  });
+
+export const changePasswordSchema = z
+  .object({ currentPassword: z.string().min(1).max(72), newPassword: z.string().min(8).max(72) })
+  .strict();
 
 export const loginSchema = z.object({ email, password: z.string().min(1).max(72) }).strict();

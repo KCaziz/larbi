@@ -1,6 +1,6 @@
 import { prisma } from '../../config/prisma.js';
 import { ARTICLE_STATUS } from '../../constants/blog.js';
-import { toAdminArticle, toAdminArticleRow } from '../../serializers/cms.js';
+import { toAdminArticle, toAdminArticleRow, toAdminTranslation } from '../../serializers/cms.js';
 import { accountTypeExists } from '../../services/accountTypes.service.js';
 import { bodyToText, normalizeTags } from '../../services/article.service.js';
 import { articleReadiness } from '../../services/readiness.service.js';
@@ -18,6 +18,7 @@ export const ARTICLE_INCLUDE = {
   author: { select: { name: true } },
   tags: { include: { tag: true } },
   media: { orderBy: { createdAt: 'asc' } },
+  translations: { orderBy: { language: 'asc' } },
 };
 
 async function loadArticle(id) {
@@ -29,7 +30,7 @@ async function loadArticle(id) {
 export async function listArticles(req, res) {
   const rows = await prisma.article.findMany({
     orderBy: { updatedAt: 'desc' },
-    include: { category: true, coverImage: true, author: { select: { name: true } } },
+    include: { category: true, coverImage: true, author: { select: { name: true } }, translations: { select: { language: true } } },
   });
   res.json({ articles: rows.map(toAdminArticleRow) });
 }
@@ -69,6 +70,15 @@ export async function updateArticle(req, res) {
       if (!category) throw new HttpError(400, 'Unknown category');
     }
     data.categoryId = categoryId;
+  }
+
+  if (rest.language !== undefined) {
+    // The language an article is written in cannot become one it is already translated into.
+    const clash = await prisma.articleTranslation.findUnique({
+      where: { articleId_language: { articleId: req.params.id, language: rest.language } },
+      select: { id: true },
+    });
+    if (clash) throw new HttpError(409, 'A translation already exists in this language');
   }
 
   if (rest.targetAccountTypes !== undefined) {
@@ -151,4 +161,53 @@ export async function createArticleCategory(req, res) {
 export async function listTags(req, res) {
   const tags = await prisma.tag.findMany({ orderBy: { name: 'asc' }, select: { name: true } });
   res.json({ tags: tags.map((t) => t.name) });
+}
+
+// ---- Translations: the language-dependent part of an article, one row per language.
+
+async function loadTranslatable(id, language) {
+  const article = await prisma.article.findUnique({ where: { id }, select: { id: true, language: true } });
+  if (!article) throw new HttpError(404, 'Not found');
+  if (article.language === language) throw new HttpError(400, 'This is the language the article is written in');
+  return article;
+}
+
+export async function getTranslation(req, res) {
+  await loadTranslatable(req.params.id, req.params.lang);
+  const row = await prisma.articleTranslation.findUnique({
+    where: { articleId_language: { articleId: req.params.id, language: req.params.lang } },
+  });
+  if (!row) throw new HttpError(404, 'Not found');
+  res.json({ translation: toAdminTranslation(row) });
+}
+
+export async function saveTranslation(req, res) {
+  await loadTranslatable(req.params.id, req.params.lang);
+  // Same rule as the article: the HTML is sanitised here whatever the editor sent.
+  const body = sanitizeRichText(req.body.body);
+  const bodyText = bodyToText(body);
+  if (!bodyText) throw new HttpError(400, 'A translation needs a text');
+  const data = {
+    title: req.body.title,
+    excerpt: req.body.excerpt,
+    body,
+    bodyText,
+    metaTitle: req.body.metaTitle ?? null,
+    metaDescription: req.body.metaDescription ?? null,
+  };
+  const key = { articleId_language: { articleId: req.params.id, language: req.params.lang } };
+  const row = await prisma.articleTranslation.upsert({
+    where: key,
+    update: data,
+    create: { ...data, articleId: req.params.id, language: req.params.lang },
+  });
+  res.json({ translation: toAdminTranslation(row) });
+}
+
+export async function deleteTranslation(req, res) {
+  const { count } = await prisma.articleTranslation.deleteMany({
+    where: { articleId: req.params.id, language: req.params.lang },
+  });
+  if (!count) throw new HttpError(404, 'Not found');
+  res.status(204).end();
 }

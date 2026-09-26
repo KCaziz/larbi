@@ -62,13 +62,42 @@ export async function login(req, res, next) {
 
 export async function updateMe(req, res, next) {
   try {
-    if (!(await isSelectableAccountType(req.body.accountType))) throw new HttpError(400, 'Unknown account type');
-    // Scoped to req.user.id: a user can only ever modify their own account.
-    const user = await prisma.user.update({
-      where: { id: req.user.id },
-      data: { accountType: req.body.accountType },
-    });
+    const { name, email, accountType, currentPassword } = req.body;
+    if (accountType !== undefined && !(await isSelectableAccountType(accountType))) {
+      throw new HttpError(400, 'Unknown account type');
+    }
+    // Changing the e-mail (the login) needs the password: a stolen open session
+    // must not be enough to take the account over.
+    if (email !== undefined && email !== req.user.email) {
+      const ok = await bcrypt.compare(currentPassword, req.user.passwordHash);
+      if (!ok) throw new HttpError(403, 'Wrong password');
+    }
+    const data = {};
+    if (name !== undefined) data.name = name;
+    if (email !== undefined) data.email = email;
+    if (accountType !== undefined) data.accountType = accountType;
+
+    let user;
+    try {
+      // Scoped to req.user.id: a user can only ever modify their own account.
+      user = await prisma.user.update({ where: { id: req.user.id }, data });
+    } catch (err) {
+      if (err.code === 'P2002') throw new HttpError(409, 'Email already registered');
+      throw err;
+    }
     res.json({ user: toPublicUser(user) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function changePassword(req, res, next) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!(await bcrypt.compare(currentPassword, req.user.passwordHash))) throw new HttpError(403, 'Wrong password');
+    const passwordHash = await bcrypt.hash(newPassword, BCRYPT_COST);
+    await prisma.user.update({ where: { id: req.user.id }, data: { passwordHash } });
+    res.status(204).end();
   } catch (err) {
     next(err);
   }

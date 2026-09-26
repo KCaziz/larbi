@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { formatDate } from '../../lib/format.js';
 import RichContent from '../ui/RichContent.jsx';
 import ArticleLock from './ArticleLock.jsx';
+import LanguageBadges from './LanguageBadges.jsx';
+import { textDirection } from '../../lib/contentLanguage.js';
 import './Blog.css';
 
 function formatSize(bytes) {
@@ -30,8 +32,14 @@ export default function ArticleView({ article, linkTags = true }) {
             </span>
           )}
         </div>
-        <h1>{article.title}</h1>
-        {article.excerpt && <p className="lead">{article.excerpt}</p>}
+        <h1 lang={article.language} dir={textDirection(article.language)}>
+          {article.title}
+        </h1>
+        {article.excerpt && (
+          <p className="lead" lang={article.language} dir={textDirection(article.language)}>
+            {article.excerpt}
+          </p>
+        )}
         <p className="blog-article-meta">
           {article.author?.name && (
             <span className="blog-meta-item">
@@ -48,6 +56,7 @@ export default function ArticleView({ article, linkTags = true }) {
               {t('blogList.readingTime', { count: article.readingMinutes })}
             </span>
           )}
+          <LanguageBadges languages={article.availableLanguages} shown={article.language} />
         </p>
       </header>
 
@@ -56,7 +65,11 @@ export default function ArticleView({ article, linkTags = true }) {
       {/* `locked` is the server's decision: for a locked reader the text and files were never sent. */}
       {article.locked && <ArticleLock reason={article.lockReason} />}
 
-      {article.body ? <RichContent html={article.body} /> : null}
+      {article.body ? (
+        <div lang={article.language} dir={textDirection(article.language)}>
+          <RichContent html={article.body} />
+        </div>
+      ) : null}
 
       {article.media?.length > 0 && (
         <section className="blog-files" aria-labelledby="blog-files-title">

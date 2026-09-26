@@ -1181,3 +1181,23 @@
 .learn-page-preview {
   max-width: 900px;
 }
+
+/* ---------- Article translations ---------- */
+.cms-translation {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cms-translation-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.cms-translation-head h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.25rem;
+}

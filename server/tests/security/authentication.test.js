@@ -105,7 +105,7 @@ describe('privilege escalation attempts', () => {
     assert.ok(before >= 0);
   });
 
-  test('the profile route can change nothing but the account type', async () => {
+  test('the profile route can change no privilege, and no e-mail without the password', async () => {
     const u = await t.user();
     for (const json of [{ role: 'admin' }, { accessLevel: 'premium' }, { accountType: 'pme', role: 'admin' }, { id: admin.id }, { email: 'x@y.co' }]) {
       assert.equal((await t.request('PATCH', '/auth/me', { user: u, json })).status, 400, JSON.stringify(json));

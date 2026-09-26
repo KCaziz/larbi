@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { CONTENT_LANGUAGES } from '../constants/blog.js';
 import { richTextToPlain } from './sanitize.service.js';
 import { slugify } from './slug.service.js';
 
@@ -18,6 +19,26 @@ export function bodyToText(html) {
 export function readingMinutes(text) {
   const words = String(text ?? '').trim().split(/\s+/).filter(Boolean).length;
   return words === 0 ? 0 : Math.max(1, Math.ceil(words / WORDS_PER_MINUTE));
+}
+
+// What a reader sees of an article in `lang`: the translation when there is one,
+// the article's own text otherwise (the default). `availableLanguages` lists the
+// language it is written in first, then its translations, in platform order.
+export function localizeArticle(article, lang) {
+  const translations = article.translations ?? [];
+  const translation = lang && lang !== article.language ? translations.find((t) => t.language === lang) : null;
+  const source = translation ?? article;
+  const order = (l) => CONTENT_LANGUAGES.indexOf(l);
+  return {
+    language: source.language ?? article.language,
+    availableLanguages: [article.language, ...translations.map((t) => t.language).sort((a, b) => order(a) - order(b))],
+    title: source.title,
+    excerpt: source.excerpt,
+    body: source.body,
+    bodyText: source.bodyText,
+    metaTitle: source.metaTitle,
+    metaDescription: source.metaDescription,
+  };
 }
 
 // URL-safe identifier of a tag. A name without any latin letter or digit (Arabic,

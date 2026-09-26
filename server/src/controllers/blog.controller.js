@@ -9,7 +9,7 @@ import { HttpError } from '../utils/httpError.js';
 // that is a draft answers 404, exactly like an unknown slug.
 
 const PUBLISHED = { status: ARTICLE_STATUS.PUBLISHED };
-const CARD_INCLUDE = { category: true, author: { select: { name: true } }, tags: { include: { tag: true } } };
+const CARD_INCLUDE = { category: true, author: { select: { name: true } }, tags: { include: { tag: true } }, translations: true };
 // Public files are cached for a few minutes: an article that is unpublished
 // stops being served as soon as the cache expires.
 const PUBLIC_CACHE = 'public, max-age=300';
@@ -23,7 +23,7 @@ const viewerDependent = (res) => {
 // "%" and "_" typed by a visitor are ordinary characters, not LIKE wildcards.
 const escapeLike = (text) => text.replace(/[\\%_]/g, '\\$&');
 
-function listFilter({ query, category, tag }, user) {
+function listFilter({ query, category, tag, lang }, user) {
   const where = { ...PUBLISHED };
   if (category) where.category = { slug: category };
   if (tag) where.tags = { some: { tag: { slug: tag } } };
@@ -37,12 +37,19 @@ function listFilter({ query, category, tag }, user) {
       { AND: [{ bodyText: contains }, { requiredAccessLevel: { in: readableLevels(user) } }] },
       { tags: { some: { tag: { name: contains } } } },
     ];
+    // Also what the visitor reads in THEIR language (same rule for the text of a locked article).
+    if (lang) {
+      where.OR.push(
+        { translations: { some: { language: lang, OR: [{ title: contains }, { excerpt: contains }] } } },
+        { AND: [{ translations: { some: { language: lang, bodyText: contains } } }, { requiredAccessLevel: { in: readableLevels(user) } }] },
+      );
+    }
   }
   return where;
 }
 
 export async function listArticles(req, res) {
-  const { page, limit } = req.query;
+  const { page, limit, lang } = req.query;
   viewerDependent(res);
   const where = listFilter(req.query, req.user);
   const [total, rows] = await prisma.$transaction([
@@ -56,7 +63,7 @@ export async function listArticles(req, res) {
     }),
   ]);
   res.json({
-    articles: rows.map((a) => toArticleCard(a, articleLock(req.user, a))),
+    articles: rows.map((a) => toArticleCard(a, articleLock(req.user, a), lang)),
     pagination: { page, limit, total, pages: Math.max(1, Math.ceil(total / limit)) },
   });
 }
@@ -90,7 +97,7 @@ export async function getArticle(req, res) {
     include: { ...CARD_INCLUDE, media: { orderBy: { createdAt: 'asc' } } },
   });
   if (!article) throw new HttpError(404, 'Not found');
-  res.json({ article: toArticleDetail(article, { lock: articleLock(req.user, article), related: await relatedTo(article, req.user) }) });
+  res.json({ article: toArticleDetail(article, { lock: articleLock(req.user, article), related: await relatedTo(article, req.user), lang: req.query.lang }) });
 }
 
 // "For your profile": articles aimed at the logged-in user's account type. Someone
@@ -109,7 +116,7 @@ export async function recommendations(req, res) {
   const rows = personalised
     ? targeted
     : await prisma.article.findMany({ where: PUBLISHED, orderBy: [{ publishedAt: 'desc' }, { id: 'asc' }], take: 3, include: CARD_INCLUDE });
-  res.json({ personalised, articles: rows.map((a) => toArticleCard(a, articleLock(req.user, a))) });
+  res.json({ personalised, articles: rows.map((a) => toArticleCard(a, articleLock(req.user, a), req.query.lang)) });
 }
 
 // Only categories / tags that have at least one published article are public.

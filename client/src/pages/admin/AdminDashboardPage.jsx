@@ -75,7 +75,7 @@ export default function AdminDashboardPage() {
   return (
     <>
       <PageToolbar title={t('admin.dashboard.title')} subtitle={t('admin.dashboard.subtitle')}>
-        <Button to="/admin/formations">{t('admin.dashboard.newFormation')}</Button>
+        <Button to="/admin/formations" variant="secondary">{t('admin.dashboard.newFormation')}</Button>
         <Button to="/admin/articles" variant="secondary">
           {t('admin.dashboard.newArticle')}
         </Button>

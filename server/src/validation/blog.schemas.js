@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MAX_TAGS_PER_ARTICLE, BLOG_PAGE_SIZE } from '../constants/blog.js';
+import { MAX_TAGS_PER_ARTICLE, BLOG_PAGE_SIZE, CONTENT_LANGUAGES } from '../constants/blog.js';
 import { ACCESS_LEVELS } from '../constants/roles.js';
 import { optionalText } from './cms.schemas.js';
 
@@ -25,6 +25,8 @@ export const updateArticleSchema = z
       .transform((types) => [...new Set(types)]),
     metaTitle: optionalText(70),
     metaDescription: optionalText(170),
+    // Language the article is written in (its translations are separate rows).
+    language: z.enum(CONTENT_LANGUAGES),
   })
   .partial()
   .strict();
@@ -37,7 +39,23 @@ export const blogListQuerySchema = z
     query: z.string().trim().max(100).optional(),
     category: slug.optional(),
     tag: slug.optional(),
+    lang: z.enum(CONTENT_LANGUAGES).optional(),
     page: z.coerce.number().int().min(1).max(1000).default(1),
     limit: z.coerce.number().int().min(1).max(BLOG_PAGE_SIZE.max).default(BLOG_PAGE_SIZE.default),
+  })
+  .strict();
+
+// Language the visitor browses in: picks the translation when there is one.
+export const blogLangQuerySchema = z.object({ lang: z.enum(CONTENT_LANGUAGES).optional() }).strict();
+
+// One translation of an article (title, summary, text, SEO). A translation needs
+// a title and a text: the server also refuses a body without any text.
+export const translationSchema = z
+  .object({
+    title: z.string().trim().min(1).max(150),
+    excerpt: z.string().trim().max(300).default(''),
+    body: z.string().min(1).max(200_000),
+    metaTitle: optionalText(70).optional(),
+    metaDescription: optionalText(170).optional(),
   })
   .strict();

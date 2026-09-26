@@ -55,7 +55,7 @@ describe('list', () => {
   test('a card carries exactly the public fields (no text, no ids, no e-mail, no status)', async () => {
     const res = await get('/blog/articles');
     const card = res.body.articles.find((a) => a.title === 'Comprendre la TVA');
-    assert.deepEqual(Object.keys(card).sort(), ['author', 'category', 'coverUrl', 'excerpt', 'lockReason', 'locked', 'publishedAt', 'readingMinutes', 'requiredAccessLevel', 'slug', 'tags', 'title']);
+    assert.deepEqual(Object.keys(card).sort(), ['author', 'availableLanguages', 'category', 'coverUrl', 'excerpt', 'language', 'lockReason', 'locked', 'publishedAt', 'readingMinutes', 'requiredAccessLevel', 'slug', 'tags', 'title']);
     assert.deepEqual(card.author, { name: 'Camille Auteur' });
     assert.deepEqual(card.category, { name: 'Fiscalité', slug: 'fiscalite' });
     assert.deepEqual(card.tags.map((x) => x.name), ['Facture', 'TVA']);
@@ -162,7 +162,7 @@ describe('article page', () => {
     assert.ok(!related.some((r) => r.slug === a1.slug));
     assert.ok(!related.some((r) => r.title === 'Brouillon secret'));
     assert.equal(related[0].title, 'TVA et auto-entrepreneurs', 'same category and same tag come first');
-    assert.ok(related.every((r) => Object.keys(r).sort().join() === 'author,category,coverUrl,excerpt,lockReason,locked,publishedAt,readingMinutes,requiredAccessLevel,slug,tags,title'));
+    assert.ok(related.every((r) => Object.keys(r).sort().join() === 'author,availableLanguages,category,coverUrl,excerpt,language,lockReason,locked,publishedAt,readingMinutes,requiredAccessLevel,slug,tags,title'));
   });
 });
 

@@ -128,6 +128,8 @@ export function toAdminFormation(formation) {
 export function toAdminArticle(article) {
   return {
     id: article.id,
+    language: article.language,
+    translations: (article.translations ?? []).map((t) => ({ language: t.language, title: t.title, updatedAt: t.updatedAt })),
     title: article.title,
     excerpt: article.excerpt,
     body: article.body,
@@ -155,6 +157,8 @@ export function toAdminArticleRow(article) {
   return {
     id: article.id,
     title: article.title,
+    language: article.language,
+    translationLanguages: (article.translations ?? []).map((t) => t.language).sort(),
     status: article.status,
     requiredAccessLevel: article.requiredAccessLevel,
     category: article.category ? { id: article.category.id, name: article.category.name } : null,
@@ -162,5 +166,18 @@ export function toAdminArticleRow(article) {
     author: article.author ? { name: article.author.name } : null,
     publishedAt: article.publishedAt,
     updatedAt: article.updatedAt,
+  };
+}
+
+// One translation, as the editor needs it.
+export function toAdminTranslation(row) {
+  return {
+    language: row.language,
+    title: row.title,
+    excerpt: row.excerpt,
+    body: row.body,
+    metaTitle: row.metaTitle,
+    metaDescription: row.metaDescription,
+    updatedAt: row.updatedAt,
   };
 }

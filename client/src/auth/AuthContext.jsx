@@ -47,9 +47,10 @@ export function AuthProvider({ children }) {
         await api.post('/auth/logout');
         setState({ status: 'anonymous', user: null });
       },
-      async updateAccountType(accountType) {
+      // Profile fields: name, email (+ currentPassword), accountType.
+      async updateProfile(fields) {
         try {
-          const { user } = await api.patch('/auth/me', { accountType });
+          const { user } = await api.patch('/auth/me', fields);
           setState({ status: 'authenticated', user });
         } catch (err) {
           if (err instanceof ApiError && err.status === 401) {
@@ -57,6 +58,13 @@ export function AuthProvider({ children }) {
           }
           throw err;
         }
+      },
+      async updateAccountType(accountType) {
+        const { user } = await api.patch('/auth/me', { accountType });
+        setState({ status: 'authenticated', user });
+      },
+      async changePassword(currentPassword, newPassword) {
+        await api.post('/auth/password', { currentPassword, newPassword });
       },
     }),
     [state],

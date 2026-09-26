@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { Clock, ImageOff, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../../lib/format.js';
+import LanguageBadges from './LanguageBadges.jsx';
+import { textDirection } from '../../lib/contentLanguage.js';
 import './Blog.css';
 
 // Card of the blog list and of "related articles". `article` = card from the API.
@@ -24,10 +26,14 @@ export default function ArticleCard({ article }) {
             </span>
           )}
         </div>
-        <h3>
+        <h3 lang={article.language} dir={textDirection(article.language)}>
           <Link to={href}>{article.title}</Link>
         </h3>
-        {article.excerpt && <p className="blog-card-text">{article.excerpt}</p>}
+        {article.excerpt && (
+          <p className="blog-card-text" lang={article.language} dir={textDirection(article.language)}>
+            {article.excerpt}
+          </p>
+        )}
         <p className="blog-card-meta">
           <time dateTime={article.publishedAt}>{formatDate(i18n.language, article.publishedAt)}</time>
           {article.readingMinutes > 0 && (
@@ -36,6 +42,7 @@ export default function ArticleCard({ article }) {
               {t('blogList.readingTime', { count: article.readingMinutes })}
             </span>
           )}
+          <LanguageBadges languages={article.availableLanguages} shown={article.language} />
         </p>
       </div>
     </article>

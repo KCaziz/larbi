@@ -308,7 +308,7 @@ describe('blog: from the editor to the reader', { skip: findChrome() ? false : '
 
     test('no JavaScript error, and no unexpected HTTP error, during the whole journey', () => {
       assert.deepEqual(b.jsErrors, []);
-      const expected = [/^401 \/api\/auth\/me$/, /^404 \/api\/blog\/articles\/[^/?]+(\/cover)?$/, /^400 \/api\/blog\/articles\?/, /^415 \/api\/admin\/articles\/[^/]+\/cover$/];
+      const expected = [/^401 \/api\/auth\/me$/, /^404 \/api\/blog\/articles\/[^/?]+(\/cover)?(\?lang=[a-z]{2})?$/, /^400 \/api\/blog\/articles\?/, /^415 \/api\/admin\/articles\/[^/]+\/cover$/];
       // provoked on purpose: anonymous session check, drafts / unpublished pages, a malformed filter, the fake image
       const unexpected = b.badResponses.filter((r) => !expected.some((re) => re.test(r)));
       assert.deepEqual(unexpected, []);

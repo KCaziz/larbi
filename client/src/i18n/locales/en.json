@@ -303,7 +303,8 @@
     "page": "Page {{page}} of {{pages}}",
     "premiumBadge": "Premium",
     "forYou": "For your profile",
-    "forYouIntro": "Articles picked for your account type."
+    "forYouIntro": "Articles picked for your account type.",
+    "availableIn": "Languages available for this article"
   },
   "article": {
     "label": "Article",
@@ -422,6 +423,27 @@
         "email": "Email",
         "accountType": "Account type",
         "accessLevel": "Access level"
+      },
+      "edit": {
+        "title": "Edit my details",
+        "save": "Save",
+        "saved": "Your details have been saved.",
+        "required": "Please fill in all fields.",
+        "currentPassword": "Current password",
+        "emailHint": "Required to change the e-mail address, which you use to sign in.",
+        "passwordNeeded": "Enter your current password to change the e-mail.",
+        "wrongPassword": "The current password is incorrect.",
+        "emailTaken": "This e-mail address is already in use."
+      },
+      "password": {
+        "title": "Change my password",
+        "new": "New password",
+        "hint": "At least 8 characters.",
+        "confirm": "Confirm the new password",
+        "save": "Change password",
+        "saved": "Your password has been changed.",
+        "tooShort": "The new password must be at least 8 characters long.",
+        "mismatch": "The two passwords do not match."
       }
     },
     "dashboard": {
@@ -730,7 +752,8 @@
           "status": "Status",
           "category": "Category",
           "author": "Author",
-          "updated": "Modified on"
+          "updated": "Modified on",
+          "languages": "Languages"
         }
       },
       "newDialog": {
@@ -753,7 +776,8 @@
         "media": "Images and media",
         "organize": "Organisation",
         "preview": "Preview",
-        "publish": "Publication"
+        "publish": "Publication",
+        "translations": "Translations"
       },
       "content": {
         "title": "Article title",
@@ -762,7 +786,9 @@
         "excerpt": "Summary",
         "excerptHint": "Two or three sentences that make people want to read. Shown in the blog list.",
         "body": "Article text",
-        "bodyHint": "Write your article. Use the buttons to format it (bold, headings, lists, links)."
+        "bodyHint": "Write your article. Use the buttons to format it (bold, headings, lists, links).",
+        "language": "Article language",
+        "languageHint": "The language you write this article in. Visitors browsing in another language will read it in this language until it is translated."
       },
       "media": {
         "cover": "Cover image",
@@ -822,6 +848,20 @@
         "confirmBody": "\"{{title}}\" and its files will be deleted. This cannot be undone.",
         "confirm": "Yes, delete",
         "blocked": "This article cannot be deleted right now."
+      },
+      "translations": {
+        "intro": "This article is written in {{language}}. Translate it when you have time: each visitor reads it in the language of their interface, or in the original language otherwise. The image, files, category, keywords and access are shared by all languages.",
+        "languageUnsaved": "You changed the article language without saving: save the \"Content\" step first.",
+        "done": "Translated",
+        "missing": "Not translated",
+        "add": "Translate",
+        "edit": "Edit",
+        "save": "Save the translation",
+        "saved": "The translation is saved.",
+        "required": "A translation needs a title and a text.",
+        "delete": "Delete the translation",
+        "deleteTitle": "Delete this translation?",
+        "deleteBody": "The {{language}} translation will be deleted. The article stays available in its original language."
       }
     },
     "newsletter": {
@@ -1523,5 +1563,12 @@
   },
   "maintenance": {
     "banner": "The site is under maintenance: some features may be temporarily unavailable."
+  },
+  "contentLanguage": {
+    "names": {
+      "fr": "French",
+      "en": "English",
+      "ar": "Arabic"
+    }
   }
 }

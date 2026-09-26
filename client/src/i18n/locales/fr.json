@@ -303,7 +303,8 @@
     "page": "Page {{page}} sur {{pages}}",
     "premiumBadge": "Premium",
     "forYou": "Pour votre profil",
-    "forYouIntro": "Des articles choisis selon votre type de compte."
+    "forYouIntro": "Des articles choisis selon votre type de compte.",
+    "availableIn": "Langues disponibles pour cet article"
   },
   "article": {
     "label": "Article",
@@ -422,6 +423,27 @@
         "email": "Email",
         "accountType": "Type de compte",
         "accessLevel": "Niveau d'accès"
+      },
+      "edit": {
+        "title": "Modifier mes informations",
+        "save": "Enregistrer",
+        "saved": "Vos informations ont été enregistrées.",
+        "required": "Merci de remplir tous les champs.",
+        "currentPassword": "Mot de passe actuel",
+        "emailHint": "Nécessaire pour changer l'adresse e-mail, qui sert à vous connecter.",
+        "passwordNeeded": "Saisissez votre mot de passe actuel pour changer l'e-mail.",
+        "wrongPassword": "Le mot de passe actuel est incorrect.",
+        "emailTaken": "Cette adresse e-mail est déjà utilisée."
+      },
+      "password": {
+        "title": "Changer mon mot de passe",
+        "new": "Nouveau mot de passe",
+        "hint": "8 caractères minimum.",
+        "confirm": "Confirmer le nouveau mot de passe",
+        "save": "Changer le mot de passe",
+        "saved": "Votre mot de passe a été changé.",
+        "tooShort": "Le nouveau mot de passe doit contenir au moins 8 caractères.",
+        "mismatch": "Les deux mots de passe ne correspondent pas."
       }
     },
     "dashboard": {
@@ -730,7 +752,8 @@
           "status": "État",
           "category": "Catégorie",
           "author": "Auteur",
-          "updated": "Modifié le"
+          "updated": "Modifié le",
+          "languages": "Langues"
         }
       },
       "newDialog": {
@@ -753,7 +776,8 @@
         "media": "Images et médias",
         "organize": "Classement",
         "preview": "Aperçu",
-        "publish": "Publication"
+        "publish": "Publication",
+        "translations": "Traductions"
       },
       "content": {
         "title": "Titre de l'article",
@@ -762,7 +786,9 @@
         "excerpt": "Résumé",
         "excerptHint": "Deux ou trois phrases qui donnent envie de lire. Affiché dans la liste du blog.",
         "body": "Texte de l'article",
-        "bodyHint": "Écrivez votre article. Utilisez les boutons pour mettre en forme (gras, titres, listes, liens)."
+        "bodyHint": "Écrivez votre article. Utilisez les boutons pour mettre en forme (gras, titres, listes, liens).",
+        "language": "Langue de l'article",
+        "languageHint": "La langue dans laquelle vous écrivez cet article. Les visiteurs d'une autre langue le liront dans cette langue, tant qu'il n'est pas traduit."
       },
       "media": {
         "cover": "Image de couverture",
@@ -822,6 +848,20 @@
         "confirmBody": "« {{title}} » et ses fichiers seront supprimés. Cette action est irréversible.",
         "confirm": "Oui, supprimer",
         "blocked": "Cet article ne peut pas être supprimé pour l'instant."
+      },
+      "translations": {
+        "intro": "Cet article est écrit en {{language}}. Traduisez-le si vous avez le temps : chaque visiteur le lira dans la langue de son interface, sinon dans la langue d'origine. L'image, les fichiers, la catégorie, les mots-clés et l'accès restent communs à toutes les langues.",
+        "languageUnsaved": "Vous avez changé la langue de l'article sans l'enregistrer : enregistrez d'abord l'étape « Contenu ».",
+        "done": "Traduit",
+        "missing": "Non traduit",
+        "add": "Traduire",
+        "edit": "Modifier",
+        "save": "Enregistrer la traduction",
+        "saved": "La traduction est enregistrée.",
+        "required": "Une traduction a besoin d’un titre et d’un texte.",
+        "delete": "Supprimer la traduction",
+        "deleteTitle": "Supprimer cette traduction ?",
+        "deleteBody": "La traduction en {{language}} sera supprimée. L'article reste disponible dans sa langue d'origine."
       }
     },
     "newsletter": {
@@ -1524,5 +1564,12 @@
   },
   "maintenance": {
     "banner": "Le site est en maintenance : certaines fonctionnalités peuvent être temporairement indisponibles."
+  },
+  "contentLanguage": {
+    "names": {
+      "fr": "Français",
+      "en": "Anglais",
+      "ar": "Arabe"
+    }
   }
 }

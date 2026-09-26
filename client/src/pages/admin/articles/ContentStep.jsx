@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import Field from '../../../components/cms/Field.jsx';
 import RichTextEditor from '../../../components/cms/RichTextEditor.jsx';
+import { CONTENT_LANGUAGES } from '../../../lib/contentLanguage.js';
 
 // Step 1: what the article says.
 export default function ContentStep({ draft, setField, titleError, resetKey }) {
@@ -8,6 +9,16 @@ export default function ContentStep({ draft, setField, titleError, resetKey }) {
 
   return (
     <div className="cms-form">
+      <Field label={t('admin.articles.content.language')} htmlFor="a-language" hint={t('admin.articles.content.languageHint')}>
+        <select id="a-language" value={draft.language} onChange={(e) => setField('language', e.target.value)} aria-describedby="a-language-hint">
+          {CONTENT_LANGUAGES.map((code) => (
+            <option key={code} value={code}>
+              {t(`contentLanguage.names.${code}`)}
+            </option>
+          ))}
+        </select>
+      </Field>
+
       <Field label={t('admin.articles.content.title')} htmlFor="a-title" hint={t('admin.articles.content.titleHint')} error={titleError}>
         <input
           id="a-title"

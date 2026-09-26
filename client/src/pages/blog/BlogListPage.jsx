@@ -11,6 +11,7 @@ import NewsletterForm from '../../components/newsletter/NewsletterForm.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
+import { withLang } from '../../lib/contentLanguage.js';
 import '../../components/blog/Blog.css';
 import '../Pages.css';
 
@@ -19,7 +20,7 @@ const toPage = (value) => Math.max(1, Math.floor(Number(value)) || 1);
 // Public blog: search, category / keyword filters and pagination. The filters live
 // in the address (?q=&category=&tag=&page=) so a filtered list can be shared.
 export default function BlogListPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [params, setParams] = useSearchParams();
   const query = params.get('q') ?? '';
   const category = params.get('category') ?? '';
@@ -33,10 +34,10 @@ export default function BlogListPage() {
   if (query) apiParams.set('query', query);
   if (category) apiParams.set('category', category);
   if (tag) apiParams.set('tag', tag);
-  const list = useApi(`/blog/articles?${apiParams}`);
+  const list = useApi(withLang(`/blog/articles?${apiParams}`, i18n.language));
   const categories = useApi('/blog/categories');
   const tags = useApi('/blog/tags');
-  const recommended = useApi('/blog/recommendations');
+  const recommended = useApi(withLang('/blog/recommendations', i18n.language));
 
   const update = (changes) => {
     const next = new URLSearchParams(params);

@@ -175,7 +175,7 @@ describe('serializers expose an explicit allow-list', () => {
 
   test('public article card and page: no id, e-mail, status, author id or storage key', () => {
     const card = toArticleCard(article);
-    assert.deepEqual(Object.keys(card).sort(), ['author', 'category', 'coverUrl', 'excerpt', 'lockReason', 'locked', 'publishedAt', 'readingMinutes', 'requiredAccessLevel', 'slug', 'tags', 'title']);
+    assert.deepEqual(Object.keys(card).sort(), ['author', 'availableLanguages', 'category', 'coverUrl', 'excerpt', 'language', 'lockReason', 'locked', 'publishedAt', 'readingMinutes', 'requiredAccessLevel', 'slug', 'tags', 'title']);
     assert.deepEqual(card.author, { name: 'Camille' }, 'the author e-mail is never public');
     assert.deepEqual(card.tags.map((t) => t.name), ['A', 'B'], 'sorted');
     const detail = toArticleDetail(article, { related: [{ article, lock: null }] });

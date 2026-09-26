@@ -5,7 +5,7 @@ import { publicReadLimiter } from '../middleware/rateLimit.js';
 import { validateQuery } from '../middleware/validate.js';
 import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
 import { HttpError } from '../utils/httpError.js';
-import { blogListQuerySchema } from '../validation/blog.schemas.js';
+import { blogLangQuerySchema, blogListQuerySchema } from '../validation/blog.schemas.js';
 
 // PUBLIC blog API (no session): only published content is ever returned.
 const router = Router();
@@ -20,9 +20,9 @@ router.param('slug', (req, res, next, value) =>
 router.param('id', uuidParam);
 
 router.get('/articles', validateQuery(blogListQuerySchema), asyncRoute(listArticles));
-router.get('/articles/:slug', asyncRoute(getArticle));
+router.get('/articles/:slug', validateQuery(blogLangQuerySchema), asyncRoute(getArticle));
 router.get('/articles/:slug/cover', asyncRoute(getCover));
-router.get('/recommendations', asyncRoute(recommendations));
+router.get('/recommendations', validateQuery(blogLangQuerySchema), asyncRoute(recommendations));
 router.get('/categories', asyncRoute(listCategories));
 router.get('/tags', asyncRoute(listTags));
 router.get('/media/:id', asyncRoute(getMedia));
