@@ -1162,6 +1162,16 @@
   font-size: 0.85rem;
 }
 
+/* A copied-but-not-translated language: visible to the admin, never to a visitor. */
+.cms-lang-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--warn);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
 /* ---------- Row actions, whole-formation preview (P3-14) ---------- */
 .cms-row-actions {
   display: inline-flex;

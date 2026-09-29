@@ -101,6 +101,14 @@ describe('article translations, end to end', { skip: findChrome() ? false : 'no 
     const arTranslation = await t.prisma.articleTranslation.findFirst({ where: { articleId: article.id, language: 'ar' } });
     assert.equal(arTranslation.title, 'Titre français', 'copied, not blank');
     assert.match(arTranslation.bodyText, /Texte français/);
+    assert.equal(arTranslation.pending, true, 'a raw copy is never mistaken for a real translation');
+    // The row marks it as "à traduire" (with a warning icon), not as a finished language.
+    assert.ok(await b.ev("!![...document.querySelectorAll('tr')].find((r) => r.textContent.includes('Titre français')).querySelector('.cms-lang-pending')"));
+    // A visitor browsing in Arabic still gets the French original: the raw copy is invisible to them.
+    await b.ev("localStorage.setItem('lang', 'ar')");
+    await b.goto(`${site.url}/blog/${article.slug}`);
+    assert.ok(await b.waitText('Titre français'));
+    await b.ev("localStorage.setItem('lang', 'fr')");
   });
 
   test('no JavaScript error during the whole journey', () => {

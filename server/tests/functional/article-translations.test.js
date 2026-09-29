@@ -88,13 +88,43 @@ describe('administration', () => {
     assert.equal(dup.status, 201);
     assert.equal(dup.body.translation.title, 'Fiche produit');
     assert.match(dup.body.translation.body, /mangouste/);
+    // The copy is French text under the "en" tag: it is NOT a translation. It must
+    // say so (pending) and never be shown to a visitor as if it were English.
+    assert.equal(dup.body.translation.pending, true);
 
     // Still one article, one row per language: the list shows both without a second article.
     const full = await t.request('GET', `/admin/articles/${copy.id}`, { user: admin });
     assert.deepEqual(full.body.article.translations.map((x) => x.language), ['en']);
+    assert.equal(full.body.article.translations[0].pending, true);
+    const list = await t.request('GET', '/admin/articles', { user: admin });
+    const row = list.body.articles.find((a) => a.id === copy.id);
+    assert.deepEqual(row.translationLanguages, [], 'not counted as finished');
+    assert.deepEqual(row.pendingLanguages, ['en']);
+
+    // A visitor asking for English gets the French original, exactly as if nobody
+    // had touched English at all: the untranslated copy is never shown as a translation.
+    const visitor = await t.request('GET', `/blog/articles/${copy.slug}?lang=en`);
+    assert.equal(visitor.body.article.title, 'Fiche produit');
+    assert.equal(visitor.body.article.language, 'fr');
+    assert.deepEqual(visitor.body.article.availableLanguages, ['fr']);
+    // The base text is still searchable regardless of the visitor's language (pre-existing
+    // behaviour): what matters here is that the pending copy never appears as a real
+    // English translation, even in a search result.
+    const search = await t.request('GET', '/blog/articles?lang=en&query=mangouste');
+    const found = search.body.articles.find((a) => a.slug === copy.slug);
+    if (found) assert.deepEqual(found.availableLanguages, ['fr'], 'the pending "en" copy is not counted as a translation');
 
     // Never overwrites text that may already have been edited.
     assert.equal((await t.request('POST', `/admin/articles/${copy.id}/translations/en/duplicate`, { user: admin, json: {} })).status, 409);
+
+    // Reviewing and saving the copy through the real editor turns it into a genuine
+    // translation: it is no longer pending, and visitors now get it.
+    const saved = await put(copy, 'en', { title: 'Product sheet', excerpt: 'Summary', body: '<p>Product text with mongoose.</p>' });
+    assert.equal(saved.status, 200);
+    assert.equal(saved.body.translation.pending, false);
+    const afterSave = await t.request('GET', `/blog/articles/${copy.slug}?lang=en`);
+    assert.equal(afterSave.body.article.title, 'Product sheet');
+    assert.equal(afterSave.body.article.language, 'en');
   });
 
   test('deleting a translation, then the article, removes them; unknown ones are a 404', async () => {

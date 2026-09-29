@@ -747,7 +747,7 @@
         "emptyBody": "Rédigez votre premier article : un titre suffit pour commencer.",
         "loadError": "Impossible de charger les articles.",
         "uncategorized": "Sans catégorie",
-        "addLanguage": "Ajouter une langue…",
+        "addLanguage": "Copier le texte pour traduire dans…",
         "columns": {
           "article": "Article",
           "status": "État",
@@ -755,7 +755,8 @@
           "author": "Auteur",
           "updated": "Modifié le",
           "languages": "Langues"
-        }
+        },
+        "languagePendingHint": "Le texte a été copié dans cette langue mais n'est pas encore traduit : les visiteurs ne le voient pas. Ouvrez l'étape « Traductions » pour le rédiger."
       },
       "newDialog": {
         "title": "Nouvel article",
@@ -862,7 +863,9 @@
         "required": "Une traduction a besoin d’un titre et d’un texte.",
         "delete": "Supprimer la traduction",
         "deleteTitle": "Supprimer cette traduction ?",
-        "deleteBody": "La traduction en {{language}} sera supprimée. L'article reste disponible dans sa langue d'origine."
+        "deleteBody": "La traduction en {{language}} sera supprimée. L'article reste disponible dans sa langue d'origine.",
+        "pending": "Copie non traduite",
+        "pendingNotice": "Ce texte est une copie exacte de l'original : rien n'est encore traduit. Il n'est jamais montré à un visiteur tant que vous ne l'avez pas réécrit et enregistré ici."
       }
     },
     "newsletter": {

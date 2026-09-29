@@ -747,7 +747,7 @@
         "emptyBody": "Write your first article: a title is enough to start.",
         "loadError": "The articles could not be loaded.",
         "uncategorized": "No category",
-        "addLanguage": "Add a language…",
+        "addLanguage": "Copy the text to translate into…",
         "columns": {
           "article": "Article",
           "status": "Status",
@@ -755,7 +755,8 @@
           "author": "Author",
           "updated": "Modified on",
           "languages": "Languages"
-        }
+        },
+        "languagePendingHint": "The text was copied into this language but is not translated yet: visitors do not see it. Open the \"Translations\" step to write it."
       },
       "newDialog": {
         "title": "New article",
@@ -862,7 +863,9 @@
         "required": "A translation needs a title and a text.",
         "delete": "Delete the translation",
         "deleteTitle": "Delete this translation?",
-        "deleteBody": "The {{language}} translation will be deleted. The article stays available in its original language."
+        "deleteBody": "The {{language}} translation will be deleted. The article stays available in its original language.",
+        "pending": "Untranslated copy",
+        "pendingNotice": "This text is an exact copy of the original: nothing is translated yet. It is never shown to a visitor until you rewrite and save it here."
       }
     },
     "newsletter": {

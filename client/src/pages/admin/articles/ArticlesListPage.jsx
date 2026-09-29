@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ImageOff, Newspaper } from 'lucide-react';
+import { ImageOff, Newspaper, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api, errorKey } from '../../../lib/api.js';
 import { CONTENT_LANGUAGES } from '../../../lib/contentLanguage.js';
@@ -9,17 +9,22 @@ import Button from '../../../components/ui/Button.jsx';
 import ContentList from '../../../components/cms/ContentList.jsx';
 import StatusBadge from '../../../components/cms/StatusBadge.jsx';
 
-// Languages badge + "copy into a new language" shortcut: starts a translation
-// from a copy of the article's own text (P3-16 follow-up) so an admin does not
-// need to open the editor just to get a language added to this row. It is
-// still one article, one row: the new language only grows this cell.
+// Languages badge + "start a translation from a copy" shortcut: pre-fills a new
+// language with the article's own text so there is something to edit right away
+// instead of a blank form (P3-16 follow-up). That copy is NOT a translation —
+// nothing is translated yet — so it is created "pending" (server-side) and shown
+// here as "à traduire", never counted among the finished languages; it stays
+// invisible to visitors until the editor (step "Traductions") is used to write
+// the real text and save it. Doing this is still one article, one row: it only
+// grows this cell.
 function LanguageCell({ article }) {
   const { t } = useTranslation();
-  const [added, setAdded] = useState([]);
+  const [pendingAdded, setPendingAdded] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-  const known = [article.language, ...article.translationLanguages, ...added];
-  const missing = CONTENT_LANGUAGES.filter((code) => !known.includes(code));
+  const done = [article.language, ...article.translationLanguages];
+  const pending = [...article.pendingLanguages, ...pendingAdded];
+  const missing = CONTENT_LANGUAGES.filter((code) => !done.includes(code) && !pending.includes(code));
 
   const duplicate = async (event) => {
     const language = event.target.value;
@@ -29,7 +34,7 @@ function LanguageCell({ article }) {
     setError(null);
     try {
       await api.post(`/admin/articles/${article.id}/translations/${language}/duplicate`);
-      setAdded((list) => [...list, language]);
+      setPendingAdded((list) => [...list, language]);
     } catch (err) {
       setError(t(errorKey(err)));
     } finally {
@@ -39,7 +44,13 @@ function LanguageCell({ article }) {
 
   return (
     <div className="cms-lang-cell">
-      <span>{known.map((code) => code.toUpperCase()).join(' · ')}</span>
+      <span>{done.map((code) => code.toUpperCase()).join(' · ')}</span>
+      {pending.length > 0 && (
+        <span className="cms-lang-pending" title={t('admin.articles.list.languagePendingHint')}>
+          <TriangleAlert size={12} strokeWidth={2.2} aria-hidden="true" />
+          {pending.map((code) => code.toUpperCase()).join(' · ')}
+        </span>
+      )}
       {missing.length > 0 && (
         <select
           className="cms-lang-select"

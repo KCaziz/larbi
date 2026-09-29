@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Languages, Pencil, Trash2 } from 'lucide-react';
+import { Check, Languages, Pencil, TriangleAlert, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api, errorKey } from '../../../lib/api.js';
 import { CONTENT_LANGUAGES, textDirection } from '../../../lib/contentLanguage.js';
@@ -22,8 +22,14 @@ const fromServer = (translation) => ({
 // One language: written from scratch (or edited) here, saved on its own. Nothing
 // but the text depends on the language: cover, files, tags, category, status and
 // access level are the article's and shared.
-function TranslationCard({ article, language, existing, onChanged }) {
+// `translation` is the row from article.translations (or undefined if none yet):
+// its `pending` flag means it is a raw, untranslated COPY of the article's own
+// text ("dupliquer pour commencer") — never shown to a visitor as a real
+// translation until a human reviews it here and saves.
+function TranslationCard({ article, language, translation, onChanged }) {
   const { t } = useTranslation();
+  const existing = Boolean(translation);
+  const pending = Boolean(translation?.pending);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(BLANK);
   const [resetKey, setResetKey] = useState(0);
@@ -49,8 +55,8 @@ function TranslationCard({ article, language, existing, onChanged }) {
     }
     setLoading(true);
     try {
-      const { translation } = await api.get(`/admin/articles/${article.id}/translations/${language}`);
-      setForm(fromServer(translation));
+      const { translation: full } = await api.get(`/admin/articles/${article.id}/translations/${language}`);
+      setForm(fromServer(full));
       setResetKey((k) => k + 1);
     } catch (err) {
       setMessage({ type: 'error', text: t(errorKey(err)) });
@@ -98,9 +104,10 @@ function TranslationCard({ article, language, existing, onChanged }) {
     <section className="cms-card cms-translation" aria-labelledby={`${id}-title`}>
       <div className="cms-translation-head">
         <h2 id={`${id}-title`}>{t(`contentLanguage.names.${language}`)}</h2>
-        <span className={`cms-badge ${existing ? 'cms-badge-published' : 'cms-badge-draft'}`}>
-          {existing ? <Check size={13} strokeWidth={2.4} aria-hidden="true" /> : null}
-          {existing ? t('admin.articles.translations.done') : t('admin.articles.translations.missing')}
+        <span className={`cms-badge ${existing && !pending ? 'cms-badge-published' : pending ? 'cms-badge-draft' : 'cms-badge-draft'}`}>
+          {existing && !pending ? <Check size={13} strokeWidth={2.4} aria-hidden="true" /> : null}
+          {pending ? <TriangleAlert size={13} strokeWidth={2.4} aria-hidden="true" /> : null}
+          {pending ? t('admin.articles.translations.pending') : existing ? t('admin.articles.translations.done') : t('admin.articles.translations.missing')}
         </span>
         <Button variant="secondary" onClick={toggle} aria-expanded={open} aria-controls={`${id}-form`}>
           <Pencil size={15} strokeWidth={1.9} aria-hidden="true" />
@@ -114,6 +121,7 @@ function TranslationCard({ article, language, existing, onChanged }) {
             <p className="cms-muted">{t('state.loading')}</p>
           ) : (
             <>
+              {pending && <Notice variant="action-needed">{t('admin.articles.translations.pendingNotice')}</Notice>}
               <Field label={t('admin.articles.content.title')} htmlFor={`${id}-t`}>
                 <input id={`${id}-t`} type="text" maxLength={150} value={form.title} onChange={(e) => set('title', e.target.value)} />
               </Field>
@@ -172,7 +180,7 @@ function TranslationCard({ article, language, existing, onChanged }) {
 export default function TranslationsStep({ article, languageUnsaved, onChanged }) {
   const { t } = useTranslation();
   const others = CONTENT_LANGUAGES.filter((code) => code !== article.language);
-  const translated = new Set(article.translations.map((tr) => tr.language));
+  const byLanguage = new Map(article.translations.map((tr) => [tr.language, tr]));
 
   return (
     <div className="cms-form">
@@ -182,7 +190,7 @@ export default function TranslationsStep({ article, languageUnsaved, onChanged }
       </p>
       {languageUnsaved && <Notice variant="info">{t('admin.articles.translations.languageUnsaved')}</Notice>}
       {others.map((code) => (
-        <TranslationCard key={code} article={article} language={code} existing={translated.has(code)} onChanged={onChanged} />
+        <TranslationCard key={code} article={article} language={code} translation={byLanguage.get(code)} onChanged={onChanged} />
       ))}
     </div>
   );

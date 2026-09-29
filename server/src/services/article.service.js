@@ -24,8 +24,11 @@ export function readingMinutes(text) {
 // What a reader sees of an article in `lang`: the translation when there is one,
 // the article's own text otherwise (the default). `availableLanguages` lists the
 // language it is written in first, then its translations, in platform order.
+// A "pending" translation (a raw, untranslated copy of the article's own text,
+// see duplicateTranslation) is never shown here: to a visitor it does not exist
+// yet, exactly as if nobody had touched that language.
 export function localizeArticle(article, lang) {
-  const translations = article.translations ?? [];
+  const translations = (article.translations ?? []).filter((t) => !t.pending);
   const translation = lang && lang !== article.language ? translations.find((t) => t.language === lang) : null;
   const source = translation ?? article;
   const order = (l) => CONTENT_LANGUAGES.indexOf(l);

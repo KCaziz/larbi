@@ -129,7 +129,7 @@ export function toAdminArticle(article) {
   return {
     id: article.id,
     language: article.language,
-    translations: (article.translations ?? []).map((t) => ({ language: t.language, title: t.title, updatedAt: t.updatedAt })),
+    translations: (article.translations ?? []).map((t) => ({ language: t.language, title: t.title, pending: t.pending, updatedAt: t.updatedAt })),
     title: article.title,
     excerpt: article.excerpt,
     body: article.body,
@@ -158,7 +158,8 @@ export function toAdminArticleRow(article) {
     id: article.id,
     title: article.title,
     language: article.language,
-    translationLanguages: (article.translations ?? []).map((t) => t.language).sort(),
+    translationLanguages: (article.translations ?? []).filter((t) => !t.pending).map((t) => t.language).sort(),
+    pendingLanguages: (article.translations ?? []).filter((t) => t.pending).map((t) => t.language).sort(),
     status: article.status,
     requiredAccessLevel: article.requiredAccessLevel,
     category: article.category ? { id: article.category.id, name: article.category.name } : null,
@@ -178,6 +179,9 @@ export function toAdminTranslation(row) {
     body: row.body,
     metaTitle: row.metaTitle,
     metaDescription: row.metaDescription,
+    // A raw copy of the article's own text, not reviewed yet (see duplicateTranslation):
+    // the editor must say so, since the text is not actually translated.
+    pending: row.pending,
     updatedAt: row.updatedAt,
   };
 }

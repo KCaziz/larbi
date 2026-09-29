@@ -30,7 +30,7 @@ async function loadArticle(id) {
 export async function listArticles(req, res) {
   const rows = await prisma.article.findMany({
     orderBy: { updatedAt: 'desc' },
-    include: { category: true, coverImage: true, author: { select: { name: true } }, translations: { select: { language: true } } },
+    include: { category: true, coverImage: true, author: { select: { name: true } }, translations: { select: { language: true, pending: true } } },
   });
   res.json({ articles: rows.map(toAdminArticleRow) });
 }
@@ -195,6 +195,8 @@ export async function saveTranslation(req, res) {
     metaTitle: req.body.metaTitle ?? null,
     metaDescription: req.body.metaDescription ?? null,
   };
+  // An explicit save is a human review, whatever the text: it always clears "pending".
+  data.pending = false;
   const key = { articleId_language: { articleId: req.params.id, language: req.params.lang } };
   const row = await prisma.articleTranslation.upsert({
     where: key,
@@ -238,6 +240,9 @@ export async function duplicateTranslation(req, res) {
       bodyText: article.bodyText,
       metaTitle: article.metaTitle,
       metaDescription: article.metaDescription,
+      // Raw copy of the French text under the English tag, say: nobody has
+      // translated a word yet. Never shown to a visitor as a real translation.
+      pending: true,
     },
   });
   res.status(201).json({ translation: toAdminTranslation(row) });

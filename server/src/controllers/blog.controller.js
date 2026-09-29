@@ -40,8 +40,8 @@ function listFilter({ query, category, tag, lang }, user) {
     // Also what the visitor reads in THEIR language (same rule for the text of a locked article).
     if (lang) {
       where.OR.push(
-        { translations: { some: { language: lang, OR: [{ title: contains }, { excerpt: contains }] } } },
-        { AND: [{ translations: { some: { language: lang, bodyText: contains } } }, { requiredAccessLevel: { in: readableLevels(user) } }] },
+        { translations: { some: { language: lang, pending: false, OR: [{ title: contains }, { excerpt: contains }] } } },
+        { AND: [{ translations: { some: { language: lang, pending: false, bodyText: contains } } }, { requiredAccessLevel: { in: readableLevels(user) } }] },
       );
     }
   }
