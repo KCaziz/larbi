@@ -58,6 +58,7 @@ function LanguageCell({ article }) {
           onChange={duplicate}
           disabled={busy}
           aria-label={t('admin.articles.list.addLanguage')}
+          title={t('admin.articles.list.addLanguageHint')}
         >
           <option value="">{t('admin.articles.list.addLanguage')}</option>
           {missing.map((code) => (

@@ -2,11 +2,13 @@
    Tokens only (see index.css): works in light and dark. */
 
 /* ---------- Shell ---------- */
+/* Wider than the public site's 1200px: the admin is a data-dense app (tables
+   with several columns), not a page meant to stay a comfortable reading width. */
 .cms-shell {
   display: grid;
   grid-template-columns: 230px minmax(0, 1fr);
   gap: 40px;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 40px 20px 96px;
 }
@@ -17,13 +19,69 @@
   top: calc(var(--header-height) + 24px);
 }
 
-.cms-menu-title {
+.cms-menu-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   margin: 0 0 12px;
+}
+
+.cms-menu-title {
+  margin: 0;
   color: var(--text);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+/* Reopens the admin tour (AdminTour.jsx). */
+.cms-tour-reopen {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cms-tour-reopen:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.cms-tour {
+  width: min(440px, calc(100vw - 32px));
+}
+
+.cms-tour-progress {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cms-tour h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cms-tour-body {
+  margin: 0;
+}
+
+.cms-tour .cms-dialog-actions {
+  justify-content: space-between;
 }
 
 [dir='rtl'] .cms-menu-title {
@@ -825,7 +883,9 @@
   padding: 14px 18px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
-  background: var(--surface);
+  /* The page's own background, not a "card" surface: it should not stand out
+     as a different-coloured box floating over the form. */
+  background: var(--bg);
   box-shadow: var(--shadow-md);
 }
 

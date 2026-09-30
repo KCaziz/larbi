@@ -748,6 +748,7 @@
         "loadError": "The articles could not be loaded.",
         "uncategorized": "No category",
         "addLanguage": "Copy the text to translate into…",
+        "addLanguageHint": "This copies the article's text to save you time: it is not a translation. Then open the \"Translations\" tab in the article's edit page to write it and save it.",
         "columns": {
           "article": "Article",
           "status": "Status",
@@ -1324,14 +1325,24 @@
       "contactAddress": "Public contact address",
       "saved": "Settings saved.",
       "save": "Save",
-      "loadError": "Could not load the settings.",
-      "customIntro": "Extra settings: a key and a value, no code change needed.",
-      "newKey": "New key",
-      "newValue": "Value",
-      "add": "Add",
-      "columns": {
-        "key": "Key",
-        "value": "Value"
+      "loadError": "Could not load the settings."
+    },
+    "tour": {
+      "reopen": "Replay the tour",
+      "progress": "Step {{step}} of {{total}}",
+      "skip": "Skip",
+      "previous": "Previous",
+      "next": "Next",
+      "finish": "Got it",
+      "steps": {
+        "dashboard": "Overview: published formations and articles or ones waiting for review, enrolments, certificates, newsletter subscribers. A good starting point every time you sign in.",
+        "formations": "Create and edit your formations: a plan of chapters and lessons, content in blocks (text, video, files, quizzes), certification, then publish once everything is ready.",
+        "articles": "Write the blog's articles: content, cover image, filing, and translations when you have time. Nothing is visible until the article is published.",
+        "newsletter": "See who is subscribed to the newsletter and prepare the text of the next mailing from the latest published articles.",
+        "media": "Every file uploaded in formations and articles, in one place: find and delete an image or a document without reopening each item.",
+        "certificates": "Certificates issued to learners: search for one, verify it, or revoke it if needed (it stays visible as revoked, never deleted).",
+        "users": "Manage accounts: account type, access level (standard or premium), role, and suspension when needed.",
+        "settings": "The site’s public contact details, maintenance mode, and any other setting you add yourself, with no technical work needed."
       }
     }
   },

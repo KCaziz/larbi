@@ -748,6 +748,7 @@
         "loadError": "Impossible de charger les articles.",
         "uncategorized": "Sans catégorie",
         "addLanguage": "Copier le texte pour traduire dans…",
+        "addLanguageHint": "Ceci copie le texte de l'article pour vous faire gagner du temps : ce n'est pas une traduction. Ouvrez ensuite l'onglet « Traductions » dans la modification de l'article pour la rédiger et l'enregistrer.",
         "columns": {
           "article": "Article",
           "status": "État",
@@ -1324,14 +1325,24 @@
       "contactAddress": "Adresse de contact publique",
       "saved": "Paramètres enregistrés.",
       "save": "Enregistrer",
-      "loadError": "Impossible de charger les paramètres.",
-      "customIntro": "Paramètres supplémentaires : une clé et une valeur, sans mise à jour du code.",
-      "newKey": "Nouvelle clé",
-      "newValue": "Valeur",
-      "add": "Ajouter",
-      "columns": {
-        "key": "Clé",
-        "value": "Valeur"
+      "loadError": "Impossible de charger les paramètres."
+    },
+    "tour": {
+      "reopen": "Revoir le tutoriel",
+      "progress": "Étape {{step}} sur {{total}}",
+      "skip": "Passer",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "finish": "J'ai compris",
+      "steps": {
+        "dashboard": "Vue d'ensemble : formations et articles publiés ou à relire, inscriptions, certificats, abonnés à la newsletter. Un bon point de départ à chaque connexion.",
+        "formations": "Créez et modifiez vos formations : plan en chapitres et leçons, contenu par blocs (texte, vidéo, fichiers, quiz), certification, puis publication quand tout est prêt.",
+        "articles": "Rédigez les articles du blog : contenu, image de couverture, classement, et traductions si vous avez le temps. Rien n'est visible tant que l'article n'est pas publié.",
+        "newsletter": "Consultez les personnes inscrites à la newsletter et préparez le texte du prochain envoi à partir des derniers articles publiés.",
+        "media": "Tous les fichiers envoyés dans les formations et les articles, au même endroit : de quoi retrouver et supprimer une image ou un document sans rouvrir chaque fiche.",
+        "certificates": "Les certificats délivrés aux apprenants : recherchez-en un, vérifiez-le, ou révoquez-le si besoin (il reste visible comme révoqué, jamais supprimé).",
+        "users": "Gérez les comptes : type de compte, niveau d'accès (standard ou premium), rôle, et suspension si nécessaire.",
+        "settings": "Coordonnées publiques du site, mode maintenance, et tout autre réglage que vous ajoutez vous-même, sans intervention technique."
       }
     }
   },

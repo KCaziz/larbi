@@ -953,13 +953,25 @@
   margin-top: 28px;
 }
 
+/* The whole header bar toggles, edge to edge (not just the text or the chevron):
+   negative margins pull it out to the card's own edges, its own padding put
+   back, so the hover/active background covers the full clickable width. */
 .account-toggle summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin: -36px -36px 0;
+  padding: 20px 36px;
+  border-radius: var(--radius) var(--radius) 0 0;
   cursor: pointer;
   list-style: none;
+  transition: background-color 0.15s;
+}
+
+.account-toggle summary:hover,
+.account-toggle summary:focus-visible {
+  background: var(--bg-alt);
 }
 
 .account-toggle summary::-webkit-details-marker {
@@ -968,16 +980,35 @@
 
 .account-toggle summary h3 {
   margin: 0;
+  pointer-events: none;
 }
 
 .account-toggle-chevron {
   flex: none;
   color: var(--text);
+  pointer-events: none;
   transition: transform 0.2s;
 }
 
 .account-toggle[open] summary {
-  margin-bottom: 22px;
+  margin-bottom: 2px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.account-toggle[open] form {
+  padding-top: 20px;
+}
+
+.account-toggle[open] .account-toggle-chevron {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .account-toggle summary {
+    margin: -24px -20px 0;
+    padding: 16px 20px;
+  }
 }
 
 .account-toggle[open] .account-toggle-chevron {

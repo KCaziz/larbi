@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import AdminTour from './AdminTour.jsx';
 import './cms.css';
 
 // Frame of the administration area: side menu + content. Generic on purpose:
@@ -10,7 +11,10 @@ export default function CmsShell({ items }) {
   return (
     <div className="cms-shell">
       <nav className="cms-menu" aria-label={t('admin.shell.menu')}>
-        <p className="cms-menu-title">{t('admin.shell.title')}</p>
+        <div className="cms-menu-title-row">
+          <p className="cms-menu-title">{t('admin.shell.title')}</p>
+          <AdminTour />
+        </div>
         <ul>
           {items.map(({ to, icon: Icon, labelKey, end }) => (
             <li key={to}>

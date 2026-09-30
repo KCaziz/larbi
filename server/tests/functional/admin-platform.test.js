@@ -144,7 +144,6 @@ describe('platform settings (P3-16)', () => {
     // always leave them exactly as they were seeded.
     await t.prisma.platformSetting.updateMany({ where: { key: 'maintenanceMode' }, data: { value: 'false' } });
     await t.prisma.platformSetting.updateMany({ where: { key: 'contactEmail' }, data: { value: '' } });
-    await t.prisma.platformSetting.deleteMany({ where: { key: { in: ['test-custom-key', 'internal-note'] } } });
   });
 
   test('a standard account is refused; an administrator sees the four core settings', async () => {
@@ -155,29 +154,21 @@ describe('platform settings (P3-16)', () => {
       list.body.settings.map((s) => s.key).sort(),
       ['contactAddress', 'contactEmail', 'contactPhone', 'maintenanceMode'],
     );
-    assert.ok(list.body.settings.every((s) => s.core));
   });
 
-  test('a core setting is editable but cannot be deleted', async () => {
+  test('a setting is editable; no other key is accepted, and none can be deleted', async () => {
     const upd = await t.request('POST', '/admin/settings', { user: admin, json: { key: 'contactEmail', value: 'contact@example.com' } });
     assert.equal(upd.status, 200);
     assert.equal(upd.body.setting.value, 'contact@example.com');
-    assert.equal((await t.request('DELETE', '/admin/settings/contactEmail', { user: admin })).status, 409);
+    assert.equal((await t.request('POST', '/admin/settings', { user: admin, json: { key: 'not-a-real-setting', value: 'x' } })).status, 400);
+    assert.equal((await t.request('DELETE', '/admin/settings/contactEmail', { user: admin })).status, 404, 'no delete route exists any more');
+    assert.equal(await t.prisma.platformSetting.count(), 4, 'still exactly the four known settings');
   });
 
-  test('a new key is extensible: created, listed, and removable without a code change', async () => {
-    const created = await t.request('POST', '/admin/settings', { user: admin, json: { key: 'test-custom-key', value: 'hello' } });
-    assert.equal(created.status, 200);
-    assert.equal(created.body.setting.core, false);
-    assert.equal((await t.request('DELETE', '/admin/settings/test-custom-key', { user: admin })).status, 204);
-  });
-
-  test('the public endpoint only ever exposes the four safe keys, never a custom one', async () => {
-    await t.request('POST', '/admin/settings', { user: admin, json: { key: 'internal-note', value: 'must never leak' } });
+  test('the public endpoint only ever exposes the four safe keys', async () => {
     const pub = await t.request('GET', '/settings/public');
     assert.equal(pub.status, 200);
     assert.deepEqual(Object.keys(pub.body).sort(), ['contactAddress', 'contactEmail', 'contactPhone', 'maintenanceMode']);
-    assert.doesNotMatch(JSON.stringify(pub.body), /must never leak/);
   });
 
   test('maintenance mode blocks the public API but not health, auth identity, settings, or the admin panel — and lets an administrator through everywhere', async () => {

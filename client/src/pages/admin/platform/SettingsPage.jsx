@@ -1,19 +1,19 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Save, Trash2 } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { api, errorKey } from '../../../lib/api.js';
 import { useApi } from '../../../lib/useApi.js';
 import Button from '../../../components/ui/Button.jsx';
 import ErrorState from '../../../components/ui/ErrorState.jsx';
 import LoadingState from '../../../components/ui/LoadingState.jsx';
-import DataTable from '../../../components/cms/DataTable.jsx';
 import Field from '../../../components/cms/Field.jsx';
 import PageToolbar from '../../../components/cms/PageToolbar.jsx';
 import Notice from '../../../components/ui/Notice.jsx';
 import './Platform.css';
 
-const CORE_KEYS = ['maintenanceMode', 'contactEmail', 'contactPhone', 'contactAddress'];
-
+// The four settings the rest of the application actually reads (P3-16): a fixed
+// form, not a free-form key/value store — a setting nothing reads is not worth
+// having, so a new one needs a real field here, not just a row in a table.
 function CoreSettings({ settings, onSaved }) {
   const { t } = useTranslation();
   const byKey = Object.fromEntries(settings.map((s) => [s.key, s.value]));
@@ -87,76 +87,6 @@ function CoreSettings({ settings, onSaved }) {
   );
 }
 
-function CustomSettings({ settings, onChanged }) {
-  const { t } = useTranslation();
-  const [key, setKey] = useState('');
-  const [value, setValue] = useState('');
-  const [error, setError] = useState(null);
-  const custom = settings.filter((s) => !s.core);
-
-  const add = async (event) => {
-    event.preventDefault();
-    if (!key.trim()) return;
-    setError(null);
-    try {
-      await api.post('/admin/settings', { key: key.trim(), value });
-      setKey('');
-      setValue('');
-      onChanged();
-    } catch (err) {
-      setError(t(errorKey(err)));
-    }
-  };
-
-  const remove = async (row) => {
-    setError(null);
-    try {
-      await api.delete(`/admin/settings/${encodeURIComponent(row.key)}`);
-      onChanged();
-    } catch (err) {
-      setError(t(errorKey(err)));
-    }
-  };
-
-  const columns = [
-    { key: 'key', header: t('admin.settings.columns.key'), render: (s) => <code>{s.key}</code> },
-    { key: 'value', header: t('admin.settings.columns.value'), render: (s) => s.value },
-    {
-      key: 'actions',
-      header: <span className="sr-only">{t('admin.list.columns.actions')}</span>,
-      render: (s) => (
-        <Button variant="secondary" onClick={() => remove(s)}>
-          <Trash2 size={15} strokeWidth={1.9} aria-hidden="true" />
-        </Button>
-      ),
-    },
-  ];
-
-  return (
-    <>
-      <p className="cms-intro">{t('admin.settings.customIntro')}</p>
-      <form className="admin-inline-form" onSubmit={add}>
-        <Field label={t('admin.settings.newKey')} htmlFor="s-new-key">
-          <input id="s-new-key" type="text" maxLength={60} value={key} onChange={(e) => setKey(e.target.value)} />
-        </Field>
-        <Field label={t('admin.settings.newValue')} htmlFor="s-new-value">
-          <input id="s-new-value" type="text" maxLength={2000} value={value} onChange={(e) => setValue(e.target.value)} />
-        </Field>
-        <Button type="submit" disabled={!key.trim()}>
-          <Plus size={16} strokeWidth={2} aria-hidden="true" />
-          {t('admin.settings.add')}
-        </Button>
-      </form>
-      {error && (
-        <p className="cms-inline-message error" role="alert">
-          {error}
-        </p>
-      )}
-      {custom.length > 0 && <DataTable columns={columns} rows={custom} />}
-    </>
-  );
-}
-
 export default function SettingsPage() {
   const { t } = useTranslation();
   const list = useApi('/admin/settings');
@@ -167,12 +97,7 @@ export default function SettingsPage() {
       <div className="admin-panel">
         {list.status === 'loading' && <LoadingState />}
         {list.status === 'error' && <ErrorState message={t('admin.settings.loadError')} onRetry={list.reload} />}
-        {list.status === 'ready' && (
-          <>
-            <CoreSettings settings={list.data.settings.filter((s) => CORE_KEYS.includes(s.key))} onSaved={list.reload} />
-            <CustomSettings settings={list.data.settings} onChanged={list.reload} />
-          </>
-        )}
+        {list.status === 'ready' && <CoreSettings settings={list.data.settings} onSaved={list.reload} />}
       </div>
     </>
   );

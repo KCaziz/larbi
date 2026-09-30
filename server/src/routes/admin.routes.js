@@ -107,7 +107,7 @@ import {
 import { createAccountTypeSchema, updateAccountTypeSchema } from '../validation/accountTypes.schemas.js';
 import { getUser, listUsers, updateUser } from '../controllers/admin/users.controller.js';
 import { updateUserSchema, usersQuerySchema } from '../validation/users.schemas.js';
-import { deleteSetting, listSettings, upsertSettingRoute } from '../controllers/admin/settings.controller.js';
+import { listSettings, upsertSettingRoute } from '../controllers/admin/settings.controller.js';
 import { upsertSettingSchema } from '../validation/settings.schemas.js';
 import {
   listCertificates,
@@ -223,7 +223,6 @@ router.patch('/users/:id', validateBody(updateUserSchema), asyncRoute(updateUser
 // Platform settings (P3-16)
 router.get('/settings', asyncRoute(listSettings));
 router.post('/settings', validateBody(upsertSettingSchema), asyncRoute(upsertSettingRoute));
-router.delete('/settings/:key', asyncRoute(deleteSetting));
 
 // Certificates (P3-16)
 router.get('/certificates', validateQuery(certificatesQuerySchema), asyncRoute(listCertificates));
