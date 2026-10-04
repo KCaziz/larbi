@@ -1,7 +1,7 @@
-/* ---------- Comparator admin ---------- */
+/* ---------- Bank comparator administration (P4-08) ---------- */
 .comparator-admin-tabs {
   display: flex;
-  gap: 0;
+  flex-wrap: wrap;
   margin-bottom: 24px;
   border-bottom: 2px solid var(--border);
 }
@@ -15,7 +15,8 @@
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
   background: none;
-  color: var(--text-l);
+  color: var(--text);
+  font: inherit;
   font-size: 0.92rem;
   font-weight: 500;
   cursor: pointer;
@@ -23,7 +24,7 @@
 }
 
 .comparator-admin-tabs button:hover {
-  color: var(--text);
+  color: var(--text-h);
 }
 
 .comparator-admin-tabs button.active {
@@ -35,133 +36,94 @@
   margin-bottom: 32px;
 }
 
+.comparator-admin-section .cms-inline-message {
+  margin: 0 0 12px;
+}
+
 .comparator-admin-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.comparator-admin-bar select {
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm, 6px);
-  background: var(--surface);
-  color: var(--text);
-  font-size: 0.92rem;
-}
-
-.comparator-admin-form {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 10px;
   margin-bottom: 16px;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
 }
 
-.comparator-admin-form input,
-.comparator-admin-form select {
-  height: 36px;
-  padding: 0 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm, 6px);
-  background: var(--bg);
+.comparator-admin-theme {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.84rem;
+  font-weight: 500;
   color: var(--text);
+}
+
+.comparator-admin-bar select,
+.comparator-admin-form input,
+.comparator-admin-form select,
+.comparator-inline-form input {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
   font-size: 0.92rem;
+}
+
+.comparator-admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+
+.comparator-admin-form h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-h);
 }
 
 .comparator-admin-form label {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  max-width: 420px;
   font-size: 0.84rem;
   font-weight: 500;
-  color: var(--text-l);
-}
-
-.comparator-admin-form fieldset {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  border: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-}
-
-.comparator-admin-form fieldset legend {
-  font-size: 0.88rem;
-  font-weight: 600;
   color: var(--text);
-  margin-bottom: 8px;
+}
+
+.comparator-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px 16px;
+}
+
+.comparator-admin-grid label {
+  max-width: none;
+}
+
+.comparator-admin-form .form-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text);
 }
 
 .comparator-admin-form-actions {
   display: flex;
-  gap: 8px;
-  width: 100%;
-}
-
-.condition-form {
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.condition-form label {
-  max-width: 400px;
-}
-
-.inline-form {
-  display: inline-flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.inline-form input {
-  height: 32px;
-  padding: 0 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm, 6px);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 0.9rem;
-}
-
-.comparator-admin-section .form-error {
-  margin-bottom: 12px;
-  padding: 8px 14px;
-  border-radius: var(--radius-sm, 6px);
-  background: color-mix(in srgb, var(--danger, #dc2626) 10%, transparent);
-  color: var(--danger, #dc2626);
-  font-size: 0.88rem;
-}
-
-.comparator-admin-section .admin-icon-btn {
+.comparator-inline-form {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm, 6px);
-  background: var(--surface);
-  color: var(--text-l);
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
-}
-
-.comparator-admin-section .admin-icon-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.comparator-admin-section .admin-icon-danger:hover {
-  border-color: var(--danger, #dc2626);
-  color: var(--danger, #dc2626);
+  gap: 8px;
 }

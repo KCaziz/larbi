@@ -281,7 +281,7 @@
       "title": "Invoice generator",
       "body": "Create invoices (client, provider, products/services, totals) with PDF and Excel export."
     },
-    "accessNote": "Accessing the tools requires being logged in and depends on your access rights.",
+    "accessNote": "The bank comparator is freely accessible. The other tools will require being logged in, depending on your access rights.",
     "notice": "The credit simulator and invoice generator will be available soon."
   },
   "blogList": {
@@ -1616,20 +1616,19 @@
     "sortByCost": "Sort by cost",
     "sortByName": "Sort by name",
     "segmentComparison": "Comparison by segment",
-    "segmentSubtitle": "Conditions specific to {{segment}}s",
-    "backToComparator": "Back to comparator",
+    "segmentSubtitle": "Conditions explicitly labelled “{{segment}}” in the source file",
     "themes": {
-      "comptes": "Account maintenance",
+      "comptes": "Account opening and management",
       "versements-retraits": "Deposits and withdrawals",
-      "carte-locale": "Local card (CIB)",
+      "carte-locale": "Local payment card (CIB)",
       "epargne": "Savings",
-      "coffres-forts": "Safe deposit boxes",
+      "coffres-forts": "Safe deposit box rental",
       "credits": "Loans",
       "virements": "Domestic transfers",
-      "carte-internationale": "International card",
-      "devises": "Foreign currency operations",
+      "carte-internationale": "International payment card",
+      "devises": "Foreign currency and international operations",
       "operations-diverses": "Miscellaneous operations",
-      "cheques": "Cheques"
+      "cheques": "Cheque operations"
     },
     "fields": {
       "fee": "Fee",
@@ -1657,24 +1656,81 @@
       "bankName": "Bank name",
       "editBank": "Rename",
       "deleteBank": "Delete bank",
-      "deleteBankConfirm": "Delete bank \"{{name}}\" and all its conditions?",
+      "deleteBankConfirm": "Delete the bank “{{name}}”? Its {{count}} condition(s) will be deleted with it. This cannot be undone.",
       "bankExists": "This bank name already exists.",
       "addCondition": "Add a condition",
       "editCondition": "Edit",
       "deleteCondition": "Delete",
-      "deleteConditionConfirm": "Delete this condition?",
+      "deleteConditionConfirm": "Delete the condition “{{label}}” of {{bank}}? This cannot be undone.",
       "selectTheme": "Choose a rubric",
-      "selectBank": "Choose a bank",
-      "label": "Label",
-      "category": "Category",
-      "segment": "Segment",
-      "values": "Values",
       "save": "Save",
       "cancel": "Cancel",
       "saved": "Saved",
       "deleted": "Deleted",
       "conditionCount_one": "{{count}} condition",
-      "conditionCount_other": "{{count}} conditions"
+      "conditionCount_other": "{{count}} conditions",
+      "subtitle": "Banks and conditions shown in the public comparator. Every change updates the \"Data updated on\" date.",
+      "actions": "Actions",
+      "segmentHint": "Only set it when the source explicitly states the segment; otherwise \"Unspecified\".",
+      "valuesHint": "Copy the texts exactly as the bank publishes them (\"Gratuit\", \"Non spécifié\", conditions…). An empty field is not shown.",
+      "emptyTheme": "No condition in this section yet."
+    },
+    "bank": "Bank",
+    "category": "Category",
+    "segment": "Segment",
+    "sortLabel": "Display order",
+    "resultCount_one": "{{count}} result",
+    "resultCount_other": "{{count}} results",
+    "notDocumentedBody": "This section is part of the comparator's structure, but the source file contains no data about it. Nothing is made up: it will be completed from a bank source provided to us.",
+    "costNote": "The estimated yearly cost is only computed when the fee is a plain amount (e.g. \"800 DA\" quarterly = 3,200 DA/year). Percentage, mixed or unspecified fees are shown as published and marked \"Not comparable\".",
+    "segmentNote": "The segment comparison only lists the rows whose segment (Individual, Professional, Business) is explicitly stated in the source file. The others remain available in each section.",
+    "noSegmentRows": "No condition is explicitly assigned to this segment in the source file.",
+    "labelHeaders": {
+      "comptes": "Account type",
+      "versements-retraits": "Operation",
+      "carte-locale": "Card / service",
+      "epargne": "Product",
+      "coffres-forts": "Size / type",
+      "credits": "Loan / financing type",
+      "virements": "Transfer type",
+      "carte-internationale": "Card",
+      "devises": "Operation",
+      "operations-diverses": "Service / operation",
+      "cheques": "Cheque operation"
+    },
+    "themeFields": {
+      "comptes": {
+        "fee": "Maintenance fee"
+      },
+      "carte-locale": {
+        "annualFee": "Annual fee",
+        "atmWithdrawal": "Interbank withdrawal"
+      },
+      "epargne": {
+        "rate": "Rate / profit share"
+      },
+      "coffres-forts": {
+        "fee": "Price"
+      },
+      "credits": {
+        "rate": "Rate / margin"
+      },
+      "carte-internationale": {
+        "annualFee": "Annual / issuing fee"
+      }
+    },
+    "themeNotes": {
+      "comptes": "Account maintenance fees and how often they are charged. The source file gives no separate opening fees.",
+      "versements-retraits": "Cash desk operations. A segment is only shown when the source file states it explicitly.",
+      "carte-locale": "CIB cards and local services, kept apart from international cards.",
+      "epargne": "Interest rates (conventional banking) and profit shares (Islamic banking) are kept as published and are never treated as equivalent.",
+      "coffres-forts": "The source file contains no safe deposit box rental data.",
+      "credits": "By type of loan: file fees, rate or margin, early repayment.",
+      "virements": "The source file has no domestic transfer table. Transfers abroad are listed under \"Foreign currency operations\".",
+      "carte-internationale": "Visa and Mastercard cards, kept apart from local CIB cards.",
+      "devises": "Transfers, currency exchange, Swift and correspondent fees, allowances.",
+      "operations-diverses": "Services found in the source file that do not belong to the other sections.",
+      "cheques": "The source file contains no cheque operations grid."
     }
   }
 }

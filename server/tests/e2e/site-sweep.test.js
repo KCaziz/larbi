@@ -43,6 +43,7 @@ describe('site sweep', { skip: findChrome() ? false : 'no Chrome/Chromium found 
     const article = await t.article({ title: 'Article balayage', tags: ['TVA'], category: cat, author: admin });
     await t.request('POST', `/admin/articles/${article.id}/cover`, { user: admin, form: fileForm(PNG) });
     const draftArticle = await t.article({ title: 'Brouillon article', status: 'draft' });
+    await t.loadComparatorData();
     data = { f, draftFormation, cert, article, draftArticle };
   });
 
@@ -99,7 +100,7 @@ describe('site sweep', { skip: findChrome() ? false : 'no Chrome/Chromium found 
       await b.setViewport(width);
       await setLanguage(lang);
 
-      const visitor = ['/', '/formations', '/outils', '/blog', `/blog/${data.article.slug}`, '/blog?category=fiscalite', '/blog?q=balayage', '/a-propos', '/services', '/faq', '/fonctionnalites', '/contact', '/mentions-legales', '/confidentialite', '/connexion', '/inscription', '/mot-de-passe-oublie', '/verification', `/verification/${data.cert.certificateNumber}`];
+      const visitor = ['/', '/formations', '/outils', '/blog', `/blog/${data.article.slug}`, '/blog?category=fiscalite', '/blog?q=balayage', '/a-propos', '/services', '/faq', '/fonctionnalites', '/contact', '/mentions-legales', '/confidentialite', '/connexion', '/inscription', '/mot-de-passe-oublie', '/verification', `/verification/${data.cert.certificateNumber}`, '/outils/comparateur', '/outils/comparateur/comptes', '/outils/comparateur/epargne', '/outils/comparateur/devises', '/outils/comparateur/coffres-forts', '/outils/comparateur/segments/particulier', '/outils/comparateur/segments/entreprise'];
       await setSession(null);
       for (const route of visitor) {
         await b.goto(site.url + route);
@@ -107,7 +108,7 @@ describe('site sweep', { skip: findChrome() ? false : 'no Chrome/Chromium found 
         await audit(`${lang}/${width} visitor ${route}`);
       }
       // pages that are "not found" ON PURPOSE (their 404 is part of the behaviour)
-      for (const route of ['/page-inexistante', `/blog/${data.draftArticle.slug}`, '/blog/inexistant', '/verification/LARBI-AAAA-BBBB-CCCC']) {
+      for (const route of ['/page-inexistante', `/blog/${data.draftArticle.slug}`, '/blog/inexistant', '/verification/LARBI-AAAA-BBBB-CCCC', '/outils/comparateur/inexistant', '/outils/comparateur/segments/non_precise']) {
         await b.goto(site.url + route);
         await sleep(300);
         await audit(`${lang}/${width} visitor (not found) ${route}`, { expectHttp: [/^404 \/api\//] });
@@ -129,7 +130,7 @@ describe('site sweep', { skip: findChrome() ? false : 'no Chrome/Chromium found 
       assert.doesNotMatch(await b.text(), /Formation balayage/, 'a learner must not see the administration');
 
       await setSession(admin);
-      for (const route of ['/admin/formations', `/admin/formations/${data.f.id}`, '/admin/articles', `/admin/articles/${data.article.id}`, '/admin/media', '/admin/certificates', '/admin/users', '/admin/settings']) {
+      for (const route of ['/admin/formations', `/admin/formations/${data.f.id}`, '/admin/articles', `/admin/articles/${data.article.id}`, '/admin/media', '/admin/certificates', '/admin/comparateur', '/admin/users', '/admin/settings']) {
         await b.goto(site.url + route);
         await sleep(500);
         await audit(`${lang}/${width} admin ${route}`);

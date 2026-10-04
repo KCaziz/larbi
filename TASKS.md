@@ -1521,8 +1521,18 @@ Tâches :
 
 Réalisé (2026-10-04) : 3 pages publiques (accueil comparateur, page rubrique avec filtres/tri/recherche, comparatif par segment), CSS responsive (tableau desktop / fiches mobile), textes i18n fr/en/ar, page outils mise à jour avec lien vers le comparateur, routes lazy-loaded. 574 tests (0 échec), build client OK.
 
+Revue et finitions (2026-10-04, reprise de session) : la tâche avait été marquée terminée sans son parcours navigateur, et la relecture a trouvé de vrais défauts, corrigés :
+- page rubrique : des hooks React (`useMemo`) appelés après les retours anticipés → plantage « Rendered more hooks » au premier affichage des données ; les hooks sont désormais tous avant les retours ;
+- textes en dur (« Label », « Cat. », « Segment ») et en-tête « Toutes les banques » à la place de « Banque » : remplacés par des textes traduits ; chaque rubrique a l'intitulé de première colonne du classeur client (« Type de compte », « Opération », « Carte »…), et un champ commun garde le mot du client selon la rubrique (« Taux / part de bénéfices » pour l'épargne, « Taux / marge » pour les crédits : règle client, jamais assimilés) ;
+- note de lecture par rubrique reprise du classeur client (sous-titre de chaque onglet) ; noms des rubriques alignés sur le guide client ; note expliquant le coût annuel estimé ; sous-titre du comparatif par segment corrigé (pluriel fabriqué en ajoutant « s » : « Businesss » en anglais, incorrect en arabe) ;
+- variables CSS inexistantes (`--text-l`, `--surface-alt`, `--shadow`, `--success`) : styles silencieusement ignorés, remplacées par les jetons du thème (clair et sombre) ; tableaux dans un conteneur à défilement horizontal ;
+- rubrique ou segment inconnu : page 404 au lieu d'un message « erreur de chargement » avec un bouton Réessayer inutile ; date affichée dans la langue choisie ; ordre fixe des segments ; rubriques non documentées présentées comme des cartes non cliquables ;
+- note de la page Outils : « l'accès aux outils nécessite d'être connecté » contredisait l'accès libre du comparateur, corrigée.
+
+Vérifications : données de la migration comparées **ligne à ligne** au classeur `Conditions_bancaires_par_thematiques_et_segments.xlsx` (script) : 152 lignes identiques, seules différences = les 4 corrections documentées en P4-06. Parcours navigateur `e2e/comparator-journey.test.js` (7 tests : rubriques, filtres, recherche, tri par coût, épargne non classée, comparatif par segment, 404, téléphone 375 px en arabe RTL, administration) ; pages du comparateur ajoutées au balayage `e2e/site-sweep.test.js` (fr/en/ar/tzm, 1280 et 375 px : aucun problème).
+
 ### P4-08 — Comparateur bancaire, lot C : administration des données
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P4-06`
 - Durée cible : 1 jour
@@ -1533,6 +1543,10 @@ Tâches :
 - Conditions par rubrique : ajout, modification, suppression, avec les colonnes propres à la rubrique ; validation côté serveur.
 - La date « données mises à jour le » affichée au public suit automatiquement les modifications.
 - Tests fonctionnels et parcours navigateur.
+
+Réalisé (2026-10-04) : API d'administration (`/api/admin/comparator/banks` et `/conditions`, réservée aux administrateurs, validation zod + contrôle des colonnes propres à chaque rubrique, date publique déplacée dans la même transaction que chaque écriture, suppressions comprises) et page `/admin/comparateur` (entrée « Comparateur » du menu) : onglet Banques (ajout, renommage, suppression avec confirmation indiquant le nombre de conditions supprimées) et onglet Conditions par rubrique (ajout, modification, suppression ; formulaire construit sur les colonnes renvoyées par le serveur, donc définies à un seul endroit). Corrigé à la reprise : la modification d'une condition lisait un champ `bankId` que l'API ne renvoie pas (banque perdue dans le formulaire), une catégorie ne pouvait pas être vidée, boutons d'icône sans nom accessible.
+
+Tests : 6 tests fonctionnels d'administration (`functional/comparator.test.js` : 401/403, banques, doublon de nom insensible à la casse, colonnes refusées hors rubrique, catégorie seulement où la rubrique en a une, suppression en cascade, date publique) ; parcours navigateur (ajout d'une banque et d'une condition, visible aussitôt côté public avec son coût annuel calculé, modification, suppression de la banque et de ses conditions) ; `/admin/comparateur` et ses deux onglets dans le balayage du site.
 
 ### Impact sur le délai (comparateur, ajout du 2026-10-04)
 
@@ -1738,7 +1752,7 @@ Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau
 Phase active : `PHASE 3` — BLOG + CMS CONTENU + NEWSLETTER (les Phases 1 et 2 ont été validées le 2026-09-19, voir P1-08 et P2-07)
 
 Dernières tâches terminées et vérifiées :
-`P3-17 — Articles multilingues (traductions)`, `P3-16 — Panel d'administration étendu (utilisateurs, droits, paramètres, médiathèque, certifications) et tableau de bord personnalisé`, `P3-15 — Types de compte dynamiques`, `P3-14 — CMS pédagogique, lot D : finitions`, `P3-13 — CMS pédagogique, lot C : quiz`, `P3-12 — CMS pédagogique, lot B : blocs de contenu et éditeur avancé`, `P3-11 — CMS pédagogique, lot A : structure d'une formation`, `P3-05 — Newsletter`, `P3-04 — Recommandation / visibilité selon profil`, `P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
+`P4-08 — Comparateur bancaire, lot C : administration des données`, `P4-07 — Comparateur bancaire, lot B : pages publiques`, `P4-06 — Comparateur bancaire, lot A : données et API publique`, `P4-01 — Architecture commune des outils` (comparateur bancaire commencé à la demande de l'utilisateur, avant la validation de la Phase 3), `P3-17 — Articles multilingues (traductions)`, `P3-16 — Panel d'administration étendu (utilisateurs, droits, paramètres, médiathèque, certifications) et tableau de bord personnalisé`, `P3-15 — Types de compte dynamiques`, `P3-14 — CMS pédagogique, lot D : finitions`, `P3-13 — CMS pédagogique, lot C : quiz`, `P3-12 — CMS pédagogique, lot B : blocs de contenu et éditeur avancé`, `P3-11 — CMS pédagogique, lot A : structure d'une formation`, `P3-05 — Newsletter`, `P3-04 — Recommandation / visibilité selon profil`, `P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
 
 Toutes les tâches de pages (P1-02, P1-03, P1-04), le socle backend (P1-05) et les deux ajouts signalés par l'utilisateur (mode clair/sombre, i18n FR/EN/AR + tamazight en repli) sont terminés. Le modèle `User` existe en base (Prisma).
 
@@ -1746,6 +1760,8 @@ Prochaines tâches réalisables (dépendances satisfaites) :
 - `P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)` (dépend de `P1-10` ✅ et `P2-02` ✅ ; **questions et réponses à fournir par le client**).
 - `P3-09 — Paiement : socle indépendant du fournisseur` (dépend de `P3-04` ✅ ; `P3-08` reste bloquée sur les décisions du client et bloque seulement `P3-10`).
 - Le blog est terminé (P3-01 à P3-06 hors paiement et assistant guidé). La Phase 4 (outils) ne doit commencer qu'après validation de la Phase 3.
+
+- Comparateur bancaire terminé (P4-01, P4-06 à P4-08). Restent dans la Phase 4 : `P4-02 — Simulateur de crédit` et `P4-03 — Générateur de facture` (le simulateur dépend des règles de calcul du client : les classeurs fournis donnent des conditions, pas de formules).
 
 Recommandation : `P3-07` si le client a fourni les questions / réponses, sinon `P3-09` ; puis la validation de fin de Phase 3. Points d'attention :
 - **Newsletter : aucun courriel réel ne part tant qu'un fournisseur d'e-mail n'est pas choisi** (pilote `none` par défaut en production : l'inscription répond « pas encore disponible »). C'est la décision client la plus urgente pour rendre P3-05 réellement utilisable ; elle débloque aussi « mot de passe oublié ».

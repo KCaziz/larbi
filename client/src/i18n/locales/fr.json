@@ -281,7 +281,7 @@
       "title": "Générateur de facture",
       "body": "Création de factures (client, prestataire, produits/services, totaux) avec export PDF et Excel."
     },
-    "accessNote": "L'accès aux outils nécessite d'être connecté et dépend de vos droits.",
+    "accessNote": "Le comparateur bancaire est en accès libre. Les autres outils nécessiteront d'être connecté, selon vos droits.",
     "notice": "Le simulateur de crédit et le générateur de facture seront disponibles prochainement."
   },
   "blogList": {
@@ -1617,20 +1617,19 @@
     "sortByCost": "Trier par coût",
     "sortByName": "Trier par nom",
     "segmentComparison": "Comparatif par segment",
-    "segmentSubtitle": "Conditions spécifiques aux {{segment}}s",
-    "backToComparator": "Retour au comparateur",
+    "segmentSubtitle": "Conditions explicitement libellées « {{segment}} » dans le fichier source",
     "themes": {
-      "comptes": "Tenue de compte",
+      "comptes": "Ouverture et gestion de comptes",
       "versements-retraits": "Versements et retraits",
-      "carte-locale": "Carte locale (CIB)",
+      "carte-locale": "Carte monétique locale (CIB)",
       "epargne": "Épargne",
-      "coffres-forts": "Coffres-forts",
+      "coffres-forts": "Location de coffre-fort",
       "credits": "Crédits",
       "virements": "Virements domestiques",
-      "carte-internationale": "Carte internationale",
-      "devises": "Opérations en devises",
+      "carte-internationale": "Carte monétique internationale",
+      "devises": "Opérations en devises et international",
       "operations-diverses": "Opérations diverses",
-      "cheques": "Chèques"
+      "cheques": "Opérations chèque"
     },
     "fields": {
       "fee": "Frais",
@@ -1658,24 +1657,81 @@
       "bankName": "Nom de la banque",
       "editBank": "Renommer",
       "deleteBank": "Supprimer la banque",
-      "deleteBankConfirm": "Supprimer la banque « {{name}} » et toutes ses conditions ?",
+      "deleteBankConfirm": "Supprimer la banque « {{name}} » ? Ses {{count}} condition(s) seront supprimées avec elle. Cette action est définitive.",
       "bankExists": "Ce nom de banque existe déjà.",
       "addCondition": "Ajouter une condition",
       "editCondition": "Modifier",
       "deleteCondition": "Supprimer",
-      "deleteConditionConfirm": "Supprimer cette condition ?",
+      "deleteConditionConfirm": "Supprimer la condition « {{label}} » de {{bank}} ? Cette action est définitive.",
       "selectTheme": "Choisir une rubrique",
-      "selectBank": "Choisir une banque",
-      "label": "Libellé",
-      "category": "Catégorie",
-      "segment": "Segment",
-      "values": "Valeurs",
       "save": "Enregistrer",
       "cancel": "Annuler",
       "saved": "Enregistré",
       "deleted": "Supprimé",
       "conditionCount_one": "{{count}} condition",
-      "conditionCount_other": "{{count}} conditions"
+      "conditionCount_other": "{{count}} conditions",
+      "subtitle": "Banques et conditions affichées dans le comparateur public. Chaque modification met à jour la date « Données mises à jour le ».",
+      "actions": "Actions",
+      "segmentHint": "À indiquer seulement si le segment figure explicitement dans la source ; sinon « Non précisé ».",
+      "valuesHint": "Recopiez les textes tels que la banque les publie (« Gratuit », « Non spécifié », conditions…). Un champ vide n'est pas affiché.",
+      "emptyTheme": "Aucune condition dans cette rubrique pour le moment."
+    },
+    "bank": "Banque",
+    "category": "Catégorie",
+    "segment": "Segment",
+    "sortLabel": "Ordre d'affichage",
+    "resultCount_one": "{{count}} résultat",
+    "resultCount_other": "{{count}} résultats",
+    "notDocumentedBody": "Cette rubrique fait partie du découpage du comparateur, mais le fichier source ne contient aucune donnée la concernant. Aucune donnée n'est inventée : elle sera complétée à partir d'une source bancaire fournie.",
+    "costNote": "Le coût annuel estimé n'est calculé que lorsque le tarif est un montant simple (ex. « 800 DA » trimestriel = 3 200 DA/an). Les tarifs en pourcentage, mixtes ou non spécifiés sont affichés tels quels et classés « Non classable ».",
+    "segmentNote": "Le comparatif par segment ne reprend que les lignes dont le segment (Particulier, Professionnel, Entreprise) figure explicitement dans le fichier source. Les autres restent consultables dans chaque rubrique.",
+    "noSegmentRows": "Aucune condition n'est explicitement attribuée à ce segment dans le fichier source.",
+    "labelHeaders": {
+      "comptes": "Type de compte",
+      "versements-retraits": "Opération",
+      "carte-locale": "Carte / service",
+      "epargne": "Produit",
+      "coffres-forts": "Format / type",
+      "credits": "Type de crédit / financement",
+      "virements": "Type de virement",
+      "carte-internationale": "Carte",
+      "devises": "Opération",
+      "operations-diverses": "Service / opération",
+      "cheques": "Opération chèque"
+    },
+    "themeFields": {
+      "comptes": {
+        "fee": "Frais de tenue"
+      },
+      "carte-locale": {
+        "annualFee": "Cotisation",
+        "atmWithdrawal": "Retrait interbancaire"
+      },
+      "epargne": {
+        "rate": "Taux / part de bénéfices"
+      },
+      "coffres-forts": {
+        "fee": "Tarif"
+      },
+      "credits": {
+        "rate": "Taux / marge"
+      },
+      "carte-internationale": {
+        "annualFee": "Cotisation / création"
+      }
+    },
+    "themeNotes": {
+      "comptes": "Frais de tenue de compte et leur périodicité. Le fichier source ne fournit pas de frais d'ouverture distincts.",
+      "versements-retraits": "Opérations de caisse. Le segment n'est indiqué que lorsqu'il figure explicitement dans le fichier source.",
+      "carte-locale": "Cartes CIB et services locaux, présentés séparément des cartes internationales.",
+      "epargne": "Les taux (finance conventionnelle) et les parts de bénéfices (finance islamique) sont laissés dans leur forme d'origine et ne sont jamais assimilés.",
+      "coffres-forts": "Aucune donnée de location de coffre-fort n'est présente dans le fichier source.",
+      "credits": "Par type de crédit : frais de dossier, taux ou marge, remboursement anticipé.",
+      "virements": "Le fichier source ne contient pas de tableau de virements domestiques. Les transferts vers l'étranger figurent dans « Opérations en devises ».",
+      "carte-internationale": "Cartes Visa et Mastercard, présentées séparément des cartes CIB locales.",
+      "devises": "Transferts, change, frais Swift et correspondants, allocations.",
+      "operations-diverses": "Services présents dans le fichier source qui ne relèvent pas directement des autres rubriques.",
+      "cheques": "Aucune grille d'opérations chèque n'est présente dans le fichier source."
     }
   }
 }
