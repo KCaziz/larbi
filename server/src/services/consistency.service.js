@@ -6,6 +6,7 @@ import { MEDIA_BLOCK_KIND, validateBlockData } from './blocks.service.js';
 import { bodyToText } from './article.service.js';
 import { CERTIFICATE_NUMBER_PATTERN } from './certificate.service.js';
 import { sanitizeRichText } from './sanitize.service.js';
+import { themeByKey } from '../constants/comparator.js';
 
 // Global consistency check: rules that must hold across the WHOLE data set (database
 // AND stored files), whatever code path wrote it. The database constraints already
@@ -142,6 +143,21 @@ export async function checkConsistency(prisma, { privateDir }) {
   // ---- accounts -------------------------------------------------------------
   const emails = await prisma.$queryRaw`SELECT id FROM users WHERE email <> lower(btrim(email))`;
   add('e-mail addresses are stored lower-case and trimmed', emails, (r) => `user ${r.id}`);
+
+  // ---- bank comparator (P4-06) ----------------------------------------------------
+  // The values of a condition are texts, and only the columns of its own rubric; a
+  // category only where the rubric has one (CHECK already covers rubric and segment).
+  const conditions = await prisma.comparatorCondition.findMany({ select: { id: true, theme: true, category: true, values: true } });
+  for (const c of conditions) {
+    const theme = themeByKey(c.theme);
+    const values = c.values && typeof c.values === 'object' && !Array.isArray(c.values) ? c.values : null;
+    if (!values || Object.entries(values).some(([key, value]) => !theme?.fields.includes(key) || typeof value !== 'string' || value.trim() === '')) {
+      problems.push(violation("a comparator condition only holds non-empty texts for its rubric's own columns", `condition ${c.id}`));
+    }
+    if (c.category !== null && !theme?.category) problems.push(violation('a comparator condition has a category only in a rubric that has one', `condition ${c.id}`));
+  }
+  const banksWithLookalike = await prisma.$queryRaw`SELECT a.id FROM comparator_banks a JOIN comparator_banks b ON a.id <> b.id AND lower(a.name) = lower(b.name)`;
+  add('two comparator banks never share a name (whatever the case)', banksWithLookalike, (r) => `bank ${r.id}`);
 
   return problems;
 }

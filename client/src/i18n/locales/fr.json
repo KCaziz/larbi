@@ -268,7 +268,11 @@
   },
   "toolsPresentation": {
     "title": "Outils",
-    "intro": "Deux outils métier sont prévus pour cette première version :",
+    "intro": "Des outils métier pour vous accompagner au quotidien :",
+    "comparator": {
+      "title": "Comparateur bancaire",
+      "body": "Comparez les conditions bancaires de 13 banques algériennes : frais de tenue de compte, cartes, épargne, crédits et plus."
+    },
     "credit": {
       "title": "Simulateur de crédit",
       "body": "Estimation du crédit possible selon votre profil financier, calculée côté serveur à partir de règles bancaires fournies par le client."
@@ -278,7 +282,7 @@
       "body": "Création de factures (client, prestataire, produits/services, totaux) avec export PDF et Excel."
     },
     "accessNote": "L'accès aux outils nécessite d'être connecté et dépend de vos droits.",
-    "notice": "Les outils deviendront utilisables en Phase 4 (tâches P4-01 à P4-05), une fois l'authentification et les rôles en place."
+    "notice": "Le simulateur de crédit et le générateur de facture seront disponibles prochainement."
   },
   "blogList": {
     "title": "Blog",
@@ -508,6 +512,7 @@
     "loading": "Chargement…",
     "sending": "Envoi en cours…",
     "retry": "Réessayer",
+    "loadError": "Impossible de charger les données.",
     "sessionError": "Impossible de vérifier votre session : le serveur ne répond pas."
   },
   "forbidden": {
@@ -521,6 +526,7 @@
       "dashboard": "Tableau de bord",
       "media": "Médiathèque",
       "certificates": "Certifications",
+      "comparator": "Comparateur",
       "users": "Utilisateurs",
       "settings": "Paramètres"
     },
@@ -1587,6 +1593,89 @@
       "fr": "Français",
       "en": "Anglais",
       "ar": "Arabe"
+    }
+  },
+  "comparator": {
+    "title": "Comparateur bancaire",
+    "subtitle": "Comparez les conditions bancaires de {{count}} banques algériennes.",
+    "disclaimer": "Les informations présentées sont à titre indicatif et ne constituent pas un conseil financier. Vérifiez toujours auprès de votre banque.",
+    "updatedAt": "Données mises à jour le {{date}}",
+    "bankCount_one": "{{count}} banque",
+    "bankCount_other": "{{count}} banques",
+    "conditionCount_one": "{{count}} offre",
+    "conditionCount_other": "{{count}} offres",
+    "notDocumented": "Non documentée dans le fichier source",
+    "browseTheme": "Consulter",
+    "estimatedCost": "Coût annuel estimé",
+    "noCost": "Non classable",
+    "free": "Gratuit",
+    "perYear": "{{amount}} DA/an",
+    "allBanks": "Toutes les banques",
+    "allSegments": "Tous les segments",
+    "search": "Rechercher…",
+    "noResults": "Aucune offre ne correspond à vos critères.",
+    "sortByCost": "Trier par coût",
+    "sortByName": "Trier par nom",
+    "segmentComparison": "Comparatif par segment",
+    "segmentSubtitle": "Conditions spécifiques aux {{segment}}s",
+    "backToComparator": "Retour au comparateur",
+    "themes": {
+      "comptes": "Tenue de compte",
+      "versements-retraits": "Versements et retraits",
+      "carte-locale": "Carte locale (CIB)",
+      "epargne": "Épargne",
+      "coffres-forts": "Coffres-forts",
+      "credits": "Crédits",
+      "virements": "Virements domestiques",
+      "carte-internationale": "Carte internationale",
+      "devises": "Opérations en devises",
+      "operations-diverses": "Opérations diverses",
+      "cheques": "Chèques"
+    },
+    "fields": {
+      "fee": "Frais",
+      "period": "Périodicité",
+      "conditions": "Conditions",
+      "annualFee": "Cotisation annuelle",
+      "atmWithdrawal": "Retrait DAB",
+      "opposition": "Opposition",
+      "rate": "Taux",
+      "fileFee": "Frais de dossier",
+      "earlyRepayment": "Remboursement anticipé",
+      "foreignWithdrawal": "Retrait à l'étranger"
+    },
+    "segments": {
+      "particulier": "Particulier",
+      "professionnel": "Professionnel",
+      "entreprise": "Entreprise",
+      "non_precise": "Non précisé"
+    },
+    "admin": {
+      "title": "Gestion du comparateur",
+      "banks": "Banques",
+      "conditions": "Conditions",
+      "addBank": "Ajouter une banque",
+      "bankName": "Nom de la banque",
+      "editBank": "Renommer",
+      "deleteBank": "Supprimer la banque",
+      "deleteBankConfirm": "Supprimer la banque « {{name}} » et toutes ses conditions ?",
+      "bankExists": "Ce nom de banque existe déjà.",
+      "addCondition": "Ajouter une condition",
+      "editCondition": "Modifier",
+      "deleteCondition": "Supprimer",
+      "deleteConditionConfirm": "Supprimer cette condition ?",
+      "selectTheme": "Choisir une rubrique",
+      "selectBank": "Choisir une banque",
+      "label": "Libellé",
+      "category": "Catégorie",
+      "segment": "Segment",
+      "values": "Valeurs",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "saved": "Enregistré",
+      "deleted": "Supprimé",
+      "conditionCount_one": "{{count}} condition",
+      "conditionCount_other": "{{count}} conditions"
     }
   }
 }

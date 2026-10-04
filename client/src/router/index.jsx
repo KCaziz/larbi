@@ -46,6 +46,9 @@ export const router = createBrowserRouter([
           { index: true, element: <HomePage /> },
           { path: 'formations', element: <FormationsPresentationPage /> },
           { path: 'outils', element: <ToolsPresentationPage /> },
+          { path: 'outils/comparateur', lazy: lazyPage(() => import('../pages/outils/ComparatorPage.jsx')) },
+          { path: 'outils/comparateur/segments/:segment', lazy: lazyPage(() => import('../pages/outils/ComparatorSegmentPage.jsx')) },
+          { path: 'outils/comparateur/:theme', lazy: lazyPage(() => import('../pages/outils/ComparatorThemePage.jsx')) },
           { path: 'blog', element: <BlogListPage /> },
           { path: 'blog/:slug', element: <ArticlePage /> },
           { path: 'newsletter/confirmer', element: <NewsletterLinkPage mode="confirm" /> },
@@ -126,6 +129,10 @@ export const router = createBrowserRouter([
                       {
                         path: 'certificates',
                         lazy: lazyPage(() => import('../pages/admin/platform/CertificatesAdminPage.jsx')),
+                      },
+                      {
+                        path: 'comparateur',
+                        lazy: lazyPage(() => import('../pages/admin/comparator/ComparatorAdminPage.jsx')),
                       },
                       {
                         path: 'users',

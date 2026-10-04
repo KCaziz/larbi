@@ -9,6 +9,7 @@ import blogRoutes from './blog.routes.js';
 import newsletterRoutes from './newsletter.routes.js';
 import accountTypesRoutes from './accountTypes.routes.js';
 import settingsRoutes from './settings.routes.js';
+import toolsRoutes from './tools.routes.js';
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use('/blog', blogRoutes);
 router.use('/newsletter', newsletterRoutes);
 router.use('/account-types', accountTypesRoutes);
 router.use('/settings', settingsRoutes);
+router.use('/tools', toolsRoutes);
 
 export default router;

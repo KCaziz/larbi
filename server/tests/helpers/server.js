@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
-import { existsSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import path from 'node:path';
-import { applyTestEnv, assertTestDatabase } from './env.js';
+import { SERVER_DIR, applyTestEnv, assertTestDatabase } from './env.js';
 
 // Boots the real Express app inside the test process (ephemeral port, test
 // database, temporary storage) and returns everything a test needs.
@@ -134,6 +134,21 @@ export async function boot({ production = false, extra = {} } = {}) {
     return created;
   }
 
+  // The bank comparator's real data (P4-06): the very SQL of its data migration,
+  // replayed after reset() (it only inserts, with fixed ids), so tests check the
+  // data the client gave, not a copy of it.
+  async function loadComparatorData() {
+    const dir = path.join(SERVER_DIR, 'prisma', 'migrations');
+    const name = readdirSync(dir).find((d) => d.endsWith('_comparator_data'));
+    const sql = readFileSync(path.join(dir, name, 'migration.sql'), 'utf8')
+      .split('\n')
+      .filter((line) => !line.startsWith('--'))
+      .join('\n');
+    for (const statement of sql.split(/;\s*$/m).map((x) => x.trim()).filter(Boolean)) {
+      await prisma.$executeRawUnsafe(statement);
+    }
+  }
+
   // ---- storage -------------------------------------------------------------
   const storedFiles = (dir = 'private') => {
     const full = path.join(storageDir, dir);
@@ -146,5 +161,5 @@ export async function boot({ production = false, extra = {} } = {}) {
     rmSync(storageDir, { recursive: true, force: true });
   }
 
-  return { baseUrl, prisma, request, reset, user, admin, formation, article, unique, storedFiles, storageDir, signSession, close };
+  return { baseUrl, prisma, request, reset, user, admin, formation, article, loadComparatorData, unique, storedFiles, storageDir, signSession, close };
 }

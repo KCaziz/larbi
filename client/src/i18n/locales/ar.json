@@ -268,7 +268,11 @@
   },
   "toolsPresentation": {
     "title": "الأدوات",
-    "intro": "من المقرَّر توفير أداتين مهنيتين في هذه النسخة الأولى:",
+    "intro": "أدوات مهنية لمرافقتكم يوميًا:",
+    "comparator": {
+      "title": "مقارنة البنوك",
+      "body": "قارنوا الشروط البنكية لـ 13 بنكًا جزائريًا: رسوم الحسابات، البطاقات، الادخار، القروض والمزيد."
+    },
     "credit": {
       "title": "محاكي القرض",
       "body": "تقدير للقرض الممكن حسب وضعكم المالي، يُحسَب من جانب الخادم انطلاقًا من قواعد بنكية يوفّرها العميل."
@@ -278,7 +282,7 @@
       "body": "إنشاء فواتير (الزبون، مقدّم الخدمة، المنتجات/الخدمات، المجاميع) مع تصدير بصيغتي PDF وExcel."
     },
     "accessNote": "يتطلب الوصول إلى الأدوات تسجيل الدخول ويخضع لصلاحياتكم.",
-    "notice": "ستصبح الأدوات قابلة للاستخدام في المرحلة 4 (المهام من P4-01 إلى P4-05)، بمجرد وضع نظام المصادقة والأدوار."
+    "notice": "سيتوفّر محاكي القرض ومولّد الفواتير قريبًا."
   },
   "blogList": {
     "title": "المدونة",
@@ -512,6 +516,7 @@
     "loading": "جارٍ التحميل…",
     "sending": "جارٍ الإرسال…",
     "retry": "إعادة المحاولة",
+    "loadError": "تعذّر تحميل البيانات.",
     "sessionError": "تعذّر التحقق من جلستك: الخادم لا يستجيب."
   },
   "forbidden": {
@@ -525,6 +530,7 @@
       "dashboard": "لوحة التحكم",
       "media": "مكتبة الوسائط",
       "certificates": "الشهادات",
+      "comparator": "المقارنة",
       "users": "المستخدمون",
       "settings": "الإعدادات"
     },
@@ -1630,6 +1636,101 @@
       "fr": "الفرنسية",
       "en": "الإنجليزية",
       "ar": "العربية"
+    }
+  },
+  "comparator": {
+    "title": "مقارنة البنوك",
+    "subtitle": "قارن الشروط البنكية لـ {{count}} بنك جزائري.",
+    "disclaimer": "المعلومات المعروضة هي للإشارة فقط ولا تُشكّل استشارة مالية. تحقّق دائمًا لدى بنكك.",
+    "updatedAt": "آخر تحديث للبيانات في {{date}}",
+    "bankCount_zero": "لا بنوك",
+    "bankCount_one": "بنك واحد",
+    "bankCount_two": "بنكان",
+    "bankCount_few": "{{count}} بنوك",
+    "bankCount_many": "{{count}} بنكًا",
+    "bankCount_other": "{{count}} بنك",
+    "conditionCount_zero": "لا عروض",
+    "conditionCount_one": "عرض واحد",
+    "conditionCount_two": "عرضان",
+    "conditionCount_few": "{{count}} عروض",
+    "conditionCount_many": "{{count}} عرضًا",
+    "conditionCount_other": "{{count}} عرض",
+    "notDocumented": "غير موثّقة في الملف المصدر",
+    "browseTheme": "تصفّح",
+    "estimatedCost": "التكلفة السنوية المقدّرة",
+    "noCost": "غير قابل للترتيب",
+    "free": "مجاني",
+    "perYear": "{{amount}} د.ج/سنة",
+    "allBanks": "جميع البنوك",
+    "allSegments": "جميع الشرائح",
+    "search": "بحث…",
+    "noResults": "لا توجد عروض تطابق معاييرك.",
+    "sortByCost": "ترتيب حسب التكلفة",
+    "sortByName": "ترتيب حسب الاسم",
+    "segmentComparison": "مقارنة حسب الشريحة",
+    "segmentSubtitle": "شروط خاصة بشريحة {{segment}}",
+    "backToComparator": "العودة إلى المقارنة",
+    "themes": {
+      "comptes": "مسك الحسابات",
+      "versements-retraits": "الإيداعات والسحوبات",
+      "carte-locale": "البطاقة المحلية (CIB)",
+      "epargne": "الادخار",
+      "coffres-forts": "الخزائن",
+      "credits": "القروض",
+      "virements": "التحويلات الداخلية",
+      "carte-internationale": "البطاقة الدولية",
+      "devises": "عمليات العملات الأجنبية",
+      "operations-diverses": "عمليات متنوعة",
+      "cheques": "الشيكات"
+    },
+    "fields": {
+      "fee": "الرسوم",
+      "period": "الدورية",
+      "conditions": "الشروط",
+      "annualFee": "الاشتراك السنوي",
+      "atmWithdrawal": "السحب من الصراف",
+      "opposition": "التعرّض",
+      "rate": "المعدّل",
+      "fileFee": "رسوم الملف",
+      "earlyRepayment": "السداد المبكر",
+      "foreignWithdrawal": "السحب في الخارج"
+    },
+    "segments": {
+      "particulier": "فرد",
+      "professionnel": "مهني",
+      "entreprise": "مؤسسة",
+      "non_precise": "غير محدّد"
+    },
+    "admin": {
+      "title": "إدارة المقارنة",
+      "banks": "البنوك",
+      "conditions": "الشروط",
+      "addBank": "إضافة بنك",
+      "bankName": "اسم البنك",
+      "editBank": "إعادة التسمية",
+      "deleteBank": "حذف البنك",
+      "deleteBankConfirm": "حذف البنك « {{name}} » وجميع شروطه؟",
+      "bankExists": "اسم البنك هذا موجود مسبقًا.",
+      "addCondition": "إضافة شرط",
+      "editCondition": "تعديل",
+      "deleteCondition": "حذف",
+      "deleteConditionConfirm": "حذف هذا الشرط؟",
+      "selectTheme": "اختر قسمًا",
+      "selectBank": "اختر بنكًا",
+      "label": "التسمية",
+      "category": "الفئة",
+      "segment": "الشريحة",
+      "values": "القيم",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "saved": "تمّ الحفظ",
+      "deleted": "تمّ الحذف",
+      "conditionCount_zero": "لا شروط",
+      "conditionCount_one": "شرط واحد",
+      "conditionCount_two": "شرطان",
+      "conditionCount_few": "{{count}} شروط",
+      "conditionCount_many": "{{count}} شرطًا",
+      "conditionCount_other": "{{count}} شرط"
     }
   }
 }

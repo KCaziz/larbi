@@ -268,7 +268,11 @@
   },
   "toolsPresentation": {
     "title": "Tools",
-    "intro": "Two business tools are planned for this first version:",
+    "intro": "Business tools to help you every day:",
+    "comparator": {
+      "title": "Bank comparator",
+      "body": "Compare banking conditions from 13 Algerian banks: account fees, cards, savings, loans and more."
+    },
     "credit": {
       "title": "Credit simulator",
       "body": "Estimate of the credit you may obtain based on your financial profile, computed server-side from banking rules supplied by the client."
@@ -278,7 +282,7 @@
       "body": "Create invoices (client, provider, products/services, totals) with PDF and Excel export."
     },
     "accessNote": "Accessing the tools requires being logged in and depends on your access rights.",
-    "notice": "The tools will become usable in Phase 4 (tasks P4-01 to P4-05), once authentication and roles are in place."
+    "notice": "The credit simulator and invoice generator will be available soon."
   },
   "blogList": {
     "title": "Blog",
@@ -508,6 +512,7 @@
     "loading": "Loading…",
     "sending": "Sending…",
     "retry": "Retry",
+    "loadError": "Unable to load data.",
     "sessionError": "Unable to verify your session: the server is not responding."
   },
   "forbidden": {
@@ -521,6 +526,7 @@
       "dashboard": "Dashboard",
       "media": "Media library",
       "certificates": "Certificates",
+      "comparator": "Comparator",
       "users": "Users",
       "settings": "Settings"
     },
@@ -1586,6 +1592,89 @@
       "fr": "French",
       "en": "English",
       "ar": "Arabic"
+    }
+  },
+  "comparator": {
+    "title": "Bank comparator",
+    "subtitle": "Compare banking conditions across {{count}} Algerian banks.",
+    "disclaimer": "The information shown is for reference only and does not constitute financial advice. Always check with your bank.",
+    "updatedAt": "Data updated on {{date}}",
+    "bankCount_one": "{{count}} bank",
+    "bankCount_other": "{{count}} banks",
+    "conditionCount_one": "{{count}} offer",
+    "conditionCount_other": "{{count}} offers",
+    "notDocumented": "Not documented in the source file",
+    "browseTheme": "Browse",
+    "estimatedCost": "Estimated annual cost",
+    "noCost": "Not rankable",
+    "free": "Free",
+    "perYear": "{{amount}} DA/year",
+    "allBanks": "All banks",
+    "allSegments": "All segments",
+    "search": "Search…",
+    "noResults": "No offers match your criteria.",
+    "sortByCost": "Sort by cost",
+    "sortByName": "Sort by name",
+    "segmentComparison": "Comparison by segment",
+    "segmentSubtitle": "Conditions specific to {{segment}}s",
+    "backToComparator": "Back to comparator",
+    "themes": {
+      "comptes": "Account maintenance",
+      "versements-retraits": "Deposits and withdrawals",
+      "carte-locale": "Local card (CIB)",
+      "epargne": "Savings",
+      "coffres-forts": "Safe deposit boxes",
+      "credits": "Loans",
+      "virements": "Domestic transfers",
+      "carte-internationale": "International card",
+      "devises": "Foreign currency operations",
+      "operations-diverses": "Miscellaneous operations",
+      "cheques": "Cheques"
+    },
+    "fields": {
+      "fee": "Fee",
+      "period": "Periodicity",
+      "conditions": "Conditions",
+      "annualFee": "Annual fee",
+      "atmWithdrawal": "ATM withdrawal",
+      "opposition": "Opposition",
+      "rate": "Rate",
+      "fileFee": "Processing fee",
+      "earlyRepayment": "Early repayment",
+      "foreignWithdrawal": "Foreign withdrawal"
+    },
+    "segments": {
+      "particulier": "Individual",
+      "professionnel": "Professional",
+      "entreprise": "Business",
+      "non_precise": "Unspecified"
+    },
+    "admin": {
+      "title": "Comparator management",
+      "banks": "Banks",
+      "conditions": "Conditions",
+      "addBank": "Add a bank",
+      "bankName": "Bank name",
+      "editBank": "Rename",
+      "deleteBank": "Delete bank",
+      "deleteBankConfirm": "Delete bank \"{{name}}\" and all its conditions?",
+      "bankExists": "This bank name already exists.",
+      "addCondition": "Add a condition",
+      "editCondition": "Edit",
+      "deleteCondition": "Delete",
+      "deleteConditionConfirm": "Delete this condition?",
+      "selectTheme": "Choose a rubric",
+      "selectBank": "Choose a bank",
+      "label": "Label",
+      "category": "Category",
+      "segment": "Segment",
+      "values": "Values",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saved": "Saved",
+      "deleted": "Deleted",
+      "conditionCount_one": "{{count}} condition",
+      "conditionCount_other": "{{count}} conditions"
     }
   }
 }

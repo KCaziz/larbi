@@ -1423,7 +1423,7 @@ Tests : `functional/article-translations.test.js` complété (copie refusée pou
 - Limites : le texte des cartes « newsletter » (préparation d'un envoi) reste dans la langue d'origine des articles ; pas de traduction automatique — la copie donne un texte identique à retravailler, pas une traduction ; pas de mise en évidence d'une traduction devenue obsolète quand l'original change ; les catégories et mots-clés ne sont pas traduits (un seul nom).
 
 ### P4-01 — Architecture commune des outils
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P3-05`
 - Durée cible : 1 jour
@@ -1435,6 +1435,10 @@ Tâches :
 - API Express dédiée.
 - Validation des entrées.
 - Journalisation minimale des erreurs.
+
+Plan (2026-10-04) : la Phase 4 commence à la demande de l'utilisateur par le **comparateur bancaire** (`P4-06` à `P4-08`), premier outil qui sert aussi à poser cette architecture commune. Le simulateur de crédit (`P4-02`) et le générateur de facture (`P4-03`) gardent leurs propres tâches.
+
+Réalisé (2026-10-04) : registre des outils (`constants/tools.js`), middleware d'accès commun (`middleware/toolAccess.js` : public / authenticated / premium), routes publiques `/api/tools`, audit de sécurité étendu aux routes tools. Vérifié par 574 tests (0 échec).
 
 ### P4-02 — Simulateur de crédit
 - Statut : `❌ todo`
@@ -1484,10 +1488,60 @@ Décision :
 - Ne pas planifier son développement dans les 8 semaines tant que le périmètre et les règles fiscales ne sont pas clairement définis.
 - Peut être ajouté en V2 si le client fournit les règles et si le délai réel le permet.
 
+### P4-06 — Comparateur bancaire, lot A : données et API publique
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Dépendances : `P4-01`
+- Durée cible : 1 jour
+
+Demande (2026-10-04) : le client a fourni deux classeurs, `Tableaux_conditions_bancaires_mise_en_forme.xlsx` (la base : 6 onglets, 13 banques algériennes) et `Conditions_bancaires_par_thematiques_et_segments.xlsx` (le découpage du comparateur, construit **exclusivement** sur la base : 11 rubriques + un comparatif transversal Particuliers / Professionnels / Entreprises). Règles du client, reprises telles quelles : aucune donnée externe, aucune donnée inventée, les mentions « Gratuit », « Non spécifié » et les conditions sont conservées mot pour mot, un segment n'est attribué que s'il figure dans le libellé, les parts de bénéfices (finance islamique) et les taux d'intérêt (finance conventionnelle) ne sont jamais assimilés.
+
+Tâches :
+- Modèle de données : banques, et conditions (rubrique, segment, catégorie, libellé, valeurs propres à chaque rubrique).
+- Les 11 rubriques du guide client, chacune avec ses propres colonnes ; les trois rubriques sans donnée (coffres-forts, virements domestiques, chèques) existent mais sont présentées comme « non documentées ».
+- Reprise des données du classeur client (migration de données reproductible) ; anomalies évidentes du fichier source corrigées **et signalées** au client, rien d'autre de modifié.
+- Coût annuel estimé calculé côté serveur, seulement quand le tarif est un montant simple (jamais pour l'épargne, les crédits ou les frais en pourcentage).
+- API publique en lecture : résumé, une rubrique, une vue par segment.
+- Contrôles de cohérence de la base et tests.
+
+Réalisé (2026-10-04) : schéma Prisma (`ComparatorBank`, `ComparatorCondition`, `ComparatorMeta`), 2 migrations (structure avec CHECK + données 13 banques / 152 conditions), constantes 11 rubriques (`constants/comparator.js`), service de calcul (`comparator.service.js`), sérialiseurs, contrôleurs publics et admin, routes, validation zod, cohérence étendue. Corrections documentées du fichier source : Pack "Smart" CSV cassé, HSBC Découvert colonne erronée, les deux corrigées et signalées. 13 tests unitaires + 17 tests fonctionnels + audit de sécurité, 574 tests au total (0 échec).
+
+### P4-07 — Comparateur bancaire, lot B : pages publiques
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Dépendances : `P4-06`
+- Durée cible : 1 jour
+
+Tâches :
+- Page d'accueil du comparateur (rubriques, nombre de banques et d'offres, rubriques non documentées signalées, date de mise à jour, mention « à titre indicatif »).
+- Page par rubrique : filtres par segment, par banque et recherche ; tri par coût annuel estimé quand la rubrique s'y prête ; tableau sur ordinateur, fiches sur téléphone.
+- Comparatif par segment (Particulier / Professionnel / Entreprise), comme l'onglet 12 du classeur client.
+- Textes fr / en / ar (les données elles-mêmes restent dans la langue du fichier client).
+- Parcours navigateur et balayage du site (toutes langues, 375 px).
+
+Réalisé (2026-10-04) : 3 pages publiques (accueil comparateur, page rubrique avec filtres/tri/recherche, comparatif par segment), CSS responsive (tableau desktop / fiches mobile), textes i18n fr/en/ar, page outils mise à jour avec lien vers le comparateur, routes lazy-loaded. 574 tests (0 échec), build client OK.
+
+### P4-08 — Comparateur bancaire, lot C : administration des données
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P4-06`
+- Durée cible : 1 jour
+
+Tâches :
+- Entrée « Comparateur bancaire » dans l'administration.
+- Banques : ajout, renommage, suppression (avec ses conditions, après confirmation).
+- Conditions par rubrique : ajout, modification, suppression, avec les colonnes propres à la rubrique ; validation côté serveur.
+- La date « données mises à jour le » affichée au public suit automatiquement les modifications.
+- Tests fonctionnels et parcours navigateur.
+
+### Impact sur le délai (comparateur, ajout du 2026-10-04)
+
+Le comparateur bancaire n'était pas dans le plan initial (Phase 4 : simulateur de crédit + générateur de facture). Estimation : **environ 3 jours** (`P4-01` compris). Le simulateur de crédit reste dépendant des règles de calcul du client (les classeurs fournis donnent des conditions, pas de formules : « TR + Marge », fourchettes, etc.). Proposé ensuite, hors de ce plan : import d'un classeur mis à jour depuis l'administration, simulation des frais pour un montant donné (retraits, transferts), traduction des données.
+
 ### P4-05 — Validation de fin de phase
 - Statut : `❌ todo`
 - Priorité : `🔴 high`
-- Dépendances : `P4-02`, `P4-03`
+- Dépendances : `P4-02`, `P4-03`, `P4-07`, `P4-08`
 - Durée cible : 1 jour
 
 Critères :

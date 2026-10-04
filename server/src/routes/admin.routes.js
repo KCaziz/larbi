@@ -115,6 +115,17 @@ import {
   revokeCertificate,
 } from '../controllers/admin/certificates.controller.js';
 import { certificatesQuerySchema, revokeCertificateSchema } from '../validation/certificates.schemas.js';
+import {
+  createBank,
+  createCondition,
+  deleteBank,
+  deleteCondition,
+  listBanks,
+  listConditions,
+  renameBank,
+  updateCondition,
+} from '../controllers/admin/comparator.controller.js';
+import { bankSchema, conditionsQuerySchema, createConditionSchema, updateConditionSchema } from '../validation/comparator.schemas.js';
 
 // CMS administration API. EVERY route below requires an authenticated admin,
 // checked here on the server (the React admin area is only a convenience).
@@ -228,5 +239,15 @@ router.post('/settings', validateBody(upsertSettingSchema), asyncRoute(upsertSet
 router.get('/certificates', validateQuery(certificatesQuerySchema), asyncRoute(listCertificates));
 router.post('/certificates/:id/revoke', validateBody(revokeCertificateSchema), asyncRoute(revokeCertificate));
 router.post('/certificates/:id/restore', asyncRoute(restoreCertificate));
+
+// Bank comparator (P4-08): banks and their conditions, rubric by rubric.
+router.get('/comparator/banks', asyncRoute(listBanks));
+router.post('/comparator/banks', validateBody(bankSchema), asyncRoute(createBank));
+router.patch('/comparator/banks/:id', validateBody(bankSchema), asyncRoute(renameBank));
+router.delete('/comparator/banks/:id', asyncRoute(deleteBank));
+router.get('/comparator/conditions', validateQuery(conditionsQuerySchema), asyncRoute(listConditions));
+router.post('/comparator/conditions', validateBody(createConditionSchema), asyncRoute(createCondition));
+router.patch('/comparator/conditions/:id', validateBody(updateConditionSchema), asyncRoute(updateCondition));
+router.delete('/comparator/conditions/:id', asyncRoute(deleteCondition));
 
 export default router;

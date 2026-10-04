@@ -26,6 +26,10 @@ const PUBLIC = new Set([
   'POST /api/newsletter/subscribe', // public by nature; signed links below (P3-05)
   'POST /api/newsletter/confirm',
   'POST /api/newsletter/unsubscribe',
+  'GET /api/tools', // tools catalogue: what exists and who may use it (P4-01)
+  'GET /api/tools/comparator', // bank comparator in free access: no access rule in the client's files (P4-06)
+  'GET /api/tools/comparator/themes/:theme',
+  'GET /api/tools/comparator/segments/:segment',
 ]);
 
 const UUID0 = '00000000-0000-4000-8000-000000000000';

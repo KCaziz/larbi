@@ -667,3 +667,57 @@ model QuizAttemptAnswer {
   @@unique([attemptId, questionId])
   @@map("quiz_attempt_answers")
 }
+
+// ---------------------------------------------------------------------------
+// Bank comparator (P4-06)
+//
+// Built from the client's workbooks (conditions of 13 Algerian banks, 11
+// rubrics). Texts are kept exactly as provided; the rubrics and their columns
+// are defined in src/constants/comparator.js.
+// ---------------------------------------------------------------------------
+
+model ComparatorBank {
+  id         String                @id @default(uuid())
+  // As the client writes it (e.g. "BNP Paribas", "TBA"): no full name is invented.
+  name       String                @unique
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  conditions ComparatorCondition[]
+
+  @@map("comparator_banks")
+}
+
+model ComparatorCondition {
+  id        String         @id @default(uuid())
+  bankId    String
+  bank      ComparatorBank @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  // One of COMPARATOR_THEMES (CHECK in the migration).
+  theme     String
+  // particulier | professionnel | entreprise | non_precise — set only when the
+  // client's file states it (CHECK in the migration).
+  segment   String         @default("non_precise")
+  // Only for the rubrics that have a "Catégorie" column (e.g. Retrait / Versement).
+  category  String?
+  // Account type, operation, card, product... (the rubric's first column).
+  label     String
+  // { field: text } — the rubric's own columns, as written by the client.
+  values    Json           @default("{}")
+  // Order of the client's file within a rubric; new rows go last.
+  position  Int            @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([theme, position])
+  @@index([bankId])
+  @@map("comparator_conditions")
+}
+
+// One row (id = 1): when the comparator's data last changed, for the public
+// "données mises à jour le". Every administration write moves it, deletions
+// included (a deleted row leaves no updatedAt behind to read).
+model ComparatorMeta {
+  id            Int      @id @default(1)
+  dataUpdatedAt DateTime @default(now())
+
+  @@map("comparator_meta")
+}

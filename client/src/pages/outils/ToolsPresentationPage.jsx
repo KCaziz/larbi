@@ -1,13 +1,15 @@
 import { useTranslation } from 'react-i18next';
-import { CreditCard, Receipt, Wrench } from 'lucide-react';
+import { CreditCard, Landmark, Receipt, Wrench } from 'lucide-react';
 import PageHeader from '../../components/layout/PageHeader.jsx';
+import Button from '../../components/ui/Button.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import Section from '../../components/ui/Section.jsx';
 import '../Pages.css';
 
 const tools = [
-  { key: 'credit', icon: CreditCard, tone: 'tone-brass' },
-  { key: 'invoice', icon: Receipt, tone: 'tone-blue' },
+  { key: 'comparator', icon: Landmark, tone: 'tone-green', to: '/outils/comparateur', available: true },
+  { key: 'credit', icon: CreditCard, tone: 'tone-brass', available: false },
+  { key: 'invoice', icon: Receipt, tone: 'tone-blue', available: false },
 ];
 
 export default function ToolsPresentationPage() {
@@ -32,6 +34,11 @@ export default function ToolsPresentationPage() {
               </span>
               <h3>{t(`toolsPresentation.${tool.key}.title`)}</h3>
               <p>{t(`toolsPresentation.${tool.key}.body`)}</p>
+              {tool.available && (
+                <Button to={tool.to} variant="ghost" arrow>
+                  {t('comparator.browseTheme')}
+                </Button>
+              )}
             </article>
             );
           })}
