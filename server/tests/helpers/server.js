@@ -56,10 +56,21 @@ export async function boot({ production = false, extra = {} } = {}) {
   // that adds or removes a category / setting cleans up after itself instead.
   const KEEP_TABLES = new Set(['_prisma_migrations', 'account_types', 'platform_settings']);
   async function reset() {
-    const tables = await prisma.$queryRaw`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`;
+    const tables = await prisma.$queryRaw`SELECT table_name AS tablename FROM information_schema.tables WHERE table_schema = DATABASE()`;
     const toTruncate = tables.filter((r) => !KEEP_TABLES.has(r.tablename));
     if (toTruncate.length) {
-      await prisma.$executeRawUnsafe(`TRUNCATE ${toTruncate.map((r) => `"${r.tablename}"`).join(', ')} RESTART IDENTITY CASCADE`);
+      // MySQL/MariaDB has no multi-table TRUNCATE: one statement per table, with
+      // foreign key checks off (truncation order would otherwise matter). A
+      // transaction keeps every statement on the SAME pooled connection: SET
+      // FOREIGN_KEY_CHECKS is session-level, and a plain sequence of calls could
+      // each land on a different connection from the pool.
+      await prisma.$transaction(async (tx) => {
+        await tx.$executeRawUnsafe('SET FOREIGN_KEY_CHECKS = 0');
+        for (const { tablename } of toTruncate) {
+          await tx.$executeRawUnsafe(`TRUNCATE TABLE \`${tablename}\``);
+        }
+        await tx.$executeRawUnsafe('SET FOREIGN_KEY_CHECKS = 1');
+      });
     }
   }
 

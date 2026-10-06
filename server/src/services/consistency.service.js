@@ -2,7 +2,7 @@ import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { isQuizComplete } from './quiz.service.js';
-import { MEDIA_BLOCK_KIND, validateBlockData } from './blocks.service.js';
+import { MEDIA_BLOCK_KIND, isMediaBlock, validateBlockData } from './blocks.service.js';
 import { bodyToText } from './article.service.js';
 import { CERTIFICATE_NUMBER_PATTERN } from './certificate.service.js';
 import { sanitizeRichText } from './sanitize.service.js';
@@ -28,6 +28,9 @@ export async function checkConsistency(prisma, { privateDir }) {
   });
 
   add('every file has an owner', media.filter((m) => !m.courseId && !m.articleId && !m.coverOf && !m.articleCoverOf), (m) => `media ${m.id} belongs to nothing`);
+  // Was a PostgreSQL CHECK (media_owner_check); MariaDB refuses a CHECK that references a
+  // FOREIGN KEY column, which courseId and articleId both are (see the integrity_checks migration).
+  add('a file belongs to at most one lesson OR one article, never both', media.filter((m) => m.courseId && m.articleId), (m) => `media ${m.id}`);
 
   const onDisk = new Set(existsSync(privateDir) ? readdirSync(privateDir) : []);
   const inDb = new Set(media.map((m) => m.storageKey));
@@ -58,14 +61,14 @@ export async function checkConsistency(prisma, { privateDir }) {
   add('a certificate carries its holder and formation names', certificates.filter((c) => !c.holderName.trim() || !c.formationTitle.trim()), (c) => `certificate ${c.certificateNumber} has an empty name`);
 
   const gaps = await prisma.$queryRaw`
-    SELECT "formationId", count(*)::int AS n, max(position)::int AS max, count(DISTINCT position)::int AS distinct_positions
+    SELECT "formationId", count(*) AS n, max(position) AS maxPosition, count(DISTINCT position) AS distinctPositions
     FROM courses GROUP BY "formationId"
     HAVING max(position) <> count(*) - 1 OR count(DISTINCT position) <> count(*)`;
-  add('the courses of a formation are numbered 0..n-1 without gap or duplicate', gaps, (r) => `formation ${r.formationId}: ${r.n} courses, positions up to ${r.max}`);
+  add('the courses of a formation are numbered 0..n-1 without gap or duplicate', gaps, (r) => `formation ${r.formationId}: ${r.n} courses, positions up to ${r.maxPosition}`);
 
   // ---- publication ----------------------------------------------------------
   for (const [table, label] of [['formations', 'formation'], ['articles', 'article']]) {
-    const rows = await prisma.$queryRawUnsafe(`SELECT id FROM ${table} WHERE "publishedAt" IS NOT NULL AND ("publishedAt" < "createdAt" OR "publishedAt" > now() + interval '1 minute')`);
+    const rows = await prisma.$queryRawUnsafe(`SELECT id FROM ${table} WHERE "publishedAt" IS NOT NULL AND ("publishedAt" < "createdAt" OR "publishedAt" > now() + interval 1 minute)`);
     add(`a published ${label} has a publication date between its creation and now`, rows, (r) => `${label} ${r.id}`);
     const later = await prisma.$queryRawUnsafe(`SELECT id FROM ${table} WHERE "updatedAt" < "createdAt"`);
     add(`a ${label} is never updated before it was created`, later, (r) => `${label} ${r.id}`);
@@ -124,9 +127,12 @@ export async function checkConsistency(prisma, { privateDir }) {
     } catch {
       clean = null;
     }
-    // (PostgreSQL keeps JSON objects in its own key order: compare the content, not the order.)
+    // (The database may reorder JSON object keys: compare the content, not the order.)
     if (!isDeepStrictEqual(clean, block.data)) problems.push(violation('block content is valid and already clean', `block ${block.id} (${block.type})`));
     if (block.media && block.media.kind !== MEDIA_BLOCK_KIND[block.type]) problems.push(violation('a file block shows a file of the right kind', `block ${block.id}`));
+    // Was a PostgreSQL CHECK (lesson_blocks_media_check); MariaDB refuses a CHECK that
+    // references a FOREIGN KEY column, which mediaId is (see the integrity_checks migration).
+    if (isMediaBlock(block.type) !== Boolean(block.media)) problems.push(violation('an image/video/file block shows a file, and no other block does', `block ${block.id} (${block.type})`));
   }
 
   // ---- quizzes --------------------------------------------------------------------
@@ -134,6 +140,16 @@ export async function checkConsistency(prisma, { privateDir }) {
   // served to learners and a complete REQUIRED one blocks the end of the formation).
   const quizzes = await prisma.quiz.findMany({ include: { questions: { include: { choices: true } } } });
   add('a quiz says whether it is complete (isComplete)', quizzes.filter((q) => q.isComplete !== isQuizComplete(q)), (q) => `quiz ${q.id}`);
+  // Was a PostgreSQL CHECK (quizzes_target_check); MariaDB refuses a CHECK that references a
+  // FOREIGN KEY column, which courseId, sectionId, finalFormationId and formationId all are
+  // (see the integrity_checks migration). The target must match the scope: a lesson, a
+  // chapter, or (final quiz) the formation itself.
+  const wrongTarget = quizzes.filter((q) => {
+    if (q.scope === 'course') return !(q.courseId && !q.sectionId && !q.finalFormationId);
+    if (q.scope === 'section') return !(!q.courseId && q.sectionId && !q.finalFormationId);
+    return !(!q.courseId && !q.sectionId && q.finalFormationId && q.finalFormationId === q.formationId);
+  });
+  add('a quiz targets a lesson, a chapter, or (final quiz) the formation itself, matching its scope', wrongTarget, (q) => `quiz ${q.id}`);
   // Question positions are 0..n-1, and a graded attempt has one answer per question it was graded on.
   for (const quiz of quizzes) {
     const positions = quiz.questions.map((q) => q.position).sort((a, b) => a - b);
@@ -141,7 +157,9 @@ export async function checkConsistency(prisma, { privateDir }) {
   }
 
   // ---- accounts -------------------------------------------------------------
-  const emails = await prisma.$queryRaw`SELECT id FROM users WHERE email <> lower(btrim(email))`;
+  // BINARY forces a byte-wise (case-sensitive) comparison: the default collation is
+  // case-insensitive, under which 'User@x.com' and 'user@x.com' compare equal.
+  const emails = await prisma.$queryRaw`SELECT id FROM users WHERE BINARY email <> BINARY lower(trim(email))`;
   add('e-mail addresses are stored lower-case and trimmed', emails, (r) => `user ${r.id}`);
 
   // ---- bank comparator (P4-06) ----------------------------------------------------

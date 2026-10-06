@@ -1,21 +1,22 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: larbi_postgres_dev
+  mariadb:
+    image: mariadb:11
+    container_name: larbi_mariadb_dev
     restart: unless-stopped
     environment:
-      POSTGRES_USER: larbi
-      POSTGRES_PASSWORD: larbi_dev_password
-      POSTGRES_DB: larbi_dev
+      MARIADB_USER: larbi
+      MARIADB_PASSWORD: larbi_dev_password
+      MARIADB_DATABASE: larbi_dev
+      MARIADB_ROOT_PASSWORD: larbi_root_dev_password
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mariadb_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U larbi -d larbi_dev"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
 volumes:
-  postgres_data:
+  mariadb_data:

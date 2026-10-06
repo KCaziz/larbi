@@ -28,7 +28,9 @@ function listFilter({ query, category, tag, lang }, user) {
   if (category) where.category = { slug: category };
   if (tag) where.tags = { some: { tag: { slug: tag } } };
   if (query) {
-    const contains = { contains: escapeLike(query), mode: 'insensitive' };
+    // No `mode: 'insensitive'` (PostgreSQL only): MySQL/MariaDB's default
+    // collation (utf8mb4_unicode_ci) already compares case-insensitively.
+    const contains = { contains: escapeLike(query) };
     where.OR = [
       { title: contains },
       { excerpt: contains },
@@ -104,13 +106,19 @@ export async function getArticle(req, res) {
 // who is not logged in (or with nothing aimed at them) gets the newest articles.
 export async function recommendations(req, res) {
   viewerDependent(res);
+  // targetAccountTypes is a JSON array (no array column on MySQL/MariaDB): membership
+  // is checked in JS, the same way relatedTo() already scores candidates above.
   const targeted = req.user
-    ? await prisma.article.findMany({
-        where: { ...PUBLISHED, targetAccountTypes: { has: req.user.accountType } },
-        orderBy: [{ publishedAt: 'desc' }, { id: 'asc' }],
-        take: 3,
-        include: CARD_INCLUDE,
-      })
+    ? (
+        await prisma.article.findMany({
+          where: PUBLISHED,
+          orderBy: [{ publishedAt: 'desc' }, { id: 'asc' }],
+          take: 40,
+          include: CARD_INCLUDE,
+        })
+      )
+        .filter((a) => isTargetedAt(a, req.user))
+        .slice(0, 3)
     : [];
   const personalised = targeted.length > 0;
   const rows = personalised

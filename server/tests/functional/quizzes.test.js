@@ -1,6 +1,7 @@
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { boot } from '../helpers/server.js';
+import { checkConsistency, privateDirOf } from '../../src/services/consistency.service.js';
 
 // P3-13 — quizzes: authoring, what a learner may see, grading by the server, attempts, and the
 // link with the end of the formation. Real API, real database.
@@ -585,10 +586,16 @@ describe('the database refuses inconsistent quizzes', () => {
     const g = await t.formation({ title: 'SQL 2', courses: [{ title: 'B' }] });
     const section = await t.prisma.section.findFirst({ where: { formationId: f.id } });
     const base = { formationId: f.id, title: 'x' };
-    await assert.rejects(t.prisma.quiz.create({ data: { ...base, scope: 'course' } }), 'lesson quiz without lesson');
-    await assert.rejects(t.prisma.quiz.create({ data: { ...base, scope: 'section', courseId: f.courses[0].id } }), 'section quiz with a lesson');
-    await assert.rejects(t.prisma.quiz.create({ data: { ...base, scope: 'formation' } }), 'final quiz without its marker');
     await assert.rejects(t.prisma.quiz.create({ data: { ...base, scope: 'exam', courseId: f.courses[0].id } }), 'unknown scope');
+    // quizzes_target_check (the target matches the scope) was a PostgreSQL CHECK; MariaDB
+    // refuses a CHECK that references a FOREIGN KEY column, which courseId, sectionId,
+    // finalFormationId and formationId all are. A mismatched target does not reject at
+    // insert time any more: caught instead by the consistency checker
+    // (services/consistency.service.js).
+    const mismatched = await t.prisma.quiz.create({ data: { ...base, scope: 'course' } });
+    const rules = (await checkConsistency(t.prisma, { privateDir: privateDirOf(t.storageDir) })).map((p) => p.rule);
+    assert.ok(rules.includes('a quiz targets a lesson, a chapter, or (final quiz) the formation itself, matching its scope'));
+    await t.prisma.quiz.delete({ where: { id: mismatched.id } });
     await assert.rejects(t.prisma.quiz.create({ data: { ...base, scope: 'course', courseId: g.courses[0].id } }), 'lesson of another formation');
     await assert.rejects(t.prisma.quiz.create({ data: { ...base, scope: 'course', courseId: f.courses[0].id, passingScore: 101 } }), 'pass mark out of range');
     await assert.rejects(t.prisma.quiz.create({ data: { ...base, scope: 'course', courseId: f.courses[0].id, maxAttempts: 0 } }), 'zero attempts');

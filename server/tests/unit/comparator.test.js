@@ -17,7 +17,7 @@ function migrationRows() {
   const dir = path.join(SERVER_DIR, 'prisma', 'migrations');
   const name = readdirSync(dir).find((d) => d.endsWith('_comparator_data'));
   const sql = readFileSync(path.join(dir, name, 'migration.sql'), 'utf8');
-  return [...sql.matchAll(/^ {2}\('c1[^']*', '[^']*', '([^']+)', '([^']+)', (?:NULL|'(?:[^']|'')*'), '((?:[^']|'')*)', '((?:[^']|'')*)'::jsonb/gm)].map((m) => ({
+  return [...sql.matchAll(/^ {2}\('c1[^']*', '[^']*', '([^']+)', '([^']+)', (?:NULL|'(?:[^']|'')*'), '((?:[^']|'')*)', '((?:[^']|'')*)'/gm)].map((m) => ({
     theme: m[1],
     segment: m[2],
     label: m[3].replace(/''/g, "'"),

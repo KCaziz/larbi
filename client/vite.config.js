@@ -1,17 +1,23 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
-    // The frontend calls the same-origin `/api`; in dev Vite forwards it to
-    // Express. Same origin means the httpOnly session cookie works with no
-    // cross-site cookie/CORS tricks (production uses a reverse proxy the same way).
-    // VITE_API_PROXY lets the automated end-to-end tests point the site at their
-    // own temporary API instead of the development one.
+    // 1. Correction de l'extension ngrok (.app au lieu de .dev)
+    allowedHosts: ['.loca.lt', '.ngrok-free.app', '.ngrok-free.dev'], 
+    
+    // 2. Configuration HMR pour éviter que le rafraîchissement automatique tourne en boucle
+    hmr: {
+      clientPort: 443,
+    },
+    
     proxy: {
-      '/api': process.env.VITE_API_PROXY || 'http://localhost:4000',
+      '/api': {
+        target: process.env.VITE_API_PROXY || 'http://localhost:4000',
+        changeOrigin: true, // Requis pour que le serveur Express accepte la requête venant du tunnel
+        secure: false
+      }
     },
   },
 })

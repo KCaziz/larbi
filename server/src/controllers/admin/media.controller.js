@@ -107,7 +107,9 @@ export async function listMedia(req, res) {
   const { page, limit, kind, query } = req.query;
   const filter = {
     ...(kind ? { kind } : {}),
-    ...(query ? { originalName: { contains: query, mode: 'insensitive' } } : {}),
+    // No `mode: 'insensitive'` (PostgreSQL only): MySQL/MariaDB's default
+    // collation (utf8mb4_unicode_ci) already compares case-insensitively.
+    ...(query ? { originalName: { contains: query } } : {}),
   };
   const [total, rows] = await Promise.all([
     prisma.media.count({ where: filter }),

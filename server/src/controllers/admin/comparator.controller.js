@@ -17,7 +17,9 @@ const byName = (a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base
 // Two banks whose names only differ by case would look like a duplicate to a visitor.
 async function assertNameFree(name, exceptId = null) {
   const clash = await prisma.comparatorBank.findFirst({
-    where: { name: { equals: name, mode: 'insensitive' }, ...(exceptId ? { id: { not: exceptId } } : {}) },
+    // No `mode: 'insensitive'` (PostgreSQL only): MySQL/MariaDB's default
+    // collation (utf8mb4_unicode_ci) already compares case-insensitively.
+    where: { name: { equals: name }, ...(exceptId ? { id: { not: exceptId } } : {}) },
     select: { id: true },
   });
   if (clash) throw new HttpError(409, 'A bank with this name already exists');

@@ -13,7 +13,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
 }
 
 model User {
@@ -151,8 +151,10 @@ model Formation {
   subtitle      String?
   // "beginner" | "intermediate" | "advanced" (CHECK in the migration), null = not set.
   level         String?
-  objectives    String[] @default([])
-  prerequisites String[] @default([])
+  // MySQL/MariaDB has no array column type: stored as a JSON array (still a
+  // plain JS array end to end, Prisma (de)serialises it automatically).
+  objectives    Json    @default("[]")
+  prerequisites Json    @default("[]")
 
   createdById String?
   createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
@@ -385,7 +387,9 @@ model Article {
   requiredAccessLevel String   @default("standard")
   // Account types this article is recommended to (values of ACCOUNT_TYPES).
   // Empty = for everybody. It only ORDERS recommendations, it never hides anything.
-  targetAccountTypes  String[] @default([])
+  // JSON array (no array column type on MySQL/MariaDB) — membership is checked
+  // in application code (blogAccess.js), not with a DB-side array filter.
+  targetAccountTypes  Json     @default("[]")
 
   categoryId String?
   category   ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -607,7 +611,8 @@ model QuizQuestion {
   explanation String @default("")
   points      Int    @default(1)
   // "text" questions: the answers accepted (compared without case, accents or extra spaces).
-  acceptedAnswers String[] @default([])
+  // JSON array (no array column type on MySQL/MariaDB).
+  acceptedAnswers Json   @default("[]")
 
   choices QuizChoice[]
 
@@ -640,7 +645,8 @@ model QuizAttempt {
   startedAt     DateTime  @default(now())
   submittedAt   DateTime?
   // Order the questions were served in (fixed per attempt, so resuming shows the same order).
-  questionOrder String[]  @default([])
+  // JSON array (no array column type on MySQL/MariaDB).
+  questionOrder Json      @default("[]")
   score         Int?
   earnedPoints  Int?
   totalPoints   Int?
@@ -659,7 +665,8 @@ model QuizAttemptAnswer {
   attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   // No foreign key: the history of a graded attempt outlives an edited question.
   questionId String
-  choiceIds  String[]    @default([])
+  // JSON array (no array column type on MySQL/MariaDB).
+  choiceIds  Json        @default("[]")
   text       String      @default("")
   correct    Boolean
   points     Int

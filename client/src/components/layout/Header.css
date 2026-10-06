@@ -10,14 +10,12 @@
 .site-header-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 5px;
   height: var(--header-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* Tight on purpose: between 1241px and 1400px the whole menu, the controls and
-     an administrator's buttons share one row, and none of them wraps. */
-  gap: 16px;
+  gap: 5px;
 }
 
 .brand {
@@ -86,7 +84,7 @@
   cursor: pointer;
 }
 
-@media (max-width: 1240px) {
+@media (max-width: 1341px) {
   .menu-toggle {
     display: flex;
   }
@@ -133,7 +131,7 @@
 
 /* Admins have one more button: on desktop "My account" shows its icon only
    (tooltip + accessible name stay), the full label appears in the mobile menu. */
-@media (min-width: 1241px) {
+@media (min-width: 1341px) {
   .auth-actions .btn-collapse .btn-label {
     position: absolute;
     width: 1px;

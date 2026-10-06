@@ -12,6 +12,7 @@ import { maintenanceGate } from './middleware/maintenance.js';
 
 export function createApp() {
   const app = express();
+  app.set('trust proxy', env.trustProxy);
 
   app.use(helmet());
   app.use(

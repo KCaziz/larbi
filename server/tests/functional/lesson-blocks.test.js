@@ -1,11 +1,10 @@
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { randomBytes } from 'node:crypto';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { HOSTILE, MP4, PDF, PNG, fileForm } from '../helpers/fixtures.js';
 import { boot } from '../helpers/server.js';
-import { SERVER_DIR } from '../helpers/env.js';
+import { checkConsistency, privateDirOf } from '../../src/services/consistency.service.js';
 
 // P3-12 — lessons made of typed blocks: validation per type, order, files, history, the
 // learner's view, and the migration of the older content. Real API, real database.
@@ -271,10 +270,17 @@ describe('files', () => {
     const other = await freshLesson('Autre');
     const foreign = (await upload(PNG, {}, other.id)).body.block.media.id;
     await assert.rejects(t.prisma.lessonBlock.create({ data: { courseId: course.id, type: 'image', position: 99, data: { alt: '', caption: '' }, mediaId: foreign } }), 'foreign file');
-    await assert.rejects(t.prisma.lessonBlock.create({ data: { courseId: course.id, type: 'image', position: 99, data: { alt: '', caption: '' } } }), 'image without file');
     await assert.rejects(t.prisma.lessonBlock.create({ data: { courseId: course.id, type: 'quote', position: 99, data: { text: 'x' }, mediaId: foreign } }), 'text with file');
     await assert.rejects(t.prisma.lessonBlock.create({ data: { courseId: course.id, type: 'poem', position: 0, data: {} } }), 'unknown type');
     await assert.rejects(t.prisma.lessonBlock.create({ data: { courseId: course.id, type: 'quote', position: -1, data: {} } }), 'negative position');
+    // lesson_blocks_media_check ((type IN (image,video,file)) = (mediaId IS NOT NULL)) was a
+    // PostgreSQL CHECK; MariaDB refuses a CHECK that references a FOREIGN KEY column, which
+    // mediaId is. An "image" block with no file does not reject at insert time any more:
+    // caught instead by the consistency checker (services/consistency.service.js).
+    const orphanImage = await t.prisma.lessonBlock.create({ data: { courseId: course.id, type: 'image', position: 99, data: { alt: '', caption: '' } } });
+    const rules = (await checkConsistency(t.prisma, { privateDir: privateDirOf(t.storageDir) })).map((p) => p.rule);
+    assert.ok(rules.includes('an image/video/file block shows a file, and no other block does'));
+    await t.prisma.lessonBlock.delete({ where: { id: orphanImage.id } });
   });
 });
 
@@ -474,39 +480,8 @@ describe('what the learner receives', () => {
   });
 });
 
-describe('migration of the existing lessons', () => {
-  test('the data migration turns text and files into blocks, in reading order, and can run twice', async () => {
-    const dir = path.join(SERVER_DIR, 'prisma/migrations');
-    const name = readdirSync(dir).find((n) => n.endsWith('_lesson_blocks'));
-    const migration = readFileSync(path.join(dir, name, 'migration.sql'), 'utf8');
-    const data = migration.slice(migration.indexOf('INSERT INTO "lesson_blocks"'));
-
-    // legacy lessons: text + files, no blocks (as they were before this change)
-    const f = await t.formation({ title: 'Héritage', courses: [{ title: 'Texte et fichiers', body: '<p>Ancien texte</p>' }, { title: 'Texte seul', body: '<p>Seul</p>' }, { title: 'Fichier seul', body: null }, { title: 'Vide', body: null }] });
-    const [both, textOnly, fileOnly, empty] = f.courses;
-    await t.prisma.course.update({ where: { id: fileOnly.id }, data: { body: null } });
-    await t.prisma.course.update({ where: { id: empty.id }, data: { body: null } });
-    const media = (courseId, kind, originalName, ageMinutes) =>
-      t.prisma.media.create({ data: { kind, storageKey: `${randomBytes(16).toString('hex')}.bin`, originalName, mimeType: 'application/octet-stream', sizeBytes: 1, courseId, createdAt: new Date(Date.now() - ageMinutes * 60_000) } });
-    const second = await media(both.id, 'document', 'b.pdf', 1);
-    const first = await media(both.id, 'image', 'a.png', 5);
-    await media(fileOnly.id, 'video', 'v.mp4', 3);
-    await t.prisma.lessonBlock.deleteMany({ where: { courseId: { in: f.courses.map((c) => c.id) } } });
-
-    const statements = data.split(/;\s*\n/).map((s) => s.trim()).filter((s) => s && !s.startsWith('--'));
-    for (let run = 1; run <= 2; run += 1) {
-      for (const statement of statements) await t.prisma.$executeRawUnsafe(statement);
-      const shape = async (id) => (await blocksOf(id)).map((b) => `${b.position}:${b.type}`);
-      assert.deepEqual(await shape(both.id), ['0:text', '1:image', '2:file'], `run ${run}: text first, then files in upload order`);
-      assert.deepEqual(await shape(textOnly.id), ['0:text']);
-      assert.deepEqual(await shape(fileOnly.id), ['0:video']);
-      assert.deepEqual(await shape(empty.id), [], 'a lesson with nothing gets no block');
-    }
-    const blocks = await blocksOf(both.id);
-    assert.equal(blocks[0].data.html, '<p>Ancien texte</p>');
-    assert.equal(blocks[1].mediaId, first.id);
-    assert.equal(blocks[2].mediaId, second.id);
-    assert.deepEqual(blocks[1].data, { alt: 'a.png', caption: '' });
-    assert.equal((await t.prisma.course.findUnique({ where: { id: both.id } })).body, '<p>Ancien texte</p>', 'the old text column is kept (nothing is lost)');
-  });
-});
+// The one-time data migration that turned existing lesson text/files into blocks
+// (PostgreSQL migration `*_lesson_blocks`) no longer exists: migrating to
+// MySQL/MariaDB (P4-06 follow-up, no production data yet) squashed the whole
+// history into one fresh baseline, which has no pre-block data to convert in
+// the first place. Removed rather than kept on a migration file that is gone.

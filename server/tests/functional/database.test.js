@@ -1,6 +1,7 @@
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { boot } from '../helpers/server.js';
+import { checkConsistency, privateDirOf } from '../../src/services/consistency.service.js';
 
 // P2-01 / P3-01 — the database itself refuses inconsistent data (CHECK, unique,
 // foreign keys) and applies the deletion rules. Nothing goes through the API here.
@@ -58,7 +59,13 @@ describe('value constraints', () => {
     await rejects(media({ storageKey: k }), 'duplicate storage key');
     const f = await t.formation();
     const a = await t.article();
-    await rejects(media({ courseId: f.courses[0].id, articleId: a.id }), 'lesson AND article');
+    // media_owner_check was a PostgreSQL CHECK; MariaDB refuses a CHECK that references a
+    // FOREIGN KEY column, which courseId and articleId both are. Caught instead by the
+    // consistency checker (services/consistency.service.js), checked here directly.
+    const both = await media({ courseId: f.courses[0].id, articleId: a.id });
+    const rules = (await checkConsistency(t.prisma, { privateDir: privateDirOf(t.storageDir) })).map((p) => p.rule);
+    assert.ok(rules.includes('a file belongs to at most one lesson OR one article, never both'));
+    await t.prisma.media.delete({ where: { id: both.id } });
     await media({ courseId: f.courses[0].id });
     await media({ articleId: a.id });
   });

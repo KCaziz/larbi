@@ -2,25 +2,25 @@
 // migration (`prisma migrate deploy`). Run automatically by `npm test`.
 // The development database is never touched.
 import { execSync } from 'node:child_process';
-import pg from 'pg';
+import mariadb from 'mariadb';
 import { SERVER_DIR, TEST_DB_NAME, assertTestDatabase, databaseName, testDatabaseUrl } from './helpers/env.js';
 
 const url = testDatabaseUrl();
 assertTestDatabase(url);
 
-// Connect to the maintenance database of the same server to create the test one.
+// Connect to the server (no particular database) to create the test one.
 const admin = new URL(url);
-admin.pathname = '/postgres';
-const client = new pg.Client({ connectionString: admin.toString() });
-await client.connect();
+const conn = await mariadb.createConnection({
+  host: admin.hostname,
+  port: admin.port ? Number(admin.port) : 3306,
+  user: decodeURIComponent(admin.username),
+  password: decodeURIComponent(admin.password),
+});
 try {
-  const exists = await client.query('SELECT 1 FROM pg_database WHERE datname = $1', [databaseName(url)]);
-  if (exists.rowCount === 0) {
-    await client.query(`CREATE DATABASE "${databaseName(url).replace(/"/g, '')}"`);
-    console.log(`[tests] created database ${TEST_DB_NAME}`);
-  }
+  const dbName = databaseName(url).replace(/`/g, '');
+  await conn.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
 } finally {
-  await client.end();
+  await conn.end();
 }
 
 execSync('npx prisma migrate deploy --config prisma7.config.ts', {

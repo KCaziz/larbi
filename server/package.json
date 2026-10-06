@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Backend API (Express + PostgreSQL) for the Larbi platform",
+  "description": "Backend API (Express + MariaDB) for the Larbi platform",
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
@@ -24,7 +24,7 @@
     "check:consistency": "node scripts/check-consistency.js"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/adapter-mariadb": "7.10.0",
     "@prisma/client": "^7.10.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
@@ -41,7 +41,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "pg": "^8.23.0",
+    "mariadb": "^3.5.4",
     "prisma": "^7.10.0"
   }
 }

@@ -4,6 +4,14 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+function parseTrustProxy(value) {
+  if (!value) return false;
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : value;
+}
+
 const required = ['DATABASE_URL', 'JWT_SECRET'];
 
 for (const key of required) {
@@ -21,6 +29,13 @@ export const env = {
   corsOrigin: (process.env.CORS_ORIGIN || 'http://localhost:5173')
     .split(',')
     .map((origin) => origin.trim()),
+  // Express's own "trust proxy" setting: how many reverse-proxy hops (ngrok, nginx,
+  // a load balancer...) stand between a visitor and this server. Needed so
+  // express-rate-limit keys requests by the VISITOR's address instead of the
+  // proxy's (otherwise every visitor behind that proxy shares one rate-limit
+  // bucket). false (default) = trust nothing: correct for direct local dev,
+  // where there is no proxy in front at all.
+  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
   isProduction: process.env.NODE_ENV === 'production',
   // One access-log line per request. Off for the automated tests (LOG_REQUESTS=false).
   logRequests: process.env.LOG_REQUESTS !== 'false' && process.env.NODE_ENV !== 'test',

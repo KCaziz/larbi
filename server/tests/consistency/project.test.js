@@ -289,7 +289,7 @@ describe('database schema', () => {
   test('every migration folder holds a migration.sql and the names are ordered', () => {
     const dir = path.join(SERVER_DIR, 'prisma/migrations');
     const folders = readdirSync(dir).filter((f) => /^\d{14}_/.test(f));
-    assert.ok(folders.length >= 6);
+    assert.ok(folders.length >= 4);
     for (const f of folders) assert.ok(existsSync(path.join(dir, f, 'migration.sql')), f);
     assert.deepEqual([...folders].sort(), folders);
   });

@@ -14,8 +14,10 @@ function where({ query, status }) {
     ...(query
       ? {
           OR: [
-            { holderName: { contains: escapeLike(query), mode: 'insensitive' } },
-            { formationTitle: { contains: escapeLike(query), mode: 'insensitive' } },
+            // No `mode: 'insensitive'` (PostgreSQL only): MySQL/MariaDB's default
+            // collation (utf8mb4_unicode_ci) already compares case-insensitively.
+            { holderName: { contains: escapeLike(query) } },
+            { formationTitle: { contains: escapeLike(query) } },
             { certificateNumber: { contains: escapeLike(query.toUpperCase()) } },
           ],
         }

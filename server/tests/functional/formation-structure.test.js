@@ -1,10 +1,7 @@
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
 import { PNG, fileForm } from '../helpers/fixtures.js';
 import { boot } from '../helpers/server.js';
-import { SERVER_DIR } from '../helpers/env.js';
 
 // P3-11 — structure of a formation: pedagogical fields, chapters, plan reorder,
 // statuses, dashboard. Everything through the real API and the real database.
@@ -318,38 +315,12 @@ describe('the database refuses inconsistent structure', () => {
   });
 });
 
-describe('migration of existing data', () => {
-  test('the data migration puts every existing lesson into ONE default chapter, and can run twice', async () => {
-    const dir = path.join(SERVER_DIR, 'prisma/migrations');
-    const { readdirSync } = await import('node:fs');
-    const name = readdirSync(dir).find((n) => n.endsWith('_cms_structure'));
-    const migration = readFileSync(path.join(dir, name, 'migration.sql'), 'utf8');
-    const data = migration.slice(migration.indexOf('INSERT INTO "sections"'));
-
-    // legacy formation: lessons without chapter, with progress
-    const legacy = await t.formation({ title: 'Ancienne', courses: [{ title: 'A' }, { title: 'B' }, { title: 'C' }] });
-    await t.prisma.course.updateMany({ where: { formationId: legacy.id }, data: { sectionId: null } });
-    await t.prisma.section.deleteMany({ where: { formationId: legacy.id } });
-    const empty = await t.formation({ title: 'Vide', courses: [] });
-    const enrollment = await t.prisma.enrollment.create({ data: { userId: learner.id, formationId: legacy.id } });
-    await t.prisma.courseProgress.create({ data: { enrollmentId: enrollment.id, courseId: legacy.courses[0].id, formationId: legacy.id } });
-    const idsBefore = (await t.prisma.course.findMany({ where: { formationId: legacy.id }, orderBy: { position: 'asc' } })).map((c) => [c.id, c.position]);
-
-    for (let run = 0; run < 2; run += 1) {
-      for (const statement of data.split(/;\s*\n/).map((s) => s.trim()).filter((s) => s && !s.startsWith('--'))) {
-        await t.prisma.$executeRawUnsafe(statement);
-      }
-      const sections = await t.prisma.section.findMany({ where: { formationId: legacy.id } });
-      assert.equal(sections.length, 1, `run ${run + 1}: one default chapter`);
-      assert.equal(sections[0].title, 'Chapitre 1');
-      const lessons = await t.prisma.course.findMany({ where: { formationId: legacy.id }, orderBy: { position: 'asc' } });
-      assert.ok(lessons.every((c) => c.sectionId === sections[0].id));
-      assert.deepEqual(lessons.map((c) => [c.id, c.position]), idsBefore, 'same ids, same order');
-      assert.equal(await t.prisma.courseProgress.count({ where: { enrollmentId: enrollment.id } }), 1);
-      assert.equal(await t.prisma.section.count({ where: { formationId: empty.id } }), 0, 'a formation without lessons gets no chapter');
-    }
-  });
-});
+// The one-time data migration that back-filled chapters for lessons that
+// predated them (PostgreSQL migration `*_cms_structure`) no longer exists:
+// migrating to MySQL/MariaDB (P4-06 follow-up, no production data yet)
+// squashed the whole history into one fresh baseline, which has no pre-chapter
+// data to repair in the first place. Removed rather than kept on a migration
+// file that is gone.
 
 describe('dashboard', () => {
   test('counts by status and the recent items with what is still missing', async () => {

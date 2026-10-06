@@ -17,7 +17,9 @@ function where({ query, role, accessLevel, status, accountType }) {
     ...(query
       ? {
           OR: [
-            { name: { contains: escapeLike(query), mode: 'insensitive' } },
+            // No `mode: 'insensitive'` (PostgreSQL only): MySQL/MariaDB's default
+            // collation (utf8mb4_unicode_ci) already compares case-insensitively.
+            { name: { contains: escapeLike(query) } },
             { email: { contains: escapeLike(query.toLowerCase()) } },
           ],
         }
