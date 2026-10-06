@@ -51,7 +51,7 @@ export default function ComparatorSegmentPage() {
           </p>
         )}
 
-        <p className="comparator-disclaimer">{t('comparator.segmentNote')}</p>
+        <p className="comparator-segment-lead">{t('comparator.segmentNote')}</p>
 
         {groups.length === 0 ? (
           <p className="comparator-disclaimer">{t('comparator.noSegmentRows')}</p>

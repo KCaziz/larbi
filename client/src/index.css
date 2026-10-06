@@ -62,9 +62,11 @@
 
   --serif: 'Fraunces Variable', 'IBM Plex Sans Arabic', Georgia, 'Times New Roman', serif;
   --sans: 'IBM Plex Sans', 'IBM Plex Sans Arabic', system-ui, 'Segoe UI', sans-serif;
-  --header-height: 68px;
+  --header-height: 72px;
 
-  font: 16px/1.65 var(--sans);
+  /* Base size of the whole site: every other size is in rem, so this single
+     value scales headings, body text, tables and forms together. */
+  font: 17.5px/1.65 var(--sans);
   color-scheme: light;
   color: var(--text);
   background: var(--bg);

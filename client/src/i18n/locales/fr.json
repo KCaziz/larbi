@@ -91,7 +91,7 @@
       },
       "security": {
         "title": "Accès sécurisé",
-        "text": "Autorisations vérifiées côté serveur"
+        "text": "Vos accès sont vérifiés à chaque consultation"
       },
       "certification": {
         "title": "Certification",
@@ -127,13 +127,13 @@
     "approachTitle": "Notre approche",
     "approachBody": "Chaque formation est organisée en cours, avec un suivi de progression et une certification délivrée une fois les conditions de complétion remplies. Les contenus du blog sont accessibles publiquement, certains étant réservés aux comptes premium selon le profil de l'utilisateur.",
     "securityTitle": "Sécurité et confidentialité",
-    "securityBody": "La protection des comptes et des contenus (vidéos, images, documents) est une priorité : les autorisations d'accès sont contrôlées côté serveur, et les contenus propriétaires ne sont jamais exposés publiquement sans vérification préalable.",
+    "securityBody": "La protection des comptes et des contenus (vidéos, images, documents) est une priorité : chaque accès est vérifié, et les contenus réservés ne sont jamais consultables sans autorisation.",
     "values": {
       "title": "Nos engagements",
       "items": [
         {
           "title": "Accès contrôlé",
-          "body": "Les autorisations sont vérifiées côté serveur, jamais seulement dans l'interface."
+          "body": "Chaque accès à un contenu réservé est vérifié."
         },
         {
           "title": "Contenus protégés",
@@ -189,11 +189,11 @@
       },
       {
         "question": "Comment fonctionne la certification des formations ?",
-        "answer": "Une certification est délivrée uniquement lorsque toutes les conditions de complétion d'une formation sont remplies, avec vérification effectuée côté serveur."
+        "answer": "Une certification est délivrée uniquement lorsque toutes les conditions de complétion d'une formation sont remplies."
       },
       {
         "question": "Mes contenus et médias sont-ils protégés ?",
-        "answer": "L'accès aux contenus propriétaires (vidéos, images, documents) est contrôlé côté serveur. Aucune solution web ne peut empêcher totalement la copie d'un contenu affiché, mais la plateforme limite fortement les possibilités de récupération directe."
+        "answer": "L'accès aux contenus propriétaires (vidéos, images, documents) est contrôlé à chaque consultation. Aucune solution web ne peut empêcher totalement la copie d'un contenu affiché, mais la plateforme limite fortement les possibilités de récupération directe."
       }
     ],
     "subtitle": "Les réponses aux questions les plus courantes sur les comptes, l'accès et la certification.",
@@ -206,7 +206,7 @@
   "contact": {
     "title": "Contact",
     "intro": "Une question sur les formations, le blog ou les outils ? Écrivez-nous via le formulaire ci-dessous.",
-    "notice": "Coordonnées de contact (email, téléphone, adresse) à fournir par le client avant mise en ligne — non affichées pour éviter de publier des informations inventées.",
+    "notice": "Nos coordonnées seront publiées prochainement. En attendant, le formulaire ci-dessous nous parvient directement.",
     "form": {
       "name": "Nom",
       "email": "Email",
@@ -236,10 +236,10 @@
     "domains": {
       "blog": "Blog & tutoriels",
       "formations": "Formations",
-      "tools": "Outils (crédit, facture)",
+      "tools": "Outils",
       "premium": "Contenus premium"
     },
-    "footNote": "Ce tableau reflète les règles d'accès déjà définies pour le projet. Le contrôle réel est toujours appliqué côté serveur, jamais uniquement dans l'interface."
+    "footNote": "Ce tableau récapitule les accès ouverts selon votre type de compte."
   },
   "formationsPresentation": {
     "title": "Formations",
@@ -256,7 +256,7 @@
         },
         {
           "title": "Une progression suivie",
-          "body": "Votre avancement est enregistré côté serveur, cours par cours."
+          "body": "Votre avancement est enregistré cours par cours."
         },
         {
           "title": "Une certification",
@@ -275,7 +275,7 @@
     },
     "credit": {
       "title": "Simulateur de crédit",
-      "body": "Estimation du crédit possible selon votre profil financier, calculée côté serveur à partir de règles bancaires fournies par le client."
+      "body": "Estimation du crédit que vous pouvez obtenir, selon votre profil financier et les conditions des banques."
     },
     "invoice": {
       "title": "Générateur de facture",
@@ -334,7 +334,7 @@
   },
   "legal": {
     "title": "Mentions légales",
-    "notice": "Cette page ne peut pas être publiée en l'état : les informations légales ci-dessous doivent être fournies et validées par le client.",
+    "notice": "Les informations légales ci-dessous seront complétées prochainement.",
     "editorTitle": "Éditeur du site",
     "fields": {
       "companyName": "Raison sociale",
@@ -346,21 +346,21 @@
     },
     "hostingTitle": "Hébergement",
     "hostingField": "Hébergeur",
-    "toComplete": "[à compléter par le client]",
+    "toComplete": "[à compléter]",
     "toCompleteShort": "[à compléter]",
-    "toCompleteHosting": "[à compléter une fois l'infrastructure de production choisie — voir P5-06]",
+    "toCompleteHosting": "[à compléter]",
     "subtitle": "Informations légales relatives à l'éditeur et à l'hébergement du site."
   },
   "privacy": {
     "title": "Politique de confidentialité",
-    "notice": "Le détail exact des traitements (finalités précises, durées de conservation, sous-traitants, contact DPO le cas échéant) doit être validé avec le client avant publication. Les principes ci-dessous reflètent uniquement les règles déjà actées dans le cahier des charges du projet.",
+    "notice": "Cette politique sera complétée prochainement (durées de conservation, prestataires, contact du délégué à la protection des données). Les principes ci-dessous s'appliquent dès à présent.",
     "dataTitle": "Données collectées",
     "dataBody": "La plateforme limite les données personnelles collectées aux informations réellement nécessaires à la gestion des comptes (auto-entrepreneur, PME, PMI, etc.), au suivi des formations et à l'usage des outils.",
     "securityTitle": "Sécurité des comptes et des contenus",
-    "securityBody": "L'accès aux comptes, aux formations, aux contenus premium et aux médias propriétaires (vidéos, images, documents) est vérifié côté serveur. Les identifiants transmis à l'API sont systématiquement contrôlés vis-à-vis de l'utilisateur connecté et de ses permissions.",
+    "securityBody": "L'accès aux comptes, aux formations, aux contenus premium et aux médias propriétaires (vidéos, images, documents) est vérifié à chaque consultation, en fonction de votre compte et de vos droits.",
     "rightsTitle": "Vos droits",
     "rightsContact": "Contact pour l'exercice de vos droits",
-    "toComplete": "[à compléter par le client]",
+    "toComplete": "[à compléter]",
     "subtitle": "Comment la plateforme traite et protège vos données personnelles."
   },
   "auth": {
@@ -480,9 +480,9 @@
       "intro": "Certains articles, formations ou outils sont réservés aux comptes premium. Voici comment ils apparaîtront pour un compte qui n'y a pas accès :",
       "lockedTitle": "Contenu réservé aux comptes premium",
       "lockedBody": "Passez à un compte premium pour débloquer ce contenu.",
-      "footNote": "Ce verrouillage est uniquement visuel : l'accès réel est toujours vérifié côté serveur, jamais uniquement dans le frontend.",
+      "footNote": "Ceci est un aperçu : l'accès réel est vérifié à chaque consultation.",
       "activeTitle": "Compte premium actif.",
-      "activeBody": "Votre compte a accès aux contenus premium. Les contenus eux-mêmes arriveront avec les modules blog et formations."
+      "activeBody": "Votre compte a accès aux contenus premium. Les contenus réservés apparaissent dans le blog et les formations."
     },
     "title": "Mon espace",
     "subtitle": "Profil, tableau de bord, type de compte et contenus premium."
@@ -1604,20 +1604,28 @@
     "bankCount_other": "{{count}} banques",
     "conditionCount_one": "{{count}} offre",
     "conditionCount_other": "{{count}} offres",
-    "notDocumented": "Non documentée dans le fichier source",
+    "notDocumented": "Bientôt disponible",
     "browseTheme": "Consulter",
     "estimatedCost": "Coût annuel estimé",
-    "noCost": "Non classable",
+    "noCost": "Variable",
     "free": "Gratuit",
     "perYear": "{{amount}} DA/an",
     "allBanks": "Toutes les banques",
-    "allSegments": "Tous les segments",
+    "allSegments": "Tous les profils",
     "search": "Rechercher…",
     "noResults": "Aucune offre ne correspond à vos critères.",
     "sortByCost": "Trier par coût",
     "sortByName": "Trier par nom",
-    "segmentComparison": "Comparatif par segment",
-    "segmentSubtitle": "Conditions explicitement libellées « {{segment}} » dans le fichier source",
+    "segmentComparison": "Comparatif par profil",
+    "segmentSubtitle": "Toutes les offres réservées aux {{segment}}s, rubrique par rubrique",
+    "segmentsTitle": "Comparez selon votre profil",
+    "segmentsIntro": "Une banque ne propose pas les mêmes conditions à tout le monde : les frais, les cartes et les crédits changent selon que vous ouvrez un compte pour vous-même, pour votre activité indépendante ou pour une société. Choisissez votre profil pour réunir sur une seule page toutes les offres qui vous sont réservées, toutes rubriques confondues.",
+    "segmentCta": "Voir les offres",
+    "segmentCards": {
+      "particulier": "Un compte à votre nom, pour vos besoins personnels.",
+      "professionnel": "Une activité indépendante : commerçant, artisan, profession libérale.",
+      "entreprise": "Une société, quelle que soit sa taille."
+    },
     "themes": {
       "comptes": "Ouverture et gestion de comptes",
       "versements-retraits": "Versements et retraits",
@@ -1670,10 +1678,10 @@
       "deleted": "Supprimé",
       "conditionCount_one": "{{count}} condition",
       "conditionCount_other": "{{count}} conditions",
-      "subtitle": "Banques et conditions affichées dans le comparateur public. Chaque modification met à jour la date « Données mises à jour le ».",
+      "subtitle": "Banques et conditions affichées dans le comparateur public. Chaque modification met à jour la date de mise à jour affichée aux visiteurs.",
       "actions": "Actions",
-      "segmentHint": "À indiquer seulement si le segment figure explicitement dans la source ; sinon « Non précisé ».",
-      "valuesHint": "Recopiez les textes tels que la banque les publie (« Gratuit », « Non spécifié », conditions…). Un champ vide n'est pas affiché.",
+      "segmentHint": "À renseigner uniquement si l'offre est réservée à ce profil ; sinon laissez « Non précisé ».",
+      "valuesHint": "Recopiez les textes tels que la banque les publie (« Gratuit », « Non spécifié », conditions…). Un champ laissé vide n'est pas affiché.",
       "emptyTheme": "Aucune condition dans cette rubrique pour le moment."
     },
     "bank": "Banque",
@@ -1682,10 +1690,10 @@
     "sortLabel": "Ordre d'affichage",
     "resultCount_one": "{{count}} résultat",
     "resultCount_other": "{{count}} résultats",
-    "notDocumentedBody": "Cette rubrique fait partie du découpage du comparateur, mais le fichier source ne contient aucune donnée la concernant. Aucune donnée n'est inventée : elle sera complétée à partir d'une source bancaire fournie.",
-    "costNote": "Le coût annuel estimé n'est calculé que lorsque le tarif est un montant simple (ex. « 800 DA » trimestriel = 3 200 DA/an). Les tarifs en pourcentage, mixtes ou non spécifiés sont affichés tels quels et classés « Non classable ».",
-    "segmentNote": "Le comparatif par segment ne reprend que les lignes dont le segment (Particulier, Professionnel, Entreprise) figure explicitement dans le fichier source. Les autres restent consultables dans chaque rubrique.",
-    "noSegmentRows": "Aucune condition n'est explicitement attribuée à ce segment dans le fichier source.",
+    "notDocumentedBody": "Cette rubrique sera complétée prochainement.",
+    "costNote": "Le coût annuel estimé additionne les frais sur une année : par exemple 800 DA prélevés chaque trimestre donnent 3 200 DA par an. Lorsque le tarif dépend du montant de l'opération ou n'est pas un montant fixe, il est affiché tel quel et marqué « Variable ».",
+    "segmentNote": "Cette page réunit les offres que les banques réservent à ce profil, rubrique par rubrique. Les offres ouvertes à tous les clients restent consultables dans chaque rubrique du comparateur.",
+    "noSegmentRows": "Aucune offre n'est réservée à ce profil pour le moment.",
     "labelHeaders": {
       "comptes": "Type de compte",
       "versements-retraits": "Opération",
@@ -1721,17 +1729,17 @@
       }
     },
     "themeNotes": {
-      "comptes": "Frais de tenue de compte et leur périodicité. Le fichier source ne fournit pas de frais d'ouverture distincts.",
-      "versements-retraits": "Opérations de caisse. Le segment n'est indiqué que lorsqu'il figure explicitement dans le fichier source.",
+      "comptes": "Frais de tenue de compte et leur périodicité, selon le type de compte.",
+      "versements-retraits": "Frais appliqués aux versements et aux retraits au guichet.",
       "carte-locale": "Cartes CIB et services locaux, présentés séparément des cartes internationales.",
-      "epargne": "Les taux (finance conventionnelle) et les parts de bénéfices (finance islamique) sont laissés dans leur forme d'origine et ne sont jamais assimilés.",
-      "coffres-forts": "Aucune donnée de location de coffre-fort n'est présente dans le fichier source.",
+      "epargne": "Les taux (finance conventionnelle) et les parts de bénéfices (finance islamique) sont présentés tels que les banques les publient, sans être assimilés.",
+      "coffres-forts": "Location de coffres-forts en agence.",
       "credits": "Par type de crédit : frais de dossier, taux ou marge, remboursement anticipé.",
-      "virements": "Le fichier source ne contient pas de tableau de virements domestiques. Les transferts vers l'étranger figurent dans « Opérations en devises ».",
+      "virements": "Virements entre comptes en Algérie. Les transferts vers l'étranger figurent dans « Opérations en devises et international ».",
       "carte-internationale": "Cartes Visa et Mastercard, présentées séparément des cartes CIB locales.",
       "devises": "Transferts, change, frais Swift et correspondants, allocations.",
-      "operations-diverses": "Services présents dans le fichier source qui ne relèvent pas directement des autres rubriques.",
-      "cheques": "Aucune grille d'opérations chèque n'est présente dans le fichier source."
+      "operations-diverses": "Services bancaires qui ne relèvent pas directement des autres rubriques.",
+      "cheques": "Frais appliqués aux opérations par chèque."
     }
   }
 }

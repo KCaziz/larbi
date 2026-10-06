@@ -91,7 +91,7 @@
       },
       "security": {
         "title": "Secure access",
-        "text": "Permissions verified server-side"
+        "text": "Your access is checked every time you open content"
       },
       "certification": {
         "title": "Certification",
@@ -127,13 +127,13 @@
     "approachTitle": "Our approach",
     "approachBody": "Each course is organised into lessons, with progress tracking and a certificate issued once the completion conditions are met. Blog content is publicly accessible, with some of it reserved for premium accounts depending on the user's profile.",
     "securityTitle": "Security and privacy",
-    "securityBody": "Protecting accounts and content (videos, images, documents) is a priority: access permissions are checked server-side, and proprietary content is never exposed publicly without prior verification.",
+    "securityBody": "Protecting accounts and content (videos, images, documents) is a priority: every access is checked, and reserved content is never readable without permission.",
     "values": {
       "title": "Our commitments",
       "items": [
         {
           "title": "Controlled access",
-          "body": "Permissions are checked server-side, never only in the interface."
+          "body": "Every access to reserved content is checked."
         },
         {
           "title": "Protected content",
@@ -189,11 +189,11 @@
       },
       {
         "question": "How does course certification work?",
-        "answer": "A certificate is issued only once all of a course's completion conditions are met, with verification performed server-side."
+        "answer": "A certificate is issued only once all of a course's completion conditions are met."
       },
       {
         "question": "Are my content and media protected?",
-        "answer": "Access to proprietary content (videos, images, documents) is controlled server-side. No web solution can fully prevent the copying of content that is displayed, but the platform strongly limits the possibilities for direct retrieval."
+        "answer": "Access to proprietary content (videos, images, documents) is checked every time it is opened. No web solution can fully prevent the copying of content that is displayed, but the platform strongly limits the possibilities for direct retrieval."
       }
     ],
     "subtitle": "Answers to the most common questions about accounts, access and certification.",
@@ -206,7 +206,7 @@
   "contact": {
     "title": "Contact",
     "intro": "A question about courses, the blog or the tools? Write to us using the form below.",
-    "notice": "Contact details (email, phone, address) must be provided by the client before going live — not shown here to avoid publishing invented information.",
+    "notice": "Our contact details will be published shortly. In the meantime, the form below reaches us directly.",
     "form": {
       "name": "Name",
       "email": "Email",
@@ -239,7 +239,7 @@
       "tools": "Tools (credit, invoicing)",
       "premium": "Premium content"
     },
-    "footNote": "This table reflects the access rules already defined for the project. The real check is always enforced server-side, never only in the interface."
+    "footNote": "This table sums up what each account type gives access to."
   },
   "formationsPresentation": {
     "title": "Courses",
@@ -256,7 +256,7 @@
         },
         {
           "title": "Tracked progress",
-          "body": "Your progress is recorded server-side, lesson by lesson."
+          "body": "Your progress is recorded lesson by lesson."
         },
         {
           "title": "A certificate",
@@ -275,7 +275,7 @@
     },
     "credit": {
       "title": "Credit simulator",
-      "body": "Estimate of the credit you may obtain based on your financial profile, computed server-side from banking rules supplied by the client."
+      "body": "Estimate of the credit you may obtain, based on your financial profile and the banks' conditions."
     },
     "invoice": {
       "title": "Invoice generator",
@@ -334,7 +334,7 @@
   },
   "legal": {
     "title": "Legal notice",
-    "notice": "This page cannot be published as is: the legal information below must be supplied and validated by the client.",
+    "notice": "The legal information below will be completed shortly.",
     "editorTitle": "Site publisher",
     "fields": {
       "companyName": "Company name",
@@ -346,21 +346,21 @@
     },
     "hostingTitle": "Hosting",
     "hostingField": "Host",
-    "toComplete": "[to be completed by the client]",
+    "toComplete": "[to be completed]",
     "toCompleteShort": "[to be completed]",
-    "toCompleteHosting": "[to be completed once the production infrastructure is chosen — see P5-06]",
+    "toCompleteHosting": "[to be completed]",
     "subtitle": "Legal information about the site's publisher and hosting."
   },
   "privacy": {
     "title": "Privacy policy",
-    "notice": "The exact details of the processing (precise purposes, retention periods, sub-processors, DPO contact if applicable) must be validated with the client before publication. The principles below only reflect rules already agreed in the project's requirements.",
+    "notice": "This policy will be completed shortly (retention periods, processors, data protection officer contact). The principles below apply already.",
     "dataTitle": "Data collected",
     "dataBody": "The platform limits the personal data collected to what is genuinely necessary to manage accounts (sole trader, SME, industrial SME, etc.), track courses and use the tools.",
     "securityTitle": "Account and content security",
-    "securityBody": "Access to accounts, courses, premium content and proprietary media (videos, images, documents) is checked server-side. IDs sent to the API are always checked against the logged-in user and their permissions.",
+    "securityBody": "Access to accounts, courses, premium content and proprietary media (videos, images, documents) is checked every time it is opened, against your account and your rights.",
     "rightsTitle": "Your rights",
     "rightsContact": "Contact to exercise your rights",
-    "toComplete": "[to be completed by the client]",
+    "toComplete": "[to be completed]",
     "subtitle": "How the platform processes and protects your personal data."
   },
   "auth": {
@@ -480,9 +480,9 @@
       "intro": "Some articles, courses or tools are reserved for premium accounts. Here is how they will appear for an account without access:",
       "lockedTitle": "Content reserved for premium accounts",
       "lockedBody": "Upgrade to a premium account to unlock this content.",
-      "footNote": "This lock is purely visual: the real access check is always enforced server-side, never only in the frontend.",
+      "footNote": "This is a preview: the real access check happens every time content is opened.",
       "activeTitle": "Premium account active.",
-      "activeBody": "Your account has access to premium content. The content itself will arrive with the blog and course modules."
+      "activeBody": "Your account has access to premium content. Reserved content appears in the blog and the courses."
     },
     "title": "My space",
     "subtitle": "Profile, dashboard, account type and premium content."
@@ -1603,20 +1603,28 @@
     "bankCount_other": "{{count}} banks",
     "conditionCount_one": "{{count}} offer",
     "conditionCount_other": "{{count}} offers",
-    "notDocumented": "Not documented in the source file",
+    "notDocumented": "Coming soon",
     "browseTheme": "Browse",
     "estimatedCost": "Estimated annual cost",
-    "noCost": "Not rankable",
+    "noCost": "Variable",
     "free": "Free",
     "perYear": "{{amount}} DA/year",
     "allBanks": "All banks",
-    "allSegments": "All segments",
+    "allSegments": "All profiles",
     "search": "Search…",
     "noResults": "No offers match your criteria.",
     "sortByCost": "Sort by cost",
     "sortByName": "Sort by name",
-    "segmentComparison": "Comparison by segment",
-    "segmentSubtitle": "Conditions explicitly labelled “{{segment}}” in the source file",
+    "segmentComparison": "Comparison by profile",
+    "segmentSubtitle": "Every offer reserved for {{segment}}s, section by section",
+    "segmentsTitle": "Compare according to your profile",
+    "segmentsIntro": "A bank does not offer everyone the same conditions: fees, cards and loans change depending on whether you open an account for yourself, for your self-employed activity or for a company. Pick your profile to gather on a single page every offer reserved for you, across all sections.",
+    "segmentCta": "See the offers",
+    "segmentCards": {
+      "particulier": "An account in your own name, for your personal needs.",
+      "professionnel": "A self-employed activity: trader, craftsperson, independent professional.",
+      "entreprise": "A company, whatever its size."
+    },
     "themes": {
       "comptes": "Account opening and management",
       "versements-retraits": "Deposits and withdrawals",
@@ -1669,9 +1677,9 @@
       "deleted": "Deleted",
       "conditionCount_one": "{{count}} condition",
       "conditionCount_other": "{{count}} conditions",
-      "subtitle": "Banks and conditions shown in the public comparator. Every change updates the \"Data updated on\" date.",
+      "subtitle": "Banks and conditions shown in the public comparator. Every change updates the update date shown to visitors.",
       "actions": "Actions",
-      "segmentHint": "Only set it when the source explicitly states the segment; otherwise \"Unspecified\".",
+      "segmentHint": "Only set it when the offer is reserved for that profile; otherwise leave \"Unspecified\".",
       "valuesHint": "Copy the texts exactly as the bank publishes them (\"Gratuit\", \"Non spécifié\", conditions…). An empty field is not shown.",
       "emptyTheme": "No condition in this section yet."
     },
@@ -1681,10 +1689,10 @@
     "sortLabel": "Display order",
     "resultCount_one": "{{count}} result",
     "resultCount_other": "{{count}} results",
-    "notDocumentedBody": "This section is part of the comparator's structure, but the source file contains no data about it. Nothing is made up: it will be completed from a bank source provided to us.",
-    "costNote": "The estimated yearly cost is only computed when the fee is a plain amount (e.g. \"800 DA\" quarterly = 3,200 DA/year). Percentage, mixed or unspecified fees are shown as published and marked \"Not comparable\".",
-    "segmentNote": "The segment comparison only lists the rows whose segment (Individual, Professional, Business) is explicitly stated in the source file. The others remain available in each section.",
-    "noSegmentRows": "No condition is explicitly assigned to this segment in the source file.",
+    "notDocumentedBody": "This section will be completed shortly.",
+    "costNote": "The estimated annual cost adds the fees up over one year: 800 DA charged every quarter comes to 3,200 DA a year. When the fee depends on the amount of the operation, or is not a fixed amount, it is shown as published and marked \"Variable\".",
+    "segmentNote": "This page gathers the offers banks reserve for this profile, section by section. Offers open to every customer remain available in each section of the comparator.",
+    "noSegmentRows": "No offer is reserved for this profile yet.",
     "labelHeaders": {
       "comptes": "Account type",
       "versements-retraits": "Operation",
@@ -1720,17 +1728,17 @@
       }
     },
     "themeNotes": {
-      "comptes": "Account maintenance fees and how often they are charged. The source file gives no separate opening fees.",
-      "versements-retraits": "Cash desk operations. A segment is only shown when the source file states it explicitly.",
+      "comptes": "Account maintenance fees and how often they are charged, by type of account.",
+      "versements-retraits": "Fees charged on over-the-counter deposits and withdrawals.",
       "carte-locale": "CIB cards and local services, kept apart from international cards.",
-      "epargne": "Interest rates (conventional banking) and profit shares (Islamic banking) are kept as published and are never treated as equivalent.",
-      "coffres-forts": "The source file contains no safe deposit box rental data.",
+      "epargne": "Interest rates (conventional banking) and profit shares (Islamic banking) are shown as the banks publish them, without being treated as equivalent.",
+      "coffres-forts": "Safe deposit box rental in branch.",
       "credits": "By type of loan: file fees, rate or margin, early repayment.",
-      "virements": "The source file has no domestic transfer table. Transfers abroad are listed under \"Foreign currency operations\".",
+      "virements": "Transfers between accounts within Algeria. Transfers abroad are listed under \"Foreign currency and international operations\".",
       "carte-internationale": "Visa and Mastercard cards, kept apart from local CIB cards.",
       "devises": "Transfers, currency exchange, Swift and correspondent fees, allowances.",
-      "operations-diverses": "Services found in the source file that do not belong to the other sections.",
-      "cheques": "The source file contains no cheque operations grid."
+      "operations-diverses": "Banking services that do not belong to the other sections.",
+      "cheques": "Fees charged on cheque operations."
     }
   }
 }

@@ -66,14 +66,23 @@ export default function ComparatorPage() {
           })}
         </div>
 
-        <section className="comparator-segments">
-          <h2>{t('comparator.segmentComparison')}</h2>
-          <p>{t('comparator.segmentNote')}</p>
-          <div className="segment-links">
+        {/* A section of its own, not a filter: the same offers read differently
+            depending on who opens the account, and that is what visitors asked about. */}
+        <section className="comparator-segments" aria-labelledby="comparator-segments-title">
+          <h2 id="comparator-segments-title">{t('comparator.segmentsTitle')}</h2>
+          <p className="comparator-segments-intro">{t('comparator.segmentsIntro')}</p>
+          <div className="segment-cards">
             {SEGMENTS.map((seg) => (
-              <Link key={seg} to={`/outils/comparateur/segments/${seg}`} className="segment-link">
-                <Users size={16} strokeWidth={1.8} aria-hidden="true" />
-                {t(`comparator.segments.${seg}`)}
+              <Link key={seg} to={`/outils/comparateur/segments/${seg}`} className="segment-card">
+                <span className="segment-card-icon" aria-hidden="true">
+                  <Users size={20} strokeWidth={1.7} />
+                </span>
+                <h3>{t(`comparator.segments.${seg}`)}</h3>
+                <p>{t(`comparator.segmentCards.${seg}`)}</p>
+                <span className="segment-card-action">
+                  {t('comparator.segmentCta')}
+                  <ArrowRight className="icon-dir" size={14} strokeWidth={2} aria-hidden="true" />
+                </span>
               </Link>
             ))}
           </div>

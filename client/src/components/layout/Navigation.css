@@ -9,7 +9,7 @@
 .main-nav a {
   position: relative;
   display: block;
-  padding: 8px 7px;
+  padding: 8px 6px;
   white-space: nowrap;
   color: var(--text);
   text-decoration: none;
@@ -30,7 +30,7 @@
 .main-nav a.active::after {
   content: '';
   position: absolute;
-  inset-inline: 7px;
+  inset-inline: 6px;
   bottom: 0;
   height: 2px;
   background: var(--accent);

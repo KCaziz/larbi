@@ -15,7 +15,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  /* Tight on purpose: between 1241px and 1400px the whole menu, the controls and
+     an administrator's buttons share one row, and none of them wraps. */
+  gap: 16px;
 }
 
 .brand {
@@ -47,8 +49,9 @@
 .nav-panel {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex: 1;
+  min-width: 0;
   justify-content: flex-end;
 }
 
