@@ -1,0 +1,56 @@
+import { Router } from 'express';
+import { requireAuth } from '../middleware/auth.js';
+import { mediaDeniedLimiter, mediaVolumeLimiter } from '../middleware/rateLimit.js';
+import { getLastResult, getQuiz, startAttempt, submitAttempt } from '../controllers/quiz.controller.js';
+import { quizLimiter } from '../middleware/rateLimit.js';
+import { validateBody } from '../middleware/validate.js';
+import { submitAttemptSchema } from '../validation/quiz.schemas.js';
+import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
+import { HttpError } from '../utils/httpError.js';
+import {
+  claimMyCertificate,
+  completeLesson,
+  enroll,
+  getCourse,
+  getCover,
+  getFormation,
+  getFormationCertificate,
+  getMedia,
+  listCatalog,
+  listMyCertificates,
+  myEnrollments,
+  reopenLesson,
+} from '../controllers/learn.controller.js';
+
+// Learner API: catalogue, enrolment, lesson content. All routes need a session.
+const router = Router();
+router.use(requireAuth);
+
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+router.param('slug', (req, res, next, value) =>
+  value.length <= 80 && SLUG.test(value) ? next() : next(new HttpError(404, 'Not found')),
+);
+router.param('courseId', uuidParam);
+router.param('id', uuidParam);
+router.param('quizId', uuidParam);
+router.param('attemptId', uuidParam);
+
+router.get('/formations', asyncRoute(listCatalog));
+router.get('/enrollments', asyncRoute(myEnrollments));
+router.get('/formations/:slug', asyncRoute(getFormation));
+router.post('/formations/:slug/enroll', asyncRoute(enroll));
+router.get('/formations/:slug/cover', mediaVolumeLimiter, asyncRoute(getCover));
+router.get('/formations/:slug/courses/:courseId', asyncRoute(getCourse));
+router.put('/formations/:slug/courses/:courseId/completion', asyncRoute(completeLesson));
+router.delete('/formations/:slug/courses/:courseId/completion', asyncRoute(reopenLesson));
+router.get('/certificates', asyncRoute(listMyCertificates));
+router.get('/formations/:slug/certificate', asyncRoute(getFormationCertificate));
+router.post('/formations/:slug/certificate', asyncRoute(claimMyCertificate));
+// Quizzes (P3-13): limited per account (starting and submitting are the only expensive calls).
+router.get('/formations/:slug/quizzes/:quizId', asyncRoute(getQuiz));
+router.post('/formations/:slug/quizzes/:quizId/attempts', quizLimiter, asyncRoute(startAttempt));
+router.post('/formations/:slug/quizzes/:quizId/attempts/:attemptId/submit', quizLimiter, validateBody(submitAttemptSchema), asyncRoute(submitAttempt));
+router.get('/formations/:slug/quizzes/:quizId/result', asyncRoute(getLastResult));
+router.get('/media/:id', mediaDeniedLimiter, mediaVolumeLimiter, asyncRoute(getMedia));
+
+export default router;

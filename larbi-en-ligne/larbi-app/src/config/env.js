@@ -1,0 +1,69 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+function parseTrustProxy(value) {
+  if (!value) return false;
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : value;
+}
+
+const required = ['DATABASE_URL', 'JWT_SECRET'];
+
+for (const key of required) {
+  if (!process.env[key]) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+}
+
+export const env = {
+  nodeEnv: process.env.NODE_ENV || 'development',
+  port: Number(process.env.PORT) || 4000,
+  databaseUrl: process.env.DATABASE_URL,
+  jwtSecret: process.env.JWT_SECRET,
+  jwtExpiresInSeconds: Number(process.env.JWT_EXPIRES_IN_SECONDS) || 60 * 60 * 24 * 7,
+  corsOrigin: (process.env.CORS_ORIGIN || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim()),
+  // Express's own "trust proxy" setting: how many reverse-proxy hops (ngrok, nginx,
+  // a load balancer...) stand between a visitor and this server. Needed so
+  // express-rate-limit keys requests by the VISITOR's address instead of the
+  // proxy's (otherwise every visitor behind that proxy shares one rate-limit
+  // bucket). false (default) = trust nothing: correct for direct local dev,
+  // where there is no proxy in front at all.
+  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
+  isProduction: process.env.NODE_ENV === 'production',
+  // One access-log line per request. Off for the automated tests (LOG_REQUESTS=false).
+  logRequests: process.env.LOG_REQUESTS !== 'false' && process.env.NODE_ENV !== 'test',
+  // Private storage for uploaded media. Lives OUTSIDE anything served
+  // statically: files are only reachable through authorised API routes.
+  storageDir: path.resolve(
+    process.env.STORAGE_DIR || path.join(path.dirname(fileURLToPath(import.meta.url)), '../../storage'),
+  ),
+  // E-mail (newsletter confirmation, later password reset). No provider is chosen
+  // yet: "console" keeps mails in memory / prints them (development and tests only),
+  // "none" refuses to send (the default in production, so nothing is ever faked).
+  mailDriver: process.env.MAIL_DRIVER || (process.env.NODE_ENV === 'production' ? 'none' : 'console'),
+  // Public address of the website, used to build the links written in e-mails.
+  publicUrl: (process.env.PUBLIC_URL || (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',')[0]).trim().replace(/\/+$/, ''),
+  maxImageBytes: Number(process.env.MAX_IMAGE_BYTES) || 5 * 1024 * 1024,
+  maxDocumentBytes: Number(process.env.MAX_DOCUMENT_BYTES) || 25 * 1024 * 1024,
+  maxVideoBytes: Number(process.env.MAX_VIDEO_BYTES) || 300 * 1024 * 1024,
+  // Built website (client/dist) served by this same process, for single-host
+  // deployments (cPanel...). Unset = API only (development: Vite serves the site).
+  clientDir: process.env.CLIENT_DIR
+    ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..', process.env.CLIENT_DIR)
+    : null,
+};
+
+if (!['console', 'none'].includes(env.mailDriver)) {
+  throw new Error('MAIL_DRIVER must be "console" or "none" (no real provider is wired yet)');
+}
+
+if (env.jwtSecret.length < 32) {
+  throw new Error('JWT_SECRET must be at least 32 characters');
+}

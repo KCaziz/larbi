@@ -1,0 +1,1 @@
+import{n as e}from"./Button-Zzn_013c.js";var t=e();function n({icon:e,title:n,children:r}){return(0,t.jsxs)(`div`,{className:`cms-empty`,children:[e&&(0,t.jsx)(`span`,{className:`cms-empty-icon`,"aria-hidden":`true`,children:(0,t.jsx)(e,{size:26,strokeWidth:1.5})}),(0,t.jsx)(`h2`,{children:n}),r]})}export{n as t};

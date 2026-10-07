@@ -1,0 +1,730 @@
+// Prisma schema.
+// Only the models genuinely needed right now are defined here (P1-05
+// "modèles initiaux", ahead of P1-06 authentication). E-Learning, blog and
+// tools models are NOT anticipated — they belong to their own tasks
+// (P2-01, P3-01) per TASKS.md.
+
+// "prisma-client-js" (not the newer "prisma-client" generator) because it
+// outputs plain, ready-to-run JS + .d.ts — this server has no TypeScript
+// build step, so a TS-source-only client wouldn't run under plain Node.
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  // Free-form string, not a DB enum: the cahier des charges explicitly
+  // allows adding new account categories later ("autres catégories
+  // pouvant être ajoutées"), and a Postgres enum would need a migration
+  // for each new one. Allowed values are validated at the application
+  // layer (see P1-06).
+  accountType  String
+  // "standard" | "premium" (see TASKS.md section 1, "Accès aux
+  // fonctionnalités"). Same free-form-string reasoning as accountType.
+  accessLevel  String   @default("standard")
+  // "user" | "admin". Orthogonal to accessLevel: role = what you may
+  // manage (RBAC), accessLevel = which content tier you may consume.
+  // Never settable from a public endpoint (see auth.schemas.js).
+  role         String   @default("user")
+  // "active" | "suspended" (P3-16). Checked on every request (requireAuth), so
+  // suspending an account takes effect immediately, on the same session.
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // E-Learning (P2-01)
+  formationsCreated Formation[]
+  mediaUploaded     Media[]
+  enrollments       Enrollment[]
+
+  // Blog (P3-01)
+  articlesAuthored Article[]
+
+  // CMS (P3-12)
+  lessonRevisions LessonRevision[]
+
+  @@map("users")
+}
+
+// Messages sent through the public contact form (P1-07). Stored in the DB
+// because no email provider is defined yet; an admin view/notification comes
+// later. Only what the form needs: no IP or other personal data is kept.
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
+}
+
+// Account categories offered at registration (P3-15). A real table, not a
+// hardcoded list: an administrator can add, rename, reorder or deactivate a
+// category from the admin panel, without a code change or a migration. Kept
+// as a soft reference from `User.accountType` (a plain string, unchanged
+// since P1-06) rather than a foreign key: it is validated against this table
+// at the application layer, exactly like the free-form status fields
+// elsewhere in this schema, so no existing relation, index or test fixture
+// had to move.
+model AccountType {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  label     String
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("account_types")
+}
+
+// Small set of platform-wide switches an administrator can change without a
+// deployment (P3-16): maintenance mode, public contact details, and any
+// future key the admin panel adds. Free-form key/value on purpose: adding a
+// new setting never needs a migration.
+model PlatformSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("platform_settings")
+}
+
+// ---------------------------------------------------------------------------
+// E-Learning (P2-01)
+//
+// Conventions, same as User:
+// - Status-like fields are plain strings validated in the application layer
+//   (constants in src/constants/elearning.js) AND guarded by CHECK constraints
+//   added by hand in the migration, so no code path can store an invalid value.
+// - Only the model lives here. Endpoints belong to P2-02 (admin) and
+//   P2-03/P2-04 (learner), media handling to P2-06.
+// ---------------------------------------------------------------------------
+
+model FormationCategory {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  formations Formation[]
+
+  @@map("formation_categories")
+}
+
+// A training programme made of an ordered list of courses.
+// The number of courses is NOT stored: it is count(courses), so it can never
+// disagree with the real list (P2-02 "définir le nombre de cours").
+model Formation {
+  id                  String @id @default(uuid())
+  slug                String @unique
+  title               String
+  description         String
+  // "draft" | "published". Only published formations are visible to learners.
+  status              String @default("draft")
+  // "standard" | "premium": lowest access level allowed to enrol.
+  // Checked server-side, never only in the UI (TASKS.md rule 1).
+  requiredAccessLevel String @default("standard")
+
+  categoryId String?
+  category   FormationCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  coverImageId String? @unique
+  coverImage   Media?  @relation("FormationCover", fields: [coverImageId], references: [id], onDelete: SetNull)
+
+  // Certification information (P2-02 / P2-05).
+  certificationEnabled     Boolean @default(true)
+  certificationTitle       String?
+  certificationDescription String?
+
+  // Pedagogical presentation (P3-11). The total duration is NOT stored: it is the sum
+  // of the lessons' estimated minutes, so it can never disagree with the real plan.
+  subtitle      String?
+  // "beginner" | "intermediate" | "advanced" (CHECK in the migration), null = not set.
+  level         String?
+  // MySQL/MariaDB has no array column type: stored as a JSON array (still a
+  // plain JS array end to end, Prisma (de)serialises it automatically).
+  objectives    Json    @default("[]")
+  prerequisites Json    @default("[]")
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  courses     Course[]
+  sections    Section[]
+  enrollments Enrollment[]
+
+  // Quizzes of the formation (P3-13); `finalQuiz` is the one at the end of the formation.
+  quizzes   Quiz[] @relation("FormationQuizzes")
+  finalQuiz Quiz?  @relation("FinalQuiz")
+
+  @@index([status])
+  @@map("formations")
+}
+
+// One lesson of a formation.
+model Course {
+  id          String    @id @default(uuid())
+  formationId String
+  formation   Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+
+  title            String
+  summary          String?
+  // Text content of the lesson. Videos / documents are Media rows.
+  body             String?
+  // Display order inside the formation (0-based). Not unique on purpose: a
+  // unique constraint makes reordering (swap) fail mid-transaction; the
+  // service reorders in one transaction and lists by (position, createdAt).
+  position         Int
+  // Required courses must all be completed to finish the formation (P2-04).
+  isRequired       Boolean @default(true)
+  estimatedMinutes Int?
+  // Chapter of the lesson (P3-11). COMPOSITE foreign key (sectionId, formationId) ->
+  // sections(id, formationId): a lesson can never sit in a chapter of another formation, and
+  // a chapter that still holds lessons cannot be deleted (RESTRICT). `position` stays the
+  // GLOBAL order of the lessons inside the formation (chapters first, then the order in the
+  // chapter): the learner side and the progress code keep reading it unchanged.
+  sectionId        String?
+  section          Section? @relation(fields: [sectionId, formationId], references: [id, formationId], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  media    Media[]
+  progress CourseProgress[]
+  blocks    LessonBlock[]
+  revisions LessonRevision[]
+  quizzes   Quiz[]
+
+  // Target of the composite foreign key from CourseProgress: guarantees a
+  // progress row can only point to a course of the SAME formation as its
+  // enrollment.
+  @@unique([id, formationId])
+  @@index([formationId, position])
+  @@map("courses")
+}
+
+// A file (video, image, document). The file itself lives in PRIVATE storage:
+// storageKey is an internal key, it must never be serialised to a client or
+// used as a public URL (TASKS.md rule 4, P2-06 signed/temporary access).
+model Media {
+  id           String @id @default(uuid())
+  // "video" | "image" | "document"
+  kind         String
+  storageKey   String @unique
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+
+  courseId String?
+  course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  uploadedById String?
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  coverOf Formation? @relation("FormationCover")
+
+  // Blog (P3-01): a file attached to an article, or the cover of an article.
+  // A file belongs to at most one lesson OR one article (CHECK in the migration).
+  articleId      String?
+  article        Article? @relation("ArticleMedia", fields: [articleId], references: [id], onDelete: Cascade)
+  articleCoverOf Article? @relation("ArticleCover")
+
+  @@index([courseId])
+  @@index([articleId])
+  
+  // Blocks of a lesson that show this file (P3-12). Deleting the file deletes those blocks.
+  blocks LessonBlock[]
+
+  // Target of the composite foreign key from lesson_blocks: a block can only show a file
+  // that belongs to ITS OWN lesson.
+  @@unique([id, courseId])
+  @@map("media")
+}
+
+// A user's enrolment in a formation. One per (user, formation).
+model Enrollment {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Restrict: a formation that has learners cannot be deleted (and their
+  // certificates lost); unpublish it instead.
+  formationId String
+  formation   Formation @relation(fields: [formationId], references: [id], onDelete: Restrict)
+
+  // "active" | "completed"
+  status      String    @default("active")
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+
+  courseProgress CourseProgress[]
+  certification  Certification?
+  quizAttempts   QuizAttempt[]
+
+  @@unique([userId, formationId])
+  @@unique([id, formationId])
+  @@index([formationId])
+  @@map("enrollments")
+}
+
+// Progress of one enrolment on one course.
+// formationId is stored on purpose: the two composite foreign keys below make
+// the database itself reject a progress row whose course is not part of the
+// enrolled formation (P2-04 "empêcher une validation incohérente").
+model CourseProgress {
+  id           String @id @default(uuid())
+  enrollmentId String
+  courseId     String
+  formationId  String
+
+  enrollment Enrollment @relation(fields: [enrollmentId, formationId], references: [id, formationId], onDelete: Cascade)
+  course     Course     @relation(fields: [courseId, formationId], references: [id, formationId], onDelete: Cascade)
+
+  // "in_progress" | "completed"
+  status      String    @default("in_progress")
+  openedAt    DateTime  @default(now())
+  completedAt DateTime?
+
+  @@unique([enrollmentId, courseId])
+  @@index([courseId])
+  @@map("course_progress")
+}
+
+// Issued when an enrolment is completed. The holder name and formation title
+// are snapshotted so the certificate stays valid and verifiable even if the
+// account or the formation is later renamed. At most one per enrolment.
+model Certification {
+  id                String     @id @default(uuid())
+  // Public, unguessable identifier used for verification. Generated by the
+  // application (P2-05), never sequential.
+  certificateNumber String     @unique
+  enrollmentId      String     @unique
+  enrollment        Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  holderName         String
+  formationTitle     String
+  // Name of the certification as defined by the admin when it was issued
+  // (nullable: falls back to the formation title when the admin left it empty).
+  certificationTitle String?
+  issuedAt           DateTime @default(now())
+
+  // Revocation (P3-16, admin only): the certificate stays on record (never deleted, the
+  // learner's achievement is not erased) but public verification and the learner's own
+  // page show it as revoked. `revokedReason` implies `revokedAt` (CHECK in the migration).
+  revokedAt     DateTime?
+  revokedReason String?
+
+  @@map("certifications")
+}
+
+// ---------------------------------------------------------------------------
+// Blog (P3-01)
+//
+// Same conventions as E-Learning: string status guarded by CHECK constraints
+// (see the blog_model migration), files live in the shared private Media store,
+// the author is a User whose deletion never deletes the article.
+// ---------------------------------------------------------------------------
+
+model ArticleCategory {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  articles Article[]
+
+  @@map("article_categories")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  articles ArticleTag[]
+
+  @@map("tags")
+}
+
+// One blog article. Only the sanitised HTML "body" is stored for reading;
+// "bodyText" is its plain-text copy, kept in sync by the application, used for
+// search and reading time (parsing HTML on every list request would be wasteful).
+model Article {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  // Language the title / excerpt / body are WRITTEN in (fr | en | ar). Other
+  // languages live in article_translations; a visitor whose language has no
+  // translation simply gets this one.
+  language    String    @default("fr")
+  title       String
+  // Short summary shown on cards and used as the default page description.
+  excerpt     String    @default("")
+  body        String?
+  bodyText    String    @default("")
+  // "draft" | "published". Only published articles are public.
+  status      String    @default("draft")
+  publishedAt DateTime?
+
+  // Visibility by profile (P3-04). "standard" = readable by every visitor,
+  // "premium" = the text and files need a premium account (the card, title and
+  // excerpt stay public as a teaser). Enforced by the server, never only in the UI.
+  requiredAccessLevel String   @default("standard")
+  // Account types this article is recommended to (values of ACCOUNT_TYPES).
+  // Empty = for everybody. It only ORDERS recommendations, it never hides anything.
+  // JSON array (no array column type on MySQL/MariaDB) — membership is checked
+  // in application code (blogAccess.js), not with a DB-side array filter.
+  targetAccountTypes  Json     @default("[]")
+
+  categoryId String?
+  category   ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  coverImageId String? @unique
+  coverImage   Media?  @relation("ArticleCover", fields: [coverImageId], references: [id], onDelete: SetNull)
+
+  // Deleting the author's account (right to erasure) keeps the article.
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  // SEO: both optional, the page falls back to the title / excerpt.
+  metaTitle       String?
+  metaDescription String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tags         ArticleTag[]
+  media        Media[]              @relation("ArticleMedia")
+  translations ArticleTranslation[]
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+  @@map("articles")
+}
+
+// The language-dependent part of an article (title, summary, text, SEO) in ONE
+// other language. Everything else (address, cover, files, category, tags,
+// status, access level) stays on the article and is shared by all languages.
+model ArticleTranslation {
+  id              String   @id @default(uuid())
+  articleId       String
+  article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  language        String
+  title           String
+  excerpt         String   @default("")
+  body            String?
+  bodyText        String   @default("")
+  metaTitle       String?
+  metaDescription String?
+  // true = this row is a raw COPY of the article's own text (from "duplicate to
+  // start"), not yet reviewed by a human: it must never be shown to a visitor as
+  // a real translation. An explicit save (saveTranslation) always clears it.
+  pending         Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([articleId, language])
+  @@map("article_translations")
+}
+
+model ArticleTag {
+  articleId String
+  tagId     String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@index([tagId])
+  @@map("article_tags")
+}
+
+// ---------------------------------------------------------------------------
+// Newsletter (P3-05). Double opt-in: an address is only "confirmed" once its
+// owner clicked the link sent to it; the confirmation date is the proof of
+// consent. Links carry a signed token (HMAC) computed from the row id, so no
+// token is stored. Deleting a row erases the person completely.
+// ---------------------------------------------------------------------------
+model NewsletterSubscriber {
+  id     String @id @default(uuid())
+  // Always stored lower-cased and trimmed (CHECK in the migration).
+  email  String @unique
+  // "pending" | "confirmed" | "unsubscribed"
+  status String @default("pending")
+  // Language of the subscriber's interface, for the language of the e-mails.
+  locale String @default("fr")
+
+  createdAt      DateTime  @default(now())
+  confirmedAt    DateTime?
+  unsubscribedAt DateTime?
+  // Last confirmation e-mail sent: limits how often one address can be mailed.
+  lastEmailAt    DateTime?
+
+  @@index([status])
+  @@map("newsletter_subscribers")
+}
+
+// A chapter of a formation (P3-11): groups lessons. A chapter that still contains
+// lessons cannot be deleted (RESTRICT): progress lives on the lessons.
+model Section {
+  id          String    @id @default(uuid())
+  formationId String
+  formation   Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  position    Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courses Course[]
+  quizzes Quiz[]
+
+  // Target of the composite foreign key from courses.
+  @@unique([id, formationId])
+  @@index([formationId, position])
+  @@map("sections")
+}
+
+// ---------------------------------------------------------------------------
+// Content of a lesson as an ordered list of typed blocks (P3-12). The server validates
+// `data` for each type (services/blocks.service.js): the browser never sends raw HTML that
+// is stored as is. `courses.body` and the files attached before blocks existed are kept
+// (expand / contract): a lesson WITHOUT blocks is still read the old way.
+// ---------------------------------------------------------------------------
+model LessonBlock {
+  id       String @id @default(uuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // text | image | video | file | code | table | quote | callout | resources (CHECK)
+  type     String
+  position Int
+  data     Json   @default("{}")
+
+  // image / video / file blocks show a file of the same lesson.
+  mediaId String?
+  media   Media?  @relation(fields: [mediaId, courseId], references: [id, courseId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId, position])
+  @@map("lesson_blocks")
+}
+
+// Snapshot of the blocks of a lesson: history with restoration. Taken automatically (at most
+// one every few minutes while editing) and on demand.
+model LessonRevision {
+  id       String @id @default(uuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  blocks Json
+  label  String?
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([courseId, createdAt])
+  @@map("lesson_revisions")
+}
+
+// ---------------------------------------------------------------------------
+// Quizzes (P3-13). A quiz is attached to a lesson, to a chapter or to the END of the
+// formation (at most one per target). Correct answers, explanations and accepted answers
+// NEVER leave the server before a learner has submitted an attempt; grading is done by the
+// server. A REQUIRED quiz must be passed to finish the formation (and get the certificate).
+// ---------------------------------------------------------------------------
+model Quiz {
+  id          String    @id @default(uuid())
+  formationId String
+  formation   Formation @relation("FormationQuizzes", fields: [formationId], references: [id], onDelete: Cascade)
+
+  // "course" (a lesson) | "section" (a chapter) | "formation" (the end of it). CHECK in the migration.
+  scope     String
+  courseId  String?
+  course    Course?  @relation(fields: [courseId, formationId], references: [id, formationId], onDelete: Cascade)
+  sectionId String?
+  section   Section? @relation(fields: [sectionId, formationId], references: [id, formationId], onDelete: Cascade)
+  // Set (to the formation id) only for the final quiz: makes "one final quiz per formation" a unique key.
+  finalFormationId String?    @unique
+  finalOf          Formation? @relation("FinalQuiz", fields: [finalFormationId], references: [id], onDelete: Cascade)
+
+  title            String
+  instructions     String  @default("")
+  // Percentage of the points needed to pass (0..100).
+  passingScore     Int     @default(70)
+  // null = unlimited attempts.
+  maxAttempts      Int?
+  shuffleQuestions Boolean @default(false)
+  // A required quiz must be passed to finish the formation.
+  isRequired       Boolean @default(false)
+  // Show the right answers and the explanations after an attempt.
+  showCorrection   Boolean @default(true)
+  // Denormalised: true when the quiz has questions and every question is well formed (a right
+  // answer, enough choices...). Kept up to date by the CMS at every change; only a complete quiz
+  // is served to learners, and only a complete REQUIRED quiz blocks the end of a formation. The
+  // consistency check recomputes it.
+  isComplete       Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@unique([id, formationId])
+  @@unique([courseId])
+  @@unique([sectionId])
+  @@index([formationId])
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id     String @id @default(uuid())
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  // "single" | "multiple" | "true_false" | "text" (CHECK). true_false has exactly two choices
+  // whose texts are "true" and "false" (the interface translates them).
+  type        String
+  position    Int
+  prompt      String @default("")
+  // Shown after the correction.
+  explanation String @default("")
+  points      Int    @default(1)
+  // "text" questions: the answers accepted (compared without case, accents or extra spaces).
+  // JSON array (no array column type on MySQL/MariaDB).
+  acceptedAnswers Json   @default("[]")
+
+  choices QuizChoice[]
+
+  @@index([quizId, position])
+  @@map("quiz_questions")
+}
+
+model QuizChoice {
+  id         String       @id @default(uuid())
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  position   Int
+  text       String
+  isCorrect  Boolean      @default(false)
+
+  @@index([questionId, position])
+  @@map("quiz_choices")
+}
+
+// One try of a learner. Created when the learner starts (the questions are served then, without
+// the answers), completed when the learner submits (graded by the server, once).
+model QuizAttempt {
+  id           String     @id @default(uuid())
+  quizId       String
+  formationId  String
+  quiz         Quiz       @relation(fields: [quizId, formationId], references: [id, formationId], onDelete: Cascade)
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId, formationId], references: [id, formationId], onDelete: Cascade)
+
+  startedAt     DateTime  @default(now())
+  submittedAt   DateTime?
+  // Order the questions were served in (fixed per attempt, so resuming shows the same order).
+  // JSON array (no array column type on MySQL/MariaDB).
+  questionOrder Json      @default("[]")
+  score         Int?
+  earnedPoints  Int?
+  totalPoints   Int?
+  passed        Boolean?
+
+  answers QuizAttemptAnswer[]
+
+  @@index([enrollmentId, quizId])
+  @@index([quizId])
+  @@map("quiz_attempts")
+}
+
+model QuizAttemptAnswer {
+  id         String      @id @default(uuid())
+  attemptId  String
+  attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  // No foreign key: the history of a graded attempt outlives an edited question.
+  questionId String
+  // JSON array (no array column type on MySQL/MariaDB).
+  choiceIds  Json        @default("[]")
+  text       String      @default("")
+  correct    Boolean
+  points     Int
+
+  @@unique([attemptId, questionId])
+  @@map("quiz_attempt_answers")
+}
+
+// ---------------------------------------------------------------------------
+// Bank comparator (P4-06)
+//
+// Built from the client's workbooks (conditions of 13 Algerian banks, 11
+// rubrics). Texts are kept exactly as provided; the rubrics and their columns
+// are defined in src/constants/comparator.js.
+// ---------------------------------------------------------------------------
+
+model ComparatorBank {
+  id         String                @id @default(uuid())
+  // As the client writes it (e.g. "BNP Paribas", "TBA"): no full name is invented.
+  name       String                @unique
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  conditions ComparatorCondition[]
+
+  @@map("comparator_banks")
+}
+
+model ComparatorCondition {
+  id        String         @id @default(uuid())
+  bankId    String
+  bank      ComparatorBank @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  // One of COMPARATOR_THEMES (CHECK in the migration).
+  theme     String
+  // particulier | professionnel | entreprise | non_precise — set only when the
+  // client's file states it (CHECK in the migration).
+  segment   String         @default("non_precise")
+  // Only for the rubrics that have a "Catégorie" column (e.g. Retrait / Versement).
+  category  String?
+  // Account type, operation, card, product... (the rubric's first column).
+  label     String
+  // { field: text } — the rubric's own columns, as written by the client.
+  values    Json           @default("{}")
+  // Order of the client's file within a rubric; new rows go last.
+  position  Int            @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([theme, position])
+  @@index([bankId])
+  @@map("comparator_conditions")
+}
+
+// One row (id = 1): when the comparator's data last changed, for the public
+// "données mises à jour le". Every administration write moves it, deletions
+// included (a deleted row leaves no updatedAt behind to read).
+model ComparatorMeta {
+  id            Int      @id @default(1)
+  dataUpdatedAt DateTime @default(now())
+
+  @@map("comparator_meta")
+}

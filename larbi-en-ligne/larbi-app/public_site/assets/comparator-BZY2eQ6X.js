@@ -1,0 +1,1 @@
+import{t as e}from"./api-Hw6IwOut.js";function t(e,t,n){return e(`comparator.themeFields.${t}.${n}`,{defaultValue:e(`comparator.fields.${n}`)})}var n=(e,t)=>e(`comparator.labelHeaders.${t}`),r=t=>t instanceof e&&t.status===404;export{r as n,n as r,t};
