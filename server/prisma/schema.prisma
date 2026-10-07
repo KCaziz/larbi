@@ -18,7 +18,7 @@ datasource db {
 
 model User {
   id           String   @id @default(uuid())
-  email        String   @unique
+  email        String   @unique @db.VarChar(254)
   passwordHash String
   name         String
   // Free-form string, not a DB enum: the cahier des charges explicitly
@@ -60,8 +60,8 @@ model User {
 model ContactMessage {
   id        String   @id @default(uuid())
   name      String
-  email     String
-  message   String
+  email     String @db.VarChar(254)
+  message   String @db.Text
   createdAt DateTime @default(now())
 
   @@map("contact_messages")
@@ -93,7 +93,7 @@ model AccountType {
 // new setting never needs a migration.
 model PlatformSetting {
   key       String   @id
-  value     String
+  value     String @db.Text
   updatedAt DateTime @updatedAt
 
   @@map("platform_settings")
@@ -128,7 +128,7 @@ model Formation {
   id                  String @id @default(uuid())
   slug                String @unique
   title               String
-  description         String
+  description         String @db.Text
   // "draft" | "published". Only published formations are visible to learners.
   status              String @default("draft")
   // "standard" | "premium": lowest access level allowed to enrol.
@@ -144,7 +144,7 @@ model Formation {
   // Certification information (P2-02 / P2-05).
   certificationEnabled     Boolean @default(true)
   certificationTitle       String?
-  certificationDescription String?
+  certificationDescription String? @db.Text
 
   // Pedagogical presentation (P3-11). The total duration is NOT stored: it is the sum
   // of the lessons' estimated minutes, so it can never disagree with the real plan.
@@ -182,9 +182,9 @@ model Course {
   formation   Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
 
   title            String
-  summary          String?
+  summary          String? @db.Text
   // Text content of the lesson. Videos / documents are Media rows.
-  body             String?
+  body             String? @db.MediumText
   // Display order inside the formation (0-based). Not unique on purpose: a
   // unique constraint makes reordering (swap) fail mid-transaction; the
   // service reorders in one transaction and lists by (position, createdAt).
@@ -225,7 +225,7 @@ model Media {
   // "video" | "image" | "document"
   kind         String
   storageKey   String @unique
-  originalName String
+  originalName String @db.VarChar(255)
   mimeType     String
   sizeBytes    Int
 
@@ -327,7 +327,7 @@ model Certification {
   // learner's achievement is not erased) but public verification and the learner's own
   // page show it as revoked. `revokedReason` implies `revokedAt` (CHECK in the migration).
   revokedAt     DateTime?
-  revokedReason String?
+  revokedReason String? @db.Text
 
   @@map("certifications")
 }
@@ -374,9 +374,9 @@ model Article {
   language    String    @default("fr")
   title       String
   // Short summary shown on cards and used as the default page description.
-  excerpt     String    @default("")
-  body        String?
-  bodyText    String    @default("")
+  excerpt     String    @default("") @db.Text
+  body        String? @db.MediumText
+  bodyText    String    @default("") @db.MediumText
   // "draft" | "published". Only published articles are public.
   status      String    @default("draft")
   publishedAt DateTime?
@@ -426,9 +426,9 @@ model ArticleTranslation {
   article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
   language        String
   title           String
-  excerpt         String   @default("")
-  body            String?
-  bodyText        String   @default("")
+  excerpt         String   @default("") @db.Text
+  body            String? @db.MediumText
+  bodyText        String   @default("") @db.MediumText
   metaTitle       String?
   metaDescription String?
   // true = this row is a raw COPY of the article's own text (from "duplicate to
@@ -462,7 +462,7 @@ model ArticleTag {
 model NewsletterSubscriber {
   id     String @id @default(uuid())
   // Always stored lower-cased and trimmed (CHECK in the migration).
-  email  String @unique
+  email  String @unique @db.VarChar(254)
   // "pending" | "confirmed" | "unsubscribed"
   status String @default("pending")
   // Language of the subscriber's interface, for the language of the e-mails.
@@ -486,7 +486,7 @@ model Section {
   formation   Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
 
   title       String
-  description String?
+  description String? @db.Text
   position    Int
 
   createdAt DateTime @default(now())
@@ -568,7 +568,7 @@ model Quiz {
   finalOf          Formation? @relation("FinalQuiz", fields: [finalFormationId], references: [id], onDelete: Cascade)
 
   title            String
-  instructions     String  @default("")
+  instructions     String  @default("") @db.Text
   // Percentage of the points needed to pass (0..100).
   passingScore     Int     @default(70)
   // null = unlimited attempts.
@@ -606,9 +606,9 @@ model QuizQuestion {
   // whose texts are "true" and "false" (the interface translates them).
   type        String
   position    Int
-  prompt      String @default("")
+  prompt      String @default("") @db.Text
   // Shown after the correction.
-  explanation String @default("")
+  explanation String @default("") @db.Text
   points      Int    @default(1)
   // "text" questions: the answers accepted (compared without case, accents or extra spaces).
   // JSON array (no array column type on MySQL/MariaDB).
@@ -625,7 +625,7 @@ model QuizChoice {
   questionId String
   question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   position   Int
-  text       String
+  text       String @db.Text
   isCorrect  Boolean      @default(false)
 
   @@index([questionId, position])
@@ -667,7 +667,7 @@ model QuizAttemptAnswer {
   questionId String
   // JSON array (no array column type on MySQL/MariaDB).
   choiceIds  Json        @default("[]")
-  text       String      @default("")
+  text       String      @default("") @db.Text
   correct    Boolean
   points     Int
 
@@ -706,7 +706,7 @@ model ComparatorCondition {
   // Only for the rubrics that have a "Catégorie" column (e.g. Retrait / Versement).
   category  String?
   // Account type, operation, card, product... (the rubric's first column).
-  label     String
+  label     String @db.Text
   // { field: text } — the rubric's own columns, as written by the client.
   values    Json           @default("{}")
   // Order of the client's file within a rubric; new rows go last.
