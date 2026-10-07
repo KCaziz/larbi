@@ -53,6 +53,11 @@ export const env = {
   maxImageBytes: Number(process.env.MAX_IMAGE_BYTES) || 5 * 1024 * 1024,
   maxDocumentBytes: Number(process.env.MAX_DOCUMENT_BYTES) || 25 * 1024 * 1024,
   maxVideoBytes: Number(process.env.MAX_VIDEO_BYTES) || 300 * 1024 * 1024,
+  // Built website (client/dist) served by this same process, for single-host
+  // deployments (cPanel...). Unset = API only (development: Vite serves the site).
+  clientDir: process.env.CLIENT_DIR
+    ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..', process.env.CLIENT_DIR)
+    : null,
 };
 
 if (!['console', 'none'].includes(env.mailDriver)) {

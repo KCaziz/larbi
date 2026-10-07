@@ -25,6 +25,8 @@ const isAlwaysAllowed = (req) => ALWAYS_ALLOWED.some((rule) => (rule.method === 
 // the same answer as a real outage would give.
 export async function maintenanceGate(req, res, next) {
   try {
+    // The website itself (when this process serves it) must load to show the banner.
+    if (!req.path.startsWith('/api/')) return next();
     if (isAlwaysAllowed(req)) return next();
     if (!(await isMaintenanceMode())) return next();
 

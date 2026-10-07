@@ -1,3 +1,4 @@
+import path from 'node:path';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -32,6 +33,18 @@ export function createApp() {
 
   app.use(maintenanceGate);
   app.use('/api', routes);
+
+  // Single-host deployment: the built website is served next to the API. Hashed
+  // bundles are cached for a year; index.html never is, so a new build shows at once.
+  // Every other non-API address returns index.html and React Router takes over.
+  if (env.clientDir) {
+    app.use('/assets', express.static(path.join(env.clientDir, 'assets'), { immutable: true, maxAge: '1y' }));
+    app.use(express.static(env.clientDir, { index: false }));
+    app.get(/^\/(?!api(\/|$)).*/, (req, res) => {
+      res.set('Cache-Control', 'no-cache');
+      res.sendFile(path.join(env.clientDir, 'index.html'));
+    });
+  }
 
   app.use(notFound);
   app.use(errorHandler);
