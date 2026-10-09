@@ -120,10 +120,10 @@ export const formulaById = (id) => FORMULAS.find((f) => f.id === id) ?? null;
 
 // The four algorithms, used where no closed formula is enough (client's wording).
 export const ALGORITHMS = [
-  { id: 'ALG-01', fn: 'debtPayoffPlan', version: 1, rule: 'Simuler période par période. Priorité au coût le plus élevé ou au capital restant le plus faible ; réallouer la mensualité libérée.' },
-  { id: 'ALG-02', fn: 'minimalSettlements', version: 1, rule: 'Calculer soldes nets, séparer créanciers/débiteurs, affecter successivement min(crédit,dette) jusqu’à extinction.' },
-  { id: 'ALG-03', fn: 'goalReachDate', version: 1, rule: 'Itérer mensuellement : capital suivant = capital×(1+r)+versement ; arrêter lorsque capital ≥ cible.' },
-  { id: 'ALG-04', fn: 'detectRecurrences', version: 1, rule: 'Comparer commerçant/libellé, montant toléré et intervalle ; demander confirmation avant création.' },
+  { id: 'ALG-01', fn: 'debtPayoffPlan', version: 1, label: 'Dette coûteuse / petite dette', rule: 'Simuler période par période. Priorité au coût le plus élevé ou au capital restant le plus faible ; réallouer la mensualité libérée.' },
+  { id: 'ALG-02', fn: 'minimalSettlements', version: 1, label: 'Minimisation des remboursements', rule: 'Calculer soldes nets, séparer créanciers/débiteurs, affecter successivement min(crédit,dette) jusqu’à extinction.' },
+  { id: 'ALG-03', fn: 'goalReachDate', version: 1, label: 'Date atteinte objectif', rule: 'Itérer mensuellement : capital suivant = capital×(1+r)+versement ; arrêter lorsque capital ≥ cible.' },
+  { id: 'ALG-04', fn: 'detectRecurrences', version: 1, label: 'Détection récurrence', rule: 'Comparer commerçant/libellé, montant toléré et intervalle ; demander confirmation avant création.' },
 ];
 
 export const ALGORITHM_IDS = ALGORITHMS.map((a) => a.id);

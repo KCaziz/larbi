@@ -8,13 +8,48 @@
 }
 
 .simulator-form {
-  margin-block-start: var(--space-lg, 32px);
+  margin-block-start: 32px;
 }
 
 .simulator-fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: 18px;
+}
+
+/* A repeated field (P4-11): the list of debts of CAL-12. It spans the whole
+   grid, because its own rows carry a grid of inputs. */
+.simulator-list {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.simulator-list legend {
+  padding-inline: 6px;
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.simulator-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  align-items: end;
+  gap: 12px;
+  padding-block: 12px;
+}
+
+.simulator-row + .simulator-row {
+  border-block-start: 1px solid var(--border);
+}
+
+.simulator-row-number {
+  grid-column: 1 / -1;
+  color: var(--text);
+  font-size: 0.82rem;
 }
 
 .simulator-unit {
@@ -85,6 +120,33 @@
   font-weight: 500;
 }
 
+/* The named parts of a composite answer (F056, ALG-01): one answer, several
+   values, so they stay inside the same result card. */
+.simulator-parts {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.simulator-parts li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.simulator-parts .simulator-value {
+  font-size: 1rem;
+}
+
+.simulator-part-name {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
 .simulator-why {
   margin-block-start: 10px;
   font-size: 0.88rem;
@@ -127,6 +189,113 @@
   margin: 10px 0 0;
   padding-inline-start: 18px;
   color: var(--warn);
+}
+
+/* The simulation workshop (P4-16). */
+.workshop-search {
+  max-width: 420px;
+  margin-block-end: 24px;
+}
+
+.scenario-save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-block-start: 24px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+
+.scenario-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.scenario {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+/* Multi-criteria comparison (P4-12). */
+.comparison-weights {
+  margin-block-start: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+
+.comparison-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.comparison-note {
+  margin: 6px 0 0;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.comparison-table-wrap {
+  overflow-x: auto;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 10px 12px;
+  border-block-end: 1px solid var(--border);
+  text-align: start;
+}
+
+.comparison-table thead th {
+  color: var(--text-h);
+}
+
+/* The best cell of a row, next to the direction that makes it checkable. */
+.comparison-best {
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.comparison-aside {
+  margin-block-start: 20px;
+  padding: 14px 16px;
+  border-inline-start: 3px solid var(--border);
+  background: var(--bg-alt);
+  border-radius: var(--radius-sm);
+}
+
+.comparison-aside h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.comparison-aside dt {
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.comparison-aside dd {
+  margin: 0 0 8px;
+  color: var(--text);
 }
 
 @media (max-width: 600px) {

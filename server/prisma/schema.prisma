@@ -51,7 +51,49 @@ model User {
   // CMS (P3-12)
   lessonRevisions LessonRevision[]
 
+  // Simulation workshop (P4-16)
+  simulationScenarios SimulationScenario[]
+
   @@map("users")
+}
+
+// A simulation the user chose to keep (P4-16, screen C18). The client's rule for
+// this screen is explicit: "hypothèses sauvegardées avec résultat" and "chaque
+// simulateur porte version de formule". Hence three JSON columns instead of one:
+//
+//   inputs      what the person typed, in the units of the engine (centimes,
+//               decimal rates). The results are RECOMPUTED from these on every
+//               read-back, so a scenario is never a screenshot of numbers whose
+//               origin nobody can check.
+//   hypotheses  the assumptions the simulation ran under (a monthly return, an
+//               inflation rate, an horizon), as the simulator returned them.
+//   versions    { Fxxx: version } for every formula the result used.
+//
+// Why the versions are stored rather than looked up: a formula may change after
+// the scenario was saved. Keeping the version it ran under is what lets the
+// screen say, a year later, "this figure came from F021 version 1" instead of
+// silently showing a different number under the same name.
+model SimulationScenario {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Key of a simulator of constants/simulators.js. Free-form string, like the
+  // other application-level vocabularies here: the catalogue grows with the
+  // client's lots, and a DB enum would need a migration for each one.
+  simulator String
+  // The name the person gave this scenario, to tell two of them apart.
+  title     String   @db.VarChar(120)
+  // ISO code the amounts are expressed in. Stored with the scenario: comparing
+  // two scenarios in different currencies is refused, never converted.
+  currency  String   @db.VarChar(3)
+  inputs    Json
+  hypotheses Json?
+  versions  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@map("simulation_scenarios")
 }
 
 // Messages sent through the public contact form (P1-07). Stored in the DB

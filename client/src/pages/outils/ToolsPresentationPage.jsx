@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { CreditCard, Landmark, Receipt, Wrench } from 'lucide-react';
+import { Briefcase, Calculator, CreditCard, FlaskConical, Landmark, Receipt, Wrench } from 'lucide-react';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import Notice from '../../components/ui/Notice.jsx';
@@ -8,8 +8,11 @@ import '../Pages.css';
 
 const tools = [
   { key: 'comparator', icon: Landmark, tone: 'tone-green', to: '/outils/comparateur', available: true },
+  { key: 'workshop', icon: FlaskConical, tone: 'tone-blue', to: '/outils/atelier', available: true },
+  { key: 'simulators', icon: Calculator, tone: 'tone-blue', to: '/outils/simulateurs', available: true },
+  { key: 'jobOffers', icon: Briefcase, tone: 'tone-brass', to: '/outils/offres-emploi', available: true },
   { key: 'credit', icon: CreditCard, tone: 'tone-brass', available: false },
-  { key: 'invoice', icon: Receipt, tone: 'tone-blue', available: false },
+  { key: 'invoice', icon: Receipt, tone: 'tone-clay', available: false },
 ];
 
 export default function ToolsPresentationPage() {

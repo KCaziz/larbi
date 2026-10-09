@@ -100,7 +100,7 @@ describe('site sweep', { skip: findChrome() ? false : 'no Chrome/Chromium found 
       await b.setViewport(width);
       await setLanguage(lang);
 
-      const visitor = ['/', '/formations', '/outils', '/blog', `/blog/${data.article.slug}`, '/blog?category=fiscalite', '/blog?q=balayage', '/a-propos', '/services', '/faq', '/fonctionnalites', '/contact', '/mentions-legales', '/confidentialite', '/connexion', '/inscription', '/mot-de-passe-oublie', '/verification', `/verification/${data.cert.certificateNumber}`, '/outils/comparateur', '/outils/comparateur/comptes', '/outils/comparateur/epargne', '/outils/comparateur/devises', '/outils/comparateur/coffres-forts', '/outils/comparateur/segments/particulier', '/outils/comparateur/segments/entreprise'];
+      const visitor = ['/', '/formations', '/outils', '/blog', `/blog/${data.article.slug}`, '/blog?category=fiscalite', '/blog?q=balayage', '/a-propos', '/services', '/faq', '/fonctionnalites', '/contact', '/mentions-legales', '/confidentialite', '/connexion', '/inscription', '/mot-de-passe-oublie', '/verification', `/verification/${data.cert.certificateNumber}`, '/outils/comparateur', '/outils/comparateur/comptes', '/outils/comparateur/epargne', '/outils/comparateur/devises', '/outils/comparateur/coffres-forts', '/outils/comparateur/segments/particulier', '/outils/comparateur/segments/entreprise', '/outils/simulateurs', '/outils/simulateurs/budget-mensuel', '/outils/simulateurs/objectif-avec-rendement', '/outils/simulateurs/budget-etudiant', '/outils/simulateurs/effort-dette', '/outils/simulateurs/mensualite-financement', '/outils/simulateurs/remboursement-anticipe', '/outils/simulateurs/strategies-dettes', '/outils/simulateurs/simulation-logement', '/outils/offres-emploi', '/outils/atelier'];
       await setSession(null);
       for (const route of visitor) {
         await b.goto(site.url + route);
@@ -108,7 +108,7 @@ describe('site sweep', { skip: findChrome() ? false : 'no Chrome/Chromium found 
         await audit(`${lang}/${width} visitor ${route}`);
       }
       // pages that are "not found" ON PURPOSE (their 404 is part of the behaviour)
-      for (const route of ['/page-inexistante', `/blog/${data.draftArticle.slug}`, '/blog/inexistant', '/verification/FINCLUDIA-AAAA-BBBB-CCCC', '/outils/comparateur/inexistant', '/outils/comparateur/segments/non_precise']) {
+      for (const route of ['/page-inexistante', `/blog/${data.draftArticle.slug}`, '/blog/inexistant', '/verification/FINCLUDIA-AAAA-BBBB-CCCC', '/outils/comparateur/inexistant', '/outils/comparateur/segments/non_precise', '/outils/simulateurs/inexistant']) {
         await b.goto(site.url + route);
         await sleep(300);
         await audit(`${lang}/${width} visitor (not found) ${route}`, { expectHttp: [/^404 \/api\//] });

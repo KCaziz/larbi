@@ -29,6 +29,7 @@ describe('public comparator, free access', () => {
     assert.deepEqual(res.body.tools, [
       { key: 'comparateur-bancaire', status: 'available', access: 'public' },
       { key: 'simulateurs', status: 'available', access: 'public' },
+      { key: 'comparaisons', status: 'available', access: 'public' },
       { key: 'simulateur-credit', status: 'planned', access: 'authenticated' },
       { key: 'generateur-facture', status: 'planned', access: 'authenticated' },
     ]);

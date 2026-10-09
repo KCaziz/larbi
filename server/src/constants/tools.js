@@ -13,6 +13,9 @@ export const TOOLS = [
   // the simulation workshop works "en mode découverte", without a profile.
   // Requiring an account is one word here if the client decides otherwise.
   { key: 'simulateurs', status: 'available', access: 'public' },
+  // Multi-criteria comparison and job-offer comparator (P4-12). Free access for
+  // the same reason: they compare the figures the person types, and read nothing.
+  { key: 'comparaisons', status: 'available', access: 'public' },
   // Cahier des charges: "Outils : accès authentifié et selon les droits".
   { key: 'simulateur-credit', status: 'planned', access: 'authenticated' },
   { key: 'generateur-facture', status: 'planned', access: 'authenticated' },

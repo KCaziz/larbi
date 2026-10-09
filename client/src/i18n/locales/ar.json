@@ -281,8 +281,20 @@
       "title": "مولّد الفواتير",
       "body": "إنشاء فواتير (الزبون، مقدّم الخدمة، المنتجات/الخدمات، المجاميع) مع تصدير بصيغتي PDF وExcel."
     },
-    "accessNote": "مقارنة البنوك متاحة مجانًا للجميع. ستتطلب الأدوات الأخرى تسجيل الدخول حسب صلاحياتكم.",
-    "notice": "سيتوفّر محاكي القرض ومولّد الفواتير قريبًا."
+    "accessNote": "مقارن البنوك والحاسبات متاحان بحرية. أما الأدوات الأخرى فستتطلب حسابًا.",
+    "notice": "سيتوفّر محاكي القرض ومولّد الفواتير قريبًا.",
+    "simulators": {
+      "title": "الحاسبات",
+      "body": "الميزانية والادخار والأهداف والتضخم: حسابات مشروحة، كل رقم يُظهر صيغته."
+    },
+    "jobOffers": {
+      "title": "مقارنة عروض العمل",
+      "body": "إلى جانب الراتب: العلاوات والمزايا القابلة للتقدير والنقل والوجبات ووقت التنقل، على عرضين أو ثلاثة."
+    },
+    "workshop": {
+      "title": "ورشة المحاكاة",
+      "body": "كل الحاسبات في مكان واحد، مع أمثلة وحفظ السيناريوهات ومقارنتها."
+    }
   },
   "blogList": {
     "title": "المدونة",
@@ -1800,5 +1812,353 @@
       "operations-diverses": "خدمات بنكية لا تندرج مباشرةً ضمن الأقسام الأخرى.",
       "cheques": "الرسوم المطبّقة على عمليات الشيكات."
     }
+  },
+  "simulators": {
+    "title": "الحاسبات",
+    "intro": "حسابات بسيطة ومشروحة، انطلاقًا من أرقام تقدّمها أنت.",
+    "disclaimer": "هذه محاكاة إرشادية تعتمد فقط على الأرقام التي تدخلها. وهي ليست نصيحة مالية ولا وعدًا بأي نتيجة.",
+    "open": "فتح",
+    "compute": "احسب",
+    "computing": "جارٍ الحساب…",
+    "reset": "إعادة التعيين",
+    "optional": "اختياري",
+    "resultsTitle": "النتائج",
+    "hypotheses": "الفرضيات المعتمدة:",
+    "notComputed": "غير محسوب",
+    "why": "لماذا هذا الرقم؟",
+    "whyFormula": "الصيغة",
+    "whyReference": "المرجع",
+    "whyVersion": "الإصدار {{version}}",
+    "whyCondition": "الشرط",
+    "whyInputs": "القيم المستعملة",
+    "formulaCount_zero": "لا صيغ",
+    "formulaCount_one": "صيغة واحدة",
+    "formulaCount_two": "صيغتان",
+    "formulaCount_few": "{{count}} صيغ",
+    "formulaCount_many": "{{count}} صيغة",
+    "formulaCount_other": "{{count}} صيغة",
+    "months_zero": "لا أشهر",
+    "months_one": "شهر واحد",
+    "months_two": "شهران",
+    "months_few": "{{count}} أشهر",
+    "months_many": "{{count}} شهرًا",
+    "months_other": "{{count}} شهر",
+    "days_zero": "لا أيام",
+    "days_one": "يوم واحد",
+    "days_two": "يومان",
+    "days_few": "{{count}} أيام",
+    "days_many": "{{count}} يومًا",
+    "days_other": "{{count}} يوم",
+    "hypothesisNames": {
+      "horizon_annees": "الأفق (سنوات)",
+      "horizon_mois": "الأفق (أشهر)",
+      "inflation": "التضخم",
+      "rendement_mensuel": "المردود الشهري",
+      "rendement_nominal": "المردود الاسمي"
+    },
+    "list": {
+      "budget-mensuel": {
+        "title": "الميزانية الشهرية",
+        "body": "مداخيلك ومصاريفك وما يتبقى لتوزيعه خلال شهر."
+      },
+      "budget-fin-de-mois": {
+        "title": "الوصول إلى نهاية الشهر",
+        "body": "ما يتبقى لك يوميًا بعد تجنيب الفواتير المتوقعة."
+      },
+      "enveloppe": {
+        "title": "مظروف الميزانية",
+        "body": "وضع فئة من المصاريف، وإلى أين ستصل بهذه الوتيرة."
+      },
+      "capacite-epargne": {
+        "title": "القدرة على الادخار",
+        "body": "ما يمكنك تجنيبه كل شهر وكل سنة."
+      },
+      "reserve-securite": {
+        "title": "احتياط الأمان",
+        "body": "عدد الأشهر التي يمكن لادخارك المتاح أن يغطيها عند طارئ."
+      },
+      "objectif-sans-rendement": {
+        "title": "هدف بدون مردود",
+        "body": "المدة أو الدفعة الشهرية اللازمة للوصول إلى مبلغ."
+      },
+      "objectif-avec-rendement": {
+        "title": "هدف مع مردود",
+        "body": "ما سيصبح عليه ادخارك بمردود تختاره أنت."
+      },
+      "inflation": {
+        "title": "التضخم والقدرة الشرائية",
+        "body": "القيمة الحقيقية لمبلغ بعد بضع سنوات."
+      },
+      "autonomie-etudiant": {
+        "title": "الاستقلالية المالية",
+        "body": "نسبة مصاريفك التي تغطيها مداخيلك الخاصة."
+      },
+      "provision": {
+        "title": "تحضير مصروف قادم",
+        "body": "ما يجب تجنيبه كل شهر لمصروف قادم."
+      },
+      "premier-salaire": {
+        "title": "الراتب الأول",
+        "body": "شكل ميزانيتك مع راتب أول."
+      },
+      "projection-retraite": {
+        "title": "توقع على المدى الطويل",
+        "body": "ما سيصبح عليه ادخار منتظم خلال سنوات، مع حساب التضخم."
+      },
+      "budget-etudiant": {
+        "title": "تحضير دراستي",
+        "body": "ميزانية حياة طالب مستقبلية والمبلغ التكميلي الذي يجب توفيره."
+      },
+      "effort-dette": {
+        "title": "نسبة استدانتي",
+        "body": "ما تمثّله أقساطك الإلزامية من مدخولك، قبل إضافة دين جديد وبعده."
+      },
+      "mensualite-financement": {
+        "title": "قسط التمويل",
+        "body": "القسط والتكلفة الإجمالية وأثرهما على ما يتبقى لك للعيش، انطلاقًا من المبلغ والنسبة والمدة التي تدخلها."
+      },
+      "remboursement-anticipe": {
+        "title": "السداد المبكر",
+        "body": "ما يغيّره دفع مبلغ إضافي في المدة والفوائد. تحقّق من بنكك إن كان عقدك يسمح بذلك."
+      },
+      "strategies-dettes": {
+        "title": "استراتيجيات السداد",
+        "body": "قارن ترتيبين للسداد — الأعلى تكلفة أو الأصغر رصيدًا أولًا — في المدة والتكلفة."
+      },
+      "simulation-logement": {
+        "title": "محاكاة السكن",
+        "body": "القسط والتكلفة الإجمالية وما يتبقى للعيش والاحتياطي بعد الدفعة الأولى، لمشروع سكني."
+      }
+    },
+    "fields": {
+      "plannedIncome": "المداخيل المتوقعة",
+      "fixedExpenses": "المصاريف الثابتة",
+      "variableExpenses": "المصاريف المتغيرة",
+      "debtInstalments": "أقساط الديون",
+      "plannedSavings": "الادخار المخطط",
+      "currentBalance": "الرصيد الحالي",
+      "remainingDays": "الأيام المتبقية في الشهر",
+      "remainingBills": "الفواتير المتبقية",
+      "dailySpendingReference": "المصروف اليومي المرجعي",
+      "categoryBudget": "ميزانية الفئة",
+      "consumed": "ما تم إنفاقه",
+      "daysElapsed": "الأيام المنقضية",
+      "daysInPeriod": "أيام الفترة",
+      "income": "المداخيل",
+      "expenses": "المصاريف",
+      "instalments": "الأقساط الإلزامية",
+      "reservedMargin": "الهامش المحتفظ به",
+      "liquidSavings": "الادخار المتاح فورًا",
+      "essentialMonthlyExpenses": "المصاريف الأساسية شهريًا",
+      "targetMonths": "الهدف بعدد أشهر المصاريف",
+      "monthlyContribution": "الدفعة الشهرية",
+      "target": "المبلغ المستهدف",
+      "capital": "رأس المال المتوفر",
+      "contribution": "الدفعة الشهرية",
+      "monthsLeft": "الأشهر المتبقية",
+      "months": "المدة بالأشهر",
+      "monthlyRate": "مردود شهري افتراضي",
+      "nominalValue": "المبلغ اليوم",
+      "inflation": "التضخم السنوي",
+      "years": "المدة بالسنوات",
+      "nominalReturn": "مردود سنوي افتراضي",
+      "ownIncome": "مداخيلي الخاصة",
+      "totalExpenses": "إجمالي المصاريف",
+      "plannedAmount": "المبلغ المطلوب تحضيره",
+      "alreadyProvisioned": "ما تم توفيره",
+      "net": "الراتب الصافي",
+      "housing": "السكن",
+      "transport": "النقل",
+      "food": "التغذية",
+      "otherExpenses": "مصاريف أخرى",
+      "savingsTarget": "الادخار المستهدف",
+      "tuition": "مصاريف الدراسة",
+      "telecom": "الهاتف والإنترنت",
+      "leisure": "الترفيه",
+      "familySupport": "مساعدة الأسرة",
+      "ownResources": "مواردي الخاصة",
+      "instalment": "مبلغ القسط",
+      "label": "الاسم",
+      "netIncome": "المدخول الصافي الشهري",
+      "newInstalment": "قسط دين جديد",
+      "outstandingPrincipal": "إجمالي رأس المال المتبقي",
+      "creditAmount": "المبلغ المقترض",
+      "downPayment": "الدفعة الأولى",
+      "annualRate": "النسبة السنوية",
+      "periodsPerYear": "عدد الأقساط في السنة",
+      "durationMonths": "المدة (أشهر)",
+      "fees": "مصاريف الملف",
+      "insurance": "التأمين",
+      "currentLivingAllowance": "ما يتبقى لك للعيش حاليًا",
+      "currentDebtService": "أقساط الديون الحالية",
+      "balance": "الرصيد المتبقي",
+      "remainingMonths": "الأقساط المتبقية",
+      "extraPayment": "دفعة شهرية إضافية",
+      "earlyRepaymentFees": "مصاريف السداد المبكر",
+      "debts": "ديوني",
+      "minimumPayment": "القسط الأدنى",
+      "price": "سعر السكن"
+    },
+    "results": {
+      "revenus": "المداخيل",
+      "depenses": "المصاريف",
+      "chargesObligatoires": "الأعباء الإلزامية",
+      "fluxNet": "التدفق الصافي",
+      "resteAVivre": "المتبقي للعيش",
+      "epargneNette": "الادخار الصافي",
+      "tauxEpargne": "نسبة الادخار",
+      "resteAAffecter": "المتبقي للتوزيع",
+      "budgetJournalier": "الميزانية اليومية",
+      "couvertureJours": "التغطية",
+      "reste": "المتبقي",
+      "tauxConsommation": "نسبة الاستهلاك",
+      "projectionFinPeriode": "التوقع في نهاية الفترة",
+      "capaciteMensuelle": "القدرة الشهرية",
+      "capaciteAnnuelle": "القدرة السنوية",
+      "moisCouverts": "التغطية الاحتياطية",
+      "montantCible": "المبلغ المستهدف",
+      "manque": "النقص",
+      "moisPourAtteindre": "المدة للوصول إلى الهدف",
+      "progression": "التقدم",
+      "moisNecessaires": "الأشهر اللازمة",
+      "versementNecessaire": "الدفعة اللازمة",
+      "valeurFutureCapital": "القيمة المستقبلية لرأس المال",
+      "valeurFutureVersements": "القيمة المستقبلية للدفعات",
+      "valeurFutureTotale": "القيمة المستقبلية الإجمالية",
+      "versementRequis": "الدفعة المطلوبة",
+      "valeurReelle": "القيمة الحقيقية",
+      "rendementReel": "المردود الحقيقي",
+      "autonomie": "الاستقلالية",
+      "provisionMensuelle": "التوفير الشهري",
+      "resteDisponible": "المتبقي المتاح",
+      "capitalFuturInitial": "رأس المال الأولي المتوقع",
+      "capitalFuturVersements": "الدفعات المتوقعة",
+      "capitalNominal": "رأس المال الاسمي",
+      "capitalReel": "رأس المال بالقيمة الحقيقية",
+      "ressourcesProjetees": "الموارد المتوقعة",
+      "depensesProjetees": "المصاريف المتوقعة",
+      "serviceMensuel": "الخدمة الشهرية للدين",
+      "tauxEffort": "نسبة الاستدانة الحالية",
+      "tauxEffortApres": "نسبة الاستدانة مع الدين الجديد",
+      "revenuAnnuel": "المدخول السنوي",
+      "detteSurRevenuAnnuel": "الدين إلى المدخول السنوي",
+      "tauxPeriodique": "النسبة لكل قسط",
+      "mensualite": "القسط",
+      "totalPaiements": "إجمالي المدفوعات",
+      "coutTotal": "التكلفة الإجمالية للتمويل",
+      "impact": "أثر هذا القسط",
+      "planActuel": "دون دفعة إضافية",
+      "planAnticipe": "مع الدفعة الإضافية",
+      "interetsEconomises": "الفوائد الموفّرة، تقدير",
+      "avalanche": "الأعلى تكلفة أولًا",
+      "bouleDeNeige": "الأصغر رصيدًا أولًا",
+      "reserveApresApport": "الاحتياطي بعد الدفعة الأولى"
+    },
+    "rowNumber": "السطر {{number}}",
+    "addRow": "إضافة سطر",
+    "removeRow": "حذف",
+    "plan": {
+      "completed": "نعم",
+      "notCompleted": "لا، ليس خلال الأفق المحسوب",
+      "payoffStep": "{{name}}: الشهر {{month}}"
+    },
+    "strategies": {
+      "avalanche": "الأعلى تكلفة أولًا",
+      "snowball": "الأصغر رصيدًا أولًا"
+    },
+    "parts": {
+      "livingAllowance": "المتبقي للعيش بعد القسط",
+      "effortRate": "نسبة الاستدانة بعد القسط",
+      "strategy": "ترتيب السداد",
+      "completed": "سداد الديون بالكامل",
+      "months": "المدة",
+      "totalPaid": "إجمالي المدفوع",
+      "totalInterest": "الفوائد المدفوعة",
+      "payoff": "الديون المسددة بالترتيب"
+    },
+    "loadExample": "تحميل مثال",
+    "exampleNote": "قيم توضيحية لمعرفة ما يفعله هذا المحاكي. عدّلها: لا يُحسب شيء قبل أن تطلب ذلك.",
+    "composite": "عدة قيم",
+    "scenarioTitle": "اسم السيناريو",
+    "saveScenario": "احفظ هذا السيناريو",
+    "scenarioSaved": "تم حفظ السيناريو «{{title}}» مع فرضياته وإصدارات صيغه.",
+    "saveNeedsAccount": "الحسابات متاحة للجميع. أما حفظ سيناريو ومقارنته لاحقًا فيتطلب حسابًا."
+  },
+  "comparison": {
+    "criterion": "المعيار",
+    "score": "النتيجة الموزونة",
+    "bestOnCriterion": "أفضل قيمة في هذا المعيار",
+    "scoreMethod": "النتيجة {{formula}}: مجموع المعايير المعيّرة (أدنى–أقصى بين الخيارات المقارنة) مضروبة في أوزانك، مقسومة على مجموع الأوزان المستخدمة. الأوزان: {{weights}}.",
+    "missingValue": "قيمة ناقصة في «{{criterion}}»: {{options}}. لم تُستبدل بصفر ولا تُحتسب في النتيجة.",
+    "direction": {
+      "lower": "الأقل أفضل",
+      "higher": "الأكثر أفضل"
+    },
+    "criteria": {
+      "cost": "التكلفة",
+      "fees": "المصاريف",
+      "netValue": "الربح الصافي",
+      "duration": "المدة",
+      "commuteMinutes": "وقت التنقل يوميًا",
+      "liquidity": "السيولة، تقييمك من 10",
+      "risk": "المخاطر، تقييمك من 10",
+      "compatibility": "التوافق",
+      "conditions": "الشروط"
+    }
+  },
+  "jobOffers": {
+    "title": "مقارنة عروض العمل",
+    "intro": "عرضان أو ثلاثة تُقارن بما تتركه فعلًا: الراتب، وما يمكن تقديره حوله، وما يكلّفه العمل.",
+    "disclaimer": "مقارنة إرشادية انطلاقًا من المبالغ التي تدخلها. وقت التنقل يُقارن بالدقائق ولا يُحوّل إلى مال أبدًا.",
+    "offerNumber": "العرض {{number}}",
+    "addOffer": "إضافة عرض",
+    "compare": "قارن",
+    "resultsTitle": "المقارنة",
+    "useScore": "حساب نتيجة موزونة",
+    "scoreNote": "النتيجة اختيارية. لا تظهر إلا إذا أعطيت أوزانًا، وتُعرض طريقة حسابها معها.",
+    "weightOf": "وزن «{{criterion}}»",
+    "nonMonetisableTitle": "مزايا غير قابلة للتقدير، معروضة على حدة",
+    "formulaNote": "الربح الاقتصادي الصافي محسوب بالصيغة {{formula}} من دفتر الشروط.",
+    "fields": {
+      "label": "اسم العرض",
+      "net": "الراتب الصافي الشهري",
+      "bonuses": "العلاوات الشهرية",
+      "monetisableBenefits": "مزايا قابلة للتقدير شهريًا",
+      "transportCost": "النقل شهريًا",
+      "mealCost": "الوجبات شهريًا",
+      "annualJobCosts": "مصاريف سنوية مرتبطة بالعمل",
+      "commuteMinutes": "وقت التنقل يوميًا (دقائق)",
+      "nonMonetisableBenefits": "مزايا غير قابلة للتقدير"
+    },
+    "results": {
+      "coutMensuelAnnualise": "المصاريف السنوية محسوبة شهريًا",
+      "coutsEmploi": "التكاليف الشهرية المرتبطة بالعمل",
+      "netEconomique": "الربح الاقتصادي الصافي"
+    },
+    "minutes_zero": "لا دقائق",
+    "minutes_one": "دقيقة واحدة",
+    "minutes_two": "دقيقتان",
+    "minutes_few": "{{count}} دقائق",
+    "minutes_many": "{{count}} دقيقة",
+    "minutes_other": "{{count}} دقيقة"
+  },
+  "workshop": {
+    "title": "ورشة المحاكاة",
+    "intro": "نقطة دخول واحدة لجميع الحاسبات: ابحث عن نوع المحاكاة، شغّلها، احفظ السيناريو وقارن اثنين أو ثلاثة منها.",
+    "searchLabel": "ابحث عن نوع المحاكاة",
+    "noMatch": "لا يوجد محاكٍ يطابق «{{search}}».",
+    "open": "افتح",
+    "close": "أغلق",
+    "myScenarios": "سيناريوهاتي",
+    "noScenario": "لا سيناريو محفوظ بعد. شغّل محاكاة أعلاه ثم أعطها اسمًا.",
+    "savedOn": "محفوظ في {{date}}",
+    "deleteScenario": "حذف",
+    "compareSelected": "قارن المحدد ({{count}})",
+    "compareHint": "اختر سيناريوهين، ثلاثة كحد أقصى.",
+    "comparisonTitle": "السيناريوهات المقارنة",
+    "figure": "الرقم",
+    "noScoreNote": "لا علامة إجمالية: لا توجد طريقة مقبولة لموازنة ما يتبقى للعيش مقابل عدد من الأشهر. تُعرض الأرقام جنبًا إلى جنب لتقرأها.",
+    "versionChanged": "حُسب بالصيغة {{formula}} الإصدار {{saved}}؛ الصيغة اليوم في الإصدار {{current}}.",
+    "stale": "المعطيات المحفوظة لم تعد تطابق ما يقبله هذا المحاكي: لا يُعاد حساب الأرقام."
   }
 }

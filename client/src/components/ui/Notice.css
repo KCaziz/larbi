@@ -26,3 +26,12 @@
 .notice-action-needed .notice-icon {
   color: var(--warn);
 }
+
+.notice-error {
+  border-inline-start-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.notice-error .notice-icon {
+  color: var(--danger);
+}

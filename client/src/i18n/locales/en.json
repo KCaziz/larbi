@@ -281,8 +281,20 @@
       "title": "Invoice generator",
       "body": "Create invoices (client, provider, products/services, totals) with PDF and Excel export."
     },
-    "accessNote": "The bank comparator is freely accessible. The other tools will require being logged in, depending on your access rights.",
-    "notice": "The credit simulator and invoice generator will be available soon."
+    "accessNote": "The bank comparator and the simulators are in free access. The other tools will require an account.",
+    "notice": "The credit simulator and invoice generator will be available soon.",
+    "simulators": {
+      "title": "Simulators",
+      "body": "Budget, savings, goals, inflation: explained calculations, every figure showing its formula."
+    },
+    "jobOffers": {
+      "title": "Compare job offers",
+      "body": "Beyond the salary: bonuses, priceable benefits, transport, meals and commute time, across two or three offers."
+    },
+    "workshop": {
+      "title": "Simulation workshop",
+      "body": "Every calculator in one place, with examples, saved scenarios and scenario comparison."
+    }
   },
   "blogList": {
     "title": "Blog",
@@ -1740,5 +1752,337 @@
       "operations-diverses": "Banking services that do not belong to the other sections.",
       "cheques": "Fees charged on cheque operations."
     }
+  },
+  "simulators": {
+    "title": "Simulators",
+    "intro": "Simple calculations, explained, from figures you provide.",
+    "disclaimer": "These are indicative simulations, based only on the figures you enter. They are neither financial advice nor a promise of any result.",
+    "open": "Open",
+    "compute": "Calculate",
+    "computing": "Calculating…",
+    "reset": "Reset",
+    "optional": "optional",
+    "resultsTitle": "Results",
+    "hypotheses": "Assumptions used:",
+    "notComputed": "Not computed",
+    "why": "Why this figure?",
+    "whyFormula": "Formula",
+    "whyReference": "Reference",
+    "whyVersion": "version {{version}}",
+    "whyCondition": "Condition",
+    "whyInputs": "Values used",
+    "formulaCount_one": "{{count}} formula",
+    "formulaCount_other": "{{count}} formulas",
+    "months_one": "{{count}} month",
+    "months_other": "{{count}} months",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "hypothesisNames": {
+      "horizon_annees": "Horizon (years)",
+      "horizon_mois": "Horizon (months)",
+      "inflation": "Inflation",
+      "rendement_mensuel": "Monthly return",
+      "rendement_nominal": "Nominal return"
+    },
+    "list": {
+      "budget-mensuel": {
+        "title": "Monthly budget",
+        "body": "Your income, your expenses and what is left to allocate over a month."
+      },
+      "budget-fin-de-mois": {
+        "title": "Making it to the end of the month",
+        "body": "What is left per day once the planned bills are set aside."
+      },
+      "enveloppe": {
+        "title": "Budget envelope",
+        "body": "Where a spending category stands, and where it will end up at this pace."
+      },
+      "capacite-epargne": {
+        "title": "Savings capacity",
+        "body": "How much you can set aside each month, and each year."
+      },
+      "reserve-securite": {
+        "title": "Safety fund",
+        "body": "How many months your available savings could absorb."
+      },
+      "objectif-sans-rendement": {
+        "title": "Goal, without a return",
+        "body": "The time or the monthly payment needed to reach an amount."
+      },
+      "objectif-avec-rendement": {
+        "title": "Goal, with a return",
+        "body": "What your savings would become with a return you choose."
+      },
+      "inflation": {
+        "title": "Inflation and purchasing power",
+        "body": "What a sum will really be worth in a few years."
+      },
+      "autonomie-etudiant": {
+        "title": "Financial autonomy",
+        "body": "The share of your expenses covered by income of your own."
+      },
+      "provision": {
+        "title": "Setting aside for an expense",
+        "body": "How much to set aside each month for an expense ahead."
+      },
+      "premier-salaire": {
+        "title": "First salary",
+        "body": "What your budget would look like on a first salary."
+      },
+      "projection-retraite": {
+        "title": "Long-term projection",
+        "body": "What regular savings would become over years, inflation included."
+      },
+      "budget-etudiant": {
+        "title": "Preparing my studies",
+        "body": "The budget of a future student life and the gap that would need filling."
+      },
+      "effort-dette": {
+        "title": "My debt effort rate",
+        "body": "What your mandatory instalments represent in your income, before and after one more debt."
+      },
+      "mensualite-financement": {
+        "title": "Instalment of a financing",
+        "body": "Instalment, total cost and effect on your living allowance, from the amount, rate and duration you enter."
+      },
+      "remboursement-anticipe": {
+        "title": "Early repayment",
+        "body": "What an extra payment changes to the duration and the interest. Check with your bank whether your contract allows it."
+      },
+      "strategies-dettes": {
+        "title": "Repayment strategies",
+        "body": "Compare two repayment orders — costliest or smallest debt first — on duration and on cost."
+      },
+      "simulation-logement": {
+        "title": "Housing simulation",
+        "body": "Instalment, total cost, living allowance and the reserve left after the down payment, for a housing project."
+      }
+    },
+    "fields": {
+      "plannedIncome": "Planned income",
+      "fixedExpenses": "Fixed expenses",
+      "variableExpenses": "Variable expenses",
+      "debtInstalments": "Debt instalments",
+      "plannedSavings": "Planned savings",
+      "currentBalance": "Current balance",
+      "remainingDays": "Days left in the month",
+      "remainingBills": "Bills still to pay",
+      "dailySpendingReference": "Reference daily spending",
+      "categoryBudget": "Category budget",
+      "consumed": "Already spent",
+      "daysElapsed": "Days elapsed",
+      "daysInPeriod": "Days in the period",
+      "income": "Income",
+      "expenses": "Expenses",
+      "instalments": "Mandatory instalments",
+      "reservedMargin": "Reserved margin",
+      "liquidSavings": "Savings available right away",
+      "essentialMonthlyExpenses": "Essential expenses per month",
+      "targetMonths": "Target, in months of expenses",
+      "monthlyContribution": "Monthly contribution",
+      "target": "Amount to reach",
+      "capital": "Capital already set aside",
+      "contribution": "Monthly contribution",
+      "monthsLeft": "Months left",
+      "months": "Duration, in months",
+      "monthlyRate": "Hypothetical monthly return",
+      "nominalValue": "Amount today",
+      "inflation": "Yearly inflation",
+      "years": "Duration, in years",
+      "nominalReturn": "Hypothetical yearly return",
+      "ownIncome": "Income of my own",
+      "totalExpenses": "Total expenses",
+      "plannedAmount": "Amount to plan for",
+      "alreadyProvisioned": "Already set aside",
+      "net": "Net salary",
+      "housing": "Housing",
+      "transport": "Transport",
+      "food": "Food",
+      "otherExpenses": "Other expenses",
+      "savingsTarget": "Savings target",
+      "tuition": "Tuition fees",
+      "telecom": "Phone and internet",
+      "leisure": "Leisure",
+      "familySupport": "Family support",
+      "ownResources": "My own resources",
+      "instalment": "Instalment amount",
+      "label": "Name",
+      "netIncome": "Monthly net income",
+      "newInstalment": "Instalment of a new debt",
+      "outstandingPrincipal": "Outstanding principal, all debts",
+      "creditAmount": "Amount borrowed",
+      "downPayment": "Down payment",
+      "annualRate": "Annual rate",
+      "periodsPerYear": "Instalments per year",
+      "durationMonths": "Duration (months)",
+      "fees": "Arrangement fees",
+      "insurance": "Insurance",
+      "currentLivingAllowance": "Current living allowance",
+      "currentDebtService": "Current debt instalments",
+      "balance": "Outstanding balance",
+      "remainingMonths": "Instalments left",
+      "extraPayment": "Extra monthly payment",
+      "earlyRepaymentFees": "Early repayment fees",
+      "debts": "My debts",
+      "minimumPayment": "Minimum instalment",
+      "price": "Price of the home"
+    },
+    "results": {
+      "revenus": "Income",
+      "depenses": "Expenses",
+      "chargesObligatoires": "Committed charges",
+      "fluxNet": "Net flow",
+      "resteAVivre": "Living allowance",
+      "epargneNette": "Net savings",
+      "tauxEpargne": "Savings rate",
+      "resteAAffecter": "Left to allocate",
+      "budgetJournalier": "Budget per day",
+      "couvertureJours": "Cover",
+      "reste": "Remaining",
+      "tauxConsommation": "Usage rate",
+      "projectionFinPeriode": "Projection at end of period",
+      "capaciteMensuelle": "Monthly capacity",
+      "capaciteAnnuelle": "Yearly capacity",
+      "moisCouverts": "Reserve covered",
+      "montantCible": "Target amount",
+      "manque": "Shortfall",
+      "moisPourAtteindre": "Time to reach the target",
+      "progression": "Progress",
+      "moisNecessaires": "Months needed",
+      "versementNecessaire": "Required payment",
+      "valeurFutureCapital": "Future value of the capital",
+      "valeurFutureVersements": "Future value of the payments",
+      "valeurFutureTotale": "Total future value",
+      "versementRequis": "Required payment",
+      "valeurReelle": "Real value",
+      "rendementReel": "Real return",
+      "autonomie": "Autonomy",
+      "provisionMensuelle": "Monthly provision",
+      "resteDisponible": "Left available",
+      "capitalFuturInitial": "Projected initial capital",
+      "capitalFuturVersements": "Projected payments",
+      "capitalNominal": "Nominal capital",
+      "capitalReel": "Capital in real terms",
+      "ressourcesProjetees": "Projected resources",
+      "depensesProjetees": "Projected expenses",
+      "serviceMensuel": "Monthly debt service",
+      "tauxEffort": "Current effort rate",
+      "tauxEffortApres": "Effort rate with the new debt",
+      "revenuAnnuel": "Annual income",
+      "detteSurRevenuAnnuel": "Debt to annual income",
+      "tauxPeriodique": "Rate per instalment",
+      "mensualite": "Instalment",
+      "totalPaiements": "Total payments",
+      "coutTotal": "Total cost of the financing",
+      "impact": "Effect of this instalment",
+      "planActuel": "Without the extra payment",
+      "planAnticipe": "With the extra payment",
+      "interetsEconomises": "Interest saved, estimate",
+      "avalanche": "Costliest debt first",
+      "bouleDeNeige": "Smallest balance first",
+      "reserveApresApport": "Reserve left after the down payment"
+    },
+    "rowNumber": "Row {{number}}",
+    "addRow": "Add a row",
+    "removeRow": "Remove",
+    "plan": {
+      "completed": "Yes",
+      "notCompleted": "No, not within the simulated horizon",
+      "payoffStep": "{{name}}: month {{month}}"
+    },
+    "strategies": {
+      "avalanche": "Costliest debt first",
+      "snowball": "Smallest balance first"
+    },
+    "parts": {
+      "livingAllowance": "Living allowance after the instalment",
+      "effortRate": "Effort rate after the instalment",
+      "strategy": "Repayment order",
+      "completed": "Debts cleared",
+      "months": "Duration",
+      "totalPaid": "Total paid",
+      "totalInterest": "Interest paid",
+      "payoff": "Debts cleared, in order"
+    },
+    "loadExample": "Load an example",
+    "exampleNote": "Illustrative values, to see what this simulator does. Change them: nothing is computed until you ask.",
+    "composite": "Several values",
+    "scenarioTitle": "Name of the scenario",
+    "saveScenario": "Keep this scenario",
+    "scenarioSaved": "Scenario \"{{title}}\" kept, with its hypotheses and its formula versions.",
+    "saveNeedsAccount": "The calculations are free to use. Keeping a scenario and comparing it later needs an account."
+  },
+  "comparison": {
+    "criterion": "Criterion",
+    "score": "Weighted score",
+    "bestOnCriterion": "Best value on this criterion",
+    "scoreMethod": "Score {{formula}}: the sum of the normalised criteria (min-max across the compared options) multiplied by your weights, divided by the sum of the weights used. Weights: {{weights}}.",
+    "missingValue": "Missing value for \"{{criterion}}\": {{options}}. It is not replaced by zero and does not count towards the score.",
+    "direction": {
+      "lower": "lower is better",
+      "higher": "higher is better"
+    },
+    "criteria": {
+      "cost": "Cost",
+      "fees": "Fees",
+      "netValue": "Net gain",
+      "duration": "Duration",
+      "commuteMinutes": "Commute time per day",
+      "liquidity": "Liquidity, your mark out of 10",
+      "risk": "Risk, your mark out of 10",
+      "compatibility": "Compatibility",
+      "conditions": "Conditions"
+    }
+  },
+  "jobOffers": {
+    "title": "Compare job offers",
+    "intro": "Two or three offers compared on what they really leave: the salary, what can be priced around it, and what the job costs.",
+    "disclaimer": "An indicative comparison, from the amounts you enter. The commute is compared in minutes and is never turned into money.",
+    "offerNumber": "Offer {{number}}",
+    "addOffer": "Add an offer",
+    "compare": "Compare",
+    "resultsTitle": "Comparison",
+    "useScore": "Compute a weighted score",
+    "scoreNote": "The score is optional. It appears only if you give weights, and its method is shown with it.",
+    "weightOf": "Weight of \"{{criterion}}\"",
+    "nonMonetisableTitle": "Benefits that cannot be priced, shown apart",
+    "formulaNote": "Net economic value computed with formula {{formula}} of the specification.",
+    "fields": {
+      "label": "Name of the offer",
+      "net": "Monthly net salary",
+      "bonuses": "Monthly bonuses",
+      "monetisableBenefits": "Benefits that can be priced, per month",
+      "transportCost": "Transport per month",
+      "mealCost": "Meals per month",
+      "annualJobCosts": "Yearly costs tied to the job",
+      "commuteMinutes": "Commute per day (minutes)",
+      "nonMonetisableBenefits": "Benefits that cannot be priced"
+    },
+    "results": {
+      "coutMensuelAnnualise": "Yearly costs brought back to the month",
+      "coutsEmploi": "Monthly costs tied to the job",
+      "netEconomique": "Net economic value"
+    },
+    "minutes_one": "{{count}} minute",
+    "minutes_other": "{{count}} minutes"
+  },
+  "workshop": {
+    "title": "Simulation workshop",
+    "intro": "One entry point for every calculator: search a type of simulation, run it, keep the scenario and compare two or three of them.",
+    "searchLabel": "Search a type of simulation",
+    "noMatch": "No simulator matches \"{{search}}\".",
+    "open": "Open",
+    "close": "Close",
+    "myScenarios": "My scenarios",
+    "noScenario": "No scenario kept yet. Run a simulation above, then give it a name.",
+    "savedOn": "kept on {{date}}",
+    "deleteScenario": "Delete",
+    "compareSelected": "Compare the selection ({{count}})",
+    "compareHint": "Pick two scenarios, three at most.",
+    "comparisonTitle": "Scenarios compared",
+    "figure": "Figure",
+    "noScoreNote": "No overall mark: there is no defensible way to weigh a living allowance against a number of months. The figures are shown side by side, for you to read.",
+    "versionChanged": "Computed with {{formula}} version {{saved}}; the formula is now at version {{current}}.",
+    "stale": "The saved parameters no longer match what this simulator accepts: the figures are not recomputed."
   }
 }

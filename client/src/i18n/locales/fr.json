@@ -281,8 +281,20 @@
       "title": "Générateur de facture",
       "body": "Création de factures (client, prestataire, produits/services, totaux) avec export PDF et Excel."
     },
-    "accessNote": "Le comparateur bancaire est en accès libre. Les autres outils nécessiteront d'être connecté, selon vos droits.",
-    "notice": "Le simulateur de crédit et le générateur de facture seront disponibles prochainement."
+    "accessNote": "Le comparateur bancaire et les simulateurs sont en accès libre. Les autres outils nécessiteront un compte.",
+    "notice": "Le simulateur de crédit et le générateur de facture seront disponibles prochainement.",
+    "simulators": {
+      "title": "Simulateurs",
+      "body": "Budget, épargne, objectifs, inflation : des calculs expliqués, chaque chiffre affichant sa formule."
+    },
+    "jobOffers": {
+      "title": "Comparer des offres d'emploi",
+      "body": "Au-delà du salaire : primes, avantages chiffrables, transport, repas et temps de trajet, sur deux ou trois offres."
+    },
+    "workshop": {
+      "title": "Atelier de simulation",
+      "body": "Tous les calculateurs au même endroit, avec des exemples, l’enregistrement d’un scénario et la comparaison de scénarios."
+    }
   },
   "blogList": {
     "title": "Blog",
@@ -1741,5 +1753,337 @@
       "operations-diverses": "Services bancaires qui ne relèvent pas directement des autres rubriques.",
       "cheques": "Frais appliqués aux opérations par chèque."
     }
+  },
+  "simulators": {
+    "title": "Simulateurs",
+    "intro": "Des calculs simples, expliqués, à partir de chiffres que vous donnez.",
+    "disclaimer": "Ce sont des simulations à titre indicatif, à partir des seuls chiffres que vous saisissez. Elles ne constituent ni un conseil financier, ni une promesse de résultat.",
+    "open": "Ouvrir",
+    "compute": "Calculer",
+    "computing": "Calcul en cours…",
+    "reset": "Réinitialiser",
+    "optional": "facultatif",
+    "resultsTitle": "Résultats",
+    "hypotheses": "Hypothèses retenues :",
+    "notComputed": "Non calculé",
+    "why": "Pourquoi ce chiffre ?",
+    "whyFormula": "Formule",
+    "whyReference": "Référence",
+    "whyVersion": "version {{version}}",
+    "whyCondition": "Condition",
+    "whyInputs": "Valeurs utilisées",
+    "formulaCount_one": "{{count}} formule",
+    "formulaCount_other": "{{count}} formules",
+    "months_one": "{{count}} mois",
+    "months_other": "{{count}} mois",
+    "days_one": "{{count}} jour",
+    "days_other": "{{count}} jours",
+    "hypothesisNames": {
+      "horizon_annees": "Horizon (années)",
+      "horizon_mois": "Horizon (mois)",
+      "inflation": "Inflation",
+      "rendement_mensuel": "Rendement mensuel",
+      "rendement_nominal": "Rendement nominal"
+    },
+    "list": {
+      "budget-mensuel": {
+        "title": "Budget mensuel",
+        "body": "Vos revenus, vos dépenses et ce qu'il vous reste à affecter sur un mois."
+      },
+      "budget-fin-de-mois": {
+        "title": "Tenir jusqu'à la fin du mois",
+        "body": "Ce qu'il reste par jour une fois les factures prévues mises de côté."
+      },
+      "enveloppe": {
+        "title": "Enveloppe budgétaire",
+        "body": "Où en est une catégorie de dépenses, et où elle finira si vous continuez ainsi."
+      },
+      "capacite-epargne": {
+        "title": "Capacité d'épargne",
+        "body": "Combien vous pouvez mettre de côté chaque mois, et chaque année."
+      },
+      "reserve-securite": {
+        "title": "Réserve de sécurité",
+        "body": "Combien de mois votre épargne disponible peut absorber un imprévu."
+      },
+      "objectif-sans-rendement": {
+        "title": "Objectif, sans rendement",
+        "body": "Le temps ou le versement mensuel nécessaire pour atteindre un montant."
+      },
+      "objectif-avec-rendement": {
+        "title": "Objectif, avec rendement",
+        "body": "Ce que deviendrait votre épargne avec un rendement que vous choisissez."
+      },
+      "inflation": {
+        "title": "Inflation et pouvoir d'achat",
+        "body": "Ce que vaudra réellement une somme dans quelques années."
+      },
+      "autonomie-etudiant": {
+        "title": "Autonomie financière",
+        "body": "La part de vos dépenses couverte par vos propres revenus."
+      },
+      "provision": {
+        "title": "Provisionner une dépense",
+        "body": "Combien mettre de côté chaque mois pour une dépense à venir."
+      },
+      "premier-salaire": {
+        "title": "Premier salaire",
+        "body": "À quoi ressemblerait votre budget avec un premier salaire."
+      },
+      "projection-retraite": {
+        "title": "Projection longue durée",
+        "body": "Ce que deviendrait une épargne régulière sur plusieurs années, inflation comprise."
+      },
+      "budget-etudiant": {
+        "title": "Préparer mes études",
+        "body": "Le budget d'une future vie étudiante et le complément qu'il faudrait trouver."
+      },
+      "effort-dette": {
+        "title": "Taux d'effort de mes dettes",
+        "body": "Ce que vos mensualités obligatoires représentent dans vos revenus, avant et après une dette supplémentaire."
+      },
+      "mensualite-financement": {
+        "title": "Mensualité d'un financement",
+        "body": "Mensualité, coût total et effet sur votre reste à vivre, à partir du capital, du taux et de la durée que vous saisissez."
+      },
+      "remboursement-anticipe": {
+        "title": "Remboursement anticipé",
+        "body": "Ce qu'un versement supplémentaire change à la durée et aux intérêts. Vérifiez auprès de votre banque si votre contrat le permet."
+      },
+      "strategies-dettes": {
+        "title": "Stratégies de remboursement",
+        "body": "Comparez deux ordres de remboursement — la dette la plus coûteuse ou la plus petite d'abord — sur la durée et sur le coût."
+      },
+      "simulation-logement": {
+        "title": "Simulation logement",
+        "body": "Mensualité, coût total, reste à vivre et réserve restante après l'apport, pour un projet de logement."
+      }
+    },
+    "fields": {
+      "plannedIncome": "Revenus prévus",
+      "fixedExpenses": "Dépenses fixes",
+      "variableExpenses": "Dépenses variables",
+      "debtInstalments": "Mensualités de dettes",
+      "plannedSavings": "Épargne planifiée",
+      "currentBalance": "Solde actuel",
+      "remainingDays": "Jours restants dans le mois",
+      "remainingBills": "Factures restant à payer",
+      "dailySpendingReference": "Dépense journalière de référence",
+      "categoryBudget": "Budget de la catégorie",
+      "consumed": "Déjà dépensé",
+      "daysElapsed": "Jours écoulés",
+      "daysInPeriod": "Jours dans la période",
+      "income": "Revenus",
+      "expenses": "Dépenses",
+      "instalments": "Mensualités obligatoires",
+      "reservedMargin": "Marge réservée",
+      "liquidSavings": "Épargne disponible immédiatement",
+      "essentialMonthlyExpenses": "Dépenses essentielles par mois",
+      "targetMonths": "Cible, en mois de dépenses",
+      "monthlyContribution": "Versement mensuel",
+      "target": "Montant à atteindre",
+      "capital": "Capital déjà mis de côté",
+      "contribution": "Versement mensuel",
+      "monthsLeft": "Mois restants",
+      "months": "Durée, en mois",
+      "monthlyRate": "Rendement mensuel hypothétique",
+      "nominalValue": "Montant aujourd'hui",
+      "inflation": "Inflation annuelle",
+      "years": "Durée, en années",
+      "nominalReturn": "Rendement annuel hypothétique",
+      "ownIncome": "Revenus qui viennent de moi",
+      "totalExpenses": "Dépenses totales",
+      "plannedAmount": "Montant à prévoir",
+      "alreadyProvisioned": "Déjà mis de côté",
+      "net": "Salaire net",
+      "housing": "Logement",
+      "transport": "Transport",
+      "food": "Alimentation",
+      "otherExpenses": "Autres dépenses",
+      "savingsTarget": "Épargne visée",
+      "tuition": "Frais d'études",
+      "telecom": "Téléphone et internet",
+      "leisure": "Loisirs",
+      "familySupport": "Aide de la famille",
+      "ownResources": "Mes propres ressources",
+      "instalment": "Montant de la mensualité",
+      "label": "Nom",
+      "netIncome": "Revenus nets mensuels",
+      "newInstalment": "Mensualité d'une nouvelle dette",
+      "outstandingPrincipal": "Capital restant dû, toutes dettes",
+      "creditAmount": "Capital emprunté",
+      "downPayment": "Apport",
+      "annualRate": "Taux annuel",
+      "periodsPerYear": "Échéances par an",
+      "durationMonths": "Durée (mois)",
+      "fees": "Frais de dossier",
+      "insurance": "Assurance",
+      "currentLivingAllowance": "Reste à vivre actuel",
+      "currentDebtService": "Mensualités de dettes actuelles",
+      "balance": "Capital restant dû",
+      "remainingMonths": "Mensualités restantes",
+      "extraPayment": "Versement supplémentaire mensuel",
+      "earlyRepaymentFees": "Frais de remboursement anticipé",
+      "debts": "Mes dettes",
+      "minimumPayment": "Mensualité minimale",
+      "price": "Prix du logement"
+    },
+    "results": {
+      "revenus": "Revenus",
+      "depenses": "Dépenses",
+      "chargesObligatoires": "Charges obligatoires",
+      "fluxNet": "Flux net",
+      "resteAVivre": "Reste à vivre",
+      "epargneNette": "Épargne nette",
+      "tauxEpargne": "Taux d'épargne",
+      "resteAAffecter": "Reste à affecter",
+      "budgetJournalier": "Budget par jour",
+      "couvertureJours": "Couverture",
+      "reste": "Reste",
+      "tauxConsommation": "Taux de consommation",
+      "projectionFinPeriode": "Projection en fin de période",
+      "capaciteMensuelle": "Capacité mensuelle",
+      "capaciteAnnuelle": "Capacité annuelle",
+      "moisCouverts": "Réserve couverte",
+      "montantCible": "Montant cible",
+      "manque": "Manque",
+      "moisPourAtteindre": "Délai pour atteindre la cible",
+      "progression": "Progression",
+      "moisNecessaires": "Mois nécessaires",
+      "versementNecessaire": "Versement nécessaire",
+      "valeurFutureCapital": "Valeur future du capital",
+      "valeurFutureVersements": "Valeur future des versements",
+      "valeurFutureTotale": "Valeur future totale",
+      "versementRequis": "Versement requis",
+      "valeurReelle": "Valeur réelle",
+      "rendementReel": "Rendement réel",
+      "autonomie": "Autonomie",
+      "provisionMensuelle": "Provision mensuelle",
+      "resteDisponible": "Reste disponible",
+      "capitalFuturInitial": "Capital initial projeté",
+      "capitalFuturVersements": "Versements projetés",
+      "capitalNominal": "Capital nominal",
+      "capitalReel": "Capital en valeur réelle",
+      "ressourcesProjetees": "Ressources projetées",
+      "depensesProjetees": "Dépenses projetées",
+      "serviceMensuel": "Service mensuel de la dette",
+      "tauxEffort": "Taux d'effort actuel",
+      "tauxEffortApres": "Taux d'effort avec la nouvelle dette",
+      "revenuAnnuel": "Revenus annuels",
+      "detteSurRevenuAnnuel": "Dette sur revenus annuels",
+      "tauxPeriodique": "Taux par échéance",
+      "mensualite": "Mensualité",
+      "totalPaiements": "Total des paiements",
+      "coutTotal": "Coût total du financement",
+      "impact": "Effet de cette mensualité",
+      "planActuel": "Sans versement supplémentaire",
+      "planAnticipe": "Avec le versement supplémentaire",
+      "interetsEconomises": "Intérêts économisés, estimation",
+      "avalanche": "Dette la plus coûteuse d'abord",
+      "bouleDeNeige": "Plus petit solde d'abord",
+      "reserveApresApport": "Réserve après l'apport"
+    },
+    "rowNumber": "Ligne {{number}}",
+    "addRow": "Ajouter une ligne",
+    "removeRow": "Retirer",
+    "plan": {
+      "completed": "Oui",
+      "notCompleted": "Non, pas sur l'horizon simulé",
+      "payoffStep": "{{name}} : mois {{month}}"
+    },
+    "strategies": {
+      "avalanche": "Dette la plus coûteuse d'abord",
+      "snowball": "Plus petit solde d'abord"
+    },
+    "parts": {
+      "livingAllowance": "Reste à vivre après la mensualité",
+      "effortRate": "Taux d'effort après la mensualité",
+      "strategy": "Ordre de remboursement",
+      "completed": "Dettes remboursées",
+      "months": "Durée",
+      "totalPaid": "Total versé",
+      "totalInterest": "Intérêts payés",
+      "payoff": "Dettes soldées, dans l’ordre"
+    },
+    "loadExample": "Charger un exemple",
+    "exampleNote": "Des valeurs d’illustration, pour voir ce que fait ce simulateur. Modifiez-les : rien n’est calculé avant que vous le demandiez.",
+    "composite": "Plusieurs valeurs",
+    "scenarioTitle": "Nom du scénario",
+    "saveScenario": "Enregistrer ce scénario",
+    "scenarioSaved": "Scénario « {{title}} » enregistré, avec ses hypothèses et ses versions de formule.",
+    "saveNeedsAccount": "Les calculs sont libres d’accès. Pour conserver un scénario et le comparer plus tard, il faut un compte."
+  },
+  "comparison": {
+    "criterion": "Critère",
+    "score": "Score pondéré",
+    "bestOnCriterion": "Meilleure valeur sur ce critère",
+    "scoreMethod": "Score {{formula}} : somme des critères normalisés (min-max sur les options comparées) multipliés par vos poids, divisée par la somme des poids utilisés. Poids : {{weights}}.",
+    "missingValue": "Donnée manquante pour « {{criterion}} » : {{options}}. Elle n’est pas remplacée par zéro et ne compte pas dans le score.",
+    "direction": {
+      "lower": "moins est mieux",
+      "higher": "plus est mieux"
+    },
+    "criteria": {
+      "cost": "Coût",
+      "fees": "Frais",
+      "netValue": "Gain net",
+      "duration": "Durée",
+      "commuteMinutes": "Temps de trajet par jour",
+      "liquidity": "Liquidité, votre note sur 10",
+      "risk": "Risque, votre note sur 10",
+      "compatibility": "Compatibilité",
+      "conditions": "Conditions"
+    }
+  },
+  "jobOffers": {
+    "title": "Comparer des offres d'emploi",
+    "intro": "Deux ou trois offres comparées sur ce qu'elles laissent réellement : le salaire, ce qui peut être chiffré autour, et ce que l'emploi coûte.",
+    "disclaimer": "Comparaison indicative, à partir des montants que vous saisissez. Le temps de trajet est comparé en minutes et n'est jamais converti en argent.",
+    "offerNumber": "Offre {{number}}",
+    "addOffer": "Ajouter une offre",
+    "compare": "Comparer",
+    "resultsTitle": "Comparaison",
+    "useScore": "Calculer un score pondéré",
+    "scoreNote": "Le score est facultatif. Il n'apparaît que si vous donnez des poids, et la méthode de calcul est affichée avec lui.",
+    "weightOf": "Poids de « {{criterion}} »",
+    "nonMonetisableTitle": "Avantages non chiffrables, affichés à part",
+    "formulaNote": "Net économique calculé par la formule {{formula}} du cahier des charges.",
+    "fields": {
+      "label": "Nom de l'offre",
+      "net": "Salaire net mensuel",
+      "bonuses": "Primes mensuelles",
+      "monetisableBenefits": "Avantages chiffrables par mois",
+      "transportCost": "Transport par mois",
+      "mealCost": "Repas par mois",
+      "annualJobCosts": "Frais annuels liés à l'emploi",
+      "commuteMinutes": "Temps de trajet par jour (minutes)",
+      "nonMonetisableBenefits": "Avantages non chiffrables"
+    },
+    "results": {
+      "coutMensuelAnnualise": "Frais annuels ramenés au mois",
+      "coutsEmploi": "Coûts mensuels liés à l'emploi",
+      "netEconomique": "Net économique"
+    },
+    "minutes_one": "{{count}} minute",
+    "minutes_other": "{{count}} minutes"
+  },
+  "workshop": {
+    "title": "Atelier de simulation",
+    "intro": "Un seul point d’entrée pour tous les calculateurs : cherchez un type de simulation, lancez-la, gardez le scénario et comparez-en deux ou trois.",
+    "searchLabel": "Chercher un type de simulation",
+    "noMatch": "Aucun simulateur ne correspond à « {{search}} ».",
+    "open": "Ouvrir",
+    "close": "Fermer",
+    "myScenarios": "Mes scénarios",
+    "noScenario": "Aucun scénario enregistré pour l’instant. Lancez une simulation ci-dessus, puis donnez-lui un nom.",
+    "savedOn": "enregistré le {{date}}",
+    "deleteScenario": "Supprimer",
+    "compareSelected": "Comparer la sélection ({{count}})",
+    "compareHint": "Choisissez deux scénarios, trois au maximum.",
+    "comparisonTitle": "Scénarios comparés",
+    "figure": "Chiffre",
+    "noScoreNote": "Aucune note globale : il n’existe pas de façon défendable de peser un reste à vivre contre un nombre de mois. Les chiffres sont mis côte à côte, vous les lisez.",
+    "versionChanged": "Calculé avec {{formula}} version {{saved}} ; la formule est aujourd’hui en version {{current}}.",
+    "stale": "Les paramètres enregistrés ne correspondent plus à ce que ce simulateur accepte : les chiffres ne sont pas recalculés."
   }
 }

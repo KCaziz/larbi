@@ -36,6 +36,11 @@ const PUBLIC = new Set([
   'GET /api/tools/simulations',
   'GET /api/tools/simulations/:key',
   'POST /api/tools/simulations/:key',
+  // Multi-criteria comparison and job-offer comparator (P4-12): pure compute
+  // from the body, no stored data read or written.
+  'GET /api/tools/comparaisons',
+  'POST /api/tools/comparaisons',
+  'POST /api/tools/comparaisons/offres-emploi',
 ]);
 
 const UUID0 = '00000000-0000-4000-8000-000000000000';

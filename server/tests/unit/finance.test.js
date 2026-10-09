@@ -29,9 +29,16 @@ describe('the catalogue and the implementations match', () => {
     assert.deepEqual(exported, catalogued);
   });
 
-  test('the 4 algorithms have an implementation', () => {
+  test('the 4 algorithms have an implementation, a name and a rule', () => {
     assert.equal(ALGORITHMS.length, 4);
-    for (const algorithm of ALGORITHMS) assert.equal(typeof algorithms[algorithm.fn], 'function', algorithm.id);
+    for (const algorithm of ALGORITHMS) {
+      assert.equal(typeof algorithms[algorithm.fn], 'function', algorithm.id);
+      // The client's two columns for an algorithm. There is no "condition"
+      // column for them, which is why a described algorithm answers null there
+      // instead of a sentence nobody wrote.
+      for (const field of ['label', 'rule']) assert.ok(algorithm[field]?.length > 0, `${algorithm.id}.${field}`);
+      assert.ok(Number.isInteger(algorithm.version) && algorithm.version >= 1, algorithm.id);
+    }
   });
 
   test('ids are unique, in the order of the client file, and every unit is known', () => {

@@ -6,7 +6,7 @@ Voir [TASKS.md](./TASKS.md) pour la source de vérité du projet (phases, tâche
 
 - Frontend : React (Vite) — [client/](./client)
 - Backend : Express / Node.js — [server/](./server)
-- Base de données : PostgreSQL (via Docker en développement)
+- Base de données : MariaDB (via Docker en développement)
 
 ## Démarrage (développement)
 
@@ -16,7 +16,7 @@ Voir [TASKS.md](./TASKS.md) pour la source de vérité du projet (phases, tâche
 docker compose up -d
 ```
 
-Démarre PostgreSQL 16 sur `localhost:5432` (utilisateur `larbi`, base `larbi_dev`).
+Démarre MariaDB 11 sur `localhost:3306` (utilisateur `larbi`, base `larbi_dev`).
 
 ### 2. Backend
 
@@ -67,7 +67,7 @@ Comptes créés par `db:seed` (développement uniquement, refusé si `NODE_ENV=p
 
 ## Tests
 
-Les tests vivent dans `server/tests/` et utilisent l'exécuteur intégré de Node (aucune dépendance de test à installer). Ils n'utilisent **jamais** la base de développement : une base dédiée `larbi_test` (même serveur PostgreSQL, créée et migrée automatiquement) et un dossier de stockage temporaire. Le nom de la base doit finir par `_test`, sinon les tests refusent de tourner.
+Les tests vivent dans `server/tests/` et utilisent l'exécuteur intégré de Node (aucune dépendance de test à installer). Ils n'utilisent **jamais** la base de développement : une base dédiée `larbi_test` (même serveur MariaDB, créée et migrée automatiquement) et un dossier de stockage temporaire. Le nom de la base doit finir par `_test`, sinon les tests refusent de tourner.
 
 ```bash
 cd server
@@ -80,7 +80,7 @@ npm run test:e2e           # vrai navigateur (Chrome/Chromium/Edge requis, CHROM
 npm run check:consistency  # vérifie la base et le stockage COURANTS (lecture seule) ; code 0 = cohérent
 ```
 
-Variables utiles : `TEST_DATABASE_URL` (autre serveur PostgreSQL de test), `CHROME_PATH` (navigateur des tests de bout en bout). Les captures d'écran des tests de bout en bout sont écrites dans `server/tests/e2e/screenshots/` (ignoré par Git).
+Variables utiles : `TEST_DATABASE_URL` (autre serveur MariaDB de test), `CHROME_PATH` (navigateur des tests de bout en bout). Les captures d'écran des tests de bout en bout sont écrites dans `server/tests/e2e/screenshots/` (ignoré par Git).
 
 ## Structure
 
@@ -99,7 +99,7 @@ server/    Backend Express
     controllers/  logique des routes
     routes/       définition des endpoints (montés sous /api)
     middleware/   gestion des erreurs, 404, etc.
-docker-compose.yml   PostgreSQL de développement
+docker-compose.yml   MariaDB de développement
 ```
 
 ## Notes techniques importantes
