@@ -1,9 +1,9 @@
 {
-  "name": "larbi-server",
+  "name": "fincludia-server",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Backend API (Express + MariaDB) for the Larbi platform",
+  "description": "Backend API (Express + MariaDB) for the FINCLUDIA platform",
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",

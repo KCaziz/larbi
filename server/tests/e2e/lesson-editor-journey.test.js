@@ -55,7 +55,7 @@ describe('lesson editor with blocks, end to end', { skip: findChrome() ? false :
     const lesson = (await api('POST', `/admin/formations/${f.id}/courses`, { json: { title: 'Ma leçon' } })).body.course;
     formation = f;
     lessonId = lesson.id;
-    const dir = mkdtempSync(path.join(tmpdir(), 'larbi-e2e-files-'));
+    const dir = mkdtempSync(path.join(tmpdir(), 'fincludia-e2e-files-'));
     imagePath = path.join(dir, 'schema.png');
     writeFileSync(imagePath, makePng(320, 180));
     site = await startSite(t.baseUrl);

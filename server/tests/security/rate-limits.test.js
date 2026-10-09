@@ -49,7 +49,7 @@ describe('public forms and lookups', () => {
   });
 
   test('certificate verification: 4 lookups, then 429', async () => {
-    const seq = await statuses(6, () => t.request('GET', '/certificates/LARBI-AAAA-BBBB-CCCC'));
+    const seq = await statuses(6, () => t.request('GET', '/certificates/FINCLUDIA-AAAA-BBBB-CCCC'));
     assert.deepEqual(seq, [404, 404, 404, 404, 429, 429]);
   });
 

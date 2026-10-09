@@ -35,7 +35,7 @@ describe('formation: from the client to a certified learner', { skip: findChrome
     await t.admin({ name: 'Cliente Formatrice', email: 'formatrice@example.com', passwordHash: await bcrypt.hash(PASSWORD, 10) });
     site = await startSite(t.baseUrl);
     b = await Browser.launch();
-    const dir = mkdtempSync(path.join(tmpdir(), 'larbi-e2e-files-'));
+    const dir = mkdtempSync(path.join(tmpdir(), 'fincludia-e2e-files-'));
     files = { cover: path.join(dir, 'couverture.png'), pdf: path.join(dir, 'support.pdf'), mp4: path.join(dir, 'demo.mp4'), fake: path.join(dir, 'faux.png') };
     writeFileSync(files.cover, makePng(640, 360));
     writeFileSync(files.pdf, PDF);

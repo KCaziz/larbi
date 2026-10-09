@@ -2,17 +2,22 @@ import { randomInt } from 'node:crypto';
 
 // Certificate numbers (P2-05).
 //
-// Format LARBI-XXXX-XXXX-XXXX, 12 random characters from a 32-letter alphabet
+// Format FINCLUDIA-XXXX-XXXX-XXXX, 12 random characters from a 32-letter alphabet
 // without look-alikes (no 0/O, 1/I): 60 bits of entropy. The number is the
 // public verification key, so it must not be guessable or sequential.
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-export const CERTIFICATE_NUMBER_PATTERN = /^LARBI-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
+
+// The brand prefix lives here alone: the pattern, the generator and the tests
+// all derive from it. It used to be spelled out in each of them, and renaming the
+// platform then left the tests cutting the number at the wrong character.
+export const CERTIFICATE_PREFIX = 'FINCLUDIA-';
+export const CERTIFICATE_NUMBER_PATTERN = new RegExp(`^${CERTIFICATE_PREFIX}[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$`);
 
 const chunk = () => Array.from({ length: 4 }, () => ALPHABET[randomInt(ALPHABET.length)]).join('');
 
-export const generateCertificateNumber = () => `LARBI-${chunk()}-${chunk()}-${chunk()}`;
+export const generateCertificateNumber = () => `${CERTIFICATE_PREFIX}${chunk()}-${chunk()}-${chunk()}`;
 
-// Accepts what a person may type ("larbi-abcd-…", surrounding spaces).
+// Accepts what a person may type ("fincludia-abcd-…", surrounding spaces).
 export const normalizeCertificateNumber = (value) => String(value ?? '').trim().toUpperCase();
 
 // A duplicate is astronomically unlikely, but a unique violation would abort the

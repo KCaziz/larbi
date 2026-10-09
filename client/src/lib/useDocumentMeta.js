@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const SUFFIX = ' · Larbi';
+const SUFFIX = ' · FINCLUDIA';
 
 // Sets the tab title and the description meta tag of the current page (SEO,
 // sharing) and restores the previous values when the page is left.

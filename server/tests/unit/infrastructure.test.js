@@ -16,7 +16,7 @@ import { toArticleCard, toArticleDetail } from '../../src/serializers/blog.js';
 import { toCertificateView, toCatalogItem, toEnrollmentSummary, toFormationDetail, toPublicCertificate } from '../../src/serializers/learner.js';
 import { env } from '../../src/config/env.js';
 
-const scratch = mkdtempSync(path.join(tmpdir(), 'larbi-unit-'));
+const scratch = mkdtempSync(path.join(tmpdir(), 'fincludia-unit-'));
 after(() => rmSync(scratch, { recursive: true, force: true }));
 const tempFile = (bytes, name = 'upload') => {
   const file = path.join(scratch, `${name}-${Math.random().toString(16).slice(2)}`);
@@ -196,7 +196,7 @@ describe('serializers expose an explicit allow-list', () => {
   });
 
   test('learner views: certificate fields and lesson list without content', () => {
-    const cert = { certificateNumber: 'LARBI-AAAA-BBBB-CCCC', holderName: 'H', formationTitle: 'F', certificationTitle: null, issuedAt: new Date(), enrollmentId: 'e1', id: 'x', revokedAt: null, revokedReason: null };
+    const cert = { certificateNumber: 'FINCLUDIA-AAAA-BBBB-CCCC', holderName: 'H', formationTitle: 'F', certificationTitle: null, issuedAt: new Date(), enrollmentId: 'e1', id: 'x', revokedAt: null, revokedReason: null };
     for (const view of [toCertificateView(cert), toPublicCertificate(cert)]) {
       assert.deepEqual(Object.keys(view).sort(), ['certificateNumber', 'certificationTitle', 'formationTitle', 'holderName', 'issuedAt', 'revoked', 'revokedAt']);
       assert.equal(view.certificationTitle, 'F', 'falls back to the formation title');

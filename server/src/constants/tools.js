@@ -8,6 +8,11 @@ export const TOOLS = [
   // 2026-10-04: the client's workbooks set no access rule for the comparator, so
   // it is in free access (the user's decision, see TASKS.md P4-06).
   { key: 'comparateur-bancaire', status: 'available', access: 'public' },
+  // FINCLUDIA simulators (P4-10). Free access: they are pure calculators that
+  // read no stored data and keep nothing, and the client's own screen C18 says
+  // the simulation workshop works "en mode découverte", without a profile.
+  // Requiring an account is one word here if the client decides otherwise.
+  { key: 'simulateurs', status: 'available', access: 'public' },
   // Cahier des charges: "Outils : accès authentifié et selon les droits".
   { key: 'simulateur-credit', status: 'planned', access: 'authenticated' },
   { key: 'generateur-facture', status: 'planned', access: 'authenticated' },

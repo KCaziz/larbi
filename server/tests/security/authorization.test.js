@@ -30,10 +30,16 @@ const PUBLIC = new Set([
   'GET /api/tools/comparator', // bank comparator in free access: no access rule in the client's files (P4-06)
   'GET /api/tools/comparator/themes/:theme',
   'GET /api/tools/comparator/segments/:segment',
+  // FINCLUDIA simulators in free access (P4-10): pure calculators, they read no
+  // stored data and keep nothing, and the client's screen C18 says the
+  // simulation workshop works without a profile ("mode découverte").
+  'GET /api/tools/simulations',
+  'GET /api/tools/simulations/:key',
+  'POST /api/tools/simulations/:key',
 ]);
 
 const UUID0 = '00000000-0000-4000-8000-000000000000';
-const sample = (p) => p.replace(/:number/g, 'LARBI-AAAA-BBBB-CCCC').replace(/:slug/g, 'x').replace(/:(id|courseId)/g, UUID0);
+const sample = (p) => p.replace(/:number/g, 'FINCLUDIA-AAAA-BBBB-CCCC').replace(/:slug/g, 'x').replace(/:(id|courseId)/g, UUID0);
 
 function walk(stack, prefix, out) {
   for (const layer of stack) {

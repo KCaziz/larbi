@@ -153,7 +153,7 @@ describe('HTTP methods', () => {
   });
 
   test('a write method on a read-only public route is not routed', async () => {
-    for (const path of ['/blog/articles', '/blog/categories', '/certificates/LARBI-AAAA-BBBB-CCCC']) {
+    for (const path of ['/blog/articles', '/blog/categories', '/certificates/FINCLUDIA-AAAA-BBBB-CCCC']) {
       for (const method of ['POST', 'PUT', 'PATCH', 'DELETE']) {
         const res = await t.request(method, path, { json: {} });
         assert.equal(res.status, 404, `${method} ${path}`);

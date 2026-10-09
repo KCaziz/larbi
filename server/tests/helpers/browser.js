@@ -88,7 +88,7 @@ export class Browser {
     const exe = findChrome();
     if (!exe) throw new Error('No Chrome/Chromium found (set CHROME_PATH)');
     const port = await freePort();
-    const child = spawn(exe, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run', `--lang=${lang}`, `--remote-debugging-port=${port}`, `--user-data-dir=${mkdtempSync(path.join(tmpdir(), 'larbi-e2e-'))}`, `--window-size=${width},${height}`, 'about:blank'], { stdio: 'ignore' });
+    const child = spawn(exe, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run', `--lang=${lang}`, `--remote-debugging-port=${port}`, `--user-data-dir=${mkdtempSync(path.join(tmpdir(), 'fincludia-e2e-'))}`, `--window-size=${width},${height}`, 'about:blank'], { stdio: 'ignore' });
     let wsUrl;
     for (let i = 0; i < 100 && !wsUrl; i += 1) {
       try {

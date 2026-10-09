@@ -53,7 +53,7 @@ export function applyTestEnv({ production = false, extra = {} } = {}) {
     JWT_EXPIRES_IN_SECONDS: '3600',
     LOG_REQUESTS: 'false',
     CORS_ORIGIN: 'http://localhost:5173',
-    STORAGE_DIR: mkdtempSync(path.join(tmpdir(), 'larbi-test-storage-')),
+    STORAGE_DIR: mkdtempSync(path.join(tmpdir(), 'fincludia-test-storage-')),
     // Generous limits so functional tests never trip them; security tests lower them on purpose.
     AUTH_RATE_LIMIT: '100000',
     CONTACT_RATE_LIMIT: '100000',

@@ -11,7 +11,7 @@ before(async () => {
 });
 after(() => t.close());
 
-const NUMBER = /^LARBI-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
+const NUMBER = /^FINCLUDIA-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
 const slugOf = (f) => f.slug;
 const get = (path, user) => t.request('GET', `/learn${path}`, { user });
 const enroll = (f, user) => t.request('POST', `/learn/formations/${f.slug}/enroll`, { user });
@@ -304,7 +304,7 @@ describe('certificate', () => {
     assert.ok(!ok.text.includes('@test.local'));
     assert.equal((await t.request('GET', `/certificates/${encodeURIComponent(`  ${certificateNumber.toLowerCase()} `)}`)).status, 200);
     const answers = [];
-    for (const bad of ['LARBI-AAAA-BBBB-CCCC', 'abc', 'LARBI-0OI1-AAAA-BBBB', "'; DROP TABLE certifications;--", 'A'.repeat(500)]) {
+    for (const bad of ['FINCLUDIA-AAAA-BBBB-CCCC', 'abc', 'FINCLUDIA-0OI1-AAAA-BBBB', "'; DROP TABLE certifications;--", 'A'.repeat(500)]) {
       const res = await t.request('GET', `/certificates/${encodeURIComponent(bad)}`);
       assert.equal(res.status, 404, bad);
       answers.push(res.body.error.message);

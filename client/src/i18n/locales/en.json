@@ -1,6 +1,6 @@
 {
   "common": {
-    "brand": "Larbi"
+    "brand": "FINCLUDIA"
   },
   "accountTypes": {
     "autoEntrepreneur": "Sole trader",
@@ -50,7 +50,7 @@
   },
   "home": {
     "hero": {
-      "title": "Welcome to Larbi",
+      "title": "Welcome to FINCLUDIA",
       "body": "Online courses, a blog, business tools and progress tracking, all on one platform, with a space tailored to each account type.",
       "ctaFormations": "Discover the courses",
       "ctaTools": "See the tools",
@@ -123,7 +123,7 @@
   },
   "about": {
     "title": "About",
-    "intro": "Larbi brings together online courses, a tutorial blog and business tools for freelancers and companies (sole traders, SMEs) on a single platform.",
+    "intro": "FINCLUDIA brings together online courses, a tutorial blog and business tools for freelancers and companies (sole traders, SMEs) on a single platform.",
     "approachTitle": "Our approach",
     "approachBody": "Each course is organised into lessons, with progress tracking and a certificate issued once the completion conditions are met. Blog content is publicly accessible, with some of it reserved for premium accounts depending on the user's profile.",
     "securityTitle": "Security and privacy",
@@ -1480,9 +1480,9 @@
     "title": "Verify a certificate",
     "intro": "Enter the number printed on the certificate to check that it is genuine.",
     "label": "Certificate number",
-    "placeholder": "LARBI-XXXX-XXXX-XXXX",
+    "placeholder": "FINCLUDIA-XXXX-XXXX-XXXX",
     "submit": "Verify",
-    "invalid": "This number does not have the right format. Example: LARBI-ABCD-2345-WXYZ.",
+    "invalid": "This number does not have the right format. Example: FINCLUDIA-ABCD-2345-WXYZ.",
     "checking": "Checking…",
     "valid": "Genuine certificate",
     "validText": "This certificate was issued by the platform.",

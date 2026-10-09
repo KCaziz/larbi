@@ -95,11 +95,11 @@ describe('value constraints', () => {
     const u = await t.user();
     const f = await t.formation();
     const e = await t.prisma.enrollment.create({ data: { userId: u.id, formationId: f.id, status: 'completed', completedAt: new Date() } });
-    await t.prisma.certification.create({ data: { certificateNumber: 'LARBI-AAAA-BBBB-CCCC', enrollmentId: e.id, holderName: 'x', formationTitle: 'y' } });
-    await rejects(t.prisma.certification.create({ data: { certificateNumber: 'LARBI-DDDD-EEEE-FFFF', enrollmentId: e.id, holderName: 'x', formationTitle: 'y' } }), 'second certificate for one enrolment');
+    await t.prisma.certification.create({ data: { certificateNumber: 'FINCLUDIA-AAAA-BBBB-CCCC', enrollmentId: e.id, holderName: 'x', formationTitle: 'y' } });
+    await rejects(t.prisma.certification.create({ data: { certificateNumber: 'FINCLUDIA-DDDD-EEEE-FFFF', enrollmentId: e.id, holderName: 'x', formationTitle: 'y' } }), 'second certificate for one enrolment');
     const u2 = await t.user();
     const e2 = await t.prisma.enrollment.create({ data: { userId: u2.id, formationId: f.id, status: 'completed', completedAt: new Date() } });
-    await rejects(t.prisma.certification.create({ data: { certificateNumber: 'LARBI-AAAA-BBBB-CCCC', enrollmentId: e2.id, holderName: 'x', formationTitle: 'y' } }), 'duplicate number');
+    await rejects(t.prisma.certification.create({ data: { certificateNumber: 'FINCLUDIA-AAAA-BBBB-CCCC', enrollmentId: e2.id, holderName: 'x', formationTitle: 'y' } }), 'duplicate number');
   });
 });
 
@@ -109,7 +109,7 @@ describe('deletion rules', () => {
     const f = await t.formation();
     const e = await t.prisma.enrollment.create({ data: { userId: u.id, formationId: f.id, status: 'completed', completedAt: new Date() } });
     await t.prisma.courseProgress.create({ data: { enrollmentId: e.id, courseId: f.courses[0].id, formationId: f.id, status: 'completed', completedAt: new Date() } });
-    await t.prisma.certification.create({ data: { certificateNumber: 'LARBI-GGGG-HHHH-JJJJ', enrollmentId: e.id, holderName: 'x', formationTitle: 'y' } });
+    await t.prisma.certification.create({ data: { certificateNumber: 'FINCLUDIA-GGGG-HHHH-JJJJ', enrollmentId: e.id, holderName: 'x', formationTitle: 'y' } });
     await t.prisma.user.delete({ where: { id: u.id } });
     assert.deepEqual(
       [await t.prisma.enrollment.count({ where: { id: e.id } }), await t.prisma.courseProgress.count({ where: { enrollmentId: e.id } }), await t.prisma.certification.count({ where: { enrollmentId: e.id } })],

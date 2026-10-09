@@ -38,7 +38,7 @@ describe('site sweep', { skip: findChrome() ? false : 'no Chrome/Chromium found 
     const draftFormation = await t.formation({ title: 'Brouillon', status: 'draft' });
     const enrollment = await t.prisma.enrollment.create({ data: { userId: learner.id, formationId: f.id, status: 'completed', completedAt: new Date() } });
     await t.prisma.courseProgress.create({ data: { enrollmentId: enrollment.id, courseId: f.courses[0].id, formationId: f.id, status: 'completed', completedAt: new Date() } });
-    const cert = await t.prisma.certification.create({ data: { certificateNumber: 'LARBI-SWEE-PPPP-TEST', enrollmentId: enrollment.id, holderName: 'Léa Apprenante', formationTitle: f.title, certificationTitle: 'Certificat balayage' } });
+    const cert = await t.prisma.certification.create({ data: { certificateNumber: 'FINCLUDIA-SWEE-PPPP-TEST', enrollmentId: enrollment.id, holderName: 'Léa Apprenante', formationTitle: f.title, certificationTitle: 'Certificat balayage' } });
     const cat = await t.prisma.articleCategory.create({ data: { slug: 'fiscalite', name: 'Fiscalité' } });
     const article = await t.article({ title: 'Article balayage', tags: ['TVA'], category: cat, author: admin });
     await t.request('POST', `/admin/articles/${article.id}/cover`, { user: admin, form: fileForm(PNG) });
@@ -108,7 +108,7 @@ describe('site sweep', { skip: findChrome() ? false : 'no Chrome/Chromium found 
         await audit(`${lang}/${width} visitor ${route}`);
       }
       // pages that are "not found" ON PURPOSE (their 404 is part of the behaviour)
-      for (const route of ['/page-inexistante', `/blog/${data.draftArticle.slug}`, '/blog/inexistant', '/verification/LARBI-AAAA-BBBB-CCCC', '/outils/comparateur/inexistant', '/outils/comparateur/segments/non_precise']) {
+      for (const route of ['/page-inexistante', `/blog/${data.draftArticle.slug}`, '/blog/inexistant', '/verification/FINCLUDIA-AAAA-BBBB-CCCC', '/outils/comparateur/inexistant', '/outils/comparateur/segments/non_precise']) {
         await b.goto(site.url + route);
         await sleep(300);
         await audit(`${lang}/${width} visitor (not found) ${route}`, { expectHttp: [/^404 \/api\//] });

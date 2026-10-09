@@ -1,17 +1,17 @@
 import '../helpers/setup-env.js';
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CERTIFICATE_NUMBER_PATTERN, generateCertificateNumber, normalizeCertificateNumber } from '../../src/services/certificate.service.js';
+import { CERTIFICATE_NUMBER_PATTERN, CERTIFICATE_PREFIX, generateCertificateNumber, normalizeCertificateNumber } from '../../src/services/certificate.service.js';
 import { isFormationFinished, summarizeProgress } from '../../src/services/progress.service.js';
 import { articleReadiness, courseHasContent, formationReadiness } from '../../src/services/readiness.service.js';
 import { ACCESS_LEVELS, ROLES, hasAccessLevel } from '../../src/constants/roles.js';
 
 describe('certificate numbers', () => {
-  test('follow LARBI-XXXX-XXXX-XXXX without look-alike characters', () => {
+  test('follow FINCLUDIA-XXXX-XXXX-XXXX without look-alike characters', () => {
     for (let i = 0; i < 2000; i += 1) {
       const n = generateCertificateNumber();
       assert.match(n, CERTIFICATE_NUMBER_PATTERN);
-      assert.doesNotMatch(n.slice(6), /[01IO]/);
+      assert.doesNotMatch(n.slice(CERTIFICATE_PREFIX.length), /[01IO]/);
     }
   });
 
@@ -19,24 +19,24 @@ describe('certificate numbers', () => {
     const seen = new Set();
     for (let i = 0; i < 20_000; i += 1) seen.add(generateCertificateNumber());
     assert.equal(seen.size, 20_000);
-    const firsts = [...seen].slice(0, 200).map((n) => n.slice(6, 10));
+    const firsts = [...seen].slice(0, 200).map((n) => n.slice(CERTIFICATE_PREFIX.length, CERTIFICATE_PREFIX.length + 4));
     assert.ok(new Set(firsts).size > 150, 'no visible ordering');
   });
 
   test('use every character of the alphabet (uniform-looking draw)', () => {
     const chars = new Set();
-    for (let i = 0; i < 2000; i += 1) for (const c of generateCertificateNumber().replaceAll('-', '').slice(5)) chars.add(c);
+    for (let i = 0; i < 2000; i += 1) for (const c of generateCertificateNumber().slice(CERTIFICATE_PREFIX.length).replaceAll('-', '')) chars.add(c);
     assert.equal(chars.size, 32);
   });
 
   test('the pattern rejects malformed and ambiguous numbers', () => {
-    for (const bad of ['', 'LARBI', 'LARBI-AAAA-BBBB', 'LARBI-AAAA-BBBB-CCCCC', 'larbi-aaaa-bbbb-cccc', 'LARBI-0AAA-BBBB-CCCC', 'LARBI-IAAA-BBBB-CCCC', 'XXXXX-AAAA-BBBB-CCCC', 'LARBI-AAAA-BBBB-CCC!', "LARBI-AAAA-BBBB-CCCC'; --"]) {
+    for (const bad of ['', 'FINCLUDIA', 'FINCLUDIA-AAAA-BBBB', 'FINCLUDIA-AAAA-BBBB-CCCCC', 'fincludia-aaaa-bbbb-cccc', 'FINCLUDIA-0AAA-BBBB-CCCC', 'FINCLUDIA-IAAA-BBBB-CCCC', 'XXXXX-AAAA-BBBB-CCCC', 'FINCLUDIA-AAAA-BBBB-CCC!', "FINCLUDIA-AAAA-BBBB-CCCC'; --", 'LARBI-ABCD-2345-WXYZ']) {
       assert.doesNotMatch(bad, CERTIFICATE_NUMBER_PATTERN, bad);
     }
   });
 
   test('typed numbers are normalised (case, spaces); non-strings are harmless', () => {
-    assert.equal(normalizeCertificateNumber('  larbi-abcd-2345-wxyz '), 'LARBI-ABCD-2345-WXYZ');
+    assert.equal(normalizeCertificateNumber('  fincludia-abcd-2345-wxyz '), 'FINCLUDIA-ABCD-2345-WXYZ');
     assert.equal(normalizeCertificateNumber(null), '');
     assert.equal(normalizeCertificateNumber(undefined), '');
     assert.equal(normalizeCertificateNumber(42), '42');

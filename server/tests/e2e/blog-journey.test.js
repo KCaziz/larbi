@@ -31,7 +31,7 @@ describe('blog: from the editor to the reader', { skip: findChrome() ? false : '
     admin = await t.admin({ name: 'Camille Rédactrice', email: 'redactrice@example.com', passwordHash: await bcrypt.hash(PASSWORD, 10) });
     site = await startSite(t.baseUrl);
     b = await Browser.launch();
-    const dir = mkdtempSync(path.join(tmpdir(), 'larbi-e2e-files-'));
+    const dir = mkdtempSync(path.join(tmpdir(), 'fincludia-e2e-files-'));
     files = { cover: path.join(dir, 'couverture.png'), pdf: path.join(dir, 'guide.pdf'), fake: path.join(dir, 'faux.png') };
     writeFileSync(files.cover, makePng(640, 360));
     writeFileSync(files.pdf, PDF);
@@ -218,7 +218,7 @@ describe('blog: from the editor to the reader', { skip: findChrome() ? false : '
       assert.ok(text.includes('Un guide simple pour émettre des factures conformes.'));
       assert.ok(text.includes('Par Camille Rédactrice'));
       assert.match(await b.ev("document.querySelector('.rich-content strong').innerText"), /la mention obligatoire/);
-      assert.equal(await b.ev("document.title"), 'Facturer en 2026 : le guide · Larbi');
+      assert.equal(await b.ev("document.title"), 'Facturer en 2026 : le guide · FINCLUDIA');
       assert.equal(await b.ev("document.querySelector('meta[name=description]').content"), 'Toutes les règles de facturation à connaître.');
       assert.ok(await b.ev("!!document.querySelector('.blog-article-cover') && document.querySelector('.blog-article-cover').naturalWidth > 0"));
       const href = await b.ev("document.querySelector('a.blog-doc').getAttribute('href')");
@@ -237,7 +237,7 @@ describe('blog: from the editor to the reader', { skip: findChrome() ? false : '
     test('a keyword leads to the filtered list; leaving the page restores the tab title', async () => {
       await b.clickWhere(`e => e.classList.contains('blog-tag') && e.textContent.trim() === 'TVA'`);
       assert.ok(await b.waitFor("location.pathname === '/blog' && new URLSearchParams(location.search).get('tag') === 'tva'"));
-      assert.ok(await b.waitFor("document.title === 'Blog · Larbi'"));
+      assert.ok(await b.waitFor("document.title === 'Blog · FINCLUDIA'"));
       assert.ok((await b.text()).includes('La TVA expliquée'));
     });
 

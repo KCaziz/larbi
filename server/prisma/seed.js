@@ -4,13 +4,13 @@
 //   npm run db:seed -- --clean removes the demo data only
 //
 // Everything created here is recognisable and removable without touching real
-// data: accounts end with "@demo.larbi.test", other records have a slug that
-// starts with "demo-" (newsletter subscribers: same @demo.larbi.test domain). Running it twice gives the same result.
+// data: accounts end with "@demo.fincludia.test", other records have a slug that
+// starts with "demo-" (newsletter subscribers: same @demo.fincludia.test domain). Running it twice gives the same result.
 //
 // Accounts (password in the table printed at the end):
-//   admin@demo.larbi.test     admin     -> the CMS (/admin)
-//   standard@demo.larbi.test  learner   -> standard access, formation in progress
-//   premium@demo.larbi.test   learner   -> premium access, formation completed + certificate
+//   admin@demo.fincludia.test     admin     -> the CMS (/admin)
+//   standard@demo.fincludia.test  learner   -> standard access, formation in progress
+//   premium@demo.fincludia.test   learner   -> premium access, formation completed + certificate
 import bcrypt from 'bcryptjs';
 import { prisma } from '../src/config/prisma.js';
 import { generateCertificateNumber } from '../src/services/certificate.service.js';
@@ -22,7 +22,7 @@ if (process.env.NODE_ENV === 'production') {
   process.exit(1);
 }
 
-const DEMO_DOMAIN = '@demo.larbi.test';
+const DEMO_DOMAIN = '@demo.fincludia.test';
 const ADMIN_PASSWORD = 'Admin-Demo-2026';
 const LEARNER_PASSWORD = 'Learner-Demo-2026';
 const daysAgo = (n) => new Date(Date.now() - n * 24 * 60 * 60 * 1000);

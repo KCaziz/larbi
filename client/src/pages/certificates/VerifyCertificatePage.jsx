@@ -15,7 +15,7 @@ import '../learn/Certificate.css';
 
 // Same format as the server (services/certificate.service.js); the server stays
 // the authority, this only saves a request for an obvious typo.
-const NUMBER_FORMAT = /^LARBI-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
+const NUMBER_FORMAT = /^FINCLUDIA-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
 
 // Public page: no account needed. `/verification` = the form,
 // `/verification/:number` = the result for that number.

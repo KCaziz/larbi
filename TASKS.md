@@ -61,6 +61,13 @@ Plateforme web composée de quatre grands domaines :
    - second outil : générateur de facture
    - éventuel simulateur fiscalité à considérer uniquement si le délai le permet
 
+5. **FINCLUDIA — gestion financière personnelle** (nouvelle direction ajoutée le 2026-10-09, voir Phase 6)
+   - sources fournies par le client, à la racine du dépôt : `FINCLUDIA spécification des parcours fonctionnels.odt` (écrans et parcours) et `FINCLUDIA_Cahier_des_Charges_Complet.xlsx` (20 onglets : 81 écrans, 417 champs, 30 calculateurs, 57 formules F001–F060, 4 algorithmes, 7 moteurs de recherche, 23 domaines d'API, tests, ordre de construction) ; **ces deux fichiers font foi** pour tout ce qui concerne FINCLUDIA
+   - 8 publics, chacun avec son parcours : lycéen (« Avenir »), étudiant (« Campus »), jeune actif (« Premier Revenu »), salarié (« Mon Argent »), colocataire, couple, famille, épargnant débutant ; un socle d'écrans communs (C01–C26) décliné par public, des écrans partagés (P01–P05) et des écrans propres à chaque public
+   - modules : Mon argent (revenus, transactions, budgets, calendrier), Mes objectifs, Ma sécurité (réserve, dettes), Mon patrimoine, Investir & simuler (portefeuille **fictif**), À plusieurs (espaces partagés), Explorer / comparer, Apprendre, atelier de simulation, décodeur de fiche de paie, assistant **déterministe** (aucune IA générative)
+   - principes imposés par le client : ne demander une donnée que lorsqu'elle sert (en expliquant pourquoi) ; tout score ou calcul affiche ses variables, hypothèses, date et version de formule ; **le réel et le fictif ne partagent jamais un total** ; une valeur non calculable s'affiche « non calculé », jamais 0 ; jamais de « score de crédit », de promesse d'accord ou de « meilleure offre » opaque ; fonctions réservées aux 18 ans et plus interdites aux mineurs ; 3 actions prioritaires au maximum à l'accueil
+   - ce que l'existant couvre déjà : comptes et connexion (C01, partiel), Apprendre (C21 : formations, quiz, certificats, blog), comparateur banque (base d'ET06 / C20), types de compte (base des 8 publics), assistant à questions prédéfinies (base de C26, `P3-07`)
+
 ## Gestion des comptes
 
 Le système doit pouvoir gérer plusieurs types de comptes / profils clients, notamment :
@@ -173,6 +180,7 @@ Security Layer
 | Phase 3 | Semaine 6 | Blog + CMS contenu + newsletter |
 | Phase 4 | Semaine 7 | Outils : crédit + générateur de facture |
 | Phase 5 | Semaine 8 | Sécurité, intégration, tests, disponibilité et livraison |
+| Phase 6 | Hors des 8 semaines (ajout du 2026-10-09) | FINCLUDIA : gestion financière personnelle (voir « Impact sur le délai (FINCLUDIA) » en fin de Phase 6) |
 
 **Total : 8 semaines.**
 
@@ -559,6 +567,26 @@ Tests effectués :
 - Un premier test mobile (390 px) semblait rogné : Edge headless impose une largeur minimale ; je ne l'ai pas considéré comme concluant, mais j'ai tout de même remplacé les `1fr` par `minmax(0, 1fr)` (cause classique de débordement de grille), puis re-testé à 500 px.
 - Limites : pas vérifié sur un vrai téléphone ni sous 500 px, ni dans Safari/Firefox ; toutes les pages n'ont pas été capturées une par une (les autres réutilisent les mêmes composants et tokens). Contraste des textes non mesuré avec un outil dédié (palette choisie pour rester lisible, à valider lors de P1-08). À regarder à l'œil : `npm run dev`.
 
+### P1-12 — FINCLUDIA : système de design et navigation de l'espace connecté (lot 0)
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P1-11`, `P6-01`
+- Durée cible : 3 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (spécification § 2–3 et § 17, onglets `14_Etats_Alertes` et `19_Cartes_Parcours`)
+
+Objectif : poser les composants communs à tous les écrans FINCLUDIA avant d'écrire le moindre écran métier (lot 0 du backlog client : « aucune dépendance, tout le reste en dépend »).
+
+Tâches :
+- Navigation de l'espace connecté : menu principal FINCLUDIA (Aujourd'hui, Mon argent, Mes objectifs, Ma sécurité, Mon patrimoine, Investir & simuler, À plusieurs, Explorer, Apprendre), **latéral sur ordinateur, onglets + menu secondaire sur téléphone** ; entrées affichées ou masquées **selon le public** (carte des parcours, onglet `19_Cartes_Parcours`) et l'âge (mineur : pas d'entrées réservées aux 18 ans et plus). Le masquage n'est qu'un confort : chaque route serveur vérifie elle-même le droit (règle 2).
+- Barre supérieure : recherche globale (branchée en `P6-20`), notifications (`P6-18`), aide / assistant (`P3-19`), profil.
+- Composants réutilisables : carte KPI (valeur, unité, date de calcul, bouton « Pourquoi ? » qui affiche formule, variables et hypothèses, état **« non calculé »** distinct de zéro) ; carte « Prochaine action » (titre, raison, impact, bouton principal, « Pourquoi ? ») ; bannière de qualité des données (donnée manquante, ancienne ou seulement déclarée) ; sélecteur de période (semaine, mois, 90 jours, année) ; **sélecteur Réel / Fictif** avec séparation visuelle forte et badge permanent « SIMULATION » ; champ montant (entier, devise obligatoire) ; champ « Pourquoi cette question ? ».
+- États UX communs (onglet `14_Etats_Alertes`) : vide (utilité + un seul appel à l'action), chargement (squelette, double envoi empêché, saisie conservée), partiel / donnée ancienne, succès (confirmation brève + impact recalculé), erreur près du champ.
+- Accessibilité exigée par le client : libellés explicites, erreurs près des champs, navigation au clavier, **jamais la couleur seule** pour porter un sens.
+- Règles du projet inchangées : `t()` fr / en / ar, tokens CSS (clair / sombre), propriétés logiques (RTL), icônes `lucide-react`, `icon-dir`.
+- Tests : balayage du site (`e2e/site-sweep.test.js`) étendu aux nouvelles pages, toutes langues, 375 et 1280 px ; parcours clavier.
+
+Important : le nom **FINCLUDIA** est tranché (décision du 2026-10-09, voir `P6-01` point 1 et le renommage documenté sous `P4-09`) ; le logo et la charte restent à fournir.
+
 ### P1-08 — Validation de fin de phase
 - Statut : `✅ done`
 - Priorité : `🔴 high`
@@ -820,6 +848,8 @@ Décisions :
 - **Accès** : émettre un certificat exige le niveau d'accès actuel (comme lire le cours) ; consulter un certificat déjà obtenu n'exige pas le premium (c'est un acquis du titulaire, pas un contenu premium).
 - **Cours obligatoire ajouté après coup** : l'inscription reste `completed` (décision P2-04) mais un certificat pas encore émis ne l'est pas tant que le nouveau cours obligatoire n'est pas terminé.
 - **Pas de révocation** d'un certificat par l'administrateur (non demandée) : à ajouter si le client le souhaite.
+
+Avancement (2026-10-09, renommage de la plateforme) : le préfixe du numéro de certificat est passé de `LARBI-` à **`FINCLUDIA-`** (motif, générateur, contrôle public, textes fr/en/ar). Aucune migration : le préfixe n'a jamais été inscrit dans une contrainte SQL, seulement dans le code. **Conséquence à connaître** : un numéro commençant par `LARBI-` ne passe plus la vérification publique — c'est volontaire et un test le vérifie désormais explicitement. La base de développement contient encore un certificat de démonstration à l'ancien préfixe (`LARBI-B7DJ-TY7D-3M26`, titulaire de démonstration créé par `db:seed`) : il faut rejouer le jeu de démonstration pour le régénérer. Aucun certificat réel n'a été délivré à ce jour.
 - Couleurs : jetons `--paper-*` (index.css) volontairement **non redéfinis en mode sombre** : la feuille reste claire, elle est faite pour le papier.
 
 Tests effectués (vrai serveur + PostgreSQL + Chrome piloté par le protocole DevTools) :
@@ -908,6 +938,49 @@ Constats non bloquants et décisions à valider avec le client :
 - **`npm audit` serveur : 4 « high »** toujours dans le CLI Prisma (jamais chargé par l'API en exécution) ; inchangé depuis P1-08.
 - **Aucune suite de tests automatisés n'est conservée dans le dépôt** (une dizaine de scripts de validation, écrits pour cette phase, vivent hors du projet) : à formaliser en P5-05 ; en attendant, ce rapport est la trace des vérifications.
 - **Non testé** : Safari, Firefox, téléphone réel ; vidéos longues réelles (fichiers de test minuscules, limites de taille éprouvées avec des seuils réduits) ; accessibilité au lecteur d'écran ; montée en charge.
+
+### P2-08 — FINCLUDIA : « Apprendre » — glossaire, mini-guides et recherche pédagogique
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P2-07`, `P3-18`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écran C21, moteur « Learning Search » de l'onglet `12_Recherche`)
+
+L'e-learning existant (formations, leçons, quiz, certificats) et le blog forment déjà le cœur d'« Apprendre ». Ce qui manque :
+- **Glossaire** (terme, définition, exemple, termes liés) et **mini-guides**, gérés dans le CMS existant, **versionnés** (le client exige un contenu versionné : une définition remplacée garde son historique).
+- **Niveau** (débutant / intermédiaire / avancé) et **thème** sur formations, articles, termes et guides ; contenus proposés selon le public (`P3-18`) — ordonner, jamais cacher, comme le ciblage des articles (`P3-04`).
+- Page « Apprendre » unique : recherche lexicale (terme, niveau, thème, format), résultats groupés cours / glossaire / guides / quiz, bouton « Simuler » quand un calculateur correspond (`P4-09`), favoris.
+- Mention imposée : **aucun contenu ne remplace un conseil réglementé**.
+- Tests : fonctionnels (versionnage, recherche, droits premium inchangés), navigateur.
+
+Important : **définitions, guides et textes pédagogiques sont fournis ou validés par le client** ; ne rien rédiger de financier, légal ou fiscal soi-même.
+
+### P2-09 — FINCLUDIA : indice de connaissances financières et passeports (Avenir, étudiant)
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P2-08`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans LY11, LY12, ET09 ; formule F052)
+
+Tâches :
+- **Indice de connaissances financières** (F052) calculé côté serveur à partir des quiz réussis et modules terminés, **séparé** du score de quiz et de tout score financier ; formule et version affichées.
+- Module **« Sécurité numérique »** (hameçonnage, mot de passe, carte, code OTP, liens frauduleux, achats en ligne) : un parcours de quiz construit avec l'outil existant (`P3-13`), contenu fourni par le client.
+- **Passeport Avenir** (lycéen) et **passeport financier étudiant** : compétences acquises, progression, étapes suivantes, export d'une **attestation pédagogique** (réutilise la génération de certificats, `P2-05`). Mention obligatoire : **le passeport n'est pas un score bancaire et ne mesure pas la solvabilité**.
+- Tests : unitaires (indice), fonctionnels (attestation, cloisonnement par utilisateur), navigateur.
+
+### P2-10 — FINCLUDIA : défis et missions pédagogiques (lycéen)
+- Statut : `❌ todo`
+- Priorité : `🟢 low`
+- Dépendances : `P2-09`, `P6-12`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écran LY03)
+
+Tâches :
+- Catalogue de missions courtes (choix successifs sur une somme **fictive**), résultat cash / épargne / résilience pédagogique, explication de chaque choix, rejouer.
+- Score de mission selon des règles configurées et explicables, **séparé** de l'indice de connaissances (`P2-09`) ; badges.
+- Aucune conséquence sur des données réelles ; adapté aux mineurs.
+
+Important : scénarios, règles de points et textes des missions sont **fournis par le client**.
 
 ---
 
@@ -1104,6 +1177,8 @@ Défauts réels trouvés par ces tests et corrigés :
 Fiabilité : lors d'une exécution isolée le balayage a passé 7/7 ; une exécution faite pendant qu'un lint et un build tournaient sur la même machine a signalé un problème de rendu non identifié (journal filtré) qui n'est pas revenu à la relance. Le balayage accorde donc désormais une seconde chance (1,5 s) aux seuls états de rendu transitoires (page vide, débordement, clé non traduite, écran d'erreur) ; les erreurs JavaScript et HTTP ne sont **jamais** rejouées. Si le problème revient, le message d'échec donne la page, la langue et la largeur en cause.
 
 Limites : pas de mesure de couverture chiffrée (aucun outil ajouté) ; les composants React ne sont pas testés isolément (aucun framework de test de composants) mais exercés en navigateur réel ; Chrome uniquement, pas de Safari / Firefox / téléphone réel ; pas d'audit d'accessibilité ; pas de test de charge ; newsletter, simulateurs et factures n'existent pas encore.
+
+Correctif (2026-10-09) : les parcours navigateur échouaient **12 fois sur 131**, et toujours sur la même assertion — « aucune erreur JavaScript pendant tout le parcours », présente dans chaque suite. Cause unique : `client/vite.config.js` forçait `hmr: { clientPort: 443 }`, réglage ajouté pendant la mise en ligne par tunnel ngrok. En local, rien n'écoute sur le port 443 : le WebSocket de rechargement à chaud n'arrivait jamais à se connecter et la console se remplissait d'erreurs `[vite] failed to connect to websocket`. Les parcours eux-mêmes passaient tous ; c'est le contrôle d'erreurs de console qui les faisait tomber — et il avait raison, cette console était réellement polluée à chaque session de développement. Le réglage est désormais conditionnel (`VITE_HMR_CLIENT_PORT`, documenté dans `client/.env.example`) : posé seulement derrière un tunnel, absent en local. Sans effet sur la production, où le rechargement à chaud n'existe pas. **`npm run test:e2e` : 131/131** pour la première fois.
 
 ### P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)
 - Statut : `❌ todo`
@@ -1422,6 +1497,41 @@ Correctif (2026-09-27) : ce raccourci avait un vrai défaut — signalé par le 
 Tests : `functional/article-translations.test.js` complété (copie refusée pour la langue d'origine, copie réussie avec le texte de l'article, jamais deux articles, refus d'écraser une traduction existante, **copie marquée `pending`, invisible et non cherchable pour un visiteur, redevient une vraie traduction après un enregistrement explicite**) et `e2e/article-translations-journey.test.js` complété (choix de la langue dans la liste déroulante du tableau, la ligne affiche la nouvelle langue sans qu'un second article n'apparaisse, **mention « à traduire » visible dans le tableau, visiteur arabe recevant toujours l'original français malgré la copie**). **`npm test` : 548/548** ; contrôle de cohérence sans violation ; lint et build du client sans avertissement.
 - Limites : le texte des cartes « newsletter » (préparation d'un envoi) reste dans la langue d'origine des articles ; pas de traduction automatique — la copie donne un texte identique à retravailler, pas une traduction ; pas de mise en évidence d'une traduction devenue obsolète quand l'original change ; les catégories et mots-clés ne sont pas traduits (un seul nom).
 
+### P3-18 — FINCLUDIA : publics (personas), âge, intention et changement de parcours
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P3-15`, `P6-01`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans C01, C02, JA01 ; onglet `01_Publics`)
+
+Les types de compte dynamiques (`P3-15`) sont la base, mais FINCLUDIA va plus loin :
+- **8 publics** (LYC, ETU, JAC, SAL, COL, COU, FAM, EPG) avec leur nom d'expérience ; **un profil principal** et des **rôles complémentaires** activables sans dupliquer les données (ex. salarié + colocataire).
+- Inscription / profil (C01, C02) : pays, langue, **devise par défaut**, tranche d'âge, situation, intention principale, horizon ; **consentements versionnés** (date, version du texte accepté) ; « Je ne sais pas » et « Modifier plus tard » toujours possibles. Connexion par téléphone : seulement si le client la confirme (`P6-01`, demande un fournisseur SMS).
+- **Mineurs** : contrôle **côté serveur** qui interdit les fonctions réservées aux 18 ans et plus (crédit, offres, couple / foyer contractuel…) ; combinaisons âge / public incohérentes refusées.
+- **Changement de parcours** (ex. étudiant → jeune actif au premier salaire) : proposé, **jamais forcé**, historique des parcours conservé (`/profile/transitions`).
+- Aucune donnée financière demandée avant le consentement.
+- Tests : fonctionnels (transitions, refus mineur sur chaque route réservée), sécurité (un mineur ne passe pas en appelant l'API directement), cohérence (public de chaque compte connu).
+
+Décision à trancher avec le client (`P6-01`) : que deviennent les types existants **auto-entrepreneur / PME / PMI** (orientés entreprise) face aux 8 publics FINCLUDIA (particuliers) — coexistence (deux axes : profil professionnel et public FINCLUDIA) ou remplacement.
+
+### P3-19 — FINCLUDIA : assistant déterministe (intentions, parcours à étapes, liens profonds)
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P3-07`, `P4-09`
+- Durée cible : 3 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écran C26, onglet `13_Chatbot`)
+
+Évolution de l'assistant à questions prédéfinies (`P3-07`) vers l'assistant FINCLUDIA, **toujours sans IA générative** :
+- **Résolveur d'intentions** à liste fermée (NAVIGUER, EXPLIQUER_INDICATEUR, CRÉER_OBJECTIF… — liste de l'onglet `13_Chatbot`) par mots-clés, synonymes et contexte de l'écran ; si la confiance est insuffisante, proposer 4 à 6 catégories puis la recherche globale.
+- **Moteur de parcours** (machine à états : parcours, étape, réponses possibles, étape suivante) — lève la limite « liste simple, pas d'arbre de décision » de `P3-07`.
+- **Modèles de réponse** pré-écrits avec variables lues dans les API de calcul (`P4-09`) en **lecture seule** ; aucune écriture, aucun calcul propre, **jamais de recommandation générée**.
+- **Liens profonds** vers un écran, un filtre ou un simulateur ; message de secours si une API est indisponible.
+- **Journal d'audit** : intention, parcours, version du modèle, action cliquée, erreur (sans donnée financière en clair).
+- Administration des intentions, synonymes, parcours et modèles dans le CMS.
+- Tests : unitaires (résolution, repli), fonctionnels, sécurité (aucune donnée d'un autre utilisateur dans une réponse), navigateur.
+
+Important : intentions, réponses et parcours sont **fournis ou validés par le client** (même règle que `P3-07`).
+
 ### P4-01 — Architecture commune des outils
 - Statut : `✅ done`
 - Priorité : `🔴 high`
@@ -1552,6 +1662,128 @@ Tests : 6 tests fonctionnels d'administration (`functional/comparator.test.js` :
 
 Le comparateur bancaire n'était pas dans le plan initial (Phase 4 : simulateur de crédit + générateur de facture). Estimation : **environ 3 jours** (`P4-01` compris). Le simulateur de crédit reste dépendant des règles de calcul du client (les classeurs fournis donnent des conditions, pas de formules : « TR + Marge », fourchettes, etc.). Proposé ensuite, hors de ce plan : import d'un classeur mis à jour depuis l'administration, simulation des frais pour un montant donné (retraits, transferts), traduction des données.
 
+### P4-09 — FINCLUDIA : moteur de calcul versionné
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Dépendances : `P4-01`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (onglets `10_Formules`, `11_Algorithmes`, `15_API` « contrat calcul critique »)
+
+Socle de **tous** les calculs FINCLUDIA (tableaux de bord, objectifs, dettes, assistant…) : un seul endroit, côté serveur.
+- Catalogue des formules **F001–F057** et algorithmes **ALG-01 à ALG-04**, chacun avec identifiant et **version** ; une formule modifiée devient une nouvelle version, l'ancienne reste lisible.
+- **Contrat de réponse imposé** pour tout calcul critique : `resultat`, `unite`, `formule_id`, `formule_version`, plus variables utilisées, hypothèses, date de calcul et qualité des données (champs exacts : onglet `15_API`).
+- Règles transversales du client : taux calculés en décimal et affichés en %, **division par zéro = « non calculé »** (jamais 0), normalisation mensuelle (F001 : hebdo × 52/12, trimestriel × 1/3…), **même devise et même période** obligatoires (pas de conversion implicite sans taux daté), montants en entiers.
+- Les tableaux de bord **ne recalculent jamais** localement : ils lisent ce moteur.
+- Tests : **un test unitaire par formule** avec les cas de l'onglet `16_QA_Tests`, cas limites (zéro, négatif, devise différente).
+
+Réalisé (2026-10-09, aucune migration : le moteur est **sans état**, il ne lit ni n'écrit en base) :
+- **`constants/finance.js`** : le catalogue du client transcrit en données — les 57 formules (identifiant, fonction, unité, version, et la **condition du client mot pour mot**) et les 4 algorithmes. Le fichier est la spécification : aucune ligne n'y est reformulée ni complétée.
+- **`services/finance/money.js`** : les règles transversales appliquées à **un seul endroit** au lieu d'être répétées 57 fois — montants en **entiers de centimes**, quotient à dénominateur nul = `null`, normalisation de fréquence (F001), répartitions dont la somme vaut **exactement** le montant, moyenne pondérée à poids fournis.
+- **`services/finance/formulas.js`** : les 57 fonctions pures, dans l'ordre du client, une par ligne du tableur.
+- **`services/finance/algorithms.js`** : les 4 algorithmes (remboursement avalanche / boule de neige avec réallocation de la mensualité libérée, minimisation des règlements, date d'atteinte d'un objectif, détection de récurrences).
+- **`services/finance/contract.js`** : l'enveloppe de réponse du client (`resultat`, `unite`, `formule_id`, `formule_version`, `entrees_snapshot`, `calcule_le`, plus `hypotheses` / `avertissements` / `versions_sources` quand elles s'appliquent). Quand un calcul n'est pas possible, la **condition écrite par le client** est renvoyée comme avertissement : l'écran explique pourquoi au lieu d'afficher un zéro.
+
+Décisions :
+- **Les montants sont des entiers de centimes**, jamais des nombres à virgule : en binaire `0,1 + 0,2 ≠ 0,3`, et un budget qui dérive d'un centime par opération est un défaut inexplicable à l'utilisateur. Les formules qui passent par de l'arithmétique réelle (annuité, part d'un total) reviennent à l'entier.
+- **Les taux sont renvoyés en décimal** (`0,15`), avec l'unité `ratio`, et l'interface les affiche en pourcentage. Le « × 100 » que le client écrit dans plusieurs formules est son étape d'affichage : le faire côté serveur figerait la présentation dans la valeur stockée.
+- **Aucun poids, aucun seuil n'est codé dans le moteur.** Les quatre indices (F051–F054) et le profil de risque (F057) reçoivent leurs pondérations en argument et renvoient `null` sans elles : le client exige des poids visibles et modifiables, et la plupart restent à définir (`P6-01`). F057 donne le score mais **jamais la catégorie** tant que les seuils ne sont pas fournis.
+- **Mélanger deux devises renvoie `null`**, jamais un total : convertir sans taux daté inventerait un taux de change. L'appelant convertit d'abord, avec son taux et sa date.
+- **Une fréquence inconnue n'est pas supposée mensuelle** : elle rend le montant non calculable. Supposer transformerait silencieusement une prime annuelle en charge mensuelle.
+- **F025 n'est pas plafonnée à 100 %** : le client plafonne l'*affichage* et conserve l'excédent à part, donc plafonner la valeur détruirait cet excédent.
+- Deux lignes du client renvoient deux valeurs à la fois (F056 reste à vivre **et** taux d'effort, F057 score **et** catégorie) : unité `composite` plutôt que de scinder une formule du client en deux.
+- Les deux algorithmes itératifs s'arrêtent à un horizon de 600 mois et répondent alors `completed: false` : un objectif inatteignable ou une dette dont la mensualité ne couvre pas les intérêts est une réponse utile, pas une requête qui tourne indéfiniment.
+
+Tests : `tests/unit/finance.test.js`, **64 tests**, dont les 7 catégories applicables de l'onglet `16_QA_Tests` (cas nominal, dénominateur nul, valeur manquante, valeur extrême, devise différente, donnée ancienne, réel/fictif — les permissions sont une affaire d'API, couverte par les tests fonctionnels des écrans qui utiliseront le moteur). Deux contrôles structurels : **le catalogue et les implémentations doivent correspondre exactement dans les deux sens** (aucune formule du client sans code, aucun export qui ne soit pas au catalogue), et chaque unité, version et condition doit être renseignée. Là où une valeur attendue aurait été un nombre magique, c'est la **propriété** qui est vérifiée : l'annuité F021 amortit réellement le prêt (échéancier simulé, solde final sous 1 DA), F031 = F029 + F030, le versement F032 atteint réellement la cible, ALG-03 donne le même résultat que F027 à rendement nul, l'avalanche ne coûte jamais plus d'intérêts que la boule de neige, et les répartitions somment exactement au montant sur 25 combinaisons. **`npm test` : 636/636** (572 avant, 64 ajoutés) ; `npm run lint` du client inchangé.
+
+Défaut trouvé et corrigé pendant les tests : la détection « cette dette n'avance pas » d'ALG-01 regardait le budget restant du mois au lieu du solde dû. Avec une mensualité qui ne couvre pas les intérêts, le solde gonflait jusqu'au dépassement de capacité des entiers et la fonction renvoyait `null` (« entrée invalide ») au lieu de « non remboursable ». Corrigé en comparant le total dû avant et après chaque mois.
+
+Limites : moteur **sans état** — rien n'est enregistré, donc pas encore de scénario sauvegardé ni de comparaison de scénarios (voir `P4-16`) ; aucune route HTTP ne l'expose encore (les calculateurs `P4-10` / `P4-11` seront ses premiers appelants) ; F005 reçoit ses catégories de charges obligatoires de l'appelant (les « catégories versionnées » du client arrivent avec `P6-02`) ; F014 et F035 ne peuvent pas distinguer seuls un actif liquide d'un actif illiquide ni un montant fictif d'un montant réel, c'est à l'appelant de ne pas les mélanger — le contrôle de cohérence de `P6-02` le vérifiera en base.
+
+### P4-16 — FINCLUDIA : atelier de simulation (C18)
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P4-09`, `P4-10`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écran C18) ; sorti de `P4-09` le 2026-10-09
+
+Séparé de `P4-09` en cours de route : le moteur de calcul est sans état et utilisable tel quel, tandis que l'atelier est un **écran** qui a besoin de simulateurs à héberger — un atelier livré avant le premier calculateur (`P4-10`) serait une page vide.
+
+Tâches :
+- Point d'entrée unique de tous les calculateurs : recherche d'un type de simulation, paramètres selon le simulateur, résultat avec ses hypothèses et sa sensibilité.
+- **Scénario enregistré avec ses hypothèses ET la version de formule** utilisée (migration additive), afin qu'un scénario rouvert plus tard reste explicable même si la formule a changé depuis.
+- Comparaison de scénarios, partage / export, mention « simulation indicative » sur chaque résultat.
+- Catalogue des simulateurs et exemples en état vide.
+
+### P4-10 — FINCLUDIA : calculateurs, lot 1 (budget, épargne, objectifs, inflation, simulations de vie)
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P4-09`
+- Durée cible : 3 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (onglet `09_Calculateurs` ; écrans LY09, LY10, ET04, ET07)
+
+Calculateurs de l'onglet `09_Calculateurs` sans dette ni crédit : budget mensuel (CAL-01), budget jusqu'à la fin du mois (CAL-02), enveloppe (CAL-03), épargne, valeur future et **valeur réelle** (inflation), date d'atteinte d'un objectif (ALG-03), provisions de dépenses annuelles ; simulations de parcours : budget de la future vie étudiante (LY09), premier salaire (LY10), premier emploi (ET07). Chacun : formulaire, résultat avec « Pourquoi ? », enregistrement de scénario. Toujours marqués « simulation », jamais de promesse.
+
+### P4-11 — FINCLUDIA : calculateurs, lot 2 (dettes et crédit)
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P4-09`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écran C14, ALG-01, onglet `09_Calculateurs`)
+
+- Mensualité / tableau d'amortissement à partir des paramètres saisis par l'utilisateur ; si le taux est inconnu, **seulement des scénarios sur le capital**.
+- Remboursement **avalanche** (coût le plus élevé d'abord) et **boule de neige** (plus petit capital d'abord) : simulation période par période, mensualité libérée réallouée (ALG-01) ; date « zéro dette », économie de temps et de coût.
+- Frais de remboursement anticipé pris en compte **s'ils sont renseignés** ; ne jamais affirmer qu'une possibilité contractuelle existe.
+- Lien avec `P4-02` (simulateur de crédit selon les règles des banques) : ce lot calcule à partir des chiffres **de l'utilisateur**, `P4-02` à partir des règles **des banques** fournies par le client ; les deux partagent le moteur `P4-09`.
+
+### P4-12 — FINCLUDIA : moteur de comparaison multicritère et comparateur d'offres d'emploi
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P4-09`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans C19, ET08)
+
+- Comparer **2 à 3 options** (scénarios, offres, solutions) sur des critères homogènes : coût, durée, liquidité, risque, frais, conditions, compatibilité.
+- Score synthétique **optionnel**, uniquement avec **poids visibles et modifiables** (Σ critère normalisé × poids) ; jamais de classement opaque ; données manquantes affichées comme telles ; devises ou horizons différents → demande de normalisation.
+- **Comparateur d'offres d'emploi** (ET08) : net économique = net + avantages monétisables − coûts liés à l'emploi (trajet, repas…) ; avantages non monétisables affichés à part.
+
+### P4-13 — Comparateur bancaire, lot D : adéquation à l'usage et « Explorer » (FINCLUDIA)
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P4-08`, `P4-12`, `P3-18`
+- Durée cible : 3 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans ET06, C20 ; moteur « Offer Search »)
+
+Prolonge le comparateur existant (`P4-06` à `P4-08`) sans toucher à ses données client :
+- **Comparateur banque / CCP étudiant** (ET06) : l'utilisateur décrit son usage (carte, paiement en ligne, retraits, virements, budget de frais) et voit l'**adéquation** = Σ(correspondance critère × poids utilisateur) / Σ poids, critère par critère ; **aucun « meilleur » absolu**. Le CCP n'est pas dans le classeur actuel : à ajouter seulement si le client fournit ses données.
+- **Explorer** (C20) : recherche de solutions par besoin (voiture, logement, épargne…), montant, horizon, type, établissement ; chaque résultat porte **source, date et fraîcheur** ; « compatibilité apparente selon critères publics » seulement si toutes les règles sont explicites, **jamais d'affirmation d'éligibilité** ; réservé aux 18 ans et plus selon les règles de `P3-18`.
+- Sauvegarde d'offres et comparaison (via `P4-12`).
+- Référentiel d'offres (« Offer Graph » : offres, fournisseurs, sources datées) : seulement les données fournies par le client, comme aujourd'hui.
+
+### P4-14 — FINCLUDIA : décodeur de fiche de paie
+- Statut : `⛔ blocked`
+- Priorité : `🟡 medium`
+- Dépendances : `P4-09`, `P6-01`
+- Durée cible : 2 jours (estimation, une fois les règles reçues)
+- Origine : direction FINCLUDIA du 2026-10-09 (écran C15)
+
+- Saisie manuelle (ou assistée) des lignes d'une fiche : brut, cotisations, IRG, primes, retenues, net, période ; décomposition expliquée ligne par ligne ; lignes inconnues « à confirmer » ; ajout au revenu mensuel **après confirmation** de l'utilisateur.
+- Net = brut + éléments positifs − retenues **seulement selon la structure saisie** ; **aucune déduction légale inventée**, ne prétend jamais certifier la fiche.
+- Import d'un document et extraction automatique : phase ultérieure (le client le note lui-même).
+
+Blocage : les **règles de paie et barèmes (cotisations, IRG), datés et versionnés**, doivent être fournis par le client (`P6-01`) avant tout calcul autre qu'une simple addition des lignes saisies.
+
+### P4-15 — FINCLUDIA : comparer un financement (conventionnel / islamique)
+- Statut : `⛔ blocked`
+- Priorité : `🟢 low`
+- Dépendances : `P4-12`, `P4-11`, `P6-01`
+- Durée cible : 2 jours (estimation, une fois les données reçues)
+- Origine : direction FINCLUDIA du 2026-10-09 (écran JA09)
+
+- Besoin, montant, durée, apport, préférence **conventionnelle ou islamique**, revenu, garanties → mensualité / coût, apport, frais, conditions, impact sur la trésorerie, source et date.
+- Taux d'intérêt et parts de bénéfices **jamais assimilés** (même règle que le comparateur, `P4-06`) ; pas de classement opaque ; pas d'éligibilité garantie.
+
+Blocage : offres de financement et leurs règles de calcul **à fournir par le client** (les classeurs actuels donnent des conditions, pas des formules — voir `P4-02`).
+
 ### P4-05 — Validation de fin de phase
 - Statut : `❌ todo`
 - Priorité : `🔴 high`
@@ -1589,6 +1821,7 @@ Vérifications :
 - Accès admin.
 - IDOR / accès à la ressource d'un autre utilisateur.
 - Contrôle serveur systématique.
+- Ajout FINCLUDIA (2026-10-09) : les données financières personnelles (revenus, transactions, dettes, patrimoine) sont les plus sensibles de la plateforme. Vérifier en plus : cloisonnement strict par propriétaire **et** par espace partagé (un membre ne voit que ce qui a été explicitement partagé, `P6-13`), accès refusé = écran neutre, droits Owner / Admin / Member / Viewer, contrôle d'âge côté serveur pour les fonctions 18+ (`P3-18`), recherche globale et assistant incapables de renvoyer une donnée d'un autre utilisateur (`P6-20`, `P3-19`), réauthentification pour les actions sensibles (export, suppression, retrait de consentement, `P6-19`).
 
 ### P5-02 — Sécurité API et backend
 - Statut : `❌ todo`
@@ -1671,6 +1904,8 @@ Avancement (2026-09-19) : la suite de tests versionnée de `P3-06` couvre déjà
 
 Avancement (2026-09-25, P3-16) : gestion des utilisateurs (types de compte, niveau d'accès, rôle, suspension) et panel d'administration (paramètres, médiathèque, certifications avec révocation) désormais couverts par `functional/admin-platform.test.js`. Point resté ouvert (noté en Décisions de `P3-16`) : il n'existe pas de suppression réelle (« droit à l'effacement ») d'un compte utilisateur, seulement la suspension ; à ajouter si le client le demande explicitement, avec ses propres tests.
 
+Ajout FINCLUDIA (2026-10-09) : le client demande désormais explicitement la suppression et l'export des données (écran C25, tâche `P6-19`), ce qui lève le point ci-dessus pour FINCLUDIA. Parcours de bout en bout à couvrir quand ils existeront : les scénarios J01 à J10 de l'onglet `02_Parcours_E2E` et les 8 scénarios par public de `16_QA_Tests` (entrer dans FINCLUDIA, construire un budget, créer un objectif, renforcer sa sécurité, gérer une dette, préparer un financement, construire son patrimoine, apprendre à investir, gérer à plusieurs, préparer une dépense annuelle).
+
 ### P5-06 — Préparation production et livraison
 - Statut : `❌ todo`
 - Priorité : `🔴 high`
@@ -1692,6 +1927,286 @@ Tâches :
 
 ---
 
+# PHASE 6 — FINCLUDIA : GESTION FINANCIÈRE PERSONNELLE
+## Durée : hors des 8 semaines (estimation dans « Impact sur le délai (FINCLUDIA) » ci-dessous)
+## Objectif
+
+Transformer la plateforme en compagnon financier pour les 8 publics FINCLUDIA, selon les deux documents du client à la racine du dépôt (`FINCLUDIA spécification des parcours fonctionnels.odt`, `FINCLUDIA_Cahier_des_Charges_Complet.xlsx`), qui font foi. Cette phase regroupe les **modules qui n'existent pas encore** ; ce qui prolonge un module existant a été ajouté dans sa phase (`P1-12`, `P2-08` à `P2-10`, `P3-18`, `P3-19`, `P4-09` à `P4-15`).
+
+Ordre suivi : celui du backlog client (onglet `17_Backlog`) — lot 0 design (`P1-12`) → lot 1 socle argent → lot 2 objectifs, sécurité, simulations → lot 3 apprentissage et paie → lot 4 patrimoine et portefeuille fictif → lot 5 espaces partagés → lot 6 financement et comparaisons → lot 7 personnalisation des 8 parcours → lot 8 exports, passeports, durcissement.
+
+Règles communes à toutes les tâches de cette phase (exigences du client) :
+- **Métadonnées obligatoires** sur chaque donnée financière importante (onglet `04_Donnees_Objets`) : valeur, devise, propriétaire / périmètre (personne, couple, foyer, espace), **source, date, statut (réel / déclaré / importé / calculé / fictif), méthode de saisie, niveau de confiance**.
+- Montants en **entiers** (plus petite unité monétaire), devise toujours explicite, aucune conversion sans taux daté.
+- Tous les calculs passent par le moteur versionné `P4-09` ; « non calculé » plutôt que 0.
+- **Réel et fictif jamais additionnés** ; le fictif porte le badge « SIMULATION ».
+- Données privées par défaut ; rien n'entre dans un espace partagé sans action explicite.
+- Messages neutres, jamais culpabilisants ni moraux (« bonne / mauvaise dette » interdit).
+- Chaque tâche : migration additive avec `CHECK` SQL, validation zod, routes déclarées dans l'audit d'autorisation, tests unitaires / fonctionnels / sécurité / cohérence / navigateur, i18n fr / en / ar, tokens, RTL.
+
+### P6-01 — FINCLUDIA : décisions de cadrage à obtenir du client
+- Statut : `⛔ blocked`
+- Priorité : `🔴 high`
+- Dépendances : `P1-06`
+- Durée cible : 0 jour de développement (décisions du client)
+- Origine : direction FINCLUDIA du 2026-10-09
+
+Les deux documents sont très détaillés sur les écrans, mais plusieurs points ne peuvent pas être décidés par Claude :
+1. ~~**Nom et identité**~~ — **tranché le 2026-10-09 : la plateforme s'appelle FINCLUDIA.** Renommage appliqué dans tout le code, les textes fr/en/ar, les tests et la documentation (détail et points d'attention : « Renommage en FINCLUDIA » ci-dessous). **Restent à fournir** : logo, charte graphique, nom de domaine. **Reste à trancher** : que deviennent l'e-learning, le blog et les outils actuels — intégrés comme modules « Apprendre » / « Explorer » (hypothèse retenue dans ce plan) ou site séparé ? Le texte de présentation de la page d'accueil décrit encore l'ancien positionnement (« formations, blog et outils pour auto-entrepreneurs, PME, PMI ») : il n'a **pas** été réécrit, parce que le nouveau positionnement est une décision commerciale, pas un renommage.
+2. **Périmètre de la première livraison** : les 8 publics d'un coup ou d'abord quelques-uns (ex. étudiant + jeune actif + salarié) ? Quels lots du backlog client ?
+3. **Types de compte existants** (auto-entrepreneur, PME, PMI) face aux 8 publics (voir `P3-18`).
+4. **Devises** : DZD seulement ou plusieurs (EUR, USD…) ? Source et fréquence des taux de change si plusieurs.
+5. **Seuils** que le document laisse « à valider » : taux d'effort dette, cibles de réserve, pondérations de l'indice de santé financière (F053) et de l'indice de préparation au financement, seuils d'alertes.
+6. **Règles de paie** (cotisations, IRG) datées, pour `P4-14` ; **offres de financement** pour `P4-15` ; données **CCP** pour `P4-13`.
+7. **Mineurs** : âge minimum d'inscription, consentement parental, fonctions exactes réservées aux 18 ans et plus.
+8. **Canaux de notification** : in-app seulement, ou aussi e-mail (fournisseur d'e-mail toujours non choisi) et push (application mobile hors MVP) ; connexion par téléphone (fournisseur SMS).
+9. **Textes légaux** : mention « pas de conseil réglementé », politique de confidentialité adaptée aux données financières, durée de conservation, politique de suppression.
+10. **Contenus** : glossaire, guides, missions, intentions de l'assistant, modèles d'objectifs, référentiel de catégories (l'onglet `03_Categories` en donne une base).
+11. **Hébergement** : un hébergement mutualisé (cPanel, MariaDB) suffit pour une démonstration ; des données financières réelles demandent sauvegardes testées, chiffrement et disponibilité à confirmer (voir `P5-04`).
+
+Livrable attendu : une note de réponses. Passer alors cette tâche à `✅ done`.
+
+#### Renommage en FINCLUDIA (2026-10-09)
+
+Appliqué : titre de la page, nom de marque et textes d'accueil fr / en / ar, suffixe des titres de pages, préfixe des numéros de certificat (`FINCLUDIA-XXXX-XXXX-XXXX`, voir `P2-05`), nom du paquet serveur (`fincludia-server`), domaine des comptes de démonstration (`@demo.fincludia.test`), dossiers temporaires des tests, README. Aucune migration n'a été nécessaire : **aucune migration ni contrainte SQL ne contenait l'ancien nom**, il n'existait que dans le code et les textes.
+
+**Volontairement non renommé, et pourquoi :**
+- **Base de données, conteneur Docker, identifiants de connexion** (`larbi_dev`, `larbi_test`, `larbi_mariadb_dev`, utilisateur `larbi`) : invisibles des utilisateurs, et les renommer demande de recréer la base et d'y recopier les données — dont les données réelles du comparateur. À faire seulement si le client le demande, avec une copie vérifiée avant bascule.
+- **Dossier du projet** (`Desktop/ayrep/Larbi`) et dépôt Git : le renommer casse les chemins de travail en cours ; opération à faire par l'utilisateur, hors session.
+- **Historique des tâches de ce fichier** (par exemple le conteneur `larbi_postgres_dev` de `P1-01`) : c'est le compte rendu de ce qui a réellement été fait à l'époque. Le réécrire falsifierait l'historique.
+- **Texte de positionnement de la page d'accueil** : voir le point 1 ci-dessus — c'est une décision commerciale.
+- **Paquet de déploiement `larbi-en-ligne/`** (suivi par Git, 262 fichiers) : artefact généré, à régénérer plutôt qu'à modifier.
+
+### P6-02 — FINCLUDIA : modèle de données financier commun
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P3-18`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (onglets `03_Categories`, `04_Donnees_Objets`)
+
+- Référentiel de **catégories** (revenus, dépenses, objectifs, actifs, dettes, dépenses partagées), standard et personnalisables, « Autre » toujours disponible ; catégories créées par l'utilisateur.
+- **Socle de métadonnées** commun (voir règles de la phase) réutilisé par toutes les tables financières ; **périmètre** (personnel / espace partagé / foyer) sur chaque ligne.
+- Suppression **logique** et correction **traçable** lorsqu'une donnée alimente un historique.
+- Contrôle de cohérence étendu : devise présente, statut connu, montants entiers, aucune ligne fictive dans un total réel.
+
+### P6-03 — FINCLUDIA : onboarding financier progressif
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P6-02`, `P1-12`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans C03, LY01, ET01, SA01, EP01)
+
+- Minimum de questions pour un premier résultat utile : ressources, dépenses essentielles estimées, épargne disponible, dette si pertinente, objectif principal ; questions **conditionnelles selon le public** ; « Passer », « Pourquoi cette question ? », « Enregistrer et quitter ».
+- Résultat immédiat : premier budget, premier indicateur, niveau de complétude.
+- Ressources irrégulières (bourse, job, freelance) avec fréquence obligatoire (normalisation F001).
+- Lycéen : jamais de dette, de patrimoine réel ni d'offre de crédit ; mode **budget fictif** proposé (« commence avec 5 000 DA fictifs »).
+- Incohérence au-delà d'un seuil → demande de confirmation, jamais de blocage silencieux.
+
+### P6-04 — FINCLUDIA : « Mon argent » — revenus et transactions
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P6-02`, `P4-09`
+- Durée cible : 3 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans C05, C07, C08 ; domaines API `/incomes`, `/transactions`)
+
+- Saisie rapide d'une dépense ou d'un revenu (type, montant, devise, date, catégorie, sous-catégorie, moyen de paiement, note, justificatif optionnel, partagé oui / non), « Enregistrer et ajouter ».
+- Historique : recherche texte, filtres (date, montant, catégorie, type, membre, source, statut), tri, totaux filtrés, recatégorisation, export ; transactions non catégorisées à part ; doublon suspect signalé ; date future seulement pour une dépense planifiée.
+- Synthèse « Mon argent » : revenus, dépenses, flux net (F004), répartition, tendance, prévu / réel.
+- Justificatifs : stockage **privé** existant (`P2-06`), jamais d'URL publique.
+- Import bancaire / scan : phase ultérieure (le client le note lui-même).
+
+### P6-05 — FINCLUDIA : budgets et enveloppes
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P6-04`
+- Durée cible : 3 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans C06, JA03, JA04 ; CAL-01, CAL-03)
+
+- Budget par période et catégorie (fixe / variable, récurrence, plafond optionnel) ; reste à affecter ; écart réel − prévu ; répartition automatique selon l'historique **proposée, jamais imposée**.
+- Plan de répartition du premier salaire (JA03 / JA04) : chaque dinar affectable, « Non affecté » toujours possible, **aucune règle type 50/30/20 imposée**.
+- Budget supérieur au revenu : autorisé mais signalé ; chevauchement de périodes refusé.
+- Alertes 80 % / 100 % / dépassement, configurables (via `P6-18`).
+
+### P6-06 — FINCLUDIA : accueil « Aujourd'hui » et tableaux de bord par public
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P6-05`, `P6-08`, `P6-09`, `P6-10`, `P6-18`
+- Durée cible : 4 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans C04, LY02, ET02, JA02, SA02 ; onglet `08_Tableaux_Bord`)
+
+- Répondre en moins de 10 secondes à « où j'en suis, que faire maintenant ? » : 3 à 5 KPI, **1 à 3 actions au maximum**, alertes, objectif prioritaire, échéances ; une carte non calculable devient une invitation à compléter.
+- Un tableau de bord par public avec ses indicateurs (onglet `08_Tableaux_Bord`) : « Ma semaine » (lycéen, 1 alerte + 1 mission max), étudiant (budget / jour, autonomie F047), premier revenu, **santé financière personnelle** (salarié : score pondéré F053 avec sous-scores cliquables et pondérations visibles, **séparé de tout crédit**), colocation, couple (« Moi / Nous »), foyer, parcours d'épargne.
+- Indicateurs **lus dans le moteur `P4-09`**, jamais recalculés côté client ; bannière de qualité si une donnée est ancienne.
+
+### P6-07 — FINCLUDIA : calendrier financier et dépenses récurrentes
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-04`
+- Durée cible : 3 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans C23, SA03, SA04, ET04, FA04 ; ALG-04)
+
+- Calendrier mois / semaine : paiements planifiés, échéances de dettes, contributions aux objectifs, provisions ; total prévu par période, **jours de tension**, cash projeté simple.
+- Un événement planifié **n'est pas une transaction** avant confirmation (« Marquer payé ») : pas de double comptage.
+- Plan du mois (SA03) : copier le mois précédent, cash de fin projeté.
+- **Détection de récurrences** (ALG-04 : libellé, montant toléré, intervalle) **proposée puis confirmée** par l'utilisateur ; coût mensuel / annuel des abonnements ; jamais de résiliation automatique.
+- Provisions de dépenses annuelles ou d'études : provision mensuelle = (montant − déjà provisionné) / mois restants ; une provision ne crée pas de dépense réalisée.
+- Rappels J-7 / J-1 configurables.
+
+### P6-08 — FINCLUDIA : objectifs financiers
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P6-05`, `P4-10`
+- Durée cible : 3 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans C09, C10, C11 ; ALG-03)
+
+- Catalogue de modèles (urgence, études, permis, voiture, logement, voyage, mariage, enfant, retraite, projet, investissement) + objectif personnalisé ; valeurs d'exemple **non présélectionnées comme recommandation**.
+- Création : nom, cible, devise, date future, capital déjà affecté (jamais plus que l'épargne marquée, sauf objectif fictif), priorité, contribution.
+- Détail : trajectoire, date estimée (ALG-03), valeur nominale / réelle, manque ou excédent, contribution nécessaire, scénarios comparés ; **hypothèses toujours visibles** ; « résultat = simulation, pas promesse ».
+- Alertes : objectif en retard, jalon atteint, contribution oubliée.
+
+### P6-09 — FINCLUDIA : réserve de sécurité
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P6-05`
+- Durée cible : 1 jour (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écran C12 ; F014)
+
+Mois de réserve = épargne liquide / dépenses essentielles mensuelles ; cible en mois choisie par l'utilisateur ; manque, date estimée, composition expliquée. **Portefeuille fictif et actifs illiquides exclus par défaut** ; dépenses essentielles = 0 → « non calculé ».
+
+### P6-10 — FINCLUDIA : dettes et analyse de l'endettement
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P6-04`, `P4-11`
+- Durée cible : 3 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans C13, C14)
+
+- Déclaration des dettes (capital restant, mensualité, taux ou coût si connu, échéance, objet, prêteur, actif financé), paiements.
+- Synthèse : encours, mensualités, **taux d'effort** (indicateur pédagogique, seuils `P6-01`), échéances ; qualification **productive / neutre / sous pression** seulement si les informations suffisent — jamais « bonne / mauvaise ».
+- Détail : scénarios avalanche / boule de neige et versement supplémentaire (`P4-11`).
+
+### P6-11 — FINCLUDIA : patrimoine réel
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-02`, `P6-10`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans C16, JA07 ; F035)
+
+Actifs (comptes, CCP, espèces, or, véhicule, immobilier, placements) et passifs, valeur **datée**, devise, propriétaire, source, liquidité ; patrimoine net = actifs réels − dettes réelles ; allocation, historique, concentration ; alerte « valeur de plus de 90 jours ». **Le fictif est interdit ici.**
+
+### P6-12 — FINCLUDIA : portefeuille fictif et laboratoire d'investissement
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-11`, `P4-09`
+- Durée cible : 4 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans C17, EP03 à EP07)
+
+- Portefeuille **fictif** : capital fictif modifiable (100 000 DA par défaut), achats / ventes fictifs, frais simulés, rééquilibrage, réinitialisation ; plus-value et rendement ; badge « SIMULATION » permanent ; **aucune exécution**, aucune valeur fictive dans le patrimoine réel.
+- Parcours épargnant : diagnostic « Suis-je prêt à commencer ? » (réserve et objectifs d'abord, sans bloquer l'accès éducatif), **profil de risque pédagogique**, « Comprendre les placements », « Marché pédagogique », **journal de décisions** et export.
+- Concentration excessive → message éducatif, pas une alarme.
+- Instruments et prix de référence : uniquement des données fournies ou validées par le client (`P6-01`).
+
+### P6-13 — FINCLUDIA : espaces partagés — création, membres et permissions
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-04`
+- Durée cible : 3 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans P01, P04, CO01, CP01, FA01)
+
+- Hub « À plusieurs » : créer un espace (colocation, couple, foyer), devise, membres, règle de partage par défaut ; invitations (expiration, membre déjà présent) ; rejoindre, quitter.
+- Rôles **Owner / Admin / Member / Viewer** ; **matrice de permissions** (revenus, transactions, actifs, objectifs : privé, partagé, total seul) — par défaut **tout est privé** ; « Partager seulement les totaux » ; révocation ; notification à chaque changement de partage.
+- Accès non autorisé → écran neutre ; membre supprimé → historique anonymisé selon la politique (`P6-01`).
+- Tests de sécurité dédiés : aucune donnée privée d'un membre visible par un autre, même par l'API directe.
+
+### P6-14 — FINCLUDIA : dépenses partagées et règlements
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-13`
+- Durée cible : 3 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans P02, P03 ; F043, ALG-02)
+
+- Dépense partagée : payeur, participants, répartition égale / en % / en montants, **somme des parts = montant**, arrondis selon une règle documentée, payeur pouvant ne pas participer.
+- Soldes par membre (convention de signe documentée dans l'API) ; « qui doit quoi à qui » avec **minimisation du nombre de remboursements** (ALG-02) qui ne change jamais la dette nette de chacun ; paiements déclaratifs (aucune intégration de paiement).
+
+### P6-15 — FINCLUDIA : colocation, couple et famille
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-14`, `P6-05`, `P6-08`
+- Durée cible : 4 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans P05, CO02 à CO06, CP02 à CP04, FA02 à FA06)
+
+- Tableau de bord partagé selon le type d'espace, **jamais de montant privé non partagé**.
+- Colocation : factures et abonnements communs (un paiement confirmé crée la dépense partagée, sans doublon), enveloppes communes, accord financier, objectifs communs.
+- Couple : objectif commun, contributions (F044), revue financière, séparation « Moi / Nous ».
+- Famille : foyer, enfants et projets (**données enfant minimales**), dépenses annuelles et provisions (F045), revue du foyer.
+
+### P6-16 — FINCLUDIA : préparation au financement
+- Statut : `❌ todo`
+- Priorité : `🟢 low`
+- Dépendances : `P6-10`, `P6-11`, `P6-01`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écrans JA08, SA05)
+
+Indice de **préparation** du dossier (complétude, stabilité, effort dette, apport, réserve ; pondérations du client), points forts / faibles, pièces manquantes, checklist, export (avec consentement). **Jamais le mot « score de crédit », aucune prédiction ni garantie d'accord.**
+
+### P6-17 — FINCLUDIA : personnalisation des 8 parcours
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-06`, `P6-15`, `P2-09`, `P4-10`
+- Durée cible : 5 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (spécification § 6 à 13, onglet `19_Cartes_Parcours` ; lot 7 du backlog client)
+
+Une fois les moteurs stables : vocabulaire, navigation, écrans activés et tableaux de bord **propres à chaque public** (carte des parcours), écrans spécifiques restants (préparer mes études LY09, autonomie ET03, transition premier revenu JA01, plan du mois SA03, diagnostic épargne EP01…), et passages d'un parcours à l'autre (`P3-18`). Les écrans communs sont réutilisés par configuration, jamais recopiés.
+
+### P6-18 — FINCLUDIA : centre de notifications et alertes
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-04`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écran C24, onglet `14_Etats_Alertes`)
+
+Liste chronologique avec lien vers l'écran concerné ; filtres (action, information, sécurité ; lu / non lu) ; priorité **sécurité > échéance > budget > apprentissage** ; quotas et anti-répétition ; désactivation par type ; **rappels uniquement sur consentement (opt-in)**. Canal in-app d'abord ; e-mail / push selon `P6-01`.
+
+### P6-19 — FINCLUDIA : centre de confiance et de données
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P6-02`, `P3-18`
+- Durée cible : 3 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écran C25)
+
+Inventaire des données (origine, date, statut, usage autorisé), consentements (retrait qui bloque les usages dépendants), **export** des données, **suppression** selon la politique légale (expliquée quand une obligation de conservation l'empêche), appareils connectés, score de complétude (**jamais un score de solvabilité**) ; actions sensibles **réauthentifiées**. Lève le point « droit à l'effacement » resté ouvert en `P5-05`.
+
+### P6-20 — FINCLUDIA : recherche globale
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-04`, `P6-08`, `P2-08`
+- Durée cible : 2 jours (estimation)
+- Origine : direction FINCLUDIA du 2026-10-09 (écran C22, onglet `12_Recherche`)
+
+Une seule barre : écrans, actions, transactions, objectifs, contenus « Apprendre », offres autorisées ; résultats groupés (Actions, Mes données, Objectifs, Apprendre, Explorer) ; recherche lexicale + synonymes configurés, **aucune interprétation générative** ; données privées **strictement cloisonnées** (propriétaire / espace) ; aucun résultat → reformulations et catégories.
+
+### P6-21 — FINCLUDIA : validation de fin de phase
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P6-03`, `P6-06`, `P6-07`, `P6-12`, `P6-15`, `P6-16`, `P6-17`, `P6-19`, `P6-20`, `P4-13`, `P4-14`, `P4-15`, `P4-16`, `P3-19`, `P2-10`
+- Durée cible : 2 jours (estimation)
+
+Critères :
+- Les 10 parcours de bout en bout (J01 à J10, onglet `02_Parcours_E2E`) passent en navigateur pour chaque public concerné.
+- Chaque formule a son test unitaire avec les exemples du client (onglet `16_QA_Tests`).
+- Aucune donnée privée visible hors de son propriétaire ou de son espace (audit de sécurité automatique + tests dédiés).
+- Aucun total ne mélange réel et fictif ; aucune valeur non calculable affichée à 0.
+- Matrice de provenance (onglet `18_Provenance`) : chaque écran livré est rattaché à sa ligne source.
+
+### Impact sur le délai (FINCLUDIA, ajout du 2026-10-09)
+
+FINCLUDIA **n'était pas dans le plan de 8 semaines** et représente un produit nettement plus grand que le MVP actuel. Estimation grossière, tâche par tâche (tests compris, **hors temps de décision du client**) :
+- prolongements des modules existants : `P1-12` 3 j, `P2-08` à `P2-10` 6 j, `P3-18` et `P3-19` 5 j, `P4-09` à `P4-16` 18 j (dont `P4-09` fait) ;
+- nouveaux modules `P6-02` à `P6-21` : environ 56 j.
+
+Soit **environ 86 jours ouvrés, de l'ordre de 4 mois** pour une personne, en plus de ce qui reste du MVP (paiement, simulateur de crédit, facture, Phase 5). Pistes pour livrer plus tôt : commencer par 2 ou 3 publics, livrer les lots 0 à 2 du backlog client (argent, budget, objectifs, réserve, dettes) avant le reste, garder espaces partagés et portefeuille fictif pour une seconde livraison. **Le client doit arbitrer (`P6-01`).**
+
+---
+
 # 4. Fonctionnalités volontairement hors MVP 8 semaines
 
 Ces éléments ne doivent pas être développés avant les fonctionnalités prioritaires :
@@ -1707,6 +2222,8 @@ Ces éléments ne doivent pas être développés avant les fonctionnalités prio
 - Paiement complexe si non indispensable au MVP.
 - Automatisations marketing avancées.
 - Multi-langue avancé si non prévu dans les pages initiales.
+
+Précision du 2026-10-09 (direction FINCLUDIA) : la liste ci-dessus reste valable **pour le MVP 8 semaines**, mais FINCLUDIA (Phase 6) en reprend volontairement plusieurs éléments, **hors de ce délai** : agrégation des données financières personnelles, portefeuille fictif, espaces partagés. Restent explicitement hors périmètre même dans FINCLUDIA, parce que le client les exclut lui-même dans ses documents : **IA générative** sous toute forme (l'assistant est déterministe, `P3-19`), **exécution d'ordres réels** (le portefeuille est fictif, `P6-12`), **connexion bancaire automatique / agrégation par API bancaire** (saisie manuelle ou import, « phase ultérieure »), **extraction automatique d'une fiche de paie** (`P4-14`), **conseil financier réglementé** et **score de solvabilité** (interdits), application mobile, paiement entre membres d'un espace partagé (règlements seulement déclaratifs, `P6-14`).
 
 Précision du 2026-09-19 (demande du client) : l'intégration d'un paiement **simple** (achat ou abonnement donnant accès au contenu premium) est désormais **dans le périmètre** — voir `P3-08`, `P3-09`, `P3-10`, dont la forme exacte reste à préciser par le client. Ce qui reste hors MVP : marketplace, multi-vendeurs, paiement fractionné, facturation d'abonnement complexe et toute règle non demandée. La ligne « Paiement complexe » ci-dessus est conservée telle quelle.
 
@@ -1729,6 +2246,15 @@ Claude Code doit considérer les règles suivantes comme obligatoires :
 11. Les sauvegardes doivent être testées, pas seulement configurées.
 12. Toute fonctionnalité de contenu doit prendre en compte la propriété intellectuelle.
 
+Règles ajoutées le 2026-10-09 (direction FINCLUDIA, données financières personnelles) :
+13. Une donnée financière appartient à un propriétaire et à un périmètre : toute lecture et toute écriture vérifient les deux côté serveur. Un espace partagé ne donne accès qu'à ce qui a été explicitement partagé.
+14. Les totaux réels et les données fictives (portefeuille, budget d'entraînement) ne sont jamais additionnés, ni dans l'API, ni dans la base, ni à l'affichage.
+15. Une valeur qui ne peut pas être calculée se renvoie « non calculée » ; ne jamais remplacer une donnée manquante par 0.
+16. Tout calcul critique renvoie sa formule, sa version, ses variables, ses hypothèses et sa date (contrat de l'onglet `15_API`). Aucun calcul financier n'est fait côté client.
+17. Aucune règle financière, légale, fiscale ou de paie n'est inventée : elle vient du client, datée et versionnée, sinon la fonction reste bloquée.
+18. Les fonctions réservées aux 18 ans et plus sont refusées côté serveur, pas seulement masquées dans l'interface.
+19. L'assistant ne génère jamais de texte : il choisit parmi des modèles validés et lit des valeurs par des API en lecture seule.
+
 ---
 
 # 6. Critères généraux de qualité
@@ -1745,6 +2271,8 @@ Une tâche ne peut passer à `✅ done` que si :
 - un test manuel ou automatisé pertinent a été effectué ;
 - les fichiers de suivi sont mis à jour.
 
+Règle ajoutée le 2026-10-09 (FINCLUDIA) : tout écran FINCLUDIA doit traiter les cinq états exigés par le client (vide, chargement, partiel / donnée ancienne, succès, erreur près du champ — onglet `14_Etats_Alertes`), afficher la date et la version de chaque valeur calculée, et rester utilisable au clavier sans dépendre de la couleur seule. Un écran livré sans son état vide ni son état « non calculé » n'est pas terminé.
+
 Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau composant texte, à partir de maintenant, doit utiliser `useTranslation()`/`t()` (i18next) dès sa création — jamais de texte en dur. Les traductions français/anglais/arabe correspondantes doivent être ajoutées dans le même changement (le tamazight reste volontairement en repli vers le français). Les couleurs doivent utiliser les tokens CSS existants (`index.css`), pas de couleurs codées en dur, pour rester compatibles avec le mode clair/sombre. Les icônes sont des composants `lucide-react` (jamais d'emoji ni de caractère décoratif) ; les flèches directionnelles utilisent la classe `icon-dir` pour s'inverser en RTL.
 
 # 7. État actuel
@@ -1752,23 +2280,29 @@ Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau
 Phase active : `PHASE 3` — BLOG + CMS CONTENU + NEWSLETTER (les Phases 1 et 2 ont été validées le 2026-09-19, voir P1-08 et P2-07)
 
 Dernières tâches terminées et vérifiées :
-`P4-08 — Comparateur bancaire, lot C : administration des données`, `P4-07 — Comparateur bancaire, lot B : pages publiques`, `P4-06 — Comparateur bancaire, lot A : données et API publique`, `P4-01 — Architecture commune des outils` (comparateur bancaire commencé à la demande de l'utilisateur, avant la validation de la Phase 3), `P3-17 — Articles multilingues (traductions)`, `P3-16 — Panel d'administration étendu (utilisateurs, droits, paramètres, médiathèque, certifications) et tableau de bord personnalisé`, `P3-15 — Types de compte dynamiques`, `P3-14 — CMS pédagogique, lot D : finitions`, `P3-13 — CMS pédagogique, lot C : quiz`, `P3-12 — CMS pédagogique, lot B : blocs de contenu et éditeur avancé`, `P3-11 — CMS pédagogique, lot A : structure d'une formation`, `P3-05 — Newsletter`, `P3-04 — Recommandation / visibilité selon profil`, `P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
+`P4-09 — FINCLUDIA : moteur de calcul versionné` (première tâche de la direction FINCLUDIA, 2026-10-09), `P4-08 — Comparateur bancaire, lot C : administration des données`, `P4-07 — Comparateur bancaire, lot B : pages publiques`, `P4-06 — Comparateur bancaire, lot A : données et API publique`, `P4-01 — Architecture commune des outils` (comparateur bancaire commencé à la demande de l'utilisateur, avant la validation de la Phase 3), `P3-17 — Articles multilingues (traductions)`, `P3-16 — Panel d'administration étendu (utilisateurs, droits, paramètres, médiathèque, certifications) et tableau de bord personnalisé`, `P3-15 — Types de compte dynamiques`, `P3-14 — CMS pédagogique, lot D : finitions`, `P3-13 — CMS pédagogique, lot C : quiz`, `P3-12 — CMS pédagogique, lot B : blocs de contenu et éditeur avancé`, `P3-11 — CMS pédagogique, lot A : structure d'une formation`, `P3-05 — Newsletter`, `P3-04 — Recommandation / visibilité selon profil`, `P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
 
 Toutes les tâches de pages (P1-02, P1-03, P1-04), le socle backend (P1-05) et les deux ajouts signalés par l'utilisateur (mode clair/sombre, i18n FR/EN/AR + tamazight en repli) sont terminés. Le modèle `User` existe en base (Prisma).
 
+Nom de la plateforme : **FINCLUDIA** (tranché le 2026-10-09, `P6-01` point 1). Renommage appliqué dans le code, les textes fr / en / ar, les tests et la documentation ; ce qui reste volontairement à l'ancien nom (base de données, conteneur Docker, dossier du projet, historique de ce fichier) et pourquoi : voir « Renommage en FINCLUDIA » dans `P6-01`.
+
+Direction ajoutée le 2026-10-09 : **FINCLUDIA** (gestion financière personnelle, 8 publics) devient la suite du projet, sur la base des deux documents du client à la racine du dépôt. Le plan est découpé en Phase 6 (`P6-01` à `P6-21`, modules nouveaux) plus les prolongements des modules existants : `P1-12` (système de design et navigation), `P2-08` à `P2-10` (Apprendre : glossaire, indice de connaissances, défis), `P3-18` et `P3-19` (publics / personas, assistant déterministe), `P4-09` à `P4-15` (moteur de calcul versionné, calculateurs, comparaisons, fiche de paie, financement). Estimation d'environ **4 mois** en plus du MVP restant, détail dans « Impact sur le délai (FINCLUDIA) » à la fin de la Phase 6. **Rien ne doit commencer avant les décisions de cadrage `P6-01`** (nom de la plateforme, périmètre de la première livraison, publics retenus, devises, seuils, règles de paie).
+
 Prochaines tâches réalisables (dépendances satisfaites) :
-- `P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)` (dépend de `P1-10` ✅ et `P2-02` ✅ ; **questions et réponses à fournir par le client**).
+- `P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)` (dépend de `P1-10` ✅ et `P2-02` ✅ ; **questions et réponses à fournir par le client**). Devient aussi la base de `P3-19` (assistant FINCLUDIA).
 - `P3-09 — Paiement : socle indépendant du fournisseur` (dépend de `P3-04` ✅ ; `P3-08` reste bloquée sur les décisions du client et bloque seulement `P3-10`).
 - Le blog est terminé (P3-01 à P3-06 hors paiement et assistant guidé). La Phase 4 (outils) ne doit commencer qu'après validation de la Phase 3.
+- `P4-10 — FINCLUDIA : calculateurs, lot 1` et `P4-11 — FINCLUDIA : calculateurs, lot 2 (dettes et crédit)` (dépendent de `P4-09` ✅, fait le 2026-10-09) : les deux seules tâches FINCLUDIA réalisables sans attendre `P6-01`, puisqu'elles n'utilisent que les formules déjà fournies par le client. Elles seront les premières à exposer le moteur par une route HTTP, et `P4-16` (atelier de simulation) suivra une fois qu'il y aura des simulateurs à héberger.
 
 - Comparateur bancaire terminé (P4-01, P4-06 à P4-08). Restent dans la Phase 4 : `P4-02 — Simulateur de crédit` et `P4-03 — Générateur de facture` (le simulateur dépend des règles de calcul du client : les classeurs fournis donnent des conditions, pas de formules).
 
-Recommandation : `P3-07` si le client a fourni les questions / réponses, sinon `P3-09` ; puis la validation de fin de Phase 3. Points d'attention :
+Recommandation : `P3-07` si le client a fourni les questions / réponses, sinon `P3-09` ; puis la validation de fin de Phase 3. En parallèle, obtenir les réponses de `P6-01`, qui conditionne tout FINCLUDIA. Points d'attention :
 - **Newsletter : aucun courriel réel ne part tant qu'un fournisseur d'e-mail n'est pas choisi** (pilote `none` par défaut en production : l'inscription répond « pas encore disponible »). C'est la décision client la plus urgente pour rendre P3-05 réellement utilisable ; elle débloque aussi « mot de passe oublié ».
 - Chaque nouvelle tâche ajoute ses tests dans `server/tests/` (voir P3-06 et README « Tests ») ; `npm test` doit rester vert, le test de cohérence du projet vérifie aussi ce fichier (statuts, dépendances, tâches terminées documentées, cette section).
 - Toute nouvelle route API : elle sera contrôlée par l'audit d'autorisation automatique (toutes les routes Express, voir P2-07) — la déclarer publique ou la protéger explicitement.
 - Décisions clients encore ouvertes, listées à la fin de P2-07 (règle des formations sans cours obligatoire, visibilité du nom sur la vérification publique, mentions du certificat).
 - Rappel : `npx prisma generate` après chaque migration (voir P1-08) ; sur une machine neuve : `npm install` dans `client/` et `server/`, `prisma migrate deploy`, `JWT_SECRET` dans `server/.env` (voir README).
+- **Paquet de déploiement `larbi-en-ligne/` périmé** depuis le renommage et le changement de préfixe des certificats : à régénérer (construction du client, assemblage, export SQL) avant toute nouvelle mise en ligne. Ce qui est actuellement déployé sur l'hébergement mutualisé porte encore l'ancien nom.
 
 Blocages / informations manquantes signalées (non bloquantes pour continuer, mais à ne pas oublier avant livraison) :
 - Mentions légales et politique de confidentialité : identité légale du client (raison sociale, SIRET, adresse, hébergeur, contact DPO) à fournir avant mise en production (voir notes P1-03).
@@ -1777,6 +2311,9 @@ Blocages / informations manquantes signalées (non bloquantes pour continuer, ma
 - Paiement (`P3-08`, `⛔ blocked`) : fournisseur / banque, moyens de paiement, devise, offres et règles de remboursement **non définis** ; le client fait ses propres recherches (liste des points dans `P3-08`). Bloque `P3-10`, pas `P3-09`.
 - Assistant guidé (`P3-07`) : questions et réponses à fournir par le client ; aucun contenu inventé.
 - Simulateur de crédit (P4-02) : règles bancaires/taux à fournir par le client le moment venu — rappel déjà noté dans la tâche elle-même.
+- **FINCLUDIA (`P6-01`, `⛔ blocked`)** : onze points de cadrage à trancher par le client avant de développer (nom de la plateforme et sort de l'existant, périmètre de la première livraison, publics retenus, coexistence avec auto-entrepreneur / PME / PMI, devises et taux de change, seuils et pondérations laissés « à valider » dans la spécification, règles de paie datées, âge minimum et consentement parental, canaux de notification, textes légaux, contenus pédagogiques). Bloque `P1-12`, `P3-18`, `P4-14`, `P4-15`, `P6-16` et, par ricochet, la quasi-totalité de la Phase 6.
+- FINCLUDIA, données à fournir par le client : barèmes de paie (`P4-14`), offres de financement et leurs formules (`P4-15`), données CCP (`P4-13`), instruments et prix de référence du portefeuille fictif (`P6-12`), glossaire et guides (`P2-08`), scénarios de missions (`P2-10`), intentions et réponses de l'assistant (`P3-19`), référentiel de catégories (`P6-02`, base dans l'onglet `03_Categories`).
+- FINCLUDIA, hébergement : l'hébergement mutualisé actuel (cPanel, MariaDB) convient à une démonstration, pas à des données financières réelles sans sauvegardes testées, chiffrement et disponibilité confirmés (voir `P5-04` et point 11 de `P6-01`).
 
 Point de vérification manuelle recommandé pour l'utilisateur : ouvrir `http://localhost:5173` après `npm run dev` dans `client/` et tester le menu mobile sous 860px de large (non vérifié visuellement par Claude faute d'outil navigateur dans cette session).
 

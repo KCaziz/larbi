@@ -1,4 +1,4 @@
-# Larbi — Plateforme E-Learning, Blog & Outils
+# FINCLUDIA — Plateforme E-Learning, Blog & Outils
 
 Voir [TASKS.md](./TASKS.md) pour la source de vérité du projet (phases, tâches, statuts, règles de sécurité).
 
@@ -63,7 +63,7 @@ npm run make-admin -- adresse@exemple.com          # donne le rôle administrate
 npm run make-admin -- adresse@exemple.com --remove # le retire
 ```
 
-Comptes créés par `db:seed` (développement uniquement, refusé si `NODE_ENV=production`) : `admin@demo.larbi.test` / `Admin-Demo-2026` (CMS sur `/admin`), `standard@demo.larbi.test` et `premium@demo.larbi.test` / `Learner-Demo-2026`. Le rôle administrateur ne peut jamais être obtenu depuis le site : il faut passer par `make-admin` (accès au serveur requis).
+Comptes créés par `db:seed` (développement uniquement, refusé si `NODE_ENV=production`) : `admin@demo.fincludia.test` / `Admin-Demo-2026` (CMS sur `/admin`), `standard@demo.fincludia.test` et `premium@demo.fincludia.test` / `Learner-Demo-2026`. Le rôle administrateur ne peut jamais être obtenu depuis le site : il faut passer par `make-admin` (accès au serveur requis).
 
 ## Tests
 

@@ -1,0 +1,140 @@
+/* FINCLUDIA simulators (P4-10). Logical properties throughout so the layout
+   mirrors itself in Arabic without a second stylesheet. */
+
+.simulator-formulas {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.simulator-form {
+  margin-block-start: var(--space-lg, 32px);
+}
+
+.simulator-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 18px;
+}
+
+.simulator-unit {
+  color: var(--text);
+  font-weight: 400;
+}
+
+.simulator-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-block-start: 24px;
+}
+
+.simulator-results h2 {
+  margin-block-end: 8px;
+}
+
+.simulator-hypotheses {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-inline-start: 3px solid var(--accent-border);
+  background: var(--accent-bg);
+  border-radius: var(--radius-sm);
+  color: var(--text-h);
+  font-size: 0.9rem;
+}
+
+.simulator-result-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.simulator-result {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.simulator-result-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.simulator-result-name {
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.simulator-value {
+  color: var(--accent);
+  font-size: 1.15rem;
+}
+
+/* "Not computed" must never look like a number, and never like zero. */
+.simulator-value-unknown {
+  color: var(--warn);
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.simulator-why {
+  margin-block-start: 10px;
+  font-size: 0.88rem;
+}
+
+.simulator-why summary {
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.simulator-why dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 10px 0 0;
+}
+
+.simulator-why dt {
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.simulator-why dd {
+  margin: 0;
+  color: var(--text);
+}
+
+.simulator-why code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--bg-alt);
+  font-size: 0.85em;
+  /* Formulas read left to right even in an Arabic page. */
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+}
+
+.simulator-warnings {
+  margin: 10px 0 0;
+  padding-inline-start: 18px;
+  color: var(--warn);
+}
+
+@media (max-width: 600px) {
+  .simulator-why dl {
+    grid-template-columns: 1fr;
+  }
+
+  .simulator-why dt {
+    margin-block-start: 6px;
+  }
+}

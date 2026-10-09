@@ -1,6 +1,6 @@
 {
   "common": {
-    "brand": "Larbi"
+    "brand": "FINCLUDIA"
   },
   "accountTypes": {
     "autoEntrepreneur": "Auto-entrepreneur",
@@ -50,7 +50,7 @@
   },
   "home": {
     "hero": {
-      "title": "Bienvenue sur Larbi",
+      "title": "Bienvenue sur FINCLUDIA",
       "body": "Formations en ligne, blog, outils métier et suivi de progression, réunis sur une seule plateforme, avec un espace adapté à chaque type de compte.",
       "ctaFormations": "Découvrir les formations",
       "ctaTools": "Voir les outils",
@@ -123,7 +123,7 @@
   },
   "about": {
     "title": "À propos",
-    "intro": "Larbi réunit sur une seule plateforme les formations en ligne, un blog de tutoriels et des outils métier destinés aux indépendants et aux entreprises (auto-entrepreneurs, PME, PMI).",
+    "intro": "FINCLUDIA réunit sur une seule plateforme les formations en ligne, un blog de tutoriels et des outils métier destinés aux indépendants et aux entreprises (auto-entrepreneurs, PME, PMI).",
     "approachTitle": "Notre approche",
     "approachBody": "Chaque formation est organisée en cours, avec un suivi de progression et une certification délivrée une fois les conditions de complétion remplies. Les contenus du blog sont accessibles publiquement, certains étant réservés aux comptes premium selon le profil de l'utilisateur.",
     "securityTitle": "Sécurité et confidentialité",
@@ -1481,9 +1481,9 @@
     "title": "Vérifier un certificat",
     "intro": "Saisissez le numéro inscrit sur le certificat pour contrôler qu'il est authentique.",
     "label": "Numéro du certificat",
-    "placeholder": "LARBI-XXXX-XXXX-XXXX",
+    "placeholder": "FINCLUDIA-XXXX-XXXX-XXXX",
     "submit": "Vérifier",
-    "invalid": "Ce numéro n'a pas le bon format. Exemple : LARBI-ABCD-2345-WXYZ.",
+    "invalid": "Ce numéro n'a pas le bon format. Exemple : FINCLUDIA-ABCD-2345-WXYZ.",
     "checking": "Vérification…",
     "valid": "Certificat authentique",
     "validText": "Ce certificat a bien été délivré par la plateforme.",
