@@ -16,7 +16,7 @@ Voir [TASKS.md](./TASKS.md) pour la source de vérité du projet (phases, tâche
 docker compose up -d
 ```
 
-Démarre MariaDB 11 sur `localhost:3306` (utilisateur `larbi`, base `larbi_dev`).
+Démarre MariaDB 11 sur `localhost:3306` (utilisateur `larbi`, base `larbi_postgres_dev`).
 
 ### 2. Backend
 

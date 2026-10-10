@@ -325,10 +325,18 @@ describe('task tracking (TASKS.md)', () => {
   });
 
   test('a finished task documents what was done and how it was verified', () => {
+    // Since TASKS.md was split (see NOTES_TECHNIQUES.md), a done task may document
+    // itself inline (older style) OR point to its section in NOTES_TECHNIQUES.md.
+    // Either way, something explains the outcome somewhere, which is what matters.
+    const notes = read(ROOT, 'NOTES_TECHNIQUES.md');
     const blocks = text.split(/^### /m).slice(1);
     const undocumented = blocks
       .filter((b) => /^P\d-\d\d/.test(b) && /- Statut : `✅ done`/.test(b))
-      .filter((b) => !/(Réalisé|Validation effectuée|Tests effectués|Décisions)/.test(b))
+      .filter((b) => {
+        if (/(Réalisé|Validation effectuée|Tests effectués|Décisions)/.test(b)) return false;
+        const id = b.slice(0, 5);
+        return !new RegExp(`<a id="${id.toLowerCase()}"`).test(notes);
+      })
       .map((b) => b.slice(0, 6));
     assert.deepEqual(undocumented, []);
   });

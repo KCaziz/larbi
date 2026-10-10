@@ -1,6 +1,6 @@
 -- MariaDB dump 10.20-11.8.9-MariaDB, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: larbi_dev
+-- Host: localhost    Database: larbi_postgres_dev
 -- ------------------------------------------------------
 -- Server version	11.8.9-MariaDB-ubu2404
 
