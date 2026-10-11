@@ -26,6 +26,14 @@ const PUBLIC = new Set([
   'POST /api/newsletter/subscribe', // public by nature; signed links below (P3-05)
   'POST /api/newsletter/confirm',
   'POST /api/newsletter/unsubscribe',
+  'GET /api/chatbot/entries', // guided assistant: published questions only, read-only (P3-07)
+  // Payment (P3-09): the offers are public; the provider calls the webhook (it is
+  // authenticated by its signature, not by a session); the simulated provider page
+  // exists in development and tests only, never in production.
+  'GET /api/payments/offers',
+  'POST /api/payments/webhook/:provider',
+  'GET /api/payments/fake/checkout/:reference',
+  'POST /api/payments/fake/checkout/:reference',
   'GET /api/tools', // tools catalogue: what exists and who may use it (P4-01)
   'GET /api/tools/comparator', // bank comparator in free access: no access rule in the client's files (P4-06)
   'GET /api/tools/comparator/themes/:theme',
@@ -44,7 +52,7 @@ const PUBLIC = new Set([
 ]);
 
 const UUID0 = '00000000-0000-4000-8000-000000000000';
-const sample = (p) => p.replace(/:number/g, 'FINCLUDIA-AAAA-BBBB-CCCC').replace(/:slug/g, 'x').replace(/:(id|courseId)/g, UUID0);
+const sample = (p) => p.replace(/:number/g, 'FINCLUDIA-AAAA-BBBB-CCCC').replace(/:slug/g, 'x').replace(/:provider/g, 'fake').replace(/:reference/g, 'x').replace(/:(id|courseId)/g, UUID0);
 
 function walk(stack, prefix, out) {
   for (const layer of stack) {

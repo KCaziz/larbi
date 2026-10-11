@@ -1,6 +1,6 @@
 # Plateforme E-Learning, Blog & Outils — Task Tracker
 
-Ce fichier liste les tâches, leurs statuts, dépendances et périmètres. Les détails de mise en œuvre (fichiers livrés, décisions techniques, tests effectués) sont dans [NOTES_TECHNIQUES.md](NOTES_TECHNIQUES.md), avec un lien à la fin de chaque tâche terminée.
+Ce fichier liste les tâches, leurs statuts, dépendances et périmètres. Les détails de mise en œuvre (fichiers livrés, décisions techniques, tests effectués) sont dans [NOTES_TECHNIQUES.md](NOTES_TECHNIQUES.md), avec un lien à la fin de chaque tâche concernée.
 
 ## 0. Rôle de ce fichier
 
@@ -742,7 +742,7 @@ Demande : tests unitaires, fonctionnels et de sécurité, plus un test de cohér
 Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p3-06).
 
 ### P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P1-10`, `P2-02`
 - Durée cible : 1 jour
@@ -757,6 +757,15 @@ Tâches :
 - Interface : bouton flottant + panneau accessible (fermeture par Échap, focus géré, `aria-*`), liste de questions cliquables, réponse affichée, retour à la liste, lien « Contacter l'équipe » vers `/contact` quand aucune question ne convient. Textes de l'interface via `t()` (fr / en / ar), couleurs par tokens (mode sombre), propriétés logiques (RTL), icônes `lucide-react`, utilisable sur mobile. Non affiché dans l'administration.
 - Si aucune entrée n'est publiée, le bouton n'apparaît pas (pas de panneau vide).
 - Tests dans `server/tests/` : unitaires (validation), fonctionnels (CRUD, seules les entrées publiées sont publiques), sécurité (routes admin refusées aux non-administrateurs, XSS dans une réponse, audit des routes), cohérence (clés de traduction), navigateur (ouvrir, choisir, lire, RTL, mobile).
+
+Décisions à trancher (valeur par défaut retenue si le client ne précise rien) :
+- Langue du contenu : une seule langue par entrée, comme les formations et les articles (défaut) ; un contenu par langue serait une extension à chiffrer.
+- Enchaînement de questions (arbre de décision « après cette réponse, proposer… ») : **hors périmètre** par défaut ; liste simple.
+- Statistiques sur les questions les plus cliquées : **hors périmètre** par défaut (minimisation des données, règle 10, et pas d'analytics avancées au MVP).
+
+Important :
+- **Les questions et réponses doivent être fournies ou validées par le client.** Ne rien inventer de commercial, juridique, tarifaire ou fiscal ; ne livrer aucun contenu factice publié.
+- Cet assistant ne remplace pas la FAQ (P1-03) : la FAQ reste la page de référence.
 
 Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p3-07).
 
@@ -783,7 +792,7 @@ Points à préciser :
 Livrable attendu : une courte note (fournisseur retenu, moyens acceptés, devise, offres et prix, règles de remboursement) et l'accès à un compte de test du fournisseur. Passer alors cette tâche à `✅ done` (décisions reçues) et `P3-10` à `❌ todo`.
 
 ### P3-09 — Paiement : socle indépendant du fournisseur
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P3-04`
 - Durée cible : 2 jours
@@ -804,6 +813,10 @@ Tâches :
 Important :
 - Ne pas choisir ni annoncer de fournisseur réel ici ; les règles de remboursement et les prix viennent du client (P3-08).
 - Le niveau d'accès premium existe déjà (P1-06, P3-04) : le paiement ne fait que l'accorder ou le retirer, côté serveur.
+
+Décisions par défaut retenues en attendant `P3-08` (à confirmer avec le client) : une offre est un **achat unique** qui accorde le niveau premium **sans durée** (abonnement et expiration attendent `P3-08`) ; un **remboursement retire le premium**, sauf si une autre commande payée le justifie encore ; les prix et devises sont **saisis par l'administrateur** à partir des informations du client.
+
+Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p3-09).
 
 ### P3-10 — Paiement : branchement du fournisseur choisi
 - Statut : `❌ todo`
@@ -842,6 +855,19 @@ Soit environ **4 à 5 jours ouvrés, donc à peu près une semaine de plus** que
 **Contexte (ajout du 2026-09-21, demandé par l'utilisateur)** : le CMS de P2-02 est jugé trop simple (titre + description + un texte + des fichiers) pour l'ambition du projet. Cette évolution (lots A à D, `P3-11` à `P3-14`) le transforme en outil de création pédagogique **sans réécriture** : migrations additives seulement (expand / contract), `Course.id` inchangé (progression, certificats et clés composites SQL intacts), lecture de l'ancien contenu conservée tant que la migration n'est pas validée.
 
 **Vocabulaire retenu (décision 1)** : « Formation » (= « cours » de l'ensemble) → « Chapitre » (table `sections`) → « Leçon » (table `courses`, nom conservé en base). Aucun renommage massif des textes existants.
+
+Décisions par défaut retenues (l'utilisateur a demandé d'avancer sans attendre les réponses ; à confirmer avec le client) :
+- Quiz : obligatoire ou informatif **au choix de l'admin, par quiz** (informatif par défaut) ; réponse libre corrigée **automatiquement** (liste de réponses acceptées) ; pas de correction manuelle dans ce lot.
+- Formation publiée : modification **directe avec historique** (pas de brouillon séparé) ; vidéos **fichiers privés uniquement** (pas d'embarquement YouTube / Vimeo) ; liens externes en simples liens `http(s)`.
+- « En révision » : **statut** seulement (l'administrateur relit puis publie) ; pas de rôle « éditeur » distinct.
+
+Tâches :
+- Champs pédagogiques d'une formation : sous-titre, niveau (débutant / intermédiaire / avancé), objectifs, prérequis ; durée totale **calculée**.
+- Chapitres : créer, renommer, supprimer, réordonner ; leçons rattachées à un chapitre ; migration des leçons existantes dans un chapitre par défaut.
+- Réorganisation du plan par glisser-déposer (chapitres et leçons, y compris d'un chapitre à l'autre), avec boutons monter / descendre conservés comme alternative clavier ; une seule requête serveur atomique.
+- Statuts `draft` / `in_review` / `published` / `archived` (contrainte SQL étendue) ; règles de visibilité côté serveur (archivée = hors catalogue, accès conservé aux inscrits).
+- Tableau de bord de production (compteurs par statut, formations récentes, ce qui reste à compléter) et liste des formations plus riche.
+- Page apprenant : programme organisé par chapitres, niveau, objectifs, prérequis, durée.
 
 Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p3-11).
 
@@ -976,7 +1002,7 @@ Plan (2026-10-04) : la Phase 4 commence à la demande de l'utilisateur par le **
 Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p4-01).
 
 ### P4-02 — Simulateur de crédit
-- Statut : `❌ todo`
+- Statut : `⛔ blocked`
 - Priorité : `🔴 high`
 - Dépendances : `P4-01`
 - Durée cible : 2 jours
@@ -992,8 +1018,10 @@ Important :
 - Les règles bancaires et formules doivent être fournies/validées par le client.
 - Ne pas inventer les critères ou taux des banques.
 
+Blocage (2026-10-11) : les deux classeurs du client donnent des **conditions bancaires** (frais, commissions), pas de **règles d'octroi ni de formules de capacité d'emprunt** (taux par banque, durée maximale, taux d'endettement admis, apport, critères de patrimoine). Sans elles, le simulateur ne peut rien calculer sans inventer. À fournir par le client ; le moteur de calcul versionné (`P4-09`) et les calculateurs de crédit génériques (`P4-11`) sont prêts à les recevoir.
+
 ### P4-03 — Générateur de facture
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P4-01`
 - Durée cible : 2 jours
@@ -1012,6 +1040,10 @@ Tâches :
 - Génération PDF.
 - Génération Excel.
 - Vérification des données avant génération.
+
+Décisions par défaut retenues (à confirmer avec le client) : **aucun taux de TVA ni mention légale n'est imposé** (l'utilisateur saisit le taux de chaque ligne et ses identifiants) ; numéro de facture **saisi par l'utilisateur** (pas de numérotation automatique, qui supposerait de conserver les factures) ; TVA arrondie **ligne par ligne** ; **rien n'est conservé sur le serveur** ; PDF produit par le navigateur, comme le certificat.
+
+Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p4-03).
 
 ### P4-04 — Simulateur fiscalité
 - Statut : `❌ todo`
@@ -1680,7 +1712,7 @@ Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau
 Phase active : `PHASE 3` — BLOG + CMS CONTENU + NEWSLETTER (les Phases 1 et 2 ont été validées le 2026-09-19, voir P1-08 et P2-07)
 
 Dernières tâches terminées et vérifiées :
-`P4-16 — FINCLUDIA : atelier de simulation (C18)`, `P4-12 — FINCLUDIA : moteur de comparaison multicritère et comparateur d'offres d'emploi`, `P4-11 — FINCLUDIA : calculateurs, lot 2 (dettes et crédit)`, `P4-10 — FINCLUDIA : calculateurs, lot 1 (budget, épargne, objectifs, inflation, simulations de vie)`, `P4-09 — FINCLUDIA : moteur de calcul versionné` (premières tâches de la direction FINCLUDIA, 2026-10-09), `P4-08 — Comparateur bancaire, lot C : administration des données`, `P4-07 — Comparateur bancaire, lot B : pages publiques`, `P4-06 — Comparateur bancaire, lot A : données et API publique`, `P4-01 — Architecture commune des outils` (comparateur bancaire commencé à la demande de l'utilisateur, avant la validation de la Phase 3), `P3-17 — Articles multilingues (traductions)`, `P3-16 — Panel d'administration étendu (utilisateurs, droits, paramètres, médiathèque, certifications) et tableau de bord personnalisé`, `P3-15 — Types de compte dynamiques`, `P3-14 — CMS pédagogique, lot D : finitions`, `P3-13 — CMS pédagogique, lot C : quiz`, `P3-12 — CMS pédagogique, lot B : blocs de contenu et éditeur avancé`, `P3-11 — CMS pédagogique, lot A : structure d'une formation`, `P3-05 — Newsletter`, `P3-04 — Recommandation / visibilité selon profil`, `P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
+`P4-03 — Générateur de facture` (sans conservation : calcul et Excel par le serveur, PDF par le navigateur), `P3-09 — Paiement : socle indépendant du fournisseur` (avec un fournisseur simulé réservé au développement ; en production le paiement reste annoncé « pas encore disponible » jusqu'à `P3-10`), `P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)` (le module est prêt ; il reste invisible tant que l'administrateur n'a publié aucune question), `P4-16 — FINCLUDIA : atelier de simulation (C18)`, `P4-12 — FINCLUDIA : moteur de comparaison multicritère et comparateur d'offres d'emploi`, `P4-11 — FINCLUDIA : calculateurs, lot 2 (dettes et crédit)`, `P4-10 — FINCLUDIA : calculateurs, lot 1 (budget, épargne, objectifs, inflation, simulations de vie)`, `P4-09 — FINCLUDIA : moteur de calcul versionné` (premières tâches de la direction FINCLUDIA, 2026-10-09), `P4-08 — Comparateur bancaire, lot C : administration des données`, `P4-07 — Comparateur bancaire, lot B : pages publiques`, `P4-06 — Comparateur bancaire, lot A : données et API publique`, `P4-01 — Architecture commune des outils` (comparateur bancaire commencé à la demande de l'utilisateur, avant la validation de la Phase 3), `P3-17 — Articles multilingues (traductions)`, `P3-16 — Panel d'administration étendu (utilisateurs, droits, paramètres, médiathèque, certifications) et tableau de bord personnalisé`, `P3-15 — Types de compte dynamiques`, `P3-14 — CMS pédagogique, lot D : finitions`, `P3-13 — CMS pédagogique, lot C : quiz`, `P3-12 — CMS pédagogique, lot B : blocs de contenu et éditeur avancé`, `P3-11 — CMS pédagogique, lot A : structure d'une formation`, `P3-05 — Newsletter`, `P3-04 — Recommandation / visibilité selon profil`, `P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
 
 Toutes les tâches de pages (P1-02, P1-03, P1-04), le socle backend (P1-05) et les deux ajouts signalés par l'utilisateur (mode clair/sombre, i18n FR/EN/AR + tamazight en repli) sont terminés. Le modèle `User` existe en base (Prisma).
 
@@ -1689,15 +1721,13 @@ Nom de la plateforme : **FINCLUDIA** (tranché le 2026-10-09, `P6-01` point 1). 
 Direction ajoutée le 2026-10-09 : **FINCLUDIA** (gestion financière personnelle, 8 publics) devient la suite du projet, sur la base des deux documents du client à la racine du dépôt. Le plan est découpé en Phase 6 (`P6-01` à `P6-21`, modules nouveaux) plus les prolongements des modules existants : `P1-12` (système de design et navigation), `P2-08` à `P2-10` (Apprendre : glossaire, indice de connaissances, défis), `P3-18` et `P3-19` (publics / personas, assistant déterministe), `P4-09` à `P4-15` (moteur de calcul versionné, calculateurs, comparaisons, fiche de paie, financement). Estimation d'environ **4 mois** en plus du MVP restant, détail dans « Impact sur le délai (FINCLUDIA) » à la fin de la Phase 6. **Rien ne doit commencer avant les décisions de cadrage `P6-01`** (nom de la plateforme, périmètre de la première livraison, publics retenus, devises, seuils, règles de paie).
 
 Prochaines tâches réalisables (dépendances satisfaites) :
-- `P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)` (dépend de `P1-10` ✅ et `P2-02` ✅ ; **questions et réponses à fournir par le client**). Devient aussi la base de `P3-19` (assistant FINCLUDIA).
-- `P3-09 — Paiement : socle indépendant du fournisseur` (dépend de `P3-04` ✅ ; `P3-08` reste bloquée sur les décisions du client et bloque seulement `P3-10`).
 - Le blog est terminé (P3-01 à P3-06 hors paiement et assistant guidé). La Phase 4 (outils) ne doit commencer qu'après validation de la Phase 3.
 - **Toutes les tâches FINCLUDIA réalisables sans `P6-01` sont faites** (`P4-09` moteur, `P4-10` et `P4-11` les 18 calculateurs, `P4-12` comparaisons et offres d'emploi, `P4-16` atelier). Ce qui reste de FINCLUDIA attend les décisions de cadrage : `P4-13` dépend aussi de `P3-18`, `P4-14` et `P4-15` des règles de paie et de financement du client, et la Phase 6 de `P6-01`.
 - Le moteur de comparaison de `P4-12` est désormais disponible pour `P4-13` (adéquation à l'usage) et pour tout écran qui doit comparer des options sans produire de classement opaque.
 
-- Comparateur bancaire terminé (P4-01, P4-06 à P4-08). Restent dans la Phase 4 : `P4-02 — Simulateur de crédit` et `P4-03 — Générateur de facture` (le simulateur dépend des règles de calcul du client : les classeurs fournis donnent des conditions, pas de formules).
+- Comparateur bancaire et générateur de facture terminés (P4-01, P4-03, P4-06 à P4-08). Reste dans la Phase 4 : `P4-02 — Simulateur de crédit`, **bloqué** sur les règles de calcul du client ; il bloque à son tour la validation de fin de phase `P4-05`, donc la Phase 5.
 
-Recommandation : `P3-07` si le client a fourni les questions / réponses, sinon `P3-09` ; puis la validation de fin de Phase 3. En parallèle, obtenir les réponses de `P6-01`, qui conditionne tout FINCLUDIA. Points d'attention :
+Recommandation : plus aucune tâche du MVP n'est réalisable sans une décision ou une donnée du client (voir « Blocages » ci-dessous) ; puis la validation de fin de Phase 3. En parallèle, obtenir les réponses de `P6-01`, qui conditionne tout FINCLUDIA. Points d'attention :
 - **Newsletter : aucun courriel réel ne part tant qu'un fournisseur d'e-mail n'est pas choisi** (pilote `none` par défaut en production : l'inscription répond « pas encore disponible »). C'est la décision client la plus urgente pour rendre P3-05 réellement utilisable ; elle débloque aussi « mot de passe oublié ».
 - Chaque nouvelle tâche ajoute ses tests dans `server/tests/` (voir P3-06 et README « Tests ») ; `npm test` doit rester vert, le test de cohérence du projet vérifie aussi ce fichier (statuts, dépendances, tâches terminées documentées, cette section).
 - Toute nouvelle route API : elle sera contrôlée par l'audit d'autorisation automatique (toutes les routes Express, voir P2-07) — la déclarer publique ou la protéger explicitement.
@@ -1710,8 +1740,8 @@ Blocages / informations manquantes signalées (non bloquantes pour continuer, ma
 - Formulaire de contact : aucune coordonnée réelle (email/téléphone/adresse) fournie. Depuis P3-16, un administrateur peut les saisir lui-même (page « Paramètres ») et elles s'affichent aussitôt sur `/contact` et dans le pied de page — reste seulement à ce que le client transmette (ou saisisse) les informations réelles.
 - Fournisseur d'email non défini : « mot de passe oublié » reste inactif et les messages du formulaire de contact ne sont que stockés en base (voir P1-07). La newsletter (P3-05) est construite mais ne peut rien envoyer tant qu'il n'est pas choisi ; à choisir avant la mise en production.
 - Paiement (`P3-08`, `⛔ blocked`) : fournisseur / banque, moyens de paiement, devise, offres et règles de remboursement **non définis** ; le client fait ses propres recherches (liste des points dans `P3-08`). Bloque `P3-10`, pas `P3-09`.
-- Assistant guidé (`P3-07`) : questions et réponses à fournir par le client ; aucun contenu inventé.
-- Simulateur de crédit (P4-02) : règles bancaires/taux à fournir par le client le moment venu — rappel déjà noté dans la tâche elle-même.
+- Assistant guidé (`P3-07`, terminé) : le module est en place mais **vide** ; les questions et réponses sont à fournir par le client et à saisir dans Administration → Assistant. Aucun contenu inventé.
+- Simulateur de crédit (`P4-02`, `⛔ blocked`) : règles d'octroi, taux et formules de capacité d'emprunt à fournir par le client (les classeurs fournis ne contiennent que des conditions bancaires). Bloque `P4-05` puis toute la Phase 5.
 - **FINCLUDIA (`P6-01`, `⛔ blocked`)** : onze points de cadrage à trancher par le client avant de développer (nom de la plateforme et sort de l'existant, périmètre de la première livraison, publics retenus, coexistence avec auto-entrepreneur / PME / PMI, devises et taux de change, seuils et pondérations laissés « à valider » dans la spécification, règles de paie datées, âge minimum et consentement parental, canaux de notification, textes légaux, contenus pédagogiques). Bloque `P1-12`, `P3-18`, `P4-14`, `P4-15`, `P6-16` et, par ricochet, la quasi-totalité de la Phase 6.
 - FINCLUDIA, données à fournir par le client : barèmes de paie (`P4-14`), offres de financement et leurs formules (`P4-15`), données CCP (`P4-13`), instruments et prix de référence du portefeuille fictif (`P6-12`), glossaire et guides (`P2-08`), scénarios de missions (`P2-10`), intentions et réponses de l'assistant (`P3-19`), référentiel de catégories (`P6-02`, base dans l'onglet `03_Categories`).
 - FINCLUDIA, hébergement : l'hébergement mutualisé actuel (cPanel, MariaDB) convient à une démonstration, pas à des données financières réelles sans sauvegardes testées, chiffrement et disponibilité confirmés (voir `P5-04` et point 11 de `P6-01`).

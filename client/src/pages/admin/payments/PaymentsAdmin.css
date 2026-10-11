@@ -1,0 +1,126 @@
+/* ---------- Payment administration (P3-09) ---------- */
+.payments-admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  border-bottom: 2px solid var(--border);
+}
+
+.payments-admin-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.payments-admin-tabs button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.payments-admin-section {
+  margin-bottom: 32px;
+}
+
+.payments-admin-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+}
+
+.payments-admin-bar .form-hint {
+  margin: 0;
+  max-width: 560px;
+}
+
+.payments-admin-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.payments-admin-filter select,
+.payments-admin-form input:not([type='checkbox']),
+.payments-admin-form textarea {
+  min-height: 38px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.92rem;
+}
+
+.payments-admin-form input:not([type='checkbox']),
+.payments-admin-form textarea {
+  width: 100%;
+  max-width: 560px;
+}
+
+.payments-admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+
+.payments-admin-form h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.payments-admin-form > .form-hint {
+  margin: 0;
+}
+
+.payments-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px 16px;
+}
+
+.payments-admin-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-h);
+}
+
+.payments-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.payments-admin-section .cms-inline-message {
+  margin: 0 0 12px;
+}
+
+.payments-admin-buyer {
+  display: flex;
+  flex-direction: column;
+}
+
+.payments-admin-buyer small {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}

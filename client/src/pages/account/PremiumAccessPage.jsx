@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth.js';
 import LockedContent from '../../components/ui/LockedContent.jsx';
 import Notice from '../../components/ui/Notice.jsx';
+import OffersList from '../../components/payments/OffersList.jsx';
 import '../Pages.css';
 
 export default function PremiumAccessPage() {
@@ -17,9 +18,13 @@ export default function PremiumAccessPage() {
           <strong>{t('account.premium.activeTitle')}</strong> {t('account.premium.activeBody')}
         </Notice>
       ) : (
-        <LockedContent title={t('account.premium.lockedTitle')}>
-          {t('account.premium.lockedBody')}
-        </LockedContent>
+        <>
+          <LockedContent title={t('account.premium.lockedTitle')}>
+            {t('account.premium.lockedBody')}
+          </LockedContent>
+          {/* Offers to become premium (P3-09). */}
+          <OffersList />
+        </>
       )}
       <Notice variant="info">{t('account.premium.footNote')}</Notice>
     </div>

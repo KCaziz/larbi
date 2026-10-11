@@ -18,7 +18,8 @@ export const TOOLS = [
   { key: 'comparaisons', status: 'available', access: 'public' },
   // Cahier des charges: "Outils : accès authentifié et selon les droits".
   { key: 'simulateur-credit', status: 'planned', access: 'authenticated' },
-  { key: 'generateur-facture', status: 'planned', access: 'authenticated' },
+  // Invoice generator (P4-03): needs an account, per the specification.
+  { key: 'generateur-facture', status: 'available', access: 'authenticated' },
 ];
 
 export const toolByKey = (key) => TOOLS.find((tool) => tool.key === key) ?? null;

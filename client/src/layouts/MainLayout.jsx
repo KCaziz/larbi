@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { TriangleAlert } from 'lucide-react';
 import Header from '../components/layout/Header.jsx';
 import Footer from '../components/layout/Footer.jsx';
+import ChatbotWidget from '../components/assistant/ChatbotWidget.jsx';
 import { usePublicSettings } from '../lib/publicSettings.js';
 
 export default function MainLayout() {
@@ -22,6 +23,7 @@ export default function MainLayout() {
         <Outlet />
       </main>
       <Footer />
+      <ChatbotWidget />
     </>
   );
 }

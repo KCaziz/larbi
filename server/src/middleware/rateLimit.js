@@ -102,3 +102,24 @@ export const publicReadLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: { message: 'Too many requests, please try again later' } },
 });
+
+// Payment provider notifications (P3-09): public by nature, verified by signature;
+// the limit only stops someone flooding the route with forged ones.
+export const paymentNotificationLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: Number(process.env.PAYMENT_NOTIFICATION_RATE_LIMIT) || 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: { message: 'Too many requests, please try again later' } },
+});
+
+// Starting a payment, per ACCOUNT: a buyer starts a few; this stops a script
+// from filling the orders table.
+export const paymentOrderLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: Number(process.env.PAYMENT_ORDER_RATE_LIMIT) || 20,
+  keyGenerator: (req) => `user:${req.user.id}`,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: { message: 'Too many attempts, please try again later' } },
+});

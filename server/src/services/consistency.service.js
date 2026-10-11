@@ -177,6 +177,20 @@ export async function checkConsistency(prisma, { privateDir }) {
   const banksWithLookalike = await prisma.$queryRaw`SELECT a.id FROM comparator_banks a JOIN comparator_banks b ON a.id <> b.id AND lower(a.name) = lower(b.name)`;
   add('two comparator banks never share a name (whatever the case)', banksWithLookalike, (r) => `bank ${r.id}`);
 
+  // ---- payment (P3-09) ------------------------------------------------------------
+  // An order is paid only by an authentic provider notification, and a paid order
+  // grants its access. (A paid order whose access an administrator removed by hand
+  // shows up here on purpose: someone paid for something they no longer have.)
+  const unpaidPaid = await prisma.$queryRaw`
+    SELECT o.id FROM payment_orders o
+    WHERE o.status IN ('paid', 'refunded')
+      AND NOT EXISTS (SELECT 1 FROM payment_events e WHERE e.orderId = o.id AND e.type = 'payment.succeeded' AND e.outcome = 'applied')`;
+  add('a paid order has the provider notification that paid it', unpaidPaid, (r) => `order ${r.id}`);
+  const paidWithoutAccess = await prisma.$queryRaw`
+    SELECT o.id FROM payment_orders o JOIN users u ON u.id = o.userId
+    WHERE o.status = 'paid' AND u.accessLevel <> o.accessLevel`;
+  add('a paid order grants its access', paidWithoutAccess, (r) => `order ${r.id}`);
+
   return problems;
 }
 

@@ -12,7 +12,7 @@ const tools = [
   { key: 'simulators', icon: Calculator, tone: 'tone-blue', to: '/outils/simulateurs', available: true },
   { key: 'jobOffers', icon: Briefcase, tone: 'tone-brass', to: '/outils/offres-emploi', available: true },
   { key: 'credit', icon: CreditCard, tone: 'tone-brass', available: false },
-  { key: 'invoice', icon: Receipt, tone: 'tone-clay', available: false },
+  { key: 'invoice', icon: Receipt, tone: 'tone-clay', to: '/outils/facture', available: true },
 ];
 
 export default function ToolsPresentationPage() {

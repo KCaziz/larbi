@@ -1,0 +1,145 @@
+/* Payment (P3-09). Tokens only (light and dark), logical properties (RTL). */
+.offers {
+  margin-block: 24px;
+}
+
+.offers h3 {
+  margin-block-end: 12px;
+}
+
+.offer-cards {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.offer-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.offer-card h4 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.offer-card p {
+  margin: 0;
+}
+
+.offer-price {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.offer-card .btn {
+  margin-block-start: auto;
+  align-self: flex-start;
+}
+
+/* Payment status badge (my payments, return page, administration). */
+.payment-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.payment-status-paid {
+  background: var(--green-bg);
+  color: var(--green);
+}
+
+.payment-status-pending {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.payment-status-failed,
+.payment-status-cancelled {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.payment-status-refunded {
+  background: var(--bg-alt);
+  color: var(--text);
+}
+
+.payment-return {
+  max-width: 640px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.payment-return-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-block-end: 12px;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.payment-return-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-block-start: 20px;
+}
+
+.payments-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payments-table th,
+.payments-table td {
+  padding: 10px 12px;
+  border-block-end: 1px solid var(--border);
+  text-align: start;
+}
+
+.payments-table th {
+  font-size: 0.85rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .payments-table thead {
+    display: none;
+  }
+
+  .payments-table tr {
+    display: grid;
+    gap: 4px;
+    padding-block: 10px;
+    border-block-end: 1px solid var(--border);
+  }
+
+  .payments-table td {
+    padding: 0;
+    border: 0;
+  }
+}

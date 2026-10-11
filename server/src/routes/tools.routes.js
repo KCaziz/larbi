@@ -18,6 +18,7 @@ import { toolAccess } from '../middleware/toolAccess.js';
 import { validateBody } from '../middleware/validate.js';
 import { SIMULATION_SCHEMAS } from '../validation/simulations.schemas.js';
 import { comparisonSchema, jobOffersSchema } from '../validation/comparisons.schemas.js';
+import { calculateInvoice, invoiceExcel } from '../controllers/invoice.controller.js';
 import { compareScenariosSchema, renameScenarioSchema, saveScenarioSchema } from '../validation/scenarios.schemas.js';
 import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
 import { HttpError } from '../utils/httpError.js';
@@ -72,5 +73,12 @@ scenarios.get('/:id', asyncRoute(getScenario));
 scenarios.patch('/:id', validateBody(renameScenarioSchema), asyncRoute(renameScenario));
 scenarios.delete('/:id', asyncRoute(deleteScenario));
 router.use('/scenarios', ...toolAccess('simulateurs'), scenarios);
+
+// Invoice generator (P4-03): checks and computes an invoice, and builds its Excel
+// file. Stateless: nothing is stored. The PDF is the printed sheet (browser).
+const invoices = Router();
+invoices.post('/calcul', calculateInvoice);
+invoices.post('/excel', asyncRoute(invoiceExcel));
+router.use('/factures', ...toolAccess('generateur-facture'), invoices);
 
 export default router;

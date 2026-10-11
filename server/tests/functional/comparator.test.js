@@ -31,7 +31,7 @@ describe('public comparator, free access', () => {
       { key: 'simulateurs', status: 'available', access: 'public' },
       { key: 'comparaisons', status: 'available', access: 'public' },
       { key: 'simulateur-credit', status: 'planned', access: 'authenticated' },
-      { key: 'generateur-facture', status: 'planned', access: 'authenticated' },
+      { key: 'generateur-facture', status: 'available', access: 'authenticated' },
     ]);
   });
 

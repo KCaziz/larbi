@@ -54,6 +54,9 @@ model User {
   // Simulation workshop (P4-16)
   simulationScenarios SimulationScenario[]
 
+  // Payment (P3-09)
+  paymentOrders PaymentOrder[]
+
   @@map("users")
 }
 
@@ -94,6 +97,95 @@ model SimulationScenario {
 
   @@index([userId, createdAt])
   @@map("simulation_scenarios")
+}
+
+// ---- Payment (P3-09): provider-independent base ------------------------------
+// What can be bought. Prices are entered by an administrator from the client's
+// figures (never invented). Amounts are INTEGERS in the currency's smallest unit
+// (centimes...): no floating point anywhere in money.
+model PaymentOffer {
+  id          String         @id @default(uuid())
+  name        String         @db.VarChar(120)
+  description String?        @db.Text
+  amount      Int
+  // ISO 4217 code, upper case ("DZD", "EUR").
+  currency    String         @db.VarChar(3)
+  // Access level the purchase grants. Only "premium" exists today (P1-06, P3-04).
+  accessLevel String         @default("premium") @db.VarChar(20)
+  isActive    Boolean        @default(false)
+  position    Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  orders      PaymentOrder[]
+
+  @@map("payment_offers")
+}
+
+// One purchase attempt. Amount, currency and access level are COPIED from the
+// offer when the order is created: changing an offer's price later never changes
+// what an existing order is worth. Orders are kept for accounting: an offer or a
+// user with orders cannot be deleted (RESTRICT).
+model PaymentOrder {
+  id                String         @id @default(uuid())
+  userId            String
+  user              User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  offerId           String
+  offer             PaymentOffer   @relation(fields: [offerId], references: [id], onDelete: Restrict)
+  amount            Int
+  currency          String         @db.VarChar(3)
+  accessLevel       String         @db.VarChar(20)
+  // pending | paid | failed | cancelled | refunded (CHECK in the migration).
+  status            String         @default("pending") @db.VarChar(20)
+  provider          String         @db.VarChar(30)
+  // The provider's id for the checkout session: how its notifications find the order.
+  providerReference String?        @unique @db.VarChar(191)
+  paidAt            DateTime?
+  refundedAt        DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  events            PaymentEvent[]
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@map("payment_orders")
+}
+
+// Every notification received from a provider, once: the UNIQUE (provider,
+// externalId) pair is what makes a replayed or duplicated notification a no-op.
+// Only what is needed to audit the outcome is kept, never the raw payload
+// (it may hold personal data).
+model PaymentEvent {
+  id         String        @id @default(uuid())
+  provider   String        @db.VarChar(30)
+  externalId String        @db.VarChar(191)
+  type       String        @db.VarChar(60)
+  orderId    String?
+  order      PaymentOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  // What processing did: applied | ignored | unknown_order | amount_mismatch.
+  outcome    String        @db.VarChar(30)
+  receivedAt DateTime      @default(now())
+
+  @@unique([provider, externalId])
+  @@map("payment_events")
+}
+
+// Guided assistant (P3-07): a question the visitor picks from a list and the
+// answer shown for it. No free text, no AI: an administrator writes both. One
+// language per entry, like articles; the public API only returns published
+// entries of the visitor's language, in the administrator's order.
+model ChatbotEntry {
+  id        String   @id @default(uuid())
+  question  String   @db.VarChar(200)
+  // Sanitised rich text (sanitizeRichText), never raw HTML from the browser.
+  answer    String   @db.Text
+  language  String   @default("fr") @db.VarChar(2)
+  status    String   @default("draft") @db.VarChar(20)
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([language, status, position])
+  @@map("chatbot_entries")
 }
 
 // Messages sent through the public contact form (P1-07). Stored in the DB

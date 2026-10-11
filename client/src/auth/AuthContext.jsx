@@ -63,6 +63,13 @@ export function AuthProvider({ children }) {
         const { user } = await api.patch('/auth/me', { accountType });
         setState({ status: 'authenticated', user });
       },
+      // Re-reads the session without the loading state (after a payment: the
+      // access level changed on the server, P3-09).
+      async refresh() {
+        const { user } = await api.get('/auth/me');
+        setState({ status: 'authenticated', user });
+        return user;
+      },
       async changePassword(currentPassword, newPassword) {
         await api.post('/auth/password', { currentPassword, newPassword });
       },

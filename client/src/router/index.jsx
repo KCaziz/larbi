@@ -73,6 +73,8 @@ export const router = createBrowserRouter([
             // Everything below needs a session (guard = convenience; the API re-checks).
             element: <RequireAuth />,
             children: [
+              // Invoice generator (P4-03): the tool registry says "account required".
+              { path: 'outils/facture', lazy: lazyPage(() => import('../pages/outils/InvoicePage.jsx')) },
               // E-Learning (learner side): formations are for logged-in users.
               { path: 'catalogue', lazy: lazyPage(() => import('../pages/learn/CatalogPage.jsx')) },
               { path: 'catalogue/:slug', lazy: lazyPage(() => import('../pages/learn/FormationPage.jsx')) },
@@ -85,6 +87,8 @@ export const router = createBrowserRouter([
                 path: 'catalogue/:slug/certificat',
                 lazy: lazyPage(() => import('../pages/learn/CertificatePage.jsx')),
               },
+              // Where the payment provider sends the buyer back (P3-09): reads the order, grants nothing.
+              { path: 'paiement/retour', lazy: lazyPage(() => import('../pages/payments/PaymentReturnPage.jsx')) },
               {
                 path: 'compte',
                 element: <AccountLayout />,
@@ -96,6 +100,7 @@ export const router = createBrowserRouter([
                   { path: 'certificats', lazy: lazyPage(() => import('../pages/account/MyCertificatesPage.jsx')) },
                   { path: 'type', element: <AccountTypePage /> },
                   { path: 'premium', element: <PremiumAccessPage /> },
+                  { path: 'paiements', lazy: lazyPage(() => import('../pages/account/MyPaymentsPage.jsx')) },
                 ],
               },
               {
@@ -133,6 +138,14 @@ export const router = createBrowserRouter([
                       {
                         path: 'certificates',
                         lazy: lazyPage(() => import('../pages/admin/platform/CertificatesAdminPage.jsx')),
+                      },
+                      {
+                        path: 'assistant',
+                        lazy: lazyPage(() => import('../pages/admin/chatbot/ChatbotAdminPage.jsx')),
+                      },
+                      {
+                        path: 'paiements',
+                        lazy: lazyPage(() => import('../pages/admin/payments/PaymentsAdminPage.jsx')),
                       },
                       {
                         path: 'comparateur',

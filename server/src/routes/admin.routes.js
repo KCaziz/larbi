@@ -125,6 +125,18 @@ import {
   renameBank,
   updateCondition,
 } from '../controllers/admin/comparator.controller.js';
+import {
+  createChatbotEntry,
+  deleteChatbotEntry,
+  listChatbotEntries,
+  publishChatbotEntry,
+  reorderChatbotEntries,
+  unpublishChatbotEntry,
+  updateChatbotEntry,
+} from '../controllers/admin/chatbot.controller.js';
+import { createChatbotEntrySchema, reorderChatbotSchema, updateChatbotEntrySchema } from '../validation/chatbot.schemas.js';
+import { createOffer, deleteOffer, listOffersAdmin, listOrdersAdmin, updateOffer } from '../controllers/admin/payments.controller.js';
+import { createOfferSchema, ordersQuerySchema, updateOfferSchema } from '../validation/payments.schemas.js';
 import { bankSchema, conditionsQuerySchema, createConditionSchema, updateConditionSchema } from '../validation/comparator.schemas.js';
 
 // CMS administration API. EVERY route below requires an authenticated admin,
@@ -249,5 +261,22 @@ router.get('/comparator/conditions', validateQuery(conditionsQuerySchema), async
 router.post('/comparator/conditions', validateBody(createConditionSchema), asyncRoute(createCondition));
 router.patch('/comparator/conditions/:id', validateBody(updateConditionSchema), asyncRoute(updateCondition));
 router.delete('/comparator/conditions/:id', asyncRoute(deleteCondition));
+
+// Guided assistant (P3-07): questions and answers shown in the public panel.
+router.get('/chatbot', asyncRoute(listChatbotEntries));
+router.post('/chatbot', validateBody(createChatbotEntrySchema), asyncRoute(createChatbotEntry));
+router.put('/chatbot/order', validateBody(reorderChatbotSchema), asyncRoute(reorderChatbotEntries));
+router.patch('/chatbot/:id', validateBody(updateChatbotEntrySchema), asyncRoute(updateChatbotEntry));
+router.post('/chatbot/:id/publish', asyncRoute(publishChatbotEntry));
+router.post('/chatbot/:id/unpublish', asyncRoute(unpublishChatbotEntry));
+router.delete('/chatbot/:id', asyncRoute(deleteChatbotEntry));
+
+// Payment (P3-09): offers, and the orders in READ-ONLY (their status only
+// changes through authentic provider notifications).
+router.get('/payments/offers', asyncRoute(listOffersAdmin));
+router.post('/payments/offers', validateBody(createOfferSchema), asyncRoute(createOffer));
+router.patch('/payments/offers/:id', validateBody(updateOfferSchema), asyncRoute(updateOffer));
+router.delete('/payments/offers/:id', asyncRoute(deleteOffer));
+router.get('/payments/orders', validateQuery(ordersQuerySchema), asyncRoute(listOrdersAdmin));
 
 export default router;

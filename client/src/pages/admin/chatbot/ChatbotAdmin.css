@@ -1,0 +1,109 @@
+/* ---------- Guided assistant administration (P3-07) ---------- */
+.chatbot-admin-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+}
+
+.chatbot-admin-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.chatbot-admin-bar .form-hint {
+  margin: 0;
+  max-width: 520px;
+}
+
+.chatbot-admin-bar select,
+.chatbot-admin-form input,
+.chatbot-admin-form select {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.92rem;
+}
+
+.chatbot-admin-form input {
+  width: 100%;
+  max-width: 640px;
+}
+
+.chatbot-admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+
+.chatbot-admin-form h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.chatbot-admin-form > .form-hint {
+  margin: 0;
+}
+
+.chatbot-admin-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cms-inline-message + .chatbot-admin-list,
+.chatbot-admin-bar + .cms-inline-message {
+  margin-top: 0;
+}
+
+.chatbot-admin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.chatbot-admin-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.chatbot-admin-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.chatbot-admin-text strong {
+  color: var(--text-h);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .chatbot-admin-item {
+    flex-wrap: wrap;
+  }
+}

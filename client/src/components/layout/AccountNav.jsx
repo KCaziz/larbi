@@ -9,6 +9,7 @@ const links = [
   { labelKey: 'account.nav.certificates', to: '/compte/certificats' },
   { labelKey: 'account.nav.type', to: '/compte/type' },
   { labelKey: 'account.nav.premium', to: '/compte/premium' },
+  { labelKey: 'account.nav.payments', to: '/compte/paiements' },
 ];
 
 export default function AccountNav() {

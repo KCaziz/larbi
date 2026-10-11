@@ -10,6 +10,7 @@ import routes from './routes/index.js';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { maintenanceGate } from './middleware/maintenance.js';
+import { MAX_NOTIFICATION_BYTES } from './constants/payments.js';
 
 export function createApp() {
   const app = express();
@@ -22,6 +23,9 @@ export function createApp() {
       credentials: true,
     })
   );
+  // Payment notifications (P3-09) are read RAW: the provider signs the exact
+  // bytes it sends, so the body must not be parsed and re-serialised first.
+  app.use('/api/payments/webhook', express.raw({ type: () => true, limit: MAX_NOTIFICATION_BYTES }));
   // Articles and lessons can be long (validation allows 200 000 characters, up to
   // 3 bytes each): the administration accepts 1 MB, everything else keeps the
   // 100 kB default so a public route cannot be fed huge bodies.

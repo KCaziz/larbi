@@ -63,6 +63,26 @@ export const api = {
     form.append('file', file);
     return request(path, { ...options, method: 'POST', body: form });
   },
+  // POSTs JSON and returns the answer as a file (Blob), e.g. a generated Excel
+  // workbook. Errors throw ApiError, like every other call.
+  async download(path, body) {
+    let response;
+    try {
+      response = await fetch(`${BASE_URL}${path}`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    } catch {
+      throw new ApiError(0, 'Network error');
+    }
+    if (!response.ok) {
+      let data = null;
+      try {
+        data = await response.json();
+      } catch {
+        /* not JSON */
+      }
+      throw new ApiError(response.status, data?.error?.message ?? response.statusText, data?.error?.details);
+    }
+    return response.blob();
+  },
 };
 
 // Maps an ApiError to an i18n key, so no server (English) message is ever

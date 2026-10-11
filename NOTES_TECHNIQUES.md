@@ -579,31 +579,51 @@ Correctif (2026-10-09) : les parcours navigateur échouaient **12 fois sur 131**
 
 ## <a id="p3-07"></a>P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)
 
-Décisions à trancher (valeur par défaut retenue si le client ne précise rien) :
-- Langue du contenu : une seule langue par entrée, comme les formations et les articles (défaut) ; un contenu par langue serait une extension à chiffrer.
-- Enchaînement de questions (arbre de décision « après cette réponse, proposer… ») : **hors périmètre** par défaut ; liste simple.
-- Statistiques sur les questions les plus cliquées : **hors périmètre** par défaut (minimisation des données, règle 10, et pas d'analytics avancées au MVP).
+Réalisé (2026-10-11, migration additive `chatbot_entries`, `prisma generate` fait) :
+- Modèle `ChatbotEntry` (`chatbot_entries`) : question (200 caractères), réponse (texte riche assaini), langue, statut `draft` / `published`, position. Contraintes SQL : question et réponse non vides, langue dans `fr` / `en` / `ar`, statut connu, position positive.
+- Administration `/api/admin/chatbot` (administrateur uniquement, routeur admin commun) : lister, créer (toujours en brouillon, à la fin de sa langue), modifier (changer de langue place l'entrée à la fin de la nouvelle langue), publier / retirer, supprimer, réordonner (`PUT /order` avec la liste **complète** d'une langue ; une liste partielle, en double ou périmée est refusée en 409). Réponse assainie par `sanitizeRichText` ; une réponse sans texte visible est refusée (400, `details.answer = 'empty'`). Maximum 200 entrées.
+- API publique `GET /api/chatbot/entries?lang=` (sans session, limitation de lecture publique, déclarée dans l'audit des routes) : uniquement les entrées publiées de la langue demandée (français par défaut), dans l'ordre, avec seulement `id`, `question`, `answer`.
+- Interface publique `components/assistant/ChatbotWidget.jsx` (dans `MainLayout`) : bouton flottant « Une question ? », panneau avec liste de questions, réponse (`RichContent`), retour à la liste, lien « Contacter l'équipe ». Échap ferme et rend le focus au bouton ; le focus suit la vue affichée. Langue du visiteur (tamazight → français), sens RTL en arabe, icône seule sur téléphone. Aucun bouton quand rien n'est publié dans la langue, ni dans l'administration.
+- Administration `pages/admin/chatbot/ChatbotAdminPage.jsx` (`/admin/assistant`, entrée « Assistant » du menu) : filtre par langue avec compteurs, formulaire (question, éditeur riche, langue), publier / retirer, monter / descendre, suppression confirmée. Textes fr / en / ar.
 
-Important :
-- **Les questions et réponses doivent être fournies ou validées par le client.** Ne rien inventer de commercial, juridique, tarifaire ou fiscal ; ne livrer aucun contenu factice publié.
-- Cet assistant ne remplace pas la FAQ (P1-03) : la FAQ reste la page de référence.
+Décisions :
+- Valeurs par défaut de la tâche appliquées : une langue par entrée, liste simple (pas d'arbre de décision), aucune statistique sur les questions consultées.
+- Aucun contenu livré : le module reste invisible pour les visiteurs tant que l'administrateur n'a pas publié de question.
+- Docker de développement : `docker/mariadb-init.sql` donne à l'utilisateur `larbi` les droits nécessaires à `prisma migrate dev` (base fantôme) et aux tests (`larbi_test`), sur une installation neuve.
+
+Tests effectués :
+- `tests/unit/chatbot.test.js` (3), `tests/functional/chatbot.test.js` (6), `tests/security/chatbot.test.js` (4 : 401 / 403, XSS retiré avant stockage, réponse vide refusée, la base refuse statut et langue inconnus), audit des routes mis à jour (vert), cohérence (38, clés de traduction).
+- `tests/e2e/chatbot-journey.test.js` (6, vrai Chrome) : aucun bouton sans contenu ; l'administrateur crée, le brouillon reste invisible, puis publie ; le visiteur ouvre, choisit, lit, revient, ferme avec Échap ; lien vers le contact ; arabe (RTL, panneau à gauche, dans l'écran) ; téléphone 390 px (bouton icône, aucun défilement horizontal).
+
+---
+
+## <a id="p3-09"></a>P3-09 — Paiement : socle indépendant du fournisseur
+
+Réalisé (2026-10-11, migration additive `payments`, `prisma generate` fait) :
+- Modèle : `PaymentOffer` (`payment_offers` : nom, description, montant **entier** en plus petite unité, devise ISO, niveau d'accès accordé, active ou non, position), `PaymentOrder` (`payment_orders` : acheteur, offre, **montant / devise / niveau copiés à la création**, statut `pending` / `paid` / `failed` / `cancelled` / `refunded`, fournisseur, référence du fournisseur **unique**, dates de paiement et de remboursement), `PaymentEvent` (`payment_events` : une ligne par notification, **UNIQUE (fournisseur, identifiant externe)**, issue `applied` / `ignored` / `unknown_order` / `amount_mismatch`, aucune charge brute conservée). Contraintes SQL : montants > 0, devise `^[A-Z]{3}$`, statut connu, `paidAt` présent si et seulement si payée / remboursée, `refundedAt` si et seulement si remboursée. Commandes conservées : offre et utilisateur en RESTRICT.
+- Adaptateur de fournisseur (`services/payments/providers`) : `createCheckout`, `verifyNotification` (renvoie l'événement normalisé ou `null`, ne lève jamais). **Fournisseur simulé** `fake` : page de paiement hébergée simulée (`/api/payments/fake/checkout/:reference`), notifications signées HMAC-SHA256 (`t=…,v1=…`, fenêtre de 300 s), comparaison en temps constant. `PAYMENT_PROVIDER` : `fake` par défaut hors production, `none` par défaut en production ; `fake` **refusé au démarrage en production** et ses routes ne sont pas enregistrées.
+- Service (`services/payments/payment.service.js`) : le prix vient toujours de l'offre côté serveur ; achat refusé (409) si l'accès est déjà détenu ; traitement d'une notification dans **une transaction** qui verrouille d'abord la commande (`SELECT … FOR UPDATE`), enregistre l'événement (doublon = sans effet), puis applique un changement d'état **conditionnel** (« seulement si encore X ») : l'accès n'est accordé qu'une fois. Montant ou devise différents de la commande : rien n'est accordé, événement de sécurité journalisé. Remboursement : premium retiré sauf autre commande payée. Conflit d'écriture de la base réessayé (3 fois).
+- API : `GET /api/payments/offers` (public, `available` indique si un fournisseur est configuré), `POST /api/payments/orders` (session, `{ offerId }` seulement, limite par compte), `GET /api/payments/orders` et `/orders/:id` (le propriétaire seulement, sinon 404), `POST /api/payments/webhook/:provider` (corps **brut** lu avant le JSON global, 64 Ko maximum, limite de débit, réponse générique « Invalid notification », 200 pour toute notification authentique même sans effet ; accepté aussi pendant la maintenance). Administration : offres (lister, créer, modifier, supprimer seulement si jamais commandée) et commandes **en lecture seule** filtrables par statut.
+- Interface : offres dans « Contenus premium » (prix via `Intl`, bouton désactivé et message si le paiement n'est pas ouvert), redirection vers la page du fournisseur, page de retour `/paiement/retour` qui **relit** l'état côté serveur (interrogation pendant 30 s, puis message d'attente) et rafraîchit la session, « Mes paiements » (`/compte/paiements`), administration `/admin/paiements` (prix saisi en texte et converti en plus petite unité **sans virgule flottante**, aperçu du prix affiché). `AuthContext.refresh()` ajouté. Textes fr / en / ar.
+- Cohérence globale (`consistency.service.js`) : une commande payée a la notification qui l'a payée ; une commande payée donne bien son accès.
+- `.env.example` : `PAYMENT_PROVIDER`, `FAKE_PAYMENT_SECRET`, `PAYMENT_NOTIFICATION_RATE_LIMIT`, `PAYMENT_ORDER_RATE_LIMIT`.
+
+Décisions :
+- Aucun fournisseur réel choisi ni annoncé ; le branchement (P3-10) consiste à ajouter un adaptateur dans `providers/index.js` et sa configuration.
+- Valeurs par défaut en attendant P3-08 : achat unique sans durée, remboursement = retrait du premium sauf autre commande payée, prix saisis par l'administrateur. Aucun prix ni offre livré.
+- La page du fournisseur simulé est en anglais technique et hors i18n : c'est un outil de développement, jamais servi en production.
+
+Tests effectués :
+- `tests/unit/payments.test.js` (4 : signature authentique / modifiée / absente / trop ancienne / future / type inconnu ; validation des offres et commandes).
+- `tests/functional/payments.test.js` (11 : offres, montants entiers, prix figé à la commande, achat / annulation sur la page simulée, remboursement avec et sans autre commande payée, « mes paiements », administration, contrôle de cohérence).
+- `tests/security/payments.test.js` (14 : signature d'un autre secret, absente, corps modifié ; rejeu hors fenêtre ; fournisseur inconnu, corps trop gros ; même notification deux fois ; **dix copies simultanées** ; **cinq notifications différentes simultanées** appliquées une seule fois ; montant / devise falsifiés ; référence inconnue ; échec après succès ; maintenance ; retour du navigateur sans effet ; commande d'un autre ; champs de prix refusés). Tests de concurrence relancés 3 fois : stables.
+- `tests/security/payments-production.test.js` (4 : paiement annoncé indisponible, 503 sans commande créée, routes simulées absentes, `PAYMENT_PROVIDER=fake` refusé au démarrage).
+- Audit des routes mis à jour (routes publiques déclarées), cohérence (38).
+- `tests/e2e/payment-journey.test.js` (7, vrai Chrome) : aucune offre → message ; l'administrateur saisit « 2500,5 » DZD (stocké 250050) puis publie ; un apprenant paie sur la page simulée et revient premium (page de retour, page premium, « Mes paiements ») ; un autre annule, rien n'est accordé ; retour manuel sur la page de retour sans effet, commande d'un autre introuvable ; l'administrateur voit les deux commandes sans action possible ; téléphone 390 px sans défilement horizontal.
 
 ---
 
 ## <a id="p3-11"></a>P3-11 — CMS pédagogique, lot A : structure d'une formation
-
-Décisions par défaut retenues (l'utilisateur a demandé d'avancer sans attendre les réponses ; à confirmer avec le client) :
-- Quiz : obligatoire ou informatif **au choix de l'admin, par quiz** (informatif par défaut) ; réponse libre corrigée **automatiquement** (liste de réponses acceptées) ; pas de correction manuelle dans ce lot.
-- Formation publiée : modification **directe avec historique** (pas de brouillon séparé) ; vidéos **fichiers privés uniquement** (pas d'embarquement YouTube / Vimeo) ; liens externes en simples liens `http(s)`.
-- « En révision » : **statut** seulement (l'administrateur relit puis publie) ; pas de rôle « éditeur » distinct.
-
-Tâches :
-- Champs pédagogiques d'une formation : sous-titre, niveau (débutant / intermédiaire / avancé), objectifs, prérequis ; durée totale **calculée**.
-- Chapitres : créer, renommer, supprimer, réordonner ; leçons rattachées à un chapitre ; migration des leçons existantes dans un chapitre par défaut.
-- Réorganisation du plan par glisser-déposer (chapitres et leçons, y compris d'un chapitre à l'autre), avec boutons monter / descendre conservés comme alternative clavier ; une seule requête serveur atomique.
-- Statuts `draft` / `in_review` / `published` / `archived` (contrainte SQL étendue) ; règles de visibilité côté serveur (archivée = hors catalogue, accès conservé aux inscrits).
-- Tableau de bord de production (compteurs par statut, formations récentes, ce qui reste à compléter) et liste des formations plus riche.
-- Page apprenant : programme organisé par chapitres, niveau, objectifs, prérequis, durée.
 
 Réalisé (migrations additives `cms_structure` + `cms_structure_relation`, `prisma generate` fait) :
 - **Modèle** : `formations` gagne `subtitle`, `level` (`CHECK` beginner / intermediate / advanced), `objectives[]`, `prerequisites[]` ; nouvelle table `sections` (chapitres) ; `courses.sectionId` avec **clé composite** `(sectionId, formationId)` → `sections(id, formationId)` : une leçon ne peut pas être dans le chapitre d'une autre formation, un chapitre qui contient encore des leçons ne peut pas être supprimé (RESTRICT, la progression vit sur les leçons). Statuts `draft` / `in_review` / `published` / `archived` (`CHECK` étendu, `publishedAt` seulement pour « publiée »).
@@ -764,6 +784,29 @@ Tests : `functional/article-translations.test.js` complété (copie refusée pou
 ## <a id="p4-01"></a>P4-01 — Architecture commune des outils
 
 Réalisé (2026-10-04) : registre des outils (`constants/tools.js`), middleware d'accès commun (`middleware/toolAccess.js` : public / authenticated / premium), routes publiques `/api/tools`, audit de sécurité étendu aux routes tools. Vérifié par 574 tests (0 échec).
+
+---
+
+## <a id="p4-03"></a>P4-03 — Générateur de facture
+
+Réalisé (2026-10-11, aucune migration : rien n'est stocké) :
+- Serveur (`/api/tools/factures`, derrière `toolAccess('generateur-facture')` = compte requis, registre passé à `available`) : `POST /calcul` (facture vérifiée et calculée, JSON) et `POST /excel` (classeur `.xlsx` réel, `exceljs`, feuille de droite à gauche en arabe, nom de fichier ASCII sans injection d'en-tête, `Cache-Control: no-store`).
+- Validation (`validation/invoice.schemas.js`) : nombres reçus **en texte** (« 1,5 », « 2500.50 »), dates ISO réelles, devise ISO, 100 lignes au plus, longueurs bornées, aucun champ inconnu (un total ne peut pas être imposé). Les erreurs renvoient le **chemin de chaque champ en faute** (`details.fields`) pour les signaler sous le champ ; caractère NUL refusé comme partout.
+- Calcul (`services/invoice.service.js`) : arithmétique **entière (BigInt)** dans la plus petite unité de la devise (décimales de la devise lues dans `Intl` : DZD 2, JPY 0, TND 3) ; ligne HT = quantité × prix unitaire arrondi au plus proche, TVA par ligne arrondie au plus proche, totaux = sommes des lignes arrondies, récapitulatif par taux ; total plafonné (refus plutôt que perte de précision) ; échéance avant émission refusée.
+- Interface `/outils/facture` (derrière la garde de session, lien depuis la page Outils) : prestataire, client (lignes libres pour adresse et identifiants), facture (numéro, dates, devise), lignes (ajout / suppression), mentions ; « Vérifier et calculer » → aperçu de la feuille avec les **montants du serveur** ; toute modification masque l'aperçu jusqu'au prochain calcul ; « Imprimer ou enregistrer en PDF » (page nommée A4 portrait, seule la feuille est imprimée) et « Télécharger le fichier Excel » (`api.download`). Brouillon conservé **dans ce navigateur seulement** (`localStorage`, protégé par `try/catch`), bouton pour effacer. Feuille toujours claire (jetons `--paper`), texte saisi gardant son propre ordre de lecture en arabe (`unicode-bidi: plaintext`). Textes fr / en / ar.
+- Bouton de l'assistant (P3-07) masqué à l'impression (certificat et facture).
+
+Décisions :
+- PDF par le navigateur, comme le certificat (P2-05) : rendu exact de l'arabe et du sens de lecture, aucune bibliothèque PDF côté serveur. Excel par le serveur : un vrai fichier, avec les mêmes montants.
+- Aucun taux de TVA, aucune mention légale, aucun identifiant fiscal imposé : l'utilisateur les saisit (ils dépendent du pays et du statut). Numéro saisi par l'utilisateur. TVA arrondie par ligne (règle par défaut, modifiable dans un seul fichier).
+- Dépendance ajoutée : `exceljs` 4.4 (MIT). `npm audit` : une alerte modérée sur `uuid` (fonctions v3/v5/v6 avec tampon, non utilisées ici).
+
+Tests effectués :
+- `tests/unit/invoice.test.js` (7 : décimales par devise, texte → entier, arrondis par ligne, 0,1 + 0,2 = 0,3 exactement, refus des centimes en JPY, quantité nulle, taux > 100 %, échéance antérieure, total absurde, dates impossibles).
+- `tests/functional/invoice.test.js` (5 : compte requis, calcul serveur, erreurs par champ, classeur relu avec `exceljs` (textes et montants), arabe RTL).
+- `tests/security/invoice.test.js` (3 : formules `=…`, `+…`, `-…`, `@…` restées du texte dans le classeur ; NUL, 101 lignes, textes trop longs, corps trop gros (413) ; nom de fichier sans chemin ni injection d'en-tête).
+- Tests existants du registre des outils mis à jour (`available`), audit des routes, cohérence.
+- `tests/e2e/invoice-journey.test.js` (9, vrai Chrome) : redirection vers la connexion sans compte, lien depuis Outils ; erreurs sous les champs ; aperçu avec les montants du serveur (5 000,00 ; 950,00 ; 225,05 ; 8 675,55) ; aperçu masqué après modification ; impression : seule la feuille, **export PDF réel d'une seule page A4 portrait** ; fichier Excel ; brouillon restauré après rechargement puis effacé ; arabe RTL ; téléphone 390 px sans défilement horizontal. Captures de la feuille vérifiées à l'œil (fr, ar, thème sombre).
 
 ---
 

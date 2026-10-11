@@ -25,8 +25,9 @@ export async function boot({ production = false, extra = {} } = {}) {
 
   // ---- HTTP client ---------------------------------------------------------
   // `user` = a database user (a valid session cookie is forged for it, exactly
-  // what login would set); `token` = a raw session value; `json` / `form` = body.
-  async function request(method, urlPath, { user, token, json, form, body, headers = {}, raw = false } = {}) {
+  // what login would set); `token` = a raw session value; `json` / `form` = body;
+  // `redirect: 'manual'` returns a redirection instead of following it.
+  async function request(method, urlPath, { user, token, json, form, body, headers = {}, raw = false, redirect = 'follow' } = {}) {
     const h = { ...headers };
     const session = token ?? (user ? signSession(user.id) : null);
     if (session) h.Cookie = `session=${session}${h.Cookie ? `; ${h.Cookie}` : ''}`;
@@ -37,7 +38,7 @@ export async function boot({ production = false, extra = {} } = {}) {
     } else if (form) {
       payload = form;
     }
-    const response = await fetch(`${baseUrl}${raw ? '' : '/api'}${urlPath}`, { method, headers: h, body: payload });
+    const response = await fetch(`${baseUrl}${raw ? '' : '/api'}${urlPath}`, { method, headers: h, body: payload, redirect });
     const buffer = Buffer.from(await response.arrayBuffer());
     const text = buffer.toString('utf8');
     let parsed = null;

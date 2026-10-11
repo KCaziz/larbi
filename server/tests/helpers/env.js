@@ -64,6 +64,8 @@ export function applyTestEnv({ production = false, extra = {} } = {}) {
     QUIZ_RATE_LIMIT: '100000',
     NEWSLETTER_RATE_LIMIT: '100000',
     NEWSLETTER_LINK_RATE_LIMIT: '100000',
+    PAYMENT_NOTIFICATION_RATE_LIMIT: '100000',
+    PAYMENT_ORDER_RATE_LIMIT: '100000',
     ...extra,
   });
   return process.env;
