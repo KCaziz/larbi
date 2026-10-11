@@ -27,6 +27,14 @@ const PUBLIC = new Set([
   'POST /api/newsletter/confirm',
   'POST /api/newsletter/unsubscribe',
   'GET /api/chatbot/entries', // guided assistant: published questions only, read-only (P3-07)
+  // "Apprendre" glossary and mini-guides (P2-08): published only, read-only.
+  'GET /api/apprendre',
+  'GET /api/apprendre/termes/:slug',
+  'GET /api/apprendre/guides/:slug',
+  // FINCLUDIA deterministic assistant (P3-19): no AI, published intents only.
+  'GET /api/fin-assistant/intents',
+  'POST /api/fin-assistant/resolve',
+  'GET /api/fin-assistant/flows/:key',
   // Payment (P3-09): the offers are public; the provider calls the webhook (it is
   // authenticated by its signature, not by a session); the simulated provider page
   // exists in development and tests only, never in production.

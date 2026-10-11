@@ -137,6 +137,42 @@ import {
 import { createChatbotEntrySchema, reorderChatbotSchema, updateChatbotEntrySchema } from '../validation/chatbot.schemas.js';
 import { createOffer, deleteOffer, listOffersAdmin, listOrdersAdmin, updateOffer } from '../controllers/admin/payments.controller.js';
 import { createOfferSchema, ordersQuerySchema, updateOfferSchema } from '../validation/payments.schemas.js';
+import {
+  createGuide,
+  createTerm,
+  deleteGuide,
+  deleteTerm,
+  getGuide,
+  getTerm,
+  listGuides,
+  listTermRevisions,
+  listTerms,
+  publishGuide,
+  publishTerm,
+  reorderGuides,
+  unpublishGuide,
+  unpublishTerm,
+  updateGuide,
+  updateTerm,
+} from '../controllers/admin/glossary.controller.js';
+import { createGuideSchema, createTermSchema, reorderGuidesSchema, updateGuideSchema, updateTermSchema } from '../validation/glossary.schemas.js';
+import {
+  createFlow,
+  createStep,
+  deleteFlow,
+  deleteStep,
+  getFlow as getFlowAdmin,
+  listAuditLog,
+  listFlows,
+  listIntents,
+  publishFlow,
+  publishIntent,
+  unpublishFlow,
+  unpublishIntent,
+  updateIntent,
+  updateStep,
+} from '../controllers/admin/finAssistant.controller.js';
+import { createFlowSchema, createStepSchema, updateIntentSchema, updateStepSchema } from '../validation/finAssistant.schemas.js';
 import { bankSchema, conditionsQuerySchema, createConditionSchema, updateConditionSchema } from '../validation/comparator.schemas.js';
 
 // CMS administration API. EVERY route below requires an authenticated admin,
@@ -146,6 +182,7 @@ const router = Router();
 router.use(requireAuth, requireRole(ROLES.ADMIN));
 router.param('id', uuidParam);
 router.param('revisionId', uuidParam);
+router.param('stepId', uuidParam);
 
 // Formations
 router.get('/formations', asyncRoute(listFormations));
@@ -278,5 +315,39 @@ router.post('/payments/offers', validateBody(createOfferSchema), asyncRoute(crea
 router.patch('/payments/offers/:id', validateBody(updateOfferSchema), asyncRoute(updateOffer));
 router.delete('/payments/offers/:id', asyncRoute(deleteOffer));
 router.get('/payments/orders', validateQuery(ordersQuerySchema), asyncRoute(listOrdersAdmin));
+
+// "Apprendre" glossary and mini-guides (P2-08).
+router.get('/glossary/terms', asyncRoute(listTerms));
+router.post('/glossary/terms', validateBody(createTermSchema), asyncRoute(createTerm));
+router.get('/glossary/terms/:id', asyncRoute(getTerm));
+router.patch('/glossary/terms/:id', validateBody(updateTermSchema), asyncRoute(updateTerm));
+router.delete('/glossary/terms/:id', asyncRoute(deleteTerm));
+router.get('/glossary/terms/:id/revisions', asyncRoute(listTermRevisions));
+router.post('/glossary/terms/:id/publish', asyncRoute(publishTerm));
+router.post('/glossary/terms/:id/unpublish', asyncRoute(unpublishTerm));
+router.get('/glossary/guides', asyncRoute(listGuides));
+router.post('/glossary/guides', validateBody(createGuideSchema), asyncRoute(createGuide));
+router.get('/glossary/guides/:id', asyncRoute(getGuide));
+router.patch('/glossary/guides/:id', validateBody(updateGuideSchema), asyncRoute(updateGuide));
+router.put('/glossary/guides/order', validateBody(reorderGuidesSchema), asyncRoute(reorderGuides));
+router.post('/glossary/guides/:id/publish', asyncRoute(publishGuide));
+router.post('/glossary/guides/:id/unpublish', asyncRoute(unpublishGuide));
+router.delete('/glossary/guides/:id', asyncRoute(deleteGuide));
+
+// FINCLUDIA deterministic assistant (P3-19).
+router.get('/fin-assistant/intents', asyncRoute(listIntents));
+router.patch('/fin-assistant/intents/:id', validateBody(updateIntentSchema), asyncRoute(updateIntent));
+router.post('/fin-assistant/intents/:id/publish', asyncRoute(publishIntent));
+router.post('/fin-assistant/intents/:id/unpublish', asyncRoute(unpublishIntent));
+router.get('/fin-assistant/flows', asyncRoute(listFlows));
+router.post('/fin-assistant/flows', validateBody(createFlowSchema), asyncRoute(createFlow));
+router.get('/fin-assistant/flows/:id', asyncRoute(getFlowAdmin));
+router.post('/fin-assistant/flows/:id/publish', asyncRoute(publishFlow));
+router.post('/fin-assistant/flows/:id/unpublish', asyncRoute(unpublishFlow));
+router.delete('/fin-assistant/flows/:id', asyncRoute(deleteFlow));
+router.post('/fin-assistant/flows/:id/steps', validateBody(createStepSchema), asyncRoute(createStep));
+router.patch('/fin-assistant/flows/:id/steps/:stepId', validateBody(updateStepSchema), asyncRoute(updateStep));
+router.delete('/fin-assistant/flows/:id/steps/:stepId', asyncRoute(deleteStep));
+router.get('/fin-assistant/audit-log', asyncRoute(listAuditLog));
 
 export default router;

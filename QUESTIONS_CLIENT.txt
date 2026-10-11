@@ -1,0 +1,61 @@
+FINCLUDIA — Questions en attente de ta réponse
+
+Voici les points qui m'empêchent d'avancer tant que je n'ai pas ta réponse ou les documents correspondants. Je n'invente rien sur ces sujets (règles bancaires, textes légaux, contenus) : c'est volontaire, pour ne rien afficher de faux ou d'approximatif aux utilisateurs.
+
+Réponds point par point, dans l'ordre qui t'arrange. Les points du groupe A sont les plus urgents : ils bloquent la livraison de la version actuelle du site.
+
+
+A. POUR TERMINER LA VERSION ACTUELLE DU SITE
+
+A1. Simulateur de crédit
+Les deux fichiers Excel que tu m'as transmis donnent les conditions des banques (frais, cartes, épargne...) mais pas les règles qui permettent de calculer le crédit qu'une personne peut obtenir. Il me manque, idéalement par banque :
+- le ou les taux appliqués
+- la durée maximale du prêt
+- la part maximale du revenu qui peut être consacrée au remboursement (le "taux d'endettement" accepté)
+- l'apport personnel exigé, s'il y en a un
+- les critères qui peuvent faire refuser un dossier (âge, type de revenu, patrimoine...)
+
+A2. Mentions légales
+Pour publier les pages "Mentions légales" et "Politique de confidentialité", il me faut ton identité légale complète :
+- raison sociale
+- SIRET ou numéro d'identification équivalent
+- adresse du siège
+- nom de l'hébergeur (si différent de nous)
+- une personne ou adresse de contact pour les questions liées aux données personnelles
+
+
+B. POUR DÉMARRER FINCLUDIA (GESTION FINANCIÈRE PERSONNELLE)
+
+Le nom FINCLUDIA est acté. Avant de commencer à construire les écrans, j'ai besoin de tes décisions sur les points suivants.
+
+B1. Identité et positionnement
+- Le logo, la charte graphique et le nom de domaine définitifs sont encore à me transmettre.
+- L'apprentissage en ligne, le blog et les outils actuels : deviennent-ils des modules de FINCLUDIA (par exemple sous "Apprendre" et "Explorer"), ou restent-ils un site à part ?
+
+B2. Quel périmètre pour la première livraison ?
+FINCLUDIA s'adresse à 8 profils différents (lycéen, étudiant, jeune actif, salarié, colocataire, couple, famille, épargnant débutant). Faut-il les livrer tous en même temps, ou commencer par 2 ou 3 d'entre eux (par exemple étudiant + jeune actif + salarié) pour avancer plus vite ? Si oui, lesquels en priorité ?
+
+B3. Devises
+Les montants sont-ils uniquement en dinars algériens, ou faut-il gérer plusieurs devises (euro, dollar...) ? Si oui, quelle source utiliser pour le taux de change, et à quelle fréquence le mettre à jour ?
+
+B4. Seuils et pondérations
+Plusieurs indicateurs ont besoin de seuils que tes documents laissent "à définir" :
+- à partir de quel niveau le remboursement de dettes est-il jugé trop élevé par rapport au revenu ?
+- quel montant viser pour l'épargne de sécurité (par exemple en nombre de mois de dépenses) ?
+- comment pondérer les différents éléments de l'indicateur de santé financière et de celui de préparation à un financement ?
+- à partir de quand déclencher une alerte à l'utilisateur ?
+
+B5. Données métier à me transmettre
+- Barèmes de paie (cotisations, impôt sur le revenu), avec leur date de validité — pour le décodeur de fiche de paie.
+- Offres de financement existantes et leur mode de calcul — pour l'écran de comparaison de financements.
+- Données sur les comptes chèques postaux (CCP) nécessaires à certains écrans.
+- Liste des catégories de dépenses/revenus que tu souhaites utiliser (une base existe déjà dans ton fichier Excel, onglet "Categories").
+
+B6. Mineurs
+- À partir de quel âge peut-on s'inscrire sur FINCLUDIA ?
+- Faut-il un accord d'un parent en dessous de cet âge ?
+- Quelles fonctions doivent être strictement réservées aux personnes majeures ?
+
+B7. Contenus pédagogiques à me transmettre
+- Les questions et réponses de l'assistant déterministe de FINCLUDIA (une version plus avancée de l'assistant à questions prédéfinies déjà en place, avec des parcours à plusieurs étapes).
+- Des modèles d'objectifs financiers à proposer aux utilisateurs.

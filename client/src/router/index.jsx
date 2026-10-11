@@ -46,6 +46,9 @@ export const router = createBrowserRouter([
           { index: true, element: <HomePage /> },
           { path: 'formations', element: <FormationsPresentationPage /> },
           { path: 'outils', element: <ToolsPresentationPage /> },
+          { path: 'apprendre', lazy: lazyPage(() => import('../pages/apprendre/ApprendrePage.jsx')) },
+          { path: 'apprendre/termes/:slug', lazy: lazyPage(() => import('../pages/apprendre/TermPage.jsx')) },
+          { path: 'apprendre/guides/:slug', lazy: lazyPage(() => import('../pages/apprendre/GuidePage.jsx')) },
           { path: 'outils/comparateur', lazy: lazyPage(() => import('../pages/outils/ComparatorPage.jsx')) },
           { path: 'outils/comparateur/segments/:segment', lazy: lazyPage(() => import('../pages/outils/ComparatorSegmentPage.jsx')) },
           { path: 'outils/comparateur/:theme', lazy: lazyPage(() => import('../pages/outils/ComparatorThemePage.jsx')) },
@@ -101,6 +104,7 @@ export const router = createBrowserRouter([
                   { path: 'type', element: <AccountTypePage /> },
                   { path: 'premium', element: <PremiumAccessPage /> },
                   { path: 'paiements', lazy: lazyPage(() => import('../pages/account/MyPaymentsPage.jsx')) },
+                  { path: 'fincludia', lazy: lazyPage(() => import('../pages/account/FinProfilePage.jsx')) },
                 ],
               },
               {
@@ -140,8 +144,16 @@ export const router = createBrowserRouter([
                         lazy: lazyPage(() => import('../pages/admin/platform/CertificatesAdminPage.jsx')),
                       },
                       {
+                        path: 'apprendre',
+                        lazy: lazyPage(() => import('../pages/admin/apprendre/GlossaryAdminPage.jsx')),
+                      },
+                      {
                         path: 'assistant',
                         lazy: lazyPage(() => import('../pages/admin/chatbot/ChatbotAdminPage.jsx')),
+                      },
+                      {
+                        path: 'assistant-fincludia',
+                        lazy: lazyPage(() => import('../pages/admin/finAssistant/FinAssistantAdminPage.jsx')),
                       },
                       {
                         path: 'paiements',

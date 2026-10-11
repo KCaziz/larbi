@@ -10,6 +10,7 @@ const links = [
   { labelKey: 'account.nav.type', to: '/compte/type' },
   { labelKey: 'account.nav.premium', to: '/compte/premium' },
   { labelKey: 'account.nav.payments', to: '/compte/paiements' },
+  { labelKey: 'account.nav.fincludia', to: '/compte/fincludia' },
 ];
 
 export default function AccountNav() {

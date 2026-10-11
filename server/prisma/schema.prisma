@@ -40,6 +40,39 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  // ---- FINCLUDIA publics (P3-18) --------------------------------------------
+  // The FINCLUDIA profile a user has chosen (one of the 8 publics of the
+  // client's own file, onglet "01_Publics": LYC/ETU/JAC/SAL/COL/COU/FAM/EPG),
+  // null until the person has gone through onboarding (C01/C02). Per the
+  // client's decision (2026-10-11): a user has ONE profile at a time — once
+  // finPublic is set, it is what defines the account, not `accountType`
+  // (kept only for the pre-FINCLUDIA features that still read it: comparator
+  // segments, article targeting...).
+  finPublic             String?
+  // Complementary roles (ex. SAL primary + COL complementary), same closed
+  // list as finPublic, never containing finPublic itself. Free-form JSON
+  // array of codes (small, bounded, validated at the application layer) —
+  // not a join table: there is no extra data attached to a secondary role.
+  finSecondaryPublics   Json                   @default("[]")
+  // Age bracket, not a birth date: the server only ever needs to know whether
+  // someone is "under18" (the 18+ gate, already settled project-wide) — a
+  // precise date of birth would be more personal data than that requires
+  // (rule 10, minimisation). The exact minimum age to register, and parental
+  // consent, remain open (P6-01 point 7) — this column is ready for both.
+  finAgeRange           String?
+  finCountry            String?                @db.VarChar(2)
+  // ISO 4217, defaults to DZD (the only currency used anywhere in the
+  // platform today): a placeholder until multi-currency is decided (P6-01
+  // point 4), never shown as a final decision.
+  finCurrency           String                 @default("DZD") @db.VarChar(3)
+  finSituation          String?
+  finMainIntention      String?
+  finHorizon            String?
+  finOnboardedAt        DateTime?
+  finProfileTransitions FinProfileTransition[]
+  finConsents           FinConsent[]
+  finAuditLogs          FinAuditLog[]
+
   // E-Learning (P2-01)
   formationsCreated Formation[]
   mediaUploaded     Media[]
@@ -77,23 +110,23 @@ model User {
 // screen say, a year later, "this figure came from F021 version 1" instead of
 // silently showing a different number under the same name.
 model SimulationScenario {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   // Key of a simulator of constants/simulators.js. Free-form string, like the
   // other application-level vocabularies here: the catalogue grows with the
   // client's lots, and a DB enum would need a migration for each one.
-  simulator String
+  simulator  String
   // The name the person gave this scenario, to tell two of them apart.
-  title     String   @db.VarChar(120)
+  title      String   @db.VarChar(120)
   // ISO code the amounts are expressed in. Stored with the scenario: comparing
   // two scenarios in different currencies is refused, never converted.
-  currency  String   @db.VarChar(3)
-  inputs    Json
+  currency   String   @db.VarChar(3)
+  inputs     Json
   hypotheses Json?
-  versions  Json     @default("{}")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  versions   Json     @default("{}")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([userId, createdAt])
   @@map("simulation_scenarios")
@@ -169,6 +202,176 @@ model PaymentEvent {
   @@map("payment_events")
 }
 
+// ---- FINCLUDIA publics (P3-18) ------------------------------------------------
+// Changing public is proposed, never forced: a user switches by their own
+// action (ex. "étudiant" -> "jeune actif" at the first salary), and every
+// switch is kept here so the account's own history is never lost.
+model FinProfileTransition {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromPublic String?
+  toPublic   String
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("fin_profile_transitions")
+}
+
+// A consent the person explicitly accepted, with the exact version of the text
+// at the time (P6-01 point 9): re-accepting after a text changes adds a new
+// row, it never overwrites the old one — the account's consent history stays
+// intact exactly like the profile transitions above.
+model FinConsent {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // "finPrivacy" | "finNoAdvice" (constants/finPublics.js), never free-form.
+  textKey    String   @db.VarChar(40)
+  version    String   @db.VarChar(20)
+  acceptedAt DateTime @default(now())
+
+  @@index([userId, textKey])
+  @@map("fin_consents")
+}
+
+// ---- "Apprendre" glossary and mini-guides (P2-08) -----------------------------
+// Both are written by an administrator (rule: nothing financial, legal or
+// tariff-specific is invented — only general definitions), in one language,
+// like articles and formations.
+model GlossaryTerm {
+  id           String   @id @default(uuid())
+  slug         String   @unique
+  term         String   @db.VarChar(120)
+  definition   String   @db.Text
+  example      String?  @db.Text
+  // Slugs of other terms (closed set: validated against existing terms).
+  relatedTerms Json     @default("[]")
+  // "beginner" | "intermediate" | "advanced", nullable (not every term needs one).
+  level        String?
+  theme        String?  @db.VarChar(60)
+  status       String   @default("draft")
+  language     String   @default("fr")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  revisions GlossaryTermRevision[]
+
+  @@map("glossary_terms")
+}
+
+// A snapshot taken right before a term's definition changes (the client
+// requires a history: "une définition remplacée garde son historique"),
+// exactly the pattern already used for lessons (LessonRevision).
+model GlossaryTermRevision {
+  id         String       @id @default(uuid())
+  termId     String
+  term       GlossaryTerm @relation(fields: [termId], references: [id], onDelete: Cascade)
+  definition String       @db.Text
+  example    String?      @db.Text
+  createdAt  DateTime     @default(now())
+
+  @@index([termId, createdAt])
+  @@map("glossary_term_revisions")
+}
+
+model MiniGuide {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  title     String   @db.VarChar(150)
+  // Sanitised rich text (sanitizeRichText), same allow-list as articles/lessons.
+  body      String   @db.MediumText
+  level     String?
+  theme     String?  @db.VarChar(60)
+  status    String   @default("draft")
+  language  String   @default("fr")
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("mini_guides")
+}
+
+// ---- FINCLUDIA deterministic assistant (P3-19) ---------------------------------
+// Closed catalogue of intentions, taken as-is from the client's own file
+// (FINCLUDIA_Cahier_des_Charges_Complet.xlsx, onglet "13_Chatbot"): the 8 codes,
+// their example phrasing and their allowed answer are the client's, not invented.
+model FinIntent {
+  id               String   @id @default(uuid())
+  // NAVIGUER | EXPLIQUER_INDICATEUR | CRÉER_OBJECTIF | AIDE_BUDGET | AIDE_DETTE |
+  // APPRENDRE_TERME | CHERCHER_SOLUTION | DÉPENSE_PARTAGÉE (the client's closed list).
+  code             String   @unique @db.VarChar(40)
+  label            String   @db.VarChar(120)
+  exampleQuery     String   @db.VarChar(200)
+  // Keywords/synonyms the resolver matches against (admin-editable, P3-19 "Résolveur
+  // d'intentions": "mots-clés, synonymes et contexte écran").
+  keywords         Json     @default("[]")
+  // Sanitised rich text, pre-written (never generated): "Moteur de modèles" in the
+  // client's words — "textes pré-écrits avec variables provenant des API." No
+  // variable is substituted yet (the financial-profile APIs it would read from,
+  // P6-02, do not exist until P6-01 is answered); the text itself must stand on
+  // its own until then.
+  responseTemplate String   @db.Text
+  // A path of this SITE the intent can open ("Liens profonds"), or null when the
+  // client's own target screen (C07, C14, P03...) is not built yet — the resolver
+  // then shows a "not available yet" message instead of a dead or wrong link.
+  deepLinkPath     String?  @db.VarChar(200)
+  status           String   @default("draft")
+  position         Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("fin_intents")
+}
+
+// "Moteur de parcours" — a state machine: parcours_id / étape_id / réponses
+// possibles / étape_suivante, in the client's own words.
+model FinFlow {
+  id        String        @id @default(uuid())
+  key       String        @unique @db.VarChar(60)
+  name      String        @db.VarChar(150)
+  status    String        @default("draft")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  steps     FinFlowStep[]
+
+  @@map("fin_flows")
+}
+
+model FinFlowStep {
+  id        String   @id @default(uuid())
+  flowId    String
+  flow      FinFlow  @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  stepKey   String   @db.VarChar(60)
+  prompt    String   @db.Text
+  // [{ label, nextStepKey | null (ends the flow), intentCode | null }]
+  options   Json     @default("[]")
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([flowId, stepKey])
+  @@map("fin_flow_steps")
+}
+
+// "Audit": intention, parcours, version du modèle, action cliquée, erreur —
+// in the client's words, "sans donnée financière en clair": only codes are kept,
+// never the free text the visitor typed nor any amount.
+model FinAuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  intentCode String?  @db.VarChar(40)
+  flowKey    String?  @db.VarChar(60)
+  stepKey    String?  @db.VarChar(60)
+  // resolved | fallback | deep_link_opened | flow_started | flow_step | flow_ended | not_available
+  action     String   @db.VarChar(30)
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("fin_audit_logs")
+}
+
 // Guided assistant (P3-07): a question the visitor picks from a list and the
 // answer shown for it. No free text, no AI: an administrator writes both. One
 // language per entry, like articles; the public API only returns published
@@ -194,8 +397,8 @@ model ChatbotEntry {
 model ContactMessage {
   id        String   @id @default(uuid())
   name      String
-  email     String @db.VarChar(254)
-  message   String @db.Text
+  email     String   @db.VarChar(254)
+  message   String   @db.Text
   createdAt DateTime @default(now())
 
   @@map("contact_messages")
@@ -227,7 +430,7 @@ model AccountType {
 // new setting never needs a migration.
 model PlatformSetting {
   key       String   @id
-  value     String @db.Text
+  value     String   @db.Text
   updatedAt DateTime @updatedAt
 
   @@map("platform_settings")
@@ -316,15 +519,15 @@ model Course {
   formation   Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
 
   title            String
-  summary          String? @db.Text
+  summary          String?  @db.Text
   // Text content of the lesson. Videos / documents are Media rows.
-  body             String? @db.MediumText
+  body             String?  @db.MediumText
   // Display order inside the formation (0-based). Not unique on purpose: a
   // unique constraint makes reordering (swap) fail mid-transaction; the
   // service reorders in one transaction and lists by (position, createdAt).
   position         Int
   // Required courses must all be completed to finish the formation (P2-04).
-  isRequired       Boolean @default(true)
+  isRequired       Boolean  @default(true)
   estimatedMinutes Int?
   // Chapter of the lesson (P3-11). COMPOSITE foreign key (sectionId, formationId) ->
   // sections(id, formationId): a lesson can never sit in a chapter of another formation, and
@@ -337,8 +540,8 @@ model Course {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  media    Media[]
-  progress CourseProgress[]
+  media     Media[]
+  progress  CourseProgress[]
   blocks    LessonBlock[]
   revisions LessonRevision[]
   quizzes   Quiz[]
@@ -379,15 +582,14 @@ model Media {
   article        Article? @relation("ArticleMedia", fields: [articleId], references: [id], onDelete: Cascade)
   articleCoverOf Article? @relation("ArticleCover")
 
-  @@index([courseId])
-  @@index([articleId])
-  
   // Blocks of a lesson that show this file (P3-12). Deleting the file deletes those blocks.
   blocks LessonBlock[]
 
   // Target of the composite foreign key from lesson_blocks: a block can only show a file
   // that belongs to ITS OWN lesson.
   @@unique([id, courseId])
+  @@index([courseId])
+  @@index([articleId])
   @@map("media")
 }
 
@@ -461,7 +663,7 @@ model Certification {
   // learner's achievement is not erased) but public verification and the learner's own
   // page show it as revoked. `revokedReason` implies `revokedAt` (CHECK in the migration).
   revokedAt     DateTime?
-  revokedReason String? @db.Text
+  revokedReason String?   @db.Text
 
   @@map("certifications")
 }
@@ -509,7 +711,7 @@ model Article {
   title       String
   // Short summary shown on cards and used as the default page description.
   excerpt     String    @default("") @db.Text
-  body        String? @db.MediumText
+  body        String?   @db.MediumText
   bodyText    String    @default("") @db.MediumText
   // "draft" | "published". Only published articles are public.
   status      String    @default("draft")
@@ -518,12 +720,12 @@ model Article {
   // Visibility by profile (P3-04). "standard" = readable by every visitor,
   // "premium" = the text and files need a premium account (the card, title and
   // excerpt stay public as a teaser). Enforced by the server, never only in the UI.
-  requiredAccessLevel String   @default("standard")
+  requiredAccessLevel String @default("standard")
   // Account types this article is recommended to (values of ACCOUNT_TYPES).
   // Empty = for everybody. It only ORDERS recommendations, it never hides anything.
   // JSON array (no array column type on MySQL/MariaDB) — membership is checked
   // in application code (blogAccess.js), not with a DB-side array filter.
-  targetAccountTypes  Json     @default("[]")
+  targetAccountTypes  Json   @default("[]")
 
   categoryId String?
   category   ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -561,7 +763,7 @@ model ArticleTranslation {
   language        String
   title           String
   excerpt         String   @default("") @db.Text
-  body            String? @db.MediumText
+  body            String?  @db.MediumText
   bodyText        String   @default("") @db.MediumText
   metaTitle       String?
   metaDescription String?
@@ -673,7 +875,7 @@ model LessonRevision {
   label  String?
 
   createdById String?
-  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
 
   @@index([courseId, createdAt])
@@ -692,11 +894,11 @@ model Quiz {
   formation   Formation @relation("FormationQuizzes", fields: [formationId], references: [id], onDelete: Cascade)
 
   // "course" (a lesson) | "section" (a chapter) | "formation" (the end of it). CHECK in the migration.
-  scope     String
-  courseId  String?
-  course    Course?  @relation(fields: [courseId, formationId], references: [id, formationId], onDelete: Cascade)
-  sectionId String?
-  section   Section? @relation(fields: [sectionId, formationId], references: [id, formationId], onDelete: Cascade)
+  scope            String
+  courseId         String?
+  course           Course?    @relation(fields: [courseId, formationId], references: [id, formationId], onDelete: Cascade)
+  sectionId        String?
+  section          Section?   @relation(fields: [sectionId, formationId], references: [id, formationId], onDelete: Cascade)
   // Set (to the formation id) only for the final quiz: makes "one final quiz per formation" a unique key.
   finalFormationId String?    @unique
   finalOf          Formation? @relation("FinalQuiz", fields: [finalFormationId], references: [id], onDelete: Cascade)
@@ -738,12 +940,12 @@ model QuizQuestion {
 
   // "single" | "multiple" | "true_false" | "text" (CHECK). true_false has exactly two choices
   // whose texts are "true" and "false" (the interface translates them).
-  type        String
-  position    Int
-  prompt      String @default("") @db.Text
+  type            String
+  position        Int
+  prompt          String @default("") @db.Text
   // Shown after the correction.
-  explanation String @default("") @db.Text
-  points      Int    @default(1)
+  explanation     String @default("") @db.Text
+  points          Int    @default(1)
   // "text" questions: the answers accepted (compared without case, accents or extra spaces).
   // JSON array (no array column type on MySQL/MariaDB).
   acceptedAnswers Json   @default("[]")
@@ -759,7 +961,7 @@ model QuizChoice {
   questionId String
   question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   position   Int
-  text       String @db.Text
+  text       String       @db.Text
   isCorrect  Boolean      @default(false)
 
   @@index([questionId, position])
@@ -840,7 +1042,7 @@ model ComparatorCondition {
   // Only for the rubrics that have a "Catégorie" column (e.g. Retrait / Versement).
   category  String?
   // Account type, operation, card, product... (the rubric's first column).
-  label     String @db.Text
+  label     String         @db.Text
   // { field: text } — the rubric's own columns, as written by the client.
   values    Json           @default("{}")
   // Order of the client's file within a rubric; new rows go last.

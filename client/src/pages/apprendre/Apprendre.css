@@ -1,0 +1,168 @@
+/* "Apprendre" — glossary and mini-guides (P2-08). Tokens only (light/dark), RTL-safe. */
+.apprendre-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+.apprendre-search {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.apprendre-search-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.apprendre-search-input input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--text-h);
+  font: inherit;
+  padding: 10px 0;
+}
+
+.apprendre-search-input input:focus {
+  outline: none;
+}
+
+.apprendre-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.apprendre-filters button {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.apprendre-filters button.active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.apprendre-clear {
+  color: var(--text) !important;
+  text-decoration: underline;
+  border-color: transparent !important;
+  background: transparent !important;
+}
+
+.apprendre-group {
+  margin-bottom: 32px;
+}
+
+.apprendre-group h2 {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+
+.apprendre-term-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.apprendre-term-list a {
+  display: block;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-h);
+  text-decoration: none;
+}
+
+.apprendre-term-list a:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.apprendre-guide-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.apprendre-guide-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-h);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.apprendre-guide-card:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.apprendre-guide-card svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.apprendre-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.apprendre-term-page .rich-content {
+  max-width: none;
+}
+
+.apprendre-example,
+.apprendre-related {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.apprendre-example h2,
+.apprendre-related h2 {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.apprendre-related ul {
+  margin: 0;
+  padding-inline-start: 20px;
+}
+
+@media (max-width: 560px) {
+  .apprendre-search {
+    flex-direction: column;
+  }
+}

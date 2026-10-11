@@ -29,7 +29,8 @@
     "account": "My account",
     "logout": "Log out",
     "admin": "Administration",
-    "verifyCertificate": "Verify a certificate"
+    "verifyCertificate": "Verify a certificate",
+    "apprendre": "Learn"
   },
   "footer": {
     "copyright": "© {{year}} {{brand}}. All rights reserved.",
@@ -430,7 +431,8 @@
       "premium": "Premium content",
       "formations": "My courses",
       "certificates": "Certificates",
-      "payments": "My payments"
+      "payments": "My payments",
+      "fincludia": "FINCLUDIA"
     },
     "profile": {
       "title": "Profile",
@@ -498,7 +500,89 @@
       "activeBody": "Your account has access to premium content. Reserved content appears in the blog and the courses."
     },
     "title": "My space",
-    "subtitle": "Profile, dashboard, account type and premium content."
+    "subtitle": "Profile, dashboard, account type and premium content.",
+    "fin": {
+      "title": "My FINCLUDIA profile",
+      "intro": "Pick the public that fits you best: it adapts the FINCLUDIA experience offered to you, without locking you in. \"I don't know\" is a real answer — you can come back to it later.",
+      "publicLabel": "Your main profile",
+      "publicHint": "One main profile at a time. You can change it later: every change stays visible below, in your history.",
+      "notSure": "I don't know / later",
+      "secondaryLabel": "Complementary roles (optional)",
+      "ageLabel": "Age bracket",
+      "situationLabel": "Your situation",
+      "intentionLabel": "Your main intention",
+      "horizonLabel": "Your time horizon",
+      "consentIntro": "Before continuing, two things to accept:",
+      "consentPrivacy": "Your financial data belongs to your account and is never read by another user without your explicit agreement. Deleting your account erases your data completely and permanently.",
+      "consentNoAdvice": "FINCLUDIA shows calculations and leads to explore, never regulated financial advice or a promise of approval: every figure states its formula and assumptions, to check with a professional before any decision.",
+      "consentAccept": "I have read and accept these two points.",
+      "save": "Save",
+      "saved": "Profile saved.",
+      "consentRequired": "Both points above must be accepted before saving.",
+      "transitionsTitle": "Profile change history",
+      "transitionLine": "{{date}}: {{from}} → {{to}}",
+      "footNote": "FINCLUDIA is being built: this profile already adapts the experience offered, but several screens that rely on it are arriving progressively.",
+      "publics": [
+        {
+          "code": "LYC",
+          "label": "High-schooler — FINCLUDIA Avenir"
+        },
+        {
+          "code": "ETU",
+          "label": "Student — FINCLUDIA Campus"
+        },
+        {
+          "code": "JAC",
+          "label": "Young professional — FINCLUDIA Premier Revenu"
+        },
+        {
+          "code": "SAL",
+          "label": "Employee — FINCLUDIA Mon Argent"
+        },
+        {
+          "code": "COL",
+          "label": "Housemate — FINCLUDIA Colocation"
+        },
+        {
+          "code": "COU",
+          "label": "Couple — FINCLUDIA Couple"
+        },
+        {
+          "code": "FAM",
+          "label": "Family — FINCLUDIA Famille"
+        },
+        {
+          "code": "EPG",
+          "label": "Beginner saver — FINCLUDIA Épargne & Investissement"
+        }
+      ],
+      "ageRanges": [
+        {
+          "code": "under18",
+          "label": "Under 18"
+        },
+        {
+          "code": "18-24",
+          "label": "18 to 24"
+        },
+        {
+          "code": "25-34",
+          "label": "25 to 34"
+        },
+        {
+          "code": "35-49",
+          "label": "35 to 49"
+        },
+        {
+          "code": "50-64",
+          "label": "50 to 64"
+        },
+        {
+          "code": "65plus",
+          "label": "65 and over"
+        }
+      ]
+    }
   },
   "notFound": {
     "code": "404 error",
@@ -543,7 +627,9 @@
       "users": "Users",
       "settings": "Settings",
       "chatbot": "Assistant",
-      "payments": "Payments"
+      "payments": "Payments",
+      "glossary": "Learn",
+      "finAssistant": "FINCLUDIA assistant"
     },
     "shell": {
       "title": "Administration",
@@ -1365,6 +1451,92 @@
         "users": "Manage accounts: account type, access level (standard or premium), role, and suspension when needed.",
         "settings": "The site’s public contact details, maintenance mode, and any other setting you add yourself, with no technical work needed."
       }
+    },
+    "glossary": {
+      "title": "Learn",
+      "subtitle": "The glossary and mini-guides shown on the site’s \"Learn\" page.",
+      "terms": "Glossary",
+      "guides": "Mini-guides",
+      "addTerm": "Add a term",
+      "termName": "Term name",
+      "definition": "Definition",
+      "example": "Example (optional)",
+      "level": "Level",
+      "noLevel": "No level",
+      "theme": "Theme (optional)",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saved": "Saved.",
+      "deleted": "Deleted.",
+      "published": "Published.",
+      "unpublished": "Unpublished.",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "edit": "Edit",
+      "delete": "Delete",
+      "revisions": "Version history",
+      "revisionsFor": "History — {{term}}",
+      "noRevision": "No earlier version.",
+      "close": "Close",
+      "noTerm": "No term yet.",
+      "noGuide": "No mini-guide yet.",
+      "needsDefinition": "A definition is required before publishing.",
+      "needsBody": "A body is required before publishing.",
+      "changed": "The list changed in the meantime: it has just been reloaded, please try again.",
+      "deleteTermConfirm": "Permanently delete the term \"{{term}}\" and its history?",
+      "addGuide": "Add a mini-guide",
+      "guideTitle": "Guide title",
+      "guideBody": "Body",
+      "reordered": "Order saved.",
+      "deleteGuideConfirm": "Permanently delete the guide \"{{title}}\"?"
+    },
+    "finAssistant": {
+      "title": "FINCLUDIA assistant",
+      "subtitle": "The intentions, flows and log of FINCLUDIA's deterministic assistant.",
+      "intents": "Intentions",
+      "flows": "Flows",
+      "audit": "Log",
+      "intentsNote": "The 8 intentions come from the client's specification (tab \"13_Chatbot\"): their name and example cannot be changed here. You can fill in their keywords, their answer and the screen they open.",
+      "example": "Example question: \"{{example}}\"",
+      "keywords": "Keywords (comma-separated)",
+      "keywordsHint": "Words visitors might type. Example: expense, add, spend.",
+      "response": "Answer",
+      "deepLink": "Screen opened by this intention",
+      "deepLinkHint": "Only already-built screens are offered: the other FINCLUDIA screens arrive progressively.",
+      "noLink": "None (not available yet)",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saved": "Saved.",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "published": "Published.",
+      "unpublished": "Unpublished.",
+      "edit": "Edit",
+      "needsResponse": "An answer is required before publishing.",
+      "flowsNote": "A flow is a sequence of steps with choices (e.g. a short budget questionnaire). It is currently built from the project spec; this page publishes or withdraws it.",
+      "addFlow": "Add a flow",
+      "flowName": "Flow name",
+      "noFlow": "No flow yet.",
+      "stepCount_one": "{{count}} step",
+      "stepCount_other": "{{count}} steps",
+      "needsStep": "At least one step is required before publishing.",
+      "delete": "Delete",
+      "deleteFlowConfirm": "Permanently delete the flow \"{{name}}\" and its steps?",
+      "deleted": "Deleted.",
+      "auditNote": "Log of recognised intentions and of the cases the assistant did not understand. No financial data and no text a visitor typed is ever kept — only codes.",
+      "auditDate": "Date",
+      "auditAction": "Action",
+      "auditTarget": "Intention / flow",
+      "noAudit": "No activity yet.",
+      "actions": {
+        "resolved": "Intention recognised",
+        "fallback": "Not understood",
+        "deep_link_opened": "Screen opened",
+        "flow_started": "Flow started",
+        "flow_step": "Flow step",
+        "flow_ended": "Flow ended",
+        "not_available": "Screen unavailable"
+      }
     }
   },
   "learn": {
@@ -2127,7 +2299,11 @@
         "draft": "Draft",
         "published": "Published"
       }
-    }
+    },
+    "searchPlaceholder": "Type your question…",
+    "searchGo": "Search",
+    "openScreen": "Open this screen",
+    "notUnderstood": "I did not understand. Choose an option…"
   },
   "payments": {
     "offersTitle": "Go premium",
@@ -2258,5 +2434,25 @@
       "vatRate": "Invalid rate: between 0 and 100, two decimals at most.",
       "total": "The invoice total is too high."
     }
+  },
+  "apprendre": {
+    "title": "Learn",
+    "intro": "A glossary and mini-guides to understand common financial terms, at your own pace.",
+    "searchLabel": "Search a term or a guide",
+    "searchPlaceholder": "Search a term or a guide…",
+    "search": "Search",
+    "allLevels": "All levels",
+    "levels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "clear": "Clear",
+    "noResult": "No result. Try another word, or remove the level filter.",
+    "glossaryTitle": "Glossary",
+    "guidesTitle": "Mini-guides",
+    "back": "Back to Learn",
+    "exampleTitle": "Example",
+    "relatedTitle": "Related terms"
   }
 }

@@ -612,7 +612,7 @@ L'e-learning existant (formations, leçons, quiz, certificats) et le blog formen
 - Mention imposée : **aucun contenu ne remplace un conseil réglementé**.
 - Tests : fonctionnels (versionnage, recherche, droits premium inchangés), navigateur.
 
-Important : **définitions, guides et textes pédagogiques sont fournis ou validés par le client** ; ne rien rédiger de financier, légal ou fiscal soi-même.
+Décision (2026-10-11) : le glossaire et les mini-guides sont **rédigés par l'équipe** (définitions générales de termes financiers courants), plus attendus du client. Reste la règle de fond : aucun contenu propre à une offre, un taux, une règle légale ou fiscale n'est inventé — ce qui est spécifique au client (barèmes, règles, offres) reste à faire valider par lui.
 
 ### P2-09 — FINCLUDIA : indice de connaissances financières et passeports (Avenir, étudiant)
 - Statut : `❌ todo`
@@ -629,7 +629,7 @@ Tâches :
 
 ### P2-10 — FINCLUDIA : défis et missions pédagogiques (lycéen)
 - Statut : `❌ todo`
-- Priorité : `🟢 low`
+- Priorité : `🟢 low` — **abandonné pour l'instant** (décision du 2026-10-11, voir note ci-dessous)
 - Dépendances : `P2-09`, `P6-12`
 - Durée cible : 2 jours (estimation)
 - Origine : direction FINCLUDIA du 2026-10-09 (écran LY03)
@@ -639,7 +639,7 @@ Tâches :
 - Score de mission selon des règles configurées et explicables, **séparé** de l'indice de connaissances (`P2-09`) ; badges.
 - Aucune conséquence sur des données réelles ; adapté aux mineurs.
 
-Important : scénarios, règles de points et textes des missions sont **fournis par le client**.
+Décision (2026-10-11) : cette tâche n'est plus demandée au client et n'est plus poursuivie pour l'instant ; elle pourra être reprise plus tard si une source de contenu (scénarios, règles de points, textes) est définie.
 
 ---
 
@@ -957,13 +957,13 @@ Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p3-17).
 
 Les types de compte dynamiques (`P3-15`) sont la base, mais FINCLUDIA va plus loin :
 - **8 publics** (LYC, ETU, JAC, SAL, COL, COU, FAM, EPG) avec leur nom d'expérience ; **un profil principal** et des **rôles complémentaires** activables sans dupliquer les données (ex. salarié + colocataire).
-- Inscription / profil (C01, C02) : pays, langue, **devise par défaut**, tranche d'âge, situation, intention principale, horizon ; **consentements versionnés** (date, version du texte accepté) ; « Je ne sais pas » et « Modifier plus tard » toujours possibles. Connexion par téléphone : seulement si le client la confirme (`P6-01`, demande un fournisseur SMS).
+- Inscription / profil (C01, C02) : pays, langue, **devise par défaut**, tranche d'âge, situation, intention principale, horizon ; **consentements versionnés** (date, version du texte accepté) ; « Je ne sais pas » et « Modifier plus tard » toujours possibles. Connexion par téléphone : **abandonnée** (décision du 2026-10-11, pas de SMS).
 - **Mineurs** : contrôle **côté serveur** qui interdit les fonctions réservées aux 18 ans et plus (crédit, offres, couple / foyer contractuel…) ; combinaisons âge / public incohérentes refusées.
 - **Changement de parcours** (ex. étudiant → jeune actif au premier salaire) : proposé, **jamais forcé**, historique des parcours conservé (`/profile/transitions`).
 - Aucune donnée financière demandée avant le consentement.
 - Tests : fonctionnels (transitions, refus mineur sur chaque route réservée), sécurité (un mineur ne passe pas en appelant l'API directement), cohérence (public de chaque compte connu).
 
-Décision à trancher avec le client (`P6-01`) : que deviennent les types existants **auto-entrepreneur / PME / PMI** (orientés entreprise) face aux 8 publics FINCLUDIA (particuliers) — coexistence (deux axes : profil professionnel et public FINCLUDIA) ou remplacement.
+Décision (2026-10-11) : les types existants **auto-entrepreneur / PME / PMI** (orientés entreprise) et les 8 publics FINCLUDIA (particuliers) ne coexistent jamais sur un même compte — **un utilisateur a un seul profil actif à la fois**, jamais deux étiquettes en même temps. Reste à détailler à l'implémentation : la bascule exacte (remplacement pur des anciens types, ou liste unique où l'utilisateur choisit une seule valeur parmi l'ensemble).
 
 ### P3-19 — FINCLUDIA : assistant déterministe (intentions, parcours à étapes, liens profonds)
 - Statut : `❌ todo`
@@ -1386,14 +1386,14 @@ Règles communes à toutes les tâches de cette phase (exigences du client) :
 Les deux documents sont très détaillés sur les écrans, mais plusieurs points ne peuvent pas être décidés par Claude :
 1. ~~**Nom et identité**~~ — **tranché le 2026-10-09 : la plateforme s'appelle FINCLUDIA.** Renommage appliqué dans tout le code, les textes fr/en/ar, les tests et la documentation (détail et points d'attention : « Renommage en FINCLUDIA » ci-dessous). **Restent à fournir** : logo, charte graphique, nom de domaine. **Reste à trancher** : que deviennent l'e-learning, le blog et les outils actuels — intégrés comme modules « Apprendre » / « Explorer » (hypothèse retenue dans ce plan) ou site séparé ? Le texte de présentation de la page d'accueil décrit encore l'ancien positionnement (« formations, blog et outils pour auto-entrepreneurs, PME, PMI ») : il n'a **pas** été réécrit, parce que le nouveau positionnement est une décision commerciale, pas un renommage.
 2. **Périmètre de la première livraison** : les 8 publics d'un coup ou d'abord quelques-uns (ex. étudiant + jeune actif + salarié) ? Quels lots du backlog client ?
-3. **Types de compte existants** (auto-entrepreneur, PME, PMI) face aux 8 publics (voir `P3-18`).
+3. ~~**Types de compte existants**~~ (auto-entrepreneur, PME, PMI) face aux 8 publics (voir `P3-18`) — **tranché le 2026-10-11 : un seul profil actif à la fois, jamais deux en même temps.** Pas de coexistence en deux axes indépendants.
 4. **Devises** : DZD seulement ou plusieurs (EUR, USD…) ? Source et fréquence des taux de change si plusieurs.
 5. **Seuils** que le document laisse « à valider » : taux d'effort dette, cibles de réserve, pondérations de l'indice de santé financière (F053) et de l'indice de préparation au financement, seuils d'alertes.
 6. **Règles de paie** (cotisations, IRG) datées, pour `P4-14` ; **offres de financement** pour `P4-15` ; données **CCP** pour `P4-13`.
 7. **Mineurs** : âge minimum d'inscription, consentement parental, fonctions exactes réservées aux 18 ans et plus.
-8. **Canaux de notification** : in-app seulement, ou aussi e-mail (fournisseur d'e-mail toujours non choisi) et push (application mobile hors MVP) ; connexion par téléphone (fournisseur SMS).
-9. **Textes légaux** : mention « pas de conseil réglementé », politique de confidentialité adaptée aux données financières, durée de conservation, politique de suppression.
-10. **Contenus** : glossaire, guides, missions, intentions de l'assistant, modèles d'objectifs, référentiel de catégories (l'onglet `03_Categories` en donne une base).
+8. ~~**Canaux de notification**~~ — **tranché le 2026-10-11 : pas de SMS.** Les notifications restent in-app ; l'e-mail reste une option future, dépendante du même choix de fournisseur que la newsletter (non fait).
+9. ~~**Textes légaux**~~ — **tranché le 2026-10-11 :** la mention « pas de conseil réglementé » et la politique de confidentialité sont rédigées par l'équipe. Une suppression de compte entraîne une suppression complète et immédiate des données (pas de durée de conservation à part).
+10. **Contenus restant à fournir** : missions (abandonné, voir `P2-10`), intentions de l'assistant déterministe (`P3-19`), modèles d'objectifs, référentiel de catégories (l'onglet `03_Categories` en donne une base). Le glossaire et les guides (`P2-08`) sont rédigés par l'équipe, plus attendus du client.
 11. **Hébergement** : un hébergement mutualisé (cPanel, MariaDB) suffit pour une démonstration ; des données financières réelles demandent sauvegardes testées, chiffrement et disponibilité à confirmer (voir `P5-04`).
 
 Livrable attendu : une note de réponses. Passer alors cette tâche à `✅ done`.
@@ -1740,10 +1740,13 @@ Blocages / informations manquantes signalées (non bloquantes pour continuer, ma
 - Formulaire de contact : aucune coordonnée réelle (email/téléphone/adresse) fournie. Depuis P3-16, un administrateur peut les saisir lui-même (page « Paramètres ») et elles s'affichent aussitôt sur `/contact` et dans le pied de page — reste seulement à ce que le client transmette (ou saisisse) les informations réelles.
 - Fournisseur d'email non défini : « mot de passe oublié » reste inactif et les messages du formulaire de contact ne sont que stockés en base (voir P1-07). La newsletter (P3-05) est construite mais ne peut rien envoyer tant qu'il n'est pas choisi ; à choisir avant la mise en production.
 - Paiement (`P3-08`, `⛔ blocked`) : fournisseur / banque, moyens de paiement, devise, offres et règles de remboursement **non définis** ; le client fait ses propres recherches (liste des points dans `P3-08`). Bloque `P3-10`, pas `P3-09`.
-- Assistant guidé (`P3-07`, terminé) : le module est en place mais **vide** ; les questions et réponses sont à fournir par le client et à saisir dans Administration → Assistant. Aucun contenu inventé.
+- Assistant guidé (`P3-07`, terminé) : une **v1 basique** est en ligne (6 questions génériques sur l'usage du site, rédigées par l'équipe — rien de commercial, légal ou tarifaire). Le client peut fournir des questions/réponses plus détaillées à tout moment, à saisir dans Administration → Assistant ; la v1 reste en place tant qu'il n'y a rien de plus précis.
 - Simulateur de crédit (`P4-02`, `⛔ blocked`) : règles d'octroi, taux et formules de capacité d'emprunt à fournir par le client (les classeurs fournis ne contiennent que des conditions bancaires). Bloque `P4-05` puis toute la Phase 5.
-- **FINCLUDIA (`P6-01`, `⛔ blocked`)** : onze points de cadrage à trancher par le client avant de développer (nom de la plateforme et sort de l'existant, périmètre de la première livraison, publics retenus, coexistence avec auto-entrepreneur / PME / PMI, devises et taux de change, seuils et pondérations laissés « à valider » dans la spécification, règles de paie datées, âge minimum et consentement parental, canaux de notification, textes légaux, contenus pédagogiques). Bloque `P1-12`, `P3-18`, `P4-14`, `P4-15`, `P6-16` et, par ricochet, la quasi-totalité de la Phase 6.
-- FINCLUDIA, données à fournir par le client : barèmes de paie (`P4-14`), offres de financement et leurs formules (`P4-15`), données CCP (`P4-13`), instruments et prix de référence du portefeuille fictif (`P6-12`), glossaire et guides (`P2-08`), scénarios de missions (`P2-10`), intentions et réponses de l'assistant (`P3-19`), référentiel de catégories (`P6-02`, base dans l'onglet `03_Categories`).
+- **FINCLUDIA (`P6-01`, `⛔ blocked`)** : points de cadrage encore ouverts à trancher par le client avant de développer (sort commercial de l'existant — module ou site à part, logo/charte/domaine, périmètre de la première livraison, publics retenus, devises et taux de change, seuils et pondérations laissés « à valider » dans la spécification, règles de paie datées, âge minimum et consentement parental). Trois points sont tranchés depuis le 2026-10-11 : type de compte (un seul profil à la fois, voir `P3-18`), canaux de notification (pas de SMS) et textes légaux de confidentialité (voir ci-dessous). Bloque `P1-12`, `P3-18`, `P4-14`, `P4-15`, `P6-16` et, par ricochet, la quasi-totalité de la Phase 6.
+- Décision (2026-10-11) : **un utilisateur a un seul profil actif à la fois.** Les types de compte actuels (auto-entrepreneur, PME, PMI) et les 8 publics FINCLUDIA ne se cumulent jamais sur un même compte (pas de double étiquette) ; voir `P3-18`.
+- Décision (2026-10-11) : **pas de SMS.** Les notifications restent dans le site (in-app) ; un envoi par e-mail reste possible plus tard, mais dépend du même choix de fournisseur que la newsletter (toujours non choisi, voir ci-dessus).
+- Décision (2026-10-11) : la mention « pas de conseil financier réglementé » et les textes de confidentialité propres aux données financières sont **rédigés par l'équipe**, pas par le client. Une demande de suppression de compte entraîne une **suppression complète et immédiate** des données : pas de durée de conservation à définir.
+- FINCLUDIA, données encore à fournir par le client : barèmes de paie (`P4-14`), offres de financement et leurs formules (`P4-15`), données CCP (`P4-13`), instruments et prix de référence du portefeuille fictif (`P6-12`), intentions et réponses de l'assistant déterministe (`P3-19`), modèles d'objectifs financiers, référentiel de catégories (`P6-02`, base dans l'onglet `03_Categories`). Le glossaire et les mini-guides (`P2-08`) sont désormais rédigés par l'équipe, pas attendus du client.
 - FINCLUDIA, hébergement : l'hébergement mutualisé actuel (cPanel, MariaDB) convient à une démonstration, pas à des données financières réelles sans sauvegardes testées, chiffrement et disponibilité confirmés (voir `P5-04` et point 11 de `P6-01`).
 
 Point de vérification manuelle recommandé pour l'utilisateur : ouvrir `http://localhost:5173` après `npm run dev` dans `client/` et tester le menu mobile sous 860px de large (non vérifié visuellement par Claude faute d'outil navigateur dans cette session).

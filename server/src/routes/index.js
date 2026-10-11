@@ -12,6 +12,9 @@ import settingsRoutes from './settings.routes.js';
 import toolsRoutes from './tools.routes.js';
 import chatbotRoutes from './chatbot.routes.js';
 import paymentsRoutes from './payments.routes.js';
+import finProfileRoutes from './finProfile.routes.js';
+import apprendreRoutes from './apprendre.routes.js';
+import finAssistantRoutes from './finAssistant.routes.js';
 
 const router = Router();
 
@@ -28,5 +31,8 @@ router.use('/settings', settingsRoutes);
 router.use('/tools', toolsRoutes);
 router.use('/chatbot', chatbotRoutes);
 router.use('/payments', paymentsRoutes);
+router.use('/profile/fin', finProfileRoutes);
+router.use('/apprendre', apprendreRoutes);
+router.use('/fin-assistant', finAssistantRoutes);
 
 export default router;

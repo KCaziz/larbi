@@ -1,0 +1,89 @@
+/* FINCLUDIA profile (P3-18). Tokens only, logical properties (RTL). */
+.fin-profile-form {
+  display: grid;
+  gap: 18px;
+  max-width: 560px;
+}
+
+.fin-secondary-field {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.fin-secondary-field legend {
+  padding: 0;
+  margin-block-end: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.fin-secondary-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.fin-secondary-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 400;
+}
+
+.fin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px 16px;
+}
+
+.fin-consents {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-alt);
+}
+
+.fin-consents p {
+  margin: 0 0 8px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.fin-consents ul {
+  margin: 0 0 10px;
+  padding-inline-start: 20px;
+}
+
+.fin-consents li {
+  margin-bottom: 6px;
+  font-size: 0.92rem;
+}
+
+.fin-consent-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.fin-transitions {
+  margin-block-start: 28px;
+  max-width: 560px;
+}
+
+.fin-transitions h3 {
+  font-size: 1.05rem;
+}
+
+.fin-transitions ul {
+  margin: 0;
+  padding-inline-start: 20px;
+}
+
+.fin-transitions li {
+  margin-bottom: 4px;
+  color: var(--text);
+}

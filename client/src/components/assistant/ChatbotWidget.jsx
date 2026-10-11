@@ -1,16 +1,19 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ChevronRight, MessageCircleQuestion, X } from 'lucide-react';
+import { ArrowLeft, ChevronRight, MessageCircleQuestion, Search, X } from 'lucide-react';
+import { api } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { contentLanguage, textDirection } from '../../lib/contentLanguage.js';
 import RichContent from '../ui/RichContent.jsx';
 import './ChatbotWidget.css';
 
-// Guided assistant (P3-07): a floating button that opens a panel listing the
-// questions an administrator published, each with its prepared answer. No free
-// text, no AI. Nothing is shown when no question is published in the visitor's
-// language (Tamazight reads the French entries), nor inside the administration.
+// Guided assistant (P3-07) and FINCLUDIA deterministic assistant (P3-19): a
+// floating button that opens a panel. Below the questions an administrator
+// published (P3-07, click to read), a free-text field tries the FINCLUDIA
+// resolver — still no AI: a closed list of intentions matched by keyword, pre-
+// written answers, never a generated one. Nothing is shown when neither has
+// any published content, nor inside the administration.
 export default function ChatbotWidget() {
   const { pathname } = useLocation();
   if (pathname === '/admin' || pathname.startsWith('/admin/')) return null;
@@ -19,10 +22,14 @@ export default function ChatbotWidget() {
 
 function Assistant() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const lang = contentLanguage(i18n.language) ?? 'fr';
   const entries = useApi(`/chatbot/entries?lang=${lang}`);
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [query, setQuery] = useState('');
+  const [resolving, setResolving] = useState(false);
+  const [resolved, setResolved] = useState(null); // { type: 'intent' | 'fallback', ... }
   const toggleRef = useRef(null);
   const headingRef = useRef(null);
   const panelId = useId();
@@ -35,7 +42,7 @@ function Assistant() {
   // change of view, so a screen reader announces the new content.
   useEffect(() => {
     if (open) headingRef.current?.focus();
-  }, [open, selectedId]);
+  }, [open, selectedId, resolved]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -49,10 +56,41 @@ function Assistant() {
   function close() {
     setOpen(false);
     setSelectedId(null);
+    setResolved(null);
+    setQuery('');
     toggleRef.current?.focus();
   }
 
+  function backToList() {
+    setSelectedId(null);
+    setResolved(null);
+  }
+
+  async function submitSearch(event) {
+    event.preventDefault();
+    if (!query.trim() || resolving) return;
+    setResolving(true);
+    try {
+      const data = await api.post('/fin-assistant/resolve', { query: query.trim() });
+      setResolved(data);
+    } catch {
+      // A network or server hiccup is the same as "not understood": the
+      // client never invents an answer either way.
+      setResolved({ type: 'fallback', categories: [] });
+    } finally {
+      setResolving(false);
+    }
+  }
+
+  function openDeepLink(path) {
+    close();
+    navigate(path);
+  }
+
   if (list.length === 0) return null;
+
+  const showingResolvedIntent = resolved?.type === 'intent';
+  const showingFallback = resolved?.type === 'fallback';
 
   return (
     <div className="chatbot" dir={textDirection(lang)}>
@@ -71,7 +109,7 @@ function Assistant() {
           <div className="chatbot-body">
             {selected ? (
               <>
-                <button type="button" className="chatbot-back" onClick={() => setSelectedId(null)}>
+                <button type="button" className="chatbot-back" onClick={backToList}>
                   <ArrowLeft className="icon-dir" size={16} strokeWidth={2} aria-hidden="true" />
                   {t('chatbot.back')}
                 </button>
@@ -80,11 +118,67 @@ function Assistant() {
                 </h3>
                 <RichContent html={selected.answer} className="chatbot-answer" />
               </>
+            ) : showingResolvedIntent ? (
+              <>
+                <button type="button" className="chatbot-back" onClick={backToList}>
+                  <ArrowLeft className="icon-dir" size={16} strokeWidth={2} aria-hidden="true" />
+                  {t('chatbot.back')}
+                </button>
+                <h3 ref={headingRef} tabIndex={-1} className="chatbot-question">
+                  {resolved.intent.label}
+                </h3>
+                <RichContent html={resolved.intent.responseTemplate} className="chatbot-answer" />
+                {resolved.intent.deepLinkPath && (
+                  <button type="button" className="chatbot-open-link" onClick={() => openDeepLink(resolved.intent.deepLinkPath)}>
+                    {t('chatbot.openScreen')}
+                    <ChevronRight className="icon-dir" size={16} strokeWidth={2} aria-hidden="true" />
+                  </button>
+                )}
+              </>
+            ) : showingFallback ? (
+              <>
+                <button type="button" className="chatbot-back" onClick={backToList}>
+                  <ArrowLeft className="icon-dir" size={16} strokeWidth={2} aria-hidden="true" />
+                  {t('chatbot.back')}
+                </button>
+                {/* Client's own wording (screen C26): "Je n'ai pas compris. Choisissez une option…" */}
+                <p ref={headingRef} tabIndex={-1} className="chatbot-fallback-intro">
+                  {t('chatbot.notUnderstood')}
+                </p>
+                {resolved.categories.length > 0 ? (
+                  <ul className="chatbot-list">
+                    {resolved.categories.map((cat) => (
+                      <li key={cat.code}>
+                        <button type="button" onClick={() => setResolved({ type: 'intent', intent: cat })}>
+                          <span>{cat.label}</span>
+                          <ChevronRight className="icon-dir" size={16} strokeWidth={2} aria-hidden="true" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="chatbot-intro">{t('chatbot.notFound')}</p>
+                )}
+              </>
             ) : (
               <>
                 <p ref={headingRef} tabIndex={-1} className="chatbot-intro">
                   {t('chatbot.intro')}
                 </p>
+                <form className="chatbot-search" onSubmit={submitSearch}>
+                  <Search size={16} strokeWidth={2} aria-hidden="true" />
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder={t('chatbot.searchPlaceholder')}
+                    aria-label={t('chatbot.searchPlaceholder')}
+                    maxLength={200}
+                  />
+                  <button type="submit" disabled={!query.trim() || resolving}>
+                    {t('chatbot.searchGo')}
+                  </button>
+                </form>
                 <ul className="chatbot-list">
                   {list.map((entry) => (
                     <li key={entry.id}>

@@ -1,0 +1,172 @@
+/* ---------- Glossary and mini-guides administration (P2-08) ---------- */
+.glossary-admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  border-bottom: 2px solid var(--border);
+}
+
+.glossary-admin-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.glossary-admin-tabs button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.glossary-admin-section {
+  margin-bottom: 32px;
+}
+
+.glossary-admin-section .cms-inline-message {
+  margin: 0 0 12px;
+}
+
+.glossary-admin-bar {
+  margin-bottom: 16px;
+}
+
+.glossary-admin-inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.glossary-admin-inline-form input {
+  flex: 1;
+  min-width: 220px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+}
+
+.glossary-admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+
+.glossary-admin-form h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.glossary-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px 16px;
+}
+
+.glossary-admin-grid select,
+.glossary-admin-grid input {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  width: 100%;
+}
+
+.glossary-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.glossary-admin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.glossary-admin-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.glossary-admin-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.glossary-admin-text strong {
+  color: var(--text-h);
+  overflow-wrap: anywhere;
+}
+
+.glossary-revisions {
+  margin-bottom: 20px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+
+.glossary-revisions-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.glossary-revisions-head h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.glossary-revisions-list {
+  margin: 0;
+  padding-inline-start: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.glossary-revisions-list time {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+@media (max-width: 640px) {
+  .glossary-admin-item {
+    flex-wrap: wrap;
+  }
+}
