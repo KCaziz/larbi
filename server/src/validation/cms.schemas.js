@@ -23,6 +23,9 @@ export const updateFormationSchema = z
     subtitle: optionalText(160),
     description: z.string().trim().max(2000),
     level: z.enum(Object.values(FORMATION_LEVEL)).nullable(),
+    // Teaching theme of the "Apprendre" search (P2-08), free-form like the
+    // glossary's: the vocabulary is the administrators', not a fixed list.
+    theme: z.string().trim().max(60).nullable(),
     objectives: lines,
     prerequisites: lines,
     categoryId: z.string().uuid().nullable(),

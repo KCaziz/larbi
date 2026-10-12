@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { ArrowLeft, BookOpen, Calculator } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import { withLang } from '../../lib/contentLanguage.js';
@@ -29,6 +29,13 @@ export default function TermPage() {
           {t('apprendre.back')}
         </Link>
         <RichContent html={t1.definition} />
+        {/* "Simuler" (C21): shown only when an administrator attached a
+            calculator to this entry. */}
+        {t1.simulator && (
+          <Link className="apprendre-simulate" to={`/outils/simulateurs/${t1.simulator}`}>
+            <Calculator size={15} aria-hidden="true" /> {t('apprendre.simulate')}
+          </Link>
+        )}
         {t1.example && (
           <div className="apprendre-example">
             <h2>{t('apprendre.exampleTitle')}</h2>

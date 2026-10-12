@@ -115,7 +115,7 @@ describe('site sweep', { skip: findChrome() ? false : 'no Chrome/Chromium found 
       }
 
       await setSession(learner);
-      const account = ['/compte/profil', '/compte/tableau-de-bord', '/compte/formations', '/compte/certificats', '/compte/type', '/compte/premium', '/catalogue', `/catalogue/${data.f.slug}`, `/catalogue/${data.f.slug}/cours/${data.f.courses[0].id}`, `/catalogue/${data.f.slug}/certificat`];
+      const account = ['/compte/profil', '/compte/tableau-de-bord', '/compte/formations', '/compte/certificats', '/compte/type', '/compte/premium', '/compte/fincludia', '/compte/categories', '/catalogue', `/catalogue/${data.f.slug}`, `/catalogue/${data.f.slug}/cours/${data.f.courses[0].id}`, `/catalogue/${data.f.slug}/certificat`];
       for (const route of account) {
         await b.goto(site.url + route);
         await sleep(400);

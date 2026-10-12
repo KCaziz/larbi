@@ -7,6 +7,9 @@ import { bodyToText } from './article.service.js';
 import { CERTIFICATE_NUMBER_PATTERN } from './certificate.service.js';
 import { sanitizeRichText } from './sanitize.service.js';
 import { themeByKey } from '../constants/comparator.js';
+import { CATEGORY_FAMILY_CODES, STANDARD_CATEGORIES } from '../constants/finCategories.js';
+import { CHANGE_ACTIONS, FINANCIAL_TABLES } from '../constants/finData.js';
+import { checkFinancialRow } from './finance/dataModel.js';
 
 // Global consistency check: rules that must hold across the WHOLE data set (database
 // AND stored files), whatever code path wrote it. The database constraints already
@@ -190,6 +193,93 @@ export async function checkConsistency(prisma, { privateDir }) {
     SELECT o.id FROM payment_orders o JOIN users u ON u.id = o.userId
     WHERE o.status = 'paid' AND u.accessLevel <> o.accessLevel`;
   add('a paid order grants its access', paidWithoutAccess, (r) => `order ${r.id}`);
+
+  // ---- FINCLUDIA financial data model (P6-02) -------------------------------
+  // The extended control the task asks for: a currency on every amount, a known
+  // status, whole-number amounts, and no fictional line inside a real total.
+  // It walks the SOCLE, table by table, so a financial table added by a later
+  // task is checked the day it declares itself in FINANCIAL_TABLES.
+  for (const { model, label, amounts } of FINANCIAL_TABLES) {
+    const rows = await prisma[model].findMany();
+    for (const row of rows) {
+      for (const problem of checkFinancialRow(row, { amounts })) {
+        problems.push(violation('every financial row carries a valid metadata socle', `${label} ${row.id}: ${problem}`));
+      }
+    }
+  }
+
+  // A category is standard (the client's reference, belonging to no account),
+  // the user's own, or the user's customisation of a standard one - and nothing
+  // else. This cannot be a SQL CHECK: it reads `userId`, a FOREIGN KEY column,
+  // which MariaDB refuses in a CHECK (same reason as the media and quiz rules
+  // above).
+  const categories = await prisma.finCategory.findMany({
+    select: { id: true, userId: true, family: true, key: true, baseKey: true, label: true, archivedAt: true, deletedAt: true, status: true },
+  });
+  const standardByKey = new Map(categories.filter((c) => !c.userId).map((c) => [c.key, c]));
+  for (const row of categories) {
+    const shape = row.userId === null ? (row.key && !row.baseKey ? 'standard' : null) : row.key === null ? 'user' : null;
+    if (!shape) {
+      problems.push(violation('a category is a standard row, a user row, or a user customisation of a standard row', `category ${row.id}`));
+      continue;
+    }
+    if (shape === 'standard' && row.status !== 'official') {
+      problems.push(violation("the client's category reference is stored as official", `category ${row.id}`));
+    }
+    if (row.baseKey && !standardByKey.has(row.baseKey)) {
+      problems.push(violation('a category customisation points at a standard category that exists', `category ${row.id}: ${row.baseKey}`));
+    } else if (row.baseKey && standardByKey.get(row.baseKey).family !== row.family) {
+      problems.push(violation('a category customisation stays in the family of the category it customises', `category ${row.id}`));
+    }
+    if (!CATEGORY_FAMILY_CODES.includes(row.family)) {
+      problems.push(violation('a category belongs to one of the declared families', `category ${row.id}: ${row.family}`));
+    }
+  }
+
+  // The reference in the database says exactly what constants/finCategories.js
+  // says: the migration generated one from the other, and a divergence would
+  // mean the application and the data disagree on what the client wrote.
+  const expectedCategories = new Map(STANDARD_CATEGORIES.map((c) => [c.key, c]));
+  const REFERENCE_RULE = 'the standard category reference matches constants/finCategories.js';
+  for (const [key, row] of standardByKey) {
+    const reference = expectedCategories.get(key);
+    if (!reference) problems.push(violation(REFERENCE_RULE, `unknown standard category ${key}`));
+    else if (reference.label !== row.label || reference.family !== row.family) {
+      problems.push(violation(REFERENCE_RULE, `standard category ${key} differs`));
+    }
+  }
+  for (const key of expectedCategories.keys()) {
+    if (!standardByKey.has(key)) problems.push(violation(REFERENCE_RULE, `missing standard category ${key}`));
+  }
+
+  // Two active categories a person could not tell apart in a picker. Compared
+  // lower-case, which is how someone reads a list.
+  const seenLabels = new Map();
+  for (const row of categories) {
+    if (row.deletedAt || !row.userId) continue;
+    const slot = `${row.userId}:${row.family}:${row.label.toLocaleLowerCase('fr')}`;
+    if (seenLabels.has(slot)) problems.push(violation('one account never has two categories with the same name in a family', `category ${row.id}`));
+    seenLabels.set(slot, row.id);
+  }
+
+  // A logically deleted row keeps the journal entry that says it was deleted:
+  // that is what makes the deletion traceable rather than silent.
+  const changes = await prisma.finChange.findMany({ select: { id: true, entity: true, entityId: true, action: true, userId: true } });
+  add('a change journal entry has a declared action', changes.filter((c) => !CHANGE_ACTIONS.includes(c.action)), (c) => `change ${c.id}: ${c.action}`);
+  const deletedRows = new Set(changes.filter((c) => c.action === 'delete').map((c) => c.entityId));
+  add(
+    'a logically deleted financial row says in the journal that it was deleted',
+    categories.filter((row) => row.deletedAt && row.userId && !deletedRows.has(row.id)),
+    (row) => `category ${row.id}`,
+  );
+  // A journal entry about a row of another account would be that account's
+  // history leaking into this one.
+  const ownerOf = new Map(categories.map((row) => [row.id, row.userId]));
+  add(
+    'a change journal entry belongs to the account that owns the row',
+    changes.filter((c) => c.entity === 'category' && ownerOf.has(c.entityId) && ownerOf.get(c.entityId) !== c.userId),
+    (c) => `change ${c.id}`,
+  );
 
   return problems;
 }

@@ -599,7 +599,7 @@ Constats non bloquants et décisions à valider avec le client :
 - **Non testé** : Safari, Firefox, téléphone réel ; vidéos longues réelles (fichiers de test minuscules, limites de taille éprouvées avec des seuils réduits) ; accessibilité au lecteur d'écran ; montée en charge.
 
 ### P2-08 — FINCLUDIA : « Apprendre » — glossaire, mini-guides et recherche pédagogique
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P2-07`, `P3-18`
 - Durée cible : 2 jours (estimation)
@@ -613,6 +613,30 @@ L'e-learning existant (formations, leçons, quiz, certificats) et le blog formen
 - Tests : fonctionnels (versionnage, recherche, droits premium inchangés), navigateur.
 
 Décision (2026-10-11) : le glossaire et les mini-guides sont **rédigés par l'équipe** (définitions générales de termes financiers courants), plus attendus du client. Reste la règle de fond : aucun contenu propre à une offre, un taux, une règle légale ou fiscale n'est inventé — ce qui est spécifique au client (barèmes, règles, offres) reste à faire valider par lui.
+
+Réalisé en deux temps. Le 2026-10-11 (migration `finculdia_p3_18_p2_08_p3_19`) : glossaire **versionné** (chaque remplacement d'une définition garde l'ancienne, sans limitation de fréquence — la règle du client), mini-guides, administration dans le CMS, pages publiques `/apprendre`, `/apprendre/termes/:slug`, `/apprendre/guides/:slug`, niveau et thème sur les deux.
+
+Terminé le 2026-10-11 (migration additive `apprendre_axes_favorites`) — ce qui manquait par rapport à la spécification :
+- **La recherche couvre les quatre familles de contenu que le client liste** (cours, glossaire, mini-guides, articles), groupées, et non plus le glossaire seul. Les quatre partagent **une seule forme de carte**, ce qui permet à un même composant de les afficher.
+- **Les deux axes existent désormais sur les quatre** : un thème sur les formations, un niveau et un thème sur les articles. Filtrer sur un axe qu'une partie du contenu ne porte pas n'aurait filtré qu'une partie du contenu.
+- **Bouton « Simuler »** : un terme ou un guide peut pointer vers un calculateur, **choisi par un administrateur** et validé contre le registre des simulateurs. Le deviner à partir du libellé aurait envoyé les gens vers le mauvais outil ; une clé dont le simulateur a disparu n'affiche pas de bouton plutôt qu'un lien mort.
+- **Favoris** (`/api/apprendre/favoris`) : une ligne par (compte, nature, référence). Un favori qui pointe vers un contenu dépublié ou supprimé disparaît simplement de la liste, au lieu d'afficher une carte morte.
+- **La mention imposée** (« aucun contenu ne remplace un conseil réglementé ») est affichée sur la page.
+
+Décisions :
+- **Ordonner, jamais cacher** (la règle de `P3-04` étendue aux quatre familles) : le contenu du public de la personne passe en premier, rien n'est retiré en fonction de qui lit. Les seules choses qui masquent un contenu restent la publication et le verrou premium, qui existaient déjà.
+- **Un article premium est trouvé et affiché, mais son texte n'est fouillé que pour qui a le droit de le lire** : chercher dans le corps d'un article payant révèlerait son contenu mot à mot. C'est la règle que le blog applique déjà, reprise à l'identique.
+- **Les quiz ne sont pas des résultats autonomes** : un quiz n'a pas de page publique et ses questions sont du contenu protégé. La carte d'une formation annonce combien elle en contient, ce qui répond au besoin sans exposer les questions.
+- **Une formation dit qu'elle demande un compte** sur sa carte, plutôt que de mener à un refus.
+- **Les thèmes proposés en filtre sont ceux présents dans les résultats** : le vocabulaire est libre (ce sont les administrateurs qui l'écrivent), donc une liste figée proposerait des thèmes que rien ne porte, ou en oublierait.
+
+Tests : `tests/functional/glossary.test.js` passe de 11 à **20 tests** (quatre groupes, les deux axes sur chaque famille, brouillons absents, article premium trouvable sans que son texte le soit, ordre par public sans rien cacher, calculateur validé contre le registre, favoris : session exigée, propriété du compte, double clic sans erreur, contenu non publié refusé, nature inconnue refusée, favori dépublié qui disparaît) ; un parcours navigateur ajouté à `tests/e2e/fincludia-journey.test.js`.
+
+Deux défauts trouvés et corrigés :
+- **L'audit d'autorisation a refusé la suppression d'un favori** : la vérification du paramètre d'URL répondait 404 avant que `requireAuth` ait pu répondre 401. Les favoris sont donc un **sous-routeur** avec son propre `requireAuth`, et non trois routes gardées une par une.
+- **Dans l'administration du glossaire, créer un terme ou un guide laissait l'administrateur sur la liste**, alors qu'une entrée est créée vide et qu'une entrée vide ne peut pas être publiée : créer ouvre maintenant l'éditeur. Et comme pour le profil FINCLUDIA, chaque enregistrement rechargeait la liste en remplaçant la page par l'état de chargement, ce qui détruisait le message de confirmation.
+
+Limites : les favoris n'ont pas d'écran dédié (ils sont une section de `/apprendre`). Le contenu du glossaire et des guides reste à écrire : la mécanique est là, les définitions sont à produire. Le ciblage par public se fait sur le thème de l'entrée ; un ciblage explicite par public viendra avec `P6-17` si le client le demande.
 
 ### P2-09 — FINCLUDIA : indice de connaissances financières et passeports (Avenir, étudiant)
 - Statut : `❌ todo`
@@ -949,9 +973,10 @@ Demande : chaque article a une langue ; l'administrateur peut le traduire s'il a
 Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p3-17).
 
 ### P3-18 — FINCLUDIA : publics (personas), âge, intention et changement de parcours
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
-- Dépendances : `P3-15`, `P6-01`
+- Dépendances : `P3-15`
+- Dépendance à `P6-01` retirée le 2026-10-11 : son point 3 (un seul profil actif) est tranché, et les deux points encore ouverts qu'elle touche sont traités comme des **réserves déclarées** plutôt que comme des inventions — la devise par défaut est `DZD` et le dit (point 4), et l'âge est une **tranche** (`under18` …) prête pour l'âge minimum et le consentement parental que le client fixera (point 7). La tâche n'attend donc plus rien pour être utile.
 - Durée cible : 2 jours (estimation)
 - Origine : direction FINCLUDIA du 2026-10-09 (écrans C01, C02, JA01 ; onglet `01_Publics`)
 
@@ -965,8 +990,20 @@ Les types de compte dynamiques (`P3-15`) sont la base, mais FINCLUDIA va plus lo
 
 Décision (2026-10-11) : les types existants **auto-entrepreneur / PME / PMI** (orientés entreprise) et les 8 publics FINCLUDIA (particuliers) ne coexistent jamais sur un même compte — **un utilisateur a un seul profil actif à la fois**, jamais deux étiquettes en même temps. Reste à détailler à l'implémentation : la bascule exacte (remplacement pur des anciens types, ou liste unique où l'utilisateur choisit une seule valeur parmi l'ensemble).
 
+Réalisé (2026-10-11, migration additive `finculdia_p3_18_p2_08_p3_19`) :
+- **Les 8 publics viennent du fichier client** (onglet `01_Publics`) : code, libellé, nom d'expérience et mission sont recopiés, pas réécrits. Un profil principal, des rôles complémentaires, et l'écran `/compte/fincludia` (C01 / C02) où chaque champ reste facultatif, avec « je ne sais pas / plus tard » toujours possible.
+- **Consentements versionnés** : une ligne par acceptation, avec la version exacte du texte accepté ; réaccepter après une modification ajoute une ligne, n'écrase jamais la précédente. Aucune donnée financière n'est demandée avant le consentement.
+- **Changement de parcours** proposé, jamais forcé, et historisé (`/profile/fin/transitions`).
+- **L'âge est une tranche, pas une date de naissance** (minimisation) : le serveur n'a besoin de savoir qu'une chose, « moins de 18 ans ou non ». Le garde-fou `requireAdult` **refuse par défaut** — une tranche non renseignée est traitée comme un mineur, pas comme un adulte.
+
+Vérifié le 2026-10-11 (audit de ce qui était livré mais non documenté) : `tests/functional/finProfile.test.js`, `tests/security/finProfile.test.js` et le parcours navigateur `tests/e2e/fincludia-journey.test.js` passent.
+
+Défaut trouvé et corrigé lors de cet audit : **l'enregistrement du profil fonctionnait mais ne disait rien**. Le message de confirmation était tenu par le formulaire, alors que sauvegarder recharge le profil — et le premier enregistrement change en plus la clé de ce formulaire (`finOnboardedAt` cesse d'être nul), donc le message était détruit avant d'avoir été lu. La confirmation appartient désormais à la page, et un rechargement ne remplace plus l'écran par l'état de chargement.
+
+Limites : `requireAdult` existe, est testé, et **ne garde encore aucune route** — les fonctions réservées aux 18 ans et plus (crédit selon les règles des banques, offres, foyer contractuel) ne sont pas encore construites. Il sera appliqué en même temps qu'elles. L'âge minimum d'inscription et le consentement parental restent à trancher (`P6-01` point 7).
+
 ### P3-19 — FINCLUDIA : assistant déterministe (intentions, parcours à étapes, liens profonds)
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P3-07`, `P4-09`
 - Durée cible : 3 jours (estimation)
@@ -982,6 +1019,14 @@ Décision (2026-10-11) : les types existants **auto-entrepreneur / PME / PMI** (
 - Tests : unitaires (résolution, repli), fonctionnels, sécurité (aucune donnée d'un autre utilisateur dans une réponse), navigateur.
 
 Important : intentions, réponses et parcours sont **fournis ou validés par le client** (même règle que `P3-07`).
+
+Réalisé (2026-10-11, migration `finculdia_p3_18_p2_08_p3_19`) : les 8 intentions de l'onglet `13_Chatbot` en liste fermée (contrainte en base), résolution par mots-clés, repli sur des catégories quand la confiance est insuffisante, moteur de parcours à étapes, liens profonds pris dans une **liste blanche re-vérifiée côté serveur**, journal d'audit sans donnée financière ni texte de requête en clair, et l'administration des intentions et des parcours dans le CMS.
+
+Vérifié le 2026-10-11 : `tests/functional/finAssistant.test.js`, `tests/security/finAssistant.test.js` et les deux parcours navigateur passent.
+
+Défaut trouvé et corrigé lors de cet audit : **le résolveur était inatteignable**. Le bouton flottant de l'assistant se masquait dès qu'aucune **question prédéfinie** (`P3-07`) n'était publiée — alors que les intentions de `P3-19` sont un contenu à part entière, et que le commentaire du composant disait déjà « rien n'est affiché quand **ni l'un ni l'autre** n'a de contenu publié ». Le composant lit maintenant aussi les intentions publiées, et le champ de saisie libre n'apparaît que s'il y a de quoi répondre : un champ qui ne peut répondre que « je n'ai pas compris » est pire que pas de champ.
+
+Limites : les intentions sont livrées en **brouillon**, avec leurs libellés du fichier client mais sans réponses rédigées — elles restent à écrire et à valider (`P6-01` point 10). Les modèles de réponse ne lisent pas encore de variable dans les API de calcul : ils sont du texte pré-écrit, ce qui est la partie prudente de la spécification.
 
 ### P4-01 — Architecture commune des outils
 - Statut : `✅ done`
@@ -1410,7 +1455,7 @@ Appliqué : titre de la page, nom de marque et textes d'accueil fr / en / ar, su
 - **Paquet de déploiement `larbi-en-ligne/`** (suivi par Git, 262 fichiers) : artefact généré, à régénérer plutôt qu'à modifier.
 
 ### P6-02 — FINCLUDIA : modèle de données financier commun
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P3-18`
 - Durée cible : 2 jours (estimation)
@@ -1420,6 +1465,33 @@ Appliqué : titre de la page, nom de marque et textes d'accueil fr / en / ar, su
 - **Socle de métadonnées** commun (voir règles de la phase) réutilisé par toutes les tables financières ; **périmètre** (personnel / espace partagé / foyer) sur chaque ligne.
 - Suppression **logique** et correction **traçable** lorsqu'une donnée alimente un historique.
 - Contrôle de cohérence étendu : devise présente, statut connu, montants entiers, aucune ligne fictive dans un total réel.
+
+**Réalisé (2026-10-12) :**
+- **Référentiel de catégories** : les **91 catégories standard** des **8 familles** de l'onglet `03_Categories` (revenus, dépenses fixes, dépenses variables, dépenses saisonnières, objectifs, actifs, dettes, dépenses partagées), extraites du fichier du client **par script** (`src/constants/finCategories.js`) et insérées par la migration. Les libellés sont **ceux du client, mot pour mot**, jamais traduits ni reformulés : c'est de la donnée de référence, comme le catalogue de formules de `P4-09` ou les données du comparateur de `P4-06`. Chaque famille garde son « Autre », ce que vérifie un test unitaire.
+- **Catégories personnalisables** : une personne peut **ajouter** ses propres catégories, **renommer** une catégorie standard **pour elle seule**, et la **masquer**. Une ligne de référence n'est **jamais modifiée** : le choix d'un compte ne peut pas changer ce qu'un autre compte voit (un test de sécurité vérifie que les 91 lignes restent identiques au bit près après que trois comptes, dont un administrateur, aient essayé). Le nom d'origine du client reste affiché à côté du nom choisi, pour que la catégorie reste trouvable sous son nom de référence.
+- **Socle de métadonnées** (`src/constants/finData.js`, `src/services/finance/dataModel.js`) : les onze métadonnées de l'onglet `04_Donnees_Objets` écrites **une seule fois** et reprises à l'identique par toute table financière de la phase — périmètre, source, référence de source, statut, confiance, usages autorisés, date d'effet, date de collecte, version, plus `value`/`currency` sur les tables qui portent un montant. Le socle est **documenté dans `schema.prisma`** au-dessus de la première table qui l'applique.
+- **Suppression logique et correction traçable** : rien n'est effacé. Une correction incrémente la `version` de l'objet et écrit une ligne par champ modifié dans le **journal `fin_changes`** (valeur avant, valeur après, motif facultatif) ; un retrait pose `archivedAt` ; une suppression pose `deletedAt` et laisse sa ligne de journal. La seule suppression physique est l'**effacement complet du compte** que promet le texte de confidentialité (`P6-01` point 9), par `ON DELETE CASCADE`.
+- **Contrôle de cohérence étendu** (`services/consistency.service.js`) : parcourt le socle **table par table** via un registre (`FINANCIAL_TABLES`), donc une table financière ajoutée par une tâche suivante est contrôlée dès qu'elle s'y déclare. S'y ajoutent : les trois formes légales d'une catégorie, la correspondance **exacte** entre le référentiel en base et `finCategories.js`, l'unicité des noms par famille et par compte, le fait qu'une ligne supprimée porte sa ligne de journal, et le fait qu'un journal ne parle jamais d'une ligne d'un autre compte.
+- **API** (`/api/fin`, `routes/finData.routes.js`) : `GET /references` (les vocabulaires, pour que l'interface ne les retape pas), `GET|POST /categories`, `PATCH|DELETE /categories/:id`, `PUT /categories/:id/archive`, `GET /categories/:id/historique`, `PATCH|DELETE /categories/standard/:key`. **Tout exige une session** : la donnée financière est privée par défaut, et il n'y a **aucun côté administration** — un administrateur est ici un compte comme un autre.
+- **Interface** : page « Mes catégories » (`/compte/categories`, `FinCategoriesPage.jsx`), ajoutée au menu du compte : familles du client, étiquettes d'origine, ajout, renommage en place, masquage, retour au nom d'origine, suppression, et l'historique des corrections dépliable par ligne. fr / en / ar, jetons CSS, propriétés logiques (RTL), icônes `lucide-react`.
+
+**Décisions (et pourquoi) :**
+- **Une seule table pour le référentiel et les catégories d'un compte**, avec trois formes (standard / propre / personnalisation). Deux tables séparées auraient été plus propres à lire, mais une ligne financière de `P6-04` doit pointer vers **une** catégorie : avec deux tables il faudrait deux clés étrangères dont une toujours nulle, ou une référence non typée. Une seule table donne **une clé étrangère et un seul espace d'identifiants**.
+- **Le référentiel est inséré par la migration**, pas par un script d'amorçage : il fait partie de l'histoire du schéma, il est présent dans toute base (développement, test, production) sans étape supplémentaire, et le contrôle de cohérence vérifie qu'il dit toujours la même chose que le code. Les identifiants sont des **uuid5 de la clé**, donc stables d'un environnement à l'autre.
+- **« Réel » et « fictif » ne sont jamais additionnés** : `totalsByReality()` rend **deux totaux séparés** et compte à part les lignes dont le statut est illisible. Il n'existe **volontairement aucune fonction** qui renvoie la somme des deux — c'est la règle de la phase, et une somme mixte serait un chiffre faux affiché avec aplomb.
+- **`404` et non `403`** sur la catégorie d'un autre compte, y compris pour son historique : un `403` confirmerait que cet identifiant existe et appartient à quelqu'un, ce qui est déjà une information sur un autre compte.
+- **Le statut suit le libellé affiché** : quand une personne renomme une catégorie standard, la ligne qu'elle voit passe de `official` à `declared`. Le libellé est devenu le sien ; prétendre le contraire serait mentir sur la provenance de la donnée.
+- **Le motif d'une correction n'est jamais obligatoire** : le client demande une correction *traçable*, pas une justification à taper avant de pouvoir corriger quoi que ce soit.
+- **La forme d'une catégorie n'est pas une contrainte SQL** : elle lit `userId`, une colonne de clé étrangère, et MariaDB refuse un `CHECK` qui en référence une (même raison que les règles médias et quiz existantes). Elle est donc vérifiée par le contrôle de cohérence, et tous les autres vocabulaires fermés ont bien leur `CHECK`.
+
+**Tests :** 27 unitaires (`tests/unit/finDataModel.test.js` : le référentiel, le socle, la séparation réel / fictif, le journal), 27 fonctionnels (`tests/functional/finCategories.test.js`), 9 de sécurité (`tests/security/finCategories.test.js` : isolation entre comptes, métadonnées non pilotables depuis le corps de la requête, référentiel en lecture seule, effacement du compte), 24 de cohérence (`tests/consistency/data.test.js` : un historique réaliste de modifications laisse le système cohérent, plus **un contrôle négatif par règle**), 8 en navigateur (`tests/e2e/fin-categories-journey.test.js`, dont le rendu arabe RTL) ; `/compte/categories` et `/compte/fincludia` ajoutées au balayage du site. `npm run check:consistency` propre. Lint et build du client sans régression.
+
+**Limites et réserves déclarées :**
+- Le **niveau de confiance** (`CONFIDENCE_LEVELS`) est à nous : le client écrit « niveau ou règle de confiance lorsque pertinent » **sans énumérer** d'échelle. La colonne est nullable, donc « non renseigné » reste distinct de « faible », et seule cette liste changera si le client donne la sienne.
+- Les **usages autorisés** (`CONSENT_USES`) se limitent aux deux usages que les règles du client décrivent réellement : l'entrée dans un espace partagé (`P6-13`) et l'export (`P6-20`). Rien d'autre n'a été déduit.
+- Le **référentiel de catégories reste à confirmer par le client** (`P6-01` point 10) : l'onglet `03_Categories` est repris tel quel, ce qui est la base qu'il annonce lui-même, pas une validation.
+- Le socle est appliqué **pour de vrai** à `fin_categories`, qui est la seule table financière existante à ce stade. Une catégorie **nomme** une ligne, elle n'en est pas une : elle ne porte donc ni `value`, ni `currency`, ni `confidence` — trois champs qui seraient nuls sur chacune de ses lignes. Les règles « devise présente » et « montants entiers » sont écrites, testées unitairement et branchées sur le registre ; elles s'appliqueront à la première table qui portera des montants (`P6-04`).
+- **Dérive de somme de contrôle réparée** : la migration `20261011212102_apprendre_axes_favorites` avait été modifiée après son application, ce qui aurait forcé une **réinitialisation destructrice** de `larbi_dev` à la migration suivante. La base correspondait déjà exactement au fichier (contraintes `CHECK` vérifiées) : seule l'empreinte stockée a été corrigée, dans `larbi_dev` et `larbi_test`. **Aucune donnée perdue.** À retenir : une migration déjà appliquée ne se modifie plus.
 
 ### P6-03 — FINCLUDIA : onboarding financier progressif
 - Statut : `❌ todo`
@@ -1712,7 +1784,7 @@ Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau
 Phase active : `PHASE 3` — BLOG + CMS CONTENU + NEWSLETTER (les Phases 1 et 2 ont été validées le 2026-09-19, voir P1-08 et P2-07)
 
 Dernières tâches terminées et vérifiées :
-`P4-03 — Générateur de facture` (sans conservation : calcul et Excel par le serveur, PDF par le navigateur), `P3-09 — Paiement : socle indépendant du fournisseur` (avec un fournisseur simulé réservé au développement ; en production le paiement reste annoncé « pas encore disponible » jusqu'à `P3-10`), `P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)` (le module est prêt ; il reste invisible tant que l'administrateur n'a publié aucune question), `P4-16 — FINCLUDIA : atelier de simulation (C18)`, `P4-12 — FINCLUDIA : moteur de comparaison multicritère et comparateur d'offres d'emploi`, `P4-11 — FINCLUDIA : calculateurs, lot 2 (dettes et crédit)`, `P4-10 — FINCLUDIA : calculateurs, lot 1 (budget, épargne, objectifs, inflation, simulations de vie)`, `P4-09 — FINCLUDIA : moteur de calcul versionné` (premières tâches de la direction FINCLUDIA, 2026-10-09), `P4-08 — Comparateur bancaire, lot C : administration des données`, `P4-07 — Comparateur bancaire, lot B : pages publiques`, `P4-06 — Comparateur bancaire, lot A : données et API publique`, `P4-01 — Architecture commune des outils` (comparateur bancaire commencé à la demande de l'utilisateur, avant la validation de la Phase 3), `P3-17 — Articles multilingues (traductions)`, `P3-16 — Panel d'administration étendu (utilisateurs, droits, paramètres, médiathèque, certifications) et tableau de bord personnalisé`, `P3-15 — Types de compte dynamiques`, `P3-14 — CMS pédagogique, lot D : finitions`, `P3-13 — CMS pédagogique, lot C : quiz`, `P3-12 — CMS pédagogique, lot B : blocs de contenu et éditeur avancé`, `P3-11 — CMS pédagogique, lot A : structure d'une formation`, `P3-05 — Newsletter`, `P3-04 — Recommandation / visibilité selon profil`, `P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
+`P6-02 — FINCLUDIA : modèle de données financier commun`, `P2-08 — FINCLUDIA : « Apprendre » — glossaire, mini-guides et recherche pédagogique`, `P3-18 — FINCLUDIA : publics (personas), âge, intention et changement de parcours`, `P3-19 — FINCLUDIA : assistant déterministe (intentions, parcours à étapes, liens profonds)`, `P4-03 — Générateur de facture` (sans conservation : calcul et Excel par le serveur, PDF par le navigateur), `P3-09 — Paiement : socle indépendant du fournisseur` (avec un fournisseur simulé réservé au développement ; en production le paiement reste annoncé « pas encore disponible » jusqu'à `P3-10`), `P3-07 — Assistant guidé (chatbot à questions / réponses prédéfinies)` (le module est prêt ; il reste invisible tant que l'administrateur n'a publié aucune question), `P4-16 — FINCLUDIA : atelier de simulation (C18)`, `P4-12 — FINCLUDIA : moteur de comparaison multicritère et comparateur d'offres d'emploi`, `P4-11 — FINCLUDIA : calculateurs, lot 2 (dettes et crédit)`, `P4-10 — FINCLUDIA : calculateurs, lot 1 (budget, épargne, objectifs, inflation, simulations de vie)`, `P4-09 — FINCLUDIA : moteur de calcul versionné` (premières tâches de la direction FINCLUDIA, 2026-10-09), `P4-08 — Comparateur bancaire, lot C : administration des données`, `P4-07 — Comparateur bancaire, lot B : pages publiques`, `P4-06 — Comparateur bancaire, lot A : données et API publique`, `P4-01 — Architecture commune des outils` (comparateur bancaire commencé à la demande de l'utilisateur, avant la validation de la Phase 3), `P3-17 — Articles multilingues (traductions)`, `P3-16 — Panel d'administration étendu (utilisateurs, droits, paramètres, médiathèque, certifications) et tableau de bord personnalisé`, `P3-15 — Types de compte dynamiques`, `P3-14 — CMS pédagogique, lot D : finitions`, `P3-13 — CMS pédagogique, lot C : quiz`, `P3-12 — CMS pédagogique, lot B : blocs de contenu et éditeur avancé`, `P3-11 — CMS pédagogique, lot A : structure d'une formation`, `P3-05 — Newsletter`, `P3-04 — Recommandation / visibilité selon profil`, `P3-06 — Suite de tests automatisés (unitaires, fonctionnels, sécurité, cohérence globale)`, `P3-03 — Frontend blog`, `P3-02 — CMS simplifié`, `P3-01 — Modèle de données blog`, `P2-07 — Validation de fin de phase` (Phase 2 validée), `P2-06 — Protection des contenus E-Learning`, `P2-05 — Certification`, `P2-04 — Suivi de progression`, `P2-03 — Interface utilisateur E-Learning`, `P2-02 — Gestion des formations côté admin (CMS)`, `P2-01 — Modèle de données E-Learning`, `P1-08 — Validation de fin de phase` (Phase 1 validée), `P1-07 — Intégration frontend/backend`, `P1-11 — Refonte visuelle du frontend`, `P1-06 — Authentification + rôles`, `P1-05 — Backend minimal et navigation dynamique`, `P1-09 — Mode clair / sombre`, `P1-10 — Internationalisation (i18n)` (toutes ✅ done)
 
 Toutes les tâches de pages (P1-02, P1-03, P1-04), le socle backend (P1-05) et les deux ajouts signalés par l'utilisateur (mode clair/sombre, i18n FR/EN/AR + tamazight en repli) sont terminés. Le modèle `User` existe en base (Prisma).
 
@@ -1722,12 +1794,20 @@ Direction ajoutée le 2026-10-09 : **FINCLUDIA** (gestion financière personnell
 
 Prochaines tâches réalisables (dépendances satisfaites) :
 - Le blog est terminé (P3-01 à P3-06 hors paiement et assistant guidé). La Phase 4 (outils) ne doit commencer qu'après validation de la Phase 3.
-- **Toutes les tâches FINCLUDIA réalisables sans `P6-01` sont faites** (`P4-09` moteur, `P4-10` et `P4-11` les 18 calculateurs, `P4-12` comparaisons et offres d'emploi, `P4-16` atelier). Ce qui reste de FINCLUDIA attend les décisions de cadrage : `P4-13` dépend aussi de `P3-18`, `P4-14` et `P4-15` des règles de paie et de financement du client, et la Phase 6 de `P6-01`.
+- La Phase 4 FINCLUDIA est faite (`P4-09` moteur, `P4-10` et `P4-11` les 18 calculateurs, `P4-12` comparaisons et offres d'emploi, `P4-16` atelier), ainsi que les fondations `P3-18` (publics), `P2-08` (Apprendre) et `P3-19` (assistant déterministe).
+- **`P6-02` est faite** : le modèle de données financier commun (référentiel de catégories, socle de métadonnées, journal de corrections, contrôle de cohérence étendu) est en place. Les tâches qu'elle débloque, par ordre d'intérêt :
+  - `P6-04 — « Mon argent » : revenus et transactions` (dépend de `P6-02` ✅, `P4-09` ✅) : la première table qui portera des **montants**, donc celle qui exercera pour de vrai les règles « devise présente » et « montants entiers » du socle. Elle ouvre ensuite `P6-05` (budgets).
+  - `P6-03 — onboarding financier progressif` (dépend de `P6-02` ✅, `P1-12`) : attention, `P1-12` (lot 0 design) n'est **pas** faite.
+  - `P6-07` (calendrier), `P6-13` (espaces partagés), `P6-18` (notifications) et `P6-19` (centre de confiance) ne dépendent plus que de leurs propres prérequis.
+  - **Ce que `P6-02` a volontairement laissé ouvert** et qui attend le client : la confirmation du référentiel de catégories (`P6-01` point 10), et l'échelle du **niveau de confiance**, que le client n'énumère pas (liste provisoire déclarée dans `constants/finData.js`).
+  - `P2-09 — indice de connaissances financières et passeports` (dépend de `P2-08` ✅) : attention, les **pondérations** de l'indice sont un seuil à valider par le client (`P6-01` point 5) ; l'indice `F052` prend ses poids en argument, donc la mécanique est faisable sans eux, pas la publication d'un score.
+  - `P4-13 — comparateur bancaire, lot D` (dépend de `P4-08` ✅, `P4-12` ✅, `P3-18` ✅) : l'adéquation à l'usage et « Explorer » sont faisables sur les données déjà fournies ; les données **CCP** manquent (`P6-01` point 6) et ne doivent pas être inventées.
+- `P4-14` et `P4-15` attendent les règles de paie et de financement du client ; le reste de la Phase 6 part maintenant de `P6-04`, puis attend `P6-01` pour ce qui touche aux seuils et aux devises.
 - Le moteur de comparaison de `P4-12` est désormais disponible pour `P4-13` (adéquation à l'usage) et pour tout écran qui doit comparer des options sans produire de classement opaque.
 
 - Comparateur bancaire et générateur de facture terminés (P4-01, P4-03, P4-06 à P4-08). Reste dans la Phase 4 : `P4-02 — Simulateur de crédit`, **bloqué** sur les règles de calcul du client ; il bloque à son tour la validation de fin de phase `P4-05`, donc la Phase 5.
 
-Recommandation : plus aucune tâche du MVP n'est réalisable sans une décision ou une donnée du client (voir « Blocages » ci-dessous) ; puis la validation de fin de Phase 3. En parallèle, obtenir les réponses de `P6-01`, qui conditionne tout FINCLUDIA. Points d'attention :
+Recommandation : plus aucune tâche du **MVP** n'est réalisable sans une décision ou une donnée du client (voir « Blocages » ci-dessous) ; côté FINCLUDIA, `P6-02` étant faite, la suite la plus utile est `P6-04` (« Mon argent »), qui ne demande rien au client. Puis la validation de fin de Phase 3. En parallèle, obtenir les réponses de `P6-01`, qui conditionne tout FINCLUDIA. Points d'attention :
 - **Newsletter : aucun courriel réel ne part tant qu'un fournisseur d'e-mail n'est pas choisi** (pilote `none` par défaut en production : l'inscription répond « pas encore disponible »). C'est la décision client la plus urgente pour rendre P3-05 réellement utilisable ; elle débloque aussi « mot de passe oublié ».
 - Chaque nouvelle tâche ajoute ses tests dans `server/tests/` (voir P3-06 et README « Tests ») ; `npm test` doit rester vert, le test de cohérence du projet vérifie aussi ce fichier (statuts, dépendances, tâches terminées documentées, cette section).
 - Toute nouvelle route API : elle sera contrôlée par l'audit d'autorisation automatique (toutes les routes Express, voir P2-07) — la déclarer publique ou la protéger explicitement.
@@ -1746,7 +1826,7 @@ Blocages / informations manquantes signalées (non bloquantes pour continuer, ma
 - Décision (2026-10-11) : **un utilisateur a un seul profil actif à la fois.** Les types de compte actuels (auto-entrepreneur, PME, PMI) et les 8 publics FINCLUDIA ne se cumulent jamais sur un même compte (pas de double étiquette) ; voir `P3-18`.
 - Décision (2026-10-11) : **pas de SMS.** Les notifications restent dans le site (in-app) ; un envoi par e-mail reste possible plus tard, mais dépend du même choix de fournisseur que la newsletter (toujours non choisi, voir ci-dessus).
 - Décision (2026-10-11) : la mention « pas de conseil financier réglementé » et les textes de confidentialité propres aux données financières sont **rédigés par l'équipe**, pas par le client. Une demande de suppression de compte entraîne une **suppression complète et immédiate** des données : pas de durée de conservation à définir.
-- FINCLUDIA, données encore à fournir par le client : barèmes de paie (`P4-14`), offres de financement et leurs formules (`P4-15`), données CCP (`P4-13`), instruments et prix de référence du portefeuille fictif (`P6-12`), intentions et réponses de l'assistant déterministe (`P3-19`), modèles d'objectifs financiers, référentiel de catégories (`P6-02`, base dans l'onglet `03_Categories`). Le glossaire et les mini-guides (`P2-08`) sont désormais rédigés par l'équipe, pas attendus du client.
+- FINCLUDIA, données encore à fournir par le client : barèmes de paie (`P4-14`), offres de financement et leurs formules (`P4-15`), données CCP (`P4-13`), instruments et prix de référence du portefeuille fictif (`P6-12`), intentions et réponses de l'assistant déterministe (`P3-19`), modèles d'objectifs financiers, **confirmation** du référentiel de catégories (`P6-02` l'a implémenté tel quel depuis l'onglet `03_Categories` ; il reste à confirmer, pas à fournir) et l'échelle du niveau de confiance, que le client n'énumère pas. Le glossaire et les mini-guides (`P2-08`) sont désormais rédigés par l'équipe, pas attendus du client.
 - FINCLUDIA, hébergement : l'hébergement mutualisé actuel (cPanel, MariaDB) convient à une démonstration, pas à des données financières réelles sans sauvegardes testées, chiffrement et disponibilité confirmés (voir `P5-04` et point 11 de `P6-01`).
 
 Point de vérification manuelle recommandé pour l'utilisateur : ouvrir `http://localhost:5173` après `npm run dev` dans `client/` et tester le menu mobile sous 860px de large (non vérifié visuellement par Claude faute d'outil navigateur dans cette session).

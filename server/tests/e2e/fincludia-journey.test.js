@@ -104,6 +104,70 @@ describe('FINCLUDIA foundations, end to end', { skip: findChrome() ? false : 'no
     await b.shot('apprendre-term');
   });
 
+  // What finishing P2-08 added: the search groups the four kinds of content the
+  // client lists, an entry can send to a calculator, and content can be kept.
+  test('P2-08: Apprendre groups courses, glossary and articles, sends to a calculator, and keeps a favourite', async () => {
+    // A course and an article on the same theme as a glossary term.
+    // Its own account: this test must not depend on what the profile test
+    // left on the shared one (a public changes the ORDER of the results).
+    const keeper = await t.user({ name: 'Collectionneuse' });
+    await t.formation({ title: 'Maitriser son budget', status: 'published', theme: 'budget', level: 'beginner' });
+    await t.article({ title: 'Tenir un budget au quotidien', status: 'published', theme: 'budget', level: 'beginner' });
+    const term = await t.prisma.glossaryTerm.create({
+      data: {
+        slug: 'mensualite-de-credit',
+        term: 'Mensualite de credit',
+        definition: '<p>Le montant verse chaque mois a la banque.</p>',
+        status: 'published',
+        theme: 'budget',
+        level: 'beginner',
+        // The calculator an administrator attached to this term.
+        simulatorKey: 'mensualite-financement',
+      },
+    });
+
+    await setSession(null);
+    await b.goto(`${site.url}/apprendre`);
+    assert.ok(await b.waitText(ap.title));
+
+    // The four groups the client asks for, each with its own heading.
+    const text = await b.text();
+    for (const heading of [ap.coursesTitle, ap.termsTitle, ap.articlesTitle]) {
+      assert.ok(text.includes(heading), `the "${heading}" group is shown`);
+    }
+    assert.ok(text.includes('Maitriser son budget') && text.includes('Tenir un budget au quotidien'));
+    // The mention the client imposes on this screen.
+    assert.ok(text.includes(ap.disclaimer.slice(0, 40)));
+    // A course says it needs an account rather than leading to a refusal.
+    assert.ok(text.includes(ap.requiresAccount));
+
+    // "Simuler" leads to the calculator the administrator chose.
+    assert.ok(await b.clickContaining(ap.simulate));
+    assert.ok(await b.waitFor("location.pathname === '/outils/simulateurs/mensualite-financement'"));
+
+    // Keeping a favourite needs an account: a visitor is told, not offered.
+    await b.goto(`${site.url}/apprendre`);
+    assert.ok(await b.waitText(ap.favorites.needsAccount.slice(0, 30)));
+    assert.equal(await b.ev("document.querySelectorAll('.apprendre-fav').length"), 0);
+
+    // Signed in, the same card can be kept, and it lands in "Mes favoris".
+    await setSession(keeper);
+    await b.goto(`${site.url}/apprendre`);
+    assert.ok(await b.waitText(ap.favorites.title));
+    assert.ok(await b.waitFor("document.querySelectorAll('.apprendre-fav').length > 0"));
+    assert.ok(
+      await b.ev(`(() => {
+        const card = [...document.querySelectorAll('.apprendre-card')].find((c) => c.innerText.includes('Mensualite de credit'));
+        if (!card) return false;
+        card.querySelector('.apprendre-fav').click();
+        return true;
+      })()`),
+    );
+    assert.ok(await b.waitFor("document.querySelectorAll('.apprendre-fav.active').length > 0"), 'the card is marked as kept');
+    assert.equal(await t.prisma.learningFavorite.count({ where: { userId: keeper.id, kind: 'term', refId: term.id } }), 1);
+    await b.shot('apprendre-grouped');
+  });
+
   test('P3-19: the assistant resolves a free-text query and opens a real screen', async () => {
     await setSession(admin);
     await b.goto(`${site.url}/admin/assistant-fincludia`);

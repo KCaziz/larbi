@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { ArrowLeft, BookOpen, Calculator } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import { withLang } from '../../lib/contentLanguage.js';
@@ -29,6 +29,13 @@ export default function GuidePage() {
           {t('apprendre.back')}
         </Link>
         <RichContent html={g.body} />
+        {/* "Simuler" (C21): shown only when an administrator attached a
+            calculator to this guide. */}
+        {g.simulator && (
+          <Link className="apprendre-simulate" to={`/outils/simulateurs/${g.simulator}`}>
+            <Calculator size={15} aria-hidden="true" /> {t('apprendre.simulate')}
+          </Link>
+        )}
       </div>
     </>
   );

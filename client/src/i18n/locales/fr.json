@@ -432,7 +432,8 @@
       "formations": "Mes formations",
       "certificates": "Certificats",
       "payments": "Mes paiements",
-      "fincludia": "FINCLUDIA"
+      "fincludia": "FINCLUDIA",
+      "categories": "Mes catégories"
     },
     "profile": {
       "title": "Profil",
@@ -2454,6 +2455,89 @@
     "guidesTitle": "Mini-guides",
     "back": "Retour à Apprendre",
     "exampleTitle": "Exemple",
-    "relatedTitle": "Termes liés"
+    "relatedTitle": "Termes liés",
+    "disclaimer": "Aucun contenu d'« Apprendre » ne remplace un conseil réglementé : ce sont des définitions et des explications générales, à vérifier auprès d'un professionnel avant toute décision.",
+    "coursesTitle": "Formations",
+    "termsTitle": "Glossaire",
+    "articlesTitle": "Articles",
+    "allThemes": "Tous les thèmes",
+    "simulate": "Simuler",
+    "requiresAccount": "Compte requis",
+    "lockLogin": "Connexion requise",
+    "lockPremium": "Réservé aux comptes premium",
+    "favorites": {
+      "title": "Mes favoris",
+      "add": "Garder",
+      "remove": "Retirer",
+      "empty": "Rien en favori pour l'instant. Le bouton « Garder » met de côté une formation, un terme, un guide ou un article.",
+      "needsAccount": "La recherche est libre. Pour garder un contenu en favori, il faut un compte."
+    },
+    "quizCount_one": "{{count}} quiz",
+    "quizCount_other": "{{count}} quiz"
+  },
+  "finCategories": {
+    "title": "Mes catégories",
+    "intro": "Les catégories servent à ranger vos revenus, vos dépenses, vos objectifs, vos biens et vos dettes. Le référentiel ci-dessous est celui du cahier des charges FINCLUDIA ; vous pouvez le renommer, en masquer ce qui ne vous concerne pas, et ajouter les vôtres.",
+    "referenceNote": "Le référentiel standard n'est jamais modifié : quand vous renommez une catégorie standard, FINCLUDIA enregistre votre nom à vous et garde le nom d'origine affiché à côté. Rien n'est effacé non plus : une catégorie retirée quitte la liste et reste lisible par ce qui l'utilisait déjà.",
+    "showArchived": "Afficher aussi les catégories masquées",
+    "count_one": "{{count}} catégorie",
+    "count_other": "{{count}} catégories",
+    "add": "Ajouter une catégorie",
+    "newLabel": "Nom de la nouvelle catégorie",
+    "newPlaceholder": "Par exemple : café du matin",
+    "renameLabel": "Nouveau nom de la catégorie",
+    "rename": "Renommer",
+    "hide": "Masquer",
+    "archive": "Retirer de la liste",
+    "restore": "Remettre dans la liste",
+    "reset": "Revenir au nom d'origine",
+    "delete": "Supprimer",
+    "history": "Voir l'historique",
+    "noHistory": "Aucune modification pour l'instant.",
+    "nothing": "rien",
+    "archivedTag": "masquée",
+    "wasCalled": "nom d'origine : {{label}}",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "created": "Catégorie créée.",
+    "saved": "Modification enregistrée.",
+    "archived": "Catégorie retirée de la liste.",
+    "restored": "Catégorie remise dans la liste.",
+    "resetDone": "Nom d'origine rétabli.",
+    "deleted": "Catégorie supprimée.",
+    "historyField": "{{field}} : « {{before}} » devient « {{after}} »",
+    "origin": {
+      "standard": "référentiel",
+      "own": "ajoutée par vous"
+    },
+    "scopes": {
+      "personal": "personnel",
+      "couple": "couple",
+      "household": "foyer",
+      "space": "espace partagé"
+    },
+    "uses": {
+      "shared_space": "espace partagé",
+      "export": "export"
+    },
+    "fields": {
+      "label": "Nom",
+      "family": "Famille",
+      "scope": "Périmètre",
+      "consentUses": "Usages autorisés",
+      "archivedAt": "Masquage",
+      "deletedAt": "Suppression"
+    },
+    "actions": {
+      "create": "Création",
+      "correct": "Correction",
+      "archive": "Retirée de la liste",
+      "restore": "Remise dans la liste",
+      "delete": "Supprimée"
+    },
+    "errors": {
+      "labelTaken": "Vous avez déjà une catégorie de ce nom dans cette famille.",
+      "tooMany": "Vous avez atteint le nombre maximal de catégories dans cette famille."
+    }
   }
 }

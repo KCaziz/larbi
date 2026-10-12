@@ -74,13 +74,14 @@ function TermsTab() {
     setBusy(true);
     setMessage(null);
     try {
-      await action();
+      const result = await action();
       setMessage({ kind: 'ok', text: okText });
       list.reload();
-      return true;
+      // The created/updated entry, so a caller can open the editor on it.
+      return { ok: true, data: result };
     } catch (err) {
       setMessage({ kind: 'error', text: t(errorKey(err, { 422: 'admin.glossary.needsDefinition' })) });
-      return false;
+      return { ok: false };
     } finally {
       setBusy(false);
     }
@@ -89,9 +90,12 @@ function TermsTab() {
   const create = async (event) => {
     event.preventDefault();
     const res = await run(() => api.post('/admin/glossary/terms', { term: newTermName.trim() }), t('admin.glossary.saved'));
-    if (res) {
+    if (res.ok) {
       setNewTermName('');
       setAdding(false);
+      // A term is created empty and draft, and an empty definition cannot be
+      // published: writing it is the only useful next step, so open it.
+      if (res.data?.term) openEdit(res.data.term);
     }
   };
 
@@ -105,14 +109,16 @@ function TermsTab() {
   const saveEdit = async (event) => {
     event.preventDefault();
     const body = { definition: draft.definition, example: draft.example.trim() || null, level: draft.level, theme: draft.theme.trim() || null };
-    if (await run(() => api.patch(`/admin/glossary/terms/${editing.id}`, body), t('admin.glossary.saved'))) setEditing(null);
+    if ((await run(() => api.patch(`/admin/glossary/terms/${editing.id}`, body), t('admin.glossary.saved'))).ok) setEditing(null);
   };
 
   const remove = async () => {
-    if (await run(() => api.delete(`/admin/glossary/terms/${deleteTarget.id}`), t('admin.glossary.deleted'))) setDeleteTarget(null);
+    if ((await run(() => api.delete(`/admin/glossary/terms/${deleteTarget.id}`), t('admin.glossary.deleted'))).ok) setDeleteTarget(null);
   };
 
-  if (list.status === 'loading') return <LoadingState />;
+  // Only the first load replaces the page: reloading after a save would
+  // otherwise unmount the confirmation message before anyone reads it.
+  if (list.status === 'loading' && !list.data) return <LoadingState />;
   if (list.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={list.reload} />;
 
   return (
@@ -256,14 +262,15 @@ function GuidesTab() {
     setBusy(true);
     setMessage(null);
     try {
-      await action();
+      const result = await action();
       setMessage({ kind: 'ok', text: okText });
       list.reload();
-      return true;
+      // The created/updated entry, so a caller can open the editor on it.
+      return { ok: true, data: result };
     } catch (err) {
       setMessage({ kind: 'error', text: t(errorKey(err, { 422: 'admin.glossary.needsBody', 409: 'admin.glossary.changed' })) });
       if (err.status === 409) list.reload();
-      return false;
+      return { ok: false };
     } finally {
       setBusy(false);
     }
@@ -271,9 +278,12 @@ function GuidesTab() {
 
   const create = async (event) => {
     event.preventDefault();
-    if (await run(() => api.post('/admin/glossary/guides', { title: newTitle.trim() }), t('admin.glossary.saved'))) {
+    const res = await run(() => api.post('/admin/glossary/guides', { title: newTitle.trim() }), t('admin.glossary.saved'));
+    if (res.ok) {
       setNewTitle('');
       setAdding(false);
+      // Same reason as a term: a guide with an empty body cannot be published.
+      if (res.data?.guide) openEdit(res.data.guide);
     }
   };
 
@@ -287,11 +297,11 @@ function GuidesTab() {
   const saveEdit = async (event) => {
     event.preventDefault();
     const body = { body: draft.body, level: draft.level, theme: draft.theme.trim() || null };
-    if (await run(() => api.patch(`/admin/glossary/guides/${editing.id}`, body), t('admin.glossary.saved'))) setEditing(null);
+    if ((await run(() => api.patch(`/admin/glossary/guides/${editing.id}`, body), t('admin.glossary.saved'))).ok) setEditing(null);
   };
 
   const remove = async () => {
-    if (await run(() => api.delete(`/admin/glossary/guides/${deleteTarget.id}`), t('admin.glossary.deleted'))) setDeleteTarget(null);
+    if ((await run(() => api.delete(`/admin/glossary/guides/${deleteTarget.id}`), t('admin.glossary.deleted'))).ok) setDeleteTarget(null);
   };
 
   const move = (from, to) => {
@@ -301,7 +311,9 @@ function GuidesTab() {
     run(() => api.put('/admin/glossary/guides/order', { ids }), t('admin.glossary.reordered'));
   };
 
-  if (list.status === 'loading') return <LoadingState />;
+  // Only the first load replaces the page: reloading after a save would
+  // otherwise unmount the confirmation message before anyone reads it.
+  if (list.status === 'loading' && !list.data) return <LoadingState />;
   if (list.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={list.reload} />;
 
   return (

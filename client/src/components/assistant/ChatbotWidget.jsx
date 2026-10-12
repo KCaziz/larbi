@@ -25,6 +25,10 @@ function Assistant() {
   const navigate = useNavigate();
   const lang = contentLanguage(i18n.language) ?? 'fr';
   const entries = useApi(`/chatbot/entries?lang=${lang}`);
+  // The deterministic resolver (P3-19) is content of its own: the panel must
+  // be reachable when an administrator published intents but no predefined
+  // question yet. Without this, the free-text field could never be used.
+  const intents = useApi('/fin-assistant/intents');
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [query, setQuery] = useState('');
@@ -36,6 +40,7 @@ function Assistant() {
   const titleId = useId();
 
   const list = entries.status === 'ready' ? entries.data.entries : [];
+  const hasResolver = intents.status === 'ready' && intents.data.intents.length > 0;
   const selected = list.find((e) => e.id === selectedId) ?? null;
 
   // Focus follows what the panel shows: its heading on open and on every
@@ -87,7 +92,9 @@ function Assistant() {
     navigate(path);
   }
 
-  if (list.length === 0) return null;
+  // Nothing published on either side: no button at all, as the comment above
+  // says. One of the two is enough to make the assistant useful.
+  if (list.length === 0 && !hasResolver) return null;
 
   const showingResolvedIntent = resolved?.type === 'intent';
   const showingFallback = resolved?.type === 'fallback';
@@ -165,6 +172,7 @@ function Assistant() {
                 <p ref={headingRef} tabIndex={-1} className="chatbot-intro">
                   {t('chatbot.intro')}
                 </p>
+                {hasResolver && (
                 <form className="chatbot-search" onSubmit={submitSearch}>
                   <Search size={16} strokeWidth={2} aria-hidden="true" />
                   <input
@@ -179,6 +187,7 @@ function Assistant() {
                     {t('chatbot.searchGo')}
                   </button>
                 </form>
+                )}
                 <ul className="chatbot-list">
                   {list.map((entry) => (
                     <li key={entry.id}>

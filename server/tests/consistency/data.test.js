@@ -84,6 +84,34 @@ describe('a realistic history leaves the system consistent', () => {
     await api('DELETE', `/admin/articles/${three.id}`);
     assert.deepEqual(await check(), []);
   });
+
+  test('FINCLUDIA categories: additions, renames, hidings and logical deletions (P6-02)', async () => {
+    const person = await t.user();
+    const own = (json) => t.request('POST', '/fin/categories', { user: person, json });
+
+    const coffee = (await own({ family: 'variable', label: 'Caf\u00e9 du matin' })).body.category;
+    const shared = (await own({ family: 'shared', label: 'Loyer du studio', scope: 'space', consentUses: ['shared_space'] })).body.category;
+    const sold = (await own({ family: 'asset', label: 'Vieille moto' })).body.category;
+
+    // Corrected, hidden, brought back, and logically deleted.
+    await t.request('PATCH', `/fin/categories/${coffee.id}`, { user: person, json: { label: 'Caf\u00e9', reason: 'plus court' } });
+    await t.request('PUT', `/fin/categories/${shared.id}/archive`, { user: person, json: { archived: true } });
+    await t.request('PUT', `/fin/categories/${shared.id}/archive`, { user: person, json: { archived: false } });
+    await t.request('DELETE', `/fin/categories/${sold.id}`, { user: person, json: { reason: 'vendue' } });
+
+    // The client's reference, renamed then hidden for this account only, then reset.
+    await t.request('PATCH', '/fin/categories/standard/variable.animaux', { user: person, json: { label: 'Mon chat' } });
+    await t.request('PATCH', '/fin/categories/standard/goal.permis', { user: person, json: { hidden: true } });
+    await t.request('DELETE', '/fin/categories/standard/variable.animaux', { user: person });
+
+    assert.deepEqual(await check(), []);
+
+    // Erasing the account takes its categories and its trail with it, and leaves
+    // the client's reference intact.
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91);
+    assert.deepEqual(await check(), []);
+  });
 });
 
 describe('the checker detects what it should (negative controls)', () => {
@@ -187,6 +215,151 @@ describe('the checker detects what it should (negative controls)', () => {
     await t.prisma.article.update({ where: { id: a.id }, data: { targetAccountTypes: ['invente'] } });
     assert.ok((await rules()).includes('article target account types are known account types'));
     await t.prisma.article.delete({ where: { id: a.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  // ---- FINCLUDIA financial data model (P6-02) ------------------------------
+  // Each rule is injected AROUND the API (writing straight to the table), which
+  // is the only way such a row could appear: the API refuses all of these.
+  const SOCLE = 'every financial row carries a valid metadata socle';
+  const SHAPES = 'a category is a standard row, a user row, or a user customisation of a standard row';
+  const REFERENCE = 'the standard category reference matches constants/finCategories.js';
+
+  // A status, a p\u00e9rim\u00e8tre or a source nobody declared cannot even be written:
+  // each has its own SQL CHECK, so the table refuses the row whatever code path
+  // asks \u2014 straight SQL included. The socle rule in the checker still covers the
+  // columns SQL cannot constrain (the JSON uses, the dates, the amounts), and
+  // checkFinancialRow is unit-tested on all of them.
+  test('a status, a p\u00e9rim\u00e8tre or a source nobody declared never reaches the table', async () => {
+    const person = await t.user();
+    const row = await t.prisma.finCategory.create({
+      data: { userId: person.id, family: 'goal', label: 'Bancale', scope: 'personal', source: 'manual', status: 'declared' },
+    });
+    for (const [column, value] of [
+      ['status', 'peut-\u00eatre'],
+      ['scope', 'plan\u00e8te'],
+      ['source', 't\u00e9l\u00e9pathie'],
+      ['family', 'invent\u00e9e'],
+    ]) {
+      await assert.rejects(
+        t.prisma.$executeRawUnsafe(`UPDATE \`fin_categories\` SET \`${column}\` = ? WHERE \`id\` = ?`, value, row.id),
+        `${column} must be refused by the database`,
+      );
+    }
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test('a category with an authorised use nobody declared', async () => {
+    const person = await t.user();
+    await t.prisma.finCategory.create({
+      data: { userId: person.id, family: 'goal', label: 'Bancale', scope: 'personal', source: 'manual', status: 'declared', consentUses: ['revente'] },
+    });
+    assert.ok((await rules()).includes(SOCLE));
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test('a version below 1 never reaches the table: the database CHECK refuses it', async () => {
+    const person = await t.user();
+    await assert.rejects(
+      t.prisma.finCategory.create({
+        data: { userId: person.id, family: 'goal', label: 'Version z\u00e9ro', scope: 'personal', source: 'manual', status: 'declared', version: 0 },
+      }),
+    );
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test('a category that is neither standard, nor a user row, nor a customisation', async () => {
+    // A row belonging to nobody and holding no reference key: it would be
+    // offered to every account while naming nothing.
+    const row = await t.prisma.finCategory.create({
+      data: { family: 'goal', label: 'Orpheline', scope: 'personal', source: 'manual', status: 'official' },
+    });
+    assert.ok((await rules()).includes(SHAPES));
+    await t.prisma.finCategory.delete({ where: { id: row.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test('a customisation pointing at a standard category that does not exist, or into another family', async () => {
+    const person = await t.user();
+    const row = await t.prisma.finCategory.create({
+      data: { userId: person.id, baseKey: 'goal.licorne', family: 'goal', label: 'Licorne', scope: 'personal', source: 'manual', status: 'declared' },
+    });
+    assert.ok((await rules()).includes('a category customisation points at a standard category that exists'));
+    await t.prisma.finCategory.update({ where: { id: row.id }, data: { baseKey: 'goal.permis', family: 'asset' } });
+    assert.ok((await rules()).includes('a category customisation stays in the family of the category it customises'));
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test("a reference row that no longer says what the client's file says", async () => {
+    const reference = await t.prisma.finCategory.findFirst({ where: { key: 'income.salaire_net', userId: null } });
+    await t.prisma.finCategory.update({ where: { id: reference.id }, data: { label: 'Salaire (modifi\u00e9 \u00e0 la main)' } });
+    assert.ok((await rules()).includes(REFERENCE));
+    await t.prisma.finCategory.update({ where: { id: reference.id }, data: { label: 'Salaire net' } });
+    assert.deepEqual(await check(), []);
+
+    // A missing reference row is caught too.
+    await t.prisma.finCategory.delete({ where: { id: reference.id } });
+    assert.ok((await rules()).includes(REFERENCE));
+    await t.prisma.finCategory.create({
+      data: {
+        id: reference.id,
+        family: reference.family,
+        key: reference.key,
+        label: reference.label,
+        scope: reference.scope,
+        source: reference.source,
+        sourceRef: reference.sourceRef,
+        status: reference.status,
+        consentUses: reference.consentUses,
+      },
+    });
+    assert.deepEqual(await check(), []);
+  });
+
+  test("a reference row stored as something other than the client's official data", async () => {
+    const reference = await t.prisma.finCategory.findFirst({ where: { key: 'goal.permis', userId: null } });
+    await t.prisma.finCategory.update({ where: { id: reference.id }, data: { status: 'real' } });
+    assert.ok((await rules()).includes("the client's category reference is stored as official"));
+    await t.prisma.finCategory.update({ where: { id: reference.id }, data: { status: 'official' } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test('two categories an account could not tell apart in a picker', async () => {
+    const person = await t.user();
+    const data = { userId: person.id, family: 'goal', scope: 'personal', source: 'manual', status: 'declared' };
+    await t.prisma.finCategory.create({ data: { ...data, label: 'Mon projet' } });
+    await t.prisma.finCategory.create({ data: { ...data, label: 'MON PROJET' } });
+    assert.ok((await rules()).includes('one account never has two categories with the same name in a family'));
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test('a row deleted without the journal entry that says so', async () => {
+    const person = await t.user();
+    const row = await t.prisma.finCategory.create({
+      data: { userId: person.id, family: 'goal', label: 'Effac\u00e9e en silence', scope: 'personal', source: 'manual', status: 'declared', deletedAt: new Date() },
+    });
+    assert.ok((await rules()).includes('a logically deleted financial row says in the journal that it was deleted'));
+    await t.prisma.finCategory.delete({ where: { id: row.id } });
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test("a journal entry about a row of ANOTHER account", async () => {
+    const person = await t.user();
+    const other = await t.user();
+    const row = (await t.request('POST', '/fin/categories', { user: person, json: { family: 'goal', label: 'Priv\u00e9e' } })).body.category;
+    const change = await t.prisma.finChange.create({
+      data: { userId: other.id, entity: 'category', entityId: row.id, action: 'correct', field: 'label' },
+    });
+    assert.ok((await rules()).includes('a change journal entry belongs to the account that owns the row'));
+    await t.prisma.finChange.delete({ where: { id: change.id } });
+    await t.prisma.user.delete({ where: { id: person.id } });
+    await t.prisma.user.delete({ where: { id: other.id } });
     assert.deepEqual(await check(), []);
   });
 });

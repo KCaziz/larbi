@@ -23,6 +23,10 @@ export const updateArticleSchema = z
       .array(z.string().trim().min(1).max(60))
       .max(20)
       .transform((types) => [...new Set(types)]),
+    // Level and theme of the "Apprendre" search (P2-08). Optional: an article
+    // written before they existed simply carries neither.
+    level: z.enum(['beginner', 'intermediate', 'advanced']).nullable(),
+    theme: z.string().trim().max(60).nullable(),
     metaTitle: optionalText(70),
     metaDescription: optionalText(170),
     // Language the article is written in (its translations are separate rows).

@@ -20,8 +20,14 @@ export default function FinProfilePage() {
   const { t } = useTranslation();
   const profile = useApi('/profile/fin');
   const transitions = useApi('/profile/fin/transitions');
+  // The confirmation lives HERE, not in the form: saving reloads the profile,
+  // and the first save also changes the form's key (finOnboardedAt stops being
+  // null), so a message held by the form was destroyed before anyone read it.
+  const [saved, setSaved] = useState(false);
 
-  if (profile.status === 'loading') return <LoadingState />;
+  // Only the FIRST load replaces the page: a refresh after saving keeps what is
+  // on screen instead of flashing it away.
+  if (profile.status === 'loading' && !profile.data) return <LoadingState />;
   if (profile.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={profile.reload} />;
 
   return (
@@ -30,7 +36,20 @@ export default function FinProfilePage() {
       <p>{t('account.fin.intro')}</p>
       {/* Keyed on the loaded profile: a fresh local copy is seeded once per
           load/reload, with no effect needed to sync it afterwards. */}
-      <FinProfileForm key={profile.data.profile.finOnboardedAt ?? 'new'} initial={profile.data.profile} onSaved={() => { profile.reload(); transitions.reload(); }} />
+      {saved && (
+        <p className="form-status" role="status">
+          {t('account.fin.saved')}
+        </p>
+      )}
+      <FinProfileForm
+        key={profile.data.profile.finOnboardedAt ?? 'new'}
+        initial={profile.data.profile}
+        onSaved={() => {
+          setSaved(true);
+          profile.reload();
+          transitions.reload();
+        }}
+      />
       {transitions.status === 'ready' && transitions.data.transitions.length > 0 && (
         <FinTransitions transitions={transitions.data.transitions} />
       )}
@@ -77,7 +96,7 @@ function FinProfileForm({ initial, onSaved }) {
       };
       if (!consented) body.acceptConsents = true;
       await api.put('/profile/fin', body);
-      setStatus({ kind: 'ok', text: t('account.fin.saved') });
+      // Announced by the page, which survives the reload this triggers.
       onSaved();
     } catch (err) {
       setStatus({ kind: 'error', text: t(errorKey(err, { 403: 'account.fin.consentRequired' })) });

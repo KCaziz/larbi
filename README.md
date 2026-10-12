@@ -42,6 +42,8 @@ npm run prisma:migrate   # applique les migrations sur la base locale
 npm run prisma:generate  # régénère le client Prisma
 ```
 
+**Les deux commandes, toujours.** `prisma:migrate` régénère normalement le client, mais la génération échoue silencieusement quand un serveur de développement tient les fichiers ouverts (fréquent sous Windows). Un client périmé ne se voit pas à l'installation : les tables existent, les pages se chargent, et seules les routes qui touchent les modèles ajoutés répondent 500 — par exemple une section entière de l'administration qui « ne marche pas ». En cas de doute : `npm run prisma:generate` puis `node tests/setup.js` (qui migre la base de test).
+
 ### 3. Frontend
 
 ```bash

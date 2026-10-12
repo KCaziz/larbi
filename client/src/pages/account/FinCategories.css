@@ -1,0 +1,157 @@
+/* "Mes catégories" (P6-02). Tokens only, logical properties (RTL). */
+.fincat-archived {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-block: 16px 8px;
+  font-size: 0.92rem;
+}
+
+.fincat-family {
+  margin-block-start: 24px;
+  padding-block-end: 16px;
+  border-block-end: 1px solid var(--border);
+}
+
+.fincat-family h3 {
+  margin-block-end: 8px;
+  font-size: 1.02rem;
+  color: var(--text-h);
+}
+
+.fincat-count {
+  margin-inline-start: 8px;
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.fincat-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.fincat-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.fincat-row:nth-child(odd) {
+  background: var(--bg-alt);
+}
+
+.fincat-archived-row .fincat-label {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+.fincat-label {
+  flex: 1 1 180px;
+  color: var(--text-h);
+}
+
+.fincat-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fincat-tag {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.74rem;
+  color: var(--text);
+}
+
+.fincat-tag-archived {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.fincat-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+
+.fincat-icon,
+.fincat-plain {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.fincat-icon:hover,
+.fincat-plain:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.fincat-add,
+.fincat-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 10px;
+}
+
+.fincat-edit {
+  flex: 1 1 100%;
+  margin-block-start: 0;
+}
+
+.fincat-add input,
+.fincat-edit input {
+  flex: 1 1 220px;
+  max-width: 340px;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.fincat-add-open {
+  margin-block-start: 10px;
+  padding-inline: 0;
+}
+
+.fincat-history {
+  flex: 1 1 100%;
+  margin: 6px 0 0;
+  padding-inline-start: 20px;
+  border-inline-start: 2px solid var(--border);
+  font-size: 0.84rem;
+  color: var(--text);
+}
+
+.fincat-history-when {
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
+.fincat-history-reason {
+  opacity: 0.85;
+  font-style: italic;
+}

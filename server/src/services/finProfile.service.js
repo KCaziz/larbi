@@ -3,7 +3,8 @@ import { FIN_CONSENT_TEXTS } from '../constants/finPublics.js';
 
 // FINCLUDIA onboarding and profile (P3-18): consent bookkeeping and the
 // "changement de parcours" history. No financial data here — this is identity
-// only; the financial profile itself is P6-02 (blocked on P6-01).
+// only; the financial data model itself is P6-02 (done), in
+// services/finCategory.service.js and services/finance/dataModel.js.
 
 // Has this account accepted the CURRENT version of every required text? A text
 // whose version was bumped after acceptance makes the old row stale: it no

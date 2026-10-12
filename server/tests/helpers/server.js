@@ -73,6 +73,29 @@ export async function boot({ production = false, extra = {} } = {}) {
         await tx.$executeRawUnsafe('SET FOREIGN_KEY_CHECKS = 1');
       });
     }
+    // The FINCLUDIA category reference (P6-02) shares its table with the
+    // categories users create, so the table cannot simply be kept like
+    // `account_types`: it is wiped with the rest and its 91 reference rows are
+    // put back. A database without them is not a valid state (the consistency
+    // control says so), and every test that offers a category needs them.
+    await replayMigrationInserts('_fin_data_model', 'fin_categories');
+  }
+
+  // Replays the INSERT statements a migration carries for ONE table. Used for
+  // reference data that reset() has to restore; the statements only insert, with
+  // fixed ids, so a test reads the data the client gave rather than a copy of it.
+  async function replayMigrationInserts(migrationSuffix, table) {
+    const dir = path.join(SERVER_DIR, 'prisma', 'migrations');
+    const name = readdirSync(dir).find((d) => d.endsWith(migrationSuffix));
+    if (!name) throw new Error(`migration ${migrationSuffix} not found`);
+    const sql = readFileSync(path.join(dir, name, 'migration.sql'), 'utf8')
+      .split('\n')
+      .filter((line) => !line.startsWith('--'))
+      .join('\n');
+    const wanted = `INSERT INTO \`${table}\``;
+    for (const statement of sql.split(/;\s*$/m).map((x) => x.trim()).filter((x) => x.startsWith(wanted))) {
+      await prisma.$executeRawUnsafe(statement);
+    }
   }
 
   let counter = 0;

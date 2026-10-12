@@ -105,6 +105,7 @@ export const router = createBrowserRouter([
                   { path: 'premium', element: <PremiumAccessPage /> },
                   { path: 'paiements', lazy: lazyPage(() => import('../pages/account/MyPaymentsPage.jsx')) },
                   { path: 'fincludia', lazy: lazyPage(() => import('../pages/account/FinProfilePage.jsx')) },
+                  { path: 'categories', lazy: lazyPage(() => import('../pages/account/FinCategoriesPage.jsx')) },
                 ],
               },
               {

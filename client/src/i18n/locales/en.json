@@ -432,7 +432,8 @@
       "formations": "My courses",
       "certificates": "Certificates",
       "payments": "My payments",
-      "fincludia": "FINCLUDIA"
+      "fincludia": "FINCLUDIA",
+      "categories": "My categories"
     },
     "profile": {
       "title": "Profile",
@@ -2453,6 +2454,89 @@
     "guidesTitle": "Mini-guides",
     "back": "Back to Learn",
     "exampleTitle": "Example",
-    "relatedTitle": "Related terms"
+    "relatedTitle": "Related terms",
+    "disclaimer": "No content in \"Apprendre\" replaces regulated advice: these are general definitions and explanations, to be checked with a professional before any decision.",
+    "coursesTitle": "Courses",
+    "termsTitle": "Glossary",
+    "articlesTitle": "Articles",
+    "allThemes": "All themes",
+    "simulate": "Simulate",
+    "requiresAccount": "Account required",
+    "lockLogin": "Sign-in required",
+    "lockPremium": "Premium accounts only",
+    "favorites": {
+      "title": "My favourites",
+      "add": "Keep",
+      "remove": "Remove",
+      "empty": "Nothing kept yet. The \"Keep\" button sets a course, a term, a guide or an article aside.",
+      "needsAccount": "The search is free to use. Keeping content as a favourite needs an account."
+    },
+    "quizCount_one": "{{count}} quiz",
+    "quizCount_other": "{{count}} quizzes"
+  },
+  "finCategories": {
+    "title": "My categories",
+    "intro": "Categories are how your income, spending, goals, assets and debts are sorted. The reference list below is the one from the FINCLUDIA specification; you can rename it, hide what does not concern you, and add your own.",
+    "referenceNote": "The standard reference is never changed: when you rename a standard category, FINCLUDIA records your own name for it and keeps the original name shown beside it. Nothing is erased either: a category you remove leaves the list and stays readable by whatever already used it.",
+    "showArchived": "Also show hidden categories",
+    "count_one": "{{count}} category",
+    "count_other": "{{count}} categories",
+    "add": "Add a category",
+    "newLabel": "Name of the new category",
+    "newPlaceholder": "For example: morning coffee",
+    "renameLabel": "New name for the category",
+    "rename": "Rename",
+    "hide": "Hide",
+    "archive": "Remove from the list",
+    "restore": "Put back in the list",
+    "reset": "Back to the original name",
+    "delete": "Delete",
+    "history": "View history",
+    "noHistory": "No change so far.",
+    "nothing": "nothing",
+    "archivedTag": "hidden",
+    "wasCalled": "original name: {{label}}",
+    "save": "Save",
+    "cancel": "Cancel",
+    "created": "Category created.",
+    "saved": "Change saved.",
+    "archived": "Category removed from the list.",
+    "restored": "Category put back in the list.",
+    "resetDone": "Original name restored.",
+    "deleted": "Category deleted.",
+    "historyField": "{{field}}: “{{before}}” becomes “{{after}}”",
+    "origin": {
+      "standard": "reference",
+      "own": "added by you"
+    },
+    "scopes": {
+      "personal": "personal",
+      "couple": "couple",
+      "household": "household",
+      "space": "shared space"
+    },
+    "uses": {
+      "shared_space": "shared space",
+      "export": "export"
+    },
+    "fields": {
+      "label": "Name",
+      "family": "Family",
+      "scope": "Perimeter",
+      "consentUses": "Authorised uses",
+      "archivedAt": "Hiding",
+      "deletedAt": "Deletion"
+    },
+    "actions": {
+      "create": "Created",
+      "correct": "Corrected",
+      "archive": "Removed from the list",
+      "restore": "Put back in the list",
+      "delete": "Deleted"
+    },
+    "errors": {
+      "labelTaken": "You already have a category with that name in this family.",
+      "tooMany": "You have reached the maximum number of categories in this family."
+    }
   }
 }
