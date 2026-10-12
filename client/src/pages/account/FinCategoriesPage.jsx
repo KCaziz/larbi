@@ -23,7 +23,7 @@ import './FinCategories.css';
 export default function FinCategoriesPage() {
   const { t } = useTranslation();
   const [includeArchived, setIncludeArchived] = useState(false);
-  const groups = useApi(`/fin/categories${includeArchived ? '?includeArchived=true' : ''}`);
+  const groups = useApi(`/fin/categories?${includeArchived ? 'includeArchived=true' : ''}`);
   const [message, setMessage] = useState(null);
   const [openHistory, setOpenHistory] = useState(null);
 

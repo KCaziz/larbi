@@ -90,6 +90,8 @@ export const router = createBrowserRouter([
                 path: 'catalogue/:slug/certificat',
                 lazy: lazyPage(() => import('../pages/learn/CertificatePage.jsx')),
               },
+              // FINCLUDIA "Mon argent" (P6-04): synthesis, entry and history.
+              { path: 'mon-argent', lazy: lazyPage(() => import('../pages/argent/MyMoneyPage.jsx')) },
               // Where the payment provider sends the buyer back (P3-09): reads the order, grants nothing.
               { path: 'paiement/retour', lazy: lazyPage(() => import('../pages/payments/PaymentReturnPage.jsx')) },
               {
@@ -106,6 +108,7 @@ export const router = createBrowserRouter([
                   { path: 'paiements', lazy: lazyPage(() => import('../pages/account/MyPaymentsPage.jsx')) },
                   { path: 'fincludia', lazy: lazyPage(() => import('../pages/account/FinProfilePage.jsx')) },
                   { path: 'categories', lazy: lazyPage(() => import('../pages/account/FinCategoriesPage.jsx')) },
+                  { path: 'premiers-pas', lazy: lazyPage(() => import('../pages/account/FinOnboardingPage.jsx')) },
                 ],
               },
               {

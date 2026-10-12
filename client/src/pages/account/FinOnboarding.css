@@ -1,0 +1,122 @@
+/* Progressive financial onboarding (P6-03). Tokens only, logical properties. */
+.fin-onboarding-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-block: 16px 4px;
+  font-size: 0.88rem;
+}
+
+.fin-onboarding-progress progress {
+  inline-size: 180px;
+  block-size: 8px;
+}
+
+.fin-onboarding-form {
+  display: grid;
+  gap: 14px;
+  margin-block: 18px;
+}
+
+.fin-onboarding-question {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.fin-onboarding-question legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.fin-onboarding-why,
+.fin-onboarding-plain {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.fin-onboarding-why:hover,
+.fin-onboarding-plain:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.fin-onboarding-why-text {
+  margin: 0;
+  padding: 8px 10px;
+  border-inline-start: 3px solid var(--accent-border);
+  background: var(--accent-bg);
+  border-radius: var(--radius-sm);
+  font-size: 0.86rem;
+}
+
+.fin-onboarding-question select,
+.fin-onboarding-question input[type='text'],
+.fin-onboarding-question input:not([type]) {
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.fin-onboarding-skip,
+.fin-onboarding-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+}
+
+.fin-onboarding-confirm {
+  color: var(--warn);
+}
+
+.fin-onboarding-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.fin-onboarding-offer {
+  margin-block: 20px;
+  padding: 14px 16px;
+  border: 1px dashed var(--warn);
+  border-radius: var(--radius);
+  background: var(--warn-bg);
+}
+
+.fin-onboarding-offer h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block: 0 6px;
+  font-size: 1rem;
+}
+
+.fin-onboarding-goal {
+  font-size: 0.92rem;
+}

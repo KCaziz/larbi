@@ -24,8 +24,9 @@ const isDateLike = (value) => value instanceof Date && !Number.isNaN(value.getTi
 // Every rule the client states about a stored financial datum, as a list of
 // problems (empty = valid). `amounts: false` is for an object that carries no
 // amount of its own — a category names a line, it is not a line — and then the
-// currency and integer rules do not apply.
-export function checkFinancialRow(row, { amounts = true } = {}) {
+// integer-amount rule does not apply; `currency` says the same about the
+// currency, and defaults to whatever `amounts` says.
+export function checkFinancialRow(row, { amounts = true, currency = amounts } = {}) {
   const problems = [];
   if (!row || typeof row !== 'object') return ['not a record'];
 
@@ -45,11 +46,11 @@ export function checkFinancialRow(row, { amounts = true } = {}) {
   if (!isDateLike(row.effectiveAt)) problems.push('no effective date');
   if (!isDateLike(row.collectedAt)) problems.push('no collection date');
 
-  if (amounts) {
-    if (!isCurrencyCode(row.currency)) problems.push('no currency');
-    // Integers in the smallest unit: a float amount has already lost centimes.
-    if (!isAmount(row.value)) problems.push('amount is not a whole number of centimes');
-  }
+  // A currency is required wherever an amount is expressed, even when the row
+  // holds several amounts rather than one `value` (an onboarding record).
+  if (currency && !isCurrencyCode(row.currency)) problems.push('no currency');
+  // Integers in the smallest unit: a float amount has already lost centimes.
+  if (amounts && !isAmount(row.value)) problems.push('amount is not a whole number of centimes');
   return problems;
 }
 

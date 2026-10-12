@@ -1,0 +1,152 @@
+/* Shared FINCLUDIA components (P1-12's figure card and amount field, used by
+   P6-03 and P6-04). Tokens only, logical properties (RTL). */
+
+.fin-figure {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+/* A fictional figure is separated VISUALLY and strongly, not just labelled:
+   the client's rule is that real and fictional are never confusable. */
+.fin-figure-simulation {
+  border-style: dashed;
+  border-color: var(--warn);
+  background: var(--warn-bg);
+}
+
+.fin-figure-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.fin-badge-simulation {
+  padding: 1px 7px;
+  border: 1px solid var(--warn);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--warn);
+}
+
+.fin-figure-value {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
+/* "Non calculé" never looks like a number: the shape of the text says it is a
+   different kind of answer, so colour alone is not carrying the meaning. */
+.fin-figure-unknown {
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+.fin-why {
+  margin-block-start: 10px;
+  font-size: 0.82rem;
+}
+
+.fin-why summary {
+  cursor: pointer;
+  color: var(--accent);
+}
+
+.fin-why dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  margin: 8px 0 0;
+}
+
+.fin-why dt {
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.fin-why dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.fin-why code {
+  font-size: 0.95em;
+}
+
+.fin-warnings {
+  margin: 8px 0 0;
+  padding-inline-start: 18px;
+  color: var(--warn);
+}
+
+.fin-field {
+  display: grid;
+  gap: 4px;
+}
+
+.fin-field > label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.fin-optional {
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.fin-amount {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.fin-amount input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 7px 10px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-amount-currency {
+  display: flex;
+  align-items: center;
+  padding-inline: 10px;
+  border-inline-start: 1px solid var(--border);
+  background: var(--bg-alt);
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.fin-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+.fin-figure-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  margin-block: 16px;
+}

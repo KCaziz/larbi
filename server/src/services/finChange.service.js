@@ -13,6 +13,34 @@ import { CHANGE_ACTIONS } from '../constants/finData.js';
 // dumping whole rows (which would also copy data the trail does not need).
 export const JOURNALLED_FIELDS = {
   category: ['family', 'label', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
+  // "Mon argent" (P6-04). The amount, the date and the category are what a
+  // person actually corrects, and what an old total was built from.
+  income: ['label', 'categoryId', 'value', 'currency', 'frequency', 'startDate', 'endDate', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
+  transaction: [
+    'kind',
+    'value',
+    'currency',
+    'occurredAt',
+    'categoryId',
+    'subcategory',
+    'paymentMethod',
+    'note',
+    'shared',
+    'planned',
+    'receiptId',
+    'scope',
+    'consentUses',
+    'archivedAt',
+    'deletedAt',
+  ],
+  // The onboarding keeps its answers in one JSON column, so what is worth
+  // journalling is that the answers changed, and whether it went fictional.
+  onboarding: ['answers', 'fictional', 'currency', 'completedAt'],
+  // Budgets and envelopes (P6-05). A budget's PERIOD is journalled as much as
+  // its amounts: moving a period changes which movements a figure was built
+  // from, which is exactly what a trail is for.
+  budget: ['label', 'periodStart', 'periodEnd', 'currency', 'recurrence', 'alertThresholds', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
+  envelope: ['categoryId', 'kind', 'value', 'currency', 'cap', 'recurring', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
 };
 
 // What actually changed between two versions of a row, field by field. Values

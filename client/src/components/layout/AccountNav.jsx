@@ -11,6 +11,8 @@ const links = [
   { labelKey: 'account.nav.premium', to: '/compte/premium' },
   { labelKey: 'account.nav.payments', to: '/compte/paiements' },
   { labelKey: 'account.nav.fincludia', to: '/compte/fincludia' },
+  { labelKey: 'account.nav.onboarding', to: '/compte/premiers-pas' },
+  { labelKey: 'nav.money', to: '/mon-argent' },
   { labelKey: 'account.nav.categories', to: '/compte/categories' },
 ];
 

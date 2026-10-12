@@ -16,6 +16,9 @@ import finProfileRoutes from './finProfile.routes.js';
 import apprendreRoutes from './apprendre.routes.js';
 import finAssistantRoutes from './finAssistant.routes.js';
 import finDataRoutes from './finData.routes.js';
+import finMoneyRoutes from './finMoney.routes.js';
+import finBudgetRoutes from './finBudget.routes.js';
+import finOnboardingRoutes from './finOnboarding.routes.js';
 
 const router = Router();
 
@@ -36,5 +39,8 @@ router.use('/profile/fin', finProfileRoutes);
 router.use('/apprendre', apprendreRoutes);
 router.use('/fin-assistant', finAssistantRoutes);
 router.use('/fin', finDataRoutes);
+router.use('/fin/onboarding', finOnboardingRoutes);
+router.use('/fin', finMoneyRoutes);
+router.use('/fin', finBudgetRoutes);
 
 export default router;

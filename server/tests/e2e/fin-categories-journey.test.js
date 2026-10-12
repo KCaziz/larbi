@@ -28,6 +28,20 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
   const rowOf = (label) =>
     `(() => { const li = [...document.querySelectorAll('.fincat-row')].find((e) => e.querySelector('.fincat-label')?.textContent.trim() === ${JSON.stringify(label)}); return li; })()`;
 
+  // Waits for a family's list to contain (or no longer contain) a label. The
+  // list is refreshed by a reload that no longer blanks the page, so reading it
+  // the instant a confirmation appears can catch the previous render.
+  const waitForLabel = (family, label, present = true) =>
+    b.waitFor(
+      `(() => {
+        const section = [...document.querySelectorAll('.fincat-family')].find((e) => e.querySelector('h3').textContent.includes(${JSON.stringify(family)}));
+        if (!section) return false;
+        const labels = [...section.querySelectorAll('.fincat-label')].map((e) => e.textContent.trim());
+        return labels.includes(${JSON.stringify(label)}) === ${JSON.stringify(present)};
+      })()`,
+      `${label} ${present ? 'listed' : 'gone'} in ${family}`,
+    );
+
   const labelsOf = (family) =>
     b.ev(`(() => {
       const section = [...document.querySelectorAll('.fincat-family')].find((e) => e.querySelector('h3').textContent.includes(${JSON.stringify(family)}));
@@ -84,7 +98,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
     await b.type('#fincat-new-variable', 'Café du matin');
     assert.ok(await b.ev(`(() => { const el = ${section}.querySelector('button[type=submit]'); if (!el) return false; el.click(); return true; })()`));
     assert.ok(await b.waitText(c.created), 'the confirmation survives the reload');
-    assert.ok((await labelsOf('Dépenses variables')).includes('Café du matin'));
+    assert.ok(await waitForLabel('Dépenses variables', 'Café du matin'));
 
     // Renaming it in place.
     assert.ok(await clickActionInRow('Café du matin', c.rename));
@@ -93,7 +107,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
     await b.type('.fincat-edit input', 'Café');
     assert.ok(await b.ev("(() => { const el = document.querySelector('.fincat-edit button[type=submit]'); if (!el) return false; el.click(); return true; })()"));
     assert.ok(await b.waitText(c.saved));
-    assert.ok((await labelsOf('Dépenses variables')).includes('Café'));
+    assert.ok(await waitForLabel('Dépenses variables', 'Café'));
 
     // The trail: the creation, then the correction, both readable.
     assert.ok(await clickActionInRow('Café', c.history));
@@ -107,7 +121,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
     await goToCategories();
     assert.ok(await clickActionInRow('Café', c.archive));
     assert.ok(await b.waitText(c.archived));
-    assert.ok(!(await labelsOf('Dépenses variables')).includes('Café'), 'gone from the list');
+    assert.ok(await waitForLabel('Dépenses variables', 'Café', false), 'gone from the list');
 
     // It is not deleted: asking for hidden categories shows it, struck through.
     assert.ok(await b.ev("(() => { const el = document.querySelector('.fincat-archived input'); if (!el) return false; el.click(); return true; })()"));
@@ -116,7 +130,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
 
     assert.ok(await clickActionInRow('Café', c.restore));
     assert.ok(await b.waitText(c.restored));
-    assert.ok((await labelsOf('Dépenses variables')).includes('Café'));
+    assert.ok(await waitForLabel('Dépenses variables', 'Café'));
   });
 
   test("renaming one of the client's standard categories keeps its original name in view", async () => {
@@ -126,8 +140,8 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
     assert.ok(await b.ev("(() => { const el = document.querySelector('.fincat-edit button[type=submit]'); if (!el) return false; el.click(); return true; })()"));
     assert.ok(await b.waitText(c.saved));
 
+    assert.ok(await waitForLabel('Dépenses variables', 'Mon chat'));
     const labels = await labelsOf('Dépenses variables');
-    assert.ok(labels.includes('Mon chat'));
     assert.ok(!labels.includes('Animaux'), 'the person sees their own label');
     // The client's wording stays shown beside it: the category must remain
     // findable under the name the reference gives it.
@@ -140,7 +154,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
     // And it can go back to the client's name.
     assert.ok(await clickActionInRow('Mon chat', c.reset));
     assert.ok(await b.waitText(c.resetDone));
-    assert.ok((await labelsOf('Dépenses variables')).includes('Animaux'));
+    assert.ok(await waitForLabel('Dépenses variables', 'Animaux'));
   });
 
   test('a refused name is explained on the page instead of blanking it', async () => {
@@ -164,7 +178,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
 
     assert.ok(await clickActionInRow('Vieille moto', c.delete));
     assert.ok(await b.waitText(c.deleted));
-    assert.ok(!(await labelsOf('Actifs réels')).includes('Vieille moto'));
+    assert.ok(await waitForLabel('Actifs réels', 'Vieille moto', false));
 
     const row = await t.prisma.finCategory.findFirst({ where: { userId: owner.id, label: 'Vieille moto' } });
     assert.ok(row.deletedAt, 'the deletion is logical: the row is still there, dated');

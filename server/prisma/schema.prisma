@@ -75,6 +75,11 @@ model User {
   learningFavorites     LearningFavorite[]
   finCategories         FinCategory[]
   finChanges            FinChange[]
+  finIncomes            FinIncome[]
+  finTransactions       FinTransaction[]
+  finOnboarding         FinOnboarding?
+  finBudgets            FinBudget[]
+  finEnvelopes          FinEnvelope[]
 
   // E-Learning (P2-01)
   formationsCreated Formation[]
@@ -296,26 +301,29 @@ model LearningFavorite {
 // A category names a line, it is not a line: it carries the socle except
 // `value`, `currency` and `confidence`, which would be null on every row.
 model FinCategory {
-  id          String    @id @default(uuid())
-  userId      String?
-  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String           @id @default(uuid())
+  userId          String?
+  user            User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
   // One of CATEGORY_FAMILY_CODES (constants/finCategories.js).
-  family      String    @db.VarChar(20)
-  key         String?   @unique @db.VarChar(80)
-  baseKey     String?   @db.VarChar(80)
-  label       String    @db.VarChar(80)
-  scope       String    @default("personal") @db.VarChar(20)
-  source      String    @db.VarChar(20)
-  sourceRef   String?   @db.VarChar(200)
-  status      String    @db.VarChar(20)
-  consentUses Json      @default("[]")
-  effectiveAt DateTime  @default(now())
-  collectedAt DateTime  @default(now())
-  version     Int       @default(1)
-  archivedAt  DateTime?
-  deletedAt   DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  family          String           @db.VarChar(20)
+  key             String?          @unique @db.VarChar(80)
+  baseKey         String?          @db.VarChar(80)
+  label           String           @db.VarChar(80)
+  scope           String           @default("personal") @db.VarChar(20)
+  source          String           @db.VarChar(20)
+  sourceRef       String?          @db.VarChar(200)
+  status          String           @db.VarChar(20)
+  consentUses     Json             @default("[]")
+  effectiveAt     DateTime         @default(now())
+  collectedAt     DateTime         @default(now())
+  version         Int              @default(1)
+  archivedAt      DateTime?
+  deletedAt       DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  finIncomes      FinIncome[]
+  finTransactions FinTransaction[]
+  finEnvelopes    FinEnvelope[]
 
   // One customisation of a given standard row per account, at most.
   @@unique([userId, baseKey])
@@ -349,6 +357,248 @@ model FinChange {
   @@index([entity, entityId, createdAt])
   @@index([userId, createdAt])
   @@map("fin_changes")
+}
+
+// ---- FINCLUDIA "Mon argent" (P6-04) and onboarding (P6-03) -------------------
+// Both reuse the metadata socle documented above FinCategory: the same columns,
+// with the same meaning, plus `value` and `currency` where there is an amount.
+// Amounts are INTEGERS in the smallest unit of the currency, and the currency is
+// always stored next to its amount — nothing is ever converted without a dated
+// rate, so a mixed-currency total answers "not computable" instead of guessing.
+
+// A recurring resource (client object "Revenu": propriétaire, type, montant,
+// devise, fréquence, date_début, source, statut). `frequency` is NOT nullable
+// on purpose: the client's own error case for screen ET01 is « fréquence
+// manquante pour ressource périodique », and a yearly grant counted monthly
+// would be a twelve-fold lie. A ONE-OFF amount is not a resource — it is a
+// transaction, below.
+model FinIncome {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label       String       @db.VarChar(80)
+  // The category this resource belongs to. SetNull, never Cascade: losing a
+  // category must never take the money with it. The application NEVER deletes a
+  // category physically anyway (P6-02 deletes logically, so an old total keeps
+  // knowing what its lines were called), so this only ever fires when the whole
+  // account is erased — and then this row is going too, which is exactly what
+  // the privacy text promises (P6-01 point 9). Restrict was wrong here: it made
+  // that erasure fail for anyone who had used a category of their own.
+  categoryId  String?
+  category    FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  value       Int
+  currency    String       @db.VarChar(3)
+  // One of FREQUENCIES (constants/finance.js): hebdomadaire, mensuel,
+  // trimestriel, semestriel, annuel. F001 normalises it to the month.
+  frequency   String       @db.VarChar(20)
+  startDate   DateTime
+  endDate     DateTime?
+  scope       String       @default("personal") @db.VarChar(20)
+  source      String       @db.VarChar(20)
+  sourceRef   String?      @db.VarChar(200)
+  status      String       @db.VarChar(20)
+  confidence  String?      @db.VarChar(10)
+  consentUses Json         @default("[]")
+  effectiveAt DateTime     @default(now())
+  collectedAt DateTime     @default(now())
+  version     Int          @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId, deletedAt])
+  @@index([categoryId])
+  @@map("fin_incomes")
+}
+
+// A dated movement, in or out (screens C07 "Ajouter une dépense / revenu" and
+// C08 "Historique & recherche"). An uncategorised movement is legitimate and
+// kept apart rather than forced into a category (the client lists
+// « transactions non catégorisées à part »), so `categoryId` is nullable.
+model FinTransaction {
+  id            String       @id @default(uuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // "income" | "expense" (TRANSACTION_KINDS).
+  kind          String       @db.VarChar(10)
+  value         Int
+  currency      String       @db.VarChar(3)
+  occurredAt    DateTime
+  categoryId    String?
+  category      FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  // Free text, unlike the category: the client asks for a sub-category field
+  // and gives no reference list for it, so inventing a closed one would refuse
+  // answers it means to accept.
+  subcategory   String?      @db.VarChar(60)
+  // One of PAYMENT_METHODS (constants/finMoney.js), a list of OURS: the client
+  // asks for the field and enumerates nothing.
+  paymentMethod String?      @db.VarChar(20)
+  note          String?      @db.VarChar(300)
+  // Marked for a shared space by an explicit action, never by default: the
+  // phase rule is « rien n'entre dans un espace partagé sans action explicite ».
+  shared        Boolean      @default(false)
+  // A movement that has not happened yet. The ONLY case where `occurredAt` may
+  // be in the future, and only for an expense (client: « date future seulement
+  // pour une dépense planifiée »).
+  planned       Boolean      @default(false)
+  receipt       Media?       @relation("TransactionReceipt")
+  scope         String       @default("personal") @db.VarChar(20)
+  source        String       @db.VarChar(20)
+  sourceRef     String?      @db.VarChar(200)
+  status        String       @db.VarChar(20)
+  confidence    String?      @db.VarChar(10)
+  consentUses   Json         @default("[]")
+  effectiveAt   DateTime     @default(now())
+  collectedAt   DateTime     @default(now())
+  version       Int          @default(1)
+  archivedAt    DateTime?
+  deletedAt     DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // The history is always read by owner and date, and the duplicate check looks
+  // up the same owner, kind and amount around a date.
+  @@index([userId, occurredAt])
+  @@index([userId, kind, value, occurredAt])
+  @@index([categoryId])
+  @@map("fin_transactions")
+}
+
+// Where someone is in the progressive onboarding (P6-03, screens C03, LY01,
+// ET01, SA01, EP01). One per account.
+//
+// `answers` holds what was answered, keyed by question (constants/
+// finOnboarding.js), with a skipped question recorded AS skipped rather than
+// absent — « Passer » is a real answer and must not look like a question nobody
+// reached. The resource answers also become real FinIncome rows; the amounts
+// whose own table does not exist yet (épargne disponible, mensualités de dette,
+// montant de l'objectif) stay here as DECLARED values until P6-05, P6-08 and
+// P6-11 give them one, and the first budget is computed from them through the
+// versioned engine like any other figure.
+model FinOnboarding {
+  id          String    @id @default(uuid())
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currency    String    @db.VarChar(3)
+  answers     Json      @default("{}")
+  // The client's fictional starter budget for a lycéen (« commence avec 5 000 DA
+  // fictifs »). When true every figure of this onboarding is fictional and
+  // carries the SIMULATION badge; it is never added to a real total.
+  fictional   Boolean   @default(false)
+  completedAt DateTime?
+  scope       String    @default("personal") @db.VarChar(20)
+  source      String    @db.VarChar(20)
+  sourceRef   String?   @db.VarChar(200)
+  status      String    @db.VarChar(20)
+  confidence  String?   @db.VarChar(10)
+  consentUses Json      @default("[]")
+  effectiveAt DateTime  @default(now())
+  collectedAt DateTime  @default(now())
+  version     Int       @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("fin_onboardings")
+}
+
+// ---- FINCLUDIA budgets and envelopes (P6-05) ---------------------------------
+// A budget is a PERIOD of one account; an envelope is what that period plans for
+// one category. Both reuse the metadata socle of P6-02.
+//
+// Two tables rather than one JSON column of envelopes: an envelope is corrected
+// on its own, has its own journal trail, and points at a category with a real
+// foreign key — three things a JSON blob cannot do.
+
+model FinBudget {
+  id              String        @id @default(uuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label           String        @db.VarChar(80)
+  // The period this budget plans. Two live budgets of one account may never
+  // overlap (client: « chevauchement de périodes refusé »); that rule needs
+  // `userId`, a FOREIGN KEY column, so it lives in the service and in the
+  // consistency control rather than in a CHECK MariaDB would refuse.
+  periodStart     DateTime
+  periodEnd       DateTime
+  currency        String        @db.VarChar(3)
+  // One of BUDGET_RECURRENCES (constants/finBudget.js). `none` is a one-off
+  // budget, which must stay possible: a mandatory recurrence would invent a
+  // commitment nobody made.
+  recurrence      String        @default("monthly") @db.VarChar(20)
+  // The thresholds this budget alerts at, as RATIOS (0.8 = 80 %). Stored per
+  // budget because the client asks for them to be configurable, and visible in
+  // every answer because the engine must never hold a hidden coefficient.
+  alertThresholds Json          @default("[0.8, 1]")
+  note            String?       @db.VarChar(300)
+  scope           String        @default("personal") @db.VarChar(20)
+  source          String        @db.VarChar(20)
+  sourceRef       String?       @db.VarChar(200)
+  status          String        @db.VarChar(20)
+  confidence      String?       @db.VarChar(10)
+  consentUses     Json          @default("[]")
+  effectiveAt     DateTime      @default(now())
+  collectedAt     DateTime      @default(now())
+  version         Int           @default(1)
+  archivedAt      DateTime?
+  deletedAt       DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  envelopes       FinEnvelope[]
+
+  @@index([userId, periodStart])
+  @@map("fin_budgets")
+}
+
+// What one period plans for one category. `value` is the planned amount; `cap`
+// is the client's optional « plafond », a ceiling the person sets for
+// themselves — passing it is SIGNALLED, never refused, because the money has
+// already been spent and refusing it would only make the figure wrong.
+//
+// `categoryId` is nullable like everywhere else in Phase 6 (SetNull), but an
+// envelope without a category makes no sense, so the service never creates one:
+// the column is nullable only so erasing an account cannot be blocked.
+model FinEnvelope {
+  id          String       @id @default(uuid())
+  // Denormalised on purpose: every read is « the envelopes of MY budget », and
+  // checking ownership through the budget on each row would be a join per row.
+  // The consistency control checks the two agree.
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  budgetId    String
+  budget      FinBudget    @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  categoryId  String?
+  category    FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  // One of ENVELOPE_KINDS: the client's own « fixe / variable ».
+  kind        String       @db.VarChar(10)
+  value       Int
+  currency    String       @db.VarChar(3)
+  cap         Int?
+  // Whether this envelope is carried over when the budget is duplicated for the
+  // next period. A one-off envelope (a trip, school fees) must not silently
+  // reappear next month.
+  recurring   Boolean      @default(true)
+  note        String?      @db.VarChar(300)
+  scope       String       @default("personal") @db.VarChar(20)
+  source      String       @db.VarChar(20)
+  sourceRef   String?      @db.VarChar(200)
+  status      String       @db.VarChar(20)
+  confidence  String?      @db.VarChar(10)
+  consentUses Json         @default("[]")
+  effectiveAt DateTime     @default(now())
+  collectedAt DateTime     @default(now())
+  version     Int          @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([budgetId])
+  @@index([userId, deletedAt])
+  @@index([categoryId])
+  @@map("fin_envelopes")
 }
 
 // ---- "Apprendre" glossary and mini-guides (P2-08) -----------------------------
@@ -714,6 +964,17 @@ model Media {
 
   // Blocks of a lesson that show this file (P3-12). Deleting the file deletes those blocks.
   blocks LessonBlock[]
+
+  // Receipt of a movement (P6-04, "justificatif optionnel"). Private storage
+  // like every other file here, served only to its owner: there is no public
+  // URL for a receipt, ever.
+  //
+  // The key is on THIS side, like courseId and articleId above, so the file row
+  // dies with the movement it documents — and therefore with the account, which
+  // is what the privacy text promises (P6-01 point 9). With the key on the
+  // transaction instead, erasing an account left every receipt behind.
+  finTransactionId String?         @unique
+  finTransaction   FinTransaction? @relation("TransactionReceipt", fields: [finTransactionId], references: [id], onDelete: Cascade)
 
   // Target of the composite foreign key from lesson_blocks: a block can only show a file
   // that belongs to ITS OWN lesson.

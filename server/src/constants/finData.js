@@ -56,4 +56,17 @@ export const CHANGE_ACTIONS = ['create', 'correct', 'archive', 'restore', 'delet
 // financial table of Phase 6 adds itself here, and `amounts: false` says the
 // object has no `value`/`currency` of its own (a category names a line, it is
 // not a line), so the currency and integer-amount rules do not apply to it.
-export const FINANCIAL_TABLES = [{ model: 'finCategory', table: 'fin_categories', label: 'category', amounts: false }];
+export const FINANCIAL_TABLES = [
+  { model: 'finCategory', table: 'fin_categories', label: 'category', amounts: false, currency: false },
+  { model: 'finIncome', table: 'fin_incomes', label: 'income', amounts: true, currency: true },
+  { model: 'finTransaction', table: 'fin_transactions', label: 'transaction', amounts: true, currency: true },
+  // An onboarding record holds SEVERAL declared amounts (in `answers`) rather
+  // than one `value`, but it does carry the currency they are all expressed in,
+  // so the currency rule applies to it and the amount rule does not.
+  { model: 'finOnboarding', table: 'fin_onboardings', label: 'onboarding', amounts: false, currency: true },
+  // A budget is a period, not an amount: its total is the sum of its envelopes.
+  // It does carry the currency they are all expressed in, so the currency rule
+  // applies to it and the amount rule does not.
+  { model: 'finBudget', table: 'fin_budgets', label: 'budget', amounts: false, currency: true },
+  { model: 'finEnvelope', table: 'fin_envelopes', label: 'envelope', amounts: true, currency: true },
+];

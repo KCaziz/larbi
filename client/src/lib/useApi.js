@@ -21,14 +21,20 @@ export function useApi(path) {
     return () => controller.abort();
   }, [path, attempt]);
 
-  const current = result.path === path && result.attempt === attempt;
+  const samePath = result.path === path;
+  const current = samePath && result.attempt === attempt;
   const reload = useCallback(() => setAttempt((n) => n + 1), []);
   // Replace the loaded data after a local action (e.g. enrolling returns the fresh detail).
   const setData = useCallback((data) => setResult((r) => ({ ...r, data })), []);
 
   return {
     status: current ? result.status : 'loading',
-    data: current ? result.data : null,
+    // A RELOAD of the same path keeps what is already on screen. Clearing it
+    // made the page render its loading state instead of its content, which
+    // unmounts every child: a half-typed form, a warning that had just been
+    // shown, the confirmation of the write that triggered the reload. A change
+    // of `path` still clears, because that is a different resource.
+    data: samePath ? result.data : null,
     error: current ? result.error : null,
     reload,
     setData,

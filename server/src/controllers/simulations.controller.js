@@ -1,4 +1,4 @@
-import { algorithmById, formulaById } from '../constants/finance.js';
+import { describeFormula } from '../services/finance/describe.js';
 import { SIMULATORS, simulatorByKey } from '../constants/simulators.js';
 import { SIMULATOR_FUNCTIONS } from '../services/finance/simulators.js';
 
@@ -11,18 +11,6 @@ import { SIMULATOR_FUNCTIONS } from '../services/finance/simulators.js';
 // cached as if it were a page: a simulation is specific to what was typed.
 const noStore = (res) => res.set('Cache-Control', 'no-store');
 
-// The client's own columns for a formula, so the interface can explain a result
-// in the client's wording instead of paraphrasing it. An algorithm (ALG-xx) has
-// a name and a rule but no "condition" column in the client's workbook, and
-// `condition: null` says that plainly rather than inventing a sentence.
-const describeFormula = (id) => {
-  const formula = formulaById(id);
-  if (formula) {
-    return { id, label: formula.label, rule: formula.rule, condition: formula.condition, unit: formula.unit, version: formula.version };
-  }
-  const algorithm = algorithmById(id);
-  return { id, label: algorithm.label, rule: algorithm.rule, condition: null, unit: 'composite', version: algorithm.version };
-};
 
 // A repeated field carries the description of its own rows, so the form can draw
 // them without a second source of truth.

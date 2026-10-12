@@ -9,6 +9,10 @@ import { sanitizeRichText } from './sanitize.service.js';
 import { themeByKey } from '../constants/comparator.js';
 import { CATEGORY_FAMILY_CODES, STANDARD_CATEGORIES } from '../constants/finCategories.js';
 import { CHANGE_ACTIONS, FINANCIAL_TABLES } from '../constants/finData.js';
+import { FREQUENCIES } from '../constants/finance.js';
+import { TRANSACTION_KINDS } from '../constants/finMoney.js';
+import { ENVELOPE_KINDS } from '../constants/finBudget.js';
+import { isBudgetableFamily } from './finBudgetProposal.service.js';
 import { checkFinancialRow } from './finance/dataModel.js';
 
 // Global consistency check: rules that must hold across the WHOLE data set (database
@@ -27,13 +31,38 @@ export async function checkConsistency(prisma, { privateDir }) {
 
   // ---- files <-> rows ------------------------------------------------------
   const media = await prisma.media.findMany({
-    select: { id: true, storageKey: true, courseId: true, articleId: true, coverOf: { select: { id: true } }, articleCoverOf: { select: { id: true } } },
+    select: {
+      id: true,
+      storageKey: true,
+      courseId: true,
+      articleId: true,
+      coverOf: { select: { id: true } },
+      articleCoverOf: { select: { id: true } },
+      // A receipt of a movement (P6-04) is an owner too, like a lesson or an
+      // article: without this, every receipt would be reported as an orphan.
+      // Who uploaded it, so a receipt can be checked against the account whose
+      // movement it documents.
+      uploadedById: true,
+      finTransactionId: true,
+      finTransaction: { select: { id: true, userId: true } },
+    },
   });
 
-  add('every file has an owner', media.filter((m) => !m.courseId && !m.articleId && !m.coverOf && !m.articleCoverOf), (m) => `media ${m.id} belongs to nothing`);
+  add(
+    'every file has an owner',
+    media.filter((m) => !m.courseId && !m.articleId && !m.coverOf && !m.articleCoverOf && !m.finTransactionId),
+    (m) => `media ${m.id} belongs to nothing`,
+  );
   // Was a PostgreSQL CHECK (media_owner_check); MariaDB refuses a CHECK that references a
   // FOREIGN KEY column, which courseId and articleId both are (see the integrity_checks migration).
   add('a file belongs to at most one lesson OR one article, never both', media.filter((m) => m.courseId && m.articleId), (m) => `media ${m.id}`);
+  // Same rule for a receipt: a private financial document must not also be a
+  // lesson attachment or an article cover, which are served under other rules.
+  add(
+    'a receipt is not also a lesson file, an article file or a cover',
+    media.filter((m) => m.finTransactionId && (m.courseId || m.articleId || m.coverOf || m.articleCoverOf)),
+    (m) => `media ${m.id}`,
+  );
 
   const onDisk = new Set(existsSync(privateDir) ? readdirSync(privateDir) : []);
   const inDb = new Set(media.map((m) => m.storageKey));
@@ -199,10 +228,10 @@ export async function checkConsistency(prisma, { privateDir }) {
   // status, whole-number amounts, and no fictional line inside a real total.
   // It walks the SOCLE, table by table, so a financial table added by a later
   // task is checked the day it declares itself in FINANCIAL_TABLES.
-  for (const { model, label, amounts } of FINANCIAL_TABLES) {
+  for (const { model, label, amounts, currency } of FINANCIAL_TABLES) {
     const rows = await prisma[model].findMany();
     for (const row of rows) {
-      for (const problem of checkFinancialRow(row, { amounts })) {
+      for (const problem of checkFinancialRow(row, { amounts, currency })) {
         problems.push(violation('every financial row carries a valid metadata socle', `${label} ${row.id}: ${problem}`));
       }
     }
@@ -262,22 +291,161 @@ export async function checkConsistency(prisma, { privateDir }) {
     seenLabels.set(slot, row.id);
   }
 
+  // ---- "Mon argent" (P6-04) -------------------------------------------------
+  // A resource must be normalisable to the month, or every total built on it is
+  // wrong: F001 needs a frequency the engine knows. (A SQL CHECK covers the
+  // list; this catches a frequency the engine later stops supporting.)
+  const incomes = await prisma.finIncome.findMany({
+    select: { id: true, userId: true, value: true, currency: true, frequency: true, startDate: true, endDate: true, categoryId: true, deletedAt: true },
+  });
+  add('a resource carries a frequency the engine can normalise', incomes.filter((row) => !FREQUENCIES.includes(row.frequency)), (row) => `income ${row.id}: ${row.frequency}`);
+  add('a resource never ends before it starts', incomes.filter((row) => row.endDate && row.endDate < row.startDate), (row) => `income ${row.id}`);
+
+  const transactions = await prisma.finTransaction.findMany({
+    select: { id: true, userId: true, kind: true, value: true, currency: true, occurredAt: true, categoryId: true, planned: true, status: true, deletedAt: true },
+  });
+  add('a movement is money in or money out', transactions.filter((row) => !TRANSACTION_KINDS.includes(row.kind)), (row) => `transaction ${row.id}: ${row.kind}`);
+  // The client's rule, and the one thing SQL cannot check on its own because it
+  // needs to know what "now" is: only a PLANNED EXPENSE may be dated ahead.
+  add(
+    'only a planned expense is dated in the future',
+    transactions.filter((row) => !row.deletedAt && row.occurredAt > new Date() && !(row.planned && row.kind === 'expense')),
+    (row) => `transaction ${row.id}`,
+  );
+  // A planned movement has not happened: calling it "real" would put it in a
+  // realised total (F004's own condition is "dépenses réalisées de la période").
+  add('a planned movement is never recorded as real', transactions.filter((row) => row.planned && row.status === 'real'), (row) => `transaction ${row.id}`);
+
+  // A row may only point at the client's reference or at its OWN account's
+  // category. Pointing at someone else's would leak that it exists, and would
+  // break the moment that account is erased.
+  const categoryOwner = new Map(
+    (await prisma.finCategory.findMany({ select: { id: true, userId: true } })).map((row) => [row.id, row.userId]),
+  );
+  for (const [label, rows] of [
+    ['income', incomes],
+    ['transaction', transactions],
+  ]) {
+    add(
+      'a financial row only uses the reference categories or its own',
+      rows.filter((row) => row.categoryId !== null && categoryOwner.get(row.categoryId) !== null && categoryOwner.get(row.categoryId) !== row.userId),
+      (row) => `${label} ${row.id}`,
+    );
+  }
+
+  // A receipt belongs to the account whose movement it documents: a private
+  // financial document must never hang off somebody else's row.
+  const receiptsOfOthers = media.filter((m) => m.finTransaction && m.uploadedById && m.finTransaction.userId !== m.uploadedById);
+  add('a receipt was uploaded by the account that owns its movement', receiptsOfOthers, (m) => `media ${m.id}`);
+
+  // ---- budgets and envelopes (P6-05) ----------------------------------------
+  const budgets = await prisma.finBudget.findMany({
+    select: { id: true, userId: true, label: true, periodStart: true, periodEnd: true, currency: true, archivedAt: true, deletedAt: true },
+  });
+  const envelopes = await prisma.finEnvelope.findMany({
+    select: { id: true, userId: true, budgetId: true, categoryId: true, kind: true, value: true, currency: true, cap: true, deletedAt: true },
+  });
+  const budgetById = new Map(budgets.map((row) => [row.id, row]));
+
+  add('a budget envelope is a fixed or a variable one', envelopes.filter((row) => !ENVELOPE_KINDS.includes(row.kind)), (row) => `envelope ${row.id}: ${row.kind}`);
+
+  // The envelope carries its owner denormalised (every read is "the envelopes
+  // of MY budget"), so the two must agree: a mismatch would let one account's
+  // planning be read through the other's.
+  add(
+    'an envelope belongs to the account that owns its budget',
+    envelopes.filter((row) => budgetById.has(row.budgetId) && budgetById.get(row.budgetId).userId !== row.userId),
+    (row) => `envelope ${row.id}`,
+  );
+
+  // The budget totals its envelopes, so they are all in its currency. Cannot be
+  // a SQL CHECK: it reads `budgetId`, a FOREIGN KEY column (MariaDB refuses
+  // that), which is the same reason the overlap rule below lives here.
+  add(
+    'an envelope is in the currency of its budget',
+    envelopes.filter((row) => budgetById.has(row.budgetId) && budgetById.get(row.budgetId).currency !== row.currency),
+    (row) => `envelope ${row.id}`,
+  );
+
+  // Two envelopes on one category would split the same money in two and make
+  // every consumption rate wrong.
+  const envelopeSlots = new Map();
+  for (const row of envelopes) {
+    if (row.deletedAt || !row.categoryId) continue;
+    const slot = `${row.budgetId}:${row.categoryId}`;
+    if (envelopeSlots.has(slot)) {
+      problems.push(violation('one budget has at most one envelope per category', `envelope ${row.id}`));
+    }
+    envelopeSlots.set(slot, row.id);
+  }
+
+  // A live envelope hanging off a deleted budget would be counted by nothing
+  // and kept by nobody.
+  add(
+    'an envelope of a deleted budget is deleted too',
+    envelopes.filter((row) => !row.deletedAt && budgetById.get(row.budgetId)?.deletedAt),
+    (row) => `envelope ${row.id}`,
+  );
+
+  // A budget plans what goes out or what is set aside: an envelope pointing at
+  // an income category would be budgeting an expense against a salary.
+  const categoryFamily = new Map(categories.map((row) => [row.id, row.family]));
+  add(
+    'an envelope never budgets an income category',
+    envelopes.filter((row) => row.categoryId && categoryFamily.has(row.categoryId) && !isBudgetableFamily(categoryFamily.get(row.categoryId))),
+    (row) => `envelope ${row.id}: ${categoryFamily.get(row.categoryId)}`,
+  );
+
+  // Same rule as for a movement: an envelope may only point at the client's
+  // reference or at its OWN account's category.
+  add(
+    'a financial row only uses the reference categories or its own',
+    envelopes.filter((row) => row.categoryId !== null && categoryOwner.get(row.categoryId) !== null && categoryOwner.get(row.categoryId) !== row.userId),
+    (row) => `envelope ${row.id}`,
+  );
+
+  // « Chevauchement de périodes refusé » (the client's own rule). Checked over
+  // the LIVE budgets of each account: archiving is how someone withdraws a
+  // budget, and a withdrawn period must not forbid planning that month again.
+  const byOwner = new Map();
+  for (const row of budgets) {
+    if (row.deletedAt || row.archivedAt) continue;
+    if (!byOwner.has(row.userId)) byOwner.set(row.userId, []);
+    byOwner.get(row.userId).push(row);
+  }
+  for (const own of byOwner.values()) {
+    const sorted = [...own].sort((a, b) => a.periodStart - b.periodStart);
+    for (let i = 1; i < sorted.length; i += 1) {
+      if (sorted[i].periodStart <= sorted[i - 1].periodEnd) {
+        problems.push(violation('two live budgets of one account never overlap', `budget ${sorted[i].id} overlaps ${sorted[i - 1].id}`));
+      }
+    }
+  }
+
   // A logically deleted row keeps the journal entry that says it was deleted:
   // that is what makes the deletion traceable rather than silent.
   const changes = await prisma.finChange.findMany({ select: { id: true, entity: true, entityId: true, action: true, userId: true } });
   add('a change journal entry has a declared action', changes.filter((c) => !CHANGE_ACTIONS.includes(c.action)), (c) => `change ${c.id}: ${c.action}`);
   const deletedRows = new Set(changes.filter((c) => c.action === 'delete').map((c) => c.entityId));
-  add(
-    'a logically deleted financial row says in the journal that it was deleted',
-    categories.filter((row) => row.deletedAt && row.userId && !deletedRows.has(row.id)),
-    (row) => `category ${row.id}`,
-  );
+  for (const [label, rows] of [
+    ['category', categories.filter((row) => row.userId)],
+    ['income', incomes],
+    ['transaction', transactions],
+    ['budget', budgets],
+    ['envelope', envelopes],
+  ]) {
+    add(
+      'a logically deleted financial row says in the journal that it was deleted',
+      rows.filter((row) => row.deletedAt && !deletedRows.has(row.id)),
+      (row) => `${label} ${row.id}`,
+    );
+  }
   // A journal entry about a row of another account would be that account's
   // history leaking into this one.
-  const ownerOf = new Map(categories.map((row) => [row.id, row.userId]));
+  const ownerOf = new Map([...categories, ...incomes, ...transactions, ...budgets, ...envelopes].map((row) => [row.id, row.userId]));
   add(
     'a change journal entry belongs to the account that owns the row',
-    changes.filter((c) => c.entity === 'category' && ownerOf.has(c.entityId) && ownerOf.get(c.entityId) !== c.userId),
+    changes.filter((c) => ownerOf.has(c.entityId) && ownerOf.get(c.entityId) !== c.userId),
     (c) => `change ${c.id}`,
   );
 

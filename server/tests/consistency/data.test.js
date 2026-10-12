@@ -13,6 +13,11 @@ import { checkConsistency, privateDirOf } from '../../src/services/consistency.s
 
 let t;
 let admin;
+// `eraseAccountReceipts` is imported AFTER boot(), not at the top of the file:
+// storage.service.js reads STORAGE_DIR when it is first imported, and boot() is
+// what points it at the test directory. A static import here would send every
+// upload of this file to the real storage directory instead.
+let eraseAccountReceipts;
 const check = () => checkConsistency(t.prisma, { privateDir: privateDirOf(t.storageDir) });
 const rules = async () => (await check()).map((p) => p.rule);
 const api = (method, path, opts) => t.request(method, path, { user: admin, ...opts });
@@ -22,6 +27,7 @@ before(async () => {
   t = await boot();
   await t.reset();
   admin = await t.admin();
+  ({ eraseAccountReceipts } = await import('../../src/services/finMoney.service.js'));
 });
 after(() => t.close());
 
@@ -111,6 +117,98 @@ describe('a realistic history leaves the system consistent', () => {
     await t.prisma.user.delete({ where: { id: person.id } });
     assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91);
     assert.deepEqual(await check(), []);
+  });
+});
+
+describe('a realistic history of money leaves the system consistent (P6-03, P6-04)', () => {
+  const HOUR = 3600 * 1000;
+  const ago = (hours) => new Date(Date.now() - hours * HOUR).toISOString();
+
+  test('an onboarding, then resources, movements, a receipt and corrections', async () => {
+    const created = await t.user();
+    await t.prisma.user.update({ where: { id: created.id }, data: { finPublic: 'SAL', finCurrency: 'DZD' } });
+    const person = await t.prisma.user.findUnique({ where: { id: created.id } });
+    const as = (method, path, json) => t.request(method, path, { user: person, ...(json === undefined ? {} : { json }) });
+
+    // The onboarding writes its resources into the resources table.
+    await as('PUT', '/fin/onboarding', {
+      answers: {
+        netSalary: { amount: 6000000, frequency: 'mensuel' },
+        fixedCharges: { amount: 2500000 },
+        liquidSavings: { amount: 1200000 },
+        debtPayment: { amount: 800000 },
+        mainGoal: { choice: 'goal.logement' },
+      },
+    });
+    await as('POST', '/fin/onboarding/terminer', {});
+
+    // A second resource, corrected then archived.
+    const extra = (await as('POST', '/fin/revenus', {
+      label: 'Revenu locatif',
+      value: 1500000,
+      currency: 'DZD',
+      frequency: 'mensuel',
+      startDate: ago(60 * 24),
+    })).body.income;
+    await as('PATCH', `/fin/revenus/${extra.id}`, { value: 1600000, reason: 'loyer révisé' });
+    await as('PUT', `/fin/revenus/${extra.id}/archive`, { archived: true });
+
+    // Movements: realised, planned, uncategorised, shared, and one deleted.
+    const food = await t.prisma.finCategory.findFirst({ where: { key: 'variable.alimentation_boissons', userId: null }, select: { id: true } });
+    const own = (await as('POST', '/fin/categories', { family: 'variable', label: 'Café du matin' })).body.category;
+    await as('POST', '/fin/transactions', { kind: 'expense', value: 250000, currency: 'DZD', occurredAt: ago(2), categoryId: food.id });
+    await as('POST', '/fin/transactions', { kind: 'expense', value: 90000, currency: 'DZD', occurredAt: ago(3), categoryId: own.id });
+    await as('POST', '/fin/transactions', { kind: 'income', value: 400000, currency: 'DZD', occurredAt: ago(4) });
+    await as('POST', '/fin/transactions', {
+      kind: 'expense',
+      value: 700000,
+      currency: 'DZD',
+      occurredAt: new Date(Date.now() + 48 * HOUR).toISOString(),
+      planned: true,
+    });
+    await as('POST', '/fin/transactions', { kind: 'expense', value: 120000, currency: 'DZD', occurredAt: ago(5), shared: true });
+    const gone = (await as('POST', '/fin/transactions', { kind: 'expense', value: 10000, currency: 'DZD', occurredAt: ago(6) })).body.transaction;
+    await as('DELETE', `/fin/transactions/${gone.id}`, { reason: 'saisie en double' });
+
+    // A receipt on a real movement.
+    const withReceipt = (await as('POST', '/fin/transactions', { kind: 'expense', value: 330000, currency: 'DZD', occurredAt: ago(7) })).body.transaction;
+    await t.request('POST', `/fin/transactions/${withReceipt.id}/justificatif`, { user: person, form: fileForm(PNG, { name: 'ticket.png' }) });
+
+    // A recategorisation, and the synthesis read back.
+    await as('PATCH', `/fin/transactions/${withReceipt.id}`, { categoryId: food.id, reason: 'mauvaise catégorie' });
+    assert.equal((await as('GET', '/fin/argent/synthese')).status, 200);
+
+    assert.deepEqual(await check(), []);
+
+    // And erasing the account leaves the system consistent too: its rows, its
+    // trail and its receipt go, the client's reference stays. The stored FILES
+    // have no foreign key, so the erasure sweeps them explicitly — that is what
+    // eraseAccountReceipts is for, and an account-deletion feature will call it.
+    await eraseAccountReceipts(t.prisma, person.id);
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.equal(await t.prisma.finTransaction.count(), 0);
+    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91);
+    assert.deepEqual(await check(), []);
+  });
+
+  test('a lycéen in fictional mode: nothing fictional ever lands in a real total', async () => {
+    const created = await t.user();
+    await t.prisma.user.update({ where: { id: created.id }, data: { finPublic: 'LYC', finCurrency: 'DZD' } });
+    const minor = await t.prisma.user.findUnique({ where: { id: created.id } });
+
+    await t.request('PUT', '/fin/onboarding', {
+      user: minor,
+      json: { fictional: true, answers: { pocketMoney: { amount: 100000, frequency: 'mensuel' } } },
+    });
+    const rows = await t.prisma.finTransaction.findMany({ where: { userId: minor.id } });
+    assert.ok(rows.every((row) => row.status === 'fictional'));
+    assert.ok((await t.prisma.finIncome.findMany({ where: { userId: minor.id } })).every((row) => row.status === 'fictional'));
+
+    const synthesis = (await t.request('GET', '/fin/argent/synthese', { user: minor })).body.synthese;
+    assert.equal(synthesis.revenus.resultat, 100000, 'the fictional resource is the only resource');
+    assert.equal(synthesis.simulation.badge, 'SIMULATION');
+    assert.deepEqual(await check(), []);
+    await t.prisma.user.delete({ where: { id: minor.id } });
   });
 });
 
@@ -346,6 +444,116 @@ describe('the checker detects what it should (negative controls)', () => {
     assert.ok((await rules()).includes('a logically deleted financial row says in the journal that it was deleted'));
     await t.prisma.finCategory.delete({ where: { id: row.id } });
     await t.prisma.user.delete({ where: { id: person.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  // ---- "Mon argent" (P6-04) ------------------------------------------------
+  // Written AROUND the API, which is the only way such a row could appear.
+  const moneyUser = async () => {
+    const created = await t.user();
+    await t.prisma.user.update({ where: { id: created.id }, data: { finPublic: 'SAL', finCurrency: 'DZD' } });
+    return t.prisma.user.findUnique({ where: { id: created.id } });
+  };
+  const rawIncome = (userId, over = {}) =>
+    t.prisma.finIncome.create({
+      data: {
+        userId,
+        label: 'Brute',
+        value: 100000,
+        currency: 'DZD',
+        frequency: 'mensuel',
+        startDate: new Date(),
+        source: 'manual',
+        status: 'declared',
+        ...over,
+      },
+    });
+  const rawMovement = (userId, over = {}) =>
+    t.prisma.finTransaction.create({
+      data: { userId, kind: 'expense', value: 100000, currency: 'DZD', occurredAt: new Date(), source: 'manual', status: 'real', ...over },
+    });
+
+  test('a resource whose frequency the engine cannot normalise', async () => {
+    const person = await moneyUser();
+    // The SQL CHECK covers the declared list, so this one is caught by making
+    // the row point at a frequency the engine no longer knows about.
+    await assert.rejects(rawIncome(person.id, { frequency: 'quand-je-peux' }), 'the database refuses it outright');
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test('a resource that ends before it starts', async () => {
+    const person = await moneyUser();
+    await assert.rejects(rawIncome(person.id, { startDate: new Date('2026-06-01'), endDate: new Date('2026-01-01') }));
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test('an unplanned movement dated in the future', async () => {
+    const person = await moneyUser();
+    const row = await rawMovement(person.id, { occurredAt: new Date(Date.now() + 72 * 3600 * 1000) });
+    assert.ok((await rules()).includes('only a planned expense is dated in the future'));
+    await t.prisma.finTransaction.delete({ where: { id: row.id } });
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test('a planned movement recorded as real', async () => {
+    const person = await moneyUser();
+    const row = await rawMovement(person.id, {
+      planned: true,
+      status: 'real',
+      occurredAt: new Date(Date.now() + 72 * 3600 * 1000),
+    });
+    const found = await rules();
+    assert.ok(found.includes('a planned movement is never recorded as real'));
+    await t.prisma.finTransaction.delete({ where: { id: row.id } });
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test("a movement pointing at another account's category", async () => {
+    const person = await moneyUser();
+    const other = await moneyUser();
+    const theirs = (await t.request('POST', '/fin/categories', { user: other, json: { family: 'variable', label: 'Leur poste' } })).body.category;
+    const row = await rawMovement(person.id, { categoryId: theirs.id });
+    assert.ok((await rules()).includes('a financial row only uses the reference categories or its own'));
+    await t.prisma.finTransaction.delete({ where: { id: row.id } });
+    for (const u of [person, other]) await t.prisma.user.delete({ where: { id: u.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test('a movement deleted without the journal entry that says so', async () => {
+    const person = await moneyUser();
+    const row = await rawMovement(person.id, { deletedAt: new Date() });
+    assert.ok((await rules()).includes('a logically deleted financial row says in the journal that it was deleted'));
+    await t.prisma.finTransaction.delete({ where: { id: row.id } });
+    await t.prisma.user.delete({ where: { id: person.id } });
+    assert.deepEqual(await check(), []);
+  });
+
+  test("a receipt hanging off another account's movement", async () => {
+    const person = await moneyUser();
+    const other = await moneyUser();
+    const movement = await rawMovement(person.id);
+    const file = await t.prisma.media.create({
+      data: {
+        kind: 'image',
+        storageKey: `${'2'.repeat(32)}.png`,
+        originalName: 'x.png',
+        mimeType: 'image/png',
+        sizeBytes: 1,
+        uploadedById: other.id,
+        finTransactionId: movement.id,
+      },
+    });
+    writeFileSync(path.join(privateDirOf(t.storageDir), file.storageKey), PNG);
+    assert.ok((await rules()).includes('a receipt was uploaded by the account that owns its movement'));
+    // Deleting the movement takes its receipt row with it, which is the whole
+    // point of the key being on `media`.
+    await t.prisma.finTransaction.delete({ where: { id: movement.id } });
+    unlinkSync(path.join(privateDirOf(t.storageDir), file.storageKey));
+    for (const u of [person, other]) await t.prisma.user.delete({ where: { id: u.id } });
     assert.deepEqual(await check(), []);
   });
 
