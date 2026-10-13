@@ -1584,7 +1584,7 @@ Appliqué : titre de la page, nom de marque et textes d'accueil fr / en / ar, su
 - **L'effacement d'un compte n'est pas encore une fonction du produit** (pas de route dédiée) : `eraseAccountReceipts()` existe pour que la tâche qui l'écrira ait un seul endroit honnête à appeler, et le test de sécurité l'exerce.
 
 ### P6-05 — FINCLUDIA : budgets et enveloppes
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P6-04`
 - Durée cible : 3 jours (estimation)
@@ -1594,6 +1594,22 @@ Appliqué : titre de la page, nom de marque et textes d'accueil fr / en / ar, su
 - Plan de répartition du premier salaire (JA03 / JA04) : chaque dinar affectable, « Non affecté » toujours possible, **aucune règle type 50/30/20 imposée**.
 - Budget supérieur au revenu : autorisé mais signalé ; chevauchement de périodes refusé.
 - Alertes 80 % / 100 % / dépassement, configurables (via `P6-18`).
+
+**Réalisé (2026-10-13) :** backend déjà posé (modèle `FinBudget` / `FinEnvelope`, services, contrôleurs, routes `/fin/budgets`), vérifié et complété dans cette session.
+- **Deux tables**, même socle que `P6-02` à `P6-04` : **`fin_budgets`** (période, devise, récurrence, seuils d'alerte configurables) et **`fin_envelopes`** (catégorie, fixe / variable, montant prévu, plafond optionnel, reconduction).
+- **Vue calculée d'un budget** (écran C06, `finBudgetView.service.js`) : par enveloppe, prévu / réel / écart (F009), taux de consommation (F010) et projection de fin de période (F011) ; pour le budget entier, ressources de la période (F002), total prévu / réel (F003), flux net (F004), **reste à affecter** (F009) et **budget journalier** (F012). Chaque figure passe par le contrat du moteur (`P4-09`).
+- **Répartition proposée, jamais imposée** (`finBudgetProposal.service.js`) : deux sources déclarées séparément (moyenne mensuelle de l'historique réel, et les dépenses déclarées à l'inscription `P6-03` normalisées au mois), fusionnées avec priorité à l'historique ; l'API `/fin/budgets/proposition` n'écrit jamais rien — c'est la personne qui choisit « Utiliser » enveloppe par enveloppe.
+- **Chevauchement de périodes refusé**, sauf avec un budget archivé ; **budget supérieur aux ressources autorisé mais signalé**, jamais refusé. **Dupliquer pour la période suivante** ne reconduit que les enveloppes marquées comme récurrentes.
+- **Interface** : liste des budgets (créer, dupliquer, archiver, supprimer) sur `/budget`, détail d'un budget sur `/budget/:id` (figures, alertes, formulaire d'ajout d'enveloppe, panneau de proposition), fr / en / ar, jetons CSS, propriétés logiques (RTL).
+
+**Défaut trouvé et corrigé en chemin :** le **client Prisma généré était désynchronisé du schéma** — les modèles `FinCategory`, `FinBudget` et plusieurs autres existaient dans `schema.prisma` mais pas dans le client compilé (`src/generated/prisma`), ce qui faisait planter plusieurs routes financières (`Cannot read properties of undefined (reading 'findFirst')`) à l'exécution. `npx prisma generate` corrige, mais le défaut montre qu'une régénération a été oubliée dans une session précédente — à refaire systématiquement après toute modification de `schema.prisma`.
+
+**Tests :** 9 de sécurité (`tests/security/finBudget.test.js`, nouveaux dans cette session : isolation entre comptes sur budgets et enveloppes, 404 et non 403, journal de corrections non partagé, métadonnées serveur non pilotables, effacement de compte), plus les unitaires et fonctionnels déjà en place (`tests/unit/finBudget.test.js`, `tests/functional/finBudget.test.js`).
+
+**Limites et réserves déclarées :**
+- **Pas encore de scénario dans la suite de cohérence globale** (`tests/consistency/data.test.js`) ni de **parcours navigateur** (`tests/e2e`) dédiés aux budgets — contrairement à `P6-04`. À ajouter si une revue plus poussée est demandée.
+- **Alertes configurables via `P6-18`** (centre de notifications) : les seuils existent et sont stockés par budget, mais rien ne pousse encore de notification — seul l'écran du budget les affiche.
+- Le **filtre « membre »** et le **périmètre partagé** d'un budget suivent la même réserve que `P6-04` : filtrables dès maintenant par `scope`, le membre viendra avec `P6-13`.
 
 ### P6-06 — FINCLUDIA : accueil « Aujourd'hui » et tableaux de bord par public
 - Statut : `❌ todo`
@@ -1621,7 +1637,7 @@ Appliqué : titre de la page, nom de marque et textes d'accueil fr / en / ar, su
 - Rappels J-7 / J-1 configurables.
 
 ### P6-08 — FINCLUDIA : objectifs financiers
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P6-05`, `P4-10`
 - Durée cible : 3 jours (estimation)
@@ -1632,8 +1648,22 @@ Appliqué : titre de la page, nom de marque et textes d'accueil fr / en / ar, su
 - Détail : trajectoire, date estimée (ALG-03), valeur nominale / réelle, manque ou excédent, contribution nécessaire, scénarios comparés ; **hypothèses toujours visibles** ; « résultat = simulation, pas promesse ».
 - Alertes : objectif en retard, jalon atteint, contribution oubliée.
 
+**Réalisé (2026-10-13) :** nouveau modèle `FinGoal`, service, contrôleur, routes `/fin/goals`, page `/objectifs`.
+- **Catalogue de 11 modèles** (`constants/finGoal.js`) : un libellé chacun, jamais de montant suggéré.
+- **Capital déjà affecté plafonné par l'épargne réellement constatée** : un nouveau service partagé (`finSavings.service.js`, F007 « épargne nette ») somme les dépôts et retraits réels catégorisés dans la famille « Objectifs » de `P6-02`, et la somme des objectifs réels d'un compte ne peut jamais la dépasser — sauf objectif **fictif**, qui ne compte pas contre de l'argent qui n'a jamais été réellement mis de côté.
+- **Trajectoire (ALG-03)** : réutilise l'algorithme déjà construit et testé en `P4-10` (simulateur autonome) ; ici appliqué aux données réelles de l'objectif. Un rendement non renseigné est traité comme 0 %, jamais deviné. `completed: false` (hors horizon de simulation) est montré comme tel, pas masqué.
+- **Contribution nécessaire pour la date choisie** (F028 / F032), affichée seulement si une date cible existe.
+- **Interface** : liste dépliable avec barre de progression, formulaire de création par modèle ou personnalisé, correction du capital affecté et de la contribution, archivage, suppression ; fr / en / ar.
+
+**Tests :** 6 de sécurité (`tests/security/finGoal.test.js` : isolation entre comptes, plafond d'allocation, effacement de compte).
+
+**Limites et réserves déclarées :**
+- **Valeur nominale / réelle (inflation) et scénarios comparés** ne sont pas repris ici : l'outil autonome `/outils/simulateurs` (`P4-10`) couvre déjà cette exploration ; les reprendre dans la fiche objectif aurait dupliqué la même mécanique sans donnée supplémentaire.
+- **Alertes** (objectif en retard, jalon atteint, contribution oubliée) attendent le centre de notifications (`P6-18`).
+- **Pas encore de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur** — seule la sécurité est couverte pour l'instant, comme `P6-05` à sa livraison.
+
 ### P6-09 — FINCLUDIA : réserve de sécurité
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P6-05`
 - Durée cible : 1 jour (estimation)
@@ -1641,8 +1671,21 @@ Appliqué : titre de la page, nom de marque et textes d'accueil fr / en / ar, su
 
 Mois de réserve = épargne liquide / dépenses essentielles mensuelles ; cible en mois choisie par l'utilisateur ; manque, date estimée, composition expliquée. **Portefeuille fictif et actifs illiquides exclus par défaut** ; dépenses essentielles = 0 → « non calculé ».
 
+**Réalisé (2026-10-13) :** pas de table dédiée — seule une cible (`users.finReserveTargetMonths`, nullable, **aucune valeur par défaut**) appartient en propre à cette tâche ; le reste se lit dans les données déjà existantes.
+- **Épargne liquide** : le même F007 que `P6-08` (dépôts − retraits réels de la famille « Objectifs »), partagé via `finSavings.service.js` pour que les deux tâches ne tiennent jamais deux comptabilités différentes de la même épargne.
+- **Dépenses essentielles mensuelles** : moyenne réelle sur 3 mois des catégories que l'onboarding (`P6-03`) qualifie déjà de `role: 'essentialExpenses'` (dérivées de `ONBOARDING_QUESTIONS`, jamais retypées) ; à défaut d'historique, reprend les réponses déclarées à l'inscription — le même pont que la proposition de budget (`P6-05`).
+- **F014/F015/F016** exposées via `/fin/reserve` ; cible modifiable via `/fin/reserve/cible`, `null` tant que la personne n'a rien choisi — jamais 0 par défaut.
+- **Interface** : page `/reserve` (figures, composition, choix de la cible), fr / en / ar.
+
+**Tests :** 4 de sécurité (`tests/security/finReserve.test.js` : session requise, cible non partagée entre comptes, absence de cible = non calculé, bornes refusées).
+
+**Limites et réserves déclarées :**
+- **Date estimée d'atteinte de la cible** n'est pas calculée : aucune formule du catalogue ne la couvre, et en inventer une aurait été exactement ce que la règle du projet interdit.
+- **Actifs illiquides et portefeuille fictif** : rien à exclure explicitement tant que `P6-11` (patrimoine réel) et `P6-12` (portefeuille fictif) n'existent pas — seule l'épargne réelle via transactions est comptée aujourd'hui, ce qui revient au même résultat qu'une exclusion, mais la case sera à revisiter quand ces tâches existeront.
+- **Pas encore de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
+
 ### P6-10 — FINCLUDIA : dettes et analyse de l'endettement
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P6-04`, `P4-11`
 - Durée cible : 3 jours (estimation)
@@ -1651,6 +1694,19 @@ Mois de réserve = épargne liquide / dépenses essentielles mensuelles ; cible 
 - Déclaration des dettes (capital restant, mensualité, taux ou coût si connu, échéance, objet, prêteur, actif financé), paiements.
 - Synthèse : encours, mensualités, **taux d'effort** (indicateur pédagogique, seuils `P6-01`), échéances ; qualification **productive / neutre / sous pression** seulement si les informations suffisent — jamais « bonne / mauvaise ».
 - Détail : scénarios avalanche / boule de neige et versement supplémentaire (`P4-11`).
+
+**Réalisé (2026-10-13) :** nouveaux modèles `FinDebt` et `FinDebtPayment`, service, contrôleur, routes `/fin/debts`, page `/dettes`.
+- **Un paiement fait baisser le capital restant** et s'écrit dans le journal de corrections de la dette, plutôt que de laisser le capital dériver d'une mensualité déclarée à part — un dépassement est plafonné au capital restant, jamais négatif.
+- **F017-F019** (service mensuel, taux d'effort, dette / revenu annuel) via `finance/formulas.js`, déjà écrites et testées depuis `P4-11` ; F018 n'est affiché que si une dette existe, pour la même raison que `P3-18`/`P6-04` : un taux à 0 % se lirait « pas de dette ».
+- **Comparaison avalanche / boule de neige (ALG-01)** : réutilise l'algorithme du simulateur autonome (`P4-11`) sur les dettes réellement déclarées ; exclut explicitement, avec avertissement, toute dette sans taux connu — un taux deviné depuis la mensualité aurait inventé une donnée.
+- **Qualification « productive / neutre / sous pression » volontairement absente** : ses seuils restent « à valider » par le client (`P6-01` point 5) ; en afficher un sans eux aurait été un verdict inventé. Seuls les indicateurs bruts sont montrés.
+- **Interface** : liste dépliable (encours, synthèse, enregistrement de paiement), formulaire de déclaration, comparaison des deux stratégies, archivage, suppression ; fr / en / ar.
+
+**Tests :** 6 de sécurité (`tests/security/finDebt.test.js` : isolation entre comptes, paiement plafonné, effacement de compte).
+
+**Limites et réserves déclarées :**
+- **Qualification productive / neutre / sous pression** : en attente des seuils du client (`P6-01` point 5), voir ci-dessus.
+- **Pas encore de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
 
 ### P6-11 — FINCLUDIA : patrimoine réel
 - Statut : `❌ todo`

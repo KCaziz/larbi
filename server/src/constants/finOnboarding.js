@@ -162,6 +162,13 @@ export const ONBOARDING_QUESTIONS = [
 export const ONBOARDING_QUESTION_KEYS = ONBOARDING_QUESTIONS.map((q) => q.key);
 export const onboardingQuestionByKey = (key) => ONBOARDING_QUESTIONS.find((q) => q.key === key) ?? null;
 
+// The standard category keys F014 (safety reserve, P6-09) averages over for
+// "dépenses essentielles mensuelles". Derived from the questions themselves
+// rather than retyped, so the two can never drift apart.
+export const ESSENTIAL_EXPENSE_CATEGORY_KEYS = [
+  ...new Set(ONBOARDING_QUESTIONS.filter((q) => q.role === 'essentialExpenses').map((q) => q.category)),
+];
+
 // The questions asked to one public, in the client's order.
 //
 // A question with no `publics` belongs to the common C03 socle. It is asked to

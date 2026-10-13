@@ -92,6 +92,15 @@ export const router = createBrowserRouter([
               },
               // FINCLUDIA "Mon argent" (P6-04): synthesis, entry and history.
               { path: 'mon-argent', lazy: lazyPage(() => import('../pages/argent/MyMoneyPage.jsx')) },
+              // FINCLUDIA budgets and envelopes (P6-05), screens C06 / JA03 / JA04.
+              { path: 'budget', lazy: lazyPage(() => import('../pages/budget/BudgetsPage.jsx')) },
+              { path: 'budget/:id', lazy: lazyPage(() => import('../pages/budget/BudgetDetailPage.jsx')) },
+              // FINCLUDIA financial goals (P6-08), screens C09-C11.
+              { path: 'objectifs', lazy: lazyPage(() => import('../pages/goals/GoalsPage.jsx')) },
+              // FINCLUDIA debts (P6-10), screens C13-C14.
+              { path: 'dettes', lazy: lazyPage(() => import('../pages/debts/DebtsPage.jsx')) },
+              // FINCLUDIA safety reserve (P6-09), screen C12.
+              { path: 'reserve', lazy: lazyPage(() => import('../pages/reserve/ReservePage.jsx')) },
               // Where the payment provider sends the buyer back (P3-09): reads the order, grants nothing.
               { path: 'paiement/retour', lazy: lazyPage(() => import('../pages/payments/PaymentReturnPage.jsx')) },
               {

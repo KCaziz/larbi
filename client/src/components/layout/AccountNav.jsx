@@ -13,6 +13,10 @@ const links = [
   { labelKey: 'account.nav.fincludia', to: '/compte/fincludia' },
   { labelKey: 'account.nav.onboarding', to: '/compte/premiers-pas' },
   { labelKey: 'nav.money', to: '/mon-argent' },
+  { labelKey: 'nav.budget', to: '/budget' },
+  { labelKey: 'nav.goals', to: '/objectifs' },
+  { labelKey: 'nav.reserve', to: '/reserve' },
+  { labelKey: 'nav.debts', to: '/dettes' },
   { labelKey: 'account.nav.categories', to: '/compte/categories' },
 ];
 

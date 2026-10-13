@@ -69,6 +69,11 @@ model User {
   finMainIntention      String?
   finHorizon            String?
   finOnboardedAt        DateTime?
+  // Target months of essential expenses the person wants set aside (screen C12,
+  // P6-09). Null until THEY choose it: a default would be an invented
+  // recommendation, which the client's own wording ("cible choisie par
+  // l'utilisateur") rules out — F015/F016 read null as "non calculé", not 0.
+  finReserveTargetMonths Int?
   finProfileTransitions FinProfileTransition[]
   finConsents           FinConsent[]
   finAuditLogs          FinAuditLog[]
@@ -80,6 +85,9 @@ model User {
   finOnboarding         FinOnboarding?
   finBudgets            FinBudget[]
   finEnvelopes          FinEnvelope[]
+  finGoals              FinGoal[]
+  finDebts              FinDebt[]
+  finDebtPayments       FinDebtPayment[]
 
   // E-Learning (P2-01)
   formationsCreated Formation[]
@@ -599,6 +607,117 @@ model FinEnvelope {
   @@index([userId, deletedAt])
   @@index([categoryId])
   @@map("fin_envelopes")
+}
+
+// ---- Financial goals (P6-08), screens C09-C11 --------------------------------
+// A savings goal: a target, a date, and how much is already set aside. The
+// client's catalogue of templates (constants/finGoal.js) only supplies a label
+// and an icon key — never a suggested amount, which the client explicitly
+// forbids ("valeurs d'exemple non présélectionnées comme recommandation").
+model FinGoal {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label      String    @db.VarChar(80)
+  // One of GOAL_TEMPLATES (constants/finGoal.js), or null for a fully custom
+  // goal. Purely a starting label/icon; nothing here is read back as data.
+  templateKey String?  @db.VarChar(40)
+  target     Int
+  currency   String    @db.VarChar(3)
+  // "Date future" the client asks for at creation. Nullable all the same: a
+  // goal corrected later or a fictional one may lose its date without losing
+  // its meaning, and ALG-03 already reports "non calculé" when it is absent.
+  targetDate DateTime?
+  // "Capital déjà affecté". Bounded against this account's own marked savings
+  // (F007) at the service layer — a CHECK cannot read another table — except
+  // for a fictional goal, which plays with money that was never really saved.
+  allocated  Int       @default(0)
+  monthlyContribution Int?
+  // Annual expected return, a RATIO (0.05 = 5 %), for ALG-03's trajectory. Null
+  // means a simple cash goal: no return is assumed, never invented.
+  rate       Float?
+  priority   Int       @default(0)
+  note       String?   @db.VarChar(300)
+  scope      String    @default("personal") @db.VarChar(20)
+  source     String    @db.VarChar(20)
+  sourceRef  String?   @db.VarChar(200)
+  status     String    @db.VarChar(20)
+  confidence String?   @db.VarChar(10)
+  consentUses Json     @default("[]")
+  effectiveAt DateTime @default(now())
+  collectedAt DateTime @default(now())
+  version    Int       @default(1)
+  archivedAt DateTime?
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([userId, deletedAt])
+  @@map("fin_goals")
+}
+
+// ---- Debts (P6-10), screens C13-C14 ------------------------------------------
+// A declared debt: what is left to pay, the instalment, and — when the client
+// knows it — a rate or a known total cost (an informal loan may have neither).
+model FinDebt {
+  id                  String          @id @default(uuid())
+  userId              String
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label               String          @db.VarChar(80)
+  lender               String?        @db.VarChar(120)
+  purpose              String?        @db.VarChar(200)
+  // The real asset this debt financed, if any (a car, a flat) — informational
+  // only; linking it to P6-11's patrimony is for when that task exists.
+  assetFinanced        String?        @db.VarChar(120)
+  outstandingPrincipal Int
+  monthlyInstalment    Int
+  currency             String         @db.VarChar(3)
+  // A ratio (0.07 = 7 %) when the client knows it, null otherwise — never
+  // guessed from the instalment, which would invent a rate nobody declared.
+  rate                 Float?
+  // The alternative when the rate is not known: a total cost already declared
+  // by the lender (a store credit's fixed total, for instance).
+  knownTotalCost       Int?
+  dueDate              DateTime?
+  note                 String?        @db.VarChar(300)
+  scope                String         @default("personal") @db.VarChar(20)
+  source               String         @db.VarChar(20)
+  sourceRef            String?        @db.VarChar(200)
+  status               String         @db.VarChar(20)
+  confidence           String?        @db.VarChar(10)
+  consentUses          Json           @default("[]")
+  effectiveAt          DateTime       @default(now())
+  collectedAt          DateTime       @default(now())
+  version              Int            @default(1)
+  archivedAt           DateTime?
+  deletedAt            DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  payments             FinDebtPayment[]
+
+  @@index([userId, deletedAt])
+  @@map("fin_debts")
+}
+
+// One payment against one debt, so the outstanding principal is a FACT
+// (declared, then paid down) rather than something recomputed from a
+// standalone instalment figure that may have changed since.
+model FinDebtPayment {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  debtId    String
+  debt      FinDebt  @relation(fields: [debtId], references: [id], onDelete: Cascade)
+  amount    Int
+  currency  String   @db.VarChar(3)
+  paidAt    DateTime
+  note      String?  @db.VarChar(300)
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+
+  @@index([debtId])
+  @@index([userId, deletedAt])
+  @@map("fin_debt_payments")
 }
 
 // ---- "Apprendre" glossary and mini-guides (P2-08) -----------------------------

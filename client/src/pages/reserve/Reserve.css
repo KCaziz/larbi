@@ -1,0 +1,47 @@
+/* Safety reserve (P6-09). Tokens only, logical properties (RTL). */
+.reserve-page {
+  max-width: 760px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  padding-block-end: 40px;
+}
+
+.reserve-composition {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin-block: 16px;
+  font-size: 0.9rem;
+}
+
+.reserve-composition dt {
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.reserve-composition dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.reserve-target-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+  margin-block-start: 18px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.reserve-target-form input {
+  width: 120px;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
