@@ -83,23 +83,32 @@ export async function assertNoOverlap(prisma, userId, { periodStart, periodEnd, 
   }
 }
 
+// The last day of the month `months` after `date`'s own month.
+const lastDayOfShiftedMonth = (date, months) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months + 1, 0));
+
+// `date` shifted by whole months, with the DAY CLAMPED to the target month.
+//
+// Date.UTC overflows on its own — 31 January plus one month gives 3 March — so
+// the day has to be clamped, or a monthly budget would walk out of the calendar
+// a little further every period.
+function addMonths(date, months) {
+  const lastDay = lastDayOfShiftedMonth(date, months).getUTCDate();
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, Math.min(date.getUTCDate(), lastDay)));
+}
+
 // The period that follows `[start, end]` for a given recurrence. `none` has no
 // next period by definition, and says so instead of guessing one.
 export function nextPeriod(recurrence, start, end) {
   const step = { monthly: 1, quarterly: 3, yearly: 12 }[recurrence];
   if (!step) return null;
-  // Month arithmetic, not "+30 days": the next month after a 31-day month is
-  // its own length, and adding days would drift out of the calendar.
-  const nextStart = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + step, start.getUTCDate()));
-  const nextEnd = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + step, end.getUTCDate()));
   // A period that ended on the last day of its month keeps ending on the last
-  // day: 31 January followed by 28 February, not 3 March.
-  const endedOnLastDay = end.getUTCDate() === new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + 1, 0)).getUTCDate();
-  if (endedOnLastDay) {
-    const lastDay = new Date(Date.UTC(nextEnd.getUTCFullYear(), nextEnd.getUTCMonth() + 1, 0));
-    return { periodStart: nextStart, periodEnd: lastDay };
-  }
-  return { periodStart: nextStart, periodEnd: nextEnd };
+  // day: 31 January is followed by 28 February, not by "28 February and three
+  // days", and not by 31 March either.
+  const endedOnLastDay = end.getUTCDate() === lastDayOfShiftedMonth(end, 0).getUTCDate();
+  return {
+    periodStart: addMonths(start, step),
+    periodEnd: endedOnLastDay ? lastDayOfShiftedMonth(end, step) : addMonths(end, step),
+  };
 }
 
 // ---- categories ------------------------------------------------------------

@@ -1002,3 +1002,75 @@ Tests : `tests/unit/comparison.test.js` (**17 tests** : vocabulaire complet, tab
 **2. Ne jamais importer un service applicatif en tête d'un fichier de test qui démarre un serveur.** `services/storage.service.js` lit `STORAGE_DIR` **au moment où il est importé**, et c'est `boot()` qui pointe cette variable vers le dossier de test. Un `import` statique en tête de fichier est évalué avant `boot()`, si bien que **tous les téléversements du fichier de test atterrissent dans le stockage de développement** pendant que le contrôle de cohérence inspecte le dossier de test : on voit alors « fichier manquant sur le disque » sur des fichiers qui existent, ailleurs. `boot()` importe les modules applicatifs dynamiquement pour cette raison ; faire pareil (`({ x } = await import(...))` dans le `before`). Onze fichiers de test se sont retrouvés dans `server/storage/private` avant que ce soit compris.
 
 ---
+
+## <a id="p6-06-p6-07"></a>P6-06 / P6-07 — Accueil « Aujourd'hui » et calendrier financier
+
+**Un paiement planifié n'a pas eu besoin de sa propre table.** C'est déjà un mouvement `planned` de `P6-04`, et le calendrier le lit là-bas. Une seconde table d'« événements planifiés » aurait été exactement le **double comptage** que le client interdit : « Marquer payé » corrige la ligne **existante** (elle cesse d'être planifiée et devient réelle), donc il n'y a jamais une deuxième ligne à compter. Le corollaire : la règle de cohérence « un mouvement planifié n'est jamais réel » de `P6-04` **porte aussi** celle de `P6-07`, et il ne faut pas l'écrire deux fois.
+
+**L'arithmétique des mois déborde, toujours, si on ne borne pas le jour.** `Date.UTC(2026, 0 + 1, 31)` donne le **3 mars**. Une récurrence mensuelle au 31 janvier, un budget mensuel commencé un 31 : les deux sortaient du calendrier un peu plus à chaque période. Deux règles, dans `finBudget.service.js` et `finCalendarView.service.js` : le jour est **borné au dernier jour du mois cible**, et chaque occurrence se calcule **depuis la date de base**, pas depuis la précédente — sinon le 31 devenu 28 ne redevient jamais 31.
+
+**Le solde de départ est déclaré, jamais déduit.** FINCLUDIA ne détient aucun solde de compte, et il n'y a rien d'honnête à en dériver un : sans solde indiqué, le **cash projeté et les jours de tension ne sont pas calculés**, et l'écran demande le solde au lieu de partir d'un zéro imaginaire. Un solde **négatif** est accepté — quelqu'un peut être à découvert.
+
+**Une provision n'est pas un paiement de la période.** Elle apparaît sur son jour et dans son propre total, mais **jamais dans le total des sorties dues** ni dans aucun total de ce qui a été dépensé : le client l'écrit, et un test le vérifie contre la synthèse de `P6-04`. Passé l'échéance, F045 n'a plus de mois pour diviser et répond **« non calculé »**, pas le reste entier.
+
+**Un score n'est pas un chiffre, c'est un jugement.** La « santé financière personnelle » (F053) du tableau salarié **n'est pas publiée** : le mécanisme existe et prend ses pondérations en argument, mais les **poids** sont « à valider » par le client (`P6-01` point 5). On affiche les **sous-scores lisibles un par un** et on **dit à l'écran** pourquoi le score global n'est pas là. Même retenue que pour l'indice de connaissances de `P2-09`. Le jour où les poids arrivent, `HEALTH_INDEX_BLOCKED` disparaît.
+
+**Quand une formule exige une définition versionnée, il faut l'écrire et la faire voyager.** F047 (autonomie étudiante) a pour condition « définition revenus personnels versionnée », et le client n'en donne pas. La nôtre est déclarée dans `constants/finDashboard.js` (le revenu qu'on **gagne** est personnel, celui qu'on **reçoit** ne l'est pas), versionnée, et **la version est dans le `entrees_snapshot`** de chaque réponse : un ratio dont la définition n'est consultable nulle part est un ratio avec lequel personne ne peut discuter.
+
+**Les deux moitiés d'un taux viennent de la même période.** F008 divise l'épargne nette par le revenu **net de la même période**. Diviser le **cumul** mis de côté par le revenu d'un mois ne donne pas un taux mais un nombre sans signification — d'où `markedSavingsInPeriod` à côté de `markedSavingsRaw` dans `finSavings.service.js`. Et rien marqué comme épargne sur la période donne **« non calculé »**, pas 0 %.
+
+**« Carte non calculable » et « module inexistant » sont deux choses différentes.** Une carte dont la formule ne peut pas aboutir devient une **invitation à compléter** (et garde la formule qu'elle aurait portée, pour le panneau « Pourquoi ? »). Une carte dont le **module n'existe pas encore** ne s'affiche **pas du tout** : inviter quelqu'un à ouvrir un écran que personne n'a construit est pire que de ne rien montrer. L'ordre des KPI d'un tableau est donc une **préférence plus longue que le plafond** (5), et les cartes affichées sont les premières qui aboutissent.
+
+### Trois pièges d'outillage
+
+**1. `dataAgeDays(referenceDate, now)`, et pas l'inverse.** Appelée dans l'autre sens, F055 renvoie des âges **négatifs** — donc `age > seuil` est toujours faux et la **bannière de qualité ne peut jamais s'afficher**. Un défaut silencieux : rien ne plante, la bannière n'apparaît simplement jamais. Seul un test qui attend une valeur précise (76 jours) l'a révélé.
+
+**2. Une chaîne de requête est du texte ; `amountSchema` refuse une chaîne à dessein.** Un corps JSON doit envoyer un vrai nombre, donc `amountSchema` n'a pas de `coerce` — et un montant passé en **paramètre de requête** est donc refusé en 400. Il faut un `queryAmount` (`z.coerce.number().int().safe()`) qui convertit **mais refuse toujours** ce qui n'est pas entier. Le même piège existe déjà pour `minAmount` / `maxAmount` dans `P6-04`.
+
+**3. Ne jamais supposer un chemin d'API dans un test : le vérifier.** `/fin/objectifs` et `/fin/dettes` n'existent pas (ce sont `/fin/goals` et `/fin/debts`). L'un a fait échouer son test ; l'**autre est passé**, parce que le statut de la création n'était pas vérifié — un test qui « cachait une dette » alors qu'aucune dette n'avait été créée ne prouvait rien. **Toute création dans un test se vérifie par son statut**, même quand ce n'est pas elle qu'on teste.
+
+**Et une leçon de registre :** `FINANCIAL_TABLES` (`constants/finData.js`) est ce qui dit au contrôle de cohérence quelles tables parcourir. `FinGoal` et `FinDebt` portaient le socle de `P6-02` **sans y être déclarées** : elles n'étaient donc **pas contrôlées du tout**. Une table financière qui n'ajoute pas sa ligne au registre est une table que personne ne vérifie.
+
+---
+
+## <a id="p6-11-p6-13"></a>P6-11 / P6-12 / P6-13 — Patrimoine réel, portefeuille fictif et espaces partagés
+
+**Une table de passifs n'a pas été créée, et c'est le point à retenir.** L'écran C16 de `P6-11` montre « actifs **et passifs** », mais les dettes ont déjà `fin_debts` (`P6-10`). En créer une seconde aurait donné **deux endroits où corriger la même dette**, et F035 aurait dépendu de celui que l'appelant avait choisi. Quand une spécification nomme deux choses et qu'une des deux existe déjà, elle décrit un **écran**, pas deux tables.
+
+**La frontière réel / fictif est tenue des deux côtés, et épinglée en SQL.** `fin_assets` **exclut** `fictional` de son `CHECK` de statut ; les trois tables de `P6-12` l'y **épinglent** (`CHECK (status = 'fictional')`). Ni « par défaut », ni vérifié seulement en zod : une ligne de l'atelier qui pourrait être stockée autrement serait à une requête près d'entrer dans un total réel, et une seule ligne fictive dans F035 ne rend pas le patrimoine net approximatif — elle le rend **faux**. Un test vérifie la frontière dans les deux sens.
+
+**« Valeur datée » veut dire que la date voyage avec le montant.** `valuedAt` est le jour où la personne a **établi** le montant, pas celui de la saisie — sinon un appartement réévalué la semaine dernière passerait pour une donnée d'un an. Corollaire appliqué : **corriger le montant sans donner la date est refusé**, car sans cela une valeur ancienne se mettrait silencieusement à paraître récente.
+
+**Un historique peut souvent être lu dans le journal de corrections.** `P6-11` demande un « historique » des valorisations : `fin_changes` enregistre déjà chaque changement de `value` et de `valuedAt` avec sa date (`P6-02`). Une série séparée aurait été les mêmes faits stockés deux fois, et les deux auraient divergé. **Avant d'ajouter une table d'historique, regarder si le journal ne la contient pas déjà.**
+
+**Quand le client interdit d'inventer la donnée, ce qui reste est l'atelier, pas rien.** `P6-12` n'a ni catalogue d'instruments ni cotation, parce que sa dernière puce l'interdit et que le client n'a rien fourni. La personne **nomme** le support et **déclare** le prix simulé, daté : c'est sa simulation, pas une référence publiée. L'API le dit (`instrumentCatalogue: null`, `pricesDeclaredByThePerson: true`) au lieu de laisser le découvrir, et la seule puce non livrée — le « Marché pédagogique » — ne l'est pas **parce que** la même spécification l'interdit.
+
+**Pas d'effet de levier dans un atelier.** Les liquidités fictives ne passent jamais sous zéro (`CHECK`), un achat qu'elles ne couvrent pas est **refusé et non emprunté**, et vendre plus d'unités qu'on en détient est refusé aussi. Les **frais simulés sont stockés sur l'opération**, pas recalculés : changer le taux plus tard ne doit pas réécrire le passé.
+
+**Un score sans ses seuils reste un score, jamais un mot.** F057 (profil de risque) et F053 (santé financière, `P6-06`) sont dans le même cas : le mécanisme fonctionne, les **pondérations ou les seuils** appartiennent au client (`P6-01`). On affiche le nombre, on **n'invente pas l'étiquette**, et l'écran dit pourquoi il n'y a pas de mot à côté du chiffre.
+
+**La seule suppression physique de la Phase 6 est la réinitialisation du portefeuille fictif.** Partout ailleurs la suppression est logique, parce qu'un total calculé le mois dernier doit garder de quoi s'expliquer. Ici rien n'a alimenté un historique réel, et une réinitialisation qui garderait les anciennes décisions n'en serait pas une — d'où l'export du journal, proposé **avant** le bouton.
+
+### `P6-13` : ce que la forme du code garantit, et qu'une vérification ne garantirait pas
+
+**Le partage est par MEMBRE, et il n'existe aucune route pour régler celui d'autrui.** Ce n'est pas un contrôle d'autorisation, c'est une **absence** : la seule route de partage écrit la ligne de l'appelant. Un contrôle peut être contourné par un appelant futur ; une route qui n'existe pas, non.
+
+**La vue d'un lecteur se construit à partir de ce que le SUJET a partagé, jamais de ce que le rôle du lecteur autorise.** Un rôle dit ce qu'on peut faire à l'**espace** (inviter, renommer, retirer) ; il ne donne jamais accès à l'argent de quelqu'un — un administrateur de colocation gère la colocation, il ne lit pas le salaire d'un colocataire. Une seule fonction décide, `visibleTo({ reader, subject, kind })`, donc il y a **un** endroit à vérifier et non un par écran.
+
+**« Totaux seuls » veut dire que les lignes ne sont pas envoyées.** Pas envoyées puis masquées par l'interface : **absentes de la réponse**. Masquer côté client est une fuite en attente d'un bug, et un test vérifie qu'une note saisie par la personne n'apparaît **nulle part** dans la charge utile à ce niveau.
+
+**404, jamais 403, pour un espace dont on n'est pas membre.** C'est la seule façon de tenir « accès non autorisé → écran neutre » : distinguer « pas à vous » de « n'existe pas » confirme l'existence de l'espace. Même raison pour les invitations — un jeton inconnu, révoqué ou expiré répondent **tous les trois à l'identique**, pour que la route ne serve pas à découvrir si un jeton a existé.
+
+**Un consentement donné une fois n'est pas un consentement pour toujours.** Quitter un espace coupe la visibilité dans les deux sens, immédiatement, et **re-rejoindre repart de privé** : l'ancienne matrice n'est pas silencieusement restaurée.
+
+**Le jeton d'invitation est stocké haché (SHA-256) et affiché une seule fois**, comme une session ou un jeton de réinitialisation : une base qui fuite ne doit pas donner la capacité de rejoindre le foyer de quelqu'un.
+
+### Deux pièges d'outillage
+
+**1. Ne jamais lancer la suite complète pendant qu'on modifie les sources.** La suite a rendu **528 échecs** une fois : non pas une régression, mais un import erroné (`sumAmounts` depuis `formulas.js` au lieu de `finance/money.js`) présent dans le fichier **pendant** que le lanceur chargeait chaque test. Chaque `boot()` échouait. Même classe de faute que lancer deux suites en parallèle sur `larbi_test` : le verdict ne veut rien dire si le code bouge sous les pieds du lanceur. **On modifie, puis on lance, et on ne touche à rien jusqu'au verdict.**
+
+**2. Vérifier la signature d'une formule du moteur avant de l'appeler, même quand son nom la rend évidente.** `netWorth` ne prend pas deux totaux mais `{ assets, liabilities, currency }` — ce sont des **listes d'entrées**, qu'elle somme elle-même avec l'additionneur qui refuse de mélanger les devises. Appelée avec deux nombres, elle sommait deux listes vides et le patrimoine net valait **0 quels que soient les montants**. Quatre tests l'ont attrapé d'un coup ; sans eux, un écran entier affichait zéro sans rien signaler. Même famille que l'inversion d'arguments de `dataAgeDays` sous `P6-06`.
+
+**Et une règle d'étiquetage :** un total brut ne porte pas l'identifiant d'une formule qui calcule un **net**. F035 est le patrimoine **net** ; les totaux d'actifs et de dettes sont des données descriptives et le disent, comme la `repartition` de la synthèse. Mettre `F035` sur un total d'actifs l'aurait mal attribué pour quiconque ouvre le panneau « Pourquoi ? ».
+
+---

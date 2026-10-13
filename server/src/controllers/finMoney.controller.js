@@ -18,7 +18,7 @@ import {
   updateTransaction,
 } from '../services/finMoney.service.js';
 import { describeFormula } from '../services/finance/describe.js';
-import { buildSynthesis, currentMonth, previousMonth } from '../services/finSynthesis.service.js';
+import { buildSynthesis, currentMonth, loadSynthesisData } from '../services/finSynthesis.service.js';
 import { sendStoredMedia } from '../services/mediaResponse.js';
 import { discardTemp, ingestUpload, removeStored } from '../services/storage.service.js';
 import { HttpError } from '../utils/httpError.js';
@@ -197,30 +197,7 @@ export async function removeReceipt(req, res) {
 
 export async function getSynthesis(req, res) {
   const period = req.query.from ? { start: req.query.from, end: req.query.to } : currentMonth();
-  const before = previousMonth(period.start);
-
-  const [incomes, movements, previous] = await Promise.all([
-    // Resources active during the period: one that ended before it started, or
-    // starts after it ended, is not part of it.
-    prisma.finIncome.findMany({
-      where: {
-        userId: req.user.id,
-        deletedAt: null,
-        archivedAt: null,
-        startDate: { lte: period.end },
-        OR: [{ endDate: null }, { endDate: { gte: period.start } }],
-      },
-      select: { id: true, label: true, value: true, currency: true, frequency: true, status: true },
-    }),
-    prisma.finTransaction.findMany({
-      where: { userId: req.user.id, deletedAt: null, occurredAt: { gte: period.start, lte: period.end } },
-      select: { id: true, kind: true, value: true, currency: true, categoryId: true, planned: true, status: true },
-    }),
-    prisma.finTransaction.findMany({
-      where: { userId: req.user.id, deletedAt: null, occurredAt: { gte: before.start, lte: before.end } },
-      select: { kind: true, value: true, currency: true, planned: true, status: true },
-    }),
-  ]);
+  const { incomes, movements, previous } = await loadSynthesisData(prisma, req.user.id, period);
 
   const synthesis = buildSynthesis({ incomes, movements, previous, fallbackCurrency: req.user.finCurrency, period });
 

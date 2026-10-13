@@ -48,46 +48,53 @@ model User {
   // finPublic is set, it is what defines the account, not `accountType`
   // (kept only for the pre-FINCLUDIA features that still read it: comparator
   // segments, article targeting...).
-  finPublic             String?
+  finPublic              String?
   // Complementary roles (ex. SAL primary + COL complementary), same closed
   // list as finPublic, never containing finPublic itself. Free-form JSON
   // array of codes (small, bounded, validated at the application layer) —
   // not a join table: there is no extra data attached to a secondary role.
-  finSecondaryPublics   Json                   @default("[]")
+  finSecondaryPublics    Json                   @default("[]")
   // Age bracket, not a birth date: the server only ever needs to know whether
   // someone is "under18" (the 18+ gate, already settled project-wide) — a
   // precise date of birth would be more personal data than that requires
   // (rule 10, minimisation). The exact minimum age to register, and parental
   // consent, remain open (P6-01 point 7) — this column is ready for both.
-  finAgeRange           String?
-  finCountry            String?                @db.VarChar(2)
+  finAgeRange            String?
+  finCountry             String?                @db.VarChar(2)
   // ISO 4217, defaults to DZD (the only currency used anywhere in the
   // platform today): a placeholder until multi-currency is decided (P6-01
   // point 4), never shown as a final decision.
-  finCurrency           String                 @default("DZD") @db.VarChar(3)
-  finSituation          String?
-  finMainIntention      String?
-  finHorizon            String?
-  finOnboardedAt        DateTime?
+  finCurrency            String                 @default("DZD") @db.VarChar(3)
+  finSituation           String?
+  finMainIntention       String?
+  finHorizon             String?
+  finOnboardedAt         DateTime?
   // Target months of essential expenses the person wants set aside (screen C12,
   // P6-09). Null until THEY choose it: a default would be an invented
   // recommendation, which the client's own wording ("cible choisie par
   // l'utilisateur") rules out — F015/F016 read null as "non calculé", not 0.
   finReserveTargetMonths Int?
-  finProfileTransitions FinProfileTransition[]
-  finConsents           FinConsent[]
-  finAuditLogs          FinAuditLog[]
-  learningFavorites     LearningFavorite[]
-  finCategories         FinCategory[]
-  finChanges            FinChange[]
-  finIncomes            FinIncome[]
-  finTransactions       FinTransaction[]
-  finOnboarding         FinOnboarding?
-  finBudgets            FinBudget[]
-  finEnvelopes          FinEnvelope[]
-  finGoals              FinGoal[]
-  finDebts              FinDebt[]
-  finDebtPayments       FinDebtPayment[]
+  finProfileTransitions  FinProfileTransition[]
+  finConsents            FinConsent[]
+  finAuditLogs           FinAuditLog[]
+  learningFavorites      LearningFavorite[]
+  finCategories          FinCategory[]
+  finChanges             FinChange[]
+  finIncomes             FinIncome[]
+  finTransactions        FinTransaction[]
+  finOnboarding          FinOnboarding?
+  finBudgets             FinBudget[]
+  finEnvelopes           FinEnvelope[]
+  finRecurrences         FinRecurrence[]
+  finProvisions          FinProvision[]
+  finAssets              FinAsset[]
+  finSpaceMemberships    FinSpaceMember[]
+  finPaperPortfolio      FinPaperPortfolio?
+  finSpaceInvitesSent    FinSpaceInvite[]       @relation("SpaceInviteSender")
+  finSpaceInvitesTaken   FinSpaceInvite[]       @relation("SpaceInviteAcceptor")
+  finGoals               FinGoal[]
+  finDebts               FinDebt[]
+  finDebtPayments        FinDebtPayment[]
 
   // E-Learning (P2-01)
   formationsCreated Formation[]
@@ -309,29 +316,33 @@ model LearningFavorite {
 // A category names a line, it is not a line: it carries the socle except
 // `value`, `currency` and `confidence`, which would be null on every row.
 model FinCategory {
-  id              String           @id @default(uuid())
-  userId          String?
-  user            User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String             @id @default(uuid())
+  userId            String?
+  user              User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
   // One of CATEGORY_FAMILY_CODES (constants/finCategories.js).
-  family          String           @db.VarChar(20)
-  key             String?          @unique @db.VarChar(80)
-  baseKey         String?          @db.VarChar(80)
-  label           String           @db.VarChar(80)
-  scope           String           @default("personal") @db.VarChar(20)
-  source          String           @db.VarChar(20)
-  sourceRef       String?          @db.VarChar(200)
-  status          String           @db.VarChar(20)
-  consentUses     Json             @default("[]")
-  effectiveAt     DateTime         @default(now())
-  collectedAt     DateTime         @default(now())
-  version         Int              @default(1)
-  archivedAt      DateTime?
-  deletedAt       DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  finIncomes      FinIncome[]
-  finTransactions FinTransaction[]
-  finEnvelopes    FinEnvelope[]
+  family            String             @db.VarChar(20)
+  key               String?            @unique @db.VarChar(80)
+  baseKey           String?            @db.VarChar(80)
+  label             String             @db.VarChar(80)
+  scope             String             @default("personal") @db.VarChar(20)
+  source            String             @db.VarChar(20)
+  sourceRef         String?            @db.VarChar(200)
+  status            String             @db.VarChar(20)
+  consentUses       Json               @default("[]")
+  effectiveAt       DateTime           @default(now())
+  collectedAt       DateTime           @default(now())
+  version           Int                @default(1)
+  archivedAt        DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  finIncomes        FinIncome[]
+  finTransactions   FinTransaction[]
+  finEnvelopes      FinEnvelope[]
+  finRecurrences    FinRecurrence[]
+  finProvisions     FinProvision[]
+  finAssets         FinAsset[]
+  finSharedExpenses FinSharedExpense[]
 
   // One customisation of a given standard row per account, at most.
   @@unique([userId, baseKey])
@@ -615,42 +626,42 @@ model FinEnvelope {
 // and an icon key — never a suggested amount, which the client explicitly
 // forbids ("valeurs d'exemple non présélectionnées comme recommandation").
 model FinGoal {
-  id         String    @id @default(uuid())
-  userId     String
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  label      String    @db.VarChar(80)
+  id                  String    @id @default(uuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label               String    @db.VarChar(80)
   // One of GOAL_TEMPLATES (constants/finGoal.js), or null for a fully custom
   // goal. Purely a starting label/icon; nothing here is read back as data.
-  templateKey String?  @db.VarChar(40)
-  target     Int
-  currency   String    @db.VarChar(3)
+  templateKey         String?   @db.VarChar(40)
+  target              Int
+  currency            String    @db.VarChar(3)
   // "Date future" the client asks for at creation. Nullable all the same: a
   // goal corrected later or a fictional one may lose its date without losing
   // its meaning, and ALG-03 already reports "non calculé" when it is absent.
-  targetDate DateTime?
+  targetDate          DateTime?
   // "Capital déjà affecté". Bounded against this account's own marked savings
   // (F007) at the service layer — a CHECK cannot read another table — except
   // for a fictional goal, which plays with money that was never really saved.
-  allocated  Int       @default(0)
+  allocated           Int       @default(0)
   monthlyContribution Int?
   // Annual expected return, a RATIO (0.05 = 5 %), for ALG-03's trajectory. Null
   // means a simple cash goal: no return is assumed, never invented.
-  rate       Float?
-  priority   Int       @default(0)
-  note       String?   @db.VarChar(300)
-  scope      String    @default("personal") @db.VarChar(20)
-  source     String    @db.VarChar(20)
-  sourceRef  String?   @db.VarChar(200)
-  status     String    @db.VarChar(20)
-  confidence String?   @db.VarChar(10)
-  consentUses Json     @default("[]")
-  effectiveAt DateTime @default(now())
-  collectedAt DateTime @default(now())
-  version    Int       @default(1)
-  archivedAt DateTime?
-  deletedAt  DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  rate                Float?
+  priority            Int       @default(0)
+  note                String?   @db.VarChar(300)
+  scope               String    @default("personal") @db.VarChar(20)
+  source              String    @db.VarChar(20)
+  sourceRef           String?   @db.VarChar(200)
+  status              String    @db.VarChar(20)
+  confidence          String?   @db.VarChar(10)
+  consentUses         Json      @default("[]")
+  effectiveAt         DateTime  @default(now())
+  collectedAt         DateTime  @default(now())
+  version             Int       @default(1)
+  archivedAt          DateTime?
+  deletedAt           DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   @@index([userId, deletedAt])
   @@map("fin_goals")
@@ -660,18 +671,18 @@ model FinGoal {
 // A declared debt: what is left to pay, the instalment, and — when the client
 // knows it — a rate or a known total cost (an informal loan may have neither).
 model FinDebt {
-  id                  String          @id @default(uuid())
-  userId              String
-  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  label               String          @db.VarChar(80)
-  lender               String?        @db.VarChar(120)
-  purpose              String?        @db.VarChar(200)
+  id                   String           @id @default(uuid())
+  userId               String
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label                String           @db.VarChar(80)
+  lender               String?          @db.VarChar(120)
+  purpose              String?          @db.VarChar(200)
   // The real asset this debt financed, if any (a car, a flat) — informational
   // only; linking it to P6-11's patrimony is for when that task exists.
-  assetFinanced        String?        @db.VarChar(120)
+  assetFinanced        String?          @db.VarChar(120)
   outstandingPrincipal Int
   monthlyInstalment    Int
-  currency             String         @db.VarChar(3)
+  currency             String           @db.VarChar(3)
   // A ratio (0.07 = 7 %) when the client knows it, null otherwise — never
   // guessed from the instalment, which would invent a rate nobody declared.
   rate                 Float?
@@ -679,20 +690,20 @@ model FinDebt {
   // by the lender (a store credit's fixed total, for instance).
   knownTotalCost       Int?
   dueDate              DateTime?
-  note                 String?        @db.VarChar(300)
-  scope                String         @default("personal") @db.VarChar(20)
-  source               String         @db.VarChar(20)
-  sourceRef            String?        @db.VarChar(200)
-  status               String         @db.VarChar(20)
-  confidence           String?        @db.VarChar(10)
-  consentUses          Json           @default("[]")
-  effectiveAt          DateTime       @default(now())
-  collectedAt          DateTime       @default(now())
-  version              Int            @default(1)
+  note                 String?          @db.VarChar(300)
+  scope                String           @default("personal") @db.VarChar(20)
+  source               String           @db.VarChar(20)
+  sourceRef            String?          @db.VarChar(200)
+  status               String           @db.VarChar(20)
+  confidence           String?          @db.VarChar(10)
+  consentUses          Json             @default("[]")
+  effectiveAt          DateTime         @default(now())
+  collectedAt          DateTime         @default(now())
+  version              Int              @default(1)
   archivedAt           DateTime?
   deletedAt            DateTime?
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
   payments             FinDebtPayment[]
 
   @@index([userId, deletedAt])
@@ -703,21 +714,485 @@ model FinDebt {
 // (declared, then paid down) rather than something recomputed from a
 // standalone instalment figure that may have changed since.
 model FinDebtPayment {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   debtId    String
-  debt      FinDebt  @relation(fields: [debtId], references: [id], onDelete: Cascade)
+  debt      FinDebt   @relation(fields: [debtId], references: [id], onDelete: Cascade)
   amount    Int
-  currency  String   @db.VarChar(3)
+  currency  String    @db.VarChar(3)
   paidAt    DateTime
-  note      String?  @db.VarChar(300)
-  createdAt DateTime @default(now())
+  note      String?   @db.VarChar(300)
+  createdAt DateTime  @default(now())
   deletedAt DateTime?
 
   @@index([debtId])
   @@index([userId, deletedAt])
   @@map("fin_debt_payments")
+}
+
+// ---- FINCLUDIA calendar and recurring expenses (P6-07) -----------------------
+// Two tables, and deliberately NOT a third: a planned payment is already a
+// movement marked `planned` in `fin_transactions` (P6-04), so the calendar reads
+// it there. Copying planned events into their own table would be the double
+// counting the client forbids — one row, one reading, « Marquer payé » flips it
+// to real in place.
+
+// A recurring expense or income the person confirmed: a subscription, a rent, a
+// salary. Detection (ALG-04) only ever PROPOSES one; nothing is created without
+// an explicit confirmation, and nothing is ever cancelled on anybody's behalf
+// (« jamais de résiliation automatique » — this table has no notion of
+// terminating a contract, only of no longer tracking it).
+model FinRecurrence {
+  id           String       @id @default(uuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label        String       @db.VarChar(80)
+  categoryId   String?
+  category     FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  // "income" | "expense" (TRANSACTION_KINDS): a recurrence is money that comes
+  // in or goes out, like the movement it will become.
+  kind         String       @db.VarChar(10)
+  value        Int
+  currency     String       @db.VarChar(3)
+  // One of FREQUENCIES (constants/finance.js). F049 normalises it to the month
+  // so the monthly and yearly cost of a subscription can be shown.
+  frequency    String       @db.VarChar(20)
+  // The next date this is expected. Advanced when an occurrence is confirmed;
+  // the calendar projects the following ones from the frequency.
+  nextDate     DateTime
+  endDate      DateTime?
+  // Days BEFORE `nextDate` to remind. The channel is P6-18's; until then this
+  // is read by the interface and pushed nowhere.
+  reminderDays Json         @default("[7, 1]")
+  // Where this row came from: `detected` means ALG-04 proposed it and the
+  // person confirmed it, `manual` means they typed it. Kept apart from the
+  // socle's `source` (which says HOW the value entered) because the client asks
+  // specifically for a detection that is proposed then confirmed.
+  detected     Boolean      @default(false)
+  note         String?      @db.VarChar(300)
+  scope        String       @default("personal") @db.VarChar(20)
+  source       String       @db.VarChar(20)
+  sourceRef    String?      @db.VarChar(200)
+  status       String       @db.VarChar(20)
+  confidence   String?      @db.VarChar(10)
+  consentUses  Json         @default("[]")
+  effectiveAt  DateTime     @default(now())
+  collectedAt  DateTime     @default(now())
+  version      Int          @default(1)
+  archivedAt   DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([userId, nextDate])
+  @@index([categoryId])
+  @@map("fin_recurrences")
+}
+
+// Money set aside month by month for a dated expense: school fees in September,
+// an insurance premium in March (the client's « provisions de dépenses
+// annuelles ou d'études »).
+//
+// A provision NEVER creates a realised expense — the client says so explicitly.
+// `provisioned` is what has been put aside so far, and F045 computes what is
+// left to put aside per month; neither is a movement, and neither enters a
+// total of what was spent.
+model FinProvision {
+  id           String       @id @default(uuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label        String       @db.VarChar(80)
+  categoryId   String?
+  category     FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  // The amount the dated expense is expected to be.
+  value        Int
+  currency     String       @db.VarChar(3)
+  // What has already been set aside for it.
+  provisioned  Int          @default(0)
+  // The date the expense falls due.
+  targetDate   DateTime
+  reminderDays Json         @default("[7, 1]")
+  note         String?      @db.VarChar(300)
+  scope        String       @default("personal") @db.VarChar(20)
+  source       String       @db.VarChar(20)
+  sourceRef    String?      @db.VarChar(200)
+  status       String       @db.VarChar(20)
+  confidence   String?      @db.VarChar(10)
+  consentUses  Json         @default("[]")
+  effectiveAt  DateTime     @default(now())
+  collectedAt  DateTime     @default(now())
+  version      Int          @default(1)
+  archivedAt   DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([userId, targetDate])
+  @@index([categoryId])
+  @@map("fin_provisions")
+}
+
+// ---- FINCLUDIA real patrimony (P6-11) ----------------------------------------
+// Assets only. The client's screen C16 shows « actifs et passifs », but the
+// liabilities already have their table (`fin_debts`, P6-10) and F035 reads them
+// there: a second table of liabilities would be two places to correct the same
+// debt, and net worth would depend on which one the caller used.
+//
+// The fictional status is FORBIDDEN here — the client's own sentence. The whole
+// point of F035 is that net worth is real, and one fictional row in it makes the
+// figure a lie. Enforced by zod, by a CHECK, and by the consistency control.
+model FinAsset {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label       String       @db.VarChar(80)
+  // One of ASSET_KINDS (constants/finWealth.js): the client's own list.
+  kind        String       @db.VarChar(20)
+  categoryId  String?
+  category    FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  value       Int
+  currency    String       @db.VarChar(3)
+  // WHEN the value was established. Not `updatedAt`: re-reading a row does not
+  // make its valuation fresher, and the client's « alerte valeur de plus de 90
+  // jours » is measured on this date (F055).
+  valuedAt    DateTime
+  // One of ASSET_LIQUIDITY. F014 (« réserve en mois ») requires the illiquid to
+  // be excluded and the engine cannot tell an account from a flat on its own.
+  liquidity   String       @db.VarChar(20)
+  // Where it is held, as the person wrote it (a bank's name, "coffre",
+  // "maison"). Free text: the client gives no list, and inventing a closed one
+  // would refuse answers it means to accept.
+  holder      String?      @db.VarChar(80)
+  note        String?      @db.VarChar(300)
+  scope       String       @default("personal") @db.VarChar(20)
+  source      String       @db.VarChar(20)
+  sourceRef   String?      @db.VarChar(200)
+  status      String       @db.VarChar(20)
+  confidence  String?      @db.VarChar(10)
+  consentUses Json         @default("[]")
+  effectiveAt DateTime     @default(now())
+  collectedAt DateTime     @default(now())
+  version     Int          @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId, deletedAt])
+  @@index([userId, valuedAt])
+  @@index([categoryId])
+  @@map("fin_assets")
+}
+
+// ---- FINCLUDIA shared spaces (P6-13) -----------------------------------------
+// The « À plusieurs » hub: a space, its members with their role, what each
+// member chooses to share, and the invitations.
+//
+// The phase rule the whole design serves: « données privées par défaut ; rien
+// n'entre dans un espace partagé sans action explicite ». So sharing is stored
+// PER MEMBER, not per space: joining a space reveals nothing, and each person
+// decides, kind by kind, what the others may see of theirs.
+
+model FinSpace {
+  id          String             @id @default(uuid())
+  // One of SPACE_KINDS (constants/finSpace.js): flatshare, couple, household.
+  kind        String             @db.VarChar(20)
+  label       String             @db.VarChar(80)
+  // The currency the space's shared figures are expressed in. One per space:
+  // the engine never converts without a dated rate, so a space that mixed
+  // currencies could not total anything.
+  currency    String             @db.VarChar(3)
+  // Default split rule for shared expenses (SPLIT_RULES). Used by P6-14; set
+  // here because the client asks for it at creation.
+  splitRule   String             @default("equal") @db.VarChar(30)
+  note        String?            @db.VarChar(300)
+  // The space is not itself a financial datum — it holds no amount — but it
+  // carries the socle's traceability columns, because who created it and when
+  // is part of the trail of every figure computed inside it.
+  source      String             @db.VarChar(20)
+  status      String             @db.VarChar(20)
+  version     Int                @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  members     FinSpaceMember[]
+  invitations FinSpaceInvite[]
+  expenses    FinSharedExpense[]
+  settlements FinSettlement[]
+
+  @@index([kind])
+  @@map("fin_spaces")
+}
+
+// One person in one space, with their role and what THEY share.
+//
+// `onDelete: Cascade` on both sides: a space that goes takes its memberships,
+// and an account that is erased leaves none behind — the complete deletion the
+// privacy text promises (P6-01 point 9).
+model FinSpaceMember {
+  id                  String             @id @default(uuid())
+  spaceId             String
+  space               FinSpace           @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  userId              String
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // One of SPACE_ROLES: owner, admin, member, viewer.
+  role                String             @db.VarChar(20)
+  // What this member shares with the others, per data kind (SHAREABLE_KINDS),
+  // at one of SHARING_LEVELS. The default is every kind `private`, and it is
+  // the member — never an admin — who changes it.
+  sharing             Json               @default("{}")
+  // The name the others see. Separate from the account's own name on purpose:
+  // joining a flatshare should not hand over one's legal name.
+  displayName         String?            @db.VarChar(60)
+  joinedAt            DateTime           @default(now())
+  leftAt              DateTime?
+  paidExpenses        FinSharedExpense[] @relation("ExpensePayer")
+  recordedExpenses    FinSharedExpense[] @relation("ExpenseRecorder")
+  shares              FinSharedShare[]
+  settlementsFrom     FinSettlement[]    @relation("SettlementFrom")
+  settlementsTo       FinSettlement[]    @relation("SettlementTo")
+  recordedSettlements FinSettlement[]    @relation("SettlementRecorder")
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  // One membership per person per space. A second one would make "my role" a
+  // question with two answers.
+  @@unique([spaceId, userId])
+  @@index([userId])
+  @@map("fin_space_members")
+}
+
+// An invitation to join a space. The token is the secret; it is stored HASHED,
+// like a session or a password-reset token, so a leaked database does not hand
+// over the ability to join somebody's household.
+model FinSpaceInvite {
+  id           String    @id @default(uuid())
+  spaceId      String
+  space        FinSpace  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  // Who sent it. Kept to show « invité par » and to refuse an invitation from
+  // somebody who has since lost the right to invite.
+  invitedById  String
+  invitedBy    User      @relation("SpaceInviteSender", fields: [invitedById], references: [id], onDelete: Cascade)
+  // SHA-256 of the token handed out. The plain token exists only in the link.
+  tokenHash    String    @unique @db.VarChar(64)
+  // The role the invitee will get. Never `owner`: a space has exactly one, and
+  // it is not something an invitation can grant.
+  role         String    @db.VarChar(20)
+  // One of INVITE_STATUSES.
+  status       String    @default("pending") @db.VarChar(20)
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  acceptedById String?
+  acceptedBy   User?     @relation("SpaceInviteAcceptor", fields: [acceptedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+
+  @@index([spaceId, status])
+  @@map("fin_space_invites")
+}
+
+// ---- FINCLUDIA paper portfolio (P6-12) ---------------------------------------
+// Fictional from end to end: « badge SIMULATION permanent, aucune exécution,
+// aucune valeur fictive dans le patrimoine réel ». P6-11 forbids the reverse
+// too, so the two can never meet.
+//
+// There is no instrument catalogue and no price table, because the client has
+// supplied neither and its own rule for this task forbids inventing them
+// (« uniquement des données fournies ou validées par le client »). The person
+// names the instrument and states the simulated price themselves — their own
+// simulation, not reference data the platform publishes.
+
+model FinPaperPortfolio {
+  id          String               @id @default(uuid())
+  // One per account: « le portefeuille fictif », and « réinitialisation » means
+  // starting this one over rather than keeping a drawer of them.
+  userId      String               @unique
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // The fictional starting capital. The client's own default is 100 000 DA,
+  // and it is « modifiable ».
+  capital     Int
+  // Fictional cash not currently invested. Kept as a column rather than derived
+  // from the trades: it is what the next buy is checked against, and deriving
+  // it on every write would make that check a race.
+  cash        Int
+  currency    String               @db.VarChar(3)
+  // Simulated fee rate, as a decimal of the traded amount. Stored per portfolio
+  // so it is visible and editable — never a hidden coefficient.
+  feeRate     Float                @default(0.01)
+  // When the portfolio was last reset, so the figures can say what period they
+  // describe.
+  resetAt     DateTime             @default(now())
+  // The socle's traceability columns. `status` is always `fictional` here, and
+  // a CHECK says so: that is what keeps this table out of every real total.
+  source      String               @db.VarChar(20)
+  status      String               @db.VarChar(20)
+  version     Int                  @default(1)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  instruments FinPaperInstrument[]
+  trades      FinPaperTrade[]
+
+  @@map("fin_paper_portfolios")
+}
+
+// An instrument the person chose to practise with, and the simulated price THEY
+// stated. `markedAt` dates that price, exactly as a real asset's valuation is
+// dated in P6-11: a price nobody can date is a price nobody can check.
+model FinPaperInstrument {
+  id          String            @id @default(uuid())
+  portfolioId String
+  portfolio   FinPaperPortfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  // Free text: see the note above. The day the client supplies a catalogue,
+  // this becomes a key into it.
+  label       String            @db.VarChar(80)
+  // The person's own simulated price per unit, in centimes.
+  markPrice   Int
+  markedAt    DateTime
+  note        String?           @db.VarChar(300)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  trades      FinPaperTrade[]
+
+  // One row per instrument in a portfolio: two would split the same position.
+  @@unique([portfolioId, label])
+  @@map("fin_paper_instruments")
+}
+
+// One fictional decision. This table IS the client's « journal de décisions »:
+// what was done, at what simulated price, with what fee — and `note`, which is
+// WHY. The reason is the point of the journal; the amounts are the easy part.
+model FinPaperTrade {
+  id           String             @id @default(uuid())
+  portfolioId  String
+  portfolio    FinPaperPortfolio  @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  instrumentId String
+  instrument   FinPaperInstrument @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+  // "buy" | "sell" (PAPER_TRADE_KINDS). Nothing else: there is no execution,
+  // no order type, no leverage and no short.
+  kind         String             @db.VarChar(10)
+  // Whole units. A workshop does not need fractional shares, and an integer is
+  // a quantity somebody can check.
+  quantity     Int
+  unitPrice    Int
+  // The simulated fee actually applied, stored rather than recomputed: a later
+  // change of the portfolio's rate must not rewrite the past.
+  fee          Int
+  currency     String             @db.VarChar(3)
+  decidedAt    DateTime
+  note         String?            @db.VarChar(300)
+  status       String             @db.VarChar(20)
+  createdAt    DateTime           @default(now())
+
+  @@index([portfolioId, decidedAt])
+  @@index([instrumentId])
+  @@map("fin_paper_trades")
+}
+
+// ---- FINCLUDIA shared expenses and settlements (P6-14) -----------------------
+// Screens P02 and P03, F041 / F042 / F043 and ALG-02.
+//
+// Everything lives inside a shared space (P6-13), in that space's currency: the
+// engine never converts without a dated rate, so a space that mixed currencies
+// could not total anything.
+//
+// A settlement is DECLARATIVE. Nothing in FINCLUDIA moves money — the client is
+// explicit about it — so this table records what people say they have settled
+// between themselves, and nothing else.
+
+model FinSharedExpense {
+  id           String           @id @default(uuid())
+  spaceId      String
+  space        FinSpace         @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  // Who paid. A MEMBERSHIP, not a user: the expense belongs to the space, and
+  // a member who later leaves must still be readable as the payer of a past
+  // expense (their membership row survives with `leftAt` set).
+  payerId      String
+  payer        FinSpaceMember   @relation("ExpensePayer", fields: [payerId], references: [id], onDelete: Cascade)
+  label        String           @db.VarChar(80)
+  value        Int
+  currency     String           @db.VarChar(3)
+  occurredAt   DateTime
+  // One of SPLIT_MODES (constants/finShared.js). Stored so the screen can say
+  // HOW it was divided, and so a correction can redo the same kind of split.
+  splitMode    String           @db.VarChar(30)
+  // The category of the client's own reference, when the person chose one.
+  categoryId   String?
+  category     FinCategory?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  note         String?          @db.VarChar(300)
+  // Who recorded it, which is not always the payer: a flatmate may enter the
+  // rent somebody else paid.
+  recordedById String
+  recordedBy   FinSpaceMember   @relation("ExpenseRecorder", fields: [recordedById], references: [id], onDelete: Cascade)
+  source       String           @db.VarChar(20)
+  status       String           @db.VarChar(20)
+  version      Int              @default(1)
+  deletedAt    DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  shares       FinSharedShare[]
+
+  @@index([spaceId, occurredAt])
+  @@index([payerId])
+  @@index([categoryId])
+  @@map("fin_shared_expenses")
+}
+
+// One participant's share of one expense.
+//
+// The shares of an expense add up to its amount EXACTLY — the client states it
+// as a rule, and it is checked by the service and by the consistency control.
+// The payer may have no share at all (« payeur pouvant ne pas participer »),
+// which is why this is a separate table rather than a column on the expense.
+model FinSharedShare {
+  id        String           @id @default(uuid())
+  expenseId String
+  expense   FinSharedExpense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  memberId  String
+  member    FinSpaceMember   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  // What this participant owes of the expense, in centimes.
+  share     Int
+  // The weight that produced it, when the split was proportional: a percentage
+  // in hundredths of a percent, or the income used. Kept so the screen can
+  // show WHY a share is what it is, and so the figure can be argued with.
+  weight    Int?
+  createdAt DateTime         @default(now())
+
+  // One share per participant per expense: two would split the same money
+  // twice and break the "shares add up to the amount" rule silently.
+  @@unique([expenseId, memberId])
+  @@index([memberId])
+  @@map("fin_shared_shares")
+}
+
+// A settlement one member declares having made to another. DECLARATIVE ONLY:
+// no payment integration, and nothing here moves any money.
+model FinSettlement {
+  id           String         @id @default(uuid())
+  spaceId      String
+  space        FinSpace       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  fromId       String
+  from         FinSpaceMember @relation("SettlementFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  toId         String
+  to           FinSpaceMember @relation("SettlementTo", fields: [toId], references: [id], onDelete: Cascade)
+  value        Int
+  currency     String         @db.VarChar(3)
+  settledAt    DateTime
+  note         String?        @db.VarChar(300)
+  // Who declared it. Either side may: the one who paid, or the one who was
+  // paid. The trail says which, because a settlement nobody can attribute is
+  // a settlement nobody can dispute.
+  recordedById String
+  recordedBy   FinSpaceMember @relation("SettlementRecorder", fields: [recordedById], references: [id], onDelete: Cascade)
+  source       String         @db.VarChar(20)
+  status       String         @db.VarChar(20)
+  deletedAt    DateTime?
+  createdAt    DateTime       @default(now())
+
+  @@index([spaceId, settledAt])
+  @@index([fromId])
+  @@index([toId])
+  @@map("fin_settlements")
 }
 
 // ---- "Apprendre" glossary and mini-guides (P2-08) -----------------------------

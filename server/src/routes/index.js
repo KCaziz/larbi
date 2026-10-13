@@ -22,6 +22,11 @@ import finOnboardingRoutes from './finOnboarding.routes.js';
 import finGoalRoutes from './finGoal.routes.js';
 import finDebtRoutes from './finDebt.routes.js';
 import finReserveRoutes from './finReserve.routes.js';
+import finCalendarRoutes from './finCalendar.routes.js';
+import finDashboardRoutes from './finDashboard.routes.js';
+import finWealthRoutes from './finWealth.routes.js';
+import finSpaceRoutes from './finSpace.routes.js';
+import finPaperRoutes from './finPaper.routes.js';
 
 const router = Router();
 
@@ -48,5 +53,10 @@ router.use('/fin', finBudgetRoutes);
 router.use('/fin', finGoalRoutes);
 router.use('/fin', finDebtRoutes);
 router.use('/fin', finReserveRoutes);
+router.use('/fin', finCalendarRoutes);
+router.use('/fin', finDashboardRoutes);
+router.use('/fin', finWealthRoutes);
+router.use('/fin', finSpaceRoutes);
+router.use('/fin', finPaperRoutes);
 
 export default router;

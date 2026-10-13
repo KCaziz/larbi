@@ -1,0 +1,246 @@
+/* Real patrimony (P6-11). Tokens only, logical properties (RTL). */
+.wealth-page {
+  max-width: 1040px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  padding-block-end: 40px;
+}
+
+.wealth-page section {
+  margin-block-start: 28px;
+}
+
+.wealth-page h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.12rem;
+  color: var(--text-h);
+}
+
+/* The rule, stated rather than implied: no fictional value lives here. */
+.wealth-rule {
+  margin-block: 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+  font-size: 0.88rem;
+}
+
+.wealth-help {
+  margin-block: 8px;
+  font-size: 0.86rem;
+  opacity: 0.85;
+}
+
+.wealth-empty {
+  margin-block: 12px;
+  padding: 12px 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.wealth-totals,
+.wealth-breakdown {
+  margin-block: 14px;
+}
+
+.wealth-totals {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  font-size: 0.9rem;
+}
+
+.wealth-totals dt {
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.wealth-totals dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* An educational note, never an alarm. */
+.wealth-notice {
+  margin-block: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+  font-size: 0.86rem;
+}
+
+.wealth-warnings {
+  margin-block: 12px;
+  padding: 10px 14px;
+  padding-inline-start: 30px;
+  border: 1px dashed var(--warn);
+  border-radius: var(--radius);
+  background: var(--warn-bg);
+  font-size: 0.86rem;
+}
+
+.wealth-breakdown {
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.wealth-breakdown li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.wealth-breakdown li:nth-child(odd) {
+  background: var(--bg-alt);
+}
+
+.wealth-breakdown li span:first-child {
+  margin-inline-end: auto;
+}
+
+.wealth-breakdown strong,
+.wealth-share {
+  font-variant-numeric: tabular-nums;
+}
+
+.wealth-share {
+  min-inline-size: 60px;
+  text-align: end;
+  opacity: 0.85;
+}
+
+.wealth-list {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.wealth-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.wealth-row:nth-child(odd) {
+  background: var(--bg-alt);
+}
+
+/* A valuation older than the threshold reads differently: it is the thing the
+   person can act on. */
+.wealth-row-stale {
+  border-inline-start: 3px solid var(--warn);
+  background: var(--warn-bg);
+}
+
+.wealth-row-label {
+  margin-inline-end: auto;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.wealth-row-amount {
+  font-variant-numeric: tabular-nums;
+}
+
+.wealth-row-date {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.84rem;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+
+.wealth-stale-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wealth-tag {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.73rem;
+}
+
+.wealth-icon {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.wealth-icon:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.wealth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-block-start: 14px;
+}
+
+.wealth-form {
+  margin-block-start: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.wealth-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+/* A grid item defaults to min-width: auto, so a select as wide as its widest
+   option pushes the page past the viewport. */
+.wealth-form-grid > * {
+  min-inline-size: 0;
+}
+
+.wealth-form label {
+  display: grid;
+  gap: 5px;
+  font-size: 0.86rem;
+}
+
+.wealth-form input,
+.wealth-form select {
+  max-inline-size: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}

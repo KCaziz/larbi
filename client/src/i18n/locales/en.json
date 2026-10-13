@@ -35,7 +35,12 @@
     "budget": "Budget",
     "goals": "Goals",
     "reserve": "Reserve",
-    "debts": "Debts"
+    "debts": "Debts",
+    "calendar": "Calendar",
+    "today": "Today",
+    "wealth": "Patrimony",
+    "paper": "Practice",
+    "spaces": "Together"
   },
   "footer": {
     "copyright": "© {{year}} {{brand}}. All rights reserved.",
@@ -2897,6 +2902,399 @@
     "targetSaved": "Target saved.",
     "errors": {
       "refused": "This value is not valid."
+    }
+  },
+  "calendar": {
+    "title": "Financial calendar",
+    "intro": "What is expected, day by day: planned payments, subscriptions and provisions. Nothing counts as paid until you confirm it.",
+    "period": "Period",
+    "viewLabel": "View",
+    "views": {
+      "month": "Month",
+      "week": "Week"
+    },
+    "balanceLabel": "Opening balance",
+    "balancePlaceholder": "e.g. 25000",
+    "plannedOut": "Planned outgoings",
+    "plannedIn": "Planned incomings",
+    "realOut": "Actual spending in the period",
+    "projectedCash": "Projected cash at the end of the period",
+    "firstTensionDay": "First day under pressure",
+    "noTension": "none",
+    "tension": "under pressure",
+    "nothingPlanned": "Nothing planned in this period.",
+    "noLabel": "No label",
+    "markPaid": "Mark as paid",
+    "paid": "Movement confirmed: it now counts as real.",
+    "provisioned": "already set aside: {{amount}}",
+    "kinds": {
+      "planned_expense": "Planned expense",
+      "planned_income": "Planned income",
+      "recurrence": "Recurrence",
+      "provision": "Provision"
+    },
+    "planTitle": "Plan of the month",
+    "planHelp": "Copies last month's planned payments, shifted by one month. Spending that already happened is never copied: that would invent a payment.",
+    "copyPlan": "Copy last month",
+    "planDone": "Plan copied.",
+    "planResult": "{{created}} plan(s) added, {{skipped}} already there.",
+    "recurrencesTitle": "Subscriptions and recurrences",
+    "monthlyCost": "Monthly cost of subscriptions",
+    "yearlyCost": "Yearly cost of subscriptions",
+    "noRecurrence": "No recurrence tracked yet.",
+    "addRecurrence": "Add a recurrence",
+    "recurrenceAdded": "Recurrence added.",
+    "recurrenceDeleted": "Recurrence no longer tracked.",
+    "detected": "detected",
+    "stopTracking": "Stop tracking {{label}}",
+    "stopTrackingHelp": "Removes the line from the calendar. It cancels nothing.",
+    "noCancellation": "Removing a recurrence stops tracking it in FINCLUDIA. It cancels no subscription: the platform never contacts a provider on your behalf.",
+    "detect": "Detect my recurrences",
+    "detectionTitle": "Detected recurrences",
+    "detectionHelp": "Proposed from your past movements (same label, similar amount, regular interval). Nothing is created until you confirm it.",
+    "noCandidate": "No recurrence detected in your recent movements.",
+    "occurrences": "{{count}} times",
+    "unknownFrequency": "frequency unclear",
+    "confirm": "Confirm",
+    "confirmed": "Recurrence confirmed.",
+    "provisionsTitle": "Provisions",
+    "provisionsHelp": "Money set aside for a dated expense. A provision never creates actual spending: it enters no total of what you have spent.",
+    "noProvision": "No provision yet.",
+    "addProvision": "Add a provision",
+    "provisionAdded": "Provision added.",
+    "provisionDeleted": "Provision deleted.",
+    "deleteProvision": "Delete the provision {{label}}",
+    "provisionTarget": "Expected amount",
+    "provisionSoFar": "Already set aside",
+    "provisionLeft": "Left to set aside",
+    "provisionDue": "Due date",
+    "monthlyProvision": "To set aside each month",
+    "states": {
+      "active": "in progress",
+      "reached": "reached",
+      "passed": "due date passed"
+    },
+    "frequencies": {
+      "hebdomadaire": "per week",
+      "mensuel": "per month",
+      "trimestriel": "per quarter",
+      "semestriel": "per half-year",
+      "annuel": "per year"
+    },
+    "fields": {
+      "label": "Label",
+      "amount": "Amount",
+      "kind": "Type",
+      "frequency": "Frequency",
+      "nextDate": "Next due date"
+    },
+    "save": "Save",
+    "cancel": "Cancel",
+    "errors": {
+      "amount": "Enter an amount as a whole number.",
+      "provisionedAboveValue": "More has been set aside than the expense itself.",
+      "refused": "This operation was refused. Check the dates and the amounts."
+    }
+  },
+  "today": {
+    "title": "Today",
+    "intro": "Where you stand, and what to do now.",
+    "dashboards": {
+      "general": "Your figures for the month, and what comes next.",
+      "myWeek": "My week",
+      "student": "Your student month: what is left per day, and how much you cover yourself.",
+      "firstIncome": "Your first income: what is already allocated, and what is left to share out.",
+      "health": "Your month, item by item.",
+      "flatshare": "Your flatshare: your spending and what is left.",
+      "couple": "Me / Us: your figures for the month.",
+      "household": "Your household: spending, budget and reserve.",
+      "savings": "Your savings path: what you set aside, and your goals."
+    },
+    "actionsTitle": "To do now",
+    "actions": {
+      "confirmPlanned": "{{count}} planned payment(s) in the next {{jours}} days: confirm them once they happen",
+      "envelopeExceeded": "{{count}} envelope(s) past your threshold: see the budget",
+      "buildReserve": "Your safety reserve cannot be computed yet: complete it",
+      "categoriseMovements": "{{count}} movement(s) with no category: sorting them makes your totals readable",
+      "finishOnboarding": "{{remaining}} question(s) left for a complete first result",
+      "createBudget": "No budget for this period: create one",
+      "addMovement": "Record a first expense to see your figures"
+    },
+    "alertsTitle": "Alerts",
+    "levels": {
+      "reached": "threshold reached",
+      "exceeded": "over budget",
+      "warning": "close to the threshold"
+    },
+    "unnamedEnvelope": "Envelope",
+    "seeBudget": "See the budget",
+    "figuresTitle": "Your figures",
+    "kpis": {
+      "netFlow": "Net flow this month",
+      "monthlyResources": "Resources this month",
+      "monthExpenses": "Spending this month",
+      "remainingToAllocate": "Left to allocate",
+      "dailyBudget": "Budget per day",
+      "reserveMonths": "Safety reserve",
+      "goalProgress": "Goal progress",
+      "debtEffort": "Debt effort rate",
+      "studentAutonomy": "Financial autonomy",
+      "subscriptionCost": "Cost of subscriptions",
+      "savingsRate": "Savings rate"
+    },
+    "invitations": {
+      "addMovement": "Record an expense",
+      "addIncome": "Declare a resource",
+      "createBudget": "Create a budget",
+      "setReserve": "Set my reserve",
+      "createGoal": "Create a goal",
+      "addDebt": "Declare a debt",
+      "addRecurrence": "Add a subscription"
+    },
+    "goalTitle": "Priority goal",
+    "goalProgress": "Progress",
+    "seeGoals": "See my goals",
+    "upcomingTitle": "Coming up",
+    "seeCalendar": "See the calendar",
+    "staleData": "These figures rest on data recorded {{days}} days ago. Updating it would make them more accurate.",
+    "healthPending": "The financial-health index ({{formula}}) is not shown: its weights have to be validated ({{task}}). A score computed on invented weights would be a judgement nobody could check. The sub-scores above are readable one by one.",
+    "pickPublic": "Choosing your path tailors this dashboard to your situation.",
+    "pickPublicLink": "Choose my path"
+  },
+  "wealth": {
+    "title": "Patrimony",
+    "intro": "What you own, what you owe, and what is left.",
+    "noFictional": "No fictional value here: the practice portfolio stays separate, and none of its figures enters your patrimony.",
+    "figuresTitle": "Your figures",
+    "netWorth": "Net worth",
+    "concentration": "Largest share",
+    "totalAssets": "Total assets",
+    "totalDebts": "Total debts",
+    "noDebt": "no debt declared",
+    "quicklyAvailable": "Available quickly",
+    "debtsFromDebtsPage": "The debts are the ones on your \"Debts\" page: they are not entered twice.",
+    "concentrationNotice": "One item is more than {{share}} of your patrimony. That is neither good nor bad: it is something to know before deciding.",
+    "allocationTitle": "Breakdown by kind",
+    "assetsTitle": "Your assets",
+    "noAsset": "No asset recorded yet.",
+    "addAsset": "Add an asset",
+    "added": "Asset added.",
+    "deleted": "Asset deleted.",
+    "delete": "Delete {{label}}",
+    "staleValue": "valued {{days}} days ago",
+    "defaultForKind": "By kind",
+    "valuedAtHelp": "The valuation date is when you established this amount, not when you typed it. It is what lets us tell you a value has aged.",
+    "kinds": {
+      "account": "Bank account",
+      "ccp": "CCP",
+      "cash": "Cash",
+      "gold": "Gold / jewellery",
+      "vehicle": "Vehicle",
+      "property": "Property",
+      "investment": "Investment",
+      "other": "Other"
+    },
+    "liquidity": {
+      "liquid": "available",
+      "semi_liquid": "sellable",
+      "illiquid": "tied up"
+    },
+    "fields": {
+      "label": "Label",
+      "kind": "Kind",
+      "value": "Value",
+      "valuedAt": "Valuation date",
+      "liquidity": "Availability",
+      "holder": "Where / with whom"
+    },
+    "save": "Save",
+    "cancel": "Cancel",
+    "errors": {
+      "amount": "Enter a value as a whole number.",
+      "refused": "This operation was refused. Check the date and the amount."
+    }
+  },
+  "paper": {
+    "title": "Practice portfolio",
+    "intro": "To practise without risking a dinar.",
+    "noExecution": "Nothing is executed anywhere: no order is sent, and none of these figures enters your real patrimony.",
+    "pricesAreYours": "The prices used here are the ones you state yourself. The platform publishes no quote and no list of instruments: that data has to come from the client, and nothing is invented in the meantime.",
+    "noCatalogue": "There is no list to pick from: name the instrument and state the simulated price you want to use.",
+    "figuresTitle": "Your simulation",
+    "since": "since {{date}}",
+    "invested": "Invested value",
+    "gainLoss": "Gain / loss",
+    "return": "Return",
+    "capital": "Fictional capital",
+    "cash": "Fictional cash",
+    "feeRate": "Simulated fees",
+    "concentrationNotice": "One instrument is more than {{share}} of your portfolio. This is an educational note, not an alert: it is yours to judge.",
+    "positionsTitle": "Your positions",
+    "noPosition": "No position yet.",
+    "units": "{{count}} unit(s)",
+    "markedAt": "{{price}} as of {{date}}",
+    "trade": "Buy / sell",
+    "addInstrument": "Add an instrument",
+    "instrumentAdded": "Instrument added.",
+    "traded": "Decision recorded.",
+    "record": "Record the decision",
+    "whyHelp": "The \"why\" is the point of a decision journal: it is what you will reread in six months.",
+    "rebalance": "Propose a rebalancing",
+    "rebalanceTitle": "Proposed rebalancing",
+    "rebalanceHelp": "Nothing has been executed. Each line is a trade you make yourself if you want to.",
+    "target": "target {{share}}",
+    "actions": {
+      "buy": "buy",
+      "sell": "sell",
+      "hold": "leave as is"
+    },
+    "readinessTitle": "Am I ready to start?",
+    "readinessHelp": "These four points are questions, not conditions: the workshop stays open whatever they answer.",
+    "checks": {
+      "reserve": "A safety reserve exists",
+      "goals": "A goal has been started",
+      "netFlow": "The month has a positive net flow",
+      "debt": "Debt instalments stay light"
+    },
+    "yes": "yes",
+    "notYet": "not yet",
+    "cannotTell": "not measurable yet",
+    "riskTitle": "Educational risk profile",
+    "riskScore": "Score",
+    "riskNoLabel": "No label accompanies this score: the thresholds that would turn a number into a word (\"cautious\", \"dynamic\"...) have to be validated by the client. A word resting on invented thresholds would read as a judgement.",
+    "computeRisk": "Compute my score",
+    "choose": "Choose...",
+    "risk": {
+      "horizon": "When might you need this money?",
+      "reaction": "If the value fell by 20 %, what would you do?",
+      "experience": "What is your experience of investing?",
+      "lossTolerance": "What temporary fall could you accept?"
+    },
+    "riskOptions": {
+      "horizon": {
+        "under2y": "Less than 2 years",
+        "2to5y": "2 to 5 years",
+        "over5y": "More than 5 years"
+      },
+      "reaction": {
+        "sellAll": "I would sell everything",
+        "wait": "I would wait",
+        "buyMore": "I would buy more"
+      },
+      "experience": {
+        "none": "None",
+        "some": "A few attempts",
+        "regular": "Regular"
+      },
+      "lossTolerance": {
+        "none": "None",
+        "tenPercent": "About 10 %",
+        "thirtyPercent": "About 30 %"
+      }
+    },
+    "journalTitle": "Decision journal",
+    "noDecision": "No decision recorded.",
+    "export": "Export the journal (CSV)",
+    "kinds": {
+      "buy": "buy",
+      "sell": "sell"
+    },
+    "resetTitle": "Reset",
+    "resetHelp": "A reset clears the instruments and every decision. Export the journal first if you want to keep it.",
+    "resetConfirm": "Reset the portfolio? The recorded decisions will be cleared.",
+    "reset": "Reset the portfolio",
+    "fields": {
+      "instrument": "Instrument",
+      "markPrice": "Simulated price per unit",
+      "markedAt": "Price as of",
+      "kind": "Operation",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price",
+      "why": "Why this decision?"
+    },
+    "save": "Save",
+    "cancel": "Cancel",
+    "errors": {
+      "price": "Enter a price as a whole number.",
+      "trade": "Enter a quantity and a price as whole numbers.",
+      "refused": "This operation was refused. Check the fictional cash and the quantities."
+    }
+  },
+  "spaces": {
+    "title": "Together",
+    "intro": "Flatshare, couple, household: organising shared spending without opening your accounts.",
+    "privateByDefault": "Joining a space shares nothing. Each person decides, item by item, what the others may see — and nobody can decide it for you.",
+    "mineTitle": "My spaces",
+    "none": "You are not part of any space.",
+    "create": "Create a space",
+    "created": "Space created.",
+    "join": "Join with a code",
+    "joinAction": "Join",
+    "joined": "You have joined the space.",
+    "joinHelp": "Paste the code the person inviting you sent.",
+    "memberCount": "{{count}} member(s)",
+    "kinds": {
+      "flatshare": "Flatshare",
+      "couple": "Couple",
+      "household": "Household"
+    },
+    "roles": {
+      "owner": "owner",
+      "admin": "admin",
+      "member": "member",
+      "viewer": "viewer"
+    },
+    "levels": {
+      "private": "Nothing",
+      "totals": "Totals only",
+      "shared": "The detail"
+    },
+    "dataKinds": {
+      "incomes": "Income",
+      "transactions": "Spending",
+      "assets": "Patrimony",
+      "goals": "Goals"
+    },
+    "mySharingTitle": "What I share",
+    "mySharingHelp": "This setting only concerns your own data. You can change or withdraw it at any time, and withdrawal is immediate.",
+    "sharingSaved": "Sharing updated.",
+    "membersTitle": "Members",
+    "me": "you",
+    "sharesNothing": "shares nothing",
+    "sharedTitle": "What the others share",
+    "nobodyShares": "Nobody shares any data in this space yet.",
+    "totalsOnly": "Totals only: the detail is not sent.",
+    "rowCount": "{{count}} shared row(s)",
+    "inviteTitle": "Invite",
+    "invite": "Create an invitation",
+    "invited": "Invitation created.",
+    "tokenOnce": "Here is the code to pass on. It will not be shown again: the server keeps only a fingerprint of it.",
+    "copy": "Copy",
+    "expires": "expires on {{date}}",
+    "revoke": "Revoke the invitation",
+    "revoked": "Invitation revoked.",
+    "remove": "Remove {{name}}",
+    "removeConfirm": "Remove {{name}} from this space?",
+    "removed": "Member removed.",
+    "leave": "Leave the space",
+    "leaveConfirm": "Leave this space? What you were sharing stops being visible at once.",
+    "left": "You have left the space.",
+    "delete": "Delete the space",
+    "deleteConfirm": "Delete this space for all its members?",
+    "deleted": "Space deleted.",
+    "fields": {
+      "kind": "Kind of space",
+      "label": "Name",
+      "displayName": "Name shown to the others",
+      "token": "Invitation code"
+    },
+    "displayNameHelp": "Optional. Joining a flatshare does not oblige you to give your full name.",
+    "save": "Create",
+    "cancel": "Cancel",
+    "errors": {
+      "label": "Give this space a name.",
+      "role": "Your role in this space does not allow this action.",
+      "refused": "This operation was refused."
     }
   }
 }

@@ -12,6 +12,9 @@ import { CHANGE_ACTIONS, FINANCIAL_TABLES } from '../constants/finData.js';
 import { FREQUENCIES } from '../constants/finance.js';
 import { TRANSACTION_KINDS } from '../constants/finMoney.js';
 import { ENVELOPE_KINDS } from '../constants/finBudget.js';
+import { ASSET_KINDS, ASSET_LIQUIDITY, FORBIDDEN_WEALTH_STATUS } from '../constants/finWealth.js';
+import { SHARING_LEVELS, SHAREABLE_KINDS, SPACE_KINDS, SPACE_ROLES, SPLIT_RULES } from '../constants/finSpace.js';
+import { PAPER_STATUS, PAPER_TRADE_KINDS } from '../constants/finPaper.js';
 import { isBudgetableFamily } from './finBudgetProposal.service.js';
 import { checkFinancialRow } from './finance/dataModel.js';
 
@@ -314,6 +317,9 @@ export async function checkConsistency(prisma, { privateDir }) {
   );
   // A planned movement has not happened: calling it "real" would put it in a
   // realised total (F004's own condition is "dépenses réalisées de la période").
+  // This is also P6-07's own rule — « un événement planifié n'est pas une
+  // transaction avant confirmation » — and it is checked here, once: the
+  // calendar reads the same rows rather than keeping planned events of its own.
   add('a planned movement is never recorded as real', transactions.filter((row) => row.planned && row.status === 'real'), (row) => `transaction ${row.id}`);
 
   // A row may only point at the client's reference or at its OWN account's
@@ -422,6 +428,192 @@ export async function checkConsistency(prisma, { privateDir }) {
     }
   }
 
+  // ---- calendar, recurrences and provisions (P6-07) -------------------------
+  const recurrences = await prisma.finRecurrence.findMany({
+    select: { id: true, userId: true, label: true, kind: true, value: true, currency: true, frequency: true, nextDate: true, endDate: true, categoryId: true, detected: true, sourceRef: true, deletedAt: true },
+  });
+  const provisions = await prisma.finProvision.findMany({
+    select: { id: true, userId: true, label: true, value: true, provisioned: true, currency: true, targetDate: true, categoryId: true, deletedAt: true },
+  });
+
+  add('a recurrence is money in or money out', recurrences.filter((row) => !TRANSACTION_KINDS.includes(row.kind)), (row) => `recurrence ${row.id}: ${row.kind}`);
+  // Same rule as a resource (P6-04): without a frequency the engine can
+  // normalise, F049 cannot bring the subscription back to the month and every
+  // total built on it is wrong.
+  add(
+    'a recurrence carries a frequency the engine can normalise',
+    recurrences.filter((row) => !FREQUENCIES.includes(row.frequency)),
+    (row) => `recurrence ${row.id}: ${row.frequency}`,
+  );
+  add('a recurrence never ends before its next date', recurrences.filter((row) => row.endDate && row.endDate < row.nextDate), (row) => `recurrence ${row.id}`);
+  // The trace of where a row came from: a detected recurrence was confirmed
+  // from ALG-04, and says so. Without this the client's « proposée puis
+  // confirmée » leaves nothing behind to check.
+  add(
+    'a detected recurrence says which detection it was confirmed from',
+    recurrences.filter((row) => row.detected && row.sourceRef !== 'detection:ALG-04'),
+    (row) => `recurrence ${row.id}`,
+  );
+  // A provision is money set aside, not money spent: it can never have more set
+  // aside than the expense it is for (the CHECK covers the column; this catches
+  // a row written around it).
+  add(
+    'a provision never has more set aside than the expense it is for',
+    provisions.filter((row) => row.provisioned > row.value || row.provisioned < 0),
+    (row) => `provision ${row.id}`,
+  );
+  for (const [label, rows] of [
+    ['recurrence', recurrences],
+    ['provision', provisions],
+  ]) {
+    add(
+      'a financial row only uses the reference categories or its own',
+      rows.filter((row) => row.categoryId !== null && categoryOwner.get(row.categoryId) !== null && categoryOwner.get(row.categoryId) !== row.userId),
+      (row) => `${label} ${row.id}`,
+    );
+  }
+
+  // ---- real patrimony (P6-11) -----------------------------------------------
+  const assets = await prisma.finAsset.findMany({
+    select: { id: true, userId: true, label: true, kind: true, value: true, currency: true, valuedAt: true, liquidity: true, status: true, categoryId: true, deletedAt: true },
+  });
+
+  // THE rule of P6-11, in the client's own words: « le fictif est interdit
+  // ici ». A CHECK already refuses it, and zod refuses it earlier; this catches
+  // a row written around both, because one fictional line inside F035 makes net
+  // worth a lie rather than a figure.
+  add('real patrimony never holds a fictional value', assets.filter((row) => row.status === FORBIDDEN_WEALTH_STATUS), (row) => `asset ${row.id}`);
+
+  add('an asset is one of the declared kinds', assets.filter((row) => !ASSET_KINDS.includes(row.kind)), (row) => `asset ${row.id}: ${row.kind}`);
+  // Liquidity is not cosmetic: F014 requires the illiquid to be excluded, and a
+  // value the engine cannot read would silently fall out of that exclusion.
+  add('an asset declares a liquidity the engine can read', assets.filter((row) => !ASSET_LIQUIDITY.includes(row.liquidity)), (row) => `asset ${row.id}: ${row.liquidity}`);
+  // « Valeur datée »: a valuation dated ahead of now would make a figure look
+  // established that nobody has established yet. Cannot be a CHECK — it needs
+  // to know what "now" is.
+  add('a valuation is never dated in the future', assets.filter((row) => !row.deletedAt && row.valuedAt > new Date()), (row) => `asset ${row.id}`);
+
+  add(
+    'a financial row only uses the reference categories or its own',
+    assets.filter((row) => row.categoryId !== null && categoryOwner.get(row.categoryId) !== null && categoryOwner.get(row.categoryId) !== row.userId),
+    (row) => `asset ${row.id}`,
+  );
+
+  // ---- shared spaces (P6-13) ------------------------------------------------
+  // These three tables are NOT in FINANCIAL_TABLES, and that is deliberate:
+  // they hold no amount and no metadata socle (a space is not a financial
+  // datum, it is who may see one). Their rules are therefore written out here
+  // rather than walked by `checkFinancialRow`.
+  const spaces = await prisma.finSpace.findMany({ select: { id: true, kind: true, currency: true, splitRule: true, deletedAt: true } });
+  const memberships = await prisma.finSpaceMember.findMany({
+    select: { id: true, spaceId: true, userId: true, role: true, sharing: true, leftAt: true },
+  });
+  const invites = await prisma.finSpaceInvite.findMany({
+    select: { id: true, spaceId: true, role: true, status: true, expiresAt: true, acceptedAt: true, acceptedById: true },
+  });
+
+  add('a space is one of the declared kinds', spaces.filter((row) => !SPACE_KINDS.includes(row.kind)), (row) => `space ${row.id}: ${row.kind}`);
+  add('a space declares a split rule the engine knows', spaces.filter((row) => !SPLIT_RULES.includes(row.splitRule)), (row) => `space ${row.id}: ${row.splitRule}`);
+  add('a membership has one of the declared roles', memberships.filter((row) => !SPACE_ROLES.includes(row.role)), (row) => `membership ${row.id}`);
+
+  // THE rule of P6-13. A sharing level the application cannot read would fall
+  // through `normaliseSharing` as `private` — the safe direction — but a row
+  // holding one means something wrote a value nobody declared, and that is
+  // worth knowing before it is a level that reveals more rather than less.
+  for (const row of memberships) {
+    const sharing = row.sharing && typeof row.sharing === 'object' && !Array.isArray(row.sharing) ? row.sharing : null;
+    if (!sharing) {
+      problems.push(violation('a membership stores its sharing matrix as an object', `membership ${row.id}`));
+      continue;
+    }
+    for (const [kind, level] of Object.entries(sharing)) {
+      if (!SHAREABLE_KINDS.includes(kind)) {
+        problems.push(violation('a sharing matrix only names the declared data kinds', `membership ${row.id}: ${kind}`));
+      } else if (!SHARING_LEVELS.includes(level)) {
+        problems.push(violation('a sharing level is one of the declared levels', `membership ${row.id}: ${kind} = ${JSON.stringify(level)}`));
+      }
+    }
+  }
+
+  // A space has exactly one owner while it lives: nobody could delete it
+  // otherwise, and two owners would make "who may hand it over" unanswerable.
+  for (const space of spaces) {
+    if (space.deletedAt) continue;
+    const owners = memberships.filter((row) => row.spaceId === space.id && row.leftAt === null && row.role === 'owner');
+    if (owners.length !== 1) {
+      problems.push(violation('a live space has exactly one owner', `space ${space.id}: ${owners.length} owner(s)`));
+    }
+  }
+
+  // An invitation can never grant ownership — not by validation alone.
+  add('an invitation never grants ownership', invites.filter((row) => row.role === 'owner'), (row) => `invite ${row.id}`);
+  // An accepted invitation says who accepted it and when; anything else says
+  // neither. Half a trail is not a trail.
+  add(
+    'an accepted invitation records who accepted it and when',
+    invites.filter((row) => (row.status === 'accepted') !== (row.acceptedAt !== null)),
+    (row) => `invite ${row.id}`,
+  );
+  // A pending invitation on a deleted space would still be a usable key.
+  add(
+    'a deleted space has no pending invitation left',
+    invites.filter((row) => row.status === 'pending' && spaces.find((space) => space.id === row.spaceId)?.deletedAt),
+    (row) => `invite ${row.id}`,
+  );
+
+  // ---- paper portfolio (P6-12) ----------------------------------------------
+  // Not in FINANCIAL_TABLES either, and for the opposite reason to the spaces:
+  // these rows carry no metadata socle because they are ENTIRELY fictional, and
+  // the socle exists to describe real data. Their rules are written out here.
+  const portfolios = await prisma.finPaperPortfolio.findMany({
+    select: { id: true, userId: true, capital: true, cash: true, currency: true, feeRate: true, status: true },
+  });
+  const paperInstruments = await prisma.finPaperInstrument.findMany({
+    select: { id: true, portfolioId: true, label: true, markPrice: true, markedAt: true },
+  });
+  const paperTrades = await prisma.finPaperTrade.findMany({
+    select: { id: true, portfolioId: true, instrumentId: true, kind: true, quantity: true, unitPrice: true, fee: true, currency: true, decidedAt: true, status: true },
+  });
+
+  // THE rule of P6-12, and the other half of P6-11's: everything in the paper
+  // portfolio is fictional, so that no query can ever pull one of these rows
+  // into a real total. A CHECK pins it; this catches a row written around it.
+  add('everything in the paper portfolio is fictional', portfolios.filter((row) => row.status !== PAPER_STATUS), (row) => `portfolio ${row.id}`);
+  add('every paper trade is fictional', paperTrades.filter((row) => row.status !== PAPER_STATUS), (row) => `paper trade ${row.id}`);
+  add('a paper trade is a buy or a sell', paperTrades.filter((row) => !PAPER_TRADE_KINDS.includes(row.kind)), (row) => `paper trade ${row.id}: ${row.kind}`);
+
+  // « Aucune exécution », and no leverage: fictional cash never goes negative,
+  // and the trades of a portfolio are all in its own currency — otherwise F038
+  // would be adding prices that cannot be added.
+  add('fictional cash is never negative', portfolios.filter((row) => row.cash < 0), (row) => `portfolio ${row.id}`);
+  const portfolioById = new Map(portfolios.map((row) => [row.id, row]));
+  add(
+    'a paper trade is in the currency of its portfolio',
+    paperTrades.filter((row) => portfolioById.has(row.portfolioId) && portfolioById.get(row.portfolioId).currency !== row.currency),
+    (row) => `paper trade ${row.id}`,
+  );
+  // A trade whose instrument belongs to another portfolio would mix two
+  // people's simulations.
+  const instrumentPortfolio = new Map(paperInstruments.map((row) => [row.id, row.portfolioId]));
+  add(
+    'a paper trade points at an instrument of its own portfolio',
+    paperTrades.filter((row) => instrumentPortfolio.get(row.instrumentId) !== row.portfolioId),
+    (row) => `paper trade ${row.id}`,
+  );
+  // A simulated price of zero is not a price, and a price dated ahead of now
+  // would be a quote nobody could have stated.
+  add('a simulated price is positive and not dated in the future', paperInstruments.filter((row) => row.markPrice <= 0 || row.markedAt > new Date()), (row) => `paper instrument ${row.id}`);
+  // A position cannot be short: the sells of an instrument never exceed its
+  // buys. Checked over the whole journal, which is the only place it can be.
+  for (const instrument of paperInstruments) {
+    const trades = paperTrades.filter((row) => row.instrumentId === instrument.id);
+    const bought = trades.filter((row) => row.kind === 'buy').reduce((sum, row) => sum + row.quantity, 0);
+    const sold = trades.filter((row) => row.kind === 'sell').reduce((sum, row) => sum + row.quantity, 0);
+    if (sold > bought) {
+      problems.push(violation('a paper position is never short', `paper instrument ${instrument.id}: sold ${sold} of ${bought}`));
+    }
+  }
+
   // A logically deleted row keeps the journal entry that says it was deleted:
   // that is what makes the deletion traceable rather than silent.
   const changes = await prisma.finChange.findMany({ select: { id: true, entity: true, entityId: true, action: true, userId: true } });
@@ -433,6 +625,9 @@ export async function checkConsistency(prisma, { privateDir }) {
     ['transaction', transactions],
     ['budget', budgets],
     ['envelope', envelopes],
+    ['recurrence', recurrences],
+    ['provision', provisions],
+    ['asset', assets],
   ]) {
     add(
       'a logically deleted financial row says in the journal that it was deleted',
@@ -442,7 +637,9 @@ export async function checkConsistency(prisma, { privateDir }) {
   }
   // A journal entry about a row of another account would be that account's
   // history leaking into this one.
-  const ownerOf = new Map([...categories, ...incomes, ...transactions, ...budgets, ...envelopes].map((row) => [row.id, row.userId]));
+  const ownerOf = new Map(
+    [...categories, ...incomes, ...transactions, ...budgets, ...envelopes, ...recurrences, ...provisions, ...assets].map((row) => [row.id, row.userId]),
+  );
   add(
     'a change journal entry belongs to the account that owns the row',
     changes.filter((c) => ownerOf.has(c.entityId) && ownerOf.get(c.entityId) !== c.userId),

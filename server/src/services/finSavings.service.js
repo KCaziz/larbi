@@ -20,6 +20,25 @@ export async function markedSavingsRaw(prisma, userId, currency) {
   return { deposits: deposits._sum.value ?? 0, withdrawals: withdrawals._sum.value ?? 0 };
 }
 
+// The same two sums, restricted to a period. F008 (« taux d'épargne ») divides
+// net savings by net income OVER THE SAME PERIOD: dividing the cumulative pool
+// by one month's income would not be a rate, it would be a number with no
+// meaning. The savings movements are dated, so the period is a real filter and
+// not an approximation.
+export async function markedSavingsInPeriod(prisma, userId, currency, { from, to }) {
+  const where = { userId, deletedAt: null, status: 'real', planned: false, currency, category: { family: 'goal' }, occurredAt: { gte: from, lte: to } };
+  const [deposits, withdrawals] = await Promise.all([
+    prisma.finTransaction.aggregate({ where: { ...where, kind: 'expense' }, _sum: { value: true } }),
+    prisma.finTransaction.aggregate({ where: { ...where, kind: 'income' }, _sum: { value: true } }),
+  ]);
+  const made = { deposits: deposits._sum.value ?? 0, withdrawals: withdrawals._sum.value ?? 0 };
+  // Nothing marked as savings in the period is NOT "saved zero": we cannot tell
+  // "put nothing aside" from "did not record it", so the rate is simply not
+  // computed (the project's rule, « non calculé plutôt que 0 »).
+  const any = made.deposits > 0 || made.withdrawals > 0;
+  return { ...made, net: any ? netSavings(made.deposits, made.withdrawals) : null };
+}
+
 // F007 itself: the net figure, ready to feed F014 (reserve) or a goal's cap.
 export async function markedSavings(prisma, userId, currency) {
   const { deposits, withdrawals } = await markedSavingsRaw(prisma, userId, currency);

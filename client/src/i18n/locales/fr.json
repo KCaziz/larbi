@@ -35,7 +35,12 @@
     "budget": "Budget",
     "goals": "Objectifs",
     "reserve": "Réserve",
-    "debts": "Dettes"
+    "debts": "Dettes",
+    "calendar": "Calendrier",
+    "today": "Aujourd'hui",
+    "wealth": "Patrimoine",
+    "paper": "Entraînement",
+    "spaces": "À plusieurs"
   },
   "footer": {
     "copyright": "© {{year}} {{brand}}. Tous droits réservés.",
@@ -2898,6 +2903,399 @@
     "targetSaved": "Cible enregistrée.",
     "errors": {
       "refused": "Cette valeur n’est pas valide."
+    }
+  },
+  "calendar": {
+    "title": "Calendrier financier",
+    "intro": "Ce qui est prévu, jour par jour : paiements planifiés, abonnements et provisions. Rien n'est compté comme payé avant que vous le confirmiez.",
+    "period": "Période",
+    "viewLabel": "Affichage",
+    "views": {
+      "month": "Mois",
+      "week": "Semaine"
+    },
+    "balanceLabel": "Solde de départ",
+    "balancePlaceholder": "ex. 25000",
+    "plannedOut": "Sorties prévues",
+    "plannedIn": "Entrées prévues",
+    "realOut": "Dépenses réelles de la période",
+    "projectedCash": "Cash projeté en fin de période",
+    "firstTensionDay": "Premier jour de tension",
+    "noTension": "aucun",
+    "tension": "tension",
+    "nothingPlanned": "Rien de prévu sur cette période.",
+    "noLabel": "Sans libellé",
+    "markPaid": "Marquer payé",
+    "paid": "Mouvement confirmé : il compte maintenant comme réel.",
+    "provisioned": "déjà provisionné : {{amount}}",
+    "kinds": {
+      "planned_expense": "Dépense planifiée",
+      "planned_income": "Entrée planifiée",
+      "recurrence": "Récurrence",
+      "provision": "Provision"
+    },
+    "planTitle": "Plan du mois",
+    "planHelp": "Reprend les paiements planifiés du mois précédent, décalés d'un mois. Les dépenses déjà réalisées ne sont jamais copiées : ce serait inventer un paiement.",
+    "copyPlan": "Copier le mois précédent",
+    "planDone": "Plan copié.",
+    "planResult": "{{created}} prévision(s) ajoutée(s), {{skipped}} déjà présente(s).",
+    "recurrencesTitle": "Abonnements et récurrences",
+    "monthlyCost": "Coût mensuel des abonnements",
+    "yearlyCost": "Coût annuel des abonnements",
+    "noRecurrence": "Aucune récurrence suivie pour le moment.",
+    "addRecurrence": "Ajouter une récurrence",
+    "recurrenceAdded": "Récurrence ajoutée.",
+    "recurrenceDeleted": "Récurrence retirée du suivi.",
+    "detected": "détectée",
+    "stopTracking": "Ne plus suivre {{label}}",
+    "stopTrackingHelp": "Retire la ligne du calendrier. Cela ne résilie rien.",
+    "noCancellation": "Retirer une récurrence arrête son suivi dans FINCLUDIA. Cela ne résilie aucun abonnement : la plateforme ne contacte jamais un fournisseur à votre place.",
+    "detect": "Détecter mes récurrences",
+    "detectionTitle": "Récurrences détectées",
+    "detectionHelp": "Proposées d'après vos mouvements passés (même libellé, montant proche, intervalle régulier). Rien n'est créé avant votre confirmation.",
+    "noCandidate": "Aucune récurrence détectée dans vos mouvements récents.",
+    "occurrences": "{{count}} fois",
+    "unknownFrequency": "fréquence incertaine",
+    "confirm": "Confirmer",
+    "confirmed": "Récurrence confirmée.",
+    "provisionsTitle": "Provisions",
+    "provisionsHelp": "De l'argent mis de côté pour une dépense datée. Une provision ne crée jamais une dépense réalisée : elle n'entre dans aucun total de ce que vous avez dépensé.",
+    "noProvision": "Aucune provision pour le moment.",
+    "addProvision": "Ajouter une provision",
+    "provisionAdded": "Provision ajoutée.",
+    "provisionDeleted": "Provision supprimée.",
+    "deleteProvision": "Supprimer la provision {{label}}",
+    "provisionTarget": "Montant prévu",
+    "provisionSoFar": "Déjà provisionné",
+    "provisionLeft": "Reste à mettre de côté",
+    "provisionDue": "Échéance",
+    "monthlyProvision": "À provisionner par mois",
+    "states": {
+      "active": "en cours",
+      "reached": "atteinte",
+      "passed": "échéance passée"
+    },
+    "frequencies": {
+      "hebdomadaire": "par semaine",
+      "mensuel": "par mois",
+      "trimestriel": "par trimestre",
+      "semestriel": "par semestre",
+      "annuel": "par an"
+    },
+    "fields": {
+      "label": "Libellé",
+      "amount": "Montant",
+      "kind": "Type",
+      "frequency": "Fréquence",
+      "nextDate": "Prochaine échéance"
+    },
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "errors": {
+      "amount": "Indiquez un montant en nombre entier.",
+      "provisionedAboveValue": "Le montant déjà provisionné dépasse la dépense prévue.",
+      "refused": "Cette opération a été refusée. Vérifiez les dates et les montants."
+    }
+  },
+  "today": {
+    "title": "Aujourd'hui",
+    "intro": "Où vous en êtes, et quoi faire maintenant.",
+    "dashboards": {
+      "general": "Vos chiffres du mois, et la suite.",
+      "myWeek": "Ma semaine",
+      "student": "Votre mois étudiant : ce qui reste par jour, et ce que vous couvrez vous-même.",
+      "firstIncome": "Votre premier revenu : ce qui est déjà affecté, et ce qui reste à répartir.",
+      "health": "Votre situation du mois, poste par poste.",
+      "flatshare": "Votre colocation : vos dépenses et ce qui reste.",
+      "couple": "Moi / Nous : vos chiffres du mois.",
+      "household": "Votre foyer : dépenses, budget et réserve.",
+      "savings": "Votre parcours épargne : ce que vous mettez de côté, et vos objectifs."
+    },
+    "actionsTitle": "À faire maintenant",
+    "actions": {
+      "confirmPlanned": "{{count}} paiement(s) prévu(s) dans les {{jours}} prochains jours : confirmez-les quand ils sont faits",
+      "envelopeExceeded": "{{count}} enveloppe(s) au-delà de votre seuil : voir le budget",
+      "buildReserve": "Votre réserve de sécurité n’est pas encore calculable : complétez-la",
+      "categoriseMovements": "{{count}} mouvement(s) sans catégorie : les ranger rend vos totaux lisibles",
+      "finishOnboarding": "Il reste {{remaining}} question(s) pour un premier résultat complet",
+      "createBudget": "Aucun budget sur cette période : en créer un",
+      "addMovement": "Enregistrez une première dépense pour voir vos chiffres"
+    },
+    "alertsTitle": "Alertes",
+    "levels": {
+      "reached": "seuil atteint",
+      "exceeded": "dépassement",
+      "warning": "proche du seuil"
+    },
+    "unnamedEnvelope": "Enveloppe",
+    "seeBudget": "Voir le budget",
+    "figuresTitle": "Vos chiffres",
+    "kpis": {
+      "netFlow": "Flux net du mois",
+      "monthlyResources": "Ressources du mois",
+      "monthExpenses": "Dépenses du mois",
+      "remainingToAllocate": "Reste à affecter",
+      "dailyBudget": "Budget par jour",
+      "reserveMonths": "Réserve de sécurité",
+      "goalProgress": "Progression de l’objectif",
+      "debtEffort": "Taux d’effort dette",
+      "studentAutonomy": "Autonomie financière",
+      "subscriptionCost": "Coût des abonnements",
+      "savingsRate": "Taux d’épargne"
+    },
+    "invitations": {
+      "addMovement": "Enregistrer une dépense",
+      "addIncome": "Déclarer une ressource",
+      "createBudget": "Créer un budget",
+      "setReserve": "Définir ma réserve",
+      "createGoal": "Créer un objectif",
+      "addDebt": "Déclarer une dette",
+      "addRecurrence": "Ajouter un abonnement"
+    },
+    "goalTitle": "Objectif prioritaire",
+    "goalProgress": "Progression",
+    "seeGoals": "Voir mes objectifs",
+    "upcomingTitle": "Prochaines échéances",
+    "seeCalendar": "Voir le calendrier",
+    "staleData": "Ces chiffres reposent sur des données saisies il y a {{days}} jours. Une mise à jour les rendrait plus justes.",
+    "healthPending": "L'indice de santé financière ({{formula}}) n'est pas affiché : ses pondérations doivent être validées ({{task}}). Un score calculé sur des poids inventés serait un jugement que personne ne pourrait vérifier. Les sous-scores ci-dessus sont lisibles un par un.",
+    "pickPublic": "Choisir votre parcours adapte ce tableau à votre situation.",
+    "pickPublicLink": "Choisir mon parcours"
+  },
+  "wealth": {
+    "title": "Patrimoine",
+    "intro": "Ce que vous possédez, ce que vous devez, et ce qu’il en reste.",
+    "noFictional": "Aucune valeur fictive ici : le portefeuille d’entraînement reste séparé, et aucun de ses chiffres n’entre dans votre patrimoine.",
+    "figuresTitle": "Vos chiffres",
+    "netWorth": "Patrimoine net",
+    "concentration": "Concentration maximale",
+    "totalAssets": "Total des actifs",
+    "totalDebts": "Total des dettes",
+    "noDebt": "aucune dette déclarée",
+    "quicklyAvailable": "Disponible rapidement",
+    "debtsFromDebtsPage": "Les dettes sont celles de votre page « Dettes » : elles ne sont pas saisies deux fois.",
+    "concentrationNotice": "Un seul poste représente plus de {{share}} de votre patrimoine. Ce n’est ni bien ni mal : c’est une information pour décider en connaissance de cause.",
+    "allocationTitle": "Répartition par type",
+    "assetsTitle": "Vos actifs",
+    "noAsset": "Aucun actif enregistré pour le moment.",
+    "addAsset": "Ajouter un actif",
+    "added": "Actif ajouté.",
+    "deleted": "Actif supprimé.",
+    "delete": "Supprimer {{label}}",
+    "staleValue": "évaluée il y a {{days}} jours",
+    "defaultForKind": "Selon le type",
+    "valuedAtHelp": "La date d’évaluation est celle où vous avez établi ce montant, pas celle de la saisie. C’est elle qui permet de vous signaler une valeur devenue ancienne.",
+    "kinds": {
+      "account": "Compte bancaire",
+      "ccp": "CCP",
+      "cash": "Espèces",
+      "gold": "Or / bijoux",
+      "vehicle": "Véhicule",
+      "property": "Immobilier",
+      "investment": "Placement",
+      "other": "Autre"
+    },
+    "liquidity": {
+      "liquid": "disponible",
+      "semi_liquid": "mobilisable",
+      "illiquid": "immobilisé"
+    },
+    "fields": {
+      "label": "Libellé",
+      "kind": "Type",
+      "value": "Valeur",
+      "valuedAt": "Date d’évaluation",
+      "liquidity": "Disponibilité",
+      "holder": "Où / chez qui"
+    },
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "errors": {
+      "amount": "Indiquez une valeur en nombre entier.",
+      "refused": "Cette opération a été refusée. Vérifiez la date et le montant."
+    }
+  },
+  "paper": {
+    "title": "Portefeuille d’entraînement",
+    "intro": "Pour s’exercer sans risquer un dinar.",
+    "noExecution": "Rien n’est exécuté nulle part : aucun ordre n’est transmis, et aucun de ces chiffres n’entre dans votre patrimoine réel.",
+    "pricesAreYours": "Les prix utilisés ici sont ceux que vous indiquez vous-même. La plateforme ne publie aucune cotation ni aucune liste d’instruments : ces données doivent venir du client, et rien n’est inventé en attendant.",
+    "noCatalogue": "Il n’y a pas de liste à choisir : nommez le support et indiquez le prix simulé que vous voulez utiliser.",
+    "figuresTitle": "Votre simulation",
+    "since": "depuis le {{date}}",
+    "invested": "Valeur investie",
+    "gainLoss": "Gain / perte",
+    "return": "Rendement",
+    "capital": "Capital fictif",
+    "cash": "Liquidités fictives",
+    "feeRate": "Frais simulés",
+    "concentrationNotice": "Un seul support représente plus de {{share}} de votre portefeuille. C’est une remarque pédagogique, pas une alerte : à vous de décider si cela vous convient.",
+    "positionsTitle": "Vos positions",
+    "noPosition": "Aucune position pour le moment.",
+    "units": "{{count}} unité(s)",
+    "markedAt": "{{price}} au {{date}}",
+    "trade": "Acheter / vendre",
+    "addInstrument": "Ajouter un support",
+    "instrumentAdded": "Support ajouté.",
+    "traded": "Décision enregistrée.",
+    "record": "Enregistrer la décision",
+    "whyHelp": "Le « pourquoi » est l’intérêt d’un journal de décisions : c’est ce que vous relirez dans six mois.",
+    "rebalance": "Proposer un rééquilibrage",
+    "rebalanceTitle": "Rééquilibrage proposé",
+    "rebalanceHelp": "Rien n’a été exécuté. Chaque ligne est une opération que vous passez vous-même si vous le souhaitez.",
+    "target": "cible {{share}}",
+    "actions": {
+      "buy": "acheter",
+      "sell": "vendre",
+      "hold": "ne rien changer"
+    },
+    "readinessTitle": "Suis-je prêt à commencer ?",
+    "readinessHelp": "Ces quatre points sont des questions, pas des conditions : l’atelier reste ouvert quoi qu’ils répondent.",
+    "checks": {
+      "reserve": "Une réserve de sécurité existe",
+      "goals": "Un objectif est commencé",
+      "netFlow": "Le mois dégage un flux positif",
+      "debt": "Les mensualités de dette restent légères"
+    },
+    "yes": "oui",
+    "notYet": "pas encore",
+    "cannotTell": "pas encore mesurable",
+    "riskTitle": "Profil de risque pédagogique",
+    "riskScore": "Score",
+    "riskNoLabel": "Aucune étiquette n’accompagne ce score : les seuils qui transformeraient un nombre en mot (« prudent », « dynamique »…) doivent être validés par le client. Un mot posé sur des seuils inventés se lirait comme un jugement.",
+    "computeRisk": "Calculer mon score",
+    "choose": "Choisir…",
+    "risk": {
+      "horizon": "À quelle échéance pourriez-vous avoir besoin de cet argent ?",
+      "reaction": "Si la valeur baissait de 20 %, que feriez-vous ?",
+      "experience": "Quelle est votre expérience des placements ?",
+      "lossTolerance": "Quelle baisse temporaire pourriez-vous accepter ?"
+    },
+    "riskOptions": {
+      "horizon": {
+        "under2y": "Moins de 2 ans",
+        "2to5y": "De 2 à 5 ans",
+        "over5y": "Plus de 5 ans"
+      },
+      "reaction": {
+        "sellAll": "Je vendrais tout",
+        "wait": "J’attendrais",
+        "buyMore": "J’en achèterais davantage"
+      },
+      "experience": {
+        "none": "Aucune",
+        "some": "Quelques essais",
+        "regular": "Régulière"
+      },
+      "lossTolerance": {
+        "none": "Aucune",
+        "tenPercent": "Environ 10 %",
+        "thirtyPercent": "Environ 30 %"
+      }
+    },
+    "journalTitle": "Journal de décisions",
+    "noDecision": "Aucune décision enregistrée.",
+    "export": "Exporter le journal (CSV)",
+    "kinds": {
+      "buy": "achat",
+      "sell": "vente"
+    },
+    "resetTitle": "Réinitialiser",
+    "resetHelp": "La réinitialisation efface les supports et toutes les décisions. Exportez le journal avant si vous voulez le garder.",
+    "resetConfirm": "Réinitialiser le portefeuille ? Les décisions enregistrées seront effacées.",
+    "reset": "Réinitialiser le portefeuille",
+    "fields": {
+      "instrument": "Support",
+      "markPrice": "Prix simulé par unité",
+      "markedAt": "Prix constaté le",
+      "kind": "Opération",
+      "quantity": "Quantité",
+      "unitPrice": "Prix unitaire",
+      "why": "Pourquoi cette décision ?"
+    },
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "errors": {
+      "price": "Indiquez un prix en nombre entier.",
+      "trade": "Indiquez une quantité et un prix en nombres entiers.",
+      "refused": "Cette opération a été refusée. Vérifiez les liquidités fictives et les quantités."
+    }
+  },
+  "spaces": {
+    "title": "À plusieurs",
+    "intro": "Colocation, couple, foyer : organiser les dépenses communes sans ouvrir vos comptes.",
+    "privateByDefault": "Rejoindre un espace ne partage rien. Chaque personne décide, poste par poste, ce que les autres peuvent voir — et personne ne peut le décider à votre place.",
+    "mineTitle": "Mes espaces",
+    "none": "Vous ne faites partie d’aucun espace.",
+    "create": "Créer un espace",
+    "created": "Espace créé.",
+    "join": "Rejoindre avec un code",
+    "joinAction": "Rejoindre",
+    "joined": "Vous avez rejoint l’espace.",
+    "joinHelp": "Collez le code que la personne qui vous invite vous a transmis.",
+    "memberCount": "{{count}} membre(s)",
+    "kinds": {
+      "flatshare": "Colocation",
+      "couple": "Couple",
+      "household": "Foyer"
+    },
+    "roles": {
+      "owner": "propriétaire",
+      "admin": "administrateur",
+      "member": "membre",
+      "viewer": "lecteur"
+    },
+    "levels": {
+      "private": "Rien",
+      "totals": "Les totaux seulement",
+      "shared": "Le détail"
+    },
+    "dataKinds": {
+      "incomes": "Revenus",
+      "transactions": "Dépenses",
+      "assets": "Patrimoine",
+      "goals": "Objectifs"
+    },
+    "mySharingTitle": "Ce que JE partage",
+    "mySharingHelp": "Ce réglage ne concerne que vos données. Vous pouvez le changer ou le retirer à tout moment, et le retrait est immédiat.",
+    "sharingSaved": "Partage mis à jour.",
+    "membersTitle": "Membres",
+    "me": "vous",
+    "sharesNothing": "ne partage rien",
+    "sharedTitle": "Ce que les autres partagent",
+    "nobodyShares": "Personne ne partage encore de données dans cet espace.",
+    "totalsOnly": "Totaux seulement : le détail n’est pas transmis.",
+    "rowCount": "{{count}} ligne(s) partagée(s)",
+    "inviteTitle": "Inviter",
+    "invite": "Créer une invitation",
+    "invited": "Invitation créée.",
+    "tokenOnce": "Voici le code à transmettre. Il ne sera plus affiché : le serveur n’en garde qu’une empreinte.",
+    "copy": "Copier",
+    "expires": "expire le {{date}}",
+    "revoke": "Révoquer l’invitation",
+    "revoked": "Invitation révoquée.",
+    "remove": "Retirer {{name}}",
+    "removeConfirm": "Retirer {{name}} de cet espace ?",
+    "removed": "Membre retiré.",
+    "leave": "Quitter l’espace",
+    "leaveConfirm": "Quitter cet espace ? Ce que vous partagiez cesse aussitôt d’être visible.",
+    "left": "Vous avez quitté l’espace.",
+    "delete": "Supprimer l’espace",
+    "deleteConfirm": "Supprimer cet espace pour tous ses membres ?",
+    "deleted": "Espace supprimé.",
+    "fields": {
+      "kind": "Type d’espace",
+      "label": "Nom",
+      "displayName": "Nom affiché aux autres",
+      "token": "Code d’invitation"
+    },
+    "displayNameHelp": "Facultatif. Rejoindre une colocation ne vous oblige pas à donner votre nom complet.",
+    "save": "Créer",
+    "cancel": "Annuler",
+    "errors": {
+      "label": "Donnez un nom à cet espace.",
+      "role": "Votre rôle dans cet espace ne permet pas cette action.",
+      "refused": "Cette opération a été refusée."
     }
   }
 }

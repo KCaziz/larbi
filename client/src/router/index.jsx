@@ -90,6 +90,9 @@ export const router = createBrowserRouter([
                 path: 'catalogue/:slug/certificat',
                 lazy: lazyPage(() => import('../pages/learn/CertificatePage.jsx')),
               },
+              // FINCLUDIA "Aujourd'hui" home screen and dashboards per public
+              // (P6-06), screens C04 / LY02 / ET02 / JA02 / SA02.
+              { path: 'aujourdhui', lazy: lazyPage(() => import('../pages/aujourdhui/TodayPage.jsx')) },
               // FINCLUDIA "Mon argent" (P6-04): synthesis, entry and history.
               { path: 'mon-argent', lazy: lazyPage(() => import('../pages/argent/MyMoneyPage.jsx')) },
               // FINCLUDIA budgets and envelopes (P6-05), screens C06 / JA03 / JA04.
@@ -101,6 +104,17 @@ export const router = createBrowserRouter([
               { path: 'dettes', lazy: lazyPage(() => import('../pages/debts/DebtsPage.jsx')) },
               // FINCLUDIA safety reserve (P6-09), screen C12.
               { path: 'reserve', lazy: lazyPage(() => import('../pages/reserve/ReservePage.jsx')) },
+              // FINCLUDIA real patrimony (P6-11), screens C16 / JA07.
+              { path: 'patrimoine', lazy: lazyPage(() => import('../pages/patrimoine/WealthPage.jsx')) },
+              // FINCLUDIA paper portfolio and investment workshop (P6-12),
+              // screens C17 / EP03-EP07.
+              { path: 'portefeuille', lazy: lazyPage(() => import('../pages/portefeuille/PaperPortfolioPage.jsx')) },
+              // FINCLUDIA shared spaces (P6-13), screens P01 / P04 / CO01 /
+              // CP01 / FA01.
+              { path: 'espaces', lazy: lazyPage(() => import('../pages/espaces/SpacesPage.jsx')) },
+              // FINCLUDIA financial calendar and recurring expenses (P6-07),
+              // screens C23 / SA03 / SA04.
+              { path: 'calendrier', lazy: lazyPage(() => import('../pages/calendrier/CalendarPage.jsx')) },
               // Where the payment provider sends the buyer back (P3-09): reads the order, grants nothing.
               { path: 'paiement/retour', lazy: lazyPage(() => import('../pages/payments/PaymentReturnPage.jsx')) },
               {

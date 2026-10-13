@@ -12,11 +12,16 @@ const links = [
   { labelKey: 'account.nav.payments', to: '/compte/paiements' },
   { labelKey: 'account.nav.fincludia', to: '/compte/fincludia' },
   { labelKey: 'account.nav.onboarding', to: '/compte/premiers-pas' },
+  { labelKey: 'nav.today', to: '/aujourdhui' },
   { labelKey: 'nav.money', to: '/mon-argent' },
   { labelKey: 'nav.budget', to: '/budget' },
   { labelKey: 'nav.goals', to: '/objectifs' },
   { labelKey: 'nav.reserve', to: '/reserve' },
   { labelKey: 'nav.debts', to: '/dettes' },
+  { labelKey: 'nav.calendar', to: '/calendrier' },
+  { labelKey: 'nav.wealth', to: '/patrimoine' },
+  { labelKey: 'nav.paper', to: '/portefeuille' },
+  { labelKey: 'nav.spaces', to: '/espaces' },
   { labelKey: 'account.nav.categories', to: '/compte/categories' },
 ];
 

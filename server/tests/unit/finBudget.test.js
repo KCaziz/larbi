@@ -63,6 +63,14 @@ describe('P6-05 — periods', () => {
     assert.deepEqual(nextPeriod('yearly', D('2026-01-01'), D('2026-12-31')), { periodStart: D('2027-01-01'), periodEnd: D('2027-12-31') });
     assert.equal(nextPeriod('none', D('2026-01-01'), D('2026-01-31')), null, 'a one-off budget has no next period');
   });
+
+  test('a period that does not start on the 1st keeps its day, clamped to the month', () => {
+    // Date arithmetic overflows on its own: 31 January plus one month gives
+    // 3 March, and a monthly budget would walk a little further out of the
+    // calendar every period. The day is clamped to the target month instead.
+    assert.deepEqual(nextPeriod('monthly', D('2026-01-31'), D('2026-02-27')), { periodStart: D('2026-02-28'), periodEnd: D('2026-03-27') });
+    assert.deepEqual(nextPeriod('monthly', D('2026-01-15'), D('2026-02-14')), { periodStart: D('2026-02-15'), periodEnd: D('2026-03-14') });
+  });
 });
 
 describe('P6-05 — alert levels', () => {

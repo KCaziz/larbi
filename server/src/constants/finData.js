@@ -69,4 +69,18 @@ export const FINANCIAL_TABLES = [
   // applies to it and the amount rule does not.
   { model: 'finBudget', table: 'fin_budgets', label: 'budget', amounts: false, currency: true },
   { model: 'finEnvelope', table: 'fin_envelopes', label: 'envelope', amounts: true, currency: true },
+  // Goals (P6-08) and debts (P6-10) name their amounts `target` / `allocated`
+  // and `outstandingPrincipal` / `monthlyInstalment` rather than `value`, so the
+  // single-amount rule does not apply to them; the currency rule does, and so
+  // does the whole rest of the socle.
+  { model: 'finGoal', table: 'fin_goals', label: 'goal', amounts: false, currency: true },
+  { model: 'finDebt', table: 'fin_debts', label: 'debt', amounts: false, currency: true },
+  // Calendar and recurring expenses (P6-07). A recurrence carries one amount
+  // (`value`) like a movement; a provision names its own `value` and the part
+  // already set aside, so the amount rule applies to both.
+  { model: 'finRecurrence', table: 'fin_recurrences', label: 'recurrence', amounts: true, currency: true },
+  { model: 'finProvision', table: 'fin_provisions', label: 'provision', amounts: true, currency: true },
+  // Real patrimony (P6-11). One amount, one currency, and the socle's `status`
+  // may never be `fictional` here — checked by its own rule below.
+  { model: 'finAsset', table: 'fin_assets', label: 'asset', amounts: true, currency: true },
 ];

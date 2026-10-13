@@ -1,0 +1,232 @@
+/* "Aujourd'hui" home screen (P6-06). Tokens only, logical properties (RTL). */
+.today-page {
+  max-width: 1040px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  padding-block-end: 40px;
+}
+
+.today-page section {
+  margin-block-start: 28px;
+}
+
+.today-page h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.12rem;
+  color: var(--text-h);
+}
+
+.today-period {
+  margin-block: 10px 0;
+  font-size: 0.84rem;
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The quality banner: a fact about the figures, not a warning about the person. */
+.today-quality {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block: 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+  font-size: 0.88rem;
+}
+
+/* ---- actions ------------------------------------------------------------ */
+.today-actions {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.today-action a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-inline-start-width: 3px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.today-action a:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.today-action-label {
+  margin-inline-end: auto;
+}
+
+/* The client's own priority order, made visible: safety reads differently from
+   a learning nudge. */
+.today-action-securite a {
+  border-inline-start-color: var(--warn);
+}
+
+.today-action-echeance a {
+  border-inline-start-color: var(--accent);
+}
+
+.today-action-budget a {
+  border-inline-start-color: var(--border-strong);
+}
+
+.today-action-apprentissage a {
+  border-inline-start-color: var(--border);
+}
+
+/* ---- alerts ------------------------------------------------------------- */
+.today-alerts {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.today-alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 12px;
+  border-inline-start: 3px solid var(--warn);
+  border-radius: var(--radius-sm);
+  background: var(--warn-bg);
+  font-size: 0.9rem;
+}
+
+.today-alert-label {
+  margin-inline-end: auto;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.today-alert-level {
+  padding: 2px 8px;
+  border: 1px solid var(--warn);
+  border-radius: 999px;
+  font-size: 0.73rem;
+}
+
+/* ---- figures ------------------------------------------------------------ */
+.today-kpi {
+  display: contents;
+}
+
+/* The invitation that replaces an uncomputable figure: an opening, not an
+   error. */
+.today-invitation {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-block-start: 8px;
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.today-invitation:hover {
+  text-decoration: underline;
+}
+
+.today-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-block-start: 10px;
+  color: var(--accent);
+  font-size: 0.86rem;
+  text-decoration: none;
+}
+
+.today-link:hover {
+  text-decoration: underline;
+}
+
+/* ---- goal --------------------------------------------------------------- */
+.today-goal {
+  margin-block-start: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.today-goal-label {
+  display: block;
+  margin-block-end: 10px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+/* ---- upcoming ----------------------------------------------------------- */
+.today-upcoming {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.today-upcoming-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.today-upcoming-row:nth-child(odd) {
+  background: var(--bg-alt);
+}
+
+.today-upcoming-date {
+  font-size: 0.84rem;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
+.today-upcoming-kind {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.72rem;
+}
+
+.today-upcoming-label {
+  margin-inline-end: auto;
+}
+
+.today-upcoming-amount {
+  font-weight: 500;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
+/* What is deliberately not shown, said out loud. */
+.today-pending {
+  margin-block-start: 24px;
+  padding: 12px 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  opacity: 0.9;
+}

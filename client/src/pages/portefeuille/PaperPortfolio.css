@@ -1,0 +1,273 @@
+/* Paper portfolio (P6-12). Tokens only, logical properties (RTL). */
+.paper-page {
+  max-width: 1040px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  padding-block-end: 40px;
+}
+
+.paper-page section {
+  margin-block-start: 28px;
+}
+
+.paper-page h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.12rem;
+  color: var(--text-h);
+}
+
+.paper-page h3 {
+  margin-block: 14px 6px;
+  font-size: 0.98rem;
+  color: var(--text-h);
+}
+
+/* The badge is permanent and at the top, not a label somebody might scroll
+   past. */
+.paper-badge {
+  display: inline-block;
+  margin-block: 14px 8px;
+}
+
+.paper-rule {
+  margin-block: 8px;
+  padding: 10px 14px;
+  border: 1px dashed var(--warn);
+  border-radius: var(--radius);
+  background: var(--warn-bg);
+  font-size: 0.86rem;
+}
+
+.paper-since {
+  font-size: 0.82rem;
+  font-weight: 400;
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
+.paper-help {
+  margin-block: 8px;
+  font-size: 0.86rem;
+  opacity: 0.85;
+}
+
+.paper-empty {
+  margin-block: 12px;
+  padding: 12px 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.paper-totals {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin-block: 14px;
+  font-size: 0.9rem;
+}
+
+.paper-totals dt {
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.paper-totals dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Educational, not an alarm. */
+.paper-notice {
+  margin-block: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+  font-size: 0.86rem;
+}
+
+.paper-warnings {
+  margin-block: 12px;
+  padding: 10px 14px;
+  padding-inline-start: 30px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  font-size: 0.86rem;
+}
+
+.paper-list {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.paper-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 0.9rem;
+}
+
+.paper-row-label {
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.paper-row-amount {
+  margin-inline-start: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.paper-row-price,
+.paper-row-date {
+  font-size: 0.82rem;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+
+.paper-row-note {
+  flex-basis: 100%;
+  font-size: 0.84rem;
+  opacity: 0.9;
+}
+
+.paper-tag {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.73rem;
+}
+
+.paper-plain {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.paper-plain:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.paper-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-block-start: 14px;
+}
+
+.paper-form {
+  margin-block-start: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.paper-form-inline {
+  flex-basis: 100%;
+}
+
+.paper-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+/* A grid item defaults to min-width: auto, so a select as wide as its widest
+   option pushes the page past the viewport. */
+.paper-form-grid > * {
+  min-inline-size: 0;
+}
+
+.paper-form label {
+  display: grid;
+  gap: 5px;
+  font-size: 0.86rem;
+}
+
+.paper-form input,
+.paper-form select {
+  max-inline-size: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.paper-plan {
+  margin-block-start: 14px;
+  padding: 12px 14px;
+  border: 1px dashed var(--accent-border);
+  border-radius: var(--radius);
+  background: var(--accent-bg);
+}
+
+.paper-checks {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.paper-check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-inline-start: 3px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.paper-check span:first-child {
+  margin-inline-end: auto;
+}
+
+.paper-check-yes {
+  border-inline-start-color: var(--green);
+}
+
+.paper-check-no {
+  border-inline-start-color: var(--warn);
+}
+
+.paper-check-unknown {
+  border-inline-start-color: var(--border-strong);
+}
+
+.paper-check-answer {
+  font-size: 0.82rem;
+  opacity: 0.9;
+}
+
+.paper-risk-result {
+  margin-block-start: 14px;
+}

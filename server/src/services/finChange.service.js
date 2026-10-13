@@ -41,6 +41,38 @@ export const JOURNALLED_FIELDS = {
   // from, which is exactly what a trail is for.
   budget: ['label', 'periodStart', 'periodEnd', 'currency', 'recurrence', 'alertThresholds', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
   envelope: ['categoryId', 'kind', 'value', 'currency', 'cap', 'recurring', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
+  // Calendar and recurring expenses (P6-07). The DATE is journalled as much as
+  // the amount: moving a due date changes which period a figure belongs to.
+  recurrence: ['label', 'categoryId', 'kind', 'value', 'currency', 'frequency', 'nextDate', 'endDate', 'reminderDays', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
+  provision: ['label', 'categoryId', 'value', 'currency', 'provisioned', 'targetDate', 'reminderDays', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
+  // Goals (P6-08) and debts (P6-10). Both services already call
+  // recordCorrection, but without their fields declared here `diffFields`
+  // returned an empty list and NOTHING was traced: a corrected target or a
+  // changed outstanding balance left no trail at all, which is the one thing
+  // P6-02 requires of a figure that feeds a history.
+  goal: ['label', 'target', 'currency', 'targetDate', 'allocated', 'monthlyContribution', 'rate', 'priority', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
+  debt: [
+    'label',
+    'lender',
+    'purpose',
+    'assetFinanced',
+    'outstandingPrincipal',
+    'monthlyInstalment',
+    'currency',
+    'rate',
+    'knownTotalCost',
+    'dueDate',
+    'note',
+    'scope',
+    'consentUses',
+    'archivedAt',
+    'deletedAt',
+  ],
+  debtPayment: ['amount', 'currency', 'paidAt', 'note', 'deletedAt'],
+  // Real patrimony (P6-11). `valuedAt` is journalled next to `value`, which is
+  // what makes the valuation history readable from the trail instead of from a
+  // second table of the same facts.
+  asset: ['label', 'kind', 'categoryId', 'value', 'currency', 'valuedAt', 'liquidity', 'holder', 'note', 'scope', 'consentUses', 'confidence', 'status', 'archivedAt', 'deletedAt'],
 };
 
 // What actually changed between two versions of a row, field by field. Values

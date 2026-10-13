@@ -1,0 +1,425 @@
+/* Financial calendar (P6-07). Tokens only, logical properties (RTL). */
+.calendar-page {
+  max-width: 1040px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  padding-block-end: 40px;
+}
+
+.calendar-page section {
+  margin-block-start: 28px;
+}
+
+.calendar-page h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.12rem;
+  color: var(--text-h);
+}
+
+.calendar-page h3 {
+  margin-block: 14px 6px;
+  font-size: 0.98rem;
+  color: var(--text-h);
+}
+
+.calendar-range {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--text);
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-help {
+  margin-block: 8px;
+  font-size: 0.86rem;
+  opacity: 0.85;
+}
+
+.calendar-empty {
+  margin-block: 12px;
+  padding: 12px 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.calendar-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-block: 14px;
+}
+
+/* A grid or flex item is `min-width: auto` by default, so a <select> or an
+   <input> as wide as its content stretches its column and pushes the page past
+   the viewport. Letting them shrink is what keeps the layout inside the
+   screen (the defect the site sweep found on /mon-argent). */
+.calendar-controls > *,
+.calendar-form-grid > * {
+  min-inline-size: 0;
+}
+
+.calendar-views {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.calendar-view {
+  padding: 6px 14px;
+  border: 0;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
+.calendar-view + .calendar-view {
+  border-inline-start: 1px solid var(--border);
+}
+
+.calendar-view-on {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.calendar-balance {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+}
+
+.calendar-balance input {
+  inline-size: 140px;
+  max-inline-size: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-currency {
+  font-size: 0.82rem;
+  opacity: 0.8;
+}
+
+.calendar-projection {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin-block: 14px;
+  font-size: 0.9rem;
+}
+
+.calendar-projection dt {
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.calendar-projection dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-warnings {
+  margin-block: 12px;
+  padding: 10px 14px;
+  padding-inline-start: 30px;
+  border: 1px dashed var(--warn);
+  border-radius: var(--radius);
+  background: var(--warn-bg);
+  font-size: 0.86rem;
+}
+
+.calendar-tension-flag,
+.calendar-badge-tension {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--warn-text, var(--text-h));
+}
+
+.calendar-badge-tension {
+  padding: 2px 8px;
+  border: 1px solid var(--warn);
+  border-radius: 999px;
+  background: var(--warn-bg);
+  font-size: 0.73rem;
+}
+
+/* ---- the days ---------------------------------------------------------- */
+.calendar-days {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.calendar-day {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+/* A day where the projected cash goes under its floor is a different kind of
+   day, not a tagged one: it is the thing the person acts on. */
+.calendar-day-tension {
+  border-inline-start: 3px solid var(--warn);
+  background: var(--warn-bg);
+}
+
+.calendar-day-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendar-day-date {
+  font-weight: 500;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-day-cash {
+  margin-inline-end: auto;
+  font-size: 0.86rem;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-events {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.calendar-event {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+}
+
+.calendar-event:nth-child(odd) {
+  background: var(--bg-alt);
+}
+
+.calendar-event-kind {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.72rem;
+}
+
+/* A provision is not a payment: it reads differently on purpose. */
+.calendar-event-provision .calendar-event-kind {
+  border-style: dashed;
+}
+
+.calendar-event-label {
+  margin-inline-end: auto;
+}
+
+.calendar-event-amount {
+  font-weight: 500;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-event-note {
+  flex-basis: 100%;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.calendar-pay,
+.calendar-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.calendar-pay:hover,
+.calendar-icon:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+/* ---- recurrences and provisions ---------------------------------------- */
+.calendar-list {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.calendar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.calendar-row:nth-child(odd) {
+  background: var(--bg-alt);
+}
+
+.calendar-row-label {
+  margin-inline-end: auto;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.calendar-row-amount {
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-row-date {
+  font-size: 0.84rem;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-tag {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.73rem;
+}
+
+.calendar-tag-detected {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.calendar-state-reached {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.calendar-state-passed {
+  border-color: var(--warn);
+}
+
+.calendar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-block-start: 14px;
+}
+
+.calendar-detection {
+  margin-block-start: 14px;
+  padding: 12px 14px;
+  border: 1px dashed var(--accent-border);
+  border-radius: var(--radius);
+  background: var(--accent-bg);
+}
+
+.calendar-form {
+  margin-block-start: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.calendar-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.calendar-form label {
+  display: grid;
+  gap: 5px;
+  font-size: 0.86rem;
+}
+
+.calendar-form input,
+.calendar-form select {
+  max-inline-size: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.calendar-provisions {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+.calendar-provision {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.calendar-provision-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendar-provision-figures {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin-block: 10px;
+  font-size: 0.88rem;
+}
+
+.calendar-provision-figures dt {
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.calendar-provision-figures dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
