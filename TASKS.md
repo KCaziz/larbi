@@ -1979,13 +1979,40 @@ Indice de **préparation** du dossier (complétude, stabilité, effort dette, ap
 - **Pas de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
 
 ### P6-17 — FINCLUDIA : personnalisation des 8 parcours
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P6-06`, `P6-15`, `P2-09`, `P4-10`
 - Durée cible : 5 jours (estimation)
 - Origine : direction FINCLUDIA du 2026-10-09 (spécification § 6 à 13, onglet `19_Cartes_Parcours` ; lot 7 du backlog client)
 
 Une fois les moteurs stables : vocabulaire, navigation, écrans activés et tableaux de bord **propres à chaque public** (carte des parcours), écrans spécifiques restants (préparer mes études LY09, autonomie ET03, transition premier revenu JA01, plan du mois SA03, diagnostic épargne EP01…), et passages d'un parcours à l'autre (`P3-18`). Les écrans communs sont réutilisés par configuration, jamais recopiés.
+
+**Réalisé (2026-10-14) :**
+
+**La carte des parcours est GÉNÉRÉE depuis le classeur du client**, pas écrite à la main : `server/scripts/generate-journeys.py` lit l'onglet `19_Cartes_Parcours` et produit `src/constants/finJourneys.js` — 78 écrans, 8 parcours. Même méthode que les 91 catégories de `P6-02` : extrait par script, jamais retapé, parce qu'une ligne que personne n'a tapée est une ligne que personne n'a pu déformer. Cet onglet n'avait jamais été exploité et il contenait exactement ce que la tâche demandait.
+
+- **Le vocabulaire est celui du client**, dans son ordre : « Ma semaine » (lycéen), « Mon mois » et « Autonomie » (étudiant), « Notre mois / Nos objectifs / Notre sécurité » (couple), « Aujourd'hui foyer » (famille). Avec le tableau de bord principal que le client nomme lui-même : « Parcours financier », « Santé financière étudiante », « Tableau de bord Premier Revenu », « Budget partagé », « Parcours d'épargne »…
+- **Les écrans communs sont réutilisés par configuration, jamais recopiés** — l'exigence explicite de la tâche. Les « écrans spécifiques restants » qu'elle cite existaient déjà, dispersés : **LY09** « Préparer mes études » est le simulateur de `P4-10`, **ET03** « Autonomie » est la carte F047 du tableau de bord de `P6-06`, **JA01** « Transition premier revenu » est son tableau « Premier revenu », **SA03** « Plan du mois » est la copie de plan de `P6-07`, **EP01** « Diagnostic épargne » sont les questions EP01 de l'onboarding `P6-03`. Cette tâche les **rattache**, elle n'en reconstruit aucun.
+- **`GET /fin/parcours`** publie la carte de l'appelant : tableau principal, navigation, et pour chaque écran s'il est servi, par quelle route, s'il est réservé aux adultes et s'il est autorisé. **`GET /fin/parcours/carte`** publie la carte entière — c'est la **matrice de provenance** que `P6-21` demande (onglet `18_Provenance`) : **71 écrans servis sur 78**, et les 7 autres disent ce qu'ils attendent plutôt que de manquer en silence (`C15` et `ET07` → `P4-14`, `JA09` → `P4-15`, `EP06` → instruments et prix à fournir, `LY03` → tâche abandonnée par le client, `LY11` → contenu à rédiger, `C22` → barre d'en-tête et non une route).
+- **La navigation lit cette carte** au lieu d'une liste en dur de 25 entrées montrée à tout le monde. Si la carte ne peut pas être lue, **toutes** les entrées restent affichées : masquer sur échec réseau ferait passer un incident pour un produit plus petit, et le serveur refuse de toute façon ce qui doit l'être.
+
+**La garde 18+ est enfin appliquée.** `requireAdult` existait depuis `P3-18`, était testé, et **ne gardait aucune route** — la limite était déclarée sous `P3-18` (« il sera appliqué en même temps que les fonctions réservées aux adultes »). Ces fonctions existent depuis `P6-10`, `P6-11` et `P6-16`, donc c'est ici. Elle garde désormais `/debts`, `/patrimoine`, `/actifs` et `/financement`, **côté serveur** : un mineur ne pouvait pas seulement les voir dans le menu, il pouvait **créer une dette ou un patrimoine réel par l'API**.
+
+**Le refus est devenu actionnable.** `requireAdult` refuse par défaut (tranche d'âge inconnue = traitée comme mineur), ce qui est la bonne direction pour une règle qui protège des mineurs. Mais il distingue maintenant les deux cas : `adultsOnly` pour un mineur, `ageUnknown` pour un adulte qui n'a simplement pas renseigné son profil. Sans cette distinction, le second cas est une porte fermée — c'est ainsi qu'une règle de protection devient un verrouillage.
+
+**Tests :** 16 de sécurité (`tests/security/finJourney.test.js`), dont celui qui compte le plus — « un mineur garde **toute** route qui est la sienne ». Deux fixtures explicites ajoutées (`t.adult()`, `t.minor()`) ; `t.user()` reste **sans** tranche d'âge, parce que c'est ce à quoi ressemble un compte neuf et que rendre le fixture adulte par défaut aurait masqué la règle à tous les tests d'un coup.
+
+**Défauts trouvés et corrigés :**
+- **J'ai failli verrouiller les mineurs hors de leur propre argent.** `router.use(requireAdult)` dans un routeur monté sur `/fin` s'applique à **toutes** les routes `/fin/*` déclarées ensuite : réserve, calendrier, accueil, notifications, recherche, passeport. La route de parcours a répondu 403 et l'a révélé. La garde est maintenant liée à ses propres chemins (`router.use('/debts', requireAdult)`), et le test qui l'interdit est écrit.
+- **Un composant utilisé sans import** dans `SpacesPage.jsx` (`Notice`), hérité d'une session précédente : la page plantait dès qu'aucune récurrence partagée n'était détectée. Trouvé par le linter, corrigé.
+- **`POST /api/tools/comparator/adequation` répondait 400 au lieu de 401** à un appel anonyme : `P4-13` avait ajouté une route publique sans la déclarer dans l'audit d'autorisation. La route est bien publique par conception (le comparateur est `access: 'public'`, elle ne lit que des données publiques et n'écrit rien) ; c'est sa **déclaration** qui manquait. L'audit a fait exactement son travail.
+- **Le client Prisma généré était désynchronisé du schéma**, pour la **deuxième fois** (déjà signalé sous `P6-05`) : `FinNotification`, `FinChild`, `FinSpaceGoal` et `FinSpaceProvision` existaient dans `schema.prisma` mais pas dans le client compilé, ce qui faisait échouer **20 tests** et plantait toutes les routes correspondantes. `npx prisma generate` corrige. À la deuxième occurrence, ce n'est plus un oubli mais un défaut de procédure : il mérite un garde-fou automatique plutôt qu'une note (proposé sous `P6-21`).
+
+**Limites et réserves déclarées :**
+- **L'interface ne propose pas encore « indiquez votre tranche d'âge »** quand le refus est `ageUnknown`. Le motif est publié par l'API et exploitable ; l'écran qui l'utilise reste à ajouter, et aucun compte existant n'a renseigné sa tranche d'âge.
+- **Les 7 écrans non servis** attendent ce qui est déclaré dans la matrice de provenance, pas du développement : trois attendent des données du client, un est abandonné, un est du contenu à rédiger, un est une barre d'en-tête et non une route.
+- **Le vocabulaire par public n'est pas traduit** : la navigation du client est en français dans le classeur, et c'est elle qui est servie. Les libellés anglais et arabes de ces entrées restent à écrire — traduire le vocabulaire d'un parcours est une décision éditoriale, pas une chaîne à deviner.
+- **Pas de parcours navigateur dédié** à la carte (le balayage couvre les pages, et la navigation filtrée est exercée par chacune).
 
 ### P6-18 — FINCLUDIA : centre de notifications et alertes
 - Statut : `✅ done`
@@ -2081,6 +2108,35 @@ Critères :
 - Aucune donnée privée visible hors de son propriétaire ou de son espace (audit de sécurité automatique + tests dédiés).
 - Aucun total ne mélange réel et fictif ; aucune valeur non calculable affichée à 0.
 - Matrice de provenance (onglet `18_Provenance`) : chaque écran livré est rattaché à sa ligne source.
+
+**Recette exécutée le 2026-10-14 — la tâche reste `❌ todo`, et pourquoi.**
+
+`P6-21` ne peut pas être déclarée terminée : deux de ses dépendances, `P4-14` (décodeur de fiche de paie) et `P4-15` (comparer un financement), sont `⛔ blocked` sur des **données que le client doit fournir** — barèmes de paie datés, offres de financement. Clore la validation de fin de phase en les laissant ouvertes dirait que la phase est recettée alors que deux de ses écrans n'existent pas. Les critères qui **ne dépendent pas** d'elles ont en revanche été exécutés, et voici leur état.
+
+**Critère « aucune donnée privée visible hors de son propriétaire ou de son espace » — tenu.** Audit d'autorisation automatique (`tests/security/authorization.test.js`) : toute route non déclarée publique répond 401 à un appel anonyme, toute route d'administration répond 403 à un compte standard, et le préfixe d'administration n'est joignable par aucune autre orthographe. Plus les suites dédiées : espaces partagés (24 tests sur la matrice de permissions), patrimoine, dettes, calendrier, portefeuille fictif, parcours.
+
+**Critère « aucun total ne mélange réel et fictif ; aucune valeur non calculable affichée à 0 » — tenu, et c'est ce critère qui a trouvé un défaut.** La grille de calcul du client (onglet `16_QA_Tests`, section « Test calcul ») est désormais un fichier de tests à elle seule : `tests/unit/finQaGrid.test.js`, **41 tests**, un `describe` par cas du client et dans son ordre — cas nominal, dénominateur nul, valeur manquante, valeur extrême, devise différente, donnée ancienne, réel/fictif, permissions. Ces huit cas sont des règles **transversales** : chaque formule avait déjà son test, et ce que personne ne vérifiait, c'est que le catalogue entier obéit à la grille.
+
+**Critère « chaque formule a son test unitaire » — tenu** : le test vérifie aussi que les **57 formules** du catalogue sont toutes implémentées et appelables, dans les deux sens.
+
+**Critère « matrice de provenance (onglet `18_Provenance`) » — tenu depuis `P6-17`** : `GET /fin/parcours/carte` rattache chacun des **78 écrans** du client soit à la route servie, soit à ce qu'il attend. **71 servis sur 78.**
+
+**Critère « les 10 parcours de bout en bout J01 à J10 passent en navigateur » — tenu.** `tests/e2e/fin-j01-j10-journey.test.js`, **10 parcours, 10 réussis** : un test par chaîne fonctionnelle de l'onglet `02_Parcours_E2E`, dans l'ordre du client. `J01` entrer dans FINCLUDIA, `J02` construire mon budget, `J03` créer un objectif, `J04` renforcer ma sécurité, `J05` comprendre une dette, `J06` préparer un financement, `J07` construire mon patrimoine, `J08` apprendre à investir, `J09` gérer à plusieurs, `J10` préparer une dépense annuelle.
+
+Les données sont posées par l'API (rapide et sans ambiguïté) ; ce que le navigateur prouve, c'est que **les écrans de la chaîne s'affichent et portent la figure dont la chaîne parle**. Deux parcours vérifient en plus une règle du client **à l'écran** : `J07` que la page de patrimoine dit qu'aucune valeur fictive n'y entre, et `J08` que le portefeuille d'entraînement porte le badge SIMULATION tout en restant **absent** du patrimoine réel.
+
+**Et ce fichier a lui-même failli ne rien prouver.** `b.hasText(x)` du pilote de navigateur ne renvoie pas un booléen mais **la chaîne de l'expression** à évaluer : écrit `assert.ok(await b.hasText(x))`, il affirme qu'une chaîne non vide est vraie, ce qui l'est toujours. Vingt assertions étaient donc vraies par construction, et le premier verdict « 9 verts sur 10 » ne valait rien. Le seul échec était, ironiquement, la seule assertion qui testait quelque chose (un `!hasText`, donc `!"chaîne"`). Corrigé par deux helpers dont le nom rend l'oubli impossible, `shows()` et `hides()`, qui évaluent l'expression — et par la vérification que l'échec de `J08` ne cachait **pas** une vraie fuite (l'API du patrimoine ne contient pas le support fictif, et le patrimoine net y est bien `null`).
+
+**Reste pour clore la tâche :** les huit scénarios par public de l'onglet QA (lycéen, étudiant, jeune actif, salarié, colocation, couple, famille, épargnant) n'ont pas de parcours navigateur dédié — ils recoupent largement les dix chaînes ci-dessus, mais pas exactement. Et les deux dépendances bloquées (`P4-14`, `P4-15`) restent la vraie raison pour laquelle cette tâche n'est pas `✅ done`.
+
+**Défauts trouvés par la recette et corrigés :**
+- **Le total réel valait 0 au lieu de « non calculé »** sur un ensemble vide (`totalsByReality`, `services/finance/dataModel.js`). L'asymétrie était parlante : le total **fictif** était protégé par `fictional.length === 0 ? null : …`, le total **réel** ne l'était pas. Conséquence concrète : un espace partagé dont la seule ligne avait un statut illisible affichait « 0 » comme revenu partagé d'un membre — ce qui se lit « cette personne n'a rien », alors que nous n'avions simplement pas pu classer sa ligne. C'est exactement le défaut que la grille du client existe pour attraper.
+- **Le client Prisma généré était désynchronisé du schéma**, pour la **deuxième fois** (voir aussi `P6-05` et `P6-17`) : **20 tests** en échec et toutes les routes de notifications, enfants, objectifs partagés et provisions partagées en panne à l'exécution. Détail et recommandation sous `P6-17`.
+- **Une route publique non déclarée dans l'audit** (`POST /api/tools/comparator/adequation`, ajoutée par `P4-13`) : elle répondait 400 au lieu de 401 à un appel anonyme. L'audit a fait son travail ; c'était la déclaration qui manquait, pas la garde.
+
+**Le garde-fou recommandé est en place.** `tests/setup.js` compare désormais les modèles de `prisma/schema.prisma` à ceux du schéma **embarqué dans le client généré** (`inlineSchema`, donc exact et sans base de données) et s'arrête en nommant les modèles manquants avec « Lancez : npx prisma generate ». Vérifié dans les deux sens : il passe en phase, il échoue avec le bon message dès qu'un modèle est ajouté au schéma sans régénérer. Le défaut qui a coûté deux sessions ne peut plus se présenter comme vingt erreurs `Cannot read properties of undefined`.
+
+**L'écran du refus réservé aux adultes est livré** : `components/fincludia/AdultOnly.jsx`, branché sur les pages dettes, patrimoine et financement, distingue les deux motifs que le serveur distingue (`adultsOnly` → rien à corriger ; `ageUnknown` → « il manque votre tranche d'âge », avec le lien vers le profil), en fr / en / ar. Sans cela, un adulte au profil incomplet n'avait qu'une porte fermée.
 
 ### Impact sur le délai (FINCLUDIA, ajout du 2026-10-09)
 

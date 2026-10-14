@@ -15,9 +15,11 @@ before(async () => {
 });
 beforeEach(async () => {
   await t.reset();
-  owner = await t.user();
-  intruder = await t.user();
-  admin = await t.admin();
+  owner = await t.adult();
+  intruder = await t.adult();
+  // Adult on purpose: otherwise `requireAdult` (P6-17) refuses before the
+  // ownership check, and this test would stop proving what it is about.
+  admin = await t.adult({ name: 'Test Admin', role: 'admin' });
   const res = await t.request('POST', '/fin/debts', {
     user: owner,
     json: { label: 'Prêt auto', outstandingPrincipal: 500_000_00, monthlyInstalment: 20_000_00, currency: 'DZD', rate: 0.06 },

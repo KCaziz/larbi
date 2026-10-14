@@ -8,6 +8,8 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
+import AdultOnly from '../../components/fincludia/AdultOnly.jsx';
+import { adultRefusalReason, isAdultRefusal } from '../../lib/adultRefusal.js';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
@@ -50,6 +52,9 @@ export default function FundingReadinessPage() {
   }
 
   if (readiness.status === 'loading' && !readiness.data) return <LoadingState />;
+  // A refusal reserved to 18+ is not a failed load: retrying cannot help,
+  // and the person needs to know whether there is anything to fix.
+  if (isAdultRefusal(readiness.error)) return <AdultOnly reason={adultRefusalReason(readiness.error)} />;
   if (readiness.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={readiness.reload} />;
 
   const r = readiness.data;

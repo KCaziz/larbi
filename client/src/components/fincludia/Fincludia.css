@@ -150,3 +150,25 @@
   gap: 12px;
   margin-block: 16px;
 }
+
+/* A page reserved to 18+ that the server refused (P6-17). Centred and narrow:
+   it is a statement, not a form. */
+.fin-adult-only {
+  max-width: 640px;
+  margin-inline: auto;
+  margin-block: 40px;
+  padding-inline: 16px;
+}
+
+.fin-adult-only-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fin-adult-only-link {
+  display: inline-block;
+  margin-block-start: 10px;
+  color: var(--accent);
+  font-size: 0.9rem;
+}

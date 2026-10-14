@@ -3638,5 +3638,10 @@
       "explorer": "Explorer"
     },
     "explorerHint": "Le comparateur bancaire et les offres d’emploi se consultent pour le moment depuis « Outils »."
+  },
+  "adultOnly": {
+    "minor": "Cette partie n’est pas accessible avant 18 ans. Les dettes, le patrimoine réel et la préparation d’un financement attendront : le reste de FINCLUDIA vous est ouvert.",
+    "ageUnknown": "Pour ouvrir cette partie, il manque votre tranche d’âge. Certaines fonctions sont réservées aux 18 ans et plus, et sans cette information nous ne pouvons pas le savoir — nous préférons refuser que supposer.",
+    "setAge": "Indiquer ma tranche d’âge"
   }
 }

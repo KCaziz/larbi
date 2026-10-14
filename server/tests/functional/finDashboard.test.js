@@ -25,7 +25,7 @@ before(async () => {
 });
 beforeEach(async () => {
   await t.reset();
-  user = await t.user();
+  user = await t.adult();
   const byKey = async (key) => (await t.prisma.finCategory.findFirst({ where: { key, userId: null }, select: { id: true } })).id;
   food = await byKey('variable.alimentation_boissons');
   salary = await byKey('income.salaire_net');
@@ -124,13 +124,17 @@ describe('P6-06 — the dashboard follows the public', () => {
   });
 
   test('a lycéen is never shown debt, and gets one alert and one action at most', async () => {
-    await setPublic('LYC', 'under18');
-    // A debt exists, and must still not appear.
+    // A debt is recorded while the account is still an adult one, THEN the
+    // account becomes a lycéen. The row has to exist for this test to mean
+    // anything — hiding a debt that is not there proves nothing — and the API
+    // now refuses a minor who tries to create one (P6-17 applies the 18+ gate),
+    // which is the stronger guarantee and the reason for this order.
     const debt = await t.request('POST', '/fin/debts', {
       user,
       json: { label: 'Téléphone', outstandingPrincipal: 2000000, monthlyInstalment: 200000, currency: 'DZD' },
     });
     assert.equal(debt.status, 201, 'the debt really exists, so hiding it is a decision and not an accident');
+    await setPublic('LYC', 'under18');
     await addIncome();
     await addMovement({ value: 1500000 });
 

@@ -46,6 +46,13 @@ const PUBLIC = new Set([
   'GET /api/tools/comparator', // bank comparator in free access: no access rule in the client's files (P4-06)
   'GET /api/tools/comparator/themes/:theme',
   'GET /api/tools/comparator/segments/:segment',
+  // "Adéquation à l'usage" (P4-13, écran ET06) : publique comme le reste du
+  // comparateur (`access: 'public'` dans constants/tools.js). Elle lit les
+  // mêmes conditions bancaires publiques et applique les poids fournis dans le
+  // corps ; elle n'écrit rien et ne lit aucune donnée de compte. Elle avait été
+  // ajoutée sans être déclarée ici, et l'audit l'a signalée en répondant 400 au
+  // lieu de 401 : c'est exactement son rôle.
+  'POST /api/tools/comparator/adequation',
   // FINCLUDIA simulators in free access (P4-10): pure calculators, they read no
   // stored data and keep nothing, and the client's screen C18 says the
   // simulation workshop works without a profile ("mode découverte").

@@ -3637,5 +3637,10 @@
       "explorer": "Explore"
     },
     "explorerHint": "The bank comparator and job offers are browsed from \"Tools\" for now."
+  },
+  "adultOnly": {
+    "minor": "This part is not available before 18. Debts, real patrimony and funding preparation will wait: the rest of FINCLUDIA is open to you.",
+    "ageUnknown": "Opening this part needs your age bracket. Some functions are reserved to 18 and over, and without that we cannot tell — we would rather refuse than assume.",
+    "setAge": "State my age bracket"
   }
 }

@@ -72,7 +72,13 @@ export function totalsByReality(rows, { currency, monthlyNormalisation = false }
   // other side.
   const entries = (list) => list.map((row) => ({ amount: row.value, currency: row.currency, ...(monthlyNormalisation ? { frequency: row.frequency } : {}) }));
   return {
-    real: sumAmounts(entries(real), options),
+    // `null` over an EMPTY set, on both sides. The asymmetry that used to be
+    // here — fictional guarded, real not — reported `real: 0` for a set whose
+    // only row had an unreadable status, which reads as « vous n'avez rien de
+    // réel » to somebody who has something we simply could not classify. The
+    // project's rule is « non calculé plutôt que 0 », and it applies to the
+    // real total exactly as much as to the fictional one.
+    real: real.length === 0 ? null : sumAmounts(entries(real), options),
     fictional: fictional.length === 0 ? null : sumAmounts(entries(fictional), options),
     counts: { real: real.length, fictional: fictional.length, unknown },
   };

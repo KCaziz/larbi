@@ -15,8 +15,8 @@ before(async () => {
 });
 beforeEach(async () => {
   await t.reset();
-  owner = await t.user();
-  other = await t.user();
+  owner = await t.adult();
+  other = await t.adult();
 });
 after(() => t.close());
 

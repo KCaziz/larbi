@@ -10,6 +10,8 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
+import AdultOnly from '../../components/fincludia/AdultOnly.jsx';
+import { adultRefusalReason, isAdultRefusal } from '../../lib/adultRefusal.js';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
@@ -47,6 +49,9 @@ export default function WealthPage() {
   }
 
   if (wealth.status === 'loading' && !wealth.data) return <LoadingState />;
+  // A refusal reserved to 18+ is not a failed load: retrying cannot help,
+  // and the person needs to know whether there is anything to fix.
+  if (isAdultRefusal(wealth.error)) return <AdultOnly reason={adultRefusalReason(wealth.error)} />;
   if (wealth.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={wealth.reload} />;
 
   const view = wealth.data.patrimoine;

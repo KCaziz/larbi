@@ -9,6 +9,8 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
+import AdultOnly from '../../components/fincludia/AdultOnly.jsx';
+import { adultRefusalReason, isAdultRefusal } from '../../lib/adultRefusal.js';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
@@ -21,7 +23,7 @@ import './Debts.css';
 // sous pression" the client asks for is deliberately absent: its thresholds
 // are still "à valider" (P6-01 point 5), so only the raw indicators are shown.
 export default function DebtsPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [showArchived, setShowArchived] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -49,6 +51,9 @@ export default function DebtsPage() {
   }
 
   if (debts.status === 'loading' && !debts.data) return <LoadingState />;
+  // A refusal reserved to 18+ is not a failed load: retrying cannot help,
+  // and the person needs to know whether there is anything to fix.
+  if (isAdultRefusal(debts.error)) return <AdultOnly reason={adultRefusalReason(debts.error)} />;
   if (debts.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={debts.reload} />;
 
   const { debts: list, synthese } = debts.data;

@@ -112,6 +112,15 @@ export async function boot({ production = false, extra = {} } = {}) {
       },
     });
   const admin = (data = {}) => user({ name: 'Test Admin', role: 'admin', ...data });
+  // An account that has declared an ADULT age bracket. Needed by every test
+  // that touches a function reserved to 18+ (debts, real patrimony, funding —
+  // P6-17 applies `requireAdult` to those routes).
+  //
+  // `user()` deliberately keeps NO age bracket, because that is what a fresh
+  // account really looks like and `requireAdult` denies by default. Making the
+  // default fixture an adult would hide that guarantee from every test at once.
+  const adult = (data = {}) => user({ finAgeRange: '25-34', ...data });
+  const minor = (data = {}) => user({ finAgeRange: 'under18', ...data });
 
   // A formation with real courses. `courses`: [{ title, isRequired, body }].
   async function formation({ title = 'Formation', status = 'published', courses = [{ title: 'Cours 1' }], ...data } = {}) {
@@ -196,5 +205,5 @@ export async function boot({ production = false, extra = {} } = {}) {
     rmSync(storageDir, { recursive: true, force: true });
   }
 
-  return { baseUrl, prisma, request, reset, user, admin, formation, article, loadComparatorData, unique, storedFiles, storageDir, signSession, close };
+  return { baseUrl, prisma, request, reset, user, admin, adult, minor, formation, article, loadComparatorData, unique, storedFiles, storageDir, signSession, close };
 }

@@ -20,7 +20,7 @@ before(async () => {
 });
 beforeEach(async () => {
   await t.reset();
-  user = await t.user();
+  user = await t.adult();
 });
 after(() => t.close());
 

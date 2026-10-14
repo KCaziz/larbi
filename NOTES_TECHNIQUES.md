@@ -1074,3 +1074,37 @@ Tests : `tests/unit/comparison.test.js` (**17 tests** : vocabulaire complet, tab
 **Et une règle d'étiquetage :** un total brut ne porte pas l'identifiant d'une formule qui calcule un **net**. F035 est le patrimoine **net** ; les totaux d'actifs et de dettes sont des données descriptives et le disent, comme la `repartition` de la synthèse. Mettre `F035` sur un total d'actifs l'aurait mal attribué pour quiconque ouvre le panneau « Pourquoi ? ».
 
 ---
+
+## <a id="p6-17-p6-21"></a>P6-17 / P6-21 — Carte des parcours, garde 18+ et recette de fin de phase
+
+**L'onglet `19_Cartes_Parcours` du classeur contenait exactement ce que `P6-17` demandait, et personne ne l'avait ouvert.** Avant d'écrire une configuration par public — vocabulaire, navigation, écrans activés — il valait la peine de vérifier si le client ne l'avait pas déjà écrite. Il l'avait : 78 écrans, 8 parcours, la navigation dans son ordre et son vocabulaire (« Ma semaine », « Notre mois », « Aujourd'hui foyer »). Générée par script (`scripts/generate-journeys.py`), comme les 91 catégories de `P6-02`. **Avant d'inventer une donnée de cadrage, chercher l'onglet qui la contient.**
+
+**Une correspondance code d'écran → route sert deux tâches à la fois.** `SCREEN_ROUTES` répond à `P6-17` (quel écran pour quel public) **et** au critère de provenance de `P6-21` (chaque écran du client rattaché à sa source). Les 7 écrans non servis y disent ce qu'ils attendent plutôt que de manquer en silence — un écran « absent » et un écran « en attente d'une donnée du client » ne se lisent pas pareil.
+
+### Le piège qui a failli coûter cher : `router.use` sans chemin
+
+**Tous les routeurs financiers sont montés sur le même préfixe `/fin`.** Un `router.use(requireAdult)` sans chemin, dans n'importe lequel d'entre eux, garde donc **toutes les routes déclarées après lui** dans `routes/index.js` — réserve, calendrier, accueil, notifications, recherche, passeport. En appliquant la garde 18+ ainsi, un mineur perdait l'accès à son propre argent : bien pire que le défaut que la garde corrige.
+
+La garde doit être liée à ses propres chemins : `router.use('/debts', requireAdult)`, `router.use(['/patrimoine', '/actifs'], requireAdult)`. Et le test qui l'interdit n'est pas « un mineur est refusé sur les dettes » — c'est **« un mineur garde toute route qui est la sienne »**, avec la liste explicite. Un test qui ne vérifie que le refus ne voit pas le sur-refus.
+
+**Corollaire sur les refus par défaut.** `requireAdult` refuse quand la tranche d'âge est inconnue, ce qui est la bonne direction pour une règle qui protège des mineurs. Mais un 403 muet transforme cette protection en verrouillage pour l'adulte qui n'a pas fini son profil. Le refus distingue donc `adultsOnly` (rien à corriger) de `ageUnknown` (champ à remplir, avec le lien) — **une règle de protection doit dire s'il y a quelque chose à faire.**
+
+**Et un fixture par défaut ne doit pas satisfaire la règle qu'il sert à tester.** `t.user()` reste **sans** tranche d'âge, parce que c'est ce à quoi ressemble un compte neuf. Rendre le fixture adulte par défaut aurait fait passer tous les tests d'un coup et masqué la règle à chacun d'eux ; `t.adult()` et `t.minor()` sont explicites, et chaque test dit désormais quel âge a le compte qu'il utilise.
+
+### `P6-21` : deux leçons de recette
+
+**1. `b.hasText(x)` renvoie une EXPRESSION, pas un booléen.** Le pilote de navigateur construit des chaînes de JavaScript à faire évaluer. Écrit `assert.ok(await b.hasText(x))`, on affirme qu'une chaîne non vide est vraie — ce qui l'est toujours. Vingt assertions des parcours `J01`–`J10` étaient vraies par construction, et le premier verdict « 9 verts sur 10 » ne valait rien. Le seul échec était, ironiquement, la seule assertion qui testait quelque chose (un `!hasText`, donc `!"chaîne"`).
+
+Deux helpers dont le nom rend l'oubli impossible : `shows(x)` et `hides(x)`, qui **évaluent** l'expression. Et la règle générale : **un helper qui renvoie du code n'est jamais une assertion** ; s'il n'est pas passé à `ev` ou `waitFor`, il ne teste rien. Le signe à chercher : un test qui passe du premier coup sur une page qu'on n'a pas encore écrite.
+
+**2. La grille QA du client est un fichier de tests, pas une intention.** L'onglet `16_QA_Tests` donne huit cas de calcul **transversaux** — dénominateur nul, valeur manquante, valeur extrême, devise différente, donnée ancienne, réel/fictif, permissions. Chaque formule avait déjà son test ; ce que personne ne vérifiait, c'est que **le catalogue entier** obéit à la grille. Écrite comme `tests/unit/finQaGrid.test.js` (41 tests, un `describe` par cas du client, dans son ordre), elle a trouvé un vrai défaut en passant : `totalsByReality` renvoyait **0** au lieu de « non calculé » pour le total réel sur un ensemble vide, alors que le total **fictif** était protégé. L'asymétrie était le signe. Conséquence concrète : un espace partagé dont la seule ligne avait un statut illisible affichait « 0 » comme revenu d'un membre — ce qui se lit « cette personne n'a rien ».
+
+**Le cas « permissions » de la grille n'est pas de l'arithmétique**, et il est pointé comme tel : il est prouvé par les suites de sécurité dédiées, et le `describe` le dit, pour que la grille n'ait pas de trou qui ressemble à un oubli. Ce qui est vérifié là, en revanche, c'est que le moteur **ne touche jamais la base** — une formule pure ne peut pas lire la ligne de quelqu'un d'autre.
+
+### Le garde-fou qui remplace une note
+
+**Le client Prisma désynchronisé du schéma a coûté deux sessions** (`P6-05`, puis `P6-17`) : un modèle présent dans `schema.prisma` et absent du client compilé, et vingt tests meurent sur `Cannot read properties of undefined (reading 'findMany')`. La note laissée sous `P6-05` n'a pas empêché la récidive.
+
+`tests/setup.js` compare maintenant les modèles du schéma à ceux du schéma **embarqué dans le client généré** (`"inlineSchema"` dans `src/generated/prisma/index.js`) : exact, sans base de données, et il s'arrête en nommant les modèles manquants avec « Lancez : npx prisma generate ». **À la deuxième occurrence d'un défaut de procédure, écrire un test plutôt qu'un commentaire.**
+
+---
