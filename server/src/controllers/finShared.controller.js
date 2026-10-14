@@ -14,10 +14,12 @@ import { listChanges } from '../services/finChange.service.js';
 import {
   SETTLEMENT_ENTITY,
   SHARED_EXPENSE_ENTITY,
+  confirmSharedRecurrence,
   createSettlement,
   createSharedExpense,
   deleteSettlement,
   deleteSharedExpense,
+  detectSharedRecurrences,
   listSettlements,
   listSharedExpenses,
   loadSharedData,
@@ -167,4 +169,14 @@ export async function getBalances(req, res) {
     // Said in the answer, so no screen can present this as a payment button.
     reglementsDeclaratifs: SETTLEMENTS_ARE_DECLARATIVE,
   });
+}
+
+// ---- recurring common bills (P6-15) ----------------------------------------
+
+export async function getSharedRecurrences(req, res) {
+  res.json({ candidates: await detectSharedRecurrences(prisma, req.user.id, req.params.id) });
+}
+
+export async function postConfirmRecurrence(req, res) {
+  res.status(201).json({ expense: await confirmSharedRecurrence(prisma, req.user.id, req.params.id, req.body) });
 }

@@ -31,6 +31,7 @@ describe('public comparator, free access', () => {
       { key: 'simulateurs', status: 'available', access: 'public' },
       { key: 'comparaisons', status: 'available', access: 'public' },
       { key: 'simulateur-credit', status: 'planned', access: 'authenticated' },
+      { key: 'explorateur-financier', status: 'available', access: 'authenticated' },
       { key: 'generateur-facture', status: 'available', access: 'authenticated' },
     ]);
   });
@@ -179,6 +180,52 @@ describe('administration of the comparator', () => {
     assert.equal((await adm('DELETE', `/banks/${cnep.id}`)).status, 204);
     assert.equal(await t.prisma.comparatorCondition.count({ where: { bankId: cnep.id } }), 0);
     assert.ok(!(await get('/tools/comparator/themes/epargne')).body.conditions.some((c) => c.bank.name === 'CNEP'));
+  });
+});
+
+describe('usage fit ("adéquation à l\'usage", P4-13, ET06)', () => {
+  const post = (body) => t.request('POST', '/tools/comparator/adequation', { json: body });
+
+  test('two real accounts: four criteria, no score unless weights are given', async () => {
+    const comptes = await t.prisma.comparatorCondition.findMany({ where: { theme: 'comptes' }, take: 2 });
+    const res = await post({ conditionIds: comptes.map((c) => c.id) });
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.body.comparison.criteria.map((c) => c.criterion), ['accountFee', 'cardFee', 'transferFee', 'atmFee']);
+    assert.equal(res.body.comparison.scores, null, 'no weights given: no score');
+  });
+
+  test('accountFee matches the comparator\'s own estimated yearly cost for the same row', async () => {
+    const natixis = await t.prisma.comparatorCondition.findFirst({ where: { theme: 'comptes', segment: 'particulier', bank: { name: 'Natixis' } } });
+    const other = await t.prisma.comparatorCondition.findFirst({ where: { theme: 'comptes', id: { not: natixis.id } } });
+    const res = await post({ conditionIds: [natixis.id, other.id] });
+    const row = res.body.comparison.criteria.find((c) => c.criterion === 'accountFee');
+    assert.equal(row.values[natixis.id], 5042, 'same figure as /tools/comparator/themes/comptes');
+  });
+
+  test('with weights, a score appears and carries its formula', async () => {
+    const comptes = await t.prisma.comparatorCondition.findMany({ where: { theme: 'comptes' }, take: 2 });
+    const res = await post({ conditionIds: comptes.map((c) => c.id), weights: { accountFee: 3, cardFee: 1 } });
+    assert.ok(res.body.comparison.scores, 'weights given: a score exists');
+    for (const key of comptes.map((c) => c.id)) assert.equal(res.body.comparison.scores[key].formule_id, 'F054');
+  });
+
+  test('an id that is not a "comptes" row, or an unknown id, is refused', async () => {
+    const comptes = await t.prisma.comparatorCondition.findMany({ where: { theme: 'comptes' }, take: 1 });
+    const other = await t.prisma.comparatorCondition.findFirst({ where: { theme: { not: 'comptes' } } });
+    assert.equal((await post({ conditionIds: [comptes[0].id, other.id] })).status, 400, 'the second id is not an account');
+    assert.equal((await post({ conditionIds: [comptes[0].id, '00000000-0000-4000-8000-000000000000'] })).status, 400, 'unknown id');
+  });
+
+  test("the client's bound of 2 to 3 options still applies", async () => {
+    const comptes = await t.prisma.comparatorCondition.findMany({ where: { theme: 'comptes' } });
+    assert.equal((await post({ conditionIds: [comptes[0].id] })).status, 400, 'one account: nothing to compare');
+    assert.equal((await post({ conditionIds: comptes.slice(0, 4).map((c) => c.id) })).status, 400, 'four accounts: beyond the bound');
+  });
+
+  test('"paiement en ligne" never appears: no column for it in the client\'s workbook', async () => {
+    const comptes = await t.prisma.comparatorCondition.findMany({ where: { theme: 'comptes' }, take: 2 });
+    const res = await post({ conditionIds: comptes.map((c) => c.id) });
+    assert.ok(!res.body.comparison.criteria.some((c) => /ligne|online/i.test(c.criterion)));
   });
 });
 

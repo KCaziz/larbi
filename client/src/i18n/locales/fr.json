@@ -40,7 +40,11 @@
     "today": "Aujourd'hui",
     "wealth": "Patrimoine",
     "paper": "Entraînement",
-    "spaces": "À plusieurs"
+    "spaces": "À plusieurs",
+    "funding": "Préparation au financement",
+    "notifications": "Notifications",
+    "trust": "Confiance et données",
+    "passport": "Passeport de connaissances"
   },
   "footer": {
     "copyright": "© {{year}} {{brand}}. Tous droits réservés.",
@@ -305,6 +309,10 @@
     "workshop": {
       "title": "Atelier de simulation",
       "body": "Tous les calculateurs au même endroit, avec des exemples, l’enregistrement d’un scénario et la comparaison de scénarios."
+    },
+    "explorer": {
+      "title": "Explorer",
+      "body": "Recherchez une offre par besoin, type ou établissement parmi les données déjà publiques du comparateur. Réservé aux 18 ans et plus, et nécessite un compte."
     }
   },
   "blogList": {
@@ -2219,7 +2227,11 @@
       "liquidity": "Liquidité, votre note sur 10",
       "risk": "Risque, votre note sur 10",
       "compatibility": "Compatibilité",
-      "conditions": "Conditions"
+      "conditions": "Conditions",
+      "accountFee": "Frais de tenue de compte",
+      "cardFee": "Cotisation carte",
+      "transferFee": "Frais de virement",
+      "atmFee": "Frais de retrait DAB"
     }
   },
   "jobOffers": {
@@ -2253,6 +2265,35 @@
     },
     "minutes_one": "{{count}} minute",
     "minutes_other": "{{count}} minutes"
+  },
+  "bankUsage": {
+    "title": "Adéquation de mon compte à mon usage",
+    "intro": "Comparez 2 ou 3 comptes déjà publics du comparateur sur ce que vous utilisez réellement : carte, retraits, virements, frais de tenue.",
+    "disclaimer": "Comparaison indicative à partir des données publiques déjà affichées dans le comparateur. Aucun « meilleur » absolu : le score n'apparaît que si vous donnez vos propres poids. Le paiement en ligne n'a pas de colonne dans les classeurs du client et n'est donc pas comparé ici.",
+    "pickAccounts": "Choisissez {{min}} à {{max}} comptes à comparer",
+    "selectedCount": "{{count}} / {{max}} choisis",
+    "noneAvailable": "Aucun compte n'est encore documenté dans le comparateur.",
+    "useScore": "Calculer un score pondéré",
+    "scoreNote": "Le score est facultatif. Il n'apparaît que si vous donnez des poids, et la méthode de calcul est affichée avec lui.",
+    "compare": "Comparer",
+    "resultsTitle": "Comparaison",
+    "perOperation": "{{amount}} DA",
+    "noOnlinePayment": "« Paiement en ligne » ne figure pas dans cette comparaison : aucune banque du classeur du client ne publie de colonne dédiée à ce sujet."
+  },
+  "explorer": {
+    "title": "Explorer",
+    "intro": "Recherchez une offre bancaire par besoin, type ou établissement, parmi les données déjà publiques du comparateur.",
+    "disclaimer": "Recherche littérale, sans classement ni affirmation d'éligibilité : chaque résultat est une offre publique du comparateur, telle que la banque l'a publiée. Réservé aux personnes de 18 ans et plus.",
+    "searchPlaceholder": "Rechercher (besoin, banque, mot-clé)…",
+    "allThemes": "Toutes les rubriques",
+    "searching": "Recherche…",
+    "resultCount_one": "{{count}} résultat",
+    "resultCount_other": "{{count}} résultats",
+    "noResults": "Aucun résultat pour « {{query}} ».",
+    "noResultsHint": "Essayez un autre mot, ou une autre rubrique.",
+    "typeToSearch": "Tapez au moins deux caractères, ou choisissez une rubrique, pour lancer la recherche.",
+    "reservedToAdults": "Explorer est réservé aux personnes de 18 ans et plus. Votre tranche d'âge ne permet pas d'y accéder.",
+    "neverEligibility": "Un résultat affiché ici n'est jamais une garantie d'éligibilité : vérifiez toujours les conditions exactes auprès de l'établissement."
   },
   "workshop": {
     "title": "Atelier de simulation",
@@ -3296,6 +3337,306 @@
       "label": "Donnez un nom à cet espace.",
       "role": "Votre rôle dans cet espace ne permet pas cette action.",
       "refused": "Cette opération a été refusée."
+    },
+    "shared": {
+      "title": "Dépenses partagées",
+      "addExpense": "Ajouter une dépense partagée",
+      "addSettlement": "Enregistrer un règlement",
+      "paidBy": "Payé par {{name}}",
+      "noExpense": "Aucune dépense partagée pour le moment.",
+      "settlementLine": "{{from}} → {{to}}",
+      "transfer": "{{from}} doit {{amount}} à {{to}}",
+      "deleteExpenseConfirm": "Supprimer définitivement cette dépense partagée ?",
+      "deleteSettlementConfirm": "Supprimer définitivement ce règlement ?",
+      "delete": "Supprimer",
+      "deleted": "Supprimé.",
+      "expenseAdded": "Dépense partagée ajoutée.",
+      "settlementAdded": "Règlement enregistré.",
+      "declarative": "Un règlement est seulement déclaratif : aucun paiement n’est effectué par la plateforme.",
+      "splitModes": {
+        "equal": "Parts égales",
+        "percent": "En pourcentage",
+        "amounts": "En montants",
+        "income_proportional": "Proportionnel aux revenus (avec consentement)"
+      },
+      "fields": {
+        "label": "Libellé",
+        "amount": "Montant",
+        "date": "Date",
+        "payer": "Payé par",
+        "splitMode": "Répartition",
+        "participants": "Participants",
+        "from": "De",
+        "to": "Vers"
+      },
+      "errors": {
+        "refused": "Cette action a été refusée. Vérifiez les informations saisies.",
+        "role": "Votre rôle dans cet espace ne permet pas cette action.",
+        "sameMember": "Un règlement a besoin de deux membres différents."
+      },
+      "recurringToggle": "Factures et abonnements récurrents",
+      "noRecurrence": "Aucune récurrence détectée pour le moment.",
+      "occurrences_one": "{{count}} occurrence",
+      "occurrences_other": "{{count}} occurrences",
+      "confirmRecurrence": "Confirmer pour cette période"
+    },
+    "common": {
+      "title": "Objectifs et enveloppes communs",
+      "create": "Créer un objectif commun",
+      "progress": "Progression",
+      "allocatedLine": "Déjà réuni : {{amount}}",
+      "contribute": "Contribuer",
+      "add": "Ajouter",
+      "deleteConfirm": "Supprimer définitivement cet objectif commun ?",
+      "delete": "Supprimer",
+      "deleted": "Supprimé.",
+      "created": "Objectif commun créé.",
+      "contributionAdded": "Contribution ajoutée.",
+      "fields": {
+        "label": "Nom",
+        "target": "Montant cible",
+        "targetDate": "Date cible (optionnel)"
+      },
+      "errors": {
+        "refused": "Cette action a été refusée. Vérifiez les informations saisies.",
+        "role": "Votre rôle dans cet espace ne permet pas cette action."
+      },
+      "fairShareTitle": "Part équitable selon les revenus (si partagés)",
+      "fairShareMissing": "Non calculé : {{names}} n’a/ont pas partagé ses/leurs revenus dans cet espace."
+    },
+    "household": {
+      "childrenTitle": "Enfants",
+      "addChild": "Ajouter un enfant",
+      "noChild": "Aucun enfant déclaré.",
+      "minimalDataHelp": "Donnée minimale : prénom et année de naissance seulement, rien de plus.",
+      "deleteChildConfirm": "Supprimer définitivement cet enfant ?",
+      "childAdded": "Enfant ajouté.",
+      "provisionsTitle": "Provisions annuelles",
+      "addProvision": "Ajouter une provision",
+      "noProvision": "Aucune provision pour le moment.",
+      "perMonth": "{{amount}} / mois",
+      "deleteProvisionConfirm": "Supprimer définitivement cette provision ?",
+      "provisionAdded": "Provision ajoutée.",
+      "delete": "Supprimer",
+      "deleted": "Supprimé.",
+      "fields": {
+        "firstName": "Prénom",
+        "birthYear": "Année de naissance",
+        "label": "Nom",
+        "plannedAmount": "Montant prévu",
+        "targetDate": "Date cible",
+        "alreadyProvisioned": "Déjà provisionné"
+      },
+      "errors": {
+        "refused": "Cette action a été refusée. Vérifiez les informations saisies.",
+        "role": "Votre rôle dans cet espace ne permet pas cette action."
+      }
+    },
+    "agreement": {
+      "title": "Accord financier",
+      "none": "Aucun accord financier rédigé pour le moment.",
+      "edit": "Modifier",
+      "saved": "Accord financier enregistré."
+    },
+    "review": {
+      "coupleTitle": "Revue financière — Moi / Nous",
+      "me": "Moi",
+      "us": "Nous",
+      "myNetFlow": "Mon flux net",
+      "noCommonGoal": "Aucun objectif commun pour le moment.",
+      "householdTitle": "Revue du foyer",
+      "householdSummary": "{{children}} enfant(s) déclaré(s), {{provisions}} provision(s) annuelle(s) ({{monthly}} / mois au total), {{goals}} objectif(s) commun(s)."
     }
+  },
+  "funding": {
+    "title": "Préparation au financement",
+    "intro": "Où en est votre dossier, sans chiffre inventé et sans jugement.",
+    "disclaimer": "Ceci n’est ni un score de crédit, ni une prédiction, ni une garantie d’accord : seulement un état de ce que vous avez déjà déclaré.",
+    "dimensionsTitle": "Les cinq dimensions",
+    "completeness": "Complétude du dossier",
+    "stability": "Stabilité",
+    "stabilityBlocked": "Aucune formule n’a encore été fournie pour cette dimension.",
+    "debtEffort": "Taux d’effort dette",
+    "downPayment": "Apport potentiel",
+    "reserve": "Réserve de sécurité",
+    "globalBlockedNote": "L’indice global combinant ces dimensions attend les pondérations du client : publier un chiffre sur des poids inventés serait un jugement sur vous que personne ne pourrait vérifier.",
+    "checklistTitle": "À compléter",
+    "pieces": {
+      "public": "Choisir votre public FINCLUDIA",
+      "income": "Déclarer au moins un revenu",
+      "reserveTarget": "Choisir une cible de réserve (en mois)",
+      "wealth": "Déclarer au moins un actif réel",
+      "stability": "Dimension en attente du client",
+      "debtEffort": "Déclarer au moins une dette pour calculer le taux d’effort"
+    },
+    "export": "Exporter",
+    "exported": "Export téléchargé.",
+    "exportConsentHint": "L’export nécessite votre consentement explicite à chaque fois.",
+    "errors": {
+      "refused": "Cette action a été refusée."
+    }
+  },
+  "passport": {
+    "title": "Passeport de connaissances financières",
+    "intro": "Vos formations terminées, vos quiz réussis et ce qu'il vous reste à faire — pas un score bancaire, pas une mesure de solvabilité.",
+    "disclaimer": "Le passeport n'est pas un score bancaire et ne mesure pas la solvabilité : c'est un résumé de votre progression pédagogique, rien de plus.",
+    "print": "Imprimer",
+    "titles": {
+      "avenir": "Passeport Avenir",
+      "etudiant": "Passeport étudiant",
+      "generic": "Passeport de connaissances"
+    },
+    "dimensionsTitle": "Vos trois repères",
+    "dimensions": {
+      "formationsCompletion": "Formations terminées",
+      "quizzesAverage": "Moyenne des quiz réussis",
+      "securityModule": "Module « Sécurité numérique »"
+    },
+    "securityModule": {
+      "notStarted": "Pas encore commencé",
+      "inProgress": "En cours",
+      "completed": "Terminé",
+      "unavailable": "Pas encore disponible",
+      "unavailableHint": "Ce module n'a pas encore été publié."
+    },
+    "globalBlockedNote": "Un indice global combinant ces repères attend les pondérations du client : publier un chiffre sur des poids inventés serait un jugement sur vous que personne ne pourrait vérifier.",
+    "completedTitle": "Formations terminées",
+    "noCompleted": "Aucune formation terminée pour le moment.",
+    "seeCertificate": "Voir mon attestation",
+    "nextStepsTitle": "Étapes suivantes",
+    "noNextSteps": "Aucune formation en cours pour le moment.",
+    "browseCatalogue": "Parcourir le catalogue",
+    "quizzesTitle": "Quiz réussis",
+    "noQuizzes": "Aucun quiz réussi pour le moment."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "intro": "Vos alertes, en un seul endroit, triées par priorité : sécurité, échéance, budget, apprentissage.",
+    "filterCategory": "Filtrer par catégorie",
+    "filterRead": "Filtrer par statut",
+    "allCategories": "Toutes les catégories",
+    "allStatuses": "Tous les statuts",
+    "unread": "Non lues",
+    "read": "Lues",
+    "categories": {
+      "action": "Action",
+      "information": "Information",
+      "securite": "Sécurité"
+    },
+    "markAllRead": "Tout marquer comme lu",
+    "settings": "Paramètres",
+    "none": "Aucune notification pour le moment.",
+    "open": "Ouvrir",
+    "markRead": "Marquer comme lue",
+    "markUnread": "Marquer comme non lue",
+    "noCategory": "cette catégorie",
+    "close": "Fermer",
+    "enabled": "Activée",
+    "optedIn": "Rappels activés (consentement)",
+    "errors": {
+      "refused": "Cette action a été refusée."
+    },
+    "typeLabels": {
+      "budget_alert": "Alertes de budget",
+      "goal_overdue": "Objectifs en retard",
+      "goal_milestone": "Jalons d’objectifs atteints",
+      "sharing_changed": "Changements de partage dans un espace",
+      "reminder_upcoming": "Rappels d’échéances à venir"
+    },
+    "messages": {
+      "budgetAlert": {
+        "warning": "L’enveloppe « {{label}} » a atteint 80 % de son budget.",
+        "reached": "L’enveloppe « {{label}} » a atteint 100 % de son budget.",
+        "exceeded": "L’enveloppe « {{label}} » a dépassé son budget."
+      },
+      "goalOverdue": "L’objectif « {{label}} » a dépassé sa date cible sans être atteint.",
+      "goalMilestone": "L’objectif « {{label}} » a franchi un nouveau jalon.",
+      "sharingChanged": "Un membre d’un de vos espaces a changé ce qu’il partage ({{kinds}}).",
+      "reminder": {
+        "planned": "Une dépense planifiée est prévue le {{date}}.",
+        "recurrence": "« {{label}} » revient le {{date}}.",
+        "provision": "La provision « {{label}} » arrive à échéance le {{date}}."
+      }
+    }
+  },
+  "trust": {
+    "title": "Confiance et données",
+    "intro": "Ce que FINCLUDIA sait de vous, d’où ça vient, et ce que vous pouvez en faire : exporter, retirer un partage, tout supprimer.",
+    "inventoryTitle": "Vos données",
+    "inventoryDetail": "du {{from}} au {{to}}",
+    "noData": "Aucune donnée financière enregistrée pour le moment.",
+    "tables": {
+      "category": "Catégories personnalisées",
+      "income": "Revenus",
+      "transaction": "Transactions",
+      "onboarding": "Réponses d’inscription",
+      "budget": "Budgets",
+      "envelope": "Enveloppes",
+      "goal": "Objectifs",
+      "debt": "Dettes",
+      "recurrence": "Récurrences",
+      "provision": "Provisions",
+      "asset": "Actifs réels"
+    },
+    "completenessTitle": "Complétude de votre dossier",
+    "completenessDisclaimer": "Ceci mesure seulement ce que vous avez déjà renseigné — jamais un score de solvabilité ni une évaluation de votre situation.",
+    "completenessChecks": {
+      "public": "Public FINCLUDIA choisi",
+      "onboarding": "Inscription terminée",
+      "income": "Au moins un revenu déclaré",
+      "budget": "Au moins un budget créé",
+      "goal": "Au moins un objectif créé",
+      "consents": "Textes légaux acceptés"
+    },
+    "consents": {
+      "title": "Vos consentements",
+      "texts": {
+        "finNoAdvice": "Avertissement « pas de conseil réglementé »",
+        "finPrivacy": "Politique de confidentialité FINCLUDIA"
+      },
+      "outdated": "version obsolète",
+      "noSharing": "Vous ne partagez actuellement rien dans un espace partagé.",
+      "withdraw": "Retirer",
+      "withdrawn": "Partage retiré.",
+      "levels": {
+        "totals": "totaux seulement",
+        "shared": "détail"
+      }
+    },
+    "devicesTitle": "Appareils connectés",
+    "devicesUnavailable": "Cette fonctionnalité n’est pas encore disponible : la plateforme ne garde pas encore la trace des sessions ouvertes.",
+    "exportTitle": "Exporter mes données",
+    "exportHint": "Télécharge toutes vos données FINCLUDIA dans un fichier. Votre mot de passe actuel est demandé.",
+    "export": "Exporter",
+    "exported": "Export téléchargé.",
+    "deleteTitle": "Supprimer mon compte",
+    "deletePolicy": "La suppression est complète et immédiate : aucune donnée n’est conservée au-delà, et l’action ne peut pas être annulée.",
+    "delete": "Supprimer mon compte",
+    "deleteConfirm": "Supprimer définitivement votre compte et toutes vos données ? Cette action est irréversible.",
+    "typeEmail": "Tapez votre adresse ({{email}}) pour confirmer",
+    "currentPassword": "Mot de passe actuel",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "errors": {
+      "wrongPassword": "Mot de passe incorrect.",
+      "emailMismatch": "L’adresse tapée ne correspond pas à votre compte."
+    }
+  },
+  "search": {
+    "label": "Recherche globale",
+    "placeholder": "Rechercher un écran, une transaction, un objectif…",
+    "clear": "Effacer",
+    "loading": "Recherche…",
+    "noResults": "Aucun résultat pour « {{query}} ».",
+    "noResultsHint": "Essayez un autre mot, ou consultez directement les catégories ci-dessous.",
+    "noLabel": "Sans note",
+    "groups": {
+      "actions": "Actions",
+      "mesDonnees": "Mes données",
+      "objectifs": "Objectifs",
+      "apprendre": "Apprendre",
+      "explorer": "Explorer"
+    },
+    "explorerHint": "Le comparateur bancaire et les offres d’emploi se consultent pour le moment depuis « Outils »."
   }
 }

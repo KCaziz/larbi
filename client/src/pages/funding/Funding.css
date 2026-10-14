@@ -1,0 +1,51 @@
+/* Funding readiness (P6-16). Tokens only, logical properties (RTL). */
+.funding-page {
+  max-width: 1040px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  padding-block-end: 40px;
+}
+
+.funding-page h2 {
+  margin-block: 24px 10px;
+  font-size: 1.05rem;
+  color: var(--text-h);
+}
+
+.funding-global-note {
+  margin-block-start: 12px;
+  font-size: 0.88rem;
+  opacity: 0.9;
+}
+
+.funding-completeness-list {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.funding-check-done {
+  color: var(--green);
+}
+
+.funding-check-missing {
+  color: var(--text);
+  opacity: 0.8;
+}
+
+.funding-checklist {
+  margin: 0;
+  padding-inline-start: 20px;
+  display: grid;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.funding-actions {
+  margin-block-start: 24px;
+  padding-block-start: 16px;
+  border-block-start: 1px solid var(--border);
+}

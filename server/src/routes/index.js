@@ -25,8 +25,15 @@ import finReserveRoutes from './finReserve.routes.js';
 import finCalendarRoutes from './finCalendar.routes.js';
 import finDashboardRoutes from './finDashboard.routes.js';
 import finWealthRoutes from './finWealth.routes.js';
+import finSharedRoutes from './finShared.routes.js';
+import finSpaceGoalRoutes from './finSpaceGoal.routes.js';
 import finSpaceRoutes from './finSpace.routes.js';
 import finPaperRoutes from './finPaper.routes.js';
+import finFundingRoutes from './finFunding.routes.js';
+import finNotificationRoutes from './finNotification.routes.js';
+import finTrustRoutes from './finTrust.routes.js';
+import finSearchRoutes from './finSearch.routes.js';
+import finPasseportRoutes from './finPasseport.routes.js';
 
 const router = Router();
 
@@ -56,7 +63,14 @@ router.use('/fin', finReserveRoutes);
 router.use('/fin', finCalendarRoutes);
 router.use('/fin', finDashboardRoutes);
 router.use('/fin', finWealthRoutes);
+router.use('/fin', finSharedRoutes);
+router.use('/fin', finSpaceGoalRoutes);
 router.use('/fin', finSpaceRoutes);
 router.use('/fin', finPaperRoutes);
+router.use('/fin', finFundingRoutes);
+router.use('/fin', finNotificationRoutes);
+router.use('/fin', finTrustRoutes);
+router.use('/fin', finSearchRoutes);
+router.use('/fin', finPasseportRoutes);
 
 export default router;

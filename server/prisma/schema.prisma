@@ -74,6 +74,10 @@ model User {
   // recommendation, which the client's own wording ("cible choisie par
   // l'utilisateur") rules out — F015/F016 read null as "non calculé", not 0.
   finReserveTargetMonths Int?
+  // Per-type enable/opt-in (P6-18): { [type]: { enabled, optedIn } }. Absent
+  // keys fall back to the catalogue's own default (constants/finNotification.js)
+  // — this column only ever holds what someone actually changed.
+  finNotificationSettings Json @default("{}")
   finProfileTransitions  FinProfileTransition[]
   finConsents            FinConsent[]
   finAuditLogs           FinAuditLog[]
@@ -95,6 +99,7 @@ model User {
   finGoals               FinGoal[]
   finDebts               FinDebt[]
   finDebtPayments        FinDebtPayment[]
+  finNotifications       FinNotification[]
 
   // E-Learning (P2-01)
   formationsCreated Formation[]
@@ -921,6 +926,9 @@ model FinSpace {
   invitations FinSpaceInvite[]
   expenses    FinSharedExpense[]
   settlements FinSettlement[]
+  goals       FinSpaceGoal[]
+  children    FinChild[]
+  provisions  FinSpaceProvision[]
 
   @@index([kind])
   @@map("fin_spaces")
@@ -954,6 +962,7 @@ model FinSpaceMember {
   settlementsFrom     FinSettlement[]    @relation("SettlementFrom")
   settlementsTo       FinSettlement[]    @relation("SettlementTo")
   recordedSettlements FinSettlement[]    @relation("SettlementRecorder")
+  goalContributions   FinSpaceGoalContribution[]
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
@@ -1193,6 +1202,138 @@ model FinSettlement {
   @@index([fromId])
   @@index([toId])
   @@map("fin_settlements")
+}
+
+// ---- Shared goals, children and provisions (P6-15) ---------------------------
+// Colocation, couple, family: screens P05, CO02-CO06, CP02-CP04, FA02-FA06.
+//
+// A common goal or envelope belongs to the SPACE, not to one account — unlike
+// `FinGoal` (P6-08), which is personal. That is the point: everyone who is a
+// member sees it by construction, the same way a shared expense (P6-14)
+// already does, rather than through the permission matrix (P6-13), which only
+// ever governs PERSONAL data someone chooses to reveal.
+
+model FinSpaceGoal {
+  id            String                     @id @default(uuid())
+  spaceId       String
+  space         FinSpace                   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  label         String                     @db.VarChar(80)
+  target        Int
+  currency      String                     @db.VarChar(3)
+  targetDate    DateTime?
+  note          String?                    @db.VarChar(300)
+  version       Int                        @default(1)
+  archivedAt    DateTime?
+  deletedAt     DateTime?
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+  contributions FinSpaceGoalContribution[]
+
+  @@index([spaceId, deletedAt])
+  @@map("fin_space_goals")
+}
+
+// What one member actually put in — the FACT a common goal's progress is
+// built from, rather than a single editable "allocated" number nobody can
+// attribute (unlike a personal goal, several people pay into this one).
+model FinSpaceGoalContribution {
+  id            String       @id @default(uuid())
+  spaceGoalId   String
+  spaceGoal     FinSpaceGoal @relation(fields: [spaceGoalId], references: [id], onDelete: Cascade)
+  memberId      String
+  member        FinSpaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  amount        Int
+  currency      String       @db.VarChar(3)
+  contributedAt DateTime
+  note          String?      @db.VarChar(300)
+  createdAt     DateTime     @default(now())
+  deletedAt     DateTime?
+
+  @@index([spaceGoalId])
+  @@index([memberId])
+  @@map("fin_space_goal_contributions")
+}
+
+// A household's child (P6-15, famille): MINIMAL data on purpose — a first
+// name and a birth year, never a full birth date, never a national id or
+// anything that identifies the child outside this one household's planning.
+model FinChild {
+  id         String    @id @default(uuid())
+  spaceId    String
+  space      FinSpace  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  firstName  String    @db.VarChar(60)
+  birthYear  Int
+  note       String?   @db.VarChar(300)
+  archivedAt DateTime?
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([spaceId, deletedAt])
+  @@map("fin_children")
+}
+
+// A household's annual or irregular expense, provisioned month by month
+// (F045): school fees, an insurance renewal, a family trip. `alreadyProvisioned`
+// is corrected as the household sets money aside; it is never recomputed from
+// elsewhere, because nothing else in FINCLUDIA tracks it.
+model FinSpaceProvision {
+  id                 String    @id @default(uuid())
+  spaceId            String
+  space              FinSpace  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  label              String    @db.VarChar(80)
+  plannedAmount      Int
+  alreadyProvisioned Int       @default(0)
+  currency           String    @db.VarChar(3)
+  targetDate         DateTime
+  note               String?   @db.VarChar(300)
+  version            Int       @default(1)
+  archivedAt         DateTime?
+  deletedAt          DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([spaceId, deletedAt])
+  @@map("fin_space_provisions")
+}
+
+// ---- Notifications (P6-18), screen C24 ---------------------------------------
+// In-app only for now: « canal in-app d'abord ; e-mail / push selon P6-01 » —
+// the client's own order, and e-mail/push are a reserve exactly like every
+// other P6-01 placeholder in this schema.
+//
+// `type` is a closed catalogue (constants/finNotification.js), never free
+// text: the server decides what a notification says, through i18n keys and
+// `params`, so nothing typed by anyone ends up rendered as a notification.
+model FinNotification {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String    @db.VarChar(40)
+  // The client's three filters: action / information / sécurité.
+  category    String    @db.VarChar(20)
+  // The client's own ordering for competing alerts: sécurité > échéance >
+  // budget > apprentissage (ACTION_PRIORITIES, shared with the home
+  // dashboard's action list, P6-06) — a SORT key, not the filter above.
+  priority    String    @db.VarChar(20)
+  // i18n interpolation values for this notification's text (amounts, labels,
+  // ids already safe to show back to their own owner) — never a rendered
+  // sentence, so the text stays translated like everything else.
+  params      Json      @default("{}")
+  // Where the client's own « lien vers l'écran concerné » leads. Always a
+  // path this server itself constructs, never user input.
+  link        String?   @db.VarChar(200)
+  // What this notification is ABOUT (a budget, an envelope, a goal...), for
+  // the anti-repetition rule: created once per (type, referenceId) at a given
+  // signal, never once per read.
+  referenceId String?   @db.VarChar(191)
+  read        Boolean   @default(false)
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId, read, createdAt])
+  @@index([userId, type, referenceId])
+  @@map("fin_notifications")
 }
 
 // ---- "Apprendre" glossary and mini-guides (P2-08) -----------------------------

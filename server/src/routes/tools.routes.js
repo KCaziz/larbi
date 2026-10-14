@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { getSegment, getSummary, getTheme, listTools } from '../controllers/comparator.controller.js';
+import { getSegment, getSummary, getTheme, listTools, postUsageFit } from '../controllers/comparator.controller.js';
+import { getExplorer } from '../controllers/explorer.controller.js';
 import { getSimulator, listSimulators, runSimulation } from '../controllers/simulations.controller.js';
 import { getComparisonMeta, runComparison, runJobOfferComparison } from '../controllers/comparisons.controller.js';
 import {
@@ -12,12 +13,13 @@ import {
 } from '../controllers/scenarios.controller.js';
 import { EXPLICIT_SEGMENTS, themeByKey } from '../constants/comparator.js';
 import { simulatorByKey } from '../constants/simulators.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAdult, requireAuth } from '../middleware/auth.js';
 import { publicReadLimiter } from '../middleware/rateLimit.js';
 import { toolAccess } from '../middleware/toolAccess.js';
-import { validateBody } from '../middleware/validate.js';
+import { validateBody, validateQuery } from '../middleware/validate.js';
 import { SIMULATION_SCHEMAS } from '../validation/simulations.schemas.js';
-import { comparisonSchema, jobOffersSchema } from '../validation/comparisons.schemas.js';
+import { comparisonSchema, jobOffersSchema, usageFitSchema } from '../validation/comparisons.schemas.js';
+import { explorerQuerySchema } from '../validation/explorer.schemas.js';
 import { calculateInvoice, invoiceExcel } from '../controllers/invoice.controller.js';
 import { compareScenariosSchema, renameScenarioSchema, saveScenarioSchema } from '../validation/scenarios.schemas.js';
 import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
@@ -37,7 +39,17 @@ comparator.param('segment', (req, res, next, value) => (EXPLICIT_SEGMENTS.includ
 comparator.get('/', asyncRoute(getSummary));
 comparator.get('/themes/:theme', asyncRoute(getTheme));
 comparator.get('/segments/:segment', asyncRoute(getSegment));
+// "Adéquation à l'usage" (P4-13, écran ET06) : lit les mêmes données publiques
+// que ci-dessus, poids fournis par la personne — aucune écriture.
+comparator.post('/adequation', validateBody(usageFitSchema), asyncRoute(postUsageFit));
 router.use('/comparator', ...toolAccess('comparateur-bancaire'), comparator);
+
+// "Explorer" (P4-13, écran C20) : réservé aux 18 ans et plus (P3-18) — un
+// compte est nécessaire pour connaître l'âge, donc `requireAdult` s'ajoute à
+// l'accès "authenticated" du registre (constants/tools.js), qui ne le couvre pas.
+const explorer = Router();
+explorer.get('/', validateQuery(explorerQuerySchema), asyncRoute(getExplorer));
+router.use('/explorateur', ...toolAccess('explorateur-financier'), requireAdult, explorer);
 
 // FINCLUDIA simulators (P4-10). Pure compute: the body is validated, the maths
 // run, nothing is read from or written to the database.

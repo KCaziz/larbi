@@ -50,6 +50,7 @@ export const router = createBrowserRouter([
           { path: 'apprendre/termes/:slug', lazy: lazyPage(() => import('../pages/apprendre/TermPage.jsx')) },
           { path: 'apprendre/guides/:slug', lazy: lazyPage(() => import('../pages/apprendre/GuidePage.jsx')) },
           { path: 'outils/comparateur', lazy: lazyPage(() => import('../pages/outils/ComparatorPage.jsx')) },
+          { path: 'outils/comparateur/adequation', lazy: lazyPage(() => import('../pages/outils/UsageFitPage.jsx')) },
           { path: 'outils/comparateur/segments/:segment', lazy: lazyPage(() => import('../pages/outils/ComparatorSegmentPage.jsx')) },
           { path: 'outils/comparateur/:theme', lazy: lazyPage(() => import('../pages/outils/ComparatorThemePage.jsx')) },
           { path: 'outils/simulateurs', lazy: lazyPage(() => import('../pages/outils/SimulatorsPage.jsx')) },
@@ -78,6 +79,8 @@ export const router = createBrowserRouter([
             children: [
               // Invoice generator (P4-03): the tool registry says "account required".
               { path: 'outils/facture', lazy: lazyPage(() => import('../pages/outils/InvoicePage.jsx')) },
+              // "Explorer" (P4-13, écran C20) : réservé aux 18 ans et plus, l'API refuse en plus server-side.
+              { path: 'outils/explorateur', lazy: lazyPage(() => import('../pages/outils/ExplorerPage.jsx')) },
               // E-Learning (learner side): formations are for logged-in users.
               { path: 'catalogue', lazy: lazyPage(() => import('../pages/learn/CatalogPage.jsx')) },
               { path: 'catalogue/:slug', lazy: lazyPage(() => import('../pages/learn/FormationPage.jsx')) },
@@ -102,6 +105,14 @@ export const router = createBrowserRouter([
               { path: 'objectifs', lazy: lazyPage(() => import('../pages/goals/GoalsPage.jsx')) },
               // FINCLUDIA debts (P6-10), screens C13-C14.
               { path: 'dettes', lazy: lazyPage(() => import('../pages/debts/DebtsPage.jsx')) },
+              // FINCLUDIA funding readiness (P6-16), screens JA08 / SA05.
+              { path: 'financement', lazy: lazyPage(() => import('../pages/funding/FundingReadinessPage.jsx')) },
+              // FINCLUDIA notifications and alerts (P6-18), screen C24.
+              { path: 'notifications', lazy: lazyPage(() => import('../pages/notifications/NotificationsPage.jsx')) },
+              // FINCLUDIA trust and data centre (P6-19), screen C25.
+              { path: 'confiance', lazy: lazyPage(() => import('../pages/trust/TrustCenterPage.jsx')) },
+              // Passeport de connaissances financières (P2-09), écrans LY11/LY12/ET09.
+              { path: 'passeport', lazy: lazyPage(() => import('../pages/apprendre/PassportPage.jsx')) },
               // FINCLUDIA safety reserve (P6-09), screen C12.
               { path: 'reserve', lazy: lazyPage(() => import('../pages/reserve/ReservePage.jsx')) },
               // FINCLUDIA real patrimony (P6-11), screens C16 / JA07.

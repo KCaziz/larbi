@@ -32,6 +32,7 @@ import { buildBudgetView } from '../services/finBudgetView.service.js';
 import { describeFormula } from '../services/finance/describe.js';
 import { questionsForPublic } from '../constants/finOnboarding.js';
 import { isAdultAgeRange } from '../constants/finPublics.js';
+import { createNotification } from '../services/finNotification.service.js';
 
 // Budgets and envelopes (P6-05), screens C06 (« Budget du mois ») and JA03 /
 // JA04 (« Plan de répartition »). Session required everywhere, and every read
@@ -105,6 +106,19 @@ export async function getBudget(req, res) {
     label: line.categoryId ? (labels.get(line.categoryId)?.label ?? null) : null,
     family: line.categoryId ? (labels.get(line.categoryId)?.family ?? null) : null,
   }));
+
+  // P6-18: an envelope that just crossed a declared threshold is new
+  // information — the same level again is not (dedupeBy "level").
+  for (const line of view.enveloppes) {
+    if (line.alerte.niveau === 'none') continue;
+    await createNotification(prisma, req.user.id, {
+      type: 'budget_alert',
+      params: { niveau: line.alerte.niveau, label: line.label, taux: line.tauxConsommation.resultat },
+      link: `/budget/${budget.id}`,
+      referenceId: line.id,
+      dedupeBy: 'level',
+    });
+  }
 
   res.json({ budget, vue: view });
 }

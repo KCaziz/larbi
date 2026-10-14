@@ -27,6 +27,15 @@ export const COMPARISON_CRITERIA = [
   { key: 'risk', unit: 'points', direction: 'lower', grade: true },
   { key: 'compatibility', unit: 'ratio', direction: 'higher' },
   { key: 'conditions', unit: 'text', direction: null },
+  // "Adéquation à l'usage" bancaire (P4-13, écran ET06): four dimensions the
+  // client's own words name (carte, retraits, virements, frais de compte),
+  // each already derivable from the public comparator's own columns
+  // (constants/comparator.js). "Paiement en ligne" has no column in the
+  // client's workbook for any bank and is not added here as a guess.
+  { key: 'accountFee', unit: 'money', direction: 'lower' },
+  { key: 'cardFee', unit: 'money', direction: 'lower' },
+  { key: 'transferFee', unit: 'money', direction: 'lower' },
+  { key: 'atmFee', unit: 'money', direction: 'lower' },
 ];
 
 export const CRITERION_KEYS = COMPARISON_CRITERIA.map((criterion) => criterion.key);

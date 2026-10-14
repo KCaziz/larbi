@@ -18,6 +18,10 @@ export const TOOLS = [
   { key: 'comparaisons', status: 'available', access: 'public' },
   // Cahier des charges: "Outils : accès authentifié et selon les droits".
   { key: 'simulateur-credit', status: 'planned', access: 'authenticated' },
+  // "Explorer" (P4-13, écran C20) : réservé aux 18 ans et plus (P3-18), donc
+  // un compte est nécessaire pour connaître l'âge — la route ajoute en plus
+  // `requireAdult`, que `authenticated` seul ne couvre pas.
+  { key: 'explorateur-financier', status: 'available', access: 'authenticated' },
   // Invoice generator (P4-03): needs an account, per the specification.
   { key: 'generateur-facture', status: 'available', access: 'authenticated' },
 ];

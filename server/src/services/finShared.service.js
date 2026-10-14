@@ -17,6 +17,7 @@ import { HttpError } from '../utils/httpError.js';
 import { recordChange } from './finChange.service.js';
 import { normaliseSharing, ownMembership, requireRole } from './finSpace.service.js';
 import { monthlyAmount } from './finance/formulas.js';
+import { detectRecurrences } from './finance/algorithms.js';
 import { computeShares } from './finSharedView.service.js';
 
 export const SHARED_EXPENSE_ENTITY = 'sharedExpense';
@@ -368,4 +369,43 @@ export async function loadSharedData(prisma, spaceId) {
     }),
   ]);
   return { members, expenses, settlements };
+}
+
+// ---- recurring common bills (P6-15) ----------------------------------------
+//
+// « Factures et abonnements communs » (colocation): the client's own rule is
+// « un paiement confirmé crée la dépense partagée sans doublon ». ALG-04
+// (P6-07) only ever proposes a candidate; nothing here creates anything on
+// its own, and confirming the SAME period twice is refused rather than
+// silently creating a second rent for the same month.
+
+const monthKey = (date) => `${date.getUTCFullYear()}-${date.getUTCMonth()}`;
+
+export async function detectSharedRecurrences(prisma, userId, spaceId) {
+  await ownMembership(prisma, userId, spaceId);
+  const rows = await prisma.finSharedExpense.findMany({
+    where: { spaceId, deletedAt: null },
+    select: { label: true, value: true, occurredAt: true },
+    orderBy: { occurredAt: 'asc' },
+  });
+  const candidates = detectRecurrences(rows.map((row) => ({ label: row.label, amount: row.value, date: row.occurredAt })));
+  return candidates ?? [];
+}
+
+/**
+ * Confirms one period of a detected recurring bill as a real shared expense.
+ *
+ * Deduplication is by (space, normalised label, calendar month): the client's
+ * own case is a rent or a subscription confirmed once per period, never
+ * twice for the same month, whichever member happens to confirm it.
+ */
+export async function confirmSharedRecurrence(prisma, userId, spaceId, body) {
+  const existing = await prisma.finSharedExpense.findMany({
+    where: { spaceId, deletedAt: null, label: body.label },
+    select: { occurredAt: true },
+  });
+  if (existing.some((row) => monthKey(row.occurredAt) === monthKey(body.occurredAt))) {
+    throw new HttpError(422, 'This period already has a shared expense for this bill', { reason: 'duplicateRecurrence' });
+  }
+  return createSharedExpense(prisma, userId, spaceId, body);
 }

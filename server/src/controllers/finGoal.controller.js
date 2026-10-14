@@ -12,6 +12,7 @@ import {
   updateGoal,
 } from '../services/finGoal.service.js';
 import { describeFormula } from '../services/finance/describe.js';
+import { createNotification } from '../services/finNotification.service.js';
 import { HttpError } from '../utils/httpError.js';
 
 // Financial goals (P6-08), screens C09-C11. Session required everywhere; every
@@ -23,7 +24,23 @@ export function getGoalReferences(req, res) {
 
 export async function getGoals(req, res) {
   const goals = await listGoals(prisma, req.user.id, { includeArchived: req.query.includeArchived === 'true' });
-  res.json({ goals: goals.map((goal) => ({ ...goal, vue: buildGoalView(goal) })) });
+  const withViews = goals.map((goal) => ({ ...goal, vue: buildGoalView(goal) }));
+
+  // P6-18: a goal past its own target date, not reached, is a one-off fact —
+  // created once per goal, never repeated once the person has seen it.
+  for (const goal of withViews) {
+    if (goal.archivedAt || !goal.targetDate || goal.targetDate.getTime() >= Date.now()) continue;
+    if ((goal.vue.progres.resultat ?? 0) >= 1) continue;
+    await createNotification(prisma, req.user.id, {
+      type: 'goal_overdue',
+      params: { label: goal.label },
+      link: '/objectifs',
+      referenceId: goal.id,
+      dedupeBy: 'reference',
+    });
+  }
+
+  res.json({ goals: withViews });
 }
 
 export async function postGoal(req, res) {

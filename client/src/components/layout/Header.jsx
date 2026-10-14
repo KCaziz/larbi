@@ -4,6 +4,7 @@ import { LayoutDashboard, LogOut, Menu, UserRound, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth.js';
 import Navigation from './Navigation.jsx';
+import GlobalSearch from './GlobalSearch.jsx';
 import Button from '../ui/Button.jsx';
 import ThemeToggle from '../ui/ThemeToggle.jsx';
 import LanguageSwitcher from '../ui/LanguageSwitcher.jsx';
@@ -56,6 +57,7 @@ export default function Header() {
           <div className="header-controls">
             <LanguageSwitcher />
             <ThemeToggle />
+            {status === 'authenticated' && <GlobalSearch />}
             {status === 'authenticated' && (
               <div className="auth-actions">
                 {user?.role === 'admin' && (

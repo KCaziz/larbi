@@ -35,6 +35,18 @@ export default function ComparatorPage() {
 
         <p className="comparator-disclaimer">{t('comparator.disclaimer')}</p>
 
+        <Link to="/outils/comparateur/adequation" className="segment-card">
+          <span className="segment-card-icon" aria-hidden="true">
+            <Landmark size={20} strokeWidth={1.7} />
+          </span>
+          <h3>{t('bankUsage.title')}</h3>
+          <p>{t('bankUsage.intro')}</p>
+          <span className="segment-card-action">
+            {t('comparator.segmentCta')}
+            <ArrowRight className="icon-dir" size={14} strokeWidth={2} aria-hidden="true" />
+          </span>
+        </Link>
+
         <div className="comparator-grid">
           {themes.map((theme) => {
             const counts = (

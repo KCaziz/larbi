@@ -57,6 +57,16 @@ export const comparisonSchema = z
   })
   .strict();
 
+// "Adéquation à l'usage" bancaire (P4-13): 2 ou 3 comptes déjà publics du
+// comparateur (P4-06), désignés par l'identifiant de leur condition — jamais
+// de montant saisi à la main ici, ces chiffres viennent déjà de la base.
+export const usageFitSchema = z
+  .object({
+    conditionIds: z.array(z.string().uuid()).min(MIN_OPTIONS).max(MAX_OPTIONS),
+    weights: weights.optional(),
+  })
+  .strict();
+
 export const jobOffersSchema = z
   .object({
     currency,

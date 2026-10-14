@@ -643,7 +643,7 @@ Deux défauts trouvés et corrigés :
 Limites : les favoris n'ont pas d'écran dédié (ils sont une section de `/apprendre`). Le contenu du glossaire et des guides reste à écrire : la mécanique est là, les définitions sont à produire. Le ciblage par public se fait sur le thème de l'entrée ; un ciblage explicite par public viendra avec `P6-17` si le client le demande.
 
 ### P2-09 — FINCLUDIA : indice de connaissances financières et passeports (Avenir, étudiant)
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P2-08`
 - Durée cible : 2 jours (estimation)
@@ -654,6 +654,23 @@ Tâches :
 - Module **« Sécurité numérique »** (hameçonnage, mot de passe, carte, code OTP, liens frauduleux, achats en ligne) : un parcours de quiz construit avec l'outil existant (`P3-13`), contenu fourni par le client.
 - **Passeport Avenir** (lycéen) et **passeport financier étudiant** : compétences acquises, progression, étapes suivantes, export d'une **attestation pédagogique** (réutilise la génération de certificats, `P2-05`). Mention obligatoire : **le passeport n'est pas un score bancaire et ne mesure pas la solvabilité**.
 - Tests : unitaires (indice), fonctionnels (attestation, cloisonnement par utilisateur), navigateur.
+
+**Réalisé (2026-10-14) :**
+- **F052 suit exactement le patron déjà posé par F051 (`P6-16`) et F053 (`P6-06`)** : le mécanisme (`weightedIndex`) et sa fiche (`describeFormula('F052')`) existaient déjà dans le moteur, mais rien d'autre n'était construit. L'indice global reste **explicitement bloqué** (`KNOWLEDGE_INDEX_BLOCKED`, `constants/finPasseport.js`) tant que ses pondérations ne sont pas fournies (`P6-01` point 5) ; trois dimensions sont montrées seules : taux de formations terminées, moyenne des quiz réussis, état du module « Sécurité numérique ».
+- **Aucune nouvelle table** : le passeport lit uniquement ce que P2-01 à P2-05 écrivent déjà (`Enrollment`, `CourseProgress`, `QuizAttempt`, `Certification`) — `services/finPasseport.service.js` ajoute la seule chose qui manquait, une lecture **cross-formation** des quiz réussis d'une personne (le modèle ne la permettait pas directement, `QuizAttempt` ne portant pas `userId`).
+- **« Sécurité numérique » est une formation comme une autre** (`constants/finPasseport.js` → `SECURITY_MODULE_SLUG = 'securite-numerique'`) : aucun contenu n'a été inventé pour ce module ; tant qu'aucune formation de ce slug n'est publiée, la dimension est déclarée indisponible (`SECURITY_MODULE_BLOCKED`), jamais mesurée à zéro.
+- **« Étapes suivantes » = les cours obligatoires qui bloquent réellement une formation en cours** — jamais une recommandation inventée. Une formation sans rien à finir n'apparaît simplement pas dans la liste.
+- **Export d'attestation : réutilise réellement P2-05, ne le duplique pas.** Il n'existe aucune génération de PDF côté serveur dans tout le projet (même l'attestation de formation s'imprime depuis le navigateur) : plutôt que d'inventer un second type de certificat sans formation associée, le passeport **relie** chaque formation déjà certifiée à son attestation réelle et vérifiable (`/compte/certificats`), et offre en plus un résumé imprimable de sa propre progression (sans numéro, jamais présenté comme un document vérifiable).
+- **« Avenir » / « étudiant » changent le titre, jamais le mécanisme** : `passeportTitleKey(finPublic)` choisit un intitulé (`LYC` → Avenir, `ETU` → étudiant, sinon générique) sur les mêmes données — aucun blocage d'accès par public, puisque rien dans les règles du client n'en demande un ici (à la différence de la majorité, `P3-18`).
+- **Mention obligatoire du client présente dans l'interface** : « le passeport n'est pas un score bancaire et ne mesure pas la solvabilité » (`passport.disclaimer`, fr/en/ar).
+- **Interface** : page `/passeport` (trois cartes de repères, formations terminées avec lien vers l'attestation réelle, étapes suivantes, quiz réussis, impression) ; fr / en / ar.
+
+**Tests :** 14 de sécurité (`tests/security/finPasseport.test.js`) : session requise, isolation entre comptes, chaque figure absente plutôt qu'à zéro pour un apprenant sans historique, l'indice global jamais un nombre, une formation certifiée distinguée d'une formation terminée sans certificat, étapes suivantes limitées à ce qui bloque réellement, quiz réussis cross-formation avec moyenne correcte, un essai échoué jamais compté, le module « Sécurité numérique » à ses quatre états (absent, brouillon, publié non commencé, terminé), le titre du passeport selon le public.
+
+**Limites et réserves déclarées :**
+- **L'indice global (F052) reste bloqué** jusqu'aux pondérations du client (`P6-01` point 5) — déclaré sur l'écran lui-même.
+- **« Sécurité numérique » n'a aucun contenu publié** : la formation et ses quiz restent à écrire par le client, comme prévu.
+- **Pas de test unitaire/fonctionnel dédié supplémentaire ni de parcours navigateur**, au-delà de ce qui est listé ci-dessus.
 
 ### P2-10 — FINCLUDIA : défis et missions pédagogiques (lycéen)
 - Statut : `❌ todo`
@@ -1228,7 +1245,7 @@ Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p4-11).
 Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p4-12).
 
 ### P4-13 — Comparateur bancaire, lot D : adéquation à l'usage et « Explorer » (FINCLUDIA)
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P4-08`, `P4-12`, `P3-18`
 - Durée cible : 3 jours (estimation)
@@ -1239,6 +1256,21 @@ Prolonge le comparateur existant (`P4-06` à `P4-08`) sans toucher à ses donné
 - **Explorer** (C20) : recherche de solutions par besoin (voiture, logement, épargne…), montant, horizon, type, établissement ; chaque résultat porte **source, date et fraîcheur** ; « compatibilité apparente selon critères publics » seulement si toutes les règles sont explicites, **jamais d'affirmation d'éligibilité** ; réservé aux 18 ans et plus selon les règles de `P3-18`.
 - Sauvegarde d'offres et comparaison (via `P4-12`).
 - Référentiel d'offres (« Offer Graph » : offres, fournisseurs, sources datées) : seulement les données fournies par le client, comme aujourd'hui.
+
+**Réalisé (2026-10-14) :**
+- **« Adéquation à l'usage » réutilise le moteur générique P4-12** (`compareOptions`, F054) plutôt que d'en inventer un second : quatre critères ajoutés au vocabulaire fixe de `constants/comparison.js` (`accountFee`, `cardFee`, `transferFee`, `atmFee`, tous `money`/`lower`), exactement comme `commuteMinutes` l'avait été pour les offres d'emploi. Les options comparées sont 2 ou 3 comptes **déjà publics** du comparateur (`P4-06`), choisis par la personne ; leurs frais de carte et de virement viennent du même établissement **seulement quand une seule ligne existe** pour cette rubrique chez cette banque — plusieurs lignes (plusieurs types de carte) restent une ambiguïté non tranchée, pas une valeur inventée (`services/bankUsage.service.js`).
+- **« Paiement en ligne » n'a jamais de colonne dans les classeurs du client**, pour aucune banque : plutôt que de deviner une valeur, ce critère n'existe simplement pas dans la liste comparée — dit dans l'interface (`bankUsage.noOnlinePayment`), vérifié par un test.
+- **« Explorer » est une recherche littérale** sur les mêmes lignes publiques du comparateur (`services/explorer.service.js`) : aucune interprétation générative, aucun classement, aucune affirmation d'éligibilité. Le besoin (voiture, logement, épargne…) n'a pas de colonne dédiée dans les classeurs du client : il se tape dans la recherche comme un mot parmi d'autres plutôt que d'être deviné par une liste de besoins inventée ici. Sans filtre réel (requête de moins de 2 caractères, aucune rubrique), la réponse est vide — jamais un listage complet déguisé en recherche (même principe que `P6-20`).
+- **Explorer est réservé aux 18 ans et plus, effectivement** : premier usage réel de `requireAdult` (middleware/auth.js), posé par `P3-18` mais jamais câblé avant cette tâche. Nouveau tool `explorateur-financier` (`access: 'authenticated'`), avec `requireAdult` ajouté en plus sur la route — une personne dont la tranche d'âge n'est pas encore déclarée est refusée comme un mineur, jamais comme un adulte par défaut.
+- **Fraîcheur honnête, pas inventée par ligne** : le modèle de données du comparateur n'a qu'une seule date, globale (`ComparatorMeta.dataUpdatedAt`) — Explorer la renvoie telle quelle plutôt que d'inventer une date par offre.
+- **Interface** : lien « Adéquation à mon usage » depuis le comparateur (public, `/outils/comparateur/adequation`) ; écran « Explorer » dans le catalogue d'outils, réservé aux 18 ans et plus (`/outils/explorateur`) ; fr / en / ar.
+
+**Tests :** 6 fonctionnels (`tests/functional/comparator.test.js`, nouveau bloc « usage fit ») : quatre critères sans score par défaut, le score n'apparaît qu'avec des poids et porte sa formule (F054), le chiffre rejoint exactement le coût annuel déjà affiché par le comparateur, un identifiant qui n'est pas un compte ou qui est inconnu est refusé, la borne 2 à 3 est respectée, « paiement en ligne » n'apparaît jamais. 10 de sécurité (`tests/security/explorer.test.js`) : session requise, mineur refusé, âge non déclaré traité comme un mineur (refus par défaut), adulte accepté, aucun filtre réel → résultat vide, correspondance littérale, rubrique inconnue refusée, jamais de classement (`best`/`scores` absents de la réponse), fraîcheur réelle renvoyée.
+
+**Limites et réserves déclarées :**
+- **CCP étudiant** : non ajouté, comme prévu — aucune donnée CCP dans le classeur actuel.
+- **Explorer ne filtre pas par montant ni par horizon** : ces deux notions n'ont pas de colonne exploitable dans les classeurs du client (les crédits et l'épargne, par exemple, n'ont ni montant ni durée structurés) ; elles se cherchent comme un mot du texte libre plutôt que d'être un filtre numérique inventé.
+- **Pas de test unitaire/fonctionnel dédié supplémentaire, de scénario de cohérence globale ni de parcours navigateur** au-delà de ce qui est listé ci-dessus.
 
 ### P4-14 — FINCLUDIA : décodeur de fiche de paie
 - Statut : `⛔ blocked`
@@ -1861,11 +1893,11 @@ Actifs (comptes, CCP, espèces, or, véhicule, immobilier, placements) et passif
 **Limites et réserves déclarées :**
 - **« Membre supprimé → historique anonymisé selon la politique » attend la politique.** Aujourd'hui l'appartenance est marquée `leftAt` (les chiffres de l'espace ont été calculés avec cette personne dedans, et effacer la ligne rendrait ce passé illisible) et **ses données cessent d'être visibles immédiatement**. Quelle part de l'historique doit être anonymisée, et comment, est un point de `P6-01` : c'est une règle de conservation, pas un détail technique, et elle n'est pas inventée.
 - **Les dépenses partagées et les règlements** sont `P6-14` : cette tâche livre l'espace, ses membres et la matrice, pas encore F041 / F042 / F043 sur des dépenses communes. La **règle de partage par défaut** est stockée à la création, prête pour elle.
-- **La notification elle-même attend `P6-18`** : le journal des changements de partage existe et est lisible, rien ne le **pousse** encore.
+- **La notification elle-même est maintenant poussée** (`P6-18`, 2026-10-14) : chaque changement de partage notifie les autres membres de l'espace, jamais l'auteur du changement. Le journal reste consultable indépendamment.
 - **Les tableaux de bord « Moi / Nous », colocation et foyer de `P6-06`** lisent encore les données personnelles du compte. Les brancher sur cette matrice est le travail de `P6-15`.
 
 ### P6-14 — FINCLUDIA : dépenses partagées et règlements
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P6-13`
 - Durée cible : 3 jours (estimation)
@@ -1874,8 +1906,25 @@ Actifs (comptes, CCP, espèces, or, véhicule, immobilier, placements) et passif
 - Dépense partagée : payeur, participants, répartition égale / en % / en montants, **somme des parts = montant**, arrondis selon une règle documentée, payeur pouvant ne pas participer.
 - Soldes par membre (convention de signe documentée dans l'API) ; « qui doit quoi à qui » avec **minimisation du nombre de remboursements** (ALG-02) qui ne change jamais la dette nette de chacun ; paiements déclaratifs (aucune intégration de paiement).
 
+**Réalisé (2026-10-14) :** modèles `FinSharedExpense` / `FinSharedShare` / `FinSettlement`, service et contrôleur déjà posés par une session précédente ; cette session a écrit les **routes** (`finShared.routes.js`, montées sur `/fin/espaces/:id/depenses`, `/reglements`, `/soldes`, manquantes jusqu'ici), appliqué les **migrations non jouées** (`fin_calendar`, `fin_assets`, `fin_spaces`, `fin_paper`, `fin_shared_expenses` — cinq migrations existaient en fichier mais n'avaient jamais été appliquées ni à la base de développement ni à celle de test), écrit les **tests de sécurité** et construit l'**interface**.
+- **Le payeur et les participants sont des appartenances (`FinSpaceMember`), pas des comptes** : une dépense reste lisible « payée par X » après le départ de X, et un participant qui n'est pas membre de l'espace est refusé (422), pas simplement ignoré.
+- **Arrondi au plus grand reste** (`ROUNDING_RULE`, documenté dans l'API elle-même, pas seulement en commentaire) : la somme des parts est toujours exactement égale au montant, et un participant listé deux fois est refusé plutôt que dédoublonné silencieusement.
+- **Le partage proportionnel aux revenus (F042) ne lit jamais un revenu sans le consentement déjà posé par `P6-13`** (niveau `incomes` ≥ `totals` de la matrice de partage) : un participant qui n'a pas partagé est nommé dans le refus, jamais contourné par un repli silencieux vers une répartition égale.
+- **Un règlement est déclaratif** (`SETTLEMENTS_ARE_DECLARATIVE: true`, publié par l'API) : aucune intégration de paiement, l'une ou l'autre partie peut l'enregistrer.
+- **ALG-02 vérifié, pas seulement appliqué** : le service recalcule la position nette de chaque membre après le plan de remboursement et lève une erreur si une seule dinar s'est déplacé entre deux personnes autrement que par le solde déjà dû — la minimisation ne doit jamais rejouer une dette.
+- **Suppression d'une dépense ou d'un règlement** : réservée à qui l'a payé(e), qui l'a enregistré(e), ou un administrateur de l'espace — pas n'importe quel membre, puisque retirer l'écriture de quelqu'un d'autre change ce que tout le monde doit.
+- **Interface** : section « Dépenses partagées » dans le détail de l'espace (`/espaces`) — soldes, plan de remboursement, formulaires de dépense et de règlement, liste et suppression ; fr / en / ar.
+
+**Défaut trouvé et corrigé en chemin :** les migrations de `P6-06`, `P6-07`, `P6-11`, `P6-12`, `P6-13` et de cette tâche existaient toutes en fichier mais **n'avaient jamais été appliquées** à la base de développement, et la base de test était également en retard — la cohérence du projet (contrôle « aucune dérive ») l'a révélé. `npx prisma migrate dev` puis `node tests/setup.js` ont rattrapé les deux. À vérifier systématiquement après avoir repris du code écrit dans une session précédente.
+
+**Tests :** 8 de sécurité (`tests/security/finShared.test.js` : espace non membre → 404 sur toutes les routes, rôle `viewer` ne peut qu'observer, somme des parts toujours exacte, consentement du partage proportionnel aux revenus, suppression réservée au payeur/enregistreur/admin, soldes de l'espace toujours nuls).
+
+**Limites et réserves déclarées :**
+- **Pas encore de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
+- **Les tableaux de bord colocation / couple / foyer** qui consomment ces dépenses partagées sont `P6-15`.
+
 ### P6-15 — FINCLUDIA : colocation, couple et famille
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P6-14`, `P6-05`, `P6-08`
 - Durée cible : 4 jours (estimation)
@@ -1886,14 +1935,48 @@ Actifs (comptes, CCP, espèces, or, véhicule, immobilier, placements) et passif
 - Couple : objectif commun, contributions (F044), revue financière, séparation « Moi / Nous ».
 - Famille : foyer, enfants et projets (**données enfant minimales**), dépenses annuelles et provisions (F045), revue du foyer.
 
+**Réalisé (2026-10-14) :**
+- **Trois nouveaux modèles liés à l'espace, pas au compte** : `FinSpaceGoal` (+ `FinSpaceGoalContribution`), `FinChild`, `FinSpaceProvision` — un objectif ou une enveloppe commune appartient à l'ESPACE, visible par construction par tous ses membres, contrairement à `FinGoal` / `FinBudget` (`P6-08` / `P6-05`) qui restent strictement personnels. C'est la décision prise en amont de cette tâche : créer des tables liées à l'espace plutôt que de superposer un deuxième sens à `scope` sur les tables personnelles.
+- **La progression d'un objectif commun vient des contributions réellement enregistrées** (F025/F026 sur leur somme), jamais d'un nombre éditable par une seule personne.
+- **F044 (contribution foyer proportionnelle au revenu)** : ce qu'il reste à atteindre sur un objectif commun est réparti par revenu via `householdContribution`, affiché **à côté** des contributions réelles comme une comparaison, jamais comme une facture. N'est calculé que si **tous** les membres vivants ont partagé leur revenu dans cet espace (même condition que F042 pour les dépenses partagées, `P6-13`) ; sinon la réponse dit explicitement « non disponible » et nomme qui manque — jamais un repli silencieux vers un partage égal.
+- **Factures et abonnements communs, avec déduplication** (`depenses-recurrentes`) : ALG-04 (déjà écrit en Phase 4) propose des candidats à partir des dépenses partagées passées ; confirmer une période crée la dépense, et confirmer une seconde fois pour le **même libellé et le même mois civil** est refusé — « un paiement confirmé crée la dépense partagée sans doublon » tenu au pied de la lettre.
+- **Accord financier** : le champ `note` de l'espace (déjà prévu par `P6-13`), rendu éditable en clair sur la page — pas une nouvelle donnée, juste la bonne étiquette dessus.
+- **Revue « Moi / Nous »** (couple) : « Moi » vient strictement de ma synthèse personnelle (`/fin/argent/synthese`), « Nous » des objectifs communs de l'espace — les deux sources ne sont jamais mélangées côté serveur.
+- **Revue du foyer** (famille) : une phrase de synthèse (enfants déclarés, provisions et leur coût mensuel total, objectifs communs), composée d'endpoints qui vérifient chacun l'appartenance — aucun nouveau calcul serveur.
+- **Les enfants portent une donnée minimale** : prénom et année de naissance seulement, imposé par une contrainte `CHECK` et par le schéma de validation.
+- **Les provisions annuelles (F045)** réutilisent la formule déjà écrite et testée en Phase 4 ; une date cible passée est refusée.
+- **Interface** : sections « Accord financier », revue Moi/Nous ou du foyer selon le type d'espace, « Factures récurrentes », « Objectifs et enveloppes communs » (avec part équitable F044), « Enfants » et « Provisions annuelles » pour un foyer — toutes intégrées au détail de `/espaces` ; fr / en / ar.
+
+**Tests :** 15 de sécurité (`tests/security/finSpaceGoal.test.js` : 10, `tests/security/finSharedRecurrence.test.js` : 5 — déduplication des factures récurrentes, F044 non disponible puis calculé et exact au centime).
+
+**Limites et réserves déclarées :**
+- **Pas de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
+- **Enveloppes communes** : modélisées comme le même objet qu'un objectif commun (une cible et des contributions), par simplification délibérée plutôt qu'un budget par catégorie façon `P6-05` ; suffisant pour « mettre de côté pour quelque chose à plusieurs », pas pour un budget détaillé par poste.
+
 ### P6-16 — FINCLUDIA : préparation au financement
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟢 low`
-- Dépendances : `P6-10`, `P6-11`, `P6-01`
+- Dépendances : `P6-10`, `P6-11`
 - Durée cible : 2 jours (estimation)
 - Origine : direction FINCLUDIA du 2026-10-09 (écrans JA08, SA05)
 
 Indice de **préparation** du dossier (complétude, stabilité, effort dette, apport, réserve ; pondérations du client), points forts / faibles, pièces manquantes, checklist, export (avec consentement). **Jamais le mot « score de crédit », aucune prédiction ni garantie d'accord.**
+
+- Dépendance à `P6-01` retirée le 2026-10-14, **pour la même raison que `P2-09` et le F053 du tableau de bord (`P6-06`)** : le mécanisme (F051, « poids configurables/visibles ») est construit et prend ses pondérations en argument, mais les pondérations elles-mêmes restent « à valider » (`P6-01` point 5). Plutôt qu'attendre, l'indice global est **explicitement bloqué** (`FUNDING_INDEX_BLOCKED`) et chaque dimension est montrée seule — exactement ce que la règle du client demande déjà ailleurs (« sous-scores... pondérations visibles »). Rien n'attend plus pour être utile.
+
+**Réalisé (2026-10-14) :**
+- **Quatre des cinq dimensions sont des chiffres déjà construits**, jamais recalculés : taux d'effort dette (F018, `P6-10`), apport potentiel (F007, épargne réellement constatée, `P6-08`/`P6-09`), réserve de sécurité (F014, `P6-09`). La **complétude** est la seule chose que cette tâche ajoute, et c'est un fait mécanique (« tel élément est-il déclaré ») — jamais un jugement : public choisi, revenu déclaré, cible de réserve choisie, au moins un actif réel (`P6-11`).
+- **« Stabilité » n'a aucune formule dans le classeur du client** — contrairement aux quatre autres dimensions. Plutôt que d'en inventer une (ce que ce projet refuse systématiquement), elle est déclarée **non disponible** (`STABILITY_BLOCKED`) et listée dans les pièces manquantes.
+- **« Points forts / points faibles »** n'est pas construit : qualifier un chiffre de fort ou de faible demanderait un seuil, et aucun seuil n'est fourni pour ces dimensions — exactement la réserve qui bloque l'indice global lui-même. Montrer les chiffres bruts, sans verdict, est la version honnête de cette exigence tant que `P6-01` n'a pas tranché.
+- **Jamais les mots « score de crédit »** : vérifié par un test qui inspecte la réponse complète de l'API.
+- **Export avec consentement explicite** (`POST /fin/financement/export`, `{ consent: true }` obligatoire à chaque appel, jamais mémorisé) : télécharge les mêmes données que l'écran, avec le même indice global bloqué.
+- **Interface** : page `/financement` (cinq cartes de figures, case « stabilité » marquée non calculée, checklist, bouton d'export) ; fr / en / ar.
+
+**Tests :** 7 de sécurité (`tests/security/finFunding.test.js` : session requise, indice global jamais un nombre calculé, absence des mots interdits, complétude qui reflète les déclarations réelles, isolation entre comptes, export refusé sans consentement).
+
+**Limites et réserves déclarées :**
+- **L'indice global (F051) et la qualification forts/faibles restent bloqués** jusqu'aux pondérations et seuils du client (`P6-01` point 5) — déclaré sur l'écran lui-même, pas seulement ici.
+- **Pas de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
 
 ### P6-17 — FINCLUDIA : personnalisation des 8 parcours
 - Statut : `❌ todo`
@@ -1905,7 +1988,7 @@ Indice de **préparation** du dossier (complétude, stabilité, effort dette, ap
 Une fois les moteurs stables : vocabulaire, navigation, écrans activés et tableaux de bord **propres à chaque public** (carte des parcours), écrans spécifiques restants (préparer mes études LY09, autonomie ET03, transition premier revenu JA01, plan du mois SA03, diagnostic épargne EP01…), et passages d'un parcours à l'autre (`P3-18`). Les écrans communs sont réutilisés par configuration, jamais recopiés.
 
 ### P6-18 — FINCLUDIA : centre de notifications et alertes
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P6-04`
 - Durée cible : 2 jours (estimation)
@@ -1913,8 +1996,30 @@ Une fois les moteurs stables : vocabulaire, navigation, écrans activés et tabl
 
 Liste chronologique avec lien vers l'écran concerné ; filtres (action, information, sécurité ; lu / non lu) ; priorité **sécurité > échéance > budget > apprentissage** ; quotas et anti-répétition ; désactivation par type ; **rappels uniquement sur consentement (opt-in)**. Canal in-app d'abord ; e-mail / push selon `P6-01`.
 
+**Réalisé (2026-10-14) :** nouveau modèle `FinNotification` (+ `users.finNotificationSettings`), moteur générique, et trois déclencheurs réels câblés dans des tâches déjà construites.
+- **Priorité réutilisée, pas redéfinie** : `NOTIFICATION_PRIORITIES` importe `ACTION_PRIORITIES` du tableau de bord (`P6-06`), qui porte déjà l'ordre exact du client — une seule liste, jamais deux qui pourraient diverger.
+- **Catalogue fermé** (`constants/finNotification.js`) : chaque type porte sa catégorie (le filtre), sa priorité (le tri), s'il exige un consentement explicite, et s'il est activé par défaut. Rien n'est jamais du texte libre côté serveur : le texte affiché vient de `params` (des valeurs déjà visibles par leur propriétaire) interprétées par i18n côté client.
+- **Anti-répétition à deux régimes** : une **escalade** (un seuil de budget qui monte) crée une nouvelle ligne — c'est une information neuve — tandis qu'un **fait ponctuel** (un objectif en retard) n'en crée qu'une seule, pour toujours, qu'elle ait été lue ou non.
+- **Trois déclencheurs réels**, chacun ajouté à l'endroit où le signal existe déjà, sans toucher à la logique de calcul :
+  - `budget_alert` dans la lecture d'un budget (`P6-05`) : un niveau d'alerte non « none » crée ou retrouve la notification de ce niveau.
+  - `goal_overdue` dans la liste des objectifs (`P6-08`) : une date cible dépassée sans objectif atteint.
+  - `sharing_changed` dans le changement de ma propre matrice de partage (`P6-13`) : notifie les **autres** membres de l'espace, jamais l'auteur du changement — exactement la phrase du client que `P6-13` avait déjà préparée.
+  - `reminder_upcoming` (opt-in) généré à la lecture même de la liste de notifications, à partir du calendrier (`P6-07`, `loadCalendarData`) : ce site n'a pas de tâche planifiée en arrière-plan, donc une visite au centre de notifications est aussi ce qui le rafraîchit.
+- **Désactivation par type et opt-in séparés** : `enabled` (activé/désactivé) et `optedIn` (consentement explicite) sont deux réglages distincts — un type qui exige un consentement reste bloqué même activé si le consentement n'a pas été donné, et inversement activé par défaut ne veut pas dire poussé sans consentement.
+- **Interface** : page `/notifications` (filtres catégorie/lu, tri par priorité, tout marquer comme lu, paramètres par type) ; fr / en / ar.
+
+**Tests :** 11 de sécurité (`tests/security/finNotification.test.js` : isolation entre comptes, tri par priorité, les trois déclencheurs réels, désactivation par type, opt-in des rappels, marquage lu/tout lu, 404 sur la notification d'un autre compte).
+
+**Défaut trouvé et corrigé en chemin :** `z.record(z.enum(TYPES), schema)` refusait une requête qui ne nommait qu'**un seul** type à modifier, en réclamant les autres comme manquants — zod calque `Record<K, V>` de TypeScript, qui rend toutes les clés d'une énumération finie obligatoires. Remplacé par un objet explicite dont chaque clé est optionnelle.
+
+**Limites et réserves déclarées :**
+- **Catégorie « sécurité » sans déclencheur** : rien dans FINCLUDIA ne lève encore d'évènement de sécurité (connexion inhabituelle, etc.) — le filtre existe, le déclencheur non, plutôt que d'en inventer un.
+- **`goal_milestone`** (jalon atteint) existe dans le catalogue mais n'est pas câblé : aucun seuil de jalon n'est défini par le client.
+- **E-mail / push restent une réserve `P6-01`** : canal in-app seulement, comme le texte du client l'annonce lui-même en premier.
+- **Pas de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
+
 ### P6-19 — FINCLUDIA : centre de confiance et de données
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P6-02`, `P3-18`
 - Durée cible : 3 jours (estimation)
@@ -1922,8 +2027,23 @@ Liste chronologique avec lien vers l'écran concerné ; filtres (action, informa
 
 Inventaire des données (origine, date, statut, usage autorisé), consentements (retrait qui bloque les usages dépendants), **export** des données, **suppression** selon la politique légale (expliquée quand une obligation de conservation l'empêche), appareils connectés, score de complétude (**jamais un score de solvabilité**) ; actions sensibles **réauthentifiées**. Lève le point « droit à l'effacement » resté ouvert en `P5-05`.
 
+**Réalisé (2026-10-14) :**
+- **L'inventaire réutilise `FINANCIAL_TABLES` (P6-02)** — le registre que le contrôle de cohérence lit déjà — plutôt qu'une seconde liste qui aurait pu diverger : pour chaque table, nombre de lignes vivantes, origines, statuts, usages consentis et fenêtre de collecte, lus directement depuis le socle que chaque tâche financière écrit déjà.
+- **Le seul consentement dont le retrait bloque réellement un usage dépendant est le niveau de partage des revenus dans un espace** (P6-13/P6-14/P6-15) : le retirer depuis ce centre appelle la même fonction que le réglage de partage, avec une réauthentification en plus, et bloque aussitôt le partage proportionnel aux revenus (F042/F044) — vérifié par un test qui retire puis constate le blocage.
+- **Export et suppression réauthentifiés** (`utils/reauth.js`, le même contrôle que le changement d'e-mail ou de mot de passe) : l'export télécharge le périmètre FINCLUDIA complet (profil + chaque table de `FINANCIAL_TABLES`, lignes entières, pas seulement les comptes) ; la suppression demande en plus de taper l'adresse e-mail du compte, une seconde preuve différente du mot de passe.
+- **Suppression complète et immédiate, sans branche de conservation** : la décision du client (2026-10-11, `P6-01` point 9) dit qu'aucune durée de conservation n'existe dans cette plateforme — la politique affichée le dit tel quel plutôt que d'inventer une règle à expliquer. Les justificatifs sont effacés avant la ligne du compte (`eraseAccountReceipts`, déjà posé par `P6-04`) ; tout le reste part en cascade depuis `User`. **Lève le point ouvert de `P5-05`** : une suppression de compte en libre-service existe désormais.
+- **Complétude mécanique, jamais un score de solvabilité** : six faits (public choisi, inscription terminée, revenu déclaré, budget créé, objectif créé, textes légaux acceptés), pas un jugement.
+- **« Appareils connectés » honnêtement déclaré indisponible** : l'authentification de cette plateforme est un jeton signé sans état (cookie), il n'existe aucune table de sessions à lire — construire une vraie liste d'appareils est un chantier de suivi de session à part, pas quelque chose que cet écran peut inventer.
+- **Interface** : page `/confiance` (inventaire, complétude, consentements avec retrait réauthentifié, appareils, export, suppression avec double confirmation) ; fr / en / ar.
+
+**Tests :** 11 de sécurité (`tests/security/finTrust.test.js` : isolation entre comptes, export et suppression refusés sans mot de passe, suppression refusée si l'e-mail ne correspond pas, suppression effective et complète, retrait de partage qui bloque effectivement l'usage dépendant, complétude qui progresse avec les déclarations réelles).
+
+**Limites et réserves déclarées :**
+- **Appareils connectés** : fonctionnalité non construite, voir ci-dessus — nécessiterait un suivi de session dédié.
+- **Pas de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
+
 ### P6-20 — FINCLUDIA : recherche globale
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P6-04`, `P6-08`, `P2-08`
 - Durée cible : 2 jours (estimation)
@@ -1931,11 +2051,29 @@ Inventaire des données (origine, date, statut, usage autorisé), consentements 
 
 Une seule barre : écrans, actions, transactions, objectifs, contenus « Apprendre », offres autorisées ; résultats groupés (Actions, Mes données, Objectifs, Apprendre, Explorer) ; recherche lexicale + synonymes configurés, **aucune interprétation générative** ; données privées **strictement cloisonnées** (propriétaire / espace) ; aucun résultat → reformulations et catégories.
 
+**Réalisé (2026-10-14) :**
+- **« Actions » est purement local** (`client/src/config/searchScreens.js`) : une vingtaine d'écrans avec mots-clés, filtrés côté client, instantané, aucun appel réseau — cohérent avec le fait qu'un écran n'est pas une donnée privée.
+- **« Mes données » et « Objectifs » interrogent le serveur**, strictement filtrés par `userId` (`GET /fin/recherche?q=`) : transactions (note, sous-catégorie), budgets, dettes, objectifs personnels — jamais les lignes partagées d'un espace, qui ont leur propre écran et leur propre vérification d'appartenance (`P6-14`) que ce fichier n'a aucune raison de dupliquer.
+- **« Apprendre » réutilise la recherche publique déjà construite** (`P2-08`, `GET /apprendre?query=`) plutôt que de la reconstruire une seconde fois.
+- **Synonymes configurés, dans les deux sens** (`constants/finSearch.js`) : chercher « dette » trouve une note écrite « crédit » et réciproquement — une liste déclarée comme la nôtre (le classeur du client demande des synonymes sans les nommer), à la manière de la liste des moyens de paiement.
+- **Aucune interprétation générative** : chaque résultat vient d'un `contains` littéral sur le texte de la requête ou l'un de ses synonymes déclarés — jamais d'un modèle qui devine une intention.
+- **« Explorer » honnêtement non branché** : le comparateur bancaire et les offres d'emploi existent déjà comme outils publics avec leurs propres règles d'accès ; les fusionner dans cette barre est une connexion à construire délibérément, pas à improviser dans cette tâche — l'API le dit explicitement (`notWiredYet`) plutôt que de renvoyer un tableau vide qui aurait l'air d'un résultat complet.
+- **Interface** : barre dans l'en-tête (visible sur toutes les pages, seulement une fois connecté), panneau groupé par catégorie, aucun résultat → message explicite ; fr / en / ar.
+
+**Tests :** 7 de sécurité (`tests/security/finSearch.test.js` : session requise, isolation entre comptes sur les transactions et les objectifs, correspondance littérale, expansion de synonyme dans les deux sens, requête vide sans résultat, « Explorer » déclaré non branché).
+
+**Limites et réserves déclarées :**
+- **« Explorer » (comparateur bancaire, offres d'emploi) non fusionné** dans cette barre, voir ci-dessus.
+- **Les objectifs et dépenses communs d'un espace** (`P6-15`) ne sont pas cherchés ici : leur visibilité suit l'appartenance à l'espace, une règle que ce fichier ne duplique pas.
+- **Pas de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
+
 ### P6-21 — FINCLUDIA : validation de fin de phase
 - Statut : `❌ todo`
 - Priorité : `🔴 high`
-- Dépendances : `P6-03`, `P6-06`, `P6-07`, `P6-12`, `P6-15`, `P6-16`, `P6-17`, `P6-19`, `P6-20`, `P4-13`, `P4-14`, `P4-15`, `P4-16`, `P3-19`, `P2-10`
+- Dépendances : `P6-03`, `P6-06`, `P6-07`, `P6-12`, `P6-15`, `P6-16`, `P6-17`, `P6-19`, `P6-20`, `P4-13`, `P4-14`, `P4-15`, `P4-16`, `P3-19`
 - Durée cible : 2 jours (estimation)
+
+- Dépendance à `P2-10` retirée le 2026-10-14 : elle n'est pas une réserve en attente du client comme les autres, mais une tâche **abandonnée** par décision du client (2026-10-11, voir `P2-10`) — la laisser dans cette liste bloquerait la clôture de la Phase 6 sur un module que personne ne demande plus. Si elle est un jour reprise, elle sera réévaluée pour cette liste à ce moment-là.
 
 Critères :
 - Les 10 parcours de bout en bout (J01 à J10, onglet `02_Parcours_E2E`) passent en navigateur pour chaque public concerné.
@@ -2045,12 +2183,10 @@ Prochaines tâches réalisables (dépendances satisfaites) :
   - **`P6-18` a un périmètre plus net qu'avant** : les alertes de budget sont déjà affichées in-app par `P6-05` et `P6-06` (ce qui est l'ordre du client, « canal in-app d'abord »), et les rappels J-7 / J-1 de `P6-07` sont **stockés** par récurrence et par provision. Il lui reste le centre de notifications lui-même : liste, quotas, anti-répétition, désactivation par type, canaux e-mail / push.
   - `P1-12` **a rétréci** : ses composants communs sont livrés (voir la note sous la tâche) ; il ne lui reste que la navigation de l'espace connecté et la barre supérieure, qui dépendent de `P6-01`, `P6-18` et `P6-20`.
   - **Ce qui reste volontairement ouvert** et attend le client : la confirmation du référentiel de catégories (`P6-01` point 10), l'échelle du **niveau de confiance** et la liste des **moyens de paiement** — trois listes provisoires, déclarées comme telles dans `constants/finData.js` et `constants/finMoney.js`.
-  - `P2-09 — indice de connaissances financières et passeports` (dépend de `P2-08` ✅) : attention, les **pondérations** de l'indice sont un seuil à valider par le client (`P6-01` point 5) ; l'indice `F052` prend ses poids en argument, donc la mécanique est faisable sans eux, pas la publication d'un score.
-  - `P4-13 — comparateur bancaire, lot D` (dépend de `P4-08` ✅, `P4-12` ✅, `P3-18` ✅) : l'adéquation à l'usage et « Explorer » sont faisables sur les données déjà fournies ; les données **CCP** manquent (`P6-01` point 6) et ne doivent pas être inventées.
 - `P4-14` et `P4-15` attendent les règles de paie et de financement du client ; le reste de la Phase 6 part maintenant de `P6-11` / `P6-13`, puis attend `P6-01` pour ce qui touche aux seuils et aux devises.
 - **Trois listes de données attendues du client bloquent désormais des points précis, pas des tâches entières** : les **instruments et prix de référence** du portefeuille fictif (`P6-12` : l'atelier fonctionne, le « Marché pédagogique » non), les **seuils du profil de risque** (`P6-12` : le score s'affiche, l'étiquette non) et la **politique d'anonymisation** d'un membre retiré d'un espace (`P6-13`).
-- **Deux scores restent délibérément non publiés**, pour la même raison et dans les mêmes termes : l'indice de **connaissances financières** (`F052`, `P2-09`) et l'indice de **santé financière** (`F053`, `P6-06`). Les deux mécanismes existent dans le moteur et prennent leurs pondérations en argument ; ce sont les **poids** que le client doit valider (`P6-01` point 5). Un score est un jugement sur quelqu'un, pas un chiffre qu'il peut vérifier : `P6-06` affiche donc les sous-scores un par un et **dit à l'écran** pourquoi le score global est absent.
-- Le moteur de comparaison de `P4-12` est désormais disponible pour `P4-13` (adéquation à l'usage) et pour tout écran qui doit comparer des options sans produire de classement opaque.
+- **Deux scores restent délibérément non publiés**, pour la même raison et dans les mêmes termes : l'indice de **connaissances financières** (`F052`, `P2-09`) et l'indice de **santé financière** (`F053`, `P6-06`). Les deux mécanismes existent dans le moteur et prennent leurs pondérations en argument ; ce sont les **poids** que le client doit valider (`P6-01` point 5). Un score est un jugement sur quelqu'un, pas un chiffre qu'il peut vérifier : `P6-06` et le passeport (`P2-09`) affichent donc leurs sous-scores un par un et **disent à l'écran** pourquoi le score global est absent.
+- **Mise à jour du 2026-10-14 : `P4-13` et `P2-09` sont faites.** `P4-13` apporte l'adéquation à l'usage bancaire et « Explorer », sur le moteur de comparaison déjà livré par `P4-12` ; `P2-09` apporte l'indice de connaissances (F052, mécanisme bloqué comme F051/F053) et le passeport, en lisant seulement des données d'e-learning déjà réelles (`P2-01` à `P2-05`). Le reste de la Phase 4 FINCLUDIA (`P4-14`, `P4-15`) reste bloqué sur les données du client comme indiqué ci-dessus ; `P6-17` (personnalisation des 8 parcours) devient réalisable, ses quatre dépendances étant maintenant toutes faites.
 
 - Comparateur bancaire et générateur de facture terminés (P4-01, P4-03, P4-06 à P4-08). Reste dans la Phase 4 : `P4-02 — Simulateur de crédit`, **bloqué** sur les règles de calcul du client ; il bloque à son tour la validation de fin de phase `P4-05`, donc la Phase 5.
 

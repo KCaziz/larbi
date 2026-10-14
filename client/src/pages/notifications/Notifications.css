@@ -1,0 +1,156 @@
+/* Notifications and alerts (P6-18). Tokens only, logical properties (RTL). */
+.notifications-page {
+  max-width: 760px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  padding-block-end: 40px;
+}
+
+.notifications-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-block-end: 16px;
+}
+
+.notifications-toolbar select {
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.notifications-plain,
+.notifications-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.notifications-plain:hover,
+.notifications-icon:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.notifications-settings {
+  margin-block-end: 16px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+
+.notifications-settings-list {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.notifications-settings-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+
+.notifications-settings-label {
+  flex: 1;
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.notifications-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.84rem;
+}
+
+.notifications-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.notifications-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.notifications-row-unread {
+  border-inline-start: 3px solid var(--accent);
+  background: var(--accent-bg);
+}
+
+.notifications-dot {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.notifications-dot-securite {
+  background: var(--danger);
+}
+
+.notifications-dot-action {
+  background: var(--warn);
+}
+
+.notifications-dot-information {
+  background: var(--blue);
+}
+
+.notifications-body {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.notifications-text {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-h);
+}
+
+.notifications-date {
+  font-size: 0.78rem;
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
+.notifications-link {
+  flex: 0 0 auto;
+  font-size: 0.84rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.notifications-link:hover {
+  text-decoration: underline;
+}

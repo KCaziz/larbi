@@ -1,0 +1,93 @@
+/* Global search (P6-20). Tokens only, logical properties (RTL). */
+.global-search {
+  position: relative;
+  flex: 0 1 240px;
+  min-inline-size: 160px;
+}
+
+.global-search-box {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-inline: 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.global-search-box input {
+  flex: 1;
+  min-inline-size: 0;
+  height: 36px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+}
+
+.global-search-box input:focus {
+  outline: none;
+}
+
+.global-search-clear {
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  background: none;
+  color: var(--text);
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.global-search-panel {
+  position: absolute;
+  inset-inline-start: 0;
+  top: calc(100% + 6px);
+  z-index: 40;
+  width: min(420px, 90vw);
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
+.global-search-loading {
+  margin: 4px 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.global-search-empty {
+  padding: 8px 4px;
+  font-size: 0.88rem;
+}
+
+.global-search-group {
+  margin-block-end: 10px;
+}
+
+.global-search-group h3 {
+  margin: 0 0 4px;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.global-search-item {
+  display: block;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--text-h);
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.global-search-item:hover {
+  background: var(--accent-bg);
+}

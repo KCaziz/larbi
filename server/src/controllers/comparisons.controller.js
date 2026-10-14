@@ -1,4 +1,5 @@
 import { COMPARISON_CRITERIA, GRADE_MAX, GRADE_MIN, MAX_OPTIONS, MIN_OPTIONS } from '../constants/comparison.js';
+import { BANK_USAGE_CRITERIA } from '../constants/bankUsage.js';
 import { compareOptions, NotComparableError } from '../services/finance/comparison.js';
 import { JOB_OFFER_CRITERIA, compareJobOffers } from '../services/finance/jobOffers.js';
 import { HttpError } from '../utils/httpError.js';
@@ -18,6 +19,7 @@ export function getComparisonMeta(req, res) {
     maxOptions: MAX_OPTIONS,
     gradeScale: { min: GRADE_MIN, max: GRADE_MAX },
     jobOfferCriteria: JOB_OFFER_CRITERIA,
+    bankUsageCriteria: BANK_USAGE_CRITERIA,
   });
 }
 

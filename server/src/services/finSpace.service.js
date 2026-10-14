@@ -32,6 +32,7 @@ import {
 } from '../constants/finSpace.js';
 import { HttpError } from '../utils/httpError.js';
 import { recordChange } from './finChange.service.js';
+import { createNotification } from './finNotification.service.js';
 
 export const SPACE_ENTITY = 'space';
 export const MEMBERSHIP_ENTITY = 'membership';
@@ -270,11 +271,11 @@ export async function updateMySharing(prisma, userId, spaceId, sharing) {
   const me = await ownMembership(prisma, userId, spaceId);
   const before = normaliseSharing(me.sharing);
   const after = normaliseSharing({ ...before, ...sharing });
+  const changedKinds = SHAREABLE_KINDS.filter((kind) => before[kind] !== after[kind]);
 
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const row = await tx.finSpaceMember.update({ where: { id: me.id }, data: { sharing: after }, select: MEMBER_SELECT });
-    for (const kind of SHAREABLE_KINDS) {
-      if (before[kind] === after[kind]) continue;
+    for (const kind of changedKinds) {
       await recordChange(tx, {
         userId,
         entity: MEMBERSHIP_ENTITY,
@@ -287,6 +288,23 @@ export async function updateMySharing(prisma, userId, spaceId, sharing) {
     }
     return { ...row, sharing: normaliseSharing(row.sharing) };
   });
+
+  // P6-18: « notification à chaque changement de partage », to the OTHER
+  // live members — never to the one who just made the change.
+  if (changedKinds.length > 0) {
+    const others = await prisma.finSpaceMember.findMany({ where: { spaceId, userId: { not: userId }, leftAt: null }, select: { userId: true } });
+    for (const other of others) {
+      await createNotification(prisma, other.userId, {
+        type: 'sharing_changed',
+        params: { kinds: changedKinds },
+        link: `/espaces`,
+        referenceId: `${me.id}:${changedKinds.join(',')}:${Date.now()}`,
+        dedupeBy: 'reference',
+      });
+    }
+  }
+
+  return result;
 }
 
 export async function setMemberRole(prisma, userId, spaceId, memberId, role) {

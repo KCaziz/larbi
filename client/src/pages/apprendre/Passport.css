@@ -1,0 +1,83 @@
+/* Passeport de connaissances (P2-09). Tokens only; the sheet is printable. */
+.passport-wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+}
+
+.passport-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.passport-sheet h2 {
+  margin: 28px 0 10px;
+}
+
+.passport-global-note {
+  margin: 10px 0 0;
+  color: var(--text);
+  font-size: 0.88rem;
+}
+
+.passport-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.passport-list > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.passport-date {
+  margin-inline-start: auto;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.passport-cert-link {
+  font-size: 0.85rem;
+}
+
+.passport-formation-title {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.passport-next-steps > li {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.passport-next-steps ul {
+  margin: 6px 0 0;
+  padding-inline-start: 18px;
+}
+
+@media print {
+  .site-header,
+  .site-footer,
+  .passport-actions .btn,
+  .notice {
+    display: none !important;
+  }
+
+  .passport-wrap {
+    max-width: none;
+    padding: 0;
+  }
+}
