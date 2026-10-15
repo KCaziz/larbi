@@ -32,7 +32,7 @@ export default function Header() {
   };
 
   return (
-    <header className="site-header">
+    <header className={`site-header${user?.role === 'admin' ? ' site-header-admin' : ''}`}>
       <div className="site-header-inner">
         <Link to="/" className="brand" onClick={closeMenu}>
           <span className="brand-mark" aria-hidden="true">

@@ -33,6 +33,13 @@ export const updateFormationSchema = z
     certificationEnabled: z.boolean(),
     certificationTitle: optionalText(150),
     certificationDescription: optionalText(1000),
+    // Suggested to this account type first (simple suggestion, no score —
+    // client's own wording). Shape only: each slug is checked against the
+    // account categories that currently exist by the controller (P3-15).
+    targetAccountTypes: z
+      .array(z.string().trim().min(1).max(60))
+      .max(20)
+      .transform((types) => [...new Set(types)]),
   })
   .partial()
   .strict();

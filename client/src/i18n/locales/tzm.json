@@ -1,3 +1,639 @@
 {
-  "_comment": "Tamazight is registered as a selectable language (see i18n/index.js and LanguageSwitcher) but intentionally not translated yet, per instruction: every key falls back to French (fallbackLng) until real Tamazight content is provided."
+  "_comment": "Tamazight (tacawit n Lezzayer, asagna n latin), afrustaq amezwaru: iswiren n unegzum, uslig, asekles, agzul, tifernatin n umiḍan FINCLUDIA. Isekkilen ur nettwasegzi ara ṭṭfen deg tfransist (fallbackLng) — ur d-yettas wara war-asekles ɣer useqdac.",
+  "common": {
+    "brand": "FINCLUDIA"
+  },
+  "accountTypes": {
+    "autoEntrepreneur": "Amsenfaṛ udmawan",
+    "pme": "Taladna meẓẓiyen",
+    "pmi": "Tasnulfut meẓẓiyen",
+    "standard": "Amagnu",
+    "premium": "Premium"
+  },
+  "nav": {
+    "home": "Agejdan",
+    "formations": "Isegman",
+    "tools": "Ifecka",
+    "blog": "Ablug",
+    "services": "Ameẓlu",
+    "about": "Ɣef-aɣ",
+    "contact": "Anermis",
+    "faq": "Isteqsiyen",
+    "login": "Qqen",
+    "register": "Jerred",
+    "legalNotice": "Tisura n destur",
+    "privacy": "Tasertit n tbaḥrit",
+    "menuOpen": "Ldi umuɣ",
+    "menuClose": "Mdel umuɣ",
+    "accountNav": "Unegzum n umiḍan",
+    "main": "Unegzum agejdan",
+    "account": "Amiḍan-iw",
+    "logout": "Ffeɣ",
+    "admin": "Anezgar",
+    "verifyCertificate": "Sentem aselkim",
+    "apprendre": "Issin",
+    "money": "Idrimen-iw",
+    "budget": "Abidjit",
+    "goals": "Ayen yettwaswel",
+    "reserve": "Tiɣriɣ",
+    "debts": "Idayunen",
+    "calendar": "Awrilag",
+    "today": "Ass-a",
+    "wealth": "Ayla",
+    "paper": "Alemmad",
+    "spaces": "D waṭas",
+    "funding": "Aswel i umsefrak",
+    "notifications": "Allagen",
+    "trust": "Laman d yisefka",
+    "passport": "Taskirt n tmusni"
+  },
+  "footer": {
+    "copyright": "© {{year}} {{brand}}. Akk izerfan ttwaḥerzen.",
+    "tagline": "Isegman, ablug d ifecka n umahil i wid yesɛan taladna d wid yesɛan amsenfaṛ.",
+    "social": "Izerfan n lmental",
+    "columns": {
+      "platform": "Asestay",
+      "company": "Taladna",
+      "info": "Talɣut"
+    }
+  },
+  "theme": {
+    "toggleToLight": "Err ɣer wudem aceɛlal",
+    "toggleToDark": "Err ɣer wudem aberkan"
+  },
+  "language": {
+    "label": "Tutlayt"
+  },
+  "home": {
+    "hero": {
+      "title": "Ansuf-ik/ikem ɣer FINCLUDIA",
+      "body": "Isegman srid, ablug, ifecka n umahil d uḍfar n tnekra, meṛṛa deg usestay-nniḍen, s wadeg yemmedwel i yal aɣawas.",
+      "ctaFormations": "Issin isegman",
+      "ctaTools": "Wali ifecka",
+      "badge": "Isegman · Ablug · Ifecka"
+    },
+    "featuresSectionTitle": "Ayen i d-yettak usestay",
+    "features": {
+      "elearning": {
+        "title": "Aselmed srid",
+        "body": "Isegman yettwaswin s uslugen, s uḍfar n tnekra-k akked uselkim mi ara tfakked aseglem.",
+        "cta": "Issin ugar"
+      },
+      "blog": {
+        "title": "Ablug & isegman wezzilen",
+        "body": "Imagraden akked yisegman wezzilen yeldi i medden, kra n wufrinen ttwaḥerzen i yimiḍanen premium.",
+        "cta": "Ɣeṛ ablug"
+      },
+      "tools": {
+        "title": "Ifecka n umahil",
+        "body": "Amsefrak n userti akked umsirew n tfaturin, i wid yesɛan amsenfaṛ udmawan, taladna meẓẓiyen d tesnulfutin meẓẓiyen.",
+        "cta": "Wali ifecka"
+      }
+    },
+    "accounts": {
+      "title": "Amiḍan yemmedwel i wudem-ik/ikem",
+      "body": "Yal amiḍan yeqqen ɣer taggayt d yiwet n tsarut n unekcum, i d-yettekkan deg wayen i tzemreḍ ad taweḍ.",
+      "cta": "Wali talqayt n unekcum s yal aɣawas"
+    },
+    "featuresSectionSubtitle": "Tlata n iferdisen i yemyemmaɣen, s yiwen umiḍan kan.",
+    "stats": {
+      "multilingual": {
+        "title": "Aṭas n tutlayin",
+        "text": "Tafransist, Taglizit akked Taɛrabt (RTL)"
+      },
+      "themes": {
+        "title": "Aceɛlal & aberkan",
+        "text": "Fren udem i k-yehwan"
+      },
+      "security": {
+        "title": "Anekcum iḥerzen",
+        "text": "Anekcum-ik yettwasenqed yal tikkelt"
+      },
+      "certification": {
+        "title": "Aselkim",
+        "text": "Yettunefk mi ara yemmed useglem"
+      }
+    },
+    "steps": {
+      "title": "Amek i yetteddu",
+      "subtitle": "Tlata n yisurifen, seg usejrid ɣer uselkim.",
+      "items": [
+        {
+          "title": "Sqadem amiḍan-ik/ikem",
+          "body": "Fren taggayt-ik: amsenfaṛ udmawan, taladna meẓẓiyen neɣ tasnulfut meẓẓiyen."
+        },
+        {
+          "title": "Issin asestay",
+          "body": "Kcem ɣer yisegman, ablug d ifecka s tsarut-ik n unekcum."
+        },
+        {
+          "title": "Ẓiḍ taswiɛt-ik/ikem",
+          "body": "Ḍfer tanekra-k/kem u awi-d aselkim-ik/ikem."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Theggiḍ ad tebduḍ?",
+      "body": "Jerred ɣer usestay u kcem ɣer wufrinen yemmedwel i wudem-ik/ikem."
+    }
+  },
+  "about": {
+    "title": "Ɣef-aɣ",
+    "intro": "FINCLUDIA tjemmeɛ deg yiwet n usestay isegman srid, ablug n yisegman wezzilen d ifecka n umahil i wid yesɛan amsenfaṛ (amsenfaṛ udmawan, taladna meẓẓiyen, tasnulfut meẓẓiyen).",
+    "approachTitle": "Tarrayt-nneɣ",
+    "approachBody": "Yal aseglem yettwaswin s uslugen, s uḍfar n tnekra akked uselkim yettunefken mi ara ttwaḥqeqen akk tsurfatin. Ufrinen n ablug llan i medden, kra ttwaḥerzen i yimiḍanen premium s wudem n useqdac.",
+    "securityTitle": "Taraɣelt d tbaḥrit",
+    "securityBody": "Ammesten n yimiḍanen d yifrinen (tividyutin, tugniwin, isemyazalen) d amenzu: yal anekcum yettwasenqed, ufrinen iḥerzen werɛad i d-ttbanen war turagt.",
+    "values": {
+      "title": "Lɛahed-nneɣ",
+      "items": [
+        {
+          "title": "Anekcum yettwaḥerzen",
+          "body": "Yal anekcum ɣer wufrin iḥerzen yettwasenqed."
+        },
+        {
+          "title": "Ufrinen yettwaḥerzen",
+          "body": "Tividyutin, tugniwin d isemyazalen ur d-ttbanen ara war asentem."
+        },
+        {
+          "title": "Tanekra teddfer",
+          "body": "Tanekra-k teskels aseglem s useglem."
+        },
+        {
+          "title": "Aselkim yettwattkel",
+          "body": "Aselkim ur yettunefk ara alamma teṛuḥ meṛṛa tsurfatin."
+        }
+      ]
+    }
+  },
+  "services": {
+    "title": "Ameẓluyen & ufrinen",
+    "intro": "Tlata n iferdisen imeqqranen, s unekcum yemmedwel ɣer waɣawas-ik d tsarut n unekcum (amagnu neɣ premium).",
+    "formations": {
+      "title": "Isegman",
+      "body": "Isurifen yettwaswin s uslugen, uḍfar n tnekra d uselkim di tagara n useglem. Anekcum s usejrid.",
+      "cta": "Wali isegman"
+    },
+    "blog": {
+      "title": "Ablug & isegman wezzilen",
+      "body": "Imagraden i medden, s ufrinen premium i d-ttunefken s wudem n uɣawas-ik.",
+      "cta": "Ɣeṛ ablug"
+    },
+    "tools": {
+      "title": "Ifecka n umahil",
+      "body": "Amsefrak n userti d umsirew n tfaturin PDF/Excel. Anekcum s usejrid d tsarut-ik.",
+      "cta": "Wali ifecka"
+    },
+    "detailCta": "Wali talqayt n unekcum s yal aɣawas",
+    "compareTitle": "Anekcum anta s waɣawas-ik?",
+    "compareBody": "Wali talqayt n unekcum s yal aɣawas d tsarut n unekcum."
+  },
+  "faq": {
+    "title": "Isteqsiyen yettuɣalen",
+    "items": [
+      {
+        "question": "Anwa aɣawasen n yimiḍanen i yellan?",
+        "answer": "Asestay yesɛa aṭas n yiɣawasen (amsenfaṛ udmawan, taladna meẓẓiyen, tasnulfut meẓẓiyen, akked wiyaḍ ara d-ttwarnun), s tsarut n unekcum amagnu neɣ premium s waɣawas-ik."
+      },
+      {
+        "question": "Anta tagara gar umiḍan amagnu d umiḍan premium?",
+        "answer": "Tsarut n umiḍan-ik i d-yettekkan deg ufrinen i izmer ad taweḍ: kra n yimagraden, isegman neɣ ifecka zemren ad ḥerzen i yimiḍanen premium."
+      },
+      {
+        "question": "Ablug yeldi i medden war amiḍan?",
+        "answer": "Ih, ablug yeldi i medden. Isegman d ifecka sṭaqen aqqen, u ṭṭfen deg izerfan-ik n unekcum."
+      },
+      {
+        "question": "Amek yetteddu uselkim n yisegman?",
+        "answer": "Aselkim yettunefk kan mi ara ttwaḥqeqen akk tsurfatin n useglem n useɣẓef."
+      },
+      {
+        "question": "Ufrinen-iw d yisefka-w ḥerzen?",
+        "answer": "Anekcum ɣer yifrinen iḥerzen (tividyutin, tugniwin, isemyazalen) yettwasenqed yal tikkelt. Ulac afus web izemren ad yeḥbes akk tudert n ufrin i d-ttbanen, maca asestay yesnerni s waṭas timmad n uweqqer n uḍfar n usɣunfu."
+      }
+    ],
+    "subtitle": "Tiririyin ɣef yisteqsiyen yettuɣalen ɣef yimiḍanen, unekcum d uselkim.",
+    "cta": {
+      "title": "Asteqsi-nniḍen?",
+      "body": "Aru-aɣ-d s uslig n unermis.",
+      "button": "Nermes-aɣ"
+    }
+  },
+  "contact": {
+    "title": "Anermis",
+    "intro": "Asteqsi ɣef yisegman, ablug neɣ ifecka? Aru-aɣ-d s uslig n wadda.",
+    "notice": "Tansayin-nneɣ ad d-ttwasnernint deqs. Alamma dayen, uslig n wadda yettaweḍ-aɣ-d s uṣuḍen.",
+    "form": {
+      "name": "Isem",
+      "email": "Imayl",
+      "message": "Izen",
+      "submit": "Azen"
+    },
+    "errors": {
+      "required": "Ttxil-k ačaṛ akk ifernaten."
+    },
+    "status": {
+      "sent": "Tanemmirt, izen-ik yettwaskels akken iwata."
+    },
+    "asideTitle": "Asteqsi?",
+    "formTitle": "Azen-aɣ-d izen"
+  },
+  "features": {
+    "title": "Tirmitin yettwanekmen",
+    "intro": "Anekcum ɣer yal aferdis yeqqen ɣer wuma n usejrid, u i kra n yifrinen, ɣer tsarut n umiḍan-ik (amagnu neɣ premium).",
+    "table": {
+      "domain": "Aferdis",
+      "visitor": "Azayer",
+      "standard": "Amiḍan amagnu",
+      "premium": "Amiḍan premium",
+      "open": "Yeldi",
+      "locked": "Yeḥbes"
+    },
+    "domains": {
+      "blog": "Ablug & isegman wezzilen",
+      "formations": "Isegman",
+      "tools": "Ifecka",
+      "premium": "Ufrinen premium"
+    },
+    "footNote": "Afran-a yesmekti-d anekcum yeldin s waɣawas n umiḍan-ik."
+  },
+  "formationsPresentation": {
+    "title": "Isegman",
+    "body": "Yal aseglem yebna s uṭas n yisurifen. Tanekra-k teddfer s usurif s useglem, aselkim yettunefk-ak mi ara ttwaḥqeqen akk tsurfatin.",
+    "accessNote": "Anekcum ɣer yisegman yeḥwaǧ asejrid u yeqqen ɣer izerfan-ik.",
+    "notice": "Qqen akken ad twaliḍ tajertilt u ad tjerrdeḍ: anekcum i yal aseglem yeqqen ɣer tsarut-ik (amagnu neɣ premium).",
+    "subtitle": "Isurifen yettwaswin, s uḍfar n tnekra d uselkim.",
+    "flow": {
+      "title": "Abrid n useglem",
+      "items": [
+        {
+          "title": "Isurifen",
+          "body": "Yal aseglem yebna s uṭas n yisurifen."
+        },
+        {
+          "title": "Tanekra teddfer",
+          "body": "Tanekra-k teskels s usurif."
+        },
+        {
+          "title": "Aselkim",
+          "body": "Yettunefk mi ara ttwaḥqeqen akk tsurfatin."
+        }
+      ]
+    },
+    "cta": "Kcem ɣer tajertilt"
+  },
+  "toolsPresentation": {
+    "title": "Ifecka",
+    "intro": "Ifecka n umahil ara k-yeǧǧen yal ass:",
+    "comparator": {
+      "title": "Amsefrak n tbanketin",
+      "body": "Senqed tiɣawsiwin n tbanketin n 13 n tbanketin tizzayriyin: aɣlif n userti, takarḍa, asekkar, userti akked waṭas-nniḍen."
+    },
+    "credit": {
+      "title": "Amsefrak n userti",
+      "body": "Alqaḍ n userti ara d-tawiḍ, s waɣawas-ik amsefrak akked tɣawsiwin n tbanketin."
+    },
+    "invoice": {
+      "title": "Amsirew n tfaturin",
+      "body": "Asnulfu n tfaturin (amsaɣ, amsekcem, aferdis/ameẓlu, timeẓriwin) s usifeḍ PDF akked Excel."
+    },
+    "accessNote": "Amsefrak n tbanketin d yimsefraken anekcum-nsen yeldi. Amsirew n tfaturin yeḥwaǧ amiḍan.",
+    "notice": "Amsefrak n userti ad yili deqs.",
+    "simulators": {
+      "title": "Imsefraken",
+      "body": "Abidjit, asekkar, ayen yettwaswel, aẓawan: asiḥsab yettwabeyyen, yal amḍan isbeyyen tanaḍt-ines."
+    },
+    "jobOffers": {
+      "title": "Senqed ufrinen n umahil",
+      "body": "Agar n userti: tirbaḥin, ufrinen ara yettwaḥsaben, aɛemmer, učči d wakud n userwal, ɣef sin neɣ tlata n yifrinen."
+    },
+    "workshop": {
+      "title": "Amezgun n usfaylu",
+      "body": "Akk imsefraken deg yiwen wadeg, s yimedyaten, askels n usfaylu akked usegti n yisfuyla."
+    },
+    "explorer": {
+      "title": "Snirem",
+      "body": "Nadi afrin s uḥwaǧ, anaw neɣ tabanka deg yisefka yeldin n umsefrak. Yeḥbes i wid yesɛan 18 iseggasen d asawen, yeḥwaǧ amiḍan."
+    }
+  },
+  "blogList": {
+    "title": "Ablug",
+    "intro": "Imagraden d yiselmaden i wid yesɛan amsenfaṛ d taladna.",
+    "searchLabel": "Nadi amagrad",
+    "searchPlaceholder": "Nadi amagrad…",
+    "searchButton": "Nadi",
+    "clear": "Sfeḍ asizdeg",
+    "categories": "Taggayin",
+    "tags": "Awalen srid",
+    "resultCount_one": "{{count}} amagrad",
+    "resultCount_other": "{{count}} imagraden",
+    "emptyTitle": "Ulac amagrad akka tura",
+    "emptyBody": "Imagraden imezwura ad d-asen deqs.",
+    "noResultsTitle": "Ulac amagrad i d-yemmeslayen",
+    "noResultsBody": "Ɛreḍ awalen-nniḍen neɣ kkes asizdeg.",
+    "loadError": "D awezɣi ad d-ttwalint imagraden.",
+    "readingTime": "{{count}} n tesdatin n tɣuri",
+    "pagination": "Isfuyla",
+    "previous": "Uɣur",
+    "next": "Ɣer zdat",
+    "page": "Asebter {{page}} seg {{pages}}",
+    "premiumBadge": "Premium",
+    "forYou": "I waɣawas-ik",
+    "forYouIntro": "Imagraden i yettwafernen s waɣawas n umiḍan-ik.",
+    "availableIn": "Tutlayin yellan i wammud-a"
+  },
+  "article": {
+    "label": "Amagrad",
+    "back": "Uɣal ɣer ablug",
+    "notFoundTitle": "Amagrad ulac-it",
+    "notFoundBody": "Amagrad-a ulac-it neɣ ur d-yettban ara.",
+    "loadError": "D awezɣi ad d-ttwali amagrad-a.",
+    "by": "S {{name}}",
+    "publishedOn": "Yettwaẓreg ass n {{date}}",
+    "related": "Ɣer daɣen",
+    "files": "Isemyazalen n umagrad",
+    "download": "Sider",
+    "videoLabel": "Tividyu: {{name}}",
+    "tagsLabel": "Awalen srid",
+    "lock": {
+      "title": "Amagrad-a yeḥbes i yimiḍanen premium",
+      "loginBody": "Qqen s umiḍan premium akken ad tɣeṛeḍ ugar.",
+      "premiumBody": "Amiḍan-ik d amagnu. Ɛreḍ ɣer premium akken ad tɣeṛeḍ amagrad-a.",
+      "login": "Qqen",
+      "register": "Sqadem amiḍan",
+      "upgrade": "Wali anekcum premium"
+    }
+  },
+  "legal": {
+    "title": "Tisura n destur",
+    "notice": "Talɣut n destur ddaw-a ad d-tettuɛemmer deqs.",
+    "editorTitle": "Amesbaḍu n usmel",
+    "fields": {
+      "companyName": "Isem n taladna",
+      "legalForm": "Taɣara n destur",
+      "siret": "SIRET",
+      "address": "Tansa n unejmuɛ",
+      "publisher": "Anezzur n uẓerg",
+      "contact": "Anermis"
+    },
+    "hostingTitle": "Asestan",
+    "hostingField": "Amsestan",
+    "toComplete": "[ad d-yettwaɛemmer]",
+    "toCompleteShort": "[ad d-yettwaɛemmer]",
+    "toCompleteHosting": "[ad d-yettwaɛemmer]",
+    "subtitle": "Talɣut n destur n umesbaḍu d usestan n usmel."
+  },
+  "privacy": {
+    "title": "Tasertit n tbaḥrit",
+    "notice": "Tasertit-a ad tettuɛemmer deqs (akud n uḥraz, imsesteynen, anermis n umesbaḍu n ummesten n yisefka). Iqenninen ddaw-a ttwaselken ass-a.",
+    "dataTitle": "Isefka yettwajemɛen",
+    "dataBody": "Asestay yesnerni isefka udmawanen i d-ttwajmeɛen ɣer wayen i yeḥwaǧ s tidet asefrek n yimiḍanen, aḍfar n yisegman d useqdec n ifecka.",
+    "securityTitle": "Taraɣelt n yimiḍanen d yifrinen",
+    "securityBody": "Anekcum ɣer yimiḍanen, isegman, ufrinen premium d yisemyazalen iḥerzen (tividyutin, tugniwin, isemyazalen) yettwasenqed yal tikkelt, s waɣawas n umiḍan-ik d izerfan-ik.",
+    "rightsTitle": "Izerfan-ik",
+    "rightsContact": "Anermis i useqdec n izerfan-ik",
+    "toComplete": "[ad d-yettwaɛemmer]",
+    "subtitle": "Amek asestay yesnerni u yeḥarez isefka-k udmawanen."
+  },
+  "auth": {
+    "login": {
+      "title": "Asejrid",
+      "intro": "Kcem ɣer yisegman-ik, ifecka d yifrinen premium.",
+      "emailLabel": "Imayl",
+      "passwordLabel": "Awal uffir",
+      "submit": "Qqen",
+      "forgot": "Ttuḍ awal uffir?",
+      "createAccount": "Sqadem amiḍan",
+      "errorRequired": "Ttxil-k ačaṛ imayl-ik d wawal uffir-ik.",
+      "invalidCredentials": "Imayl neɣ awal uffir d arameɣtu."
+    },
+    "register": {
+      "title": "Sqadem amiḍan",
+      "intro": "Fren taggayt i d-yemmeslayen ɣef urmud-ik.",
+      "nameLabel": "Isem",
+      "emailLabel": "Imayl",
+      "passwordLabel": "Awal uffir",
+      "accountTypeLabel": "Anaw n umiḍan",
+      "submit": "Sqadem amiḍan-iw",
+      "alreadyAccount": "Tesɛiḍ yakan amiḍan?",
+      "login": "Qqen",
+      "errorRequired": "Ttxil-k ačaṛ akk ifernaten.",
+      "emailTaken": "Amiḍan yella yakan s imayl-a.",
+      "passwordHint": "8 n isekkilen ɣef tazwara.",
+      "errorPasswordShort": "Awal uffir ilaq ad yesɛu ma drus 8 n isekkilen.",
+      "accountTypesError": "D awezɣi ad d-ttwalint ianawen n yimiḍanen."
+    },
+    "forgot": {
+      "title": "Ttuḍ awal uffir",
+      "intro": "Sken-d imayl-ik akken ad twaliḍ awsil n usenselket.",
+      "emailLabel": "Imayl",
+      "submit": "Azen awsil",
+      "backToLogin": "Uɣal ɣer usejrid",
+      "errorRequired": "Ttxil-k sken-d imayl-ik.",
+      "notWired": "Asenselket s imayl ulac-it dɣa: yeḥwaǧ ameẓlu n uzen n yimaylen, werɛad yettwaxtaṛ.",
+      "notice": "Taẓuri d tarmidt: ulac imayl ara yettazenen alamma ameẓlu n uzen werɛad yettusbadu."
+    },
+    "panel": {
+      "title": "Adeg-ik udmawan",
+      "points": [
+        "Isegman, aḍfar n tnekra d uselkim",
+        "Ifecka n umahil: amsefrak n userti d usirew n tfaturin",
+        "Ufrinen yemmedwelen i waɣawas-ik d tsarut-ik n unekcum"
+      ]
+    }
+  },
+  "account": {
+    "nav": {
+      "profile": "Amaḍal-ik",
+      "dashboard": "Tafelwit n usefrek",
+      "type": "Anaw n umiḍan",
+      "premium": "Ufrinen premium",
+      "formations": "Isegman-iw",
+      "certificates": "Iselkimen",
+      "payments": "Isirwen-iw",
+      "fincludia": "FINCLUDIA",
+      "categories": "Taggayin-iw",
+      "onboarding": "Isurifen imezwura"
+    },
+    "profile": {
+      "title": "Amaḍal-ik",
+      "intro": "Talɣut-ik udmawant.",
+      "fields": {
+        "name": "Isem",
+        "email": "Imayl",
+        "accountType": "Anaw n umiḍan",
+        "accessLevel": "Tsarut n unekcum"
+      },
+      "edit": {
+        "title": "Beddel talɣut-iw",
+        "save": "Sekles",
+        "saved": "Talɣut-ik tettwaskels.",
+        "required": "Ttxil-k ačaṛ akk ifernaten.",
+        "currentPassword": "Awal uffir ass-a",
+        "emailHint": "Yeḥwaǧit akken ad tbeddleḍ tansa-k n imayl, yettwasqedcen i usejrid.",
+        "passwordNeeded": "Sken-d awal uffir-ik ass-a akken ad tbeddleḍ imayl.",
+        "wrongPassword": "Awal uffir ass-a d arameɣtu.",
+        "emailTaken": "Tansa-a n imayl tettwasqedec yakan."
+      },
+      "password": {
+        "title": "Beddel awal uffir-iw",
+        "new": "Awal uffir amaynut",
+        "hint": "8 n isekkilen ɣef tazwara.",
+        "confirm": "Sentem awal uffir amaynut",
+        "save": "Beddel awal uffir",
+        "saved": "Awal uffir-ik yettwabeddel.",
+        "tooShort": "Awal uffir amaynut ilaq ad yesɛu ma drus 8 n isekkilen.",
+        "mismatch": "Isekkilen n wawal uffir ur mṣadan ara."
+      }
+    },
+    "dashboard": {
+      "title": "Tafelwit n usefrek",
+      "intro": "Taẓri tamatut n urmud-ik n uselmed.",
+      "widgets": {
+        "coursesInProgress": "Isegman deg uddawal",
+        "certificates": "Iselkimen i d-yettwawin",
+        "recentArticles": "Imagraden i d-teɣriḍ melmi kan"
+      },
+      "editProfile": "Beddel amaḍal",
+      "myFormations": "Isegman-iw",
+      "myCertificates": "Iselkimen-iw",
+      "seeAll": "Wali akk",
+      "forYourProfile": "I waɣawas-ik",
+      "latestArticles": "Imagraden imaynuten",
+      "tools": "Ifecka",
+      "toolsIntro": "Amsefrak n userti, amsirew n tfaturin… ifecka n umahil ad d-asen.",
+      "toolsLink": "Wali ifecka"
+    },
+    "type": {
+      "title": "Anaw n umiḍan",
+      "intro": "Taggayt-ik i d-yettekkan deg kra n yifrinen i izmer ad taweḍ (amsenfaṛ udmawan, taladna meẓẓiyen neɣ tasnulfut meẓẓiyen).",
+      "categoryLabel": "Taggayt",
+      "save": "Sekles",
+      "saved": "Anaw n umiḍan yettwaleqqem."
+    },
+    "premium": {
+      "title": "Ufrinen premium",
+      "intro": "Kra n yimagraden, isegman neɣ ifecka ḥerzen i yimiḍanen premium. Atan amek ara d-bannen i umiḍan ur neseɛ ara anekcum:",
+      "lockedTitle": "Afrin iḥerzen i yimiḍanen premium",
+      "lockedBody": "Ɛreḍ ɣer umiḍan premium akken ad teldiḍ afrin-a.",
+      "footNote": "Wagi d amezwer kan: anekcum n tidet yettwasenqed yal tikkelt.",
+      "activeTitle": "Amiḍan premium ikti.",
+      "activeBody": "Amiḍan-ik yesɛa anekcum ɣer yifrinen premium. Ufrinen iḥerzen d-ttbanen deg ablug d yisegman."
+    },
+    "title": "Adeg-iw",
+    "subtitle": "Amaḍal, tafelwit n usefrek, anaw n umiḍan d yifrinen premium.",
+    "fin": {
+      "title": "Amaḍal-iw n FINCLUDIA",
+      "intro": "Fren aɣawas i k-yemmeslayen ugar: wagi ad yessemdiwel turmit n FINCLUDIA i d-ttunefken, war ma yesserreḥ-ak ara i lebda. Tzemreḍ ad d-tiniḍ « ur ssineɣ ara » u ad d-tuɣaleḍ ticki.",
+      "publicLabel": "Aɣawas-ik agejdan",
+      "publicHint": "Yiwen aɣawas agejdan kan di yal takkelt. Tzemreḍ ad t-tbeddleḍ ticki: yal abeddel iqqim-d d ubeyyen ddaw-a, deg umazray-ik.",
+      "notSure": "Ur ssineɣ ara / ticki",
+      "secondaryLabel": "Tiriẓyin niḍen (ara ma tḥwaǧeḍ)",
+      "ageLabel": "Taggayt n leɛmer",
+      "situationLabel": "Addad-ik",
+      "intentionLabel": "Lebɣi-k agejdan",
+      "horizonLabel": "Lmedda-k",
+      "consentIntro": "Send ad nkemmel, sin n yiferdisen ilaq ad ten-tqebleḍ:",
+      "consentPrivacy": "Isefka-k idrimanen weḥd-sen i umiḍan-ik, ur ttwaɣren ara s useqdac-nniḍen war tsentem-ik s wudem ibeyyen. Akkes n umiḍan yesfeḍ isefka-k s wudem yemmedin u ur yettuɣal ara.",
+      "consentNoAdvice": "FINCLUDIA tessken-d asiḥsab d yiberdan ara tesnadiḍ, maca ur d-tettak ara ameslay n idrimen yettwasbadun ne d laɛahed n uṭaweḍ: yal amḍan isbeyyen tanaḍt-ines d wayen i wumi yebna, sentem akked umahil send yal tadwilt.",
+      "consentAccept": "Ɣriɣ u qebleɣ sin-a n yiferdisen.",
+      "save": "Sekles",
+      "saved": "Amaḍal yettwaskels.",
+      "consentRequired": "Ilaq ad tqebleḍ sin n yiferdisen ddaw-a send asekles.",
+      "transitionsTitle": "Amazray n ubeddel n uɣawas",
+      "transitionLine": "{{date}}: {{from}} → {{to}}",
+      "footNote": "FINCLUDIA tettwabna akka tura: aɣawas-a yessemdiwel yakan turmit i d-ttunefken, maca aṭas n yisebtar i t-yeqqnen ad d-asen s wudem adiwan.",
+      "publics": [
+        {
+          "code": "LYC",
+          "label": "Anelmad n unadi — FINCLUDIA Zdat"
+        },
+        {
+          "code": "ETU",
+          "label": "Anelmad — FINCLUDIA Campus"
+        },
+        {
+          "code": "JAC",
+          "label": "Amaẓlan amaynut — FINCLUDIA Aɣrud Amenzu"
+        },
+        {
+          "code": "SAL",
+          "label": "Amaẓlan — FINCLUDIA Idrimen-iw"
+        },
+        {
+          "code": "COL",
+          "label": "Amsidak n ukuẓin — FINCLUDIA Akuẓin"
+        },
+        {
+          "code": "COU",
+          "label": "Imyugaren — FINCLUDIA Imyugaren"
+        },
+        {
+          "code": "FAM",
+          "label": "Twacult — FINCLUDIA Twacult"
+        },
+        {
+          "code": "EPG",
+          "label": "Amsekkar amaynut — FINCLUDIA Asekkar & Asefrak"
+        }
+      ],
+      "ageRanges": [
+        {
+          "code": "under18",
+          "label": "Drus n 18 iseggasen"
+        },
+        {
+          "code": "18-24",
+          "label": "18 ɣer 24 n iseggasen"
+        },
+        {
+          "code": "25-34",
+          "label": "25 ɣer 34 n iseggasen"
+        },
+        {
+          "code": "35-49",
+          "label": "35 ɣer 49 n iseggasen"
+        },
+        {
+          "code": "50-64",
+          "label": "50 ɣer 64 n iseggasen"
+        },
+        {
+          "code": "65plus",
+          "label": "65 n iseggasen d asawen"
+        }
+      ]
+    }
+  },
+  "notFound": {
+    "code": "Tuccḍa 404",
+    "title": "Asebter ulac-it",
+    "body": "Asebter i tnadiḍ ulac-it neɣ yettwasnekkel.",
+    "back": "Uɣal ɣer ugejdan"
+  },
+  "errorPage": {
+    "code": "Tuccḍa",
+    "title": "Tella-d tuccḍa ur nettwasenqer ara",
+    "body": "Ttxil-k ɛreḍ tikkelt-nniḍen. Ma tuccḍa teqqim, nermes amesselken."
+  },
+  "errors": {
+    "network": "D awezɣi anermes aqeddac. Senqed azday-ik u ɛreḍ tikkelt-nniḍen.",
+    "invalid": "Kra n talɣut d tarameɣtut. Senqed tajertilt.",
+    "tooMany": "Aṭas n tirmitin. Ɛreḍ ticki daɣen deg kra n tesdatin.",
+    "generic": "Tella-d tuccḍa. Ɛreḍ ticki daɣen.",
+    "forbidden": "Ulac anekcum-ik ɣer usebter-a.",
+    "notFound": "Aferdis ulac-it.",
+    "fileTooLarge": "Afaylu-a meqqer aṭas.",
+    "fileUnsupported": "Anaw-a n ufaylu ur yettwaqbal ara."
+  },
+  "state": {
+    "loading": "Asali…",
+    "sending": "Azen deg uddawal…",
+    "retry": "Ɛreḍ tikkelt-nniḍen",
+    "loadError": "D awezɣi ad d-ttwalint isefka.",
+    "sessionError": "D awezɣi asentem n tɣimit-ik: aqeddac ur d-yettarra ara."
+  },
+  "forbidden": {
+    "title": "Anekcum yugi"
+  }
 }

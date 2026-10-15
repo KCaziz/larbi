@@ -2,21 +2,19 @@ import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   BookOpenText,
-  Building2,
+  Briefcase,
   Calculator,
-  Factory,
   GraduationCap,
   Languages,
   Layers,
   Newspaper,
   ShieldCheck,
-  Sprout,
-  Star,
-  UserRound,
+  Users,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../components/ui/Button.jsx';
 import Section from '../components/ui/Section.jsx';
+import Reveal from '../components/ui/Reveal.jsx';
 import './Pages.css';
 
 const stats = [
@@ -32,17 +30,17 @@ const features = [
   { key: 'tools', icon: Calculator, tone: 'tone-brass', to: '/outils' },
 ];
 
-const accountPills = [
-  { key: 'autoEntrepreneur', icon: UserRound, tone: 'tone-primary' },
-  { key: 'pme', icon: Building2, tone: 'tone-blue' },
-  { key: 'pmi', icon: Factory, tone: 'tone-brass' },
-  { key: 'standard', icon: Sprout, tone: 'tone-green' },
-  { key: 'premium', icon: Star, tone: 'tone-clay' },
-];
+// Two FINCLUDIA solutions (client positioning, 2026-10): FINCLUDIA Particulier
+// (the 8 personal journeys, P3-18) and FINCLUDIA Entreprise (the pre-existing
+// auto-entrepreneur / PME / PMI categories). The 8 journey labels are read
+// from `account.fin.publics` — the exact list the profile form already uses
+// — rather than re-typed here, so the two can never drift apart.
+const businessTypes = ['autoEntrepreneur', 'pme', 'pmi'];
 
 export default function HomePage() {
   const { t } = useTranslation();
   const steps = t('home.steps.items', { returnObjects: true });
+  const publics = t('account.fin.publics', { returnObjects: true });
 
   return (
     <>
@@ -63,10 +61,10 @@ export default function HomePage() {
           </div>
 
           <ul className="hero-index">
-            {features.map((feature) => {
+            {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <li key={feature.key} className={feature.tone}>
+                <Reveal as="li" key={feature.key} className={feature.tone} delay={index * 80}>
                   <Link to={feature.to}>
                     <span className="icon-badge" aria-hidden="true">
                       <Icon size={22} strokeWidth={1.6} />
@@ -74,7 +72,7 @@ export default function HomePage() {
                     <span className="hero-index-title">{t(`home.features.${feature.key}.title`)}</span>
                     <ArrowRight className="arrow icon-dir" size={18} strokeWidth={1.75} aria-hidden="true" />
                   </Link>
-                </li>
+                </Reveal>
               );
             })}
           </ul>
@@ -83,16 +81,16 @@ export default function HomePage() {
 
       <div className="stats">
         <div className="stats-grid">
-          {stats.map((stat) => {
+          {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <div className={`stat ${stat.tone}`} key={stat.key}>
+              <Reveal as="div" className={`stat ${stat.tone}`} key={stat.key} delay={index * 60}>
                 <Icon className="stat-icon" size={22} strokeWidth={1.6} aria-hidden="true" />
                 <div>
                   <strong>{t(`home.stats.${stat.key}.title`)}</strong>
                   <span className="stat-text">{t(`home.stats.${stat.key}.text`)}</span>
                 </div>
-              </div>
+              </Reveal>
             );
           })}
         </div>
@@ -103,10 +101,10 @@ export default function HomePage() {
         subtitle={t('home.featuresSectionSubtitle')}
       >
         <div className="feature-grid">
-          {features.map((feature) => {
+          {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <article className={`feature-card ${feature.tone}`} key={feature.key}>
+              <Reveal as="article" className={`feature-card ${feature.tone}`} key={feature.key} delay={index * 80}>
                 <span className="icon-badge" aria-hidden="true">
                   <Icon size={22} strokeWidth={1.6} />
                 </span>
@@ -115,7 +113,7 @@ export default function HomePage() {
                 <Button to={feature.to} variant="ghost" arrow>
                   {t(`home.features.${feature.key}.cta`)}
                 </Button>
-              </article>
+              </Reveal>
             );
           })}
         </div>
@@ -124,28 +122,54 @@ export default function HomePage() {
       <Section alt title={t('home.steps.title')} subtitle={t('home.steps.subtitle')}>
         <div className="steps">
           {steps.map((step, index) => (
-            <div className="step" key={step.title}>
+            <Reveal as="div" className="step" key={step.title} delay={index * 100}>
               <div className="step-number">{String(index + 1).padStart(2, '0')}</div>
               <h3>{step.title}</h3>
               <p>{step.body}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </Section>
 
       <Section title={t('home.accounts.title')} subtitle={t('home.accounts.body')}>
-        <div className="pill-grid">
-          {accountPills.map((pill) => {
-            const Icon = pill.icon;
-            return (
-              <div className={`pill ${pill.tone}`} key={pill.key}>
-                <Icon className="pill-icon" size={20} strokeWidth={1.6} aria-hidden="true" />
-                {t(`accountTypes.${pill.key}`)}
-              </div>
-            );
-          })}
+        <div className="offers-grid">
+          <Reveal as="article" className="offer-card">
+            <span className="icon-badge tone-primary" aria-hidden="true">
+              <Users size={22} strokeWidth={1.6} />
+            </span>
+            <h3>{t('home.accounts.individual.title')}</h3>
+            <p>{t('home.accounts.individual.body')}</p>
+            <div className="offer-chips">
+              {publics.map((p) => (
+                <span className="offer-chip" key={p.code}>
+                  {p.label}
+                </span>
+              ))}
+            </div>
+            <Button to="/compte/fincludia" variant="ghost" arrow>
+              {t('home.accounts.individual.cta')}
+            </Button>
+          </Reveal>
+
+          <Reveal as="article" className="offer-card" delay={100}>
+            <span className="icon-badge tone-brass" aria-hidden="true">
+              <Briefcase size={22} strokeWidth={1.6} />
+            </span>
+            <h3>{t('home.accounts.business.title')}</h3>
+            <p>{t('home.accounts.business.body')}</p>
+            <div className="offer-chips">
+              {businessTypes.map((key) => (
+                <span className="offer-chip" key={key}>
+                  {t(`accountTypes.${key}`)}
+                </span>
+              ))}
+            </div>
+            <Button to="/compte/type" variant="ghost" arrow>
+              {t('home.accounts.business.cta')}
+            </Button>
+          </Reveal>
         </div>
-        <Button to="/fonctionnalites" variant="ghost" arrow>
+        <Button to="/fonctionnalites" variant="ghost" arrow className="mt-lg">
           {t('home.accounts.cta')}
         </Button>
       </Section>

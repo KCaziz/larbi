@@ -1,21 +1,20 @@
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useApi } from '../../lib/useApi.js';
 import './AccountNav.css';
 
-// The navigation of the connected space (P6-17).
+// The navigation of the account/settings area (P6-17 follow-up): profile,
+// formations, certificates, account type, payments, the FINCLUDIA profile
+// form and the onboarding/categories screens. These stay in frame — the
+// `<Outlet/>` of AccountLayout swaps between them without ever leaving this
+// nav bar.
 //
-// The FINCLUDIA entries are filtered by the journey map of the caller's public
-// (the client's tab `19_Cartes_Parcours`, served by `GET /fin/parcours`): a
-// lycéen has no debt and no patrimony entry, because the client says so.
-//
-// This is a CONVENIENCE, never the protection. The routes behind the
-// adults-only screens are guarded by `requireAdult` on the server, so a hidden
-// entry and a refused request are two independent statements of the same rule —
-// and the one that matters is the server's.
-//
-// Account entries (/compte/*) are not part of a journey: they are the account
-// itself, and everybody has one.
+// The FINCLUDIA screens (today, money, budget, goals…) used to be mixed into
+// this SAME list, even though clicking one of them left this area entirely
+// (a different layout, no nav bar, no way back) — exactly the inconsistency
+// reported: some entries stayed "in place", others silently redirected. They
+// now live in their own persistent nav (`JourneyNav.jsx`), and the one link
+// below ("Retour à FINCLUDIA") is the explicit, always-available way back —
+// the equivalent of JourneyNav's own trailing "Mon compte" entry.
 const accountLinks = [
   { labelKey: 'account.nav.profile', to: '/compte/profil' },
   { labelKey: 'account.nav.dashboard', to: '/compte/tableau-de-bord' },
@@ -29,50 +28,22 @@ const accountLinks = [
   { labelKey: 'account.nav.categories', to: '/compte/categories' },
 ];
 
-// The FINCLUDIA screens, each tied to the route the journey map speaks about.
-const journeyLinks = [
-  { labelKey: 'nav.today', to: '/aujourdhui' },
-  { labelKey: 'nav.money', to: '/mon-argent' },
-  { labelKey: 'nav.budget', to: '/budget' },
-  { labelKey: 'nav.goals', to: '/objectifs' },
-  { labelKey: 'nav.reserve', to: '/reserve' },
-  { labelKey: 'nav.debts', to: '/dettes' },
-  { labelKey: 'nav.wealth', to: '/patrimoine' },
-  { labelKey: 'nav.funding', to: '/financement' },
-  { labelKey: 'nav.calendar', to: '/calendrier' },
-  { labelKey: 'nav.paper', to: '/portefeuille' },
-  { labelKey: 'nav.spaces', to: '/espaces' },
-  { labelKey: 'nav.notifications', to: '/notifications' },
-  { labelKey: 'nav.trust', to: '/confiance' },
-  { labelKey: 'nav.passport', to: '/passeport' },
-];
-
 export default function AccountNav() {
   const { t } = useTranslation();
-  const journey = useApi('/fin/parcours');
-
-  // While the map is loading, or if it cannot be read, every entry is shown.
-  // Hiding entries on a failed request would make a network hiccup look like a
-  // smaller product — and the server refuses what must be refused anyway.
-  const allowed = journey.data
-    ? new Set(journey.data.ecrans.filter((screen) => screen.autorise && screen.to).map((screen) => screen.to))
-    : null;
-
-  const links = [
-    ...accountLinks,
-    ...journeyLinks.filter((link) => allowed === null || allowed.has(link.to)),
-  ];
 
   return (
     <nav className="account-nav" aria-label={t('nav.accountNav')}>
       <ul>
-        {links.map((link) => (
+        {accountLinks.map((link) => (
           <li key={link.to}>
             <NavLink to={link.to} className={({ isActive }) => (isActive ? 'active' : undefined)}>
               {t(link.labelKey)}
             </NavLink>
           </li>
         ))}
+        <li className="account-nav-sep">
+          <NavLink to="/aujourdhui">{t('account.nav.backToFincludia')}</NavLink>
+        </li>
       </ul>
     </nav>
   );

@@ -4,6 +4,7 @@ import RequireAuth from '../components/auth/RequireAuth.jsx';
 import MaintenanceGate from '../components/auth/MaintenanceGate.jsx';
 import MainLayout from '../layouts/MainLayout.jsx';
 import AccountLayout from '../layouts/AccountLayout.jsx';
+import FinLayout from '../layouts/FinLayout.jsx';
 import HomePage from '../pages/HomePage.jsx';
 import AboutPage from '../pages/AboutPage.jsx';
 import ServicesPage from '../pages/ServicesPage.jsx';
@@ -93,41 +94,51 @@ export const router = createBrowserRouter([
                 path: 'catalogue/:slug/certificat',
                 lazy: lazyPage(() => import('../pages/learn/CertificatePage.jsx')),
               },
-              // FINCLUDIA "Aujourd'hui" home screen and dashboards per public
-              // (P6-06), screens C04 / LY02 / ET02 / JA02 / SA02.
-              { path: 'aujourdhui', lazy: lazyPage(() => import('../pages/aujourdhui/TodayPage.jsx')) },
-              // FINCLUDIA "Mon argent" (P6-04): synthesis, entry and history.
-              { path: 'mon-argent', lazy: lazyPage(() => import('../pages/argent/MyMoneyPage.jsx')) },
-              // FINCLUDIA budgets and envelopes (P6-05), screens C06 / JA03 / JA04.
-              { path: 'budget', lazy: lazyPage(() => import('../pages/budget/BudgetsPage.jsx')) },
-              { path: 'budget/:id', lazy: lazyPage(() => import('../pages/budget/BudgetDetailPage.jsx')) },
-              // FINCLUDIA financial goals (P6-08), screens C09-C11.
-              { path: 'objectifs', lazy: lazyPage(() => import('../pages/goals/GoalsPage.jsx')) },
-              // FINCLUDIA debts (P6-10), screens C13-C14.
-              { path: 'dettes', lazy: lazyPage(() => import('../pages/debts/DebtsPage.jsx')) },
-              // FINCLUDIA funding readiness (P6-16), screens JA08 / SA05.
-              { path: 'financement', lazy: lazyPage(() => import('../pages/funding/FundingReadinessPage.jsx')) },
-              // FINCLUDIA notifications and alerts (P6-18), screen C24.
-              { path: 'notifications', lazy: lazyPage(() => import('../pages/notifications/NotificationsPage.jsx')) },
-              // FINCLUDIA trust and data centre (P6-19), screen C25.
-              { path: 'confiance', lazy: lazyPage(() => import('../pages/trust/TrustCenterPage.jsx')) },
-              // Passeport de connaissances financières (P2-09), écrans LY11/LY12/ET09.
-              { path: 'passeport', lazy: lazyPage(() => import('../pages/apprendre/PassportPage.jsx')) },
-              // FINCLUDIA safety reserve (P6-09), screen C12.
-              { path: 'reserve', lazy: lazyPage(() => import('../pages/reserve/ReservePage.jsx')) },
-              // FINCLUDIA real patrimony (P6-11), screens C16 / JA07.
-              { path: 'patrimoine', lazy: lazyPage(() => import('../pages/patrimoine/WealthPage.jsx')) },
-              // FINCLUDIA paper portfolio and investment workshop (P6-12),
-              // screens C17 / EP03-EP07.
-              { path: 'portefeuille', lazy: lazyPage(() => import('../pages/portefeuille/PaperPortfolioPage.jsx')) },
-              // FINCLUDIA shared spaces (P6-13), screens P01 / P04 / CO01 /
-              // CP01 / FA01.
-              { path: 'espaces', lazy: lazyPage(() => import('../pages/espaces/SpacesPage.jsx')) },
-              // FINCLUDIA financial calendar and recurring expenses (P6-07),
-              // screens C23 / SA03 / SA04.
-              { path: 'calendrier', lazy: lazyPage(() => import('../pages/calendrier/CalendarPage.jsx')) },
               // Where the payment provider sends the buyer back (P3-09): reads the order, grants nothing.
               { path: 'paiement/retour', lazy: lazyPage(() => import('../pages/payments/PaymentReturnPage.jsx')) },
+              {
+                // The FINCLUDIA screens share one persistent nav (JourneyNav,
+                // P6-17 follow-up) instead of each being a one-off page with
+                // no way back — this is what used to make "Mon argent",
+                // "Aujourd'hui" etc. feel like they threw the person out of
+                // the app when clicked from the account menu.
+                element: <FinLayout />,
+                children: [
+                  // FINCLUDIA "Aujourd'hui" home screen and dashboards per public
+                  // (P6-06), screens C04 / LY02 / ET02 / JA02 / SA02.
+                  { path: 'aujourdhui', lazy: lazyPage(() => import('../pages/aujourdhui/TodayPage.jsx')) },
+                  // FINCLUDIA "Mon argent" (P6-04): synthesis, entry and history.
+                  { path: 'mon-argent', lazy: lazyPage(() => import('../pages/argent/MyMoneyPage.jsx')) },
+                  // FINCLUDIA budgets and envelopes (P6-05), screens C06 / JA03 / JA04.
+                  { path: 'budget', lazy: lazyPage(() => import('../pages/budget/BudgetsPage.jsx')) },
+                  { path: 'budget/:id', lazy: lazyPage(() => import('../pages/budget/BudgetDetailPage.jsx')) },
+                  // FINCLUDIA financial goals (P6-08), screens C09-C11.
+                  { path: 'objectifs', lazy: lazyPage(() => import('../pages/goals/GoalsPage.jsx')) },
+                  // FINCLUDIA debts (P6-10), screens C13-C14.
+                  { path: 'dettes', lazy: lazyPage(() => import('../pages/debts/DebtsPage.jsx')) },
+                  // FINCLUDIA funding readiness (P6-16), screens JA08 / SA05.
+                  { path: 'financement', lazy: lazyPage(() => import('../pages/funding/FundingReadinessPage.jsx')) },
+                  // FINCLUDIA notifications and alerts (P6-18), screen C24.
+                  { path: 'notifications', lazy: lazyPage(() => import('../pages/notifications/NotificationsPage.jsx')) },
+                  // FINCLUDIA trust and data centre (P6-19), screen C25.
+                  { path: 'confiance', lazy: lazyPage(() => import('../pages/trust/TrustCenterPage.jsx')) },
+                  // Passeport de connaissances financières (P2-09), écrans LY11/LY12/ET09.
+                  { path: 'passeport', lazy: lazyPage(() => import('../pages/apprendre/PassportPage.jsx')) },
+                  // FINCLUDIA safety reserve (P6-09), screen C12.
+                  { path: 'reserve', lazy: lazyPage(() => import('../pages/reserve/ReservePage.jsx')) },
+                  // FINCLUDIA real patrimony (P6-11), screens C16 / JA07.
+                  { path: 'patrimoine', lazy: lazyPage(() => import('../pages/patrimoine/WealthPage.jsx')) },
+                  // FINCLUDIA paper portfolio and investment workshop (P6-12),
+                  // screens C17 / EP03-EP07.
+                  { path: 'portefeuille', lazy: lazyPage(() => import('../pages/portefeuille/PaperPortfolioPage.jsx')) },
+                  // FINCLUDIA shared spaces (P6-13), screens P01 / P04 / CO01 /
+                  // CP01 / FA01.
+                  { path: 'espaces', lazy: lazyPage(() => import('../pages/espaces/SpacesPage.jsx')) },
+                  // FINCLUDIA financial calendar and recurring expenses (P6-07),
+                  // screens C23 / SA03 / SA04.
+                  { path: 'calendrier', lazy: lazyPage(() => import('../pages/calendrier/CalendarPage.jsx')) },
+                ],
+              },
               {
                 path: 'compte',
                 element: <AccountLayout />,

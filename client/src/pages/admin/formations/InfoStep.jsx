@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api, errorKey } from '../../../lib/api.js';
+import { accountTypeLabel, useAccountTypes } from '../../../lib/accountTypes.js';
 import Button from '../../../components/ui/Button.jsx';
 import Field from '../../../components/cms/Field.jsx';
 import ImageField from '../../../components/cms/ImageField.jsx';
@@ -9,6 +10,7 @@ import LinesInput from '../../../components/cms/LinesInput.jsx';
 
 export default function InfoStep({ draft, setField, titleError, formation, categories, onCategoryCreated, onChanged }) {
   const { t } = useTranslation();
+  const accountTypes = useAccountTypes();
   const [newCategory, setNewCategory] = useState(null); // null = closed, string = name being typed
   const [categoryError, setCategoryError] = useState(null);
   const [coverError, setCoverError] = useState(null);
@@ -140,6 +142,26 @@ export default function InfoStep({ draft, setField, titleError, formation, categ
           <option value="premium">{t('admin.info.accessPremium')}</option>
         </select>
       </Field>
+
+      <fieldset className="cms-fieldset">
+        <legend>{t('admin.info.audience')}</legend>
+        <small className="form-hint">{t('admin.info.audienceHint')}</small>
+        {accountTypes.types.map((type) => (
+          <label key={type.value} className="cms-check">
+            <input
+              type="checkbox"
+              checked={draft.targetAccountTypes.includes(type.value)}
+              onChange={(e) =>
+                setField(
+                  'targetAccountTypes',
+                  e.target.checked ? [...draft.targetAccountTypes, type.value] : draft.targetAccountTypes.filter((v) => v !== type.value),
+                )
+              }
+            />
+            {accountTypeLabel(type)}
+          </label>
+        ))}
+      </fieldset>
 
       <div className="form-field cms-field">
         <span className="cms-label" id="f-cover-label">

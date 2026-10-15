@@ -10,12 +10,12 @@
 .site-header-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 5px;
+  padding: 0 16px;
   height: var(--header-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 5px;
+  gap: 10px;
 }
 
 .brand {
@@ -129,10 +129,71 @@
   font-size: 0.85rem;
 }
 
+/* Admins have one more button (Administration) than everyone else, on the
+   same single fixed-height row (search, language, theme, admin, account,
+   logout): past a point that extra button has nowhere to go and starts
+   overlapping its neighbours instead of wrapping (the row's height is fixed
+   to keep the sticky header and the mobile dropdown's offsets correct). The
+   fix is to switch THIS row to the mobile dropdown a little earlier than
+   everyone else, before it runs out of room, rather than letting it collide. */
+@media (max-width: 1460px) {
+  .site-header-admin .menu-toggle {
+    display: flex;
+  }
+
+  .site-header-admin .nav-panel {
+    position: absolute;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    padding: 16px 20px 24px;
+    display: none;
+  }
+
+  .site-header-admin .nav-panel.open {
+    display: flex;
+  }
+
+  .site-header-admin .header-controls {
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .site-header-admin .auth-actions {
+    width: 100%;
+    margin: 8px 0 0;
+    flex-direction: column;
+  }
+
+  .site-header-admin .auth-actions .btn {
+    width: 100%;
+  }
+}
+
 /* Admins have one more button: on desktop "My account" shows its icon only
-   (tooltip + accessible name stay), the full label appears in the mobile menu. */
+   (tooltip + accessible name stay), the full label appears in the mobile menu.
+   Scoped to each row's OWN desktop range, since the admin row switches to the
+   dropdown earlier (1460px) than everyone else's (1341px) — the label must
+   stay visible once it is inside that dropdown, in both cases. */
 @media (min-width: 1341px) {
-  .auth-actions .btn-collapse .btn-label {
+  .site-header:not(.site-header-admin) .auth-actions .btn-collapse .btn-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 1461px) {
+  .site-header-admin .auth-actions .btn-collapse .btn-label {
     position: absolute;
     width: 1px;
     height: 1px;

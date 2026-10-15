@@ -36,3 +36,16 @@
   border-bottom-color: var(--accent);
   color: var(--text-h);
 }
+
+/* The one link that crosses into the OTHER area (account <-> FINCLUDIA
+   screens): visually set apart with a left divider, so it reads as "leaves
+   here" rather than another tab of the same group. */
+.account-nav-sep {
+  margin-inline-start: 8px;
+  padding-inline-start: 12px;
+  border-inline-start: 1px solid var(--border);
+}
+
+.journey-nav {
+  margin-bottom: 24px;
+}

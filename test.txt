@@ -1,2 +1,11 @@
-- top bar incompréhensible contenu se superpose en mode admin
-- 
+- top bar en mode admin totalement incompréhensible le contenu contenu se superpose 
+- ajouter la langue tamazight 
+- le client m'a dit que l'on doit rendre la landing page je cite "dynamique" esseye de mettre du mouvement (n'ajoute surtout pas l'effet que t'adore de changement de mots c de la merde)
+- les infos sur la landing page sont erronée car elle parle de juste pme pmi et auto entreprenneur alors que comme tu sais on a ajouter d'autre parcours 
+- aussi comme infos la sollution va etre couper en deux (theoriquement pour le moment) on includia pour particulier avec les 8 parcours que tu a ajouter puis on a fincludia entreprise pour les pme pmi et auto entreprenneur
+- le client m'a indiquer qu'on devais suggerer des formations (certif) en fonction du type de compte (car il y'a un truc a calculer si le client fait une formation ou non )
+- la page Mon profil FINCLUDIA est nul pas centrer les champs dépasse du cadre et il ne soint pas alligner
+- la bar de navigation dans le compte n'est pas ergonomique repense a comment améliorer l'xp user pour la navigation dans son espace
+- aussi certaine catégorie (mon-argent, aujord'hui, budget, objectifs, calendrier) nous sortent carrement de la navigation entre les section et nous emmene vers une page dedier je ne suis pas contre mais il faut etre coherent soit c'est un index qui nous emmene vers d'autre page soit c'est une navigation entre section mais l'on est pas rediriger tu comprend aussi si c'est mieux de changer de page ajoute un boutton retour
+- j'ai remarquer que beaucoup de bouttons et de petite rebrique sont coller a d'autre ellement ajoute du margin quand c'est le cas
+- bref de maniére gobale améliore l'ergonomie et l'xp user surtout sur la navigation et la clareter des ecrans repense ton systémes 
