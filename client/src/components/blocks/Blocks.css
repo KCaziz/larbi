@@ -169,7 +169,7 @@
   padding-inline-start: 18px;
   border-inline-start: 3px solid var(--accent-border);
   color: var(--text-h);
-  font-family: var(--serif);
+  font-family: var(--display);
   font-size: 1.2rem;
   font-style: italic;
 }

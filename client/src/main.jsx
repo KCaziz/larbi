@@ -1,9 +1,14 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import '@fontsource-variable/fraunces'
-import '@fontsource/ibm-plex-sans/400.css'
-import '@fontsource/ibm-plex-sans/500.css'
-import '@fontsource/ibm-plex-sans/600.css'
+// Typographies de la charte officielle (P1-13) : Sora pour les titres, Inter
+// pour le contenu et les données. Auto-hébergées via npm, jamais depuis un CDN
+// tiers : la règle de P1-11 est qu'aucune adresse IP de visiteur ne parte vers
+// un tiers pour afficher une police.
+//
+// IBM Plex Sans Arabic reste chargée, et ce n'est pas un reste : ni Sora ni
+// Inter ne couvrent l'alphabet arabe.
+import '@fontsource-variable/sora'
+import '@fontsource-variable/inter'
 import '@fontsource/ibm-plex-sans-arabic/400.css'
 import '@fontsource/ibm-plex-sans-arabic/500.css'
 import '@fontsource/ibm-plex-sans-arabic/600.css'

@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, LogOut, Menu, UserRound, X } from 'lucide-react';
+import { LayoutDashboard, LifeBuoy, LogOut, Menu, UserRound, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth.js';
 import Navigation from './Navigation.jsx';
 import GlobalSearch from './GlobalSearch.jsx';
+import NotificationBell from './NotificationBell.jsx';
+import { ASSISTANT_OPEN_EVENT } from '../../lib/finControls.js';
 import Button from '../ui/Button.jsx';
 import ThemeToggle from '../ui/ThemeToggle.jsx';
 import LanguageSwitcher from '../ui/LanguageSwitcher.jsx';
 import { mainNavLinks } from '../../config/navigation.js';
+import brandMark from '../../assets/brand/fincludia-mark.png';
 import './Header.css';
 
 export default function Header() {
@@ -19,6 +22,13 @@ export default function Header() {
   const navigate = useNavigate();
 
   const closeMenu = () => setMenuOpen(false);
+
+  // The assistant is a floating panel, not a page: the bar asks for it rather
+  // than navigating to it (see <ChatbotWidget>).
+  const openAssistant = () => {
+    closeMenu();
+    document.dispatchEvent(new CustomEvent(ASSISTANT_OPEN_EVENT));
+  };
 
   const handleLogout = async () => {
     setLogoutFailed(false);
@@ -34,10 +44,12 @@ export default function Header() {
   return (
     <header className="site-header">
       <div className="site-header-inner">
+        {/* La marque officielle de la charte (P1-13), à la place de la lettre
+            « L » héritée de l'ancien nom. L'image est décorative : le nom est
+            déjà écrit à côté en texte, donc un `alt` le répéterait pour un
+            lecteur d'écran. */}
         <Link to="/" className="brand" onClick={closeMenu}>
-          <span className="brand-mark" aria-hidden="true">
-            L
-          </span>
+          <img src={brandMark} className="brand-mark" alt="" aria-hidden="true" width="32" height="32" />
           {t('common.brand')}
         </Link>
 
@@ -58,8 +70,23 @@ export default function Header() {
             <LanguageSwitcher />
             <ThemeToggle />
             {status === 'authenticated' && <GlobalSearch />}
+            {/* The top bar the client specifies (P1-12): global search
+                (P6-20), notifications (P6-18), help / assistant (P3-19) and
+                the profile. The assistant also floats on every screen as a
+                bubble (P3-07); the bar entry is for the people who look for
+                help in the bar, which is where the client put it. */}
+            {status === 'authenticated' && <NotificationBell />}
             {status === 'authenticated' && (
               <div className="auth-actions">
+                <Button
+                  variant="secondary"
+                  className="btn-collapse"
+                  title={t('nav.assistant')}
+                  onClick={openAssistant}
+                >
+                  <LifeBuoy size={16} strokeWidth={1.75} aria-hidden="true" />
+                  <span className="btn-label">{t('nav.assistant')}</span>
+                </Button>
                 {user?.role === 'admin' && (
                   <Button to="/admin" variant="secondary" onClick={closeMenu}>
                     <LayoutDashboard size={16} strokeWidth={1.75} aria-hidden="true" />

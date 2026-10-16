@@ -1,0 +1,196 @@
+/* Espace entreprise (P7-02). Propriétés logiques partout (RTL), aucun sens
+   porté par la couleur seule : chaque état de document porte aussi son mot. */
+
+.business-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 20px 56px;
+}
+
+.business-page section {
+  margin-block-start: 32px;
+}
+
+.business-page h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+}
+
+/* ---- formulaires ------------------------------------------------------- */
+
+.business-form {
+  margin-block-end: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+
+.business-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-block-end: 12px;
+}
+
+.business-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.business-form input,
+.business-form select {
+  padding: 8px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.92rem;
+}
+
+.business-create {
+  max-width: 540px;
+}
+
+.business-create h2 {
+  margin-block-start: 0;
+}
+
+.business-payment {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+  margin-block: 12px 0;
+  padding: 10px 12px;
+  background: var(--surface);
+}
+
+/* ---- documents --------------------------------------------------------- */
+
+.business-documents,
+.business-late,
+.business-blocked {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.business-document {
+  margin-block-end: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-inline-start: 4px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+/* L'état est écrit en toutes lettres dans la carte ; le liseré ne fait que le
+   répéter pour l'œil qui balaie. */
+.business-document-unpaid {
+  border-inline-start-color: var(--warn);
+}
+
+.business-document-partial {
+  border-inline-start-color: var(--blue);
+}
+
+.business-document-paid {
+  border-inline-start-color: var(--green);
+}
+
+.business-document-overpaid {
+  border-inline-start-color: var(--danger);
+}
+
+.business-document-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.business-document-state {
+  margin-inline-start: auto;
+  padding: 2px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.business-document-amounts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-block-start: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.business-document-outstanding {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.business-document-warning {
+  margin: 8px 0 0;
+  color: var(--warn);
+  font-size: 0.82rem;
+}
+
+/* ---- retards ----------------------------------------------------------- */
+
+.business-late li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 0;
+  border-block-end: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.business-late-amount {
+  margin-inline-start: auto;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.business-late-due {
+  color: var(--text);
+}
+
+/* ---- états non produits ------------------------------------------------ */
+
+.business-blocked-intro {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.business-blocked li {
+  display: grid;
+  gap: 2px;
+  padding: 10px 0;
+  border-block-end: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+
+.business-blocked strong {
+  color: var(--text-h);
+}
+
+.business-blocked span {
+  color: var(--text);
+}
+
+.business-empty {
+  color: var(--text);
+  font-size: 0.92rem;
+}

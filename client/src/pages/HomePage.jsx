@@ -50,7 +50,13 @@ export default function HomePage() {
         <div className="hero-inner">
           <div className="hero-copy">
             <span className="eyebrow">{t('home.hero.badge')}</span>
+            {/* Le titre est la signature officielle de la charte (P1-13), et
+                le paragraphe son positionnement, mot pour mot. Ni l'un ni
+                l'autre n'est une formule rédigée ici : ce sont des éléments de
+                marque, et les réécrire reviendrait à changer le discours du
+                client. */}
             <h1>{t('home.hero.title')}</h1>
+            <p className="hero-signature">{t('home.hero.signature')}</p>
             <p>{t('home.hero.body')}</p>
             <div className="hero-actions">
               <Button to="/formations" variant="primary" className="btn-lg" arrow>

@@ -1,0 +1,35 @@
+/* The bell of the top bar (P1-12). Logical properties so the badge sits on the
+   outer corner in Arabic too. */
+
+.notif-bell {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  text-decoration: none;
+}
+
+.notif-bell:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.notif-bell-count {
+  position: absolute;
+  inset-block-start: -6px;
+  inset-inline-end: -6px;
+  min-width: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}

@@ -42,7 +42,7 @@ export const SCREEN_ROUTES = {
   C23: { label: 'Calendrier financier', to: '/calendrier', task: 'P6-07' },
   C24: { label: 'Centre de notifications', to: '/notifications', task: 'P6-18' },
   C25: { label: 'Centre de confiance & données', to: '/confiance', task: 'P6-19' },
-  C26: { label: 'Chatbot simple FINCLUDIA', to: '/assistant-fincludia', task: 'P3-19' },
+  C26: { label: 'Chatbot simple FINCLUDIA', to: null, task: 'P3-19', note: "bulle d'assistant présente sur toutes les pages, ouverte aussi depuis la barre supérieure : pas une route" },
   CO01: { label: 'Créer une colocation', to: '/espaces', task: 'P6-13' },
   CO02: { label: 'Tableau de bord colocation', to: '/espaces', task: 'P6-15' },
   CO03: { label: 'Factures & abonnements communs', to: '/espaces', task: 'P6-15' },

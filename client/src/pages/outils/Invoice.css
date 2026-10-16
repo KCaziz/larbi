@@ -20,7 +20,7 @@
 
 .invoice-block legend {
   padding-inline: 6px;
-  font-family: var(--serif);
+  font-family: var(--display);
   font-size: 1.15rem;
   color: var(--text-h);
 }

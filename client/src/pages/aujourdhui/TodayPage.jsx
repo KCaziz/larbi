@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, CalendarClock, Clock, Compass, Target } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarClock, Compass, Target } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
@@ -8,6 +8,8 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
+import DataQualityBanner from '../../components/fincludia/DataQualityBanner.jsx';
+import NextActionCard from '../../components/fincludia/NextActionCard.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Today.css';
 
@@ -35,14 +37,10 @@ export default function TodayPage() {
     <>
       <PageHeader icon={Compass} title={t('today.title')} subtitle={t(`today.dashboards.${view.titre}`, t('today.intro'))} />
       <div className="today-page">
-        {/* The client's « bannière de qualité »: a fact about the figures, not a
-            scolding. Shown only when the data really is old. */}
-        {view.qualite?.stale && (
-          <p className="today-quality" role="status">
-            <Clock size={15} aria-hidden="true" />
-            {t('today.staleData', { days: view.qualite.age.resultat })}
-          </p>
-        )}
+        {/* The client's « bannière de qualité » (P1-12), now the shared
+            component: a fact about the figures, not a scolding, and shown only
+            when the data really is old. */}
+        <DataQualityBanner quality={view.qualite} />
 
         {view.periode && (
           <p className="today-period">
@@ -56,16 +54,24 @@ export default function TodayPage() {
         {view.actions.length > 0 && (
           <section aria-labelledby="today-actions">
             <h2 id="today-actions">{t('today.actionsTitle')}</h2>
-            <ul className="today-actions">
-              {view.actions.map((action) => (
-                <li key={action.key} className={`today-action today-action-${action.priority}`}>
-                  <Link to={action.to}>
-                    <span className="today-action-label">{t(`today.actions.${action.key}`, action.contexte ?? {})}</span>
-                    <ArrowRight size={16} aria-hidden="true" className="icon-dir" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {/* The first one is THE next action, and the client gives it its
+                own card: the reason, the impact, one button, « Pourquoi ? ».
+                The server has already ordered them, so "first" is its answer
+                and not a choice made here. The others stay a plain list —
+                three cards of equal weight would be three next actions. */}
+            <NextActionCard action={view.actions[0]} />
+            {view.actions.length > 1 && (
+              <ul className="today-actions">
+                {view.actions.slice(1).map((action) => (
+                  <li key={action.key} className={`today-action today-action-${action.priority}`}>
+                    <Link to={action.to}>
+                      <span className="today-action-label">{t(`today.actions.${action.key}`, action.contexte ?? {})}</span>
+                      <ArrowRight size={16} aria-hidden="true" className="icon-dir" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
         )}
 

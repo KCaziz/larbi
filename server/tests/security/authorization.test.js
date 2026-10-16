@@ -53,6 +53,20 @@ const PUBLIC = new Set([
   // ajoutée sans être déclarée ici, et l'audit l'a signalée en répondant 400 au
   // lieu de 401 : c'est exactement son rôle.
   'POST /api/tools/comparator/adequation',
+  // Référentiel Algérie Poste / CCP (P4-17) : public comme le comparateur
+  // bancaire, et pour la même raison — ce sont des données de référence, pas
+  // des données de compte. Aucune route n'écrit ni ne lit la base.
+  //
+  // Ce qui est public ici, c'est le CATALOGUE : quels services existent, par
+  // quel canal, à quelles conditions. Les montants n'en sortent pas, parce
+  // qu'aucune ligne du classeur n'est publiable faute de pièce officielle
+  // datée — c'est la vue publique du service qui les retire, pas cette liste.
+  'GET /api/tools/postal',
+  'GET /api/tools/postal/services',
+  'GET /api/tools/postal/services/:id',
+  'GET /api/tools/postal/pinpad',
+  'GET /api/tools/postal/controles',
+  'POST /api/tools/postal/cout-annuel',
   // FINCLUDIA simulators in free access (P4-10): pure calculators, they read no
   // stored data and keep nothing, and the client's screen C18 says the
   // simulation workshop works without a profile ("mode découverte").

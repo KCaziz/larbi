@@ -83,4 +83,33 @@ export const FINANCIAL_TABLES = [
   // Real patrimony (P6-11). One amount, one currency, and the socle's `status`
   // may never be `fictional` here — checked by its own rule below.
   { model: 'finAsset', table: 'fin_assets', label: 'asset', amounts: true, currency: true },
+  // Espace entreprise (P7-02). Déclaré ici le jour même de sa création : les
+  // objectifs et les dettes avaient été oubliés de cette liste et n'étaient
+  // donc parcourus par aucun contrôle de cohérence — un défaut invisible,
+  // trouvé seulement en P6-21.
+  //
+  // Une entreprise porte la devise de ses documents sans porter de montant ;
+  // un tiers ne porte ni l'un ni l'autre ; un document nomme ses montants
+  // `amountExcl` et `taxAmount` plutôt que `value`, donc la règle du montant
+  // unique ne s'y applique pas ; un règlement, lui, porte bien `value`.
+  //
+  // `ownerWhere` : ces trois tables-là n'ont PAS de `userId`. Elles
+  // appartiennent à une entreprise, qui appartient à un compte. Sans ce
+  // chemin, l'inventaire et l'export du centre de confiance les auraient
+  // cherchées par un champ inexistant — et une donnée qu'un export oublie est
+  // une donnée que la promesse de transparence ne couvre pas.
+  { model: 'finBusiness', table: 'fin_businesses', label: 'business', amounts: false, currency: true },
+  { model: 'finBusinessContact', table: 'fin_business_contacts', label: 'businessContact', amounts: false, currency: false, ownerWhere: (userId) => ({ business: { userId } }) },
+  { model: 'finBusinessDocument', table: 'fin_business_documents', label: 'businessDocument', amounts: false, currency: true, ownerWhere: (userId) => ({ business: { userId } }) },
+  { model: 'finBusinessPayment', table: 'fin_business_payments', label: 'businessPayment', amounts: true, currency: true, ownerWhere: (userId) => ({ business: { userId } }) },
 ];
+
+/**
+ * Comment atteindre les lignes d'un compte dans une table du socle.
+ *
+ * La plupart portent `userId` ; certaines appartiennent à un objet qui le
+ * porte. Déclarer le chemin ici plutôt que dans chaque lecteur évite qu'un
+ * lecteur l'oublie — ce qui, pour l'export de ses propres données, ne se
+ * verrait pas.
+ */
+export const ownerFilter = (table, userId) => (table.ownerWhere ? table.ownerWhere(userId) : { userId });

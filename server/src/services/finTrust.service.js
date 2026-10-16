@@ -2,7 +2,7 @@
 // completeness. Reuses FINANCIAL_TABLES (P6-02) as the single registry of
 // what "this account's financial data" means, rather than a second list that
 // could drift from the one the consistency control already checks against.
-import { FINANCIAL_TABLES } from '../constants/finData.js';
+import { FINANCIAL_TABLES, ownerFilter } from '../constants/finData.js';
 import { FIN_CONSENT_TEXTS } from '../constants/finPublics.js';
 import { COMPLETENESS_CHECKS, DELETION_POLICY, DEVICES_BLOCKED } from '../constants/finTrust.js';
 import { SHAREABLE_KINDS } from '../constants/finSpace.js';
@@ -16,9 +16,13 @@ import { hasCurrentConsents } from './finProfile.service.js';
 // bookkeeping of its own.
 export async function buildDataInventory(prisma, userId) {
   const rows = await Promise.all(
-    FINANCIAL_TABLES.map(async ({ model, label }) => {
+    FINANCIAL_TABLES.map(async (table) => {
+      const { model, label } = table;
       const data = await prisma[model].findMany({
-        where: { userId, deletedAt: null },
+        // Certaines tables du socle n'ont pas de `userId` : elles appartiennent
+        // à un objet qui le porte. Le chemin est déclaré dans le registre, donc
+        // aucun lecteur n'a à le deviner.
+        where: { ...ownerFilter(table, userId), deletedAt: null },
         select: { source: true, status: true, consentUses: true, collectedAt: true },
       });
       if (data.length === 0) return { label, count: 0, sources: [], statuses: [], usages: [], premiereCollecte: null, derniereCollecte: null };
@@ -109,7 +113,10 @@ export async function exportAccountData(prisma, userId) {
     select: { id: true, name: true, email: true, finPublic: true, finCurrency: true, finAgeRange: true, finCountry: true, finOnboardedAt: true },
   });
   const tables = await Promise.all(
-    FINANCIAL_TABLES.map(async ({ model, label }) => ({ label, rows: await prisma[model].findMany({ where: { userId, deletedAt: null } }) })),
+    FINANCIAL_TABLES.map(async (table) => ({
+      label: table.label,
+      rows: await prisma[table.model].findMany({ where: { ...ownerFilter(table, userId), deletedAt: null } }),
+    })),
   );
   const consents = await listConsents(prisma, userId);
   return { compte: user, donnees: tables, consentements: consents, politiqueSuppression: DELETION_POLICY, exporteLe: new Date().toISOString() };

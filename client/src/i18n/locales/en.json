@@ -44,7 +44,32 @@
     "funding": "Funding readiness",
     "notifications": "Notifications",
     "trust": "Trust and data",
-    "passport": "Knowledge passport"
+    "passport": "Knowledge passport",
+    "fincludiaNav": "My space navigation",
+    "accountGroup": "My account",
+    "menuUnavailable": "Your journey menu could not be loaded. Your pages are still reachable from this reduced menu.",
+    "assistant": "Help",
+    "notificationsUnread": "Notifications, {{count}} unread",
+    "workshop": "Simulation workshop",
+    "firstSalary": "First salary",
+    "studentBudget": "Student budget",
+    "comparator": "Bank comparator",
+    "comparatorAccounts": "Accounts and CCP",
+    "explorer": "Explore",
+    "jobOffers": "Job offers",
+    "groups": {
+      "today": "Today",
+      "money": "My money",
+      "goals": "My goals",
+      "safety": "My safety",
+      "wealth": "My patrimony",
+      "invest": "Invest & simulate",
+      "together": "Together",
+      "explore": "Explore",
+      "learn": "Learn",
+      "business": "My business"
+    },
+    "businessSpace": "My business"
   },
   "footer": {
     "copyright": "© {{year}} {{brand}}. All rights reserved.",
@@ -65,11 +90,12 @@
   },
   "home": {
     "hero": {
-      "title": "Welcome to FINCLUDIA",
-      "body": "Online courses, a blog, business tools and progress tracking, all on one platform, with a space tailored to each account type.",
+      "title": "Finance, finally clear.",
+      "body": "FINCLUDIA is a platform for financial education, inclusion and intelligence that helps individuals, entrepreneurs and businesses understand, simulate and decide better.",
       "ctaFormations": "Discover the courses",
       "ctaTools": "See the tools",
-      "badge": "Courses · Blog · Tools"
+      "badge": "Courses · Blog · Tools",
+      "signature": "Understand. Simulate. Decide. Move forward."
     },
     "featuresSectionTitle": "What the platform offers",
     "features": {
@@ -313,6 +339,10 @@
     "explorer": {
       "title": "Explorer",
       "body": "Search an offer by need, type or provider among the comparator's already public data. Reserved to the age of 18 and over, and needs an account."
+    },
+    "postal": {
+      "title": "Algérie Poste / CCP reference",
+      "body": "The CCP, EDAHABIA, BaridiMob and postal services documented by the client — and, just as prominently, what remains to be verified before any tariff is published."
     }
   },
   "blogList": {
@@ -2603,7 +2633,62 @@
     "whyVersion": "version {{version}}",
     "whyCondition": "Condition",
     "whyInputs": "Data used",
-    "whyComputedAt": "Computed on"
+    "whyComputedAt": "Computed on",
+    "whyHypotheses": "Hypotheses",
+    "period": {
+      "legend": "Period",
+      "semaine": "Week",
+      "mois": "Month",
+      "90jours": "90 days",
+      "annee": "Year"
+    },
+    "reality": {
+      "legend": "Real or fictional",
+      "reel": "Real",
+      "fictif": "Fictional",
+      "warning": "The amounts shown are fictional. They are never added to your real money."
+    },
+    "quality": {
+      "missing": "Nothing has been recorded yet: there is nothing to compute for now.",
+      "old": "These figures rest on data {{days}} days old (threshold: {{seuil}}).",
+      "oldUnknown": "These figures rest on data older than the {{seuil}} day threshold.",
+      "declared": "These figures rest on amounts you declared, not on imported data.",
+      "declaredCount_one": "{{count}} row rests on a declared amount, not an imported one.",
+      "declaredCount_other": "{{count}} rows rest on declared amounts, not imported ones."
+    },
+    "nextAction": {
+      "title": "Next action",
+      "reason": "Why now",
+      "impact": "What it changes",
+      "go": "Go there",
+      "whyPriority": "Priority applied",
+      "whyRule": "Rule applied",
+      "whyRuleBody": "Actions are ranked in a fixed order — safety, due date, budget, learning — and capped at three. This is not a prediction: it is that order applied to what your data shows today.",
+      "priorities": {
+        "securite": "Safety: what protects you first.",
+        "echeance": "Due date: something is coming up.",
+        "budget": "Budget: a gap on your envelopes.",
+        "apprentissage": "Learning: what makes a calculation possible."
+      },
+      "reasons": {
+        "confirmPlanned": "{{count}} planned movement(s) fall within the next {{jours}} days and are not confirmed yet.",
+        "envelopeExceeded": "{{count}} envelope(s) reached or passed the threshold you set yourself.",
+        "buildReserve": "Your safety reserve is not computable: something is missing to measure it.",
+        "categoriseMovements": "{{count}} movement(s) have no category.",
+        "finishOnboarding": "{{remaining}} question(s) are left in your first steps.",
+        "createBudget": "You have no budget yet for the current period.",
+        "addMovement": "No expense is recorded: your totals are not computable."
+      },
+      "impacts": {
+        "confirmPlanned": "A confirmed movement enters your real totals and leaves the plan.",
+        "envelopeExceeded": "You see which envelope is over and by how much, before the period ends.",
+        "buildReserve": "Your reserve becomes measurable in months of expenses covered.",
+        "categoriseMovements": "Your spending per category and your budget gaps become computable.",
+        "finishOnboarding": "The calculations that were waiting on these answers become possible.",
+        "createBudget": "Your spending is compared to envelopes instead of being one total.",
+        "addMovement": "From the first recorded expense, your totals and what is left are computed."
+      }
+    }
   },
   "finOnboarding": {
     "title": "First steps",
@@ -3097,7 +3182,6 @@
     "seeGoals": "See my goals",
     "upcomingTitle": "Coming up",
     "seeCalendar": "See the calendar",
-    "staleData": "These figures rest on data recorded {{days}} days ago. Updating it would make them more accurate.",
     "healthPending": "The financial-health index ({{formula}}) is not shown: its weights have to be validated ({{task}}). A score computed on invented weights would be a judgement nobody could check. The sub-scores above are readable one by one.",
     "pickPublic": "Choosing your path tailors this dashboard to your situation.",
     "pickPublicLink": "Choose my path"
@@ -3642,5 +3726,78 @@
     "minor": "This part is not available before 18. Debts, real patrimony and funding preparation will wait: the rest of FINCLUDIA is open to you.",
     "ageUnknown": "Opening this part needs your age bracket. Some functions are reserved to 18 and over, and without that we cannot tell — we would rather refuse than assume.",
     "setAge": "State my age bracket"
+  },
+  "postal": {
+    "title": "Algérie Poste / CCP reference",
+    "intro": "The CCP, EDAHABIA, BaridiMob, TPE and postal services documented by the client, with what remains to be verified before any tariff is published.",
+    "noTariffTitle": "No tariff is published here.",
+    "counts": {
+      "records": "Records",
+      "publishable": "Publishable",
+      "computable": "Computable",
+      "controls": "Open controls"
+    },
+    "catalogueTitle": "Documented services",
+    "catalogueIntro": "What the supplied text describes: the service, its audience, its channel and its conditions.",
+    "familyLabel": "Family",
+    "allFamilies": "All families",
+    "tariffWithheld": "Tariff not published — awaiting the dated official schedule.",
+    "undocumentedTitle": "What is not documented",
+    "blockedTitle": "Blocked calculations",
+    "blockedIntro": "Three scales are transcribed without being applied: two readings would give two different prices.",
+    "controlsTitle": "The 16 controls to obtain",
+    "controlsIntro": "The questions to put to Algérie Poste, as the client listed them. While they stay open, tariffs stay unpublished.",
+    "proofExpected": "Evidence expected:",
+    "productImpact": "Product impact:"
+  },
+  "business": {
+    "title": "My business",
+    "intro": "Your sales, your purchases, your payments — and what actually came in and went out.",
+    "createTitle": "Create your business space",
+    "createIntro": "One space per account. You can complete the legal details afterwards.",
+    "nameLabel": "Business name",
+    "create": "Create the space",
+    "created": "The business space is created.",
+    "cashTitle": "Cash",
+    "cashIn": "Money in",
+    "cashOut": "Money out",
+    "balance": "Cash balance",
+    "receivables": "Customer receivables",
+    "payables": "Supplier payables",
+    "overdue": "Overdue and unpaid",
+    "lateTitle": "Overdue",
+    "blockedTitle": "What this space does not produce",
+    "blockedIntro": "These statements require the accounting framework and the applicable tax rules, which have not been supplied. Producing them without those would give false documents presented as accounting.",
+    "documentsTitle": "Sales and purchases",
+    "kind": "Kind",
+    "kinds": {
+      "sale": "Sale",
+      "purchase": "Purchase"
+    },
+    "number": "Number",
+    "label": "Description",
+    "issuedAt": "Issue date",
+    "dueAt": "Due date",
+    "amountExcl": "Amount excluding tax",
+    "taxAmount": "Tax",
+    "addDocument": "Add the document",
+    "documentCreated": "Document recorded.",
+    "outstanding": "Still due:",
+    "states": {
+      "unpaid": "Unpaid",
+      "partial": "Partial",
+      "paid": "Settled",
+      "overpaid": "Overpaid"
+    },
+    "paymentAmount": "Amount paid",
+    "paymentDate": "Payment date",
+    "addPayment": "Record the payment",
+    "paymentCreated": "Payment recorded.",
+    "foreignPayments": "A payment in another currency is not counted: the engine never converts without a dated rate.",
+    "noDocuments": "No document yet.",
+    "errors": {
+      "refused": "This entry was refused: check the amounts, the currencies and the dates.",
+      "conflict": "That document number already exists, or this space already exists."
+    }
   }
 }

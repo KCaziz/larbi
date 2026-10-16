@@ -395,6 +395,62 @@ Tâches :
 
 Important : le nom **FINCLUDIA** est tranché (décision du 2026-10-09, voir `P6-01` point 1 et le renommage documenté sous `P4-09`) ; le logo et la charte restent à fournir.
 
+### P1-13 — Charte graphique officielle (logo, palette, typographies)
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Dépendances : `P1-11`, `P1-12`
+- Durée cible : 2 jours (estimation)
+- Origine : document client « Positionnement officiel aperçu charte graphique.odt », reçu le 2026-10-16
+
+Ce document **lève la réserve « logo et charte restent à fournir »** portée depuis le 2026-10-09 (`P6-01` point 1).
+
+Ce qu'il tranche :
+- **Positionnement** : « plateforme d'éducation, d'inclusion et d'intelligence financières qui aide les particuliers, entrepreneurs et entreprises à comprendre, simuler et mieux décider ».
+- **Signature** : « La finance, enfin plus claire. » / « Comprendre. Simuler. Décider. Avancer. »
+- **Couleurs officielles** : Bleu profond `#055686` (institutionnelle), Sarcelle `#10A9B6` (innovation), Menthe `#4FE5D3` (progression), Encre `#102A43` (texte principal), Blanc `#FFFFFF` (fond), Menthe très pâle `#EFFBFA` (fond secondaire).
+- **Dégradé officiel** : bleu profond → sarcelle → menthe, décrit comme « un actif graphique de FINCLUDIA ».
+- **Répartition** : 70 % blanc / neutres, 15 % bleu profond, 10 % sarcelle, 5 % menthe.
+- **Typographies UI** : **Sora** pour les titres, **Inter** pour le contenu et les données.
+- **Direction UX** : white-first, premium, fintech + edtech, très lisible, pédagogique, courbes inspirées du F. **Principe produit** : comprendre → calculer → comparer → décider.
+- **Logo** : « F » + mot-symbole FINCLUDIA, **géométrie figée**, fourni en PNG dans le document.
+
+**Écart avec l'existant, mesuré et non supposé :**
+- **La palette coïncide déjà.** `client/src/index.css` porte `--accent: #055686`, `--text-h: #102A43`, un accent sombre `#4FE5D3`, et son commentaire nomme déjà « teal #10A9B6 ». Rien à changer sur les couleurs d'accent : c'est le seul endroit où la charte confirme ce qui existe au lieu de le contredire.
+- **Les typographies ne correspondent pas.** `P1-11` a posé **Fraunces** (serif) pour les titres et **IBM Plex Sans** pour le texte ; la charte demande **Sora** et **Inter**. C'est le seul écart structurant.
+- **Le fond n'est pas « white-first »** : `--bg` vaut `#f4f9fb`, la charte demande `#FFFFFF` avec `#EFFBFA` en fond secondaire.
+- **Le logo n'est pas utilisé** : l'en-tête affiche la lettre « L » (`brand-mark`).
+
+Tâches :
+- Remplacer les polices, **auto-hébergées via npm** comme les actuelles — pas d'appel à un CDN tiers, donc pas de fuite d'IP visiteur (règle posée en `P1-11`). Garder **IBM Plex Sans Arabic** en repli : ni Sora ni Inter ne couvrent l'arabe, et la plateforme est trilingue.
+- Fond blanc, fond secondaire `#EFFBFA`, répartition 70/15/10/5.
+- Intégrer le logo (en-tête, favicon, page d'accueil, certificats).
+- Reprendre le positionnement et la signature sur la page d'accueil — ce que `P6-01` point 1 laissait ouvert faute de texte officiel. Le texte actuel décrit encore « formations, blog et outils pour auto-entrepreneurs, PME, PMI ».
+- Mesurer le contraste de la nouvelle palette : `P1-11` l'avait déclaré non mesuré.
+
+**À demander au client avant de commencer :**
+- **Le logo en vectoriel (SVG).** Seul un PNG est fourni ; un logo d'en-tête en PNG est flou sur écran dense, et une « géométrie figée » mérite un format qui ne se dégrade pas.
+- **La signature exacte** : le document en donne deux formes — « Comprendre. Simuler. Décider. Avancer. » dans le corps, « Comprendre. Décider. Avancer. » dans le bloc de synthèse. Une signature de marque ne se devine pas.
+- **Le mode sombre**, que la charte ne décrit pas du tout. Le projet en a un depuis `P1-09`. Il sera conservé tel quel et déclaré comme tel, plutôt qu'inventé aux couleurs de la charte.
+- Les **traductions** du positionnement et de la signature : la charte est en français seul, et la plateforme sert fr / en / ar.
+
+**Réalisé (2026-10-16) :**
+
+- **Typographies remplacées** : Sora pour les titres, Inter pour le contenu, auto-hébergées via npm (`@fontsource-variable/sora`, `@fontsource-variable/inter`) — aucune adresse IP de visiteur ne part vers un CDN tiers, règle posée en `P1-11`. **IBM Plex Sans Arabic reste chargée** et n'est pas un reste : ni Sora ni Inter ne couvrent l'alphabet arabe, et sans ce repli un titre arabe tomberait sur une police système au hasard de la machine. Fraunces et IBM Plex Sans sont désinstallées.
+- **Le jeton de police a changé de nom** : `--serif` est devenu `--display` (27 usages). Il portait une serif avant la charte et porte une sans aujourd'hui ; un jeton nommé d'après une classe de police n'aurait pas survécu au changement, un jeton nommé d'après son rôle le traverse.
+- **Fond « white-first »** : `--bg` passe de `#f4f9fb` à `#FFFFFF`, `--bg-alt` à `#EFFBFA`. Le mode sombre n'est **pas** touché : la charte ne le décrit pas, et l'inventer à ses couleurs aurait été une décision de marque prise à la place du client.
+- **Le dégradé officiel est un jeton**, `--brand-gradient` (bleu profond → sarcelle → menthe) : la charte le désigne comme « un actif graphique », donc il est nommé une fois et non recopié à chaque usage. Il habille la signature de la page d'accueil, avec un repli en couleur pleine — `background-clip: text` n'est pas universel, et un texte invisible vaut moins qu'un texte monochrome.
+- **Le logo remplace la lettre « L »** dans l'en-tête, et devient le favicon. Les deux PNG de la charte ont été préparés sans toucher à la géométrie : fond blanc rendu transparent et rognage, pour qu'un logo ne pose pas un carré blanc sur fond sombre. **L'ancien favicon était violet** — un reste du thème abandonné en `P1-11`, qui contredisait la palette depuis.
+- **La page d'accueil porte enfin le positionnement du client** : la signature « La finance, enfin plus claire. » en titre, le positionnement officiel en chapeau, traduits en fr / en / ar. Le texte précédent décrivait encore « formations, blog et outils pour auto-entrepreneurs, PME, PMI ».
+
+**Ce que la charte confirme, et c'est notable :** la palette coïncidait **déjà** avec le code. `index.css` portait `#055686`, `#102A43` et `#4FE5D3`, et son commentaire nommait même « teal #10A9B6 ». Aucune couleur d'accent n'a eu à changer.
+
+**Réserves déclarées :**
+- **Le logo n'existe qu'en PNG.** Il est utilisé tel quel ; le SVG reste à demander, et une « géométrie figée » mérite un format qui ne se dégrade pas sur écran dense.
+- **La signature a deux formes dans le même document** — « Comprendre. Simuler. Décider. Avancer. » dans le corps, « Comprendre. Décider. Avancer. » dans la synthèse. La première est retenue ; le client doit trancher.
+- **Le mode sombre, le RTL, les tailles et les espacements ne sont pas décrits** par la charte : ils restent ceux de `P1-11`.
+- **Les traductions du positionnement sont de l'équipe**, le document étant en français seul.
+- **Le contraste de la nouvelle palette de texte n'a pas été mesuré** avec un outil dédié ; la réserve de `P1-11` reste ouverte.
+
 ### P1-08 — Validation de fin de phase
 - Statut : `✅ done`
 - Priorité : `🔴 high`
@@ -1297,6 +1353,51 @@ Blocage : les **règles de paie et barèmes (cotisations, IRG), datés et versio
 
 Blocage : offres de financement et leurs règles de calcul **à fournir par le client** (les classeurs actuels donnent des conditions, pas des formules — voir `P4-02`).
 
+### P4-17 — Référentiel Algérie Poste / CCP (comparateur et pédagogie)
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P4-06`, `P4-13`
+- Durée cible : 3 jours (estimation)
+- Origine : classeur client `FINCLUDIA_ALGERIE_POSTE_CCP_REFERENTIEL_COMPARATEUR.xlsx`, reçu le 2026-10-16
+
+Ce classeur **lève le blocage « données CCP »** (`P6-01` point 6) et la réserve de `P4-13` / écran ET06 : « le CCP n'est pas dans le classeur actuel : à ajouter seulement si le client fournit ses données ». 16 onglets, **75 lignes uniques**, et un schéma d'import déjà normalisé.
+
+Ce qui est directement exploitable :
+- `01_Referentiel_Unique` : 75 fiches `AP-001`…`AP-075`, avec la nature de l'information **explicitement typée** — `TARIF` (46), `PLAFOND` (4), `DÉLAI` (7), `PROCÉDURE`, `INFORMATION`, `DÉFINITION`. La consigne du client est écrite en toutes lettres : **tarif ≠ plafond ≠ délai ≠ procédure**.
+- `12_Import_FINCLUDIA` : un export à **32 colonnes** prêt au mapping, et `14_Dictionnaire_API` qui donne pour chaque champ son type, un exemple et son contrôle d'intégrité.
+- `10_Matrice_FINCLUDIA` : la couverture rubrique par rubrique, les familles **« Non documenté »** isolées, et une précaution d'intégration par rubrique.
+- `11_Controle_Validation` : **16 contrôles à faire avant publication** (`P01`…`P16`), chacun avec la preuve attendue et l'impact produit.
+- `13_Couts_Annualises` (équivalents annuels quand prix fixe et périodicité sont explicites) et `15_Sources_Provenance`.
+
+**Ce qui n'est pas fourni — et c'est le classeur lui-même qui le dit :**
+- **Aucune ligne n'est publiable.** `publishable = FALSE` et `auto_compute = FALSE` sur **toutes** les lignes, `verification_status = UNVERIFIED_USER_SUPPLIED`, `source_proof_url` et `valid_from` **volontairement vides**. La source est un texte transmis, pas une brochure officielle datée.
+- **Trois calculs sont explicitement bloqués** : le barème progressif PIN PAD (`P03` — base, arrondi des fractions de 1 000 et plafond inconnus), les tranches de virement BaridiMob « 12 à 24 DA » (`P05`), et la commission TPE « jusqu'à 1,50 % », qui est un **plafond, pas un taux appliqué** (`P07`).
+- **`P16`** : « Ne jamais importer une offre à partir d'une absence de données » — crédit, carte internationale, change / devises et coffre-fort restent **bloqués**, et l'absence de donnée ne vaut pas absence de produit.
+
+Tâches :
+- Modèle et **import reproductible par script** depuis `12_Import_FINCLUDIA`, comme les 91 catégories de `P6-02` et les 78 écrans de `P6-17` : extrait, jamais retapé.
+- **Faire respecter `publishable` et `auto_compute` par le code**, pas seulement par la documentation : une ligne non publiable ne s'affiche pas comme un tarif public, une ligne sans calcul possible ne nourrit aucun simulateur. C'est la même règle que « non calculé ≠ 0 », appliquée à la provenance.
+- **Le piège du double comptage** : l'abonnement TPE à 800 DA HT et ses trois composantes (300 + 300 + 200) sont la **même** dépense ; le champ `parent_fee_id` existe pour ça et doit être honoré.
+- **Séparer le comparateur postal du comparateur bancaire** (consigne de `10_Matrice_FINCLUDIA` : « ne pas transformer une boîte postale en coffre bancaire », « comparateur postal séparé du comparateur bancaire »).
+- Alimenter **ET06** (comparateur banque / CCP étudiant) et `P4-13` avec ce que le classeur documente réellement, et seulement cela.
+- Rendre les **16 contrôles visibles** (centre de confiance `P6-19` ou administration) plutôt que de les laisser dans un fichier que personne ne rouvre : ce sont les questions à poser à Algérie Poste.
+- Les fiches `DÉFINITION` (RIP, NIP) sont du **contenu pédagogique** : elles relèvent d'`Apprendre` (`P2-08`), pas du comparateur.
+
+Réserve : tant que le client n'a pas obtenu la grille tarifaire officielle datée (`P01`), ce lot livre **un référentiel interne et une pédagogie**, pas un comparateur public de tarifs Algérie Poste.
+
+**Réalisé (2026-10-16) :**
+
+- **Généré par script**, `server/scripts/generate-postal.py` → `src/constants/finPostal.js` : 75 fiches, 16 contrôles, 15 rubriques de couverture, 4 lignes de barème PIN PAD. Même méthode que les 91 catégories de `P6-02` et les 78 écrans de `P6-17` — extrait, jamais retapé, parce qu'une ligne que personne n'a tapée est une ligne que personne n'a pu déformer. Ici ce sont des tarifs.
+- **La règle « aucune ligne publiable » est tenue par le CODE, pas par la documentation.** `publicView()` retire tout montant, tout taux et tout plafond d'une fiche non publiable, et pose `tarifStatut: 'non_publie'` avec la raison. « Non publié » et « gratuit » ne doivent jamais se ressembler — c'est la même règle que « non calculé ≠ 0 », appliquée à la provenance.
+- **API publique** sous `/api/tools/postal` : résumé, catalogue filtrable, fiche, barème PIN PAD, les 16 contrôles, et un coût annuel qui répond `null` **ligne par ligne avec sa raison**. Libre d'accès comme le comparateur bancaire, et déclarée telle dans l'audit d'autorisation.
+- **Le piège du double comptage est codé** : l'abonnement TPE à 800 DA HT et ses composantes (300 + 300 + 200) sont la même dépense ; `parent_fee_id` les écarte du total dès que le parent est dans la sélection. Sans cela un commerçant verrait 1 600 DA par mois au lieu de 800.
+- **Page publique** `/outils/postal` : le catalogue, les familles non documentées, les trois calculs bloqués et les 16 contrôles — publiés plutôt que rangés dans un fichier, parce que ce sont les questions à poser à Algérie Poste et qu'une liste que personne ne rouvre n'en fait avancer aucune.
+- **Tests** : 26 unitaires, 15 fonctionnels. Le plus important balaie **toute** la réponse de l'API à la recherche d'un montant, champ par champ, au lieu de vérifier une liste de champs écrite d'avance : un champ ajouté plus tard ne serait pas couvert par une telle liste.
+
+**Défaut trouvé dans mes propres tests :** trois tests fonctionnels passaient pour la mauvaise raison. Ils envoyaient le corps avec `body:` au lieu de `json:`, donc Express ne lisait rien et la route répondait 400 — ce qu'ils attendaient. Deux tests voisins, qui attendaient 200, l'ont révélé. **Un test qui attend une erreur doit être regardé deux fois : il passe aussi quand la requête n'arrive jamais.**
+
+**Et une attente à moi qui était fausse :** le classeur range `AP-017` (Western Union reçu) sous la rubrique « Change / comptes en devises », pourtant marquée non documentée. Mon test exigeait zéro référence ; le client cite cette fiche comme **contre-exemple**, pour prévenir qu'un transfert reçu n'est pas une opération de change. Le test vérifie maintenant ce qui compte — aucune **fiche** ne se range dans une famille non documentée — et la mise en garde du client est préservée.
+
 ### P4-05 — Validation de fin de phase
 - Statut : `❌ todo`
 - Priorité : `🔴 high`
@@ -1440,6 +1541,45 @@ Tâches :
 
 ---
 
+### P5-07 — Livrables contractuels, réversibilité et matrice de recette
+- Statut : `🚧 in-progress`
+- Priorité : `🔴 high`
+- Dépendances : `P5-06`
+- Durée cible : 2 jours (estimation)
+- Origine : « FINCLUDIA contrat.docx », reçu le 2026-10-16 (contrat de prestation daté du 14/09/2026)
+
+Le contrat ajoute des **livrables** que ce plan ne prévoyait nulle part. Ils ne sont pas du développement, mais ils conditionnent la livraison finale et le dernier quart du paiement.
+
+Livrables exigés, article par article :
+- **Article 14 — inventaire des composants tiers.** Liste des bibliothèques, frameworks, plugins et API intégrés, **avec leurs licences**, et les obligations significatives signalées. Générable depuis `package.json` des deux paquets, donc à générer plutôt qu'à écrire à la main.
+- **Article 3 — dossiers d'études des tests et des formules**, **dossier d'exécution**, **catalogue de données** et **mini-formation de prise en main**. Les deux premiers existent en grande partie : la suite de tests et `NOTES_TECHNIQUES.md` les documentent ; ce qui manque est leur mise en forme en documents remis.
+- **Article 17 — réversibilité.** Code source, documentation, bases et scripts, configurations non secrètes, comptes et accès, sauvegardes disponibles, inventaire des composants tiers : remis **dans les sept (7) jours** suivant la fin du contrat.
+- **Article 10 — comptes au nom du client.** Domaine, hébergement, cloud, dépôt Git, base, messagerie, SSL, analytics et API doivent être ouverts au nom du client ou sous son contrôle direct. À vérifier compte par compte avant la livraison : aujourd'hui le dépôt et la base de développement sont sur la machine du prestataire.
+- **Annexe 2 — matrice des livrables et recette.** Le contrat fournit un tableau **vide** (livrable / prévu / livré / test / réserve). C'est exactement ce que produisent déjà les validations de fin de phase (`P1-08`, `P2-07`, `P4-05`, `P6-21`) : la matrice doit être **générée depuis ce fichier et la suite de tests**, pas retapée.
+
+Obligations qui touchent le code, et où elles en sont :
+- **Article 9 — absence de backdoor, de compte administrateur dissimulé, de collecte non autorisée.** À affirmer explicitement dans l'audit de `P5-01` / `P5-02`, avec la preuve : l'audit d'autorisation parcourt déjà **toutes** les routes Express, et aucun compte n'est créé hors migration ou action d'administrateur.
+- **Article 13 — pas de secret en clair dans le code.** Règle déjà tenue (`.env`, jamais de secret côté navigateur) ; elle devient contractuelle, donc elle mérite un test de cohérence plutôt qu'une habitude.
+- **Article 12 — pas de données personnelles réelles en développement ni en test.** Déjà respecté : les tests créent leurs propres comptes fictifs. À déclarer dans le dossier de livraison.
+- **Article 12 — base légale nommée** : loi n° 18-07 du 10 juin 2018, **modifiée et complétée par la loi n° 25-11 du 24 juillet 2025**. La politique de confidentialité et le centre de confiance (`P6-19`) peuvent enfin citer un texte précis au lieu de rester génériques.
+- **Article 15 — garantie de 90 jours** après la livraison finale, pour les anomalies imputables aux développements livrés.
+- **Article 7 — recette** : anomalies **bloquantes / majeures / mineures**, les deux premières corrigées avant la livraison finale, les mineures consignées en réserves. Délai de validation proposé : **10 jours calendaires** à compter d'une version réellement testable.
+
+Réserve : le contrat laisse la **date de livraison cible vide** (`P6-01` point 13). Les jalons existent (conception, version intermédiaire, recette, corrections, mise en production, livraison finale) mais aucun n'a d'échéance.
+
+**Réalisé (2026-10-16) — les deux documents sont GÉNÉRÉS, pas rédigés :**
+
+`npm run deliverables` (`server/scripts/generate-deliverables.js`) produit :
+
+- **`LIVRABLES/INVENTAIRE_COMPOSANTS.md`** (article 14) : 40 composants, 8 licences, lus depuis les `package.json` **réellement installés** — versions installées et non intervalles demandés, parce que c'est le code installé qui est livré. Un paquet sans champ `license` serait signalé comme tel plutôt que complété au jugé ; il n'y en a aucun aujourd'hui.
+- **`LIVRABLES/MATRICE_RECETTE.md`** (annexe 2) : les 88 livrables du plan avec leur état et la suite de tests qui les couvre, et une section « réserves, en clair » pour que les livrables bloqués par une donnée du client ne soient pas lus comme des anomalies à la recette.
+
+**Deux licences à obligations sont signalées au client**, ce que l'article 14 demande explicitement : `mariadb` (LGPL-2.1-or-later, dépendance de développement) et `dompurify` (MPL-2.0 **OR** Apache-2.0, donc sans obligation si la branche permissive est retenue). Les deux sont utilisées sans modification ; la décision d'accepter l'obligation appartient au client, pas au prestataire.
+
+**Un document généré ne peut pas mentir sur l'état du dépôt ; un document recopié le peut dès la semaine suivante.** Quatre tests de cohérence le vérifient : chaque dépendance déclarée figure à l'inventaire, chaque licence à obligations est signalée, chaque livrable du plan figure à la matrice, et **aucun livrable bloqué n'y apparaît comme livré** — ce document sert à la recette et au dernier quart du paiement, un « livré » de trop s'y lit comme une facturation de trop.
+
+**Reste à faire :** la vérification compte par compte de l'article 10 (domaine, hébergement, dépôt Git, base, SSL au nom du client — aujourd'hui le dépôt et la base de développement sont sur la machine du prestataire), le dossier d'exécution et la mini-formation, et l'affirmation explicite de l'article 9 dans l'audit de `P5-01`.
+
 # PHASE 6 — FINCLUDIA : GESTION FINANCIÈRE PERSONNELLE
 ## Durée : hors des 8 semaines (estimation dans « Impact sur le délai (FINCLUDIA) » ci-dessous)
 ## Objectif
@@ -1465,17 +1605,20 @@ Règles communes à toutes les tâches de cette phase (exigences du client) :
 - Origine : direction FINCLUDIA du 2026-10-09
 
 Les deux documents sont très détaillés sur les écrans, mais plusieurs points ne peuvent pas être décidés par Claude :
-1. ~~**Nom et identité**~~ — **tranché le 2026-10-09 : la plateforme s'appelle FINCLUDIA.** Renommage appliqué dans tout le code, les textes fr/en/ar, les tests et la documentation (détail et points d'attention : « Renommage en FINCLUDIA » ci-dessous). **Restent à fournir** : logo, charte graphique, nom de domaine. **Reste à trancher** : que deviennent l'e-learning, le blog et les outils actuels — intégrés comme modules « Apprendre » / « Explorer » (hypothèse retenue dans ce plan) ou site séparé ? Le texte de présentation de la page d'accueil décrit encore l'ancien positionnement (« formations, blog et outils pour auto-entrepreneurs, PME, PMI ») : il n'a **pas** été réécrit, parce que le nouveau positionnement est une décision commerciale, pas un renommage.
+1. ~~**Nom et identité**~~ — **tranché le 2026-10-09 : la plateforme s'appelle FINCLUDIA.** Renommage appliqué dans tout le code, les textes fr/en/ar, les tests et la documentation (détail et points d'attention : « Renommage en FINCLUDIA » ci-dessous). **Restent à fournir** : logo, charte graphique, nom de domaine. **Reste à trancher** : que deviennent l'e-learning, le blog et les outils actuels — intégrés comme modules « Apprendre » / « Explorer » (hypothèse retenue dans ce plan) ou site séparé ? Le texte de présentation de la page d'accueil décrit encore l'ancien positionnement (« formations, blog et outils pour auto-entrepreneurs, PME, PMI ») : il n'a **pas** été réécrit, parce que le nouveau positionnement est une décision commerciale, pas un renommage. **Reçu le 2026-10-16 : le logo et la charte graphique officielle** (« Positionnement officiel aperçu charte graphique.odt ») — positionnement, signature, palette, dégradé officiel, typographies et logo. Détail, écarts avec l'existant et travail restant : `P1-13`. **Reste à fournir : le nom de domaine.** Le sort commercial de l'e-learning, du blog et des outils n'est toujours **pas** tranché, mais la charte y répond en partie : elle décrit une plateforme « d'éducation, d'inclusion et d'intelligence financières », donc un seul produit.
 2. **Périmètre de la première livraison** : les 8 publics d'un coup ou d'abord quelques-uns (ex. étudiant + jeune actif + salarié) ? Quels lots du backlog client ?
 3. ~~**Types de compte existants**~~ (auto-entrepreneur, PME, PMI) face aux 8 publics (voir `P3-18`) — **tranché le 2026-10-11 : un seul profil actif à la fois, jamais deux en même temps.** Pas de coexistence en deux axes indépendants.
 4. **Devises** : DZD seulement ou plusieurs (EUR, USD…) ? Source et fréquence des taux de change si plusieurs.
 5. **Seuils** que le document laisse « à valider » : taux d'effort dette, cibles de réserve, pondérations de l'indice de santé financière (F053) et de l'indice de préparation au financement, seuils d'alertes.
-6. **Règles de paie** (cotisations, IRG) datées, pour `P4-14` ; **offres de financement** pour `P4-15` ; données **CCP** pour `P4-13`.
+6. **Règles de paie** (cotisations, IRG) datées, pour `P4-14` ; **offres de financement** pour `P4-15` ; données **CCP** pour `P4-13`. **Les données CCP sont fournies depuis le 2026-10-16** (classeur `FINCLUDIA_ALGERIE_POSTE_CCP_REFERENTIEL_COMPARATEUR.xlsx`, voir `P4-17`) — mais le classeur déclare lui-même **aucune ligne publiable** faute de pièce officielle datée. Le modèle et l'import sont débloqués, **la publication des tarifs ne l'est pas**. Les barèmes de paie et les offres de financement restent attendus.
 7. **Mineurs** : âge minimum d'inscription, consentement parental, fonctions exactes réservées aux 18 ans et plus.
 8. ~~**Canaux de notification**~~ — **tranché le 2026-10-11 : pas de SMS.** Les notifications restent in-app ; l'e-mail reste une option future, dépendante du même choix de fournisseur que la newsletter (non fait).
 9. ~~**Textes légaux**~~ — **tranché le 2026-10-11 :** la mention « pas de conseil réglementé » et la politique de confidentialité sont rédigées par l'équipe. Une suppression de compte entraîne une suppression complète et immédiate des données (pas de durée de conservation à part).
 10. **Contenus restant à fournir** : missions (abandonné, voir `P2-10`), intentions de l'assistant déterministe (`P3-19`), modèles d'objectifs, référentiel de catégories (l'onglet `03_Categories` en donne une base). Le glossaire et les guides (`P2-08`) sont rédigés par l'équipe, plus attendus du client.
-11. **Hébergement** : un hébergement mutualisé (cPanel, MariaDB) suffit pour une démonstration ; des données financières réelles demandent sauvegardes testées, chiffrement et disponibilité à confirmer (voir `P5-04`).
+11. **Hébergement** : un hébergement mutualisé (cPanel, MariaDB) suffit pour une démonstration ; des données financières réelles demandent sauvegardes testées, chiffrement et disponibilité à confirmer (voir `P5-04`). **Précision contractuelle (contrat du 2026-09-14, article 6)** : les frais annexes — nom de domaine, hébergement, licences tierces, certificats de sécurité — sont **à la charge du prestataire**, sauf stipulation contraire. Le choix de l'hébergement reste une décision du client (il porte ses données), mais son coût n'est pas un argument pour le reporter.
+12. **Périmètre contractuel non couvert par ce plan** (contrat, Annexe 1) : le contrat annonce, au-delà de la gestion de budget des particuliers, un **ERP pour entreprises, PME, PMI, micro-entreprises, startupeurs, auto-entrepreneurs, micro-importateurs et professions libérales** avec tableaux de bord et **états financiers**, ainsi qu'un volet **diaspora et commerce international**. Rien de tout cela n'existe dans ce plan. Voir `P7-01` : c'est une décision de périmètre, pas une tâche à lancer.
+13. **Date de livraison cible** : le contrat la laisse **vide** (article « Date de livraison cible »), alors qu'il fixe le début au 14/09/2026, un paiement en quatre fois (25 % / 25 % / 25 % à la validation de la recette / 25 % à la livraison finale et à la levée des réserves) et une garantie de **90 jours**. Sans date, ni les jalons ni la recette n'ont d'échéance opposable.
+14. **Annexe 1 du contrat à compléter** : front-end, back-end, base de données, espace administrateur, gestion des rôles, hébergement, sécurité/sauvegardes, documentation/formation et mise en production y sont **tous laissés vides**. Ce plan en est la réponse de fait ; il vaut mieux l'y reporter que de laisser l'annexe muette.
 
 Livrable attendu : une note de réponses. Passer alors cette tâche à `✅ done`.
 
@@ -2148,6 +2291,85 @@ Soit **environ 86 jours ouvrés, de l'ordre de 4 mois** pour une personne, en pl
 
 ---
 
+# PHASE 7 — PÉRIMÈTRE CONTRACTUEL NON COUVERT
+## Durée : non estimable en l'état
+## Objectif
+
+Signaler, sans l'engager, la partie du périmètre que le contrat annonce et que ce plan ne couvre pas. Cette phase n'est pas un planning : c'est une alerte de périmètre.
+
+### P7-01 — ERP entreprises, diaspora et commerce international
+- Statut : `⛔ blocked`
+- **Décision du client (2026-10-16) : oui, cette partie est demandée.** Le socle qui ne dépend d'aucun référentiel comptable est livré (`P7-02`) ; ce qui reste bloqué ici est tout ce qui en dépend — états financiers, TVA, amortissements, stock — et le volet diaspora / commerce international, pour lequel aucun cahier des charges n'a été fourni.
+- Priorité : `🔴 high`
+- Dépendances : `P6-01`
+- Durée cible : non estimable tant que le périmètre n'est pas défini
+- Origine : « FINCLUDIA contrat.docx », Annexe 1 « Fonctionnalités principales », reçu le 2026-10-16
+
+L'Annexe 1 du contrat annonce, **au-delà** de la gestion de budget des particuliers :
+- un **ERP** pour entreprises, PME, PMI, micro-entreprises, startupeurs, auto-entrepreneurs, micro-importateurs et professions libérales, avec **tableaux de bord et états financiers** ;
+- un volet **diaspora et commerce international** ;
+- un cahier des charges « détaillé produit par produit et réparti selon le public cible ».
+
+La charte graphique le confirme de son côté : ses publics incluent « indépendants + entrepreneurs + startups + PME/PMI, commerce international et diaspora ».
+
+**Rien de cela n'existe dans ce plan, et il ne faut pas faire semblant du contraire.** Les Phases 1 à 6 livrent une plateforme d'éducation financière, un blog, des outils publics et FINCLUDIA pour les **particuliers** (8 publics, tous personnels). Un ERP avec états financiers — comptabilité, facturation, immobilisations, TVA, bilan et compte de résultat — est un autre produit, avec d'autres obligations légales et fiscales.
+
+Ce qui bloque, concrètement :
+- **Le cahier des charges « produit par produit » n'a pas été fourni** pour cette partie. Le classeur `FINCLUDIA_Cahier_des_Charges_Complet.xlsx` reçu couvre les parcours **personnels** ; aucun onglet ne décrit un ERP.
+- Des **états financiers** supposent un référentiel comptable daté (plan comptable algérien, règles de TVA, obligations déclaratives). C'est précisément la catégorie d'information que ce projet n'invente jamais — comme les barèmes de paie de `P4-14` et les offres de financement de `P4-15`.
+- L'Annexe 1 est marquée « à compléter avant signature » et ses autres lignes (front-end, back-end, base, administration, hébergement, sécurité, documentation, mise en production) sont **vides**.
+
+Décision attendue du client, et c'est une question de périmètre, pas de calendrier :
+1. Cette partie fait-elle partie de la **même** livraison que les Phases 1 à 6, ou d'un contrat ultérieur ?
+2. Si elle en fait partie, le montant, le délai et l'Annexe 1 doivent être revus — l'article 4 du contrat prévoit exactement cela : « une modification substantielle fait l'objet d'une validation écrite précisant l'impact sur le prix, le délai et le périmètre ».
+3. Si elle n'en fait pas partie, l'Annexe 1 doit le dire, sinon la livraison finale sera jugée incomplète au regard de son propre texte.
+
+Tant que ce point n'est pas tranché, **aucune ligne de code ne doit être écrite pour cette partie** : commencer un ERP sans son cahier des charges produirait exactement le genre de travail qu'il faudrait jeter.
+
+**Mise à jour du 2026-10-16.** Le client confirme la demande. La ligne de partage retenue, et elle est nette :
+
+- **Ce qui ne dépend d'aucune norme est livré** (`P7-02`) : des tiers, des documents de vente et d'achat tels qu'ils ont été émis ou reçus, les règlements qui les soldent, et un tableau de bord de **trésorerie**. « Qui me doit quoi, qu'est-ce que je dois, combien est réellement entré ce mois-ci » sont des faits, pas des conventions comptables.
+- **Ce qui suppose une norme reste bloqué ici** : bilan, compte de résultat, déclaration de TVA, amortissements, stocks. Ils supposent le **Système Comptable Financier algérien** et des règles fiscales datées. Ils sont **nommés dans le produit**, chacun avec ce qui lui manque, plutôt que tus — un écran muet se lit comme une fonction oubliée.
+- **Le volet diaspora et commerce international reste entier** : aucun onglet du cahier des charges ne le décrit, et il ne se devine pas.
+
+**Ce qu'il faut obtenir pour débloquer la suite :** le plan comptable et les règles de présentation applicables, le régime d'imposition et les taux de TVA datés, les durées et modes d'amortissement admis, la méthode de valorisation des stocks — et le cahier des charges « produit par produit » que l'annexe 1 annonce pour cette partie.
+
+### P7-02 — Espace entreprise : socle de trésorerie (tiers, ventes, achats, règlements)
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Dépendances : `P6-02`
+- Durée cible : 4 jours (estimation)
+- Origine : contrat, annexe 1 « Fonctionnalités principales » ; décision du client du 2026-10-16
+
+`P7-01` est l'**origine** de cette tâche, pas son prérequis : elle restera `⛔ blocked` tant que les états comptables n'auront pas leur référentiel, et attendre qu'elle soit terminée aurait bloqué tout l'espace entreprise sur la partie qu'on ne peut justement pas construire.
+
+Le premier lot de l'ERP : **tout ce qui se calcule sans référentiel comptable**, et rien d'autre.
+
+**Réalisé (2026-10-16) :**
+
+- **Modèle** : `FinBusiness` (une entreprise par compte), `FinBusinessContact` (clients et fournisseurs), `FinBusinessDocument` (ventes et achats), `FinBusinessPayment` (règlements). Migration `20261016120000_fin_business`, **17 CHECK**, socle de métadonnées de `P6-02` sur chaque table qui porte un montant. Les quatre tables sont **déclarées dans `FINANCIAL_TABLES` le jour même** — les objectifs et les dettes y avaient été oubliés et n'étaient parcourus par aucun contrôle de cohérence, défaut trouvé seulement en `P6-21`.
+- **Dix chiffres**, `E001` à `E010`, dans **leur propre catalogue** : le catalogue `F001`-`F057` est celui du classeur du client, et y glisser des identifiants de notre fait le rendrait impossible à relire face à sa source. Ils passent par le même contrat de moteur (formule, version, entrées, date) que tous les autres.
+- **Tableau de bord de trésorerie** : encaissements, décaissements, solde, créances clients, dettes fournisseurs, échu non réglé **avec la liste des documents qui le composent** (un montant échu sans le détail n'est pas actionnable), et délai moyen de règlement.
+- **Page `/entreprise`**, réservée aux majeurs, avec la garde **liée à son chemin** : un `router.use(requireAdult)` sans chemin aurait refusé toutes les routes `/fin/*` déclarées ensuite, le défaut qui avait enfermé les mineurs hors de leur propre argent en `P6-17`. Un test vérifie le **sur-refus**, pas seulement le refus.
+- **Dixième entrée de menu**, ajoutée **après** les neuf du client et déclarée comme nôtre (`EXTRA_ROUTES`, origine « contrat, annexe 1 ») : `SCREEN_ROUTES` est généré depuis le classeur des parcours, et y ajouter un écran de notre fait corromprait la matrice de provenance de `P6-21`.
+- **Tests** : 26 unitaires, 18 de sécurité. Verts du premier coup.
+
+**Les règles qui ne pouvaient pas être des contraintes SQL**, et où elles vivent :
+- « un règlement est dans la devise de son document » référence une colonne de clé étrangère — MariaDB refuse (erreur 1901) : service + test de sécurité ;
+- « la somme des règlements ne dépasse pas le total » traverse plusieurs lignes : service. Le trop-perçu est **refusé**, pas toléré : il vient presque toujours d'une saisie en double, et le laisser passer fausse les créances sans que personne ne le voie. Un vrai trop-perçu se traite par un avoir, c'est-à-dire par un document ;
+- « une vente va à un client, un achat à un fournisseur » : sans elle, le total des créances clients compterait des fournisseurs.
+
+**Décisions qui méritent d'être lues :**
+- **Aucun taux de TVA n'est appliqué nulle part.** Hors taxe et taxe sont **saisis tous les deux**, parce que le taux appartient au document réel. Un test interdit qu'une formule du module calcule une taxe.
+- **L'état de règlement d'un document est toujours DÉDUIT**, jamais stocké : un document qu'on peut marquer « payé » à la main ment dès que quelqu'un se trompe.
+- **Un document sans échéance n'est jamais en retard.** Beaucoup n'en portent pas ; les traiter comme échus transformerait une absence d'information en dette exigible.
+- **Le délai moyen ne compte que les documents soldés.** Inclure les documents en cours avec leur délai écoulé ferait baisser la moyenne à chaque facture émise : un indicateur qui s'améliore quand on facture davantage ne mesure rien.
+- **Les identifiants fiscaux (NIF, RC, NIS) ne sont pas validés par un format.** Nous n'avons pas la règle officielle de composition, et un format inventé refuserait des entreprises réelles.
+
+**Limite déclarée, et elle est centrale :** cet espace ne produit **ni bilan, ni compte de résultat, ni déclaration de TVA, ni amortissements, ni état de stock**. Ces cinq états sont nommés dans l'API et à l'écran, chacun avec ce qui lui manque. Un compte de résultat inventé serait faux **et** présenté comme comptable : c'est la faute la plus coûteuse que ce module pourrait commettre, et elle est interdite par construction.
+
+---
+
 # 4. Fonctionnalités volontairement hors MVP 8 semaines
 
 Ces éléments ne doivent pas être développés avant les fonctionnalités prioritaires :
@@ -2255,6 +2477,12 @@ Recommandation : plus aucune tâche du **MVP** n'est réalisable sans une décis
 - **Paquet de déploiement `larbi-en-ligne/` périmé** depuis le renommage et le changement de préfixe des certificats : à régénérer (construction du client, assemblage, export SQL) avant toute nouvelle mise en ligne. Ce qui est actuellement déployé sur l'hébergement mutualisé porte encore l'ancien nom.
 
 Blocages / informations manquantes signalées (non bloquantes pour continuer, mais à ne pas oublier avant livraison) :
+- **Documents client reçus le 2026-10-16**, et ce qu'ils changent :
+  - **« Positionnement officiel aperçu charte graphique.odt »** — logo, palette, dégradé, typographies **Sora / Inter**, direction white-first. Lève la réserve « logo et charte à fournir » de `P6-01` point 1. Travail et écarts : `P1-13`. À demander : le **logo en SVG**, la **signature exacte** (le document en donne deux formes), les couleurs du **mode sombre** (absent de la charte) et les traductions en / ar.
+  - **`FINCLUDIA_ALGERIE_POSTE_CCP_REFERENTIEL_COMPARATEUR.xlsx`** — 75 fiches CCP / EDAHABIA / BaridiMob / TPE / réseau postal, avec un schéma d'import à 32 colonnes. Lève le blocage « données CCP » de `P6-01` point 6 et la réserve d'ET06. **Mais aucune ligne n'est publiable** (`publishable = FALSE` partout, aucune pièce officielle datée) et trois calculs sont explicitement bloqués. Travail : `P4-17`.
+  - **« FINCLUDIA contrat.docx »** — contrat de prestation daté du 14/09/2026, 120 000 DA, paiement en quatre fois, garantie 90 jours, réversibilité sous 7 jours. Ajoute des **livrables non prévus** (inventaire des licences, dossier d'exécution, catalogue de données, mini-formation, matrice de recette de l'Annexe 2) : `P5-07`. Nomme la **base légale** des données personnelles (loi 18-07 du 10/06/2018, modifiée par la loi 25-11 du 24/07/2025), que la politique de confidentialité et `P6-19` peuvent désormais citer.
+- **Alerte de périmètre (`P7-01`, `⛔ blocked`)** : l'Annexe 1 du contrat annonce un **ERP pour entreprises, PME/PMI, auto-entrepreneurs et professions libérales avec états financiers**, plus un volet **diaspora et commerce international**. Ce plan ne le couvre pas et aucun cahier des charges n'a été fourni pour cette partie. À trancher avant la livraison finale, sinon elle sera incomplète au regard de son propre contrat.
+- **Date de livraison cible absente du contrat** : le début est fixé au 14/09/2026, les jalons et l'échéancier de paiement existent, mais aucune échéance n'est opposable tant que la case reste vide.
 - Mentions légales et politique de confidentialité : identité légale du client (raison sociale, SIRET, adresse, hébergeur, contact DPO) à fournir avant mise en production (voir notes P1-03).
 - Formulaire de contact : aucune coordonnée réelle (email/téléphone/adresse) fournie. Depuis P3-16, un administrateur peut les saisir lui-même (page « Paramètres ») et elles s'affichent aussitôt sur `/contact` et dans le pied de page — reste seulement à ce que le client transmette (ou saisisse) les informations réelles.
 - Fournisseur d'email non défini : « mot de passe oublié » reste inactif et les messages du formulaire de contact ne sont que stockés en base (voir P1-07). La newsletter (P3-05) est construite mais ne peut rien envoyer tant qu'il n'est pas choisi ; à choisir avant la mise en production.

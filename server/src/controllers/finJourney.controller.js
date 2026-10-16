@@ -9,6 +9,7 @@ import {
 } from '../constants/finJourneys.js';
 import { FIN_PUBLICS, isAdultAgeRange } from '../constants/finPublics.js';
 import { dashboardFor } from '../constants/finDashboard.js';
+import { menuFor, OUT_OF_MENU_ROUTES } from '../constants/finNavigation.js';
 
 // The journey map of the caller (P6-17), from the client's own tab
 // `19_Cartes_Parcours`.
@@ -48,6 +49,15 @@ export function getJourney(req, res) {
     // visible navigation, in the client's own order.
     tableauPrincipal: journey?.dashboard ?? null,
     navigation: journey?.nav ?? [],
+    // The menu of the connected space (P1-12): the client's nine entries, in
+    // its order, each reduced to the routes this account may open. The
+    // navigation renders this answer instead of holding its own list, so a menu
+    // cannot disagree with the rule it is supposed to show.
+    menu: menuFor({ publicCode, adult }),
+    // Served routes the client places in the top bar or the account rather than
+    // in a menu group — named so the interface does not have to guess that
+    // their absence from `menu` is deliberate.
+    horsMenu: OUT_OF_MENU_ROUTES,
     // Which of our dashboards (P6-06) backs that name.
     tableauDeBord: dashboardFor(publicCode).title,
     ecrans: screens,

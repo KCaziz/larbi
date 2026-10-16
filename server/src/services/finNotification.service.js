@@ -87,6 +87,24 @@ export async function listNotifications(prisma, userId, { category, read } = {})
   return [...rows].sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority) || b.createdAt - a.createdAt);
 }
 
+/**
+ * How many unread notifications EXIST, for the badge of the top bar (P1-12).
+ *
+ * Deliberately one `count`, and deliberately WITHOUT `generateReminders`: the
+ * badge is read on every page of the connected space, and reminder generation
+ * costs four queries and writes rows. Paying that on every navigation to keep a
+ * number fresh would be the wrong trade.
+ *
+ * The consequence, stated rather than hidden: a reminder that becomes due is
+ * counted only once something has generated it — a visit to the notification
+ * centre or the calendar. The badge therefore never over-reports, and can lag.
+ * Removing that lag means generating reminders on a schedule, which this
+ * platform has no job runner for (see `P5-04`).
+ */
+export async function countUnread(prisma, userId) {
+  return prisma.finNotification.count({ where: { userId, read: false } });
+}
+
 export async function markRead(prisma, userId, id, read = true) {
   const row = await prisma.finNotification.findFirst({ where: { id, userId } });
   if (!row) return null;

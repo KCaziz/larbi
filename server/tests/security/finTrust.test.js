@@ -42,6 +42,57 @@ describe('the data inventory', () => {
   });
 });
 
+// L'espace entreprise (P7-02) dans l'inventaire et l'export.
+//
+// Ses tables filles — tiers, documents, règlements — ne portent PAS de
+// `userId` : elles appartiennent à une entreprise, qui appartient au compte.
+// Le registre déclare ce chemin (`ownerWhere`), et ce test vérifie qu'il est
+// réellement suivi.
+//
+// L'enjeu n'est pas cosmétique : une donnée qu'un export oublie est une donnée
+// que la promesse de transparence du centre de confiance ne couvre pas, et
+// personne ne s'en aperçoit — un export incomplet a exactement l'air d'un
+// export complet.
+describe("l'espace entreprise est inventorié comme le reste", () => {
+  test('ses tiers et ses documents comptent pour leur compte, et pour lui seul', async () => {
+    const boss = await t.adult();
+    const stranger = await t.adult();
+
+    const created = await t.request('POST', '/fin/entreprise', {
+      user: boss,
+      json: { name: 'Atelier Belkacem', currency: 'DZD' },
+    });
+    assert.equal(created.status, 201);
+    await t.request('POST', '/fin/entreprise/tiers', { user: boss, json: { kind: 'client', name: 'Client A' } });
+    await t.request('POST', '/fin/entreprise/documents', {
+      user: boss,
+      json: {
+        kind: 'sale',
+        number: 'F-001',
+        label: 'Prestation',
+        issuedAt: '2026-01-10T00:00:00.000Z',
+        amountExcl: 100000,
+        taxAmount: 19000,
+        currency: 'DZD',
+      },
+    });
+
+    const mine = await t.request('GET', '/fin/confiance/inventaire', { user: boss });
+    const count = (body, label) => body.tables.find((table) => table.label === label)?.count;
+    assert.equal(count(mine.body, 'business'), 1);
+    assert.equal(count(mine.body, 'businessContact'), 1);
+    assert.equal(count(mine.body, 'businessDocument'), 1);
+
+    // Et l'inventaire d'un autre compte n'en voit rien : c'est la même
+    // garantie que pour l'argent personnel, appliquée à une table qui n'a pas
+    // de `userId` à elle.
+    const theirs = await t.request('GET', '/fin/confiance/inventaire', { user: stranger });
+    assert.equal(count(theirs.body, 'business'), 0);
+    assert.equal(count(theirs.body, 'businessContact'), 0);
+    assert.equal(count(theirs.body, 'businessDocument'), 0);
+  });
+});
+
 describe('completeness', () => {
   test('is a mechanical fact, and improves as the account declares data', async () => {
     const before1 = await t.request('GET', '/fin/confiance/completude', { user: owner });

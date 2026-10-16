@@ -13,8 +13,12 @@
   /* Text & surfaces */
   --text: #41586d;
   --text-h: #102A43;
-  --bg: #f4f9fb;
-  --bg-alt: #e7f1f5;
+  /* « White-first » de la charte : fond blanc, fond secondaire menthe très
+     pâle (#EFFBFA). La répartition visée est 70 % blanc / neutres, 15 % bleu
+     profond, 10 % sarcelle, 5 % menthe — d'où des surfaces neutres et des
+     couleurs réservées aux accents, jamais aux aplats de fond. */
+  --bg: #ffffff;
+  --bg-alt: #effbfa;
   --surface: #ffffff;
   --border: #d5e3ea;
   --border-strong: #b7cdd8;
@@ -45,6 +49,11 @@
   --band-line: rgba(255, 255, 255, 0.14);
   --grid-line: rgba(16, 42, 67, 0.05);
 
+  /* Dégradé officiel de la charte : bleu profond -> sarcelle -> menthe. Le
+     document le désigne comme « un actif graphique de FINCLUDIA », donc il est
+     un jeton nommé et non une suite de couleurs recopiée à chaque usage. */
+  --brand-gradient: linear-gradient(135deg, #055686 0%, #10a9b6 55%, #4fe5d3 100%);
+
   /* Shape & depth */
   --radius: 12px;
   --radius-sm: 8px;
@@ -60,8 +69,18 @@
   --paper-accent: #055686;
   --paper-brass: #087682;
 
-  --serif: 'Fraunces Variable', 'IBM Plex Sans Arabic', Georgia, 'Times New Roman', serif;
-  --sans: 'IBM Plex Sans', 'IBM Plex Sans Arabic', system-ui, 'Segoe UI', sans-serif;
+  /* Typographies de la charte officielle (P1-13) : Sora pour les titres,
+     Inter pour le contenu et les données.
+
+     IBM Plex Sans Arabic reste en repli juste derrière : ni Sora ni Inter ne
+     couvrent l'arabe, et la plateforme est trilingue. Sans ce repli, un titre
+     arabe tomberait sur une police système au hasard de la machine.
+
+     Le jeton garde un nom de RÔLE (`--display`, le titre) et non de classe de
+     police : il portait une serif avant la charte, il porte une sans
+     aujourd'hui, et le nom n'aurait pas survécu au changement. */
+  --display: 'Sora Variable', 'IBM Plex Sans Arabic', system-ui, 'Segoe UI', sans-serif;
+  --sans: 'Inter Variable', 'IBM Plex Sans Arabic', system-ui, 'Segoe UI', sans-serif;
   --header-height: 72px;
 
   /* Base size of the whole site: every other size is in rem, so this single
@@ -187,7 +206,7 @@ h1,
 h2,
 h3 {
   color: var(--text-h);
-  font-family: var(--serif);
+  font-family: var(--display);
   font-weight: 500;
   line-height: 1.15;
   letter-spacing: -0.02em;

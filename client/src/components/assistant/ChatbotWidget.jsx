@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ChevronRight, MessageCircleQuestion, Search, X } from 'lucide-react';
 import { api } from '../../lib/api.js';
+import { ASSISTANT_OPEN_EVENT } from '../../lib/finControls.js';
 import { useApi } from '../../lib/useApi.js';
 import { contentLanguage, textDirection } from '../../lib/contentLanguage.js';
 import RichContent from '../ui/RichContent.jsx';
@@ -49,6 +50,20 @@ function Assistant() {
     if (open) headingRef.current?.focus();
   }, [open, selectedId, resolved]);
 
+  // The top bar also opens the assistant (P1-12: « aide / assistant » is one of
+  // the four entries the client puts there). The panel is not a route, so the
+  // header cannot link to it; it announces the intent instead and the widget —
+  // the one place that owns this state — answers.
+  //
+  // A DOM event rather than lifted state or a context: the two components have
+  // no common ancestor other than the layout, and threading a boolean through
+  // it would make every page re-render when the panel opens.
+  useEffect(() => {
+    const onRequest = () => setOpen(true);
+    document.addEventListener(ASSISTANT_OPEN_EVENT, onRequest);
+    return () => document.removeEventListener(ASSISTANT_OPEN_EVENT, onRequest);
+  }, []);
+
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (event) => {
@@ -92,9 +107,16 @@ function Assistant() {
     navigate(path);
   }
 
-  // Nothing published on either side: no button at all, as the comment above
+  // Nothing published on either side: no floating button, as the comment above
   // says. One of the two is enough to make the assistant useful.
-  if (list.length === 0 && !hasResolver) return null;
+  //
+  // The panel itself still opens when the TOP BAR asks for it (P1-12): a help
+  // entry the client puts in the bar permanently cannot be a button that does
+  // nothing on the days nothing is published. With no content the panel is its
+  // own empty state — the footer offers the contact page in every state, which
+  // is the way out a person actually needs.
+  const empty = list.length === 0 && !hasResolver;
+  if (empty && !open) return null;
 
   const showingResolvedIntent = resolved?.type === 'intent';
   const showingFallback = resolved?.type === 'fallback';
@@ -211,17 +233,21 @@ function Assistant() {
         </section>
       )}
 
-      <button
-        ref={toggleRef}
-        type="button"
-        className="chatbot-toggle"
-        aria-expanded={open}
-        aria-controls={open ? panelId : undefined}
-        onClick={() => (open ? close() : setOpen(true))}
-      >
-        {open ? <X size={20} strokeWidth={2} aria-hidden="true" /> : <MessageCircleQuestion size={20} strokeWidth={1.9} aria-hidden="true" />}
-        <span>{open ? t('chatbot.close') : t('chatbot.open')}</span>
-      </button>
+      {/* The floating launcher appears only when there is something to launch;
+          the panel above answers the top bar either way. */}
+      {!empty && (
+        <button
+          ref={toggleRef}
+          type="button"
+          className="chatbot-toggle"
+          aria-expanded={open}
+          aria-controls={open ? panelId : undefined}
+          onClick={() => (open ? close() : setOpen(true))}
+        >
+          {open ? <X size={20} strokeWidth={2} aria-hidden="true" /> : <MessageCircleQuestion size={20} strokeWidth={1.9} aria-hidden="true" />}
+          <span>{open ? t('chatbot.close') : t('chatbot.open')}</span>
+        </button>
+      )}
     </div>
   );
 }

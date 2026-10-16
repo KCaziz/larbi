@@ -24,6 +24,12 @@ export const TOOLS = [
   { key: 'explorateur-financier', status: 'available', access: 'authenticated' },
   // Invoice generator (P4-03): needs an account, per the specification.
   { key: 'generateur-facture', status: 'available', access: 'authenticated' },
+  // Référentiel Algérie Poste / CCP (P4-17). Libre d'accès comme le
+  // comparateur bancaire, et pour la même raison : ce sont des données de
+  // référence, pas des données de compte. Ce qui n'est PAS libre, c'est le
+  // tarif : aucune ligne n'est publiable tant que la grille officielle datée
+  // n'est pas fournie, et la vue publique les retire (voir finPostal.service).
+  { key: 'referentiel-postal', status: 'available', access: 'public' },
 ];
 
 export const toolByKey = (key) => TOOLS.find((tool) => tool.key === key) ?? null;

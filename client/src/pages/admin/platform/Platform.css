@@ -32,7 +32,7 @@
 .admin-stats dd {
   margin: 4px 0 0;
   color: var(--text-h);
-  font-family: var(--serif);
+  font-family: var(--display);
   font-size: 1.8rem;
 }
 

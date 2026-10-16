@@ -3,6 +3,7 @@ import {
   getNotificationReferences,
   getNotifications,
   getSettings,
+  getUnreadCount,
   postMarkAllRead,
   putNotificationRead,
   putSettings,
@@ -18,6 +19,7 @@ router.use(requireAuth);
 router.param('id', uuidParam);
 
 router.get('/notifications/references', getNotificationReferences);
+router.get('/notifications/non-lues', asyncRoute(getUnreadCount));
 router.get('/notifications/parametres', asyncRoute(getSettings));
 router.put('/notifications/parametres', validateBody(settingsSchema), asyncRoute(putSettings));
 router.post('/notifications/tout-lire', asyncRoute(postMarkAllRead));

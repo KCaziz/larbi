@@ -29,7 +29,7 @@
 
 .offer-card h4 {
   margin: 0;
-  font-family: var(--serif);
+  font-family: var(--display);
   font-size: 1.2rem;
   font-weight: 500;
   color: var(--text-h);

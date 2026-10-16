@@ -1,0 +1,22 @@
+/* The shell of the connected space (P1-12).
+ *
+ * One markup, two layouts: a single column on a phone with the navigation
+ * above the page, two columns from 1024px with the navigation beside it. All
+ * inline/block properties, never left/right, so the sidebar lands on the
+ * correct side in Arabic without a second rule. */
+
+.fin-shell {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.fin-shell-main {
+  min-width: 0; /* a grid column does not shrink below its content without this */
+}
+
+@media (min-width: 1024px) {
+  .fin-shell {
+    grid-template-columns: 264px minmax(0, 1fr);
+    align-items: start;
+  }
+}

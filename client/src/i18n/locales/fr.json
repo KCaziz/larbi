@@ -44,7 +44,32 @@
     "funding": "Préparation au financement",
     "notifications": "Notifications",
     "trust": "Confiance et données",
-    "passport": "Passeport de connaissances"
+    "passport": "Passeport de connaissances",
+    "fincludiaNav": "Navigation de mon espace",
+    "accountGroup": "Mon compte",
+    "menuUnavailable": "Le menu de votre parcours n’a pas pu être chargé. Vos pages restent accessibles depuis ce menu réduit.",
+    "assistant": "Aide",
+    "notificationsUnread": "Notifications, {{count}} non lues",
+    "workshop": "Atelier de simulation",
+    "firstSalary": "Premier salaire",
+    "studentBudget": "Budget étudiant",
+    "comparator": "Comparateur bancaire",
+    "comparatorAccounts": "Comptes et CCP",
+    "explorer": "Explorer",
+    "jobOffers": "Offres d’emploi",
+    "groups": {
+      "today": "Aujourd’hui",
+      "money": "Mon argent",
+      "goals": "Mes objectifs",
+      "safety": "Ma sécurité",
+      "wealth": "Mon patrimoine",
+      "invest": "Investir & simuler",
+      "together": "À plusieurs",
+      "explore": "Explorer",
+      "learn": "Apprendre",
+      "business": "Mon entreprise"
+    },
+    "businessSpace": "Mon entreprise"
   },
   "footer": {
     "copyright": "© {{year}} {{brand}}. Tous droits réservés.",
@@ -65,11 +90,12 @@
   },
   "home": {
     "hero": {
-      "title": "Bienvenue sur FINCLUDIA",
-      "body": "Formations en ligne, blog, outils métier et suivi de progression, réunis sur une seule plateforme, avec un espace adapté à chaque type de compte.",
+      "title": "La finance, enfin plus claire.",
+      "body": "FINCLUDIA est une plateforme d’éducation, d’inclusion et d’intelligence financières qui aide les particuliers, les entrepreneurs et les entreprises à comprendre, simuler et mieux décider.",
       "ctaFormations": "Découvrir les formations",
       "ctaTools": "Voir les outils",
-      "badge": "Formations · Blog · Outils"
+      "badge": "Formations · Blog · Outils",
+      "signature": "Comprendre. Simuler. Décider. Avancer."
     },
     "featuresSectionTitle": "Ce que propose la plateforme",
     "features": {
@@ -313,6 +339,10 @@
     "explorer": {
       "title": "Explorer",
       "body": "Recherchez une offre par besoin, type ou établissement parmi les données déjà publiques du comparateur. Réservé aux 18 ans et plus, et nécessite un compte."
+    },
+    "postal": {
+      "title": "Référentiel Algérie Poste / CCP",
+      "body": "Les services CCP, EDAHABIA, BaridiMob et postaux documentés par le client — et, à la même hauteur, ce qui reste à vérifier avant d'en publier un tarif."
     }
   },
   "blogList": {
@@ -2604,7 +2634,62 @@
     "whyVersion": "version {{version}}",
     "whyCondition": "Condition",
     "whyInputs": "Données utilisées",
-    "whyComputedAt": "Calculé le"
+    "whyComputedAt": "Calculé le",
+    "whyHypotheses": "Hypothèses",
+    "period": {
+      "legend": "Période",
+      "semaine": "Semaine",
+      "mois": "Mois",
+      "90jours": "90 jours",
+      "annee": "Année"
+    },
+    "reality": {
+      "legend": "Réel ou fictif",
+      "reel": "Réel",
+      "fictif": "Fictif",
+      "warning": "Les montants affichés sont fictifs. Ils ne sont jamais additionnés à votre argent réel."
+    },
+    "quality": {
+      "missing": "Aucune donnée n’a encore été enregistrée : il n’y a rien à calculer pour l’instant.",
+      "old": "Ces chiffres reposent sur des données vieilles de {{days}} jours (seuil : {{seuil}}).",
+      "oldUnknown": "Ces chiffres reposent sur des données plus anciennes que le seuil de {{seuil}} jours.",
+      "declared": "Ces chiffres reposent sur des montants que vous avez déclarés, non sur des données importées.",
+      "declaredCount_one": "{{count}} ligne repose sur un montant déclaré, non importé.",
+      "declaredCount_other": "{{count}} lignes reposent sur des montants déclarés, non importés."
+    },
+    "nextAction": {
+      "title": "Prochaine action",
+      "reason": "Pourquoi maintenant",
+      "impact": "Ce que cela change",
+      "go": "Y aller",
+      "whyPriority": "Priorité retenue",
+      "whyRule": "Règle appliquée",
+      "whyRuleBody": "Les actions sont classées dans un ordre fixe — sécurité, échéance, budget, apprentissage — et limitées à trois. Ce n’est pas une prédiction : c’est cet ordre appliqué à ce que vos données montrent aujourd’hui.",
+      "priorities": {
+        "securite": "Sécurité : ce qui protège d’abord.",
+        "echeance": "Échéance : quelque chose arrive bientôt.",
+        "budget": "Budget : un écart sur vos enveloppes.",
+        "apprentissage": "Apprentissage : de quoi rendre un calcul possible."
+      },
+      "reasons": {
+        "confirmPlanned": "{{count}} mouvement(s) prévu(s) arrivent dans les {{jours}} prochains jours et ne sont pas encore confirmés.",
+        "envelopeExceeded": "{{count}} enveloppe(s) ont atteint ou dépassé le seuil que vous avez vous-même fixé.",
+        "buildReserve": "Votre réserve de sécurité n’est pas calculable : il manque de quoi la mesurer.",
+        "categoriseMovements": "{{count}} mouvement(s) n’ont pas de catégorie.",
+        "finishOnboarding": "Il reste {{remaining}} question(s) à vos premiers pas.",
+        "createBudget": "Vous n’avez pas encore de budget pour la période en cours.",
+        "addMovement": "Aucune dépense n’est enregistrée : vos totaux ne sont pas calculables."
+      },
+      "impacts": {
+        "confirmPlanned": "Un mouvement confirmé entre dans vos totaux réels et sort du prévisionnel.",
+        "envelopeExceeded": "Vous voyez quelle enveloppe déborde et de combien, avant la fin de la période.",
+        "buildReserve": "Votre réserve devient chiffrable en mois de dépenses couverts.",
+        "categoriseMovements": "Vos dépenses par catégorie et vos écarts de budget deviennent calculables.",
+        "finishOnboarding": "Les calculs qui attendaient ces réponses deviennent possibles.",
+        "createBudget": "Vos dépenses se comparent à des enveloppes au lieu d’être un simple total.",
+        "addMovement": "Dès la première dépense enregistrée, vos totaux et votre reste à vivre se calculent."
+      }
+    }
   },
   "finOnboarding": {
     "title": "Premiers pas",
@@ -3098,7 +3183,6 @@
     "seeGoals": "Voir mes objectifs",
     "upcomingTitle": "Prochaines échéances",
     "seeCalendar": "Voir le calendrier",
-    "staleData": "Ces chiffres reposent sur des données saisies il y a {{days}} jours. Une mise à jour les rendrait plus justes.",
     "healthPending": "L'indice de santé financière ({{formula}}) n'est pas affiché : ses pondérations doivent être validées ({{task}}). Un score calculé sur des poids inventés serait un jugement que personne ne pourrait vérifier. Les sous-scores ci-dessus sont lisibles un par un.",
     "pickPublic": "Choisir votre parcours adapte ce tableau à votre situation.",
     "pickPublicLink": "Choisir mon parcours"
@@ -3643,5 +3727,78 @@
     "minor": "Cette partie n’est pas accessible avant 18 ans. Les dettes, le patrimoine réel et la préparation d’un financement attendront : le reste de FINCLUDIA vous est ouvert.",
     "ageUnknown": "Pour ouvrir cette partie, il manque votre tranche d’âge. Certaines fonctions sont réservées aux 18 ans et plus, et sans cette information nous ne pouvons pas le savoir — nous préférons refuser que supposer.",
     "setAge": "Indiquer ma tranche d’âge"
+  },
+  "postal": {
+    "title": "Référentiel Algérie Poste / CCP",
+    "intro": "Les services CCP, EDAHABIA, BaridiMob, TPE et postaux documentés par le client, avec ce qui reste à vérifier avant toute publication de tarif.",
+    "noTariffTitle": "Aucun tarif n’est publié ici.",
+    "counts": {
+      "records": "Fiches",
+      "publishable": "Publiables",
+      "computable": "Calculables",
+      "controls": "Contrôles ouverts"
+    },
+    "catalogueTitle": "Les services documentés",
+    "catalogueIntro": "Ce que le texte transmis décrit : le service, son public, son canal et ses conditions.",
+    "familyLabel": "Famille",
+    "allFamilies": "Toutes les familles",
+    "tariffWithheld": "Tarif non publié — en attente de la grille officielle datée.",
+    "undocumentedTitle": "Ce qui n’est pas documenté",
+    "blockedTitle": "Les calculs bloqués",
+    "blockedIntro": "Trois barèmes sont transcrits sans être appliqués : deux lectures donneraient deux prix différents.",
+    "controlsTitle": "Les 16 contrôles à obtenir",
+    "controlsIntro": "Les questions à poser à Algérie Poste, telles que le client les a listées. Tant qu’elles sont ouvertes, les tarifs restent non publiés.",
+    "proofExpected": "Preuve attendue :",
+    "productImpact": "Impact produit :"
+  },
+  "business": {
+    "title": "Mon entreprise",
+    "intro": "Vos ventes, vos achats, vos règlements — et ce qui est réellement entré et sorti.",
+    "createTitle": "Créer votre espace entreprise",
+    "createIntro": "Un seul espace par compte. Vous pourrez compléter les informations légales ensuite.",
+    "nameLabel": "Nom de l’entreprise",
+    "create": "Créer l’espace",
+    "created": "L’espace entreprise est créé.",
+    "cashTitle": "Trésorerie",
+    "cashIn": "Encaissements",
+    "cashOut": "Décaissements",
+    "balance": "Solde de trésorerie",
+    "receivables": "Créances clients",
+    "payables": "Dettes fournisseurs",
+    "overdue": "Échu non réglé",
+    "lateTitle": "En retard",
+    "blockedTitle": "Ce que cet espace ne produit pas",
+    "blockedIntro": "Ces états supposent le référentiel comptable et les règles fiscales applicables, qui n’ont pas été fournis. Les produire sans eux donnerait des documents faux présentés comme comptables.",
+    "documentsTitle": "Ventes et achats",
+    "kind": "Nature",
+    "kinds": {
+      "sale": "Vente",
+      "purchase": "Achat"
+    },
+    "number": "Numéro",
+    "label": "Libellé",
+    "issuedAt": "Date d’émission",
+    "dueAt": "Échéance",
+    "amountExcl": "Montant hors taxe",
+    "taxAmount": "Taxe",
+    "addDocument": "Ajouter le document",
+    "documentCreated": "Document enregistré.",
+    "outstanding": "Reste dû :",
+    "states": {
+      "unpaid": "Impayé",
+      "partial": "Partiel",
+      "paid": "Soldé",
+      "overpaid": "Trop-perçu"
+    },
+    "paymentAmount": "Montant réglé",
+    "paymentDate": "Date du règlement",
+    "addPayment": "Enregistrer le règlement",
+    "paymentCreated": "Règlement enregistré.",
+    "foreignPayments": "Un règlement dans une autre devise n’est pas compté : le moteur ne convertit jamais sans taux daté.",
+    "noDocuments": "Aucun document pour l’instant.",
+    "errors": {
+      "refused": "Cette saisie a été refusée : vérifiez les montants, les devises et les dates.",
+      "conflict": "Ce numéro de document existe déjà, ou cet espace existe déjà."
+    }
   }
 }

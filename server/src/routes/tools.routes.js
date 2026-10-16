@@ -12,6 +12,15 @@ import {
   saveScenario,
 } from '../controllers/scenarios.controller.js';
 import { EXPLICIT_SEGMENTS, themeByKey } from '../constants/comparator.js';
+import {
+  getCatalogue,
+  getControls,
+  getPinpad,
+  getService,
+  getSummary as getPostalSummary,
+  postAnnualTotal,
+} from '../controllers/finPostal.controller.js';
+import { annualTotalSchema, catalogueQuerySchema } from '../validation/finPostal.schemas.js';
 import { simulatorByKey } from '../constants/simulators.js';
 import { requireAdult, requireAuth } from '../middleware/auth.js';
 import { publicReadLimiter } from '../middleware/rateLimit.js';
@@ -43,6 +52,23 @@ comparator.get('/segments/:segment', asyncRoute(getSegment));
 // que ci-dessus, poids fournis par la personne — aucune écriture.
 comparator.post('/adequation', validateBody(usageFitSchema), asyncRoute(postUsageFit));
 router.use('/comparator', ...toolAccess('comparateur-bancaire'), comparator);
+
+// Référentiel Algérie Poste / CCP (P4-17). Libre d'accès comme le comparateur
+// bancaire : ce sont des données de référence, pas des données de compte.
+//
+// Ce que ces routes NE servent PAS : les montants. Aucune des 75 fiches n'est
+// publiable tant que la grille officielle datée n'est pas fournie, et la vue
+// publique les retire en disant pourquoi — « non publié » et « gratuit » ne
+// doivent jamais se ressembler.
+const postal = Router();
+postal.get('/', asyncRoute(getPostalSummary));
+postal.get('/services', validateQuery(catalogueQuerySchema), asyncRoute(getCatalogue));
+postal.get('/services/:id', asyncRoute(getService));
+postal.get('/pinpad', asyncRoute(getPinpad));
+postal.get('/controles', asyncRoute(getControls));
+// Calcul pur, aucune écriture : la sélection vient du corps de la requête.
+postal.post('/cout-annuel', validateBody(annualTotalSchema), asyncRoute(postAnnualTotal));
+router.use('/postal', ...toolAccess('referentiel-postal'), postal);
 
 // "Explorer" (P4-13, écran C20) : réservé aux 18 ans et plus (P3-18) — un
 // compte est nécessaire pour connaître l'âge, donc `requireAdult` s'ajoute à

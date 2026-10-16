@@ -66,7 +66,11 @@ SCREENS = {
     'C23': {'to': '/calendrier', 'task': 'P6-07'},
     'C24': {'to': '/notifications', 'task': 'P6-18'},
     'C25': {'to': '/confiance', 'task': 'P6-19'},
-    'C26': {'to': '/assistant-fincludia', 'task': 'P3-19'},
+    # Served, but not as a route: the deterministic assistant is a floating
+    # panel present on every screen (P3-07 / P3-19). `/assistant-fincludia`
+    # exists only under `/admin`, so pointing the screen at it made a dead
+    # link in the provenance matrix. Same shape as C22 for the same reason.
+    'C26': {'to': None, 'task': 'P3-19', 'note': "bulle d'assistant présente sur toutes les pages, ouverte aussi depuis la barre supérieure : pas une route"},
     # ---- lycéen ---------------------------------------------------------
     'LY01': {'to': '/compte/premiers-pas', 'task': 'P6-03'},
     'LY02': {'to': '/aujourdhui', 'task': 'P6-06', 'note': 'tableau de bord « Ma semaine »'},

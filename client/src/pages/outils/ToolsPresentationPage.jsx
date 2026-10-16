@@ -12,6 +12,7 @@ const tools = [
   { key: 'simulators', icon: Calculator, tone: 'tone-blue', to: '/outils/simulateurs', available: true },
   { key: 'jobOffers', icon: Briefcase, tone: 'tone-brass', to: '/outils/offres-emploi', available: true },
   { key: 'explorer', icon: Compass, tone: 'tone-green', to: '/outils/explorateur', available: true },
+  { key: 'postal', icon: Landmark, tone: 'tone-green', to: '/outils/postal', available: true },
   { key: 'credit', icon: CreditCard, tone: 'tone-brass', available: false },
   { key: 'invoice', icon: Receipt, tone: 'tone-clay', to: '/outils/facture', available: true },
 ];

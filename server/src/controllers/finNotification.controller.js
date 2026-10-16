@@ -1,6 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { NOTIFICATION_CATEGORIES, NOTIFICATION_TYPES } from '../constants/finNotification.js';
 import {
+  countUnread,
   generateReminders,
   getNotificationSettings,
   listNotifications,
@@ -20,6 +21,11 @@ export async function getNotifications(req, res) {
   await generateReminders(prisma, req.user.id);
   const notifications = await listNotifications(prisma, req.user.id, { category: req.query.category, read: req.query.read === undefined ? undefined : req.query.read === 'true' });
   res.json({ notifications, nonLues: notifications.filter((n) => !n.read).length });
+}
+
+// The badge of the top bar (P1-12): a number, nothing else.
+export async function getUnreadCount(req, res) {
+  res.json({ nonLues: await countUnread(prisma, req.user.id) });
 }
 
 export async function putNotificationRead(req, res) {

@@ -39,7 +39,7 @@
 
 .fin-figure-value {
   margin: 0;
-  font-family: var(--serif);
+  font-family: var(--display);
   font-size: 1.5rem;
   color: var(--text-h);
   font-variant-numeric: tabular-nums;
@@ -171,4 +171,223 @@
   margin-block-start: 10px;
   color: var(--accent);
   font-size: 0.9rem;
+}
+
+/* ======================================================================
+ * The common controls of the connected space (P1-12).
+ *
+ * Logical properties only, so the whole set mirrors in Arabic without a
+ * second stylesheet, and no state is carried by colour alone: every
+ * selected option also changes weight and keeps a visible focus ring.
+ * ====================================================================== */
+
+.fin-hypotheses {
+  margin: 0;
+  padding-inline-start: 18px;
+}
+
+/* ---- period selector -------------------------------------------------- */
+
+/* `min-inline-size: 0` is not cosmetic: a `fieldset` refuses to shrink below
+   the minimum width of its content, whatever the layout says. Inside the
+   content column of the connected space (264px of side menu taken) that quirk
+   pushed « Mon argent » into a horizontal page scroll at 1280px — found by the
+   site sweep, which measures the overflow rather than trusting the eye. */
+.fin-period,
+.fin-reality {
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.fin-period legend,
+.fin-reality legend {
+  padding: 0;
+  margin-block-end: 6px;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.fin-period-options,
+.fin-reality-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-inline-size: 0;
+}
+
+.fin-period-option,
+.fin-reality-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* The radio itself stays in the page and keeps its own focus ring: hiding it
+   with `display: none` would take it out of the tab order and out of the
+   accessibility tree, which is how a radio group stops being one. */
+.fin-period-option input,
+.fin-reality-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.fin-period-option:has(input:focus-visible),
+.fin-reality-option:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.fin-period-option.checked,
+.fin-reality-option.checked {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+/* ---- real / fictional ------------------------------------------------- */
+
+/* The « séparation visuelle forte » the client asks for: the fictional side
+   is a bordered, tinted block, not a different shade of the same card. */
+.fin-reality-fictional {
+  padding: 12px 14px;
+  border: 1px dashed var(--brass);
+  border-radius: var(--radius);
+  background: var(--brass-bg);
+}
+
+.fin-reality-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  color: var(--text-h);
+  font-size: 0.85rem;
+}
+
+/* ---- data quality banner --------------------------------------------- */
+
+.fin-quality {
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border-inline-start: 3px solid var(--warn);
+  border-radius: var(--radius-sm);
+  background: var(--warn-bg);
+}
+
+.fin-quality-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--text-h);
+  font-size: 0.88rem;
+}
+
+.fin-quality-line + .fin-quality-line {
+  margin-block-start: 6px;
+}
+
+/* ---- next action card ------------------------------------------------- */
+
+.fin-next-action {
+  margin: 0 0 24px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-inline-start: 4px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+/* The client's priority order, readable without the colour: the kicker names
+   the priority in words in the « Pourquoi ? » panel, and the stripe only
+   repeats it. */
+.fin-next-action-securite {
+  border-inline-start-color: var(--danger);
+}
+
+.fin-next-action-echeance {
+  border-inline-start-color: var(--warn);
+}
+
+.fin-next-action-budget {
+  border-inline-start-color: var(--blue);
+}
+
+.fin-next-action-apprentissage {
+  border-inline-start-color: var(--green);
+}
+
+.fin-next-action-kicker {
+  margin: 0 0 4px;
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fin-next-action-title {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+}
+
+.fin-next-action-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+}
+
+.fin-next-action-body dt {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.fin-next-action-body dd {
+  margin: 0;
+  color: var(--text-h);
+}
+
+.fin-next-action-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.fin-next-action-cta:hover {
+  background: var(--accent-hover);
+}
+
+@media (max-width: 520px) {
+  .fin-next-action-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0 0;
+  }
+
+  .fin-next-action-body dd {
+    margin-block-end: 8px;
+  }
 }

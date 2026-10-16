@@ -48,58 +48,59 @@ model User {
   // finPublic is set, it is what defines the account, not `accountType`
   // (kept only for the pre-FINCLUDIA features that still read it: comparator
   // segments, article targeting...).
-  finPublic              String?
+  finPublic               String?
   // Complementary roles (ex. SAL primary + COL complementary), same closed
   // list as finPublic, never containing finPublic itself. Free-form JSON
   // array of codes (small, bounded, validated at the application layer) —
   // not a join table: there is no extra data attached to a secondary role.
-  finSecondaryPublics    Json                   @default("[]")
+  finSecondaryPublics     Json                   @default("[]")
   // Age bracket, not a birth date: the server only ever needs to know whether
   // someone is "under18" (the 18+ gate, already settled project-wide) — a
   // precise date of birth would be more personal data than that requires
   // (rule 10, minimisation). The exact minimum age to register, and parental
   // consent, remain open (P6-01 point 7) — this column is ready for both.
-  finAgeRange            String?
-  finCountry             String?                @db.VarChar(2)
+  finAgeRange             String?
+  finCountry              String?                @db.VarChar(2)
   // ISO 4217, defaults to DZD (the only currency used anywhere in the
   // platform today): a placeholder until multi-currency is decided (P6-01
   // point 4), never shown as a final decision.
-  finCurrency            String                 @default("DZD") @db.VarChar(3)
-  finSituation           String?
-  finMainIntention       String?
-  finHorizon             String?
-  finOnboardedAt         DateTime?
+  finCurrency             String                 @default("DZD") @db.VarChar(3)
+  finSituation            String?
+  finMainIntention        String?
+  finHorizon              String?
+  finOnboardedAt          DateTime?
   // Target months of essential expenses the person wants set aside (screen C12,
   // P6-09). Null until THEY choose it: a default would be an invented
   // recommendation, which the client's own wording ("cible choisie par
   // l'utilisateur") rules out — F015/F016 read null as "non calculé", not 0.
-  finReserveTargetMonths Int?
+  finReserveTargetMonths  Int?
   // Per-type enable/opt-in (P6-18): { [type]: { enabled, optedIn } }. Absent
   // keys fall back to the catalogue's own default (constants/finNotification.js)
   // — this column only ever holds what someone actually changed.
-  finNotificationSettings Json @default("{}")
-  finProfileTransitions  FinProfileTransition[]
-  finConsents            FinConsent[]
-  finAuditLogs           FinAuditLog[]
-  learningFavorites      LearningFavorite[]
-  finCategories          FinCategory[]
-  finChanges             FinChange[]
-  finIncomes             FinIncome[]
-  finTransactions        FinTransaction[]
-  finOnboarding          FinOnboarding?
-  finBudgets             FinBudget[]
-  finEnvelopes           FinEnvelope[]
-  finRecurrences         FinRecurrence[]
-  finProvisions          FinProvision[]
-  finAssets              FinAsset[]
-  finSpaceMemberships    FinSpaceMember[]
-  finPaperPortfolio      FinPaperPortfolio?
-  finSpaceInvitesSent    FinSpaceInvite[]       @relation("SpaceInviteSender")
-  finSpaceInvitesTaken   FinSpaceInvite[]       @relation("SpaceInviteAcceptor")
-  finGoals               FinGoal[]
-  finDebts               FinDebt[]
-  finDebtPayments        FinDebtPayment[]
-  finNotifications       FinNotification[]
+  finNotificationSettings Json                   @default("{}")
+  finProfileTransitions   FinProfileTransition[]
+  finConsents             FinConsent[]
+  finAuditLogs            FinAuditLog[]
+  learningFavorites       LearningFavorite[]
+  finCategories           FinCategory[]
+  finChanges              FinChange[]
+  finIncomes              FinIncome[]
+  finTransactions         FinTransaction[]
+  finOnboarding           FinOnboarding?
+  finBudgets              FinBudget[]
+  finEnvelopes            FinEnvelope[]
+  finRecurrences          FinRecurrence[]
+  finProvisions           FinProvision[]
+  finAssets               FinAsset[]
+  finSpaceMemberships     FinSpaceMember[]
+  finPaperPortfolio       FinPaperPortfolio?
+  finSpaceInvitesSent     FinSpaceInvite[]       @relation("SpaceInviteSender")
+  finSpaceInvitesTaken    FinSpaceInvite[]       @relation("SpaceInviteAcceptor")
+  finGoals                FinGoal[]
+  finDebts                FinDebt[]
+  finDebtPayments         FinDebtPayment[]
+  finNotifications        FinNotification[]
+  finBusiness             FinBusiness?
 
   // E-Learning (P2-01)
   formationsCreated Formation[]
@@ -900,28 +901,28 @@ model FinAsset {
 // decides, kind by kind, what the others may see of theirs.
 
 model FinSpace {
-  id          String             @id @default(uuid())
+  id          String              @id @default(uuid())
   // One of SPACE_KINDS (constants/finSpace.js): flatshare, couple, household.
-  kind        String             @db.VarChar(20)
-  label       String             @db.VarChar(80)
+  kind        String              @db.VarChar(20)
+  label       String              @db.VarChar(80)
   // The currency the space's shared figures are expressed in. One per space:
   // the engine never converts without a dated rate, so a space that mixed
   // currencies could not total anything.
-  currency    String             @db.VarChar(3)
+  currency    String              @db.VarChar(3)
   // Default split rule for shared expenses (SPLIT_RULES). Used by P6-14; set
   // here because the client asks for it at creation.
-  splitRule   String             @default("equal") @db.VarChar(30)
-  note        String?            @db.VarChar(300)
+  splitRule   String              @default("equal") @db.VarChar(30)
+  note        String?             @db.VarChar(300)
   // The space is not itself a financial datum — it holds no amount — but it
   // carries the socle's traceability columns, because who created it and when
   // is part of the trail of every figure computed inside it.
-  source      String             @db.VarChar(20)
-  status      String             @db.VarChar(20)
-  version     Int                @default(1)
+  source      String              @db.VarChar(20)
+  status      String              @db.VarChar(20)
+  version     Int                 @default(1)
   archivedAt  DateTime?
   deletedAt   DateTime?
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
   members     FinSpaceMember[]
   invitations FinSpaceInvite[]
   expenses    FinSharedExpense[]
@@ -940,31 +941,31 @@ model FinSpace {
 // and an account that is erased leaves none behind — the complete deletion the
 // privacy text promises (P6-01 point 9).
 model FinSpaceMember {
-  id                  String             @id @default(uuid())
+  id                  String                     @id @default(uuid())
   spaceId             String
-  space               FinSpace           @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  space               FinSpace                   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   userId              String
-  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
   // One of SPACE_ROLES: owner, admin, member, viewer.
-  role                String             @db.VarChar(20)
+  role                String                     @db.VarChar(20)
   // What this member shares with the others, per data kind (SHAREABLE_KINDS),
   // at one of SHARING_LEVELS. The default is every kind `private`, and it is
   // the member — never an admin — who changes it.
-  sharing             Json               @default("{}")
+  sharing             Json                       @default("{}")
   // The name the others see. Separate from the account's own name on purpose:
   // joining a flatshare should not hand over one's legal name.
-  displayName         String?            @db.VarChar(60)
-  joinedAt            DateTime           @default(now())
+  displayName         String?                    @db.VarChar(60)
+  joinedAt            DateTime                   @default(now())
   leftAt              DateTime?
-  paidExpenses        FinSharedExpense[] @relation("ExpensePayer")
-  recordedExpenses    FinSharedExpense[] @relation("ExpenseRecorder")
+  paidExpenses        FinSharedExpense[]         @relation("ExpensePayer")
+  recordedExpenses    FinSharedExpense[]         @relation("ExpenseRecorder")
   shares              FinSharedShare[]
-  settlementsFrom     FinSettlement[]    @relation("SettlementFrom")
-  settlementsTo       FinSettlement[]    @relation("SettlementTo")
-  recordedSettlements FinSettlement[]    @relation("SettlementRecorder")
+  settlementsFrom     FinSettlement[]            @relation("SettlementFrom")
+  settlementsTo       FinSettlement[]            @relation("SettlementTo")
+  recordedSettlements FinSettlement[]            @relation("SettlementRecorder")
   goalContributions   FinSpaceGoalContribution[]
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
 
   // One membership per person per space. A second one would make "my role" a
   // question with two answers.
@@ -1237,16 +1238,16 @@ model FinSpaceGoal {
 // built from, rather than a single editable "allocated" number nobody can
 // attribute (unlike a personal goal, several people pay into this one).
 model FinSpaceGoalContribution {
-  id            String       @id @default(uuid())
+  id            String         @id @default(uuid())
   spaceGoalId   String
-  spaceGoal     FinSpaceGoal @relation(fields: [spaceGoalId], references: [id], onDelete: Cascade)
+  spaceGoal     FinSpaceGoal   @relation(fields: [spaceGoalId], references: [id], onDelete: Cascade)
   memberId      String
   member        FinSpaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
   amount        Int
-  currency      String       @db.VarChar(3)
+  currency      String         @db.VarChar(3)
   contributedAt DateTime
-  note          String?      @db.VarChar(300)
-  createdAt     DateTime     @default(now())
+  note          String?        @db.VarChar(300)
+  createdAt     DateTime       @default(now())
   deletedAt     DateTime?
 
   @@index([spaceGoalId])
@@ -2194,4 +2195,169 @@ model ComparatorMeta {
   dataUpdatedAt DateTime @default(now())
 
   @@map("comparator_meta")
+}
+
+// ---------------------------------------------------------------------------
+// Espace entreprise (P7-02) — le socle de l'ERP annoncé par l'annexe 1 du
+// contrat : entreprises, PME, PMI, micro-entreprises, auto-entrepreneurs,
+// micro-importateurs et professions libérales.
+//
+// CE QUI EST MODÉLISÉ ICI ne dépend d'aucun référentiel comptable : des tiers,
+// des documents de vente et d'achat tels que l'entreprise les émet ou les
+// reçoit, et les règlements qui les soldent. De quoi répondre à « qui me doit
+// quoi, qu'est-ce que je dois, et combien est réellement entré ce mois-ci ».
+//
+// CE QUI N'EST PAS MODÉLISÉ, et pourquoi : bilan, compte de résultat, TVA à
+// déclarer, amortissements, stock. Tout cela suppose le Système Comptable
+// Financier algérien et des règles fiscales datées que le client n'a pas
+// fournies. Les inventer produirait des états faux présentés comme
+// comptables — la faute la plus coûteuse que ce projet puisse commettre.
+// Voir `P7-01` et `BUSINESS_BLOCKED_STATEMENTS`.
+//
+// Le socle de métadonnées de `P6-02` s'applique à chaque table qui porte un
+// montant : scope, source, sourceRef, status, confidence, consentUses,
+// effectiveAt, collectedAt, version, archivedAt, deletedAt.
+
+model FinBusiness {
+  id                   String                @id @default(uuid())
+  userId               String                @unique
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                 String                @db.VarChar(160)
+  // Forme juridique DÉCLARÉE par le compte, pas déduite : les obligations
+  // attachées à chaque forme relèvent du droit algérien, que nous ne
+  // modélisons pas (P7-01).
+  legalForm            String?               @db.VarChar(40)
+  // Identifiants fiscaux et commerciaux : saisis tels quels, jamais validés
+  // contre un format inventé. Un NIF refusé à tort empêche d'enregistrer une
+  // entreprise réelle.
+  taxId                String?               @db.VarChar(40)
+  tradeRegister        String?               @db.VarChar(40)
+  statisticalId        String?               @db.VarChar(40)
+  activity             String?               @db.VarChar(160)
+  currency             String                @db.VarChar(3)
+  // Début de l'exercice : un mois (1-12). Le client n'a fourni aucune règle
+  // d'exercice, donc il est déclaré et non supposé janvier.
+  fiscalYearStartMonth Int                   @default(1)
+  scope                String                @default("business") @db.VarChar(20)
+  source               String                @db.VarChar(20)
+  sourceRef            String?               @db.VarChar(200)
+  status               String                @db.VarChar(20)
+  consentUses          Json                  @default("[]")
+  effectiveAt          DateTime              @default(now())
+  collectedAt          DateTime              @default(now())
+  version              Int                   @default(1)
+  archivedAt           DateTime?
+  deletedAt            DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  contacts             FinBusinessContact[]
+  documents            FinBusinessDocument[]
+  payments             FinBusinessPayment[]
+
+  @@map("fin_businesses")
+}
+
+model FinBusinessContact {
+  id          String                @id @default(uuid())
+  businessId  String
+  business    FinBusiness           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  // "client" | "supplier" (BUSINESS_CONTACT_KINDS). Un même tiers peut être
+  // les deux : il est alors enregistré deux fois, parce qu'un client et un
+  // fournisseur n'ont ni le même solde ni le même délai.
+  kind        String                @db.VarChar(10)
+  name        String                @db.VarChar(160)
+  taxId       String?               @db.VarChar(40)
+  email       String?               @db.VarChar(254)
+  phone       String?               @db.VarChar(40)
+  address     String?               @db.VarChar(300)
+  country     String?               @db.VarChar(2)
+  note        String?               @db.VarChar(300)
+  scope       String                @default("business") @db.VarChar(20)
+  source      String                @db.VarChar(20)
+  sourceRef   String?               @db.VarChar(200)
+  status      String                @db.VarChar(20)
+  consentUses Json                  @default("[]")
+  effectiveAt DateTime              @default(now())
+  collectedAt DateTime              @default(now())
+  version     Int                   @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  documents   FinBusinessDocument[]
+
+  @@index([businessId, kind])
+  @@map("fin_business_contacts")
+}
+
+model FinBusinessDocument {
+  id          String               @id @default(uuid())
+  businessId  String
+  business    FinBusiness          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  contactId   String?
+  contact     FinBusinessContact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  // "sale" | "purchase" (BUSINESS_DOCUMENT_KINDS) : ce que l'entreprise émet
+  // et ce qu'elle reçoit. Le sens du montant en dépend entièrement.
+  kind        String               @db.VarChar(10)
+  number      String               @db.VarChar(40)
+  label       String               @db.VarChar(200)
+  issuedAt    DateTime
+  dueAt       DateTime?
+  // Montants en centimes, comme partout dans le moteur. Hors taxe et taxe sont
+  // DÉCLARÉS tous les deux : le taux de TVA appliqué appartient au document
+  // réel, et aucun taux n'est supposé ici (voir P7-01).
+  amountExcl  Int
+  taxAmount   Int                  @default(0)
+  currency    String               @db.VarChar(3)
+  note        String?              @db.VarChar(300)
+  scope       String               @default("business") @db.VarChar(20)
+  source      String               @db.VarChar(20)
+  sourceRef   String?              @db.VarChar(200)
+  status      String               @db.VarChar(20)
+  confidence  String?              @db.VarChar(20)
+  consentUses Json                 @default("[]")
+  effectiveAt DateTime             @default(now())
+  collectedAt DateTime             @default(now())
+  version     Int                  @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  payments    FinBusinessPayment[]
+
+  // Un numéro de document est unique dans l'entreprise qui l'émet : deux
+  // factures portant le même numéro sont une erreur de saisie, pas deux
+  // factures.
+  @@unique([businessId, kind, number])
+  @@index([businessId, issuedAt])
+  @@map("fin_business_documents")
+}
+
+model FinBusinessPayment {
+  id          String              @id @default(uuid())
+  businessId  String
+  business    FinBusiness         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  documentId  String
+  document    FinBusinessDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  value       Int
+  currency    String              @db.VarChar(3)
+  receivedAt  DateTime
+  method      String?             @db.VarChar(20)
+  note        String?             @db.VarChar(300)
+  scope       String              @default("business") @db.VarChar(20)
+  source      String              @db.VarChar(20)
+  sourceRef   String?             @db.VarChar(200)
+  status      String              @db.VarChar(20)
+  consentUses Json                @default("[]")
+  effectiveAt DateTime            @default(now())
+  collectedAt DateTime            @default(now())
+  version     Int                 @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([businessId, receivedAt])
+  @@index([documentId])
+  @@map("fin_business_payments")
 }

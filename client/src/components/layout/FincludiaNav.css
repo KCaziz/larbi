@@ -1,0 +1,190 @@
+/* The navigation of the connected space (P1-12).
+ *
+ * Phone: the nine groups are a scrollable tab strip, and the entries of the
+ * group you are in sit on a second row below it. Computer: the same markup
+ * becomes a side menu with every group open.
+ *
+ * Logical properties throughout (inline-start, margin-inline, padding-block):
+ * in Arabic the menu, its indentation and its active marker move to the other
+ * side with no second stylesheet.
+ *
+ * Nothing here carries meaning by colour alone — the client asks for that
+ * explicitly. The current entry is marked by a border AND a weight AND
+ * `aria-current`, which React Router sets on an active NavLink. */
+
+.fin-nav {
+  font-size: 0.95rem;
+}
+
+.fin-nav-degraded {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-inline-start: 3px solid var(--warn);
+  background: var(--warn-bg);
+  color: var(--text-h);
+  font-size: 0.85rem;
+}
+
+.fin-nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---- the groups ------------------------------------------------------- */
+
+.fin-nav-groups {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-block-end: 1px solid var(--border);
+}
+
+.fin-nav-group-link,
+.fin-nav-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background-color 0.15s;
+}
+
+.fin-nav-group-link {
+  padding: 12px 14px;
+  border-block-end: 2px solid transparent;
+  margin-block-end: -1px;
+  font-weight: 500;
+}
+
+.fin-nav-group-link:hover,
+.fin-nav-entry:hover {
+  color: var(--text-h);
+}
+
+.fin-nav-group-link.active,
+.fin-nav-group-current > .fin-nav-group-link {
+  border-block-end-color: var(--accent);
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+/* ---- the entries of a group ------------------------------------------- */
+
+.fin-nav-entries {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* On a phone only the group you are in shows its entries: a second row under
+   the tabs — the client's « onglets + menu secondaire ». A closed group is
+   hidden rather than collapsed, so it costs no tab stop. */
+.fin-nav-group:not(.fin-nav-group-current) .fin-nav-entries {
+  display: none;
+}
+
+.fin-nav-entry {
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.fin-nav-entry.active {
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--accent-border);
+}
+
+.fin-nav-heading {
+  margin: 20px 0 6px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fin-nav-account {
+  padding-block-end: 4px;
+}
+
+/* The secondary row of the current group, on a phone. It is a child of its
+   group, so it is lifted out of the strip rather than stretching it: a tab
+   strip whose height depends on which tab is open jumps as you browse. */
+@media (max-width: 1023px) {
+  .fin-nav {
+    position: relative;
+    margin-block-end: 24px;
+    padding-block-end: 46px;
+  }
+
+  .fin-nav-group-current .fin-nav-entries {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 100%;
+    margin-block-start: -46px;
+    padding-block: 5px;
+  }
+}
+
+/* ---- computer: a side menu ------------------------------------------- */
+
+@media (min-width: 1024px) {
+  .fin-nav {
+    position: sticky;
+    inset-block-start: calc(var(--header-height) + 12px);
+    max-height: calc(100vh - var(--header-height) - 24px);
+    padding: 20px;
+    overflow-y: auto;
+    border-inline-end: 1px solid var(--border);
+  }
+
+  .fin-nav-groups,
+  .fin-nav-entries {
+    display: block;
+    overflow: visible;
+    border-block-end: 0;
+  }
+
+  .fin-nav-group {
+    margin-block-end: 10px;
+  }
+
+  .fin-nav-group-link {
+    padding: 6px 0;
+    border-block-end: 0;
+    border-inline-start: 2px solid transparent;
+    padding-inline-start: 10px;
+    margin-block-end: 0;
+  }
+
+  .fin-nav-group-link.active,
+  .fin-nav-group-current > .fin-nav-group-link {
+    border-block-end-color: transparent;
+    border-inline-start-color: var(--accent);
+  }
+
+  /* Every group is open on a computer: there is room, and a menu that hides
+     eight entries out of nine to save space it has is just a menu you have to
+     click twice. */
+  .fin-nav-group:not(.fin-nav-group-current) .fin-nav-entries {
+    display: block;
+  }
+
+  .fin-nav-entries {
+    margin-inline-start: 12px;
+  }
+
+  .fin-nav-entry {
+    padding: 6px 10px;
+  }
+}

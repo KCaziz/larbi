@@ -66,6 +66,24 @@ export default function FigureCard({ label, answer, formula = null, simulation =
               .map(([name, input]) => `${name} = ${input !== null && typeof input === 'object' ? JSON.stringify(input) : input}`)
               .join(' · ') || '—'}
           </dd>
+          {/* The client asks the « Pourquoi ? » panel for the formula, the
+              variables AND the hypotheses. The answer contract carries
+              `hypotheses` only when the calculation rests on one, so an empty
+              list prints nothing rather than an empty heading. */}
+          {answer.hypotheses?.length > 0 && (
+            <>
+              <dt>{t('fincludia.whyHypotheses')}</dt>
+              <dd>
+                <ul className="fin-hypotheses">
+                  {answer.hypotheses.map((hypothesis) => (
+                    <li key={typeof hypothesis === 'string' ? hypothesis : JSON.stringify(hypothesis)}>
+                      {typeof hypothesis === 'string' ? hypothesis : JSON.stringify(hypothesis)}
+                    </li>
+                  ))}
+                </ul>
+              </dd>
+            </>
+          )}
           <dt>{t('fincludia.whyComputedAt')}</dt>
           <dd>{formatDate(i18n.language, answer.calcule_le)}</dd>
         </dl>

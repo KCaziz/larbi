@@ -1,0 +1,180 @@
+/* Référentiel Algérie Poste / CCP (P4-17).
+   Propriétés logiques partout : la page se lit en arabe sans second jeu de
+   règles. Aucun sens porté par la couleur seule — chaque état porte aussi un
+   mot ou une icône. */
+
+.postal-counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 20px 0 16px;
+}
+
+.postal-counts div {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.postal-counts dt {
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.postal-counts dd {
+  margin: 4px 0 0;
+  color: var(--text-h);
+  font-family: var(--display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.postal-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.postal-kinds li {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.postal-kind {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.postal-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-block-end: 16px;
+}
+
+.postal-list,
+.postal-undocumented,
+.postal-blocked {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.postal-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.postal-card {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.postal-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.postal-card h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.postal-badge {
+  padding: 2px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Les natures que le client distingue. Chacune garde son mot : la pastille ne
+   fait que le répéter en couleur. */
+.postal-badge-tarif {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.postal-badge-plafond {
+  border-color: var(--warn);
+  background: var(--warn-bg);
+}
+
+.postal-badge-dlai {
+  border-color: var(--blue);
+  background: var(--blue-bg);
+}
+
+.postal-meta {
+  margin: 6px 0 0;
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.postal-conditions {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+}
+
+.postal-tariff {
+  margin: 10px 0 0;
+  padding-block-start: 8px;
+  border-block-start: 1px dashed var(--border-strong);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+.postal-undocumented li,
+.postal-blocked li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  border-block-end: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.postal-controls {
+  margin: 0;
+  padding-inline-start: 20px;
+}
+
+.postal-controls li {
+  margin-block-end: 16px;
+}
+
+.postal-controls p {
+  margin: 0 0 4px;
+  font-size: 0.88rem;
+}
+
+.postal-control-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-h);
+}
+
+.postal-control-limit {
+  color: var(--text-h);
+}
+
+.postal-control-proof,
+.postal-control-impact {
+  color: var(--text);
+}

@@ -22,7 +22,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--serif);
+  font-family: var(--display);
   font-size: 1.4rem;
   font-weight: 500;
   letter-spacing: -0.02em;
@@ -30,18 +30,13 @@
   text-decoration: none;
 }
 
+/* La marque est une image à fond transparent : pas de pastille colorée
+   derrière elle. Le dégradé officiel est DANS le dessin, et le poser aussi en
+   fond ferait deux dégradés qui se contredisent. */
 .brand-mark {
-  display: grid;
-  place-items: center;
   width: 32px;
   height: 32px;
-  border-radius: 8px;
-  background: var(--accent);
-  color: var(--on-accent);
-  font-family: var(--serif);
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: 0;
+  object-fit: contain;
 }
 
 .nav-panel {

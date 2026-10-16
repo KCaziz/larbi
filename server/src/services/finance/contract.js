@@ -19,6 +19,11 @@
 // envelope, and the interface never recomputes a value of its own.
 
 import { algorithmById, formulaById } from '../../constants/finance.js';
+// Les chiffres de l'espace entreprise (P7-02) portent le même contrat que ceux
+// du client, mais vivent dans leur propre catalogue : le catalogue F001-F057
+// est celui du classeur, et y mélanger des identifiants de notre fait le
+// rendrait impossible à relire face à sa source.
+import { businessFormulaById } from '../../constants/finBusiness.js';
 
 // `unite` as the client wants it: a money result carries the currency actually
 // used, a rate says it is a decimal to be shown as a percentage.
@@ -47,7 +52,7 @@ function resolveUnit(unit, currency) {
  * can say WHY instead of showing a zero.
  */
 export function computed(id, result, { inputs = {}, currency, hypotheses = null, warnings = [], sources = null, now = new Date() } = {}) {
-  const formula = formulaById(id);
+  const formula = formulaById(id) ?? businessFormulaById(id);
   const algorithm = formula ? null : algorithmById(id);
   if (!formula && !algorithm) throw new Error(`Unknown formula or algorithm: ${id}`);
 

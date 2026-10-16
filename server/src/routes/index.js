@@ -32,6 +32,7 @@ import finSpaceRoutes from './finSpace.routes.js';
 import finPaperRoutes from './finPaper.routes.js';
 import finFundingRoutes from './finFunding.routes.js';
 import finNotificationRoutes from './finNotification.routes.js';
+import finBusinessRoutes from './finBusiness.routes.js';
 import finTrustRoutes from './finTrust.routes.js';
 import finSearchRoutes from './finSearch.routes.js';
 import finPasseportRoutes from './finPasseport.routes.js';
@@ -71,6 +72,8 @@ router.use('/fin', finSpaceRoutes);
 router.use('/fin', finPaperRoutes);
 router.use('/fin', finFundingRoutes);
 router.use('/fin', finNotificationRoutes);
+// Espace entreprise (P7-02) : socle de l'ERP annoncé par l'annexe 1 du contrat.
+router.use('/fin', finBusinessRoutes);
 router.use('/fin', finTrustRoutes);
 router.use('/fin', finSearchRoutes);
 router.use('/fin', finPasseportRoutes);

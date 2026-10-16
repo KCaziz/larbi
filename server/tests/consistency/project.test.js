@@ -124,10 +124,45 @@ describe('client <-> server contract', () => {
 
   test('every navigation entry (main menu, footer, account tabs, admin menu) leads to a route', () => {
     const specific = clientRoutes().filter((r) => r !== '/*').map((r) => patternToRegex(r));
-    const sources = ['src/config/navigation.js', 'src/config/adminNav.js', 'src/components/layout/AccountNav.jsx'];
+    const sources = ['src/config/navigation.js', 'src/config/adminNav.js', 'src/config/fincludiaMenu.js'];
     const targets = sources.flatMap((s) => [...read(CLIENT, s).matchAll(/to:\s*'(\/[^']*)'/g)].map((m) => m[1]));
     assert.ok(targets.length >= 15);
     assert.deepEqual(targets.filter((tg) => !specific.some((re) => re.test(tg))), []);
+  });
+
+  // Since P1-12 the SERVER decides the menu of the connected space: it sends
+  // the routes, the client only writes their label. So the check that matters
+  // is no longer on a client array — it is that every route the server can put
+  // in a menu is a route the client actually serves.
+  //
+  // Without this, a menu entry pointing at nothing is only visible to whoever
+  // clicks it, for the public that has it. That is exactly how the assistant's
+  // dead link survived in the journey registry.
+  test('every route the server can put in the menu leads to a client route', async () => {
+    const specific = clientRoutes().filter((r) => r !== '/*').map((r) => patternToRegex(r));
+    const { MENU_GROUPS, OUT_OF_MENU_ROUTES } = await import('../../src/constants/finNavigation.js');
+    const targets = [...MENU_GROUPS.flatMap((group) => group.routes), ...OUT_OF_MENU_ROUTES];
+    assert.ok(targets.length >= 20, `only ${targets.length} routes in the menu`);
+    assert.deepEqual(targets.filter((tg) => !specific.some((re) => re.test(tg))), []);
+  });
+
+  // And the label side of the same contract: a route the server sends falls
+  // back to its raw path when the client has no label for it, which is better
+  // than hiding a page the account is entitled to — but it should never happen.
+  test('every route the server can put in the menu has a label in the client', async () => {
+    const { MENU_GROUPS } = await import('../../src/constants/finNavigation.js');
+    const labels = read(CLIENT, 'src/config/fincludiaMenu.js');
+    const missing = MENU_GROUPS.flatMap((group) => group.routes).filter((route) => !labels.includes(`'${route}':`));
+    assert.deepEqual(missing, []);
+  });
+
+  // Every screen of the client's map that we serve must be reachable without
+  // typing its address: in a menu group, or deliberately named as belonging to
+  // the top bar or the account.
+  test('no served screen is unreachable from the navigation', async () => {
+    const { unreachableRoutes, danglingMenuRoutes } = await import('../../src/constants/finNavigation.js');
+    assert.deepEqual(unreachableRoutes(), []);
+    assert.deepEqual(danglingMenuRoutes(), []);
   });
 });
 
@@ -292,6 +327,72 @@ describe('database schema', () => {
     assert.ok(folders.length >= 4);
     for (const f of folders) assert.ok(existsSync(path.join(dir, f, 'migration.sql')), f);
     assert.deepEqual([...folders].sort(), folders);
+  });
+});
+
+// Les deux livrables que le contrat exige et que le dépôt génère (P5-07).
+//
+// Ils sont vérifiés plutôt que relus : un inventaire de licences qui oublie une
+// dépendance ajoutée la semaine dernière est pire qu'absent, parce qu'il a
+// l'air complet. Le test ne compare pas les fichiers caractère par caractère —
+// ils portent une date de génération — mais ce qu'ils doivent contenir.
+describe('livrables contractuels (LIVRABLES/)', () => {
+  const inventory = read(ROOT, 'LIVRABLES', 'INVENTAIRE_COMPOSANTS.md');
+  const matrix = read(ROOT, 'LIVRABLES', 'MATRICE_RECETTE.md');
+  const cited = (file, token) => file.includes('`' + token + '`');
+
+  test("l'inventaire des composants cite chaque dépendance réellement déclarée", () => {
+    // Article 14 du contrat. La liste ne vient pas d'une relecture : elle vient
+    // des `package.json`, donc elle ne peut pas oublier ce qui a été installé.
+    const missing = [];
+    for (const dir of ['server', 'client']) {
+      const pkg = JSON.parse(read(ROOT, dir, 'package.json'));
+      for (const key of ['dependencies', 'devDependencies']) {
+        for (const name of Object.keys(pkg[key] ?? {})) {
+          if (!cited(inventory, name)) missing.push(`${dir}: ${name}`);
+        }
+      }
+    }
+    assert.deepEqual(missing, [], 'relancer : npm run deliverables');
+  });
+
+  test("l'inventaire signale les licences à obligations plutôt que de les noyer", () => {
+    // Une licence copyleft présente et non signalée est exactement ce que
+    // l'article 14 demande d'éviter : le Client doit pouvoir décider en
+    // connaissance de cause, pas découvrir l'obligation après la livraison.
+    const copyleft = new Set(['GPL', 'LGPL', 'AGPL', 'MPL', 'EPL', 'CDDL']);
+    const detail = inventory.split('## Détail')[1] ?? '';
+    const rows = detail.split('\n').filter((line) => line.startsWith('| '));
+    assert.ok(rows.length >= 20, `${rows.length} lignes de détail`);
+
+    const flagged = inventory.split('## Licences à signaler au Client')[1]?.split('## Répartition')[0] ?? '';
+    const shouldBeFlagged = rows
+      .map((line) => line.split('|').map((cell) => cell.trim()))
+      .filter((cells) => cells.length > 6 && cells[6].split(/[^A-Za-z]+/).some((word) => copyleft.has(word.toUpperCase())))
+      .map((cells) => cells[3]);
+    assert.ok(shouldBeFlagged.length > 0, 'aucune licence à obligations : vérifier la détection');
+    for (const name of shouldBeFlagged) assert.ok(flagged.includes(name), `non signalé : ${name}`);
+  });
+
+  test('la matrice de recette liste chaque livrable du plan, avec son état', () => {
+    // Annexe 2 du contrat. Un livrable absent de la matrice est un livrable que
+    // la recette ne regardera pas.
+    const ids = [...read(ROOT, 'TASKS.md').matchAll(/^### (P\d-\d\d) — /gm)].map((m) => m[1]);
+    assert.ok(ids.length >= 30);
+    const absent = ids.filter((id) => !cited(matrix, id));
+    assert.deepEqual(absent, [], 'relancer : npm run deliverables');
+  });
+
+  test('la matrice ne présente jamais un livrable bloqué comme livré', () => {
+    // Le point sensible du document : il sert à la recette et au dernier quart
+    // du paiement. Un « livré » de trop se lit comme une facturation de trop.
+    const blocked = [...read(ROOT, 'TASKS.md').matchAll(/^### (P\d-\d\d) — [^\n]*\r?\n- Statut : `⛔ blocked`/gm)].map((m) => m[1]);
+    assert.ok(blocked.length > 0);
+    for (const id of blocked) {
+      const row = matrix.split('\n').find((line) => cited(line, id));
+      assert.ok(row, `${id} absent de la matrice`);
+      assert.match(row, /Bloqué/, id);
+    }
   });
 });
 

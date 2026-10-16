@@ -262,6 +262,99 @@ Tests effectués :
 
 ---
 
+## <a id="p1-12"></a>P1-12 — Navigation de l'espace connecté, barre supérieure et contrôles communs
+
+**Quatorze écrans du produit n'étaient reliés à aucun menu.** Les pages FINCLUDIA étaient déclarées à plat sous `RequireAuth`, et la seule navigation du projet vivait dans `AccountLayout`, donc sous `/compte` uniquement : `/aujourdhui`, `/budget`, `/dettes`, `/calendrier` et dix autres n'étaient atteignables qu'en tapant leur adresse. Le défaut n'était visible dans aucun test parce que chaque test, comme chaque parcours, naviguait par URL. **Un balayage qui visite les pages par leur adresse ne prouve rien sur leur accessibilité.**
+
+### La règle est au serveur, l'écriture au client
+
+Les neuf entrées du client (spécification § 2–3) sont désormais une réponse d'API, pas un tableau dans le navigateur. `GET /fin/parcours` renvoie `menu` : les neuf groupes, dans l'ordre du client, **déjà réduits aux routes que ce compte peut ouvrir**, pour son public et pour son âge. `components/layout/FincludiaNav.jsx` n'écrit que le libellé et l'icône de ce que le serveur a nommé.
+
+Ce partage n'est pas une préférence d'architecture, c'est ce qui empêche une classe de défaut entière : **un menu qui tient sa propre liste peut contredire la règle qu'il est censé montrer**, et c'est exactement ce que faisait l'ancien (quatorze entrées écrites à la main, filtrées après coup). Le découpage est explicite dans `constants/finNavigation.js` : les neuf noms et leur ordre sont **du client** ; la répartition des routes sous ces noms est **de nous**, parce que l'onglet `19_Cartes_Parcours` dit quels écrans un public voit, jamais comment ils sont groupés.
+
+**Le vocabulaire par public reste servi en français seul et n'est pas le menu.** L'onglet 19 donne les mots du client par public (« Ma semaine », « Notre mois », « Aujourd'hui foyer ») et ils continuent d'être renvoyés dans `navigation`. Les utiliser comme menu aurait donné un menu français à un lecteur arabophone : la structure i18n l'emporte, le vocabulaire du client reste une réserve déclarée.
+
+### Deux garde-fous qui remplacent une relecture
+
+`unreachableRoutes()` et `danglingMenuRoutes()` sont les deux moitiés du même contrat, vérifiées par `tests/consistency/project.test.js` :
+
+- une route servie qui n'est dans **aucun** groupe et qui n'est pas **nommée** comme appartenant à la barre supérieure ou au compte est une page qu'on ne peut atteindre qu'en tapant son adresse ;
+- un groupe qui revendique une route que personne ne sert est un lien mort.
+
+Le second a trouvé un vrai défaut en passant. **`SCREEN_ROUTES.C26` pointait sur `/assistant-fincludia`, qui n'existe que sous `/admin`** : l'assistant côté utilisateur est une bulle flottante, pas une page. Le registre des parcours — qui *est* la matrice de provenance de `P6-21` — annonçait donc un écran servi par une route inexistante. Corrigé dans le script générateur **et** dans le fichier généré, sur le patron de `C22` (recherche globale) : `to: null` avec la note qui dit pourquoi. **Un lien mort dans un registre ne se voit que pour le public qui l'a, et seulement si quelqu'un clique.**
+
+### `router.use` sans chemin, côté interface cette fois
+
+L'équivalent client du piège de `P6-17` : la navigation masque les entrées réservées aux majeurs, et le test qui compte n'est pas « un mineur ne voit pas les dettes » mais **« masquer ne coûte rien d'autre à un salarié »** — la liste des routes qui disparaissent entre `adult: true` et `adult: false` doit être **exactement** les quatre réservées. Un test qui ne vérifie que le masquage ne voit pas le sur-masquage, et un menu qui protège un mineur en lui retirant ses propres pages est pire que le défaut qu'il corrige.
+
+Même raison pour les défauts de `menuFor()` : **aucun public, pas majeur**. Un défaut qui supposerait la majorité ferait de chaque argument oublié une fuite.
+
+### Un markup, deux dispositions
+
+Latéral sur ordinateur, onglets + menu secondaire sur téléphone : **une seule structure, commutée par CSS**. Rendre le menu deux fois doublerait les arrêts de tabulation et le ferait lire deux fois par un lecteur d'écran.
+
+Sur téléphone, le menu secondaire est **déduit de la route courante**, pas tenu en état : le groupe ouvert est le groupe où vous êtes. Pas de bascule, donc pas d'`aria-expanded` à maintenir vrai, et tout le menu reste atteignable à la touche Tab seule. Les entrées du groupe courant sont positionnées hors du ruban (`position: absolute`, `inset-inline`) : **un ruban d'onglets dont la hauteur dépend de l'onglet ouvert saute quand on navigue.**
+
+`display: contents` aurait été plus simple pour aplatir la liste imbriquée sur téléphone, et a été écarté : il retire la sémantique de liste de l'arbre d'accessibilité dans plusieurs navigateurs, ce qui est un prix inacceptable sur une tâche dont l'accessibilité est une exigence du client.
+
+### Deux défauts que le menu latéral a révélés
+
+**Un `fieldset` ne se réduit pas sous la largeur minimale de son contenu**, quelle que soit la mise en page. Invisible tant que les pages occupaient toute la largeur ; dès que le menu latéral prend 264 px, le sélecteur de période a poussé « Mon argent » en défilement horizontal à 1280 px. `min-inline-size: 0` sur le `fieldset` et sur sa rangée d'options. Trouvé par le balayage, qui **mesure** `scrollWidth - innerWidth` au lieu de s'en remettre à l'œil.
+
+**Changer de période démontait la page.** `useApi` vide ses données quand le chemin change — à raison en général : deux ressources différentes ne doivent jamais s'afficher sous l'URL l'une de l'autre. Mais ici les deux requêtes sont la **même** ressource sur deux fenêtres, et le garde-fou `if (loading && !data) return <LoadingState/>` remplaçait toute la page par un indicateur de chargement : **le sélecteur disparaissait au moment précis où on s'en servait**, avec la position de défilement. La page garde maintenant la réponse précédente pendant que la suivante charge (`aria-busy` sur la section), et c'est la page qui en décide — pas `useApi`, dont le comportement par défaut est le bon.
+
+L'état dérivé est tenu par `useState` ajusté pendant le rendu, pas par un `useRef` : React rend à nouveau immédiatement avec la nouvelle valeur, alors qu'une référence écrite pendant le rendu est une valeur que le rendu suivant peut ne pas voir (le linter le signale, et il a raison).
+
+### Le clavier se mesure en appuyant sur Tab
+
+`tests/e2e/fin-navigation-journey.test.js` envoie de **vrais événements clavier** (`Input.dispatchKeyEvent`) et marche jusqu'à ce que le focus atteigne l'entrée visée, puis valide avec Entrée. Aucun `focus()` nulle part : un test qui place le focus lui-même ne prouve rien sur l'ordre, qui est précisément ce qu'on vérifie. Même logique pour la disposition : « latéral » est une affirmation géométrique, donc elle est **mesurée** (`getBoundingClientRect`), pas supposée.
+
+Et le piège de `P6-21` est rappelé en tête du fichier : `b.hasText(x)` renvoie une **expression**, pas un booléen. Les helpers `shows` / `hides` l'évaluent.
+
+### Deux pièges d'attente, dont un qui a échoué d'abord
+
+Le premier test est tombé parce qu'il attendait `.fin-nav` — qui apparaît tout de suite, avec le bloc du compte — alors que les groupes arrivent **après** `GET /fin/parcours`. **Attendre le mauvais élément est la façon dont un test de menu passe sur un menu encore vide.** Corrigé en attendant `.fin-nav-groups`.
+
+Et quand la carte ne peut pas être lue, la navigation **le dit** au lieu de deviner : tout montrer offrirait des pages que le compte ne peut pas ouvrir, tout masquer ferait passer un hoquet réseau pour un produit plus petit.
+
+### La barre supérieure : un compteur qui ne génère rien
+
+`GET /fin/notifications/non-lues` est une route à part, un seul `count`, et **sans** `generateReminders` — volontairement. La génération des rappels coûte quatre requêtes et écrit des lignes, et le badge est lu sur **chaque** page de l'espace connecté. La conséquence est déclarée plutôt que cachée : **le badge peut être en retard, jamais en avance.** Le supprimer suppose de générer les rappels sur planification, ce que cette plateforme n'a pas (`P5-04`).
+
+Le compte est dans le **nom accessible**, pas seulement dans la pastille : un petit disque coloré à côté d'une icône est exactement le sens porté par la vue seule que le client interdit.
+
+### Un bouton d'aide ne peut pas être mort
+
+Le client met « aide / assistant » en permanence dans la barre. La bulle, elle, ne s'affichait pas du tout quand rien n'était publié (`P3-07`) — donc le bouton de la barre n'aurait rien ouvert les jours sans contenu. La bulle **répond désormais à la barre dans tous les cas** ; seul son lanceur flottant reste conditionné au contenu, et le panneau vide est son propre état vide, avec le lien contact que son pied de page offre dans tous les états.
+
+Le mécanisme est un **événement DOM** (`fincludia:assistant-open`) : les deux composants n'ont pour ancêtre commun que la mise en page, et y faire passer un booléen ferait rendre à nouveau chaque page à l'ouverture du panneau.
+
+### Ce qui a été supprimé, et pourquoi
+
+- `components/layout/AccountNav.jsx` / `.css` — remplacés par la navigation de l'espace connecté.
+- `config/journeyMap.js` — **mort et contradictoire** : il recopiait côté client la carte des parcours du client, avec ses routes, alors que le serveur en est désormais la source. Aucun module ne l'importait. La spécification interdit la seconde implémentation d'un écran ; une seconde implémentation de la **carte** est le même défaut un étage plus haut.
+- `today.staleData` et `.today-quality` — dits maintenant par `DataQualityBanner`.
+
+### Le contrôle qui n'a pas d'écran
+
+Des cinq contrôles réutilisables demandés, quatre sont livrés **et utilisés** : la carte KPI (`FigureCard`, depuis `P6-03`, qui montre désormais aussi les `hypotheses` du contrat de réponse), la carte « Prochaine action », la bannière de qualité et le sélecteur de période. Le **sélecteur Réel / Fictif** est livré sans consommateur, et c'est un constat, pas un oubli : **aucun écran actuel ne propose un choix entre les deux mondes.** Le produit les sépare par écran (`/patrimoine` réel, `/portefeuille` fictif) ou les montre côte à côte (`/espaces`, où masquer une moitié retirerait l'information que la séparation sert à rendre visible). La règle qu'il protège est tenue par le moteur et montrée en permanence par le badge « SIMULATION ». Il attend le premier écran qui montrera les deux et laissera choisir.
+
+### « Prochaine action » : quelle partie est une donnée
+
+Le client demande titre, raison, impact, bouton, « Pourquoi ? ». Trois de ces parties sont des données du serveur ; la quatrième ne pouvait pas l'être, et le dire était la seule option honnête :
+
+- **raison** — interpolée depuis le `contexte` que le serveur calcule (trois mouvements à classer, deux jours avant une échéance). Un compte, jamais une estimation.
+- **impact** — décrit **notre logiciel**, pas l'argent du lecteur : « vos dépenses par catégorie deviennent calculables » est un fait sur le produit. Aucun chiffre n'est promis, parce qu'aucun n'est connu : une carte qui annoncerait « vous économiseriez 4 000 DZD » en inventerait un.
+- **« Pourquoi ? »** — la priorité retenue et la règle : un ordre fixe (sécurité, échéance, budget, apprentissage), plafonné à trois. **Ce n'est pas une prédiction**, et la carte le dit.
+
+Seule la première action reçoit la carte ; les suivantes restent une liste. Trois cartes de poids égal seraient trois « prochaines » actions.
+
+### Le sélecteur de période, et la semaine qu'on n'a pas voulu définir
+
+« Mois » n'envoie **aucun** paramètre : le défaut du serveur est déjà le mois calendaire, et le laisser tel quel garde le comportement existant intact. « 90 jours » et « semaine » sont des fenêtres **glissantes**, « année » l'année calendaire. La semaine glissante est un choix, pas une facilité : **le premier jour de la semaine dépend de la locale** (lundi, samedi, dimanche), et une semaine calendaire aurait fait changer le chiffre selon la langue de lecture, sans que rien ne le dise.
+
+---
+
 ## <a id="p2-01"></a>P2-01 — Modèle de données E-Learning
 
 Réalisé (modèle de données uniquement — aucun endpoint, ils appartiennent à P2-02 et suivantes) :

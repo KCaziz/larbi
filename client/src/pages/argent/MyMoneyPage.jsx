@@ -13,6 +13,8 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
+import PeriodSelector from '../../components/fincludia/PeriodSelector.jsx';
+import { periodRange } from '../../lib/finControls.js';
 import { toMinorUnits } from '../../lib/money.js';
 import './MyMoney.css';
 
@@ -28,18 +30,53 @@ const EMPTY_FILTERS = { text: '', kind: '', categoryId: '', uncategorised: false
 export default function MyMoneyPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const [period, setPeriod] = useState('mois');
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [applied, setApplied] = useState(EMPTY_FILTERS);
   const [message, setMessage] = useState(null);
   useDocumentMeta(t('myMoney.title'), t('myMoney.intro'));
 
   const query = useMemo(() => buildQuery(applied, user?.finCurrency ?? 'DZD'), [applied, user]);
-  const synthesis = useApi('/fin/argent/synthese');
+  // The client's four windows (P1-12). The server computes the figures for the
+  // period it is given; the browser only says which window was chosen, and
+  // « mois » says nothing at all because that is already the server's default.
+  //
+  // The query string is built WITHOUT its `?`, and the `?` is written in the
+  // URL itself, like the history request below. That is not a style choice: the
+  // project's consistency check reads the literal path of every call to make
+  // sure the server serves that method there, and it can only do that when the
+  // part before the `?` is literal.
+  const periodQuery = useMemo(() => {
+    const range = periodRange(period);
+    return range ? `from=${range.from}&to=${range.to}` : '';
+  }, [period]);
+  const synthesis = useApi(`/fin/argent/synthese?${periodQuery}`);
+  // Changing the period changes the REQUEST, and `useApi` clears its data on a
+  // path change — for a good reason in general (two different resources must
+  // never be shown under each other's URL). Here the two requests are the same
+  // resource over two windows, so the previous answer stays on screen while the
+  // next one loads.
+  //
+  // Without this, choosing a period replaced the whole page with the loading
+  // state, which unmounts the selector the person had just used along with
+  // their scroll position: the control disappeared at the moment it was used.
+  // The client's loading rule (tab `14_Etats_Alertes`) asks for the opposite —
+  // a skeleton, and nothing lost.
+  // State adjusted during render rather than a ref: React re-renders at once
+  // with the new value, and a ref written while rendering is a value the next
+  // render may not see.
+  const [kept, setKept] = useState(null);
+  if (synthesis.data && synthesis.data !== kept) setKept(synthesis.data);
+  const loaded = synthesis.data ?? kept;
+  const refreshing = synthesis.status === 'loading' && !synthesis.data;
   const history = useApi(`/fin/transactions?${query}`);
   const categories = useApi('/fin/categories');
   const references = useApi('/fin/argent/references');
 
-  const currency = synthesis.data?.synthese?.currency ?? user?.finCurrency ?? 'DZD';
+  // From the kept answer, never from the in-flight one: while a window reloads
+  // it would fall back to the account's default currency and the amounts
+  // already on screen would be relabelled for an instant.
+  const currency = loaded?.synthese?.currency ?? user?.finCurrency ?? 'DZD';
   const formulas = useMemo(() => new Map((references.data?.formulas ?? []).map((formula) => [formula.id, formula])), [references.data]);
   const flatCategories = useMemo(
     () => (categories.data?.groups ?? []).flatMap((group) => group.categories.map((category) => ({ ...category, family: group.label }))),
@@ -60,10 +97,10 @@ export default function MyMoneyPage() {
     }
   }
 
-  if (synthesis.status === 'loading' && !synthesis.data) return <LoadingState />;
+  if (!loaded && synthesis.status === 'loading') return <LoadingState />;
   if (synthesis.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={synthesis.reload} />;
 
-  const s = synthesis.data.synthese;
+  const s = loaded.synthese;
 
   return (
     <>
@@ -79,11 +116,12 @@ export default function MyMoneyPage() {
             converting without a dated rate would produce a wrong number. */}
         {s.mixedCurrencies && <Notice variant="action-needed">{t('myMoney.mixedCurrencies')}</Notice>}
 
-        <section>
+        <section aria-busy={refreshing || undefined}>
+          <PeriodSelector value={period} onChange={setPeriod} name="money-period" />
           <h2>
             {t('myMoney.synthesisTitle')}{' '}
             <span className="money-period">
-              {formatDate(i18n.language, synthesis.data.periode.debut)} – {formatDate(i18n.language, synthesis.data.periode.fin)}
+              {formatDate(i18n.language, loaded.periode.debut)} – {formatDate(i18n.language, loaded.periode.fin)}
             </span>
           </h2>
           <div className="fin-figure-grid">
