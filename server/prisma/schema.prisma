@@ -1583,6 +1583,11 @@ model Formation {
   // "standard" | "premium": lowest access level allowed to enrol.
   // Checked server-side, never only in the UI (TASKS.md rule 1).
   requiredAccessLevel String @default("standard")
+  // Account types this formation is suggested to first (client request: a
+  // simple suggestion by account type, never a computed score). Empty = no
+  // particular order. Same JSON-array shape as Article.targetAccountTypes,
+  // same reason: no array column type on MySQL/MariaDB.
+  targetAccountTypes  Json   @default("[]")
 
   categoryId String?
   category   FormationCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)

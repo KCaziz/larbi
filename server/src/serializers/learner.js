@@ -80,7 +80,7 @@ export const toPublicCertificate = (c) => ({
 });
 
 // Card in the catalogue / "my formations".
-export function toCatalogItem(formation, { accessible, enrollment }) {
+export function toCatalogItem(formation, { accessible, enrollment, recommended = false }) {
   return {
     slug: formation.slug,
     title: formation.title,
@@ -93,6 +93,9 @@ export function toCatalogItem(formation, { accessible, enrollment }) {
     courseCount: formation.courses.length,
     requiredAccessLevel: formation.requiredAccessLevel,
     accessible,
+    // Suggested to this account type (client request): a flag ordering the
+    // catalogue, never a hidden formation and never a computed score.
+    recommended,
     published: formation.status === 'published',
     archived: formation.status === 'archived',
     enrollment: toEnrollmentSummary(enrollment, formation.courses, formation.quizzes),

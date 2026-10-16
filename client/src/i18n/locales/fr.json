@@ -25,6 +25,7 @@
     "menuOpen": "Ouvrir le menu",
     "menuClose": "Fermer le menu",
     "accountNav": "Navigation du compte",
+    "journeyNav": "Navigation FINCLUDIA",
     "main": "Navigation principale",
     "account": "Mon espace",
     "logout": "Déconnexion",
@@ -111,14 +112,24 @@
       },
       "tools": {
         "title": "Outils métier",
-        "body": "Simulateur de crédit et générateur de facture pensés pour les auto-entrepreneurs, PME et PMI.",
+        "body": "Comparateur bancaire, simulateurs et générateur de facture, utiles aussi bien à un particulier qu'à une entreprise.",
         "cta": "Voir les outils"
       }
     },
     "accounts": {
-      "title": "Un compte adapté à votre profil",
-      "body": "Chaque compte est associé à une catégorie et à un niveau d'accès, qui déterminent les contenus et fonctionnalités disponibles.",
-      "cta": "Voir le détail des accès par type de compte"
+      "title": "Deux solutions FINCLUDIA",
+      "body": "Pensées différemment selon qui vous êtes : particulier ou entreprise. Pour le moment, les deux restent complémentaires sur une même plateforme.",
+      "cta": "Voir le détail des accès par type de compte",
+      "individual": {
+        "title": "FINCLUDIA Particulier",
+        "body": "8 parcours adaptés à votre situation.",
+        "cta": "Découvrir les 8 parcours"
+      },
+      "business": {
+        "title": "FINCLUDIA Entreprise",
+        "body": "Formations, outils métier et facturation pour les indépendants et les entreprises.",
+        "cta": "Voir les outils entreprise"
+      }
     },
     "featuresSectionSubtitle": "Trois domaines complémentaires, accessibles avec un seul compte.",
     "stats": {
@@ -145,7 +156,7 @@
       "items": [
         {
           "title": "Créez votre compte",
-          "body": "Choisissez votre catégorie : auto-entrepreneur, PME ou PMI."
+          "body": "Choisissez le parcours qui vous correspond : un particulier (8 parcours FINCLUDIA) ou une entreprise (auto-entrepreneur, PME, PMI)."
         },
         {
           "title": "Explorez la plateforme",
@@ -482,7 +493,9 @@
       "payments": "Mes paiements",
       "fincludia": "FINCLUDIA",
       "categories": "Mes catégories",
-      "onboarding": "Premiers pas"
+      "onboarding": "Premiers pas",
+      "myAccount": "Mon compte",
+      "backToFincludia": "← Retour à FINCLUDIA"
     },
     "profile": {
       "title": "Profil",
@@ -753,6 +766,8 @@
       "access": "Qui peut suivre cette formation ?",
       "accessStandard": "Tous les comptes (standard et premium)",
       "accessPremium": "Uniquement les comptes premium",
+      "audience": "Suggérée en priorité à",
+      "audienceHint": "Ne cache rien : tous les comptes voient cette formation dans le catalogue, elle est juste proposée en premier aux profils cochés. Ne cochez rien pour ne privilégier personne.",
       "cover": "Image de couverture",
       "coverHint": "JPG, PNG ou WebP, 5 Mo maximum. Cette image illustre la formation dans le catalogue.",
       "coverAdd": "Choisir une image",
@@ -1606,7 +1621,8 @@
       "premium": "Premium",
       "completed": "Terminée",
       "locked": "Réservée aux comptes premium",
-      "certified": "Certificat obtenu"
+      "certified": "Certificat obtenu",
+      "recommended": "Suggérée pour vous"
     },
     "progress": {
       "text": "{{completed}} sur {{total}} cours terminés",

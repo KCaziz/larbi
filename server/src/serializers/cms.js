@@ -107,6 +107,7 @@ export function toAdminFormation(formation) {
     totalMinutes: (formation.courses ?? []).reduce((sum, c) => sum + (c.estimatedMinutes ?? 0), 0),
     status: formation.status,
     requiredAccessLevel: formation.requiredAccessLevel,
+    targetAccountTypes: formation.targetAccountTypes ?? [],
     category: formation.category ? { id: formation.category.id, name: formation.category.name } : null,
     cover: toMedia(formation.coverImage),
     certification: {

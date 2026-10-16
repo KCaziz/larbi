@@ -58,6 +58,15 @@ describe('formation', () => {
     assert.deepEqual(g.certification, { enabled: false, title: null, description: 'Note' });
   });
 
+  test('suggested-to account types: saved, deduplicated, an unknown one refused', async () => {
+    const f = await newFormation();
+    const res = await api('PATCH', `/admin/formations/${f.id}`, { targetAccountTypes: ['pme', 'pme', 'pmi'] });
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.body.formation.targetAccountTypes, ['pme', 'pmi']);
+    assert.equal((await api('PATCH', `/admin/formations/${f.id}`, { targetAccountTypes: ['astronaute'] })).status, 400);
+    assert.equal((await api('PATCH', `/admin/formations/${f.id}`, { targetAccountTypes: 'pme' })).status, 400);
+  });
+
   test('categories: created from a name, unknown ones refused, clearable', async () => {
     const f = await newFormation();
     const cat = (await api('POST', '/admin/categories', { name: 'Gestion' })).body.category;

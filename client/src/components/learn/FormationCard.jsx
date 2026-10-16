@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Award, CircleCheck, ImageOff, Lock, Star } from 'lucide-react';
+import { Award, CircleCheck, ImageOff, Lock, Sparkles, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ProgressBar from './ProgressBar.jsx';
 
@@ -17,6 +17,12 @@ export default function FormationCard({ item }) {
       </Link>
       <div className="learn-card-body">
         <div className="learn-chips">
+          {item.recommended && (
+            <span className="learn-chip learn-chip-recommended">
+              <Sparkles size={13} strokeWidth={2} aria-hidden="true" />
+              {t('learn.card.recommended')}
+            </span>
+          )}
           {item.category && <span className="learn-chip">{item.category.name}</span>}
           {premium && (
             <span className="learn-chip learn-chip-premium">

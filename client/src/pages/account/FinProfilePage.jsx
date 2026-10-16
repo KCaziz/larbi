@@ -31,7 +31,7 @@ export default function FinProfilePage() {
   if (profile.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={profile.reload} />;
 
   return (
-    <div>
+    <div className="fin-profile-page">
       <h2 className="account-heading">{t('account.fin.title')}</h2>
       <p>{t('account.fin.intro')}</p>
       {/* Keyed on the loaded profile: a fresh local copy is seeded once per

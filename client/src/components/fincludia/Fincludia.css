@@ -91,9 +91,19 @@
   color: var(--warn);
 }
 
+/* `minmax(0, 1fr)` et non la valeur par défaut : une grille dimensionne sa
+   colonne sur le contenu le plus large, donc un libellé long imposait 261 px
+   dans un conteneur de 180 et débordait de la page. Invisible tant que les
+   écrans occupaient toute la largeur ; visible dès que le menu latéral prend
+   264 px. Le libellé passe à la ligne au lieu de pousser la mise en page. */
 .fin-field {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 4px;
+}
+
+.fin-field > label {
+  overflow-wrap: anywhere;
 }
 
 .fin-field > label {

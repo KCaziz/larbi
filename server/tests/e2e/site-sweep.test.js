@@ -115,11 +115,23 @@ describe('site sweep', { skip: findChrome() ? false : 'no Chrome/Chromium found 
       }
 
       await setSession(learner);
-      const account = ['/compte/profil', '/compte/tableau-de-bord', '/compte/formations', '/compte/certificats', '/compte/type', '/compte/premium', '/compte/fincludia', '/compte/categories', '/compte/premiers-pas', '/aujourdhui', '/mon-argent', '/budget', '/objectifs', '/reserve', '/dettes', '/calendrier', '/patrimoine', '/portefeuille', '/espaces', '/financement', '/notifications', '/confiance', '/passeport', '/catalogue', `/catalogue/${data.f.slug}`, `/catalogue/${data.f.slug}/cours/${data.f.courses[0].id}`, `/catalogue/${data.f.slug}/certificat`];
+      const account = ['/compte/profil', '/compte/tableau-de-bord', '/compte/formations', '/compte/certificats', '/compte/type', '/compte/premium', '/compte/fincludia', '/compte/categories', '/compte/premiers-pas', '/aujourdhui', '/mon-argent', '/budget', '/objectifs', '/reserve', '/dettes', '/calendrier', '/patrimoine', '/portefeuille', '/espaces', '/financement', '/entreprise', '/notifications', '/confiance', '/passeport', '/outils/postal', '/catalogue', `/catalogue/${data.f.slug}`, `/catalogue/${data.f.slug}/cours/${data.f.courses[0].id}`, `/catalogue/${data.f.slug}/certificat`];
+      // Les écrans réservés aux 18 ans et plus. Ce compte d'apprenant n'a pas
+      // de tranche d'âge — c'est à quoi ressemble un compte neuf — donc le
+      // serveur les REFUSE, et la page affiche l'invitation à compléter son
+      // profil. Ces 403 sont le comportement attendu, pas une anomalie : ce
+      // qui est balayé ici, c'est justement que l'écran de refus s'affiche
+      // correctement, dans toutes les langues et aux deux largeurs.
+      const adultsOnly = {
+        '/dettes': [/^403 \/api\/fin\/debts/],
+        '/patrimoine': [/^403 \/api\/fin\/patrimoine/],
+        '/financement': [/^403 \/api\/fin\/financement/],
+        '/entreprise': [/^403 \/api\/fin\/entreprise/],
+      };
       for (const route of account) {
         await b.goto(site.url + route);
         await sleep(400);
-        await audit(`${lang}/${width} learner ${route}`);
+        await audit(`${lang}/${width} learner ${route}`, { expectHttp: adultsOnly[route] ?? [] });
       }
       await b.goto(`${site.url}/catalogue/${data.draftFormation.slug}`);
       await sleep(300);

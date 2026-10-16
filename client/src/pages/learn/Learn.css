@@ -155,6 +155,12 @@
   border-style: dashed;
 }
 
+.learn-chip-recommended {
+  border-color: transparent;
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
 /* ---------- Progress ---------- */
 .learn-progress-track {
   height: 8px;

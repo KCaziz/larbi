@@ -42,6 +42,21 @@ describe('catalogue', () => {
     assert.ok(open1 && locked);
   });
 
+  test('suggested by account type: listed first, never hidden from anyone else', async () => {
+    const pme = await t.user({ accountType: 'pme' }); // t.user()'s own default, named for clarity here
+    const pmi = await t.user({ accountType: 'pmi' });
+    await t.formation({ title: 'Pour tous' });
+    const forPme = await t.formation({ title: 'Pour PME', targetAccountTypes: ['pme'] });
+    const asPme = (await get('/formations', pme)).body.formations;
+    assert.equal(asPme[0].title, 'Pour PME', 'the targeted formation comes first');
+    assert.equal(asPme.find((f) => f.title === 'Pour PME').recommended, true);
+    assert.equal(asPme.find((f) => f.title === 'Pour tous').recommended, false);
+    const asPmi = (await get('/formations', pmi)).body.formations;
+    assert.ok(asPmi.some((f) => f.title === 'Pour PME'), 'never hidden from an account it is not aimed at');
+    assert.equal(asPmi.find((f) => f.title === 'Pour PME').recommended, false);
+    assert.ok(forPme);
+  });
+
   test('the detail shows the programme WITHOUT any lesson content or file; a draft is unknown (404)', async () => {
     const u = await t.user();
     const f = await t.formation({ title: 'Détail', courses: [{ title: 'A', body: '<p>SECRET</p>' }] });

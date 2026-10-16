@@ -25,6 +25,7 @@
     "menuOpen": "Open menu",
     "menuClose": "Close menu",
     "accountNav": "Account navigation",
+    "journeyNav": "FINCLUDIA navigation",
     "main": "Main navigation",
     "account": "My account",
     "logout": "Log out",
@@ -111,14 +112,24 @@
       },
       "tools": {
         "title": "Business tools",
-        "body": "Credit simulator and invoice generator designed for sole traders and SMEs.",
+        "body": "Bank comparator, simulators and invoice generator, useful to an individual and a business alike.",
         "cta": "See the tools"
       }
     },
     "accounts": {
-      "title": "An account tailored to your profile",
-      "body": "Each account has a category and an access level, which determine the content and features available.",
-      "cta": "See access details by account type"
+      "title": "Two FINCLUDIA solutions",
+      "body": "Designed differently depending on who you are: an individual or a business. For now, the two remain complementary on the same platform.",
+      "cta": "See access details by account type",
+      "individual": {
+        "title": "FINCLUDIA Individual",
+        "body": "8 journeys adapted to your situation.",
+        "cta": "Discover the 8 journeys"
+      },
+      "business": {
+        "title": "FINCLUDIA Business",
+        "body": "Courses, business tools and invoicing for freelancers and businesses.",
+        "cta": "See the business tools"
+      }
     },
     "featuresSectionSubtitle": "Three complementary areas, all accessible with a single account.",
     "stats": {
@@ -145,7 +156,7 @@
       "items": [
         {
           "title": "Create your account",
-          "body": "Choose your category: sole trader, SME or industrial SME."
+          "body": "Choose the journey that fits you: an individual (8 FINCLUDIA journeys) or a business (sole trader, SME, industrial SME)."
         },
         {
           "title": "Explore the platform",
@@ -482,7 +493,9 @@
       "payments": "My payments",
       "fincludia": "FINCLUDIA",
       "categories": "My categories",
-      "onboarding": "First steps"
+      "onboarding": "First steps",
+      "myAccount": "My account",
+      "backToFincludia": "← Back to FINCLUDIA"
     },
     "profile": {
       "title": "Profile",
@@ -753,6 +766,8 @@
       "access": "Who can take this course?",
       "accessStandard": "All accounts (standard and premium)",
       "accessPremium": "Premium accounts only",
+      "audience": "Suggested first to",
+      "audienceHint": "Hides nothing: every account sees this course in the catalogue, it is just offered first to the checked profiles. Check nothing to favour no one.",
       "cover": "Cover image",
       "coverHint": "JPG, PNG or WebP, 5 MB maximum. This image illustrates the course in the catalogue.",
       "coverAdd": "Choose an image",
@@ -1606,7 +1621,8 @@
       "premium": "Premium",
       "completed": "Completed",
       "locked": "Reserved for premium accounts",
-      "certified": "Certificate earned"
+      "certified": "Certificate earned",
+      "recommended": "Suggested for you"
     },
     "progress": {
       "text": "{{completed}} of {{total}} lessons completed",

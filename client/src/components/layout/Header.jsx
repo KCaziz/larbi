@@ -42,7 +42,7 @@ export default function Header() {
   };
 
   return (
-    <header className="site-header">
+    <header className={`site-header${user?.role === 'admin' ? ' site-header-admin' : ''}`}>
       <div className="site-header-inner">
         {/* La marque officielle de la charte (P1-13), à la place de la lettre
             « L » héritée de l'ancien nom. L'image est décorative : le nom est

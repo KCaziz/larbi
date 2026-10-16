@@ -317,29 +317,52 @@
   }
 }
 
-/* ---------- Account-type list ---------- */
-.pill-grid {
+/* ---------- Two FINCLUDIA solutions (home) ---------- */
+.offers-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 12px;
-  margin-bottom: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 12px;
 }
 
-.pill {
+.offer-card {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 26px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   background: var(--surface);
-  color: var(--text-h);
-  font-weight: 500;
+  transition: border-color 0.15s;
 }
 
-.pill-icon {
-  flex: none;
-  color: var(--tone);
+.offer-card:hover {
+  border-color: var(--border-strong);
+}
+
+.offer-card h3 {
+  margin: 4px 0 0;
+}
+
+.offer-card > p {
+  margin: 0;
+}
+
+.offer-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 10px;
+}
+
+.offer-chip {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-alt);
+  color: var(--text-h);
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 /* ---------- Call-to-action band ---------- */

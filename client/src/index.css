@@ -60,6 +60,13 @@
   --shadow-sm: 0 1px 2px rgba(16, 42, 67, 0.06);
   --shadow-md: 0 6px 20px rgba(16, 42, 67, 0.09);
 
+  /* Spacing scale used by the mt-/mb-/gap- utilities below. */
+  --space-xs: 6px;
+  --space-sm: 12px;
+  --space-md: 20px;
+  --space-lg: 32px;
+  --space-xl: 48px;
+
   /* Printed documents (certificate): stay light in BOTH themes, they are meant for paper.
      Deliberately not redefined in the dark blocks below. */
   --paper: #fbfefe;
@@ -262,6 +269,27 @@ main {
   background: var(--accent);
   color: var(--on-accent);
 }
+
+/* Spacing utilities: reach for these on any button row, badge or small block
+   that is not already inside a flex/grid container with its own `gap` —
+   never leave an adjacent pair of controls with nothing between them. */
+.mt-xs { margin-block-start: var(--space-xs); }
+.mt-sm { margin-block-start: var(--space-sm); }
+.mt-md { margin-block-start: var(--space-md); }
+.mt-lg { margin-block-start: var(--space-lg); }
+.mt-xl { margin-block-start: var(--space-xl); }
+.mb-xs { margin-block-end: var(--space-xs); }
+.mb-sm { margin-block-end: var(--space-sm); }
+.mb-md { margin-block-end: var(--space-md); }
+.mb-lg { margin-block-end: var(--space-lg); }
+.gap-xs { gap: var(--space-xs); }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+/* A vertical stack where every direct child gets the gap, without the
+   caller needing to add `display: flex` itself on every container. */
+.stack-sm { display: flex; flex-direction: column; gap: var(--space-sm); }
+.stack-md { display: flex; flex-direction: column; gap: var(--space-md); }
 
 /* Tone modifiers: give any card/icon/chip its own accent colour by adding one
    of these classes — components read --tone / --tone-bg. */
