@@ -17,7 +17,7 @@ function run(user) {
 
 describe('requireAdult: deny by default', () => {
   test('a minor (under18) is refused, whatever else is on the account', () => {
-    const err = run({ finAgeRange: 'under18', role: 'admin', accessLevel: 'premium' });
+    const err = run({ finAgeRange: '13-18', role: 'admin', accessLevel: 'premium' });
     assert.equal(err?.statusCode, 403);
   });
 
@@ -27,13 +27,13 @@ describe('requireAdult: deny by default', () => {
   });
 
   test('every adult bracket passes', () => {
-    for (const range of ['18-24', '25-34', '35-49', '50-64', '65plus']) {
+    for (const range of ['19-24', '25-34', '35-49', '50-64', '65plus']) {
       assert.equal(run({ finAgeRange: range }), 'next');
     }
   });
 
   test('the check cannot be satisfied by any other field (role, accessLevel, accountType)', () => {
-    assert.equal(run({ finAgeRange: 'under18', role: 'admin' })?.statusCode, 403);
-    assert.equal(run({ finAgeRange: 'under18', accessLevel: 'premium' })?.statusCode, 403);
+    assert.equal(run({ finAgeRange: '13-18', role: 'admin' })?.statusCode, 403);
+    assert.equal(run({ finAgeRange: '13-18', accessLevel: 'premium' })?.statusCode, 403);
   });
 });

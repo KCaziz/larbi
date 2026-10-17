@@ -134,7 +134,7 @@ describe('P6-06 — the dashboard follows the public', () => {
       json: { label: 'Téléphone', outstandingPrincipal: 2000000, monthlyInstalment: 200000, currency: 'DZD' },
     });
     assert.equal(debt.status, 201, 'the debt really exists, so hiding it is a decision and not an accident');
-    await setPublic('LYC', 'under18');
+    await setPublic('LYC', '13-18');
     await addIncome();
     await addMovement({ value: 1500000 });
 
@@ -148,7 +148,7 @@ describe('P6-06 — the dashboard follows the public', () => {
   });
 
   test('somebody under 18 stays a minor whichever public they picked', async () => {
-    await setPublic('SAL', 'under18');
+    await setPublic('SAL', '13-18');
     const view = (await today()).body.aujourdhui;
     assert.equal(view.minor, true);
     assert.ok(!view.kpis.some((kpi) => kpi.key === 'debtEffort'));
@@ -258,14 +258,26 @@ describe('P6-06 — the priority goal and the savings rate', () => {
 });
 
 describe('P6-06 — what is declared rather than invented', () => {
-  test('the overall financial-health score is declared as waiting on the client', async () => {
-    await setPublic('SAL');
+  test('l’indice de santé financière est calculé, et annoncé partiel', async () => {
+    // Il attendait les pondérations du client (P6-01 point 5) ; le référentiel
+    // maître les fournit (P6-22, chantier 2, barème B à 7 dimensions). Ce qui
+    // reste vrai : un score partiel s'annonce comme tel, et il n'est pas une
+    // carte parmi les autres.
+    await setPublic('SAL', '25-34');
     const res = await today();
-    // F053's weights are a threshold the client still owes (P6-01 point 5): the
-    // mechanism exists, the score is not published on weights we made up.
-    assert.equal(res.body.aujourdhui.santeFinanciere.formula, 'F053');
-    assert.equal(res.body.aujourdhui.santeFinanciere.waitingOn, 'P6-01');
+    const health = res.body.aujourdhui.santeFinanciere;
+    assert.equal(health.version, 'B-7');
+    assert.equal(health.answer.formule_id, 'F053');
+    assert.ok(Array.isArray(health.dimensions) && health.dimensions.length === 7);
     assert.ok(!res.body.aujourdhui.kpis.some((kpi) => kpi.formule === 'F053'));
+  });
+
+  test('et il n’est pas affiché à un compte jeune', async () => {
+    // Le client exclut l'alerte adulte sur la réserve d'un lycéen ; une note
+    // globale est le même jugement d'adulte.
+    await setPublic('LYC', '13-18');
+    const res = await today();
+    assert.equal(res.body.aujourdhui.santeFinanciere.reason, 'youth');
   });
 
   test('the references publish the limits, the thresholds and the definitions', async () => {

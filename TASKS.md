@@ -1126,9 +1126,9 @@ Plan (2026-10-04) : la Phase 4 commence à la demande de l'utilisateur par le **
 Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p4-01).
 
 ### P4-02 — Simulateur de crédit
-- Statut : `⛔ blocked`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
-- Dépendances : `P4-01`
+- Dépendances : `P4-01`, `P6-22`
 - Durée cible : 2 jours
 
 Fonctionnement cible :
@@ -1142,7 +1142,21 @@ Important :
 - Les règles bancaires et formules doivent être fournies/validées par le client.
 - Ne pas inventer les critères ou taux des banques.
 
-Blocage (2026-10-11) : les deux classeurs du client donnent des **conditions bancaires** (frais, commissions), pas de **règles d'octroi ni de formules de capacité d'emprunt** (taux par banque, durée maximale, taux d'endettement admis, apport, critères de patrimoine). Sans elles, le simulateur ne peut rien calculer sans inventer. À fournir par le client ; le moteur de calcul versionné (`P4-09`) et les calculateurs de crédit génériques (`P4-11`) sont prêts à les recevoir.
+~~Blocage (2026-10-11)~~ — **levé le 2026-10-17.** Le référentiel maître fournit les formules `CR01`-`CR10`, les règles-cadres et 25 fiches produits de 18 banques (`03_Offres_Credit`, `04_Credit_Regles`).
+
+**Réalisé (2026-10-17) :**
+
+**Deux moitiés, tenues séparées.** Les **mathématiques** sont ordinaires et se calculent toujours : mensualité, capacité, coût total, taux d'effort. Les **critères d'une banque** ne se calculent pas, ils se lisent — et aucune des 25 offres n'est publiable.
+
+- **Le plafond légal est un verrou, pas un avertissement** : article 16 du décret exécutif 15-114, le crédit à la consommation ne peut dépasser 30 % des revenus nets réguliers. Un dépassement **bloque** la simulation.
+- **Et il n'est jamais généralisé à l'immobilier.** Le client l'écrit en tête de son onglet ; l'appliquer partout refuserait des dossiers que la loi n'interdit pas, et plusieurs offres immobilières du référentiel annoncent 40 % ou 50 % selon le revenu. Deux tests encadrent la frontière : le même dossier bloque en consommation et passe en immobilier.
+- **Le cas « taux zéro » est traité** : ce n'est pas une curiosité mathématique — un prêt à taux zéro existe, certaines formules islamiques n'affichent aucune marge, et la formule générale y diviserait par zéro.
+- **Les cinq messages du client sont repris mot pour mot.** Ce sont des phrases juridiques autant que commerciales ; les reformuler changerait ce que le produit affirme. Dont celle qui résume tout : « L'établissement prêteur reste décisionnaire. »
+- L'outil passe de `planned` à `available` dans le registre, après être resté annoncé-non-construit depuis le début du projet.
+
+**Défaut introduit puis attrapé :** le script de génération marquait une offre publiable « sauf si son statut mentionne un audit ». `ODT-CR-015` a une case de statut **vide** et sortait publiable — alors que son statut déclaré dit « Conflit officiel – bloquer production tant que banque non confirmée ». **Une absence lue comme une autorisation**, exactement ce que le client interdit ailleurs. La règle est inversée : publiable seulement si le client l'autorise explicitement. Aucune des 25 ne passe.
+
+**Tests :** 26 unitaires (`tests/unit/finCredit.test.js`).
 
 ### P4-03 — Générateur de facture
 - Statut : `✅ done`
@@ -1331,27 +1345,49 @@ Prolonge le comparateur existant (`P4-06` à `P4-08`) sans toucher à ses donné
 - **Pas de test unitaire/fonctionnel dédié supplémentaire, de scénario de cohérence globale ni de parcours navigateur** au-delà de ce qui est listé ci-dessus.
 
 ### P4-14 — FINCLUDIA : décodeur de fiche de paie
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
-- Dépendances : `P4-09`, `P6-01`, `P6-22`
+- Dépendances : `P4-09`, `P6-22`
 - Durée cible : 2 jours (estimation, une fois les règles reçues)
+
+**Dépendance à `P6-01` retirée le 2026-10-17**, pour la même raison que `P6-22` : cette tâche collecte des réponses du client, et celles dont le décodeur avait besoin — SNMG, barème IRG, cotisations datées et sourcées — sont arrivées. La garder bloquerait une tâche livrée sur une tâche dont le rôle est d'attendre.
 - Origine : direction FINCLUDIA du 2026-10-09 (écran C15)
 
 - Saisie manuelle (ou assistée) des lignes d'une fiche : brut, cotisations, IRG, primes, retenues, net, période ; décomposition expliquée ligne par ligne ; lignes inconnues « à confirmer » ; ajout au revenu mensuel **après confirmation** de l'utilisateur.
 - Net = brut + éléments positifs − retenues **seulement selon la structure saisie** ; **aucune déduction légale inventée**, ne prétend jamais certifier la fiche.
 - Import d'un document et extraction automatique : phase ultérieure (le client le note lui-même).
 
-**Déblocage du 2026-10-17** : SNMG, barème IRG et cotisations (employeur/salarié, par branche, datés et sourcés) reçus — voir `P6-01` point 6 et `P6-22`. Plus `⛔ blocked` ; reste à implémenter.
+**Déblocage du 2026-10-17** : SNMG, barème IRG et cotisations (employeur/salarié, par branche, datés et sourcés) reçus — voir `P6-01` point 6 et `P6-22`.
+
+**Réalisé (2026-10-17) :**
+
+**La ligne de partage de toute la tâche :** le client écrit en tête de son propre onglet que sa grille « ne fait pas un moteur de paie complet ». Et la tâche demande un **décodeur** — la personne saisit les lignes de sa fiche, le produit les explique. Recalculer un IRG sur un barème dont la date d'effet n'est pas confirmée, puis l'afficher à côté du chiffre de l'employeur, ferait croire à une erreur de paie là où il n'y a qu'une incertitude de notre côté.
+
+- `net = brut − retenues`, **uniquement d'après la structure saisie**. Une fiche sans cotisation donne un net égal au brut : le décodeur lit, il ne complète pas.
+- **Le sens vient du type de ligne, jamais du signe** : quelqu'un qui saisit « IRG 4 500 » ne doit pas voir son net augmenter.
+- Sur trois régimes IRG mensuels, **deux sont déclarés non calculables avec leur raison**. Seule l'exonération sous 30 000 DA est appliquée, parce qu'elle est sans ambiguïté.
+- **Quatre contrôles, tous formulés comme des points à vérifier** : cohérence avec le net inscrit, écart aux 9 % salariaux (avec tolérance d'un dinar, les arrondis d'un logiciel de paie n'étant pas les nôtres), brut sous le SNMG (avec l'explication possible du temps partiel), IRG retenu sous le seuil d'exonération. Le message sur la cotisation précise que **l'assiette n'est pas toujours le brut total**, parce que c'est vrai et que l'omettre inquiéterait pour rien.
+- **La fiche n'est pas conservée** : c'est une donnée sensible, et le client ne demande pas de la garder. L'ajout au revenu mensuel passe par `P6-04`, après confirmation explicite.
+
+**Tests :** 20 unitaires (`tests/unit/finPayroll.test.js`), dont la vérification que la part salariale est bien la somme de ses branches (1,5 + 6,75 + 0,5 + 0,25 = 9 %) et que le barème IRG est continu et croissant — une borne mal transcrite laisserait un trou invisible à la lecture.
 
 ### P4-15 — FINCLUDIA : comparer un financement (conventionnel / islamique)
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟢 low`
-- Dépendances : `P4-12`, `P4-11`, `P6-01`, `P6-22`
+- Dépendances : `P4-12`, `P4-11`, `P6-22`
 - Durée cible : 2 jours (estimation, une fois les données reçues)
+
+**Dépendance à `P6-01` retirée le 2026-10-17** : les offres de financement que cette tâche attendait sont dans le référentiel maître (25 fiches, onglet `03_Offres_Credit`).
 - Origine : direction FINCLUDIA du 2026-10-09 (écran JA09)
 
 - Besoin, montant, durée, apport, préférence **conventionnelle ou islamique**, revenu, garanties → mensualité / coût, apport, frais, conditions, impact sur la trésorerie, source et date.
 - Taux d'intérêt et parts de bénéfices **jamais assimilés** (même règle que le comparateur, `P4-06`) ; pas de classement opaque ; pas d'éligibilité garantie.
+
+**Réalisé (2026-10-17) :** 4 offres islamiques et 21 conventionnelles, rendues **séparément**, jamais dans une même colonne triée — une marge bénéficiaire et un taux d'intérêt ne se comparent pas terme à terme, et les aligner pour les classer revient à les assimiler. La raison est **dite** dans la réponse, pas sous-entendue.
+
+Les critères sortent **en texte**, tels que le client les a écrits (« 8,00 % épargnant / 8,25 % non-épargnant », « Jusqu'à 40 ans », « Non publié »). Les convertir en seuils comparables obligerait à choisir lequel des deux taux retenir : une décision commerciale déguisée en conversion.
+
+Et la comparaison annonce elle-même **combien d'offres sont réellement publiables** : zéro sur vingt-cinq, tant que les brochures officielles n'ont pas été contrôlées.
 
 **Déblocage du 2026-10-17** : 25 fiches produits réelles et leurs formules de calcul reçues — voir `P6-01` point 6 et `P6-22`. Plus `⛔ blocked` ; reste à implémenter **en respectant le garde-fou du client** : la quasi-totalité de ces 25 fiches est marquée « audit primaire requis » dans sa propre source (statut déclaré, pas une vérification indépendante) et un produit (`ODT-CR-015`, Al Salam Bank « Tayssir véhicule ») est explicitement signalé en conflit — à bloquer en production tant que la banque n'a pas confirmé.
 
@@ -1401,7 +1437,7 @@ Réserve : tant que le client n'a pas obtenu la grille tarifaire officielle dat�
 **Et une attente à moi qui était fausse :** le classeur range `AP-017` (Western Union reçu) sous la rubrique « Change / comptes en devises », pourtant marquée non documentée. Mon test exigeait zéro référence ; le client cite cette fiche comme **contre-exemple**, pour prévenir qu'un transfert reçu n'est pas une opération de change. Le test vérifie maintenant ce qui compte — aucune **fiche** ne se range dans une famille non documentée — et la mise en garde du client est préservée.
 
 ### P4-05 — Validation de fin de phase
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P4-02`, `P4-03`, `P4-07`, `P4-08`
 - Durée cible : 1 jour
@@ -1412,6 +1448,16 @@ Critères :
 - Les résultats du simulateur sont cohérents avec les règles fournies.
 - Les factures PDF et Excel sont générées correctement.
 - Les outils respectent les règles d'accès utilisateur.
+
+**Validation effectuée le 2026-10-17 — Phase 4 validée.** Les cinq critères sont vérifiés **mécaniquement** par `tests/functional/p4-05-validation.test.js` (14 tests), et non cochés à la relecture : un critère coché à la main se décoche tout seul à la modification suivante.
+
+- **Critère 1** — neuf outils disponibles, et surtout : **aucun outil annoncé disponible n'est en réalité absent**. C'est le piège d'un catalogue, et `simulateur-credit` y figurait comme `planned` depuis le début du projet. Il est passé `available` le jour où il a existé.
+- **Critère 2** — balayage de **toutes** les routes POST des outils : aucune n'accepte un corps vide. Une route ajoutée demain sans validation serait signalée par ce test et par aucun autre. Plus : champ inconnu refusé, montant décimal refusé plutôt qu'arrondi.
+- **Critère 3** — la mensualité suit la formule `CR02` du client au dinar près, le plafond légal de la consommation **bloque** en citant l'article 16 du décret 15-114, et il n'est pas appliqué à l'immobilier. Aucun taux de banque n'est servi : les 25 offres restent non publiées.
+- **Critère 4** — facture calculée et fichier Excel produit.
+- **Critère 5** — les deux sens de l'accès : un outil public reste ouvert, un outil authentifié reste fermé, « Explorer » reste réservé aux majeurs (19 ans depuis `P6-22`), et **aucun outil n'écrit en base**.
+
+**Deux défauts, tous deux dans le test et non dans le produit.** Il connaissait les chemins de mémoire et les avait devinés en anglais (`/comparisons`, `/explorer`, `/invoice`) alors qu'ils sont en français : il signalait trois outils absents qui existaient tous. Il lit maintenant les montages dans le fichier de routes. Et il envoyait une facture sans numéro, sans date, sans vendeur ni acheteur — le serveur avait raison de la refuser.
 
 ---
 
@@ -1641,9 +1687,11 @@ Livrable attendu : une note de réponses. Passer alors cette tâche à `✅ done
 **Nouvelle tâche créée pour absorber ce contenu : `P6-22`.**
 
 ### P6-22 — FINCLUDIA : intégration du référentiel maître (seuils, paie, mineurs, assistant, objectifs)
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
-- Dépendances : `P6-01`
+- Dépendances : `P4-09`
+
+**Dépendance à `P6-01` retirée le 2026-10-17 :** `P6-01` est la tâche « décisions à obtenir du client », et le référentiel maître reçu ce jour-là **répond** à ce que cette tâche attendait. Attendre que `P6-01` passe `✅ done` aurait bloqué six chantiers sur une tâche dont le rôle est justement de collecter des réponses déjà arrivées.
 - Durée cible : 5 jours (estimation)
 - Origine : `FINCLUDIA_REFERENTIEL_MAITRE_EXCEL_BLOCAGES_AZIZ.xlsx`, reçu le 2026-10-17
 
@@ -1656,7 +1704,48 @@ Six chantiers distincts, listés séparément parce qu'ils touchent des modules 
 5. **Paie et IRG (`P4-14`)** et **offres de financement (`P4-15`)** : implémenter avec les données reçues (voir `P6-01` points 6), **en respectant le garde-fou du client** — pas de publication d'une offre marquée « audit primaire requis » sans contrôle, blocage explicite de `ODT-CR-015`.
 6. **Contenu plus riche de l'assistant (`P3-19`, 25 intentions) et des objectifs (`P6-08`, 20 modèles)** : remplacer les 8 intentions brouillon et les 11 modèles génériques actuels par le contenu complet du client, avec ses garde-fous (ex. CB22 « jamais demander un code PIN/OTP »).
 
-Aucun de ces six chantiers n'est commencé.
+**Réalisé (2026-10-17) — les six chantiers :**
+
+**1. Majorité civile à 19 ans.** Le référentiel tranche : **19 ans révolus, Code civil algérien article 40** (`ADULT_AGE`, onglets `19_Mineurs` et `25_Constantes`). Le projet avait supposé 18 — l'habitude française — et cette supposition décidait qui pouvait voir ses dettes, son patrimoine réel et préparer un financement. **Une personne de 18 ans y avait accès alors qu'elle est mineure au regard du droit applicable.**
+
+- Tranches : `under13 | 13-18 | 19-24 | 25-34 | 35-49 | 50-64 | 65plus`. Le second seuil est 13 ans, et le client précise que c'est une **politique FINCLUDIA**, pas un âge légal de consentement numérique.
+- Les tranches mineures sont **nommées** (`MINOR_AGE_RANGES`) et non déduites par « tout sauf under13 » : une tranche ajoutée plus tard serait adulte par oubli, et l'erreur se ferait dans le sens qui ouvre des droits.
+- **Migration de données, et le refus de deviner** : `under18` → `13-18` (le compte était mineur, il le reste, aucun droit ouvert) ; `18-24` → **`NULL`**. Cette tranche est devenue ambiguë — la remapper vers `19-24` promouvrait des mineurs, vers `13-18` retirerait des droits à des majeurs. `NULL` est un état déjà prévu et sûr : `requireAdult` refuse par défaut et le refus porte le motif `ageUnknown`, que l'écran traduit en « indiquez votre tranche d'âge » avec le lien.
+- **La contrainte SQL avait été oubliée** : `users_fin_age_range_check` énumérait encore les anciennes valeurs, et la base refusait ce que le code produisait. Trouvé par la suite, corrigé dans la migration — en plaçant le remplacement **après** le remappage, puisque l'inverse échouerait sur les lignes portant encore les anciennes valeurs.
+- Le refus adressé à un compte jeune **dit ce qui lui reste** (budget réel, enveloppes, objectifs, sécurité, apprentissage, portefeuille fictif) : un refus qui n'énumère que des interdits se lit comme une porte fermée.
+
+**2. Indice de santé financière (F053), enfin calculé.** Bloqué depuis le début de la Phase 6 faute de pondérations ; le client fournit le **barème B à 7 dimensions** (`09_Sante_Poids`, `10_Sante_Baremes`). Ce qui reste vrai : **une dimension absente n'est jamais un zéro** — elle sort du calcul, son poids sort du dénominateur, et le score s'annonce partiel en nommant ce qui manque. Un test le prouve d'une façon qui ne peut pas mentir : retirer une dimension faible fait **monter** le score, ce qui serait impossible si l'absence valait zéro.
+
+Il n'est **pas affiché à un compte jeune** : le client exclut l'alerte adulte sur la réserve d'un lycéen, et une note globale « Priorité sécurité » affichée à un adolescent est le même jugement d'adulte.
+
+**3. Préparation au financement (version A) et cibles de réserve (grille A).** Deux règles du client tenues à la lettre :
+- **Au-delà du plafond publié par la banque, ce n'est pas un score bas, c'est un BLOCAGE.** Un 0 noyé dans six critères pondérés laisserait un dossier « presque prêt » alors que la banque le refuse.
+- **Un lycéen n'est jamais alerté sur sa réserve** (« objectif éducatif, sans alerte adulte »).
+- `EPG` (épargnant débutant) **n'a de cible dans aucune des deux grilles** : sa cible est `null` avec la raison, pas « 3 mois par défaut ». Inventer une cible de réserve, c'est inventer un objectif d'épargne.
+
+**4. Seuils d'alertes** (`13_Alertes`, `25_Constantes`) : 18 règles avec leur niveau et **le message du client mot pour mot**. Ce sont des phrases adressées à quelqu'un sur sa situation financière ; les reformuler change le ton d'une alerte, et le ton est la moitié du message.
+
+La nuance que le produit n'avait pas : **la fraîcheur dépend du type de donnée** — 90 jours pour un revenu ou une dette, 180 pour une valeur de patrimoine, 31 pour une donnée mensuelle. Le produit n'avait qu'un seuil unique.
+
+Les seuils d'enveloppe déjà codés (80 %, 100 %) tombaient **déjà** juste, mais par coïncidence : ils sont maintenant rattachés à leur source, et un test vérifie qu'ils ne divergent plus.
+
+**5. Paie, IRG et crédit.** Voir `P4-14` (décodeur de fiche de paie), `P4-02` (simulateur de crédit) et `P4-15` (comparaison de financements), toutes trois débloquées et livrées le même jour.
+
+**6. Assistant et objectifs.** Les **25 intentions** `CB01`-`CB25` remplacent 8 brouillons ; les **20 modèles d'objectifs** `G01`-`G20` remplacent 11 génériques. Générés par script depuis les onglets `20_Assistant_25` et `22_Objectifs_20`.
+
+Le plus précieux n'est pas le contenu, ce sont les **garde-fous**, présents sur les 25 sans exception et protégeant de trois fautes distinctes : `CB22` « ne jamais demander code PIN/OTP/mot de passe » (exposer un secret), `CB24` « ne jamais deviner un taux » (inventer un chiffre), `CB99` « ne jamais générer de contenu hors base validée » (improviser). Un test balaie **toutes** les réponses à la recherche d'une promesse de décision bancaire, plutôt qu'une liste choisie d'avance.
+
+`CB16` (« utilisateur mineur ») dit « <19 fonctions adultes bloquées » : un test vérifie que cet âge est bien celui du chantier 1, pour que le catalogue du client et la règle du produit ne puissent pas diverger en silence.
+
+**Les divergences déclarées, pas tranchées en silence.** Le document du client contient plusieurs tables qui ne coïncident pas, et il écrit lui-même « aucune ne doit remplacer l'autre silencieusement ». Six divergences sont publiées par l'API avec le choix retenu, l'alternative et la raison : deux barèmes de santé, deux usages de la préparation, deux grilles de réserve, le seuil de vigilance de dette (20 % ou 30 %), le délai d'exclusion d'une offre (60 ou 90 jours) et la fraîcheur mensuelle (30 ou 31 jours).
+
+**Tests :** environ 120 ajoutés (`finHealth`, `finPayroll`, `finCredit`, `finAlerts`, `finIntents`, plus les tranches d'âge dans `finProfile`).
+
+**Réserves déclarées :**
+- Le **barème de santé à 6 dimensions** mentionné par le client n'est pas implémentable : il n'est pas chiffré dans son document.
+- Les **régimes IRG** au-dessus du seuil d'exonération sont transcrits mais **non appliqués** : la formule du second abattement et la date d'effet ne sont pas confirmées.
+- **Aucune des 25 offres de crédit n'est publiable** tant que le client n'a pas contrôlé les brochures officielles.
+- Le **consentement vérifié du représentant légal** (13-18 ans, loi 18-07 article 8) reste à construire : le client en pose l'obligation sans décrire de méthode de vérification.
 
 #### Renommage en FINCLUDIA (2026-10-09)
 

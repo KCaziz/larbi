@@ -90,7 +90,11 @@ export const router = createBrowserRouter([
                 // Everything below needs a session (guard = convenience; the API re-checks).
                 element: <RequireAuth />,
                 children: [
-                  // Invoice generator (P4-03): the tool registry says "account required".
+                  // Simulateur de crédit (P4-02) et comparaison de financements
+              // (P4-15) : compte requis, comme le cahier des charges le
+              // demande pour les outils.
+              { path: 'outils/credit', lazy: lazyPage(() => import('../pages/outils/CreditSimulatorPage.jsx')) },
+              // Invoice generator (P4-03): the tool registry says "account required".
                   { path: 'outils/facture', lazy: lazyPage(() => import('../pages/outils/InvoicePage.jsx')) },
                   // "Explorer" (P4-13, écran C20) : réservé aux 18 ans et plus, l'API refuse en plus server-side.
                   { path: 'outils/explorateur', lazy: lazyPage(() => import('../pages/outils/ExplorerPage.jsx')) },

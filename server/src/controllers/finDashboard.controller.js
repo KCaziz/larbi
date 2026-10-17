@@ -4,7 +4,7 @@ import {
   ACTION_PRIORITIES,
   DASHBOARDS,
   DATA_AGE_WARNING_DAYS,
-  HEALTH_INDEX_BLOCKED,
+  HEALTH_INDEX_NOT_FOR_YOUTH,
   KPI_KEYS,
   KPI_MAX,
   KPI_MIN,
@@ -13,6 +13,7 @@ import {
   UPCOMING_DAYS,
   dashboardFor,
 } from '../constants/finDashboard.js';
+import { HEALTH_BANDS, HEALTH_DIMENSIONS, HEALTH_VERSION, REFERENTIAL_DIVERGENCES } from '../constants/finHealth.js';
 import { questionsForPublic } from '../constants/finOnboarding.js';
 import { isAdultAgeRange } from '../constants/finPublics.js';
 import { currentBudget, loadBudgetData } from '../services/finBudget.service.js';
@@ -44,9 +45,22 @@ export function getDashboardReferences(req, res) {
     priorities: ACTION_PRIORITIES,
     dashboards: Object.fromEntries(Object.entries(DASHBOARDS).map(([code, dashboard]) => [code, dashboard.title])),
     dataAgeWarningDays: DATA_AGE_WARNING_DAYS,
-    // Declared, not hidden: what the overall financial-health score is waiting
-    // for, and the definition F047 reads.
-    santeFinanciere: HEALTH_INDEX_BLOCKED,
+    // L'indice de santé financière n'attend plus rien (P6-22, chantier 2) :
+    // ses pondérations sont dans le référentiel maître du client. Ce qui est
+    // publié ici, c'est le barème retenu, ses dimensions et leurs poids —
+    // « sous-scores cliquables, pondérations visibles » est la demande du
+    // client — plus la seule règle d'affichage qui reste.
+    santeFinanciere: {
+      version: HEALTH_VERSION,
+      dimensions: HEALTH_DIMENSIONS,
+      bandes: HEALTH_BANDS.map((row) => ({ min: row.min, max: row.max, label: row.label })),
+      compteJeune: HEALTH_INDEX_NOT_FOR_YOUTH,
+    },
+    // Les divergences que le client signale dans son propre référentiel, et le
+    // choix fait en attendant sa réponse. Publiées plutôt que notées : un
+    // barème choisi par le prestataire parce qu'il fallait bien en choisir un
+    // devient une décision du client par usure s'il ne se voit pas.
+    divergencesReferentiel: REFERENTIAL_DIVERGENCES,
     definitionRevenusPersonnels: { version: PERSONAL_INCOME_DEFINITION_VERSION, categories: PERSONAL_INCOME_CATEGORY_KEYS },
     formulas: ['F002', 'F003', 'F004', 'F008', 'F009', 'F012', 'F014', 'F018', 'F025', 'F047', 'F049', 'F055'].map(describeFormula),
   });

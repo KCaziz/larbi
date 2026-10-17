@@ -98,14 +98,23 @@
   color: var(--text);
 }
 
+/* `min(240px, 100%)` et non `240px` : une piste de grille à largeur fixe ne
+   se réduit pas sous son minimum, donc sur un écran de 375 px elle dépasse de
+   ce qui manque. Le débordement n'apparaissait qu'en arabe, où la mise en page
+   miroir le rendait visible du côté opposé — mais il était là dans les deux
+   sens. Même famille de défaut que les champs de montant (P1-12). */
 .comparator-admin-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
   gap: 14px 16px;
 }
 
 .comparator-admin-grid label {
   max-width: none;
+  /* Un élément de grille ne descend pas sous la largeur de son contenu sans
+     ceci : un libellé long rouvrirait le débordement que la ligne ci-dessus
+     vient de fermer. */
+  min-inline-size: 0;
 }
 
 .comparator-admin-form .form-hint {

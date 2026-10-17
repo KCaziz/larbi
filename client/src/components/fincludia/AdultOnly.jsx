@@ -8,8 +8,12 @@ import Notice from '../ui/Notice.jsx';
 // The server distinguishes two refusals, and they need opposite answers on
 // screen — which is the whole reason it bothers to distinguish them:
 //
-//   adultsOnly  the account is a minor's. The function is not for them, and
-//               saying so plainly is the end of it: there is nothing to fix.
+//   adultsOnly  the account is a minor's — under 19, the age of civil
+//               majority in Algeria (Code civil art. 40, confirmed by the
+//               client's master referential; the project had assumed 18).
+//               The function is not for them, so the notice says so AND says
+//               what they keep: a refusal listing only prohibitions reads as
+//               a closed door.
 //   ageUnknown  the account never stated its age bracket. Deny by default is
 //               right (unknown is not adult), but telling an adult only
 //               "forbidden" is a dead end — so this says which field to fill
@@ -28,6 +32,11 @@ export default function AdultOnly({ reason }) {
           <ShieldAlert size={16} aria-hidden="true" />
           {t(unknown ? 'adultOnly.ageUnknown' : 'adultOnly.minor')}
         </span>
+        {/* Un refus qui n'énumère que des interdits se lit comme une porte
+            fermée. Le référentiel du client est précis sur ce qu'un compte
+            jeune garde (budget réel, enveloppes, objectifs, sécurité,
+            apprentissage, portefeuille fictif) : autant le dire. */}
+        {!unknown && <span className="fin-adult-only-keeps">{t('adultOnly.minorKeeps')}</span>}
         {unknown && (
           <Link to="/compte/fincludia" className="fin-adult-only-link">
             {t('adultOnly.setAge')}

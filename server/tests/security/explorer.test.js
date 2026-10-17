@@ -17,7 +17,7 @@ before(async () => {
   t = await boot();
   await t.reset();
   await t.loadComparatorData();
-  minor = await t.user({ finAgeRange: 'under18' });
+  minor = await t.user({ finAgeRange: '13-18' });
   undetermined = await t.user({ finAgeRange: null });
   adult = await t.user({ finAgeRange: '25-34' });
 });

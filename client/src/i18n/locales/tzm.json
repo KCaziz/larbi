@@ -313,7 +313,7 @@
     },
     "explorer": {
       "title": "Snirem",
-      "body": "Nadi afrin s uḥwaǧ, anaw neɣ tabanka deg yisefka yeldin n umsefrak. Yeḥbes i wid yesɛan 18 iseggasen d asawen, yeḥwaǧ amiḍan."
+      "body": "Nadi afrin s uḥwaǧ, anaw neɣ tabanka deg yisefka yeldin n umsefrak. Yeḥbes i wid yesɛan 19 iseggasen d asawen, yeḥwaǧ amiḍan."
     }
   },
   "blogList": {
@@ -579,12 +579,16 @@
       ],
       "ageRanges": [
         {
-          "code": "under18",
-          "label": "Drus n 18 iseggasen"
+          "code": "under13",
+          "label": "Drus n 13 iseggasen"
         },
         {
-          "code": "18-24",
-          "label": "18 ɣer 24 n iseggasen"
+          "code": "13-18",
+          "label": "13 ɣer 18 n iseggasen"
+        },
+        {
+          "code": "19-24",
+          "label": "19 ɣer 24 n iseggasen"
         },
         {
           "code": "25-34",

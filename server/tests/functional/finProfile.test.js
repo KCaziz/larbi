@@ -43,7 +43,7 @@ describe('consent gate', () => {
   });
 
   test('accepting consent in the same call writes the data and the consent together', async () => {
-    const res = await put({ finPublic: 'ETU', finAgeRange: '18-24', acceptConsents: true });
+    const res = await put({ finPublic: 'ETU', finAgeRange: '19-24', acceptConsents: true });
     assert.equal(res.status, 200);
     assert.equal(res.body.profile.finPublic, 'ETU');
     assert.equal(res.body.profile.consented, true);

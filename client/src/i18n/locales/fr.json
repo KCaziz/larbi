@@ -352,7 +352,7 @@
     },
     "explorer": {
       "title": "Explorer",
-      "body": "Recherchez une offre par besoin, type ou établissement parmi les données déjà publiques du comparateur. Réservé aux 18 ans et plus, et nécessite un compte."
+      "body": "Recherchez une offre par besoin, type ou établissement parmi les données déjà publiques du comparateur. Réservé aux 19 ans et plus, et nécessite un compte."
     },
     "postal": {
       "title": "Référentiel Algérie Poste / CCP",
@@ -624,12 +624,16 @@
       ],
       "ageRanges": [
         {
-          "code": "under18",
-          "label": "Moins de 18 ans"
+          "code": "under13",
+          "label": "Moins de 13 ans"
         },
         {
-          "code": "18-24",
-          "label": "18 à 24 ans"
+          "code": "13-18",
+          "label": "13 à 18 ans"
+        },
+        {
+          "code": "19-24",
+          "label": "19 à 24 ans"
         },
         {
           "code": "25-34",
@@ -2342,7 +2346,7 @@
     "noResultsHint": "Essayez un autre mot, ou une autre rubrique.",
     "typeToSearch": "Tapez au moins deux caractères, ou choisissez une rubrique, pour lancer la recherche.",
     "tryExample": "Essayez par exemple :",
-    "reservedToAdults": "Explorer est réservé aux personnes de 18 ans et plus. Votre tranche d'âge ne permet pas d'y accéder.",
+    "reservedToAdults": "Explorer est réservé aux personnes de 19 ans et plus — l’âge de la majorité civile en Algérie. Votre tranche d’âge ne permet pas d’y accéder.",
     "neverEligibility": "Un résultat affiché ici n'est jamais une garantie d'éligibilité : vérifiez toujours les conditions exactes auprès de l'établissement."
   },
   "workshop": {
@@ -3750,9 +3754,10 @@
     "explorerHint": "Le comparateur bancaire et les offres d’emploi se consultent pour le moment depuis « Outils »."
   },
   "adultOnly": {
-    "minor": "Cette partie n’est pas accessible avant 18 ans. Les dettes, le patrimoine réel et la préparation d’un financement attendront : le reste de FINCLUDIA vous est ouvert.",
-    "ageUnknown": "Pour ouvrir cette partie, il manque votre tranche d’âge. Certaines fonctions sont réservées aux 18 ans et plus, et sans cette information nous ne pouvons pas le savoir — nous préférons refuser que supposer.",
-    "setAge": "Indiquer ma tranche d’âge"
+    "minor": "Cette partie n’est pas accessible avant 19 ans, l’âge de la majorité civile en Algérie. Les dettes, le patrimoine réel et la préparation d’un financement attendront.",
+    "ageUnknown": "Pour ouvrir cette partie, il manque votre tranche d’âge. Certaines fonctions sont réservées aux 19 ans et plus, et sans cette information nous ne pouvons pas le savoir — nous préférons refuser que supposer.",
+    "setAge": "Indiquer ma tranche d’âge",
+    "minorKeeps": "Vous gardez le reste de FINCLUDIA : budget réel, enveloppes, objectifs, sécurité, apprentissage et portefeuille fictif."
   },
   "postal": {
     "title": "Référentiel Algérie Poste / CCP",
@@ -3825,6 +3830,42 @@
     "errors": {
       "refused": "Cette saisie a été refusée : vérifiez les montants, les devises et les dates.",
       "conflict": "Ce numéro de document existe déjà, ou cet espace existe déjà."
+    }
+  },
+  "creditSim": {
+    "title": "Simulateur de crédit",
+    "intro": "Calculez une mensualité, un coût total et un taux d’effort sur vos propres chiffres.",
+    "kind": "Nature du crédit",
+    "kinds": {
+      "consumer": "Consommation",
+      "auto": "Automobile",
+      "housing": "Immobilier"
+    },
+    "principal": "Montant emprunté",
+    "rate": "Taux annuel (%)",
+    "months": "Durée (mois)",
+    "income": "Revenu net mensuel",
+    "incomeHint": "Nécessaire pour calculer le taux d’effort et le plafond légal.",
+    "existing": "Mensualités déjà en cours",
+    "fees": "Frais de dossier",
+    "insurance": "Assurance",
+    "compute": "Calculer",
+    "resultTitle": "Résultat de la simulation",
+    "instalment": "Mensualité",
+    "totalCost": "Coût total",
+    "dsrBefore": "Taux d’effort actuel",
+    "dsrAfter": "Taux d’effort après ce crédit",
+    "cap": "Mensualité maximale",
+    "capUnknown": "Non calculable",
+    "capSource": "Source du plafond :",
+    "offersTitle": "Les offres du référentiel",
+    "offersIntro": "Ce que le document du client recense, et ce qui manque pour le publier.",
+    "offersBlocked": "{{publishable}} offre sur {{total}} est publiable. Les conditions des banques attendent le contrôle des brochures officielles : aucun taux n’est affiché ici.",
+    "islamic": "Islamique",
+    "conventional": "Conventionnel",
+    "rulesTitle": "Les règles qui s’appliquent",
+    "errors": {
+      "input": "Vérifiez les montants, le taux et la durée saisis."
     }
   }
 }

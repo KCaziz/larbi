@@ -352,7 +352,7 @@
     },
     "explorer": {
       "title": "Explorer",
-      "body": "Search an offer by need, type or provider among the comparator's already public data. Reserved to the age of 18 and over, and needs an account."
+      "body": "Search an offer by need, type or provider among the comparator's already public data. Reserved to the age of 19 and over, and needs an account."
     },
     "postal": {
       "title": "Algérie Poste / CCP reference",
@@ -624,12 +624,16 @@
       ],
       "ageRanges": [
         {
-          "code": "under18",
-          "label": "Under 18"
+          "code": "under13",
+          "label": "Under 13"
         },
         {
-          "code": "18-24",
-          "label": "18 to 24"
+          "code": "13-18",
+          "label": "13 to 18"
+        },
+        {
+          "code": "19-24",
+          "label": "19 to 24"
         },
         {
           "code": "25-34",
@@ -2341,7 +2345,7 @@
     "noResultsHint": "Try another word, or another rubric.",
     "typeToSearch": "Type at least two characters, or choose a rubric, to start the search.",
     "tryExample": "Try for example:",
-    "reservedToAdults": "Explorer is reserved to people aged 18 and over. Your age bracket does not allow access.",
+    "reservedToAdults": "Explorer is reserved to people aged 19 and over — the age of civil majority in Algeria. Your age bracket does not allow access.",
     "neverEligibility": "A result shown here is never a guarantee of eligibility: always check the exact conditions with the provider."
   },
   "workshop": {
@@ -3749,9 +3753,10 @@
     "explorerHint": "The bank comparator and job offers are browsed from \"Tools\" for now."
   },
   "adultOnly": {
-    "minor": "This part is not available before 18. Debts, real patrimony and funding preparation will wait: the rest of FINCLUDIA is open to you.",
-    "ageUnknown": "Opening this part needs your age bracket. Some functions are reserved to 18 and over, and without that we cannot tell — we would rather refuse than assume.",
-    "setAge": "State my age bracket"
+    "minor": "This part is not available before 19, the age of civil majority in Algeria. Debts, real patrimony and funding preparation will wait.",
+    "ageUnknown": "Opening this part needs your age bracket. Some functions are reserved to 19 and over, and without that we cannot tell — we would rather refuse than assume.",
+    "setAge": "State my age bracket",
+    "minorKeeps": "You keep the rest of FINCLUDIA: real budget, envelopes, goals, safety, learning and the paper portfolio."
   },
   "postal": {
     "title": "Algérie Poste / CCP reference",
@@ -3824,6 +3829,42 @@
     "errors": {
       "refused": "This entry was refused: check the amounts, the currencies and the dates.",
       "conflict": "That document number already exists, or this space already exists."
+    }
+  },
+  "creditSim": {
+    "title": "Credit simulator",
+    "intro": "Compute an instalment, a total cost and a debt-service ratio on your own figures.",
+    "kind": "Credit kind",
+    "kinds": {
+      "consumer": "Consumer",
+      "auto": "Car",
+      "housing": "Housing"
+    },
+    "principal": "Amount borrowed",
+    "rate": "Annual rate (%)",
+    "months": "Term (months)",
+    "income": "Monthly net income",
+    "incomeHint": "Needed to compute the debt-service ratio and the legal cap.",
+    "existing": "Instalments already running",
+    "fees": "Arrangement fees",
+    "insurance": "Insurance",
+    "compute": "Compute",
+    "resultTitle": "Simulation result",
+    "instalment": "Instalment",
+    "totalCost": "Total cost",
+    "dsrBefore": "Current debt-service ratio",
+    "dsrAfter": "Debt-service ratio after this credit",
+    "cap": "Maximum instalment",
+    "capUnknown": "Not computable",
+    "capSource": "Cap source:",
+    "offersTitle": "The offers in the reference",
+    "offersIntro": "What the client’s document records, and what is missing to publish it.",
+    "offersBlocked": "{{publishable}} offer out of {{total}} is publishable. The banks’ conditions await the check of official brochures: no rate is shown here.",
+    "islamic": "Islamic",
+    "conventional": "Conventional",
+    "rulesTitle": "The rules that apply",
+    "errors": {
+      "input": "Check the amounts, the rate and the term you typed."
     }
   }
 }

@@ -120,7 +120,7 @@ export async function boot({ production = false, extra = {} } = {}) {
   // account really looks like and `requireAdult` denies by default. Making the
   // default fixture an adult would hide that guarantee from every test at once.
   const adult = (data = {}) => user({ finAgeRange: '25-34', ...data });
-  const minor = (data = {}) => user({ finAgeRange: 'under18', ...data });
+  const minor = (data = {}) => user({ finAgeRange: '13-18', ...data });
 
   // A formation with real courses. `courses`: [{ title, isRequired, body }].
   async function formation({ title = 'Formation', status = 'published', courses = [{ title: 'Cours 1' }], ...data } = {}) {

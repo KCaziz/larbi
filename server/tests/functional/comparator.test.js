@@ -30,7 +30,7 @@ describe('public comparator, free access', () => {
       { key: 'comparateur-bancaire', status: 'available', access: 'public' },
       { key: 'simulateurs', status: 'available', access: 'public' },
       { key: 'comparaisons', status: 'available', access: 'public' },
-      { key: 'simulateur-credit', status: 'planned', access: 'authenticated' },
+      { key: 'simulateur-credit', status: 'available', access: 'authenticated' },
       { key: 'explorateur-financier', status: 'available', access: 'authenticated' },
       { key: 'generateur-facture', status: 'available', access: 'authenticated' },
       { key: 'referentiel-postal', status: 'available', access: 'public' },

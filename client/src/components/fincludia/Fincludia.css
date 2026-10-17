@@ -401,3 +401,12 @@
     margin-block-end: 8px;
   }
 }
+
+/* Ce qu'un compte jeune garde, sous le refus (P6-22). Deuxième ligne du même
+   bloc : la phrase doit se lire dans la foulée du refus, pas ailleurs. */
+.fin-adult-only-keeps {
+  display: block;
+  margin-block-start: 6px;
+  color: var(--text);
+  font-size: 0.88rem;
+}

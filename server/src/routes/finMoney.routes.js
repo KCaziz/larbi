@@ -18,6 +18,8 @@ import {
   removeReceipt,
   removeTransaction,
 } from '../controllers/finMoney.controller.js';
+import { getPayrollReference, postDecodePayslip } from '../controllers/finPayroll.controller.js';
+import { decodePayslipSchema } from '../validation/finPayroll.schemas.js';
 import { requireAuth } from '../middleware/auth.js';
 import { receiveFile } from '../middleware/upload.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
@@ -65,5 +67,12 @@ router.get('/transactions/:id/historique', asyncRoute(getTransactionHistory));
 router.post('/transactions/:id/justificatif', receiveFile, asyncRoute(postReceipt));
 router.get('/transactions/:id/justificatif', asyncRoute(getReceipt));
 router.delete('/transactions/:id/justificatif', asyncRoute(removeReceipt));
+
+// Décodeur de fiche de paie (P4-14, écran C15). Calcul pur : rien n'est lu ni
+// écrit en base, et la fiche n'est pas conservée — c'est une donnée sensible
+// que le client ne demande pas de garder. L'ajout au revenu mensuel passe par
+// les routes de revenus ci-dessus, après confirmation explicite.
+router.get('/paie/reference', getPayrollReference);
+router.post('/paie/decoder', validateBody(decodePayslipSchema), asyncRoute(postDecodePayslip));
 
 export default router;

@@ -148,20 +148,28 @@ export const DEFAULT_DASHBOARD = { title: 'general', kpis: ['netFlow', 'monthlyR
 export const dashboardFor = (publicCode) => DASHBOARDS[publicCode] ?? DEFAULT_DASHBOARD;
 
 /**
- * Why the salarié's « santé financière personnelle » is not computed yet.
+ * L'indice de santé financière n'est plus bloqué (P6-22, chantier 2).
  *
- * F053 is in the engine and takes its weights as arguments — the mechanism
- * works. What is missing is the WEIGHTS: the client left them « à valider »
- * (P6-01 point 5), and a score is not a figure somebody can check, it is a
- * judgement on them. Publishing one on weights we invented would be the one
- * thing this project refuses to do, and P2-09's knowledge index is held back
- * for exactly the same reason.
+ * Il l'a été tant que les pondérations manquaient : « un score n'est pas un
+ * chiffre que l'on peut vérifier, c'est un jugement porté sur quelqu'un », et
+ * le publier sur des poids inventés était la chose que ce projet refusait.
+ * Le référentiel maître du client les fournit — barème B, sept dimensions,
+ * onglet `09_Sante_Poids` — et F053 y est désormais branché
+ * (`services/finHealth.service.js`).
  *
- * So the dashboard shows the sub-scores it CAN compute, each on its own, and
- * says plainly that the overall score is waiting on the client. The day the
- * weights arrive, this constant goes and F053 is wired to them.
+ * Ce qui reste déclaré : le score est **partiel** tant que toutes les
+ * dimensions ne sont pas mesurables, et il le dit.
+ *
+ * Et il n'est pas montré à un compte jeune. Le client exclut l'alerte adulte
+ * sur la réserve d'un lycéen (« objectif éducatif, sans alerte adulte ») ; une
+ * note globale « Priorité sécurité » affichée à un adolescent est le même
+ * jugement d'adulte, porté sur un public dont le produit est pédagogique.
  */
-export const HEALTH_INDEX_BLOCKED = { formula: 'F053', waitingOn: 'P6-01', reason: 'weights' };
+export const HEALTH_INDEX_NOT_FOR_YOUTH = {
+  formula: 'F053',
+  reason: 'youth',
+  detail: 'L’indice global n’est pas affiché à un compte jeune : le produit y est pédagogique, pas évaluatif.',
+};
 
 /**
  * The actions the home screen may propose, in priority order.

@@ -21,6 +21,8 @@ import {
   postAnnualTotal,
 } from '../controllers/finPostal.controller.js';
 import { annualTotalSchema, catalogueQuerySchema } from '../validation/finPostal.schemas.js';
+import { getComparison, getCreditRules, getOffer, getOffers, postSimulate } from '../controllers/finCredit.controller.js';
+import { offerQuerySchema, offerRefSchema, simulateCreditSchema } from '../validation/finCredit.schemas.js';
 import { simulatorByKey } from '../constants/simulators.js';
 import { requireAdult, requireAuth } from '../middleware/auth.js';
 import { publicReadLimiter } from '../middleware/rateLimit.js';
@@ -69,6 +71,22 @@ postal.get('/controles', asyncRoute(getControls));
 // Calcul pur, aucune écriture : la sélection vient du corps de la requête.
 postal.post('/cout-annuel', validateBody(annualTotalSchema), asyncRoute(postAnnualTotal));
 router.use('/postal', ...toolAccess('referentiel-postal'), postal);
+
+// Simulateur de crédit (P4-02) et comparaison de financements (P4-15).
+// Compte requis, comme le cahier des charges le demande pour les outils.
+//
+// Ce que ces routes servent : des MATHÉMATIQUES sur les chiffres saisis, et la
+// liste de ce que le référentiel documente. Ce qu'elles ne servent pas : les
+// taux des banques, parce qu'aucune des 25 fiches n'est publiable tant que le
+// client n'a pas contrôlé les brochures officielles.
+const credit = Router();
+credit.param('ref', (req, res, next, value) => (offerRefSchema.safeParse(value).success ? next() : next(new HttpError(404, 'Not found'))));
+credit.get('/regles', asyncRoute(getCreditRules));
+credit.post('/simuler', validateBody(simulateCreditSchema), asyncRoute(postSimulate));
+credit.get('/offres', validateQuery(offerQuerySchema), asyncRoute(getOffers));
+credit.get('/offres/:ref', asyncRoute(getOffer));
+credit.get('/comparaison', validateQuery(offerQuerySchema), asyncRoute(getComparison));
+router.use('/credit', ...toolAccess('simulateur-credit'), credit);
 
 // "Explorer" (P4-13, écran C20) : réservé aux 18 ans et plus (P3-18) — un
 // compte est nécessaire pour connaître l'âge, donc `requireAdult` s'ajoute à

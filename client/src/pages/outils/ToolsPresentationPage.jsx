@@ -13,7 +13,7 @@ const tools = [
   { key: 'jobOffers', icon: Briefcase, tone: 'tone-brass', to: '/outils/offres-emploi', available: true },
   { key: 'explorer', icon: Compass, tone: 'tone-green', to: '/outils/explorateur', available: true },
   { key: 'postal', icon: Landmark, tone: 'tone-green', to: '/outils/postal', available: true },
-  { key: 'credit', icon: CreditCard, tone: 'tone-brass', available: false },
+  { key: 'credit', icon: CreditCard, tone: 'tone-brass', to: '/outils/credit', available: true },
   { key: 'invoice', icon: Receipt, tone: 'tone-clay', to: '/outils/facture', available: true },
 ];
 

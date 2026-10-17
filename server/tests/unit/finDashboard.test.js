@@ -6,7 +6,7 @@ import {
   DASHBOARDS,
   DASHBOARD_KPIS,
   DATA_AGE_WARNING_DAYS,
-  HEALTH_INDEX_BLOCKED,
+  HEALTH_INDEX_NOT_FOR_YOUTH,
   KPI_KEYS,
   KPI_MAX,
   KPI_MIN,
@@ -77,13 +77,23 @@ describe('P6-06 — the registry', () => {
     assert.equal(DASHBOARDS.LYC.minor, true);
   });
 
-  test('the overall financial-health score is declared as waiting, not computed', () => {
-    // F053's weights are a threshold the client still owes (P6-01 point 5). A
-    // score is a judgement on somebody, not a figure they can check, so none is
-    // published on weights we invented.
-    assert.equal(HEALTH_INDEX_BLOCKED.formula, 'F053');
-    assert.equal(HEALTH_INDEX_BLOCKED.waitingOn, 'P6-01');
-    assert.ok(!DASHBOARDS.SAL.kpis.includes('healthIndex'), 'it is not among the cards either');
+  test('l’indice global est calculé pour un adulte, et partiel tant qu’il manque des mesures', () => {
+    // Il était bloqué faute de pondérations ; le référentiel maître du client
+    // les fournit (P6-22, chantier 2). Ce qui reste vrai : un score partiel
+    // s'annonce comme tel.
+    const view = buildDashboard({ publicCode: 'SAL', ageRange: '25-34', synthesis: synthesisOf(), currency: 'DZD', now: NOW });
+    assert.equal(view.santeFinanciere.version, 'B-7');
+    assert.ok(view.santeFinanciere.answer.formule_id === 'F053');
+    assert.ok(!DASHBOARDS.SAL.kpis.includes('healthIndex'), 'il n’est toujours pas une carte parmi les autres');
+  });
+
+  test('et il n’est pas affiché à un compte jeune', () => {
+    // Le client exclut l'alerte adulte sur la réserve d'un lycéen ; une note
+    // globale « Priorité sécurité » affichée à un adolescent est le même
+    // jugement d'adulte, porté sur un public dont le produit est pédagogique.
+    const view = buildDashboard({ publicCode: 'LYC', ageRange: '13-18', synthesis: synthesisOf(), currency: 'DZD', now: NOW });
+    assert.equal(view.santeFinanciere.reason, 'youth');
+    assert.equal(HEALTH_INDEX_NOT_FOR_YOUTH.formula, 'F053');
   });
 });
 
@@ -134,7 +144,7 @@ describe('P6-06 — the limits of a ten-second screen', () => {
   test('an age bracket under 18 makes a minor of any public', () => {
     // Somebody under 18 who declared themselves a salarié is still a minor, the
     // same rule P6-03 applies to the questions.
-    const view = buildDashboard({ publicCode: 'SAL', ageRange: 'under18', synthesis: synthesisOf(), currency: 'DZD', now: NOW });
+    const view = buildDashboard({ publicCode: 'SAL', ageRange: '13-18', synthesis: synthesisOf(), currency: 'DZD', now: NOW });
     assert.equal(view.minor, true);
   });
 

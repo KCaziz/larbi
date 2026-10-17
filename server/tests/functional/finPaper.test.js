@@ -339,3 +339,30 @@ describe('P6-12 — one account, one portfolio', () => {
     assert.equal(await t.prisma.finPaperInstrument.count(), 0);
   });
 });
+
+describe('P6-12 — la première visite d’un nouveau compte', () => {
+  test('quatre requêtes simultanées ne créent qu’un portefeuille, et aucune n’échoue', async () => {
+    // Le défaut que ce test interdit : la page lance quatre requêtes en
+    // parallèle au montage, et plusieurs passent par `getOrCreatePortfolio`.
+    // Avec un « chercher puis créer », toutes voyaient « pas de portefeuille »
+    // en même temps, toutes tentaient de le créer, et la contrainte d'unicité
+    // sur `userId` en refusait une : la PREMIÈRE visite de tout nouveau compte
+    // échouait en 409.
+    //
+    // Un test qui appelle les routes l'une après l'autre ne le reproduit
+    // jamais. Celui-ci les lance ensemble, comme un navigateur.
+    const fresh = await t.user();
+    const responses = await Promise.all([
+      t.request('GET', '/fin/portefeuille', { user: fresh }),
+      t.request('GET', '/fin/portefeuille/diagnostic', { user: fresh }),
+      t.request('GET', '/fin/portefeuille/decisions', { user: fresh }),
+      t.request('GET', '/fin/portefeuille', { user: fresh }),
+    ]);
+
+    const failed = responses.filter((res) => res.status !== 200).map((res) => `${res.status} ${JSON.stringify(res.body).slice(0, 120)}`);
+    assert.deepEqual(failed, [], 'une requête simultanée a échoué');
+
+    // Et un seul portefeuille existe au bout du compte.
+    assert.equal(await t.prisma.finPaperPortfolio.count({ where: { userId: fresh.id } }), 1);
+  });
+});

@@ -86,7 +86,17 @@ describe('site sweep', { skip: findChrome() ? false : 'no Chrome/Chromium found 
     }
     found.push(...render);
     if (b.jsErrors.length) found.push(`JavaScript error: ${b.jsErrors.slice(0, 2).join(' || ')}`);
-    const bad = b.badResponses.filter((r) => !/^401 \/api\/auth\/me$/.test(r) && !expectHttp.some((re) => re.test(r)));
+    // Deux 401 anonymes sont attendus et ne disent rien sur la page visitée :
+    //
+    //   `/api/auth/me`   la vérification de session d'un visiteur anonyme.
+    //   `/api/fin/notifications/non-lues`  la cloche de la barre supérieure.
+    //
+    // La cloche ne s'affiche que pour un compte connecté. Son 401 apparaît
+    // quand une requête PARTIE alors qu'une session existait revient après que
+    // le balayage a effacé le cookie — un effet du harnais, pas du produit, et
+    // la même situation que celle qui vaut déjà son exception à `auth/me`.
+    const anonymous = /^401 \/api\/(auth\/me|fin\/notifications\/non-lues)$/;
+    const bad = b.badResponses.filter((r) => !anonymous.test(r) && !expectHttp.some((re) => re.test(r)));
     if (bad.length) found.push(`unexpected HTTP: ${bad.slice(0, 3).join(', ')}`);
     if (found.length) problems.push({ label, found });
     b.jsErrors.length = 0;

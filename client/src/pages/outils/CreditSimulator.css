@@ -1,0 +1,131 @@
+/* Simulateur de crédit (P4-02) et offres (P4-15).
+   Propriétés logiques (RTL), jetons CSS, aucun sens porté par la couleur
+   seule : une offre non publiable porte sa raison en toutes lettres. */
+
+.credit-form {
+  margin-block-end: 8px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+
+.credit-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-block-end: 12px;
+}
+
+.credit-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-inline-size: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.credit-form input,
+.credit-form select {
+  padding: 8px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.92rem;
+}
+
+.credit-ratios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-block: 16px;
+}
+
+.credit-ratios div {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.credit-ratios dt {
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.credit-ratios dd {
+  margin: 4px 0 0;
+  color: var(--text-h);
+  font-family: var(--display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.credit-source {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.credit-offers,
+.credit-rules {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.credit-offer {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-inline-start: 3px solid var(--warn);
+  border-radius: var(--radius);
+  background: var(--surface);
+  margin-block-end: 10px;
+}
+
+.credit-offer-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.credit-badge {
+  margin-inline-start: auto;
+  padding: 2px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Islamique et conventionnel ne se classent jamais ensemble : la pastille
+   nomme la famille, elle ne la hiérarchise pas. */
+.credit-badge-islamic {
+  border-color: var(--brass);
+  background: var(--brass-bg);
+}
+
+.credit-offer-reason {
+  margin: 6px 0 0;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.credit-rules li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 0;
+  border-block-end: 1px solid var(--border);
+  font-size: 0.9rem;
+}

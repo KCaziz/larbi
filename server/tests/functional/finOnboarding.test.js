@@ -56,7 +56,7 @@ describe('the questions asked', () => {
 
   test('an under-18 bracket is spared debt and patrimony, whichever public was picked', async () => {
     const created = await t.user();
-    await t.prisma.user.update({ where: { id: created.id }, data: { finPublic: 'SAL', finAgeRange: 'under18', finCurrency: 'DZD' } });
+    await t.prisma.user.update({ where: { id: created.id }, data: { finPublic: 'SAL', finAgeRange: '13-18', finCurrency: 'DZD' } });
     const minor = await t.prisma.user.findUnique({ where: { id: created.id } });
 
     const asked = keysOf((await state(minor)).body);
