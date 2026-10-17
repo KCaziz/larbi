@@ -53,6 +53,9 @@ export const env = {
   maxImageBytes: Number(process.env.MAX_IMAGE_BYTES) || 5 * 1024 * 1024,
   maxDocumentBytes: Number(process.env.MAX_DOCUMENT_BYTES) || 25 * 1024 * 1024,
   maxVideoBytes: Number(process.env.MAX_VIDEO_BYTES) || 300 * 1024 * 1024,
+  // Payment provider (P3-09): "fake" (simulated, development and tests only) or
+  // "none" (default in production until the client's provider is wired, P3-10).
+  paymentProvider: process.env.PAYMENT_PROVIDER || (process.env.NODE_ENV === 'production' ? 'none' : 'fake'),
   // Built website (client/dist) served by this same process, for single-host
   // deployments (cPanel...). Unset = API only (development: Vite serves the site).
   clientDir: process.env.CLIENT_DIR
@@ -62,6 +65,14 @@ export const env = {
 
 if (!['console', 'none'].includes(env.mailDriver)) {
   throw new Error('MAIL_DRIVER must be "console" or "none" (no real provider is wired yet)');
+}
+
+if (!['none', 'fake'].includes(env.paymentProvider)) {
+  throw new Error('PAYMENT_PROVIDER must be "none" or "fake" (no real provider is wired yet, see P3-10)');
+}
+// The simulated provider accepts any payment: it must never run in production.
+if (env.paymentProvider === 'fake' && env.isProduction) {
+  throw new Error('PAYMENT_PROVIDER=fake is for development and tests only');
 }
 
 if (env.jwtSecret.length < 32) {

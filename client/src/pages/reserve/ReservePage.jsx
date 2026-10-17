@@ -50,7 +50,7 @@ export default function ReservePage() {
 
   return (
     <>
-      <PageHeader icon={ShieldCheck} title={t('reserve.title')} subtitle={t('reserve.intro')} />
+      <PageHeader icon={ShieldCheck} title={t('reserve.title')} subtitle={t('reserve.intro')} maxWidth={760} />
       <div className="reserve-page">
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">

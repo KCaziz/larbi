@@ -1,12 +1,12 @@
 # Matrice des livrables et recette
 
-> Généré le 2026-10-16 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
+> Généré le 2026-10-17 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
 
 Livrable de l'**annexe 2** du contrat, dont le tableau est fourni vide (livrable / prévu / livré / test / réserve).
 
 La colonne « Test / résultat » renvoie à la suite automatisée : `npm test` dans `server/`. La colonne « Réserve » reprend ce que le plan déclare bloqué, sans l'adoucir — l'article 7 distingue les anomalies bloquantes, majeures et mineures, et une donnée que le client doit fournir n'est aucune des trois : c'est une réserve.
 
-**70 livrables sur 89** sont terminés et vérifiés. **6** sont bloqués par une décision ou une donnée du client.
+**70 livrables sur 90** sont terminés et vérifiés. **4** sont bloqués par une décision ou une donnée du client.
 
 Suite de tests : 118 fichiers (consistency : 2, e2e : 23, functional : 33, security : 35, unit : 25).
 
@@ -67,8 +67,8 @@ Suite de tests : 118 fichiers (consistency : 2, e2e : 23, functional : 33, secur
 | `P4-11` — FINCLUDIA : calculateurs, lot 2 (dettes et crédit) | Oui | Oui | Suite automatisée verte |  |
 | `P4-12` — FINCLUDIA : moteur de comparaison multicritère et comparateur d'offres d'emploi | Oui | Oui | Suite automatisée verte |  |
 | `P4-13` — Comparateur bancaire, lot D : adéquation à l'usage et « Explorer » (FINCLUDIA) | Oui | Oui | Suite automatisée verte |  |
-| `P4-14` — FINCLUDIA : décodeur de fiche de paie | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
-| `P4-15` — FINCLUDIA : comparer un financement (conventionnel / islamique) | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
+| `P4-14` — FINCLUDIA : décodeur de fiche de paie | Oui | Non | — | Non commencé |
+| `P4-15` — FINCLUDIA : comparer un financement (conventionnel / islamique) | Oui | Non | — | Non commencé |
 | `P4-17` — Référentiel Algérie Poste / CCP (comparateur et pédagogie) | Oui | Oui | Suite automatisée verte |  |
 | `P4-05` — Validation de fin de phase | Oui | Non | — | Non commencé |
 | `P5-01` — Audit d'authentification et autorisation | Oui | Non | — | Non commencé |
@@ -79,6 +79,7 @@ Suite de tests : 118 fichiers (consistency : 2, e2e : 23, functional : 33, secur
 | `P5-06` — Préparation production et livraison | Oui | Non | — | Non commencé |
 | `P5-07` — Livrables contractuels, réversibilité et matrice de recette | Oui | En cours | — |  |
 | `P6-01` — FINCLUDIA : décisions de cadrage à obtenir du client | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
+| `P6-22` — FINCLUDIA : intégration du référentiel maître (seuils, paie, mineurs, assistant, objectifs) | Oui | Non | — | Non commencé |
 | `P6-02` — FINCLUDIA : modèle de données financier commun | Oui | Oui | Suite automatisée verte |  |
 | `P6-03` — FINCLUDIA : onboarding financier progressif | Oui | Oui | Suite automatisée verte |  |
 | `P6-04` — FINCLUDIA : « Mon argent » — revenus et transactions | Oui | Oui | Suite automatisée verte |  |
@@ -108,8 +109,6 @@ Ces livrables ne sont pas en retard : ils attendent une information que seul le 
 
 - `P3-08` — Paiement : décisions à préciser (recherches à mener par le client)
 - `P4-02` — Simulateur de crédit
-- `P4-14` — FINCLUDIA : décodeur de fiche de paie
-- `P4-15` — FINCLUDIA : comparer un financement (conventionnel / islamique)
 - `P6-01` — FINCLUDIA : décisions de cadrage à obtenir du client
 - `P7-01` — ERP entreprises, diaspora et commerce international
 

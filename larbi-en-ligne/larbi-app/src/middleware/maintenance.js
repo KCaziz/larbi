@@ -16,6 +16,9 @@ const ALWAYS_ALLOWED = [
   { method: 'POST', path: /^\/api\/auth\/login$/ },
   { method: 'POST', path: /^\/api\/auth\/logout$/ },
   { method: 'GET', path: /^\/api\/auth\/me$/ },
+  // A payment made just before maintenance must still be confirmed (P3-09): the
+  // provider's notification is authenticated by its signature, not by a session.
+  { method: 'POST', path: /^\/api\/payments\/webhook\// },
 ];
 
 const isAlwaysAllowed = (req) => ALWAYS_ALLOWED.some((rule) => (rule.method === 'ANY' || rule.method === req.method) && rule.path.test(req.path));

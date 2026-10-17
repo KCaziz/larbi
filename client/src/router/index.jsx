@@ -47,20 +47,6 @@ export const router = createBrowserRouter([
           { index: true, element: <HomePage /> },
           { path: 'formations', element: <FormationsPresentationPage /> },
           { path: 'outils', element: <ToolsPresentationPage /> },
-          { path: 'apprendre', lazy: lazyPage(() => import('../pages/apprendre/ApprendrePage.jsx')) },
-          { path: 'apprendre/termes/:slug', lazy: lazyPage(() => import('../pages/apprendre/TermPage.jsx')) },
-          { path: 'apprendre/guides/:slug', lazy: lazyPage(() => import('../pages/apprendre/GuidePage.jsx')) },
-          { path: 'outils/comparateur', lazy: lazyPage(() => import('../pages/outils/ComparatorPage.jsx')) },
-          { path: 'outils/comparateur/adequation', lazy: lazyPage(() => import('../pages/outils/UsageFitPage.jsx')) },
-          { path: 'outils/comparateur/segments/:segment', lazy: lazyPage(() => import('../pages/outils/ComparatorSegmentPage.jsx')) },
-          { path: 'outils/comparateur/:theme', lazy: lazyPage(() => import('../pages/outils/ComparatorThemePage.jsx')) },
-          { path: 'outils/simulateurs', lazy: lazyPage(() => import('../pages/outils/SimulatorsPage.jsx')) },
-          { path: 'outils/simulateurs/:key', lazy: lazyPage(() => import('../pages/outils/SimulatorPage.jsx')) },
-          { path: 'outils/offres-emploi', lazy: lazyPage(() => import('../pages/outils/JobOffersPage.jsx')) },
-          { path: 'outils/atelier', lazy: lazyPage(() => import('../pages/outils/WorkshopPage.jsx')) },
-          // Référentiel Algérie Poste / CCP (P4-17) : public comme le
-          // comparateur bancaire — des données de référence, pas de compte.
-          { path: 'outils/postal', lazy: lazyPage(() => import('../pages/outils/PostalReferencePage.jsx')) },
           { path: 'blog', element: <BlogListPage /> },
           { path: 'blog/:slug', element: <ArticlePage /> },
           { path: 'newsletter/confirmer', element: <NewsletterLinkPage mode="confirm" /> },
@@ -78,89 +64,111 @@ export const router = createBrowserRouter([
           { path: 'verification', lazy: lazyPage(() => import('../pages/certificates/VerifyCertificatePage.jsx')) },
           { path: 'verification/:number', lazy: lazyPage(() => import('../pages/certificates/VerifyCertificatePage.jsx')) },
           {
-            // Everything below needs a session (guard = convenience; the API re-checks).
-            element: <RequireAuth />,
+            // The shell of the connected space (P1-12): the navigation of
+            // the nine client entries, rendered once for every screen that
+            // belongs to it. It also wraps the pages below that stay public
+            // (the glossary, the bank comparator...): a signed-in account
+            // must not lose its menu by following a link anyone may open —
+            // `FincludiaLayout` itself shows nothing extra to a visitor.
+            element: <FincludiaLayout />,
             children: [
-              // Invoice generator (P4-03): the tool registry says "account required".
-              { path: 'outils/facture', lazy: lazyPage(() => import('../pages/outils/InvoicePage.jsx')) },
-              // "Explorer" (P4-13, écran C20) : réservé aux 18 ans et plus, l'API refuse en plus server-side.
-              { path: 'outils/explorateur', lazy: lazyPage(() => import('../pages/outils/ExplorerPage.jsx')) },
-              // E-Learning (learner side): formations are for logged-in users.
-              { path: 'catalogue', lazy: lazyPage(() => import('../pages/learn/CatalogPage.jsx')) },
-              { path: 'catalogue/:slug', lazy: lazyPage(() => import('../pages/learn/FormationPage.jsx')) },
-              { path: 'catalogue/:slug/quiz/:quizId', lazy: lazyPage(() => import('../pages/learn/QuizPage.jsx')) },
+              { path: 'apprendre', lazy: lazyPage(() => import('../pages/apprendre/ApprendrePage.jsx')) },
+              { path: 'apprendre/termes/:slug', lazy: lazyPage(() => import('../pages/apprendre/TermPage.jsx')) },
+              { path: 'apprendre/guides/:slug', lazy: lazyPage(() => import('../pages/apprendre/GuidePage.jsx')) },
+              { path: 'outils/comparateur', lazy: lazyPage(() => import('../pages/outils/ComparatorPage.jsx')) },
+              { path: 'outils/comparateur/adequation', lazy: lazyPage(() => import('../pages/outils/UsageFitPage.jsx')) },
+              { path: 'outils/comparateur/segments/:segment', lazy: lazyPage(() => import('../pages/outils/ComparatorSegmentPage.jsx')) },
+              { path: 'outils/comparateur/:theme', lazy: lazyPage(() => import('../pages/outils/ComparatorThemePage.jsx')) },
+              { path: 'outils/simulateurs', lazy: lazyPage(() => import('../pages/outils/SimulatorsPage.jsx')) },
+              { path: 'outils/simulateurs/:key', lazy: lazyPage(() => import('../pages/outils/SimulatorPage.jsx')) },
+              { path: 'outils/offres-emploi', lazy: lazyPage(() => import('../pages/outils/JobOffersPage.jsx')) },
+              { path: 'outils/atelier', lazy: lazyPage(() => import('../pages/outils/WorkshopPage.jsx')) },
+              // Référentiel Algérie Poste / CCP (P4-17) : public comme le
+              // comparateur bancaire — des données de référence, pas de compte.
+              { path: 'outils/postal', lazy: lazyPage(() => import('../pages/outils/PostalReferencePage.jsx')) },
               {
-                path: 'catalogue/:slug/cours/:courseId',
-                lazy: lazyPage(() => import('../pages/learn/CoursePage.jsx')),
-              },
-              {
-                path: 'catalogue/:slug/certificat',
-                lazy: lazyPage(() => import('../pages/learn/CertificatePage.jsx')),
-              },
-              // Where the payment provider sends the buyer back (P3-09): reads the order, grants nothing.
-              { path: 'paiement/retour', lazy: lazyPage(() => import('../pages/payments/PaymentReturnPage.jsx')) },
-              {
-                // The shell of the connected space (P1-12): the navigation
-                // of the nine client entries, rendered once for every screen
-                // that belongs to it — the account's pages included.
-                element: <FincludiaLayout />,
+                // Everything below needs a session (guard = convenience; the API re-checks).
+                element: <RequireAuth />,
                 children: [
-                // FINCLUDIA "Aujourd'hui" home screen and dashboards per public
-                // (P6-06), screens C04 / LY02 / ET02 / JA02 / SA02.
-                { path: 'aujourdhui', lazy: lazyPage(() => import('../pages/aujourdhui/TodayPage.jsx')) },
-                // FINCLUDIA "Mon argent" (P6-04): synthesis, entry and history.
-                { path: 'mon-argent', lazy: lazyPage(() => import('../pages/argent/MyMoneyPage.jsx')) },
-                // FINCLUDIA budgets and envelopes (P6-05), screens C06 / JA03 / JA04.
-                { path: 'budget', lazy: lazyPage(() => import('../pages/budget/BudgetsPage.jsx')) },
-                { path: 'budget/:id', lazy: lazyPage(() => import('../pages/budget/BudgetDetailPage.jsx')) },
-                // FINCLUDIA financial goals (P6-08), screens C09-C11.
-                { path: 'objectifs', lazy: lazyPage(() => import('../pages/goals/GoalsPage.jsx')) },
-                // FINCLUDIA debts (P6-10), screens C13-C14.
-                { path: 'dettes', lazy: lazyPage(() => import('../pages/debts/DebtsPage.jsx')) },
-                // FINCLUDIA funding readiness (P6-16), screens JA08 / SA05.
-                { path: 'financement', lazy: lazyPage(() => import('../pages/funding/FundingReadinessPage.jsx')) },
-                // FINCLUDIA notifications and alerts (P6-18), screen C24.
-                { path: 'notifications', lazy: lazyPage(() => import('../pages/notifications/NotificationsPage.jsx')) },
-                // FINCLUDIA trust and data centre (P6-19), screen C25.
-                { path: 'confiance', lazy: lazyPage(() => import('../pages/trust/TrustCenterPage.jsx')) },
-                // Passeport de connaissances financières (P2-09), écrans LY11/LY12/ET09.
-                { path: 'passeport', lazy: lazyPage(() => import('../pages/apprendre/PassportPage.jsx')) },
-                // FINCLUDIA safety reserve (P6-09), screen C12.
-                { path: 'reserve', lazy: lazyPage(() => import('../pages/reserve/ReservePage.jsx')) },
-                // FINCLUDIA real patrimony (P6-11), screens C16 / JA07.
-                { path: 'patrimoine', lazy: lazyPage(() => import('../pages/patrimoine/WealthPage.jsx')) },
-                // FINCLUDIA paper portfolio and investment workshop (P6-12),
-                // screens C17 / EP03-EP07.
-                { path: 'portefeuille', lazy: lazyPage(() => import('../pages/portefeuille/PaperPortfolioPage.jsx')) },
-                // FINCLUDIA shared spaces (P6-13), screens P01 / P04 / CO01 /
-                // CP01 / FA01.
-                { path: 'espaces', lazy: lazyPage(() => import('../pages/espaces/SpacesPage.jsx')) },
-                // Espace entreprise (P7-02) : socle de l'ERP annoncé par
-                // l'annexe 1 du contrat. Réservé aux majeurs, et l'API le
-                // refuse de son côté.
-                { path: 'entreprise', lazy: lazyPage(() => import('../pages/entreprise/BusinessPage.jsx')) },
-                // FINCLUDIA financial calendar and recurring expenses (P6-07),
-                // screens C23 / SA03 / SA04.
-                { path: 'calendrier', lazy: lazyPage(() => import('../pages/calendrier/CalendarPage.jsx')) },
-                {
-                  path: 'compte',
-                  element: <AccountLayout />,
-                  children: [
-                    { index: true, element: <Navigate to="profil" replace /> },
-                    { path: 'profil', element: <ProfilePage /> },
-                    { path: 'tableau-de-bord', element: <DashboardPage /> },
-                    { path: 'formations', lazy: lazyPage(() => import('../pages/account/MyFormationsPage.jsx')) },
-                    { path: 'certificats', lazy: lazyPage(() => import('../pages/account/MyCertificatesPage.jsx')) },
-                    { path: 'type', element: <AccountTypePage /> },
-                    { path: 'premium', element: <PremiumAccessPage /> },
-                    { path: 'paiements', lazy: lazyPage(() => import('../pages/account/MyPaymentsPage.jsx')) },
-                    { path: 'fincludia', lazy: lazyPage(() => import('../pages/account/FinProfilePage.jsx')) },
-                    { path: 'categories', lazy: lazyPage(() => import('../pages/account/FinCategoriesPage.jsx')) },
-                    { path: 'premiers-pas', lazy: lazyPage(() => import('../pages/account/FinOnboardingPage.jsx')) },
-                  ],
-                },
+                  // Invoice generator (P4-03): the tool registry says "account required".
+                  { path: 'outils/facture', lazy: lazyPage(() => import('../pages/outils/InvoicePage.jsx')) },
+                  // "Explorer" (P4-13, écran C20) : réservé aux 18 ans et plus, l'API refuse en plus server-side.
+                  { path: 'outils/explorateur', lazy: lazyPage(() => import('../pages/outils/ExplorerPage.jsx')) },
+                  // E-Learning (learner side): formations are for logged-in users.
+                  { path: 'catalogue', lazy: lazyPage(() => import('../pages/learn/CatalogPage.jsx')) },
+                  { path: 'catalogue/:slug', lazy: lazyPage(() => import('../pages/learn/FormationPage.jsx')) },
+                  { path: 'catalogue/:slug/quiz/:quizId', lazy: lazyPage(() => import('../pages/learn/QuizPage.jsx')) },
+                  {
+                    path: 'catalogue/:slug/cours/:courseId',
+                    lazy: lazyPage(() => import('../pages/learn/CoursePage.jsx')),
+                  },
+                  {
+                    path: 'catalogue/:slug/certificat',
+                    lazy: lazyPage(() => import('../pages/learn/CertificatePage.jsx')),
+                  },
+                  // Where the payment provider sends the buyer back (P3-09): reads the order, grants nothing.
+                  { path: 'paiement/retour', lazy: lazyPage(() => import('../pages/payments/PaymentReturnPage.jsx')) },
+                  // FINCLUDIA "Aujourd'hui" home screen and dashboards per public
+                  // (P6-06), screens C04 / LY02 / ET02 / JA02 / SA02.
+                  { path: 'aujourdhui', lazy: lazyPage(() => import('../pages/aujourdhui/TodayPage.jsx')) },
+                  // FINCLUDIA "Mon argent" (P6-04): synthesis, entry and history.
+                  { path: 'mon-argent', lazy: lazyPage(() => import('../pages/argent/MyMoneyPage.jsx')) },
+                  // FINCLUDIA budgets and envelopes (P6-05), screens C06 / JA03 / JA04.
+                  { path: 'budget', lazy: lazyPage(() => import('../pages/budget/BudgetsPage.jsx')) },
+                  { path: 'budget/:id', lazy: lazyPage(() => import('../pages/budget/BudgetDetailPage.jsx')) },
+                  // FINCLUDIA financial goals (P6-08), screens C09-C11.
+                  { path: 'objectifs', lazy: lazyPage(() => import('../pages/goals/GoalsPage.jsx')) },
+                  // FINCLUDIA debts (P6-10), screens C13-C14.
+                  { path: 'dettes', lazy: lazyPage(() => import('../pages/debts/DebtsPage.jsx')) },
+                  // FINCLUDIA funding readiness (P6-16), screens JA08 / SA05.
+                  { path: 'financement', lazy: lazyPage(() => import('../pages/funding/FundingReadinessPage.jsx')) },
+                  // FINCLUDIA notifications and alerts (P6-18), screen C24.
+                  { path: 'notifications', lazy: lazyPage(() => import('../pages/notifications/NotificationsPage.jsx')) },
+                  // FINCLUDIA trust and data centre (P6-19), screen C25.
+                  { path: 'confiance', lazy: lazyPage(() => import('../pages/trust/TrustCenterPage.jsx')) },
+                  // Passeport de connaissances financières (P2-09), écrans LY11/LY12/ET09.
+                  { path: 'passeport', lazy: lazyPage(() => import('../pages/apprendre/PassportPage.jsx')) },
+                  // FINCLUDIA safety reserve (P6-09), screen C12.
+                  { path: 'reserve', lazy: lazyPage(() => import('../pages/reserve/ReservePage.jsx')) },
+                  // FINCLUDIA real patrimony (P6-11), screens C16 / JA07.
+                  { path: 'patrimoine', lazy: lazyPage(() => import('../pages/patrimoine/WealthPage.jsx')) },
+                  // FINCLUDIA paper portfolio and investment workshop (P6-12),
+                  // screens C17 / EP03-EP07.
+                  { path: 'portefeuille', lazy: lazyPage(() => import('../pages/portefeuille/PaperPortfolioPage.jsx')) },
+                  // FINCLUDIA shared spaces (P6-13), screens P01 / P04 / CO01 /
+                  // CP01 / FA01.
+                  { path: 'espaces', lazy: lazyPage(() => import('../pages/espaces/SpacesPage.jsx')) },
+                  // Espace entreprise (P7-02) : socle de l'ERP annoncé par
+                  // l'annexe 1 du contrat. Réservé aux majeurs, et l'API le
+                  // refuse de son côté.
+                  { path: 'entreprise', lazy: lazyPage(() => import('../pages/entreprise/BusinessPage.jsx')) },
+                  // FINCLUDIA financial calendar and recurring expenses (P6-07),
+                  // screens C23 / SA03 / SA04.
+                  { path: 'calendrier', lazy: lazyPage(() => import('../pages/calendrier/CalendarPage.jsx')) },
+                  {
+                    path: 'compte',
+                    element: <AccountLayout />,
+                    children: [
+                      { index: true, element: <Navigate to="profil" replace /> },
+                      { path: 'profil', element: <ProfilePage /> },
+                      { path: 'tableau-de-bord', element: <DashboardPage /> },
+                      { path: 'formations', lazy: lazyPage(() => import('../pages/account/MyFormationsPage.jsx')) },
+                      { path: 'certificats', lazy: lazyPage(() => import('../pages/account/MyCertificatesPage.jsx')) },
+                      { path: 'type', element: <AccountTypePage /> },
+                      { path: 'premium', element: <PremiumAccessPage /> },
+                      { path: 'paiements', lazy: lazyPage(() => import('../pages/account/MyPaymentsPage.jsx')) },
+                      { path: 'fincludia', lazy: lazyPage(() => import('../pages/account/FinProfilePage.jsx')) },
+                      { path: 'categories', lazy: lazyPage(() => import('../pages/account/FinCategoriesPage.jsx')) },
+                      { path: 'premiers-pas', lazy: lazyPage(() => import('../pages/account/FinOnboardingPage.jsx')) },
+                    ],
+                  },
                 ],
               },
+            ],
+          },
+          {
+            element: <RequireAuth />,
+            children: [
               {
                 element: <RequireRole role="admin" />,
                 children: [

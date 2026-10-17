@@ -151,9 +151,23 @@
 }
 
 .wealth-row-label {
-  margin-inline-end: auto;
+  flex: 1 1 160px;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
   font-weight: 500;
   color: var(--text-h);
+}
+
+/* Everything but the label, grouped so it wraps as its own block instead of
+   fighting the label for the same line — the old `margin-inline-end: auto`
+   on the label, inside a wrapping flex row, let a long label push every
+   other field onto a line of its own underneath it. */
+.wealth-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-inline-start: auto;
 }
 
 .wealth-row-amount {

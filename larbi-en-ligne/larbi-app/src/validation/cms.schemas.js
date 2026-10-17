@@ -23,6 +23,9 @@ export const updateFormationSchema = z
     subtitle: optionalText(160),
     description: z.string().trim().max(2000),
     level: z.enum(Object.values(FORMATION_LEVEL)).nullable(),
+    // Teaching theme of the "Apprendre" search (P2-08), free-form like the
+    // glossary's: the vocabulary is the administrators', not a fixed list.
+    theme: z.string().trim().max(60).nullable(),
     objectives: lines,
     prerequisites: lines,
     categoryId: z.string().uuid().nullable(),
@@ -30,6 +33,13 @@ export const updateFormationSchema = z
     certificationEnabled: z.boolean(),
     certificationTitle: optionalText(150),
     certificationDescription: optionalText(1000),
+    // Suggested to this account type first (simple suggestion, no score —
+    // client's own wording). Shape only: each slug is checked against the
+    // account categories that currently exist by the controller (P3-15).
+    targetAccountTypes: z
+      .array(z.string().trim().min(1).max(60))
+      .max(20)
+      .transform((types) => [...new Set(types)]),
   })
   .partial()
   .strict();

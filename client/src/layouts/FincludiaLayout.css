@@ -1,22 +1,26 @@
 /* The shell of the connected space (P1-12).
  *
- * One markup, two layouts: a single column on a phone with the navigation
- * above the page, two columns from 1024px with the navigation beside it. All
- * inline/block properties, never left/right, so the sidebar lands on the
- * correct side in Arabic without a second rule. */
+ * Flexbox, not a grid with two named states: the sidebar's own width (set in
+ * FincludiaNav.css, by whether it carries `.fin-nav-collapsed`) is the only
+ * thing that changes. The content pane is always `flex: 1 1 auto` next to it
+ * — it never becomes a full-bleed single column just because the sidebar
+ * went narrow, which is what a grid driven from here, out of sync with the
+ * sidebar's own state, used to do. */
 
 .fin-shell {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
 }
 
 .fin-shell-main {
-  min-width: 0; /* a grid column does not shrink below its content without this */
+  flex: 1 1 auto;
+  min-width: 0; /* a flex item does not shrink below its content without this */
 }
 
-@media (min-width: 1024px) {
+@media (max-width: 1023px) {
   .fin-shell {
-    grid-template-columns: 264px minmax(0, 1fr);
-    align-items: start;
+    flex-direction: column;
+    gap: 16px;
   }
 }

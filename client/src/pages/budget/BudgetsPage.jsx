@@ -48,7 +48,7 @@ export default function BudgetsPage() {
 
   return (
     <>
-      <PageHeader icon={PiggyBank} title={t('budget.title')} subtitle={t('budget.intro')} />
+      <PageHeader icon={PiggyBank} title={t('budget.title')} subtitle={t('budget.intro')} maxWidth={1040} />
       <div className="budget-page">
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">

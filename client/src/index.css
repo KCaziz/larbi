@@ -291,6 +291,19 @@ main {
 .stack-sm { display: flex; flex-direction: column; gap: var(--space-sm); }
 .stack-md { display: flex; flex-direction: column; gap: var(--space-md); }
 
+/* A form-level error message, used bare (not paired with .form-status) across
+   the FINCLUDIA pages. A red badge, never shouting-loud: a tinted background
+   and a left border carry the signal, the text stays the normal weight. */
+.form-error {
+  margin: 0;
+  padding: 10px 14px;
+  border-inline-start: 3px solid var(--danger);
+  border-radius: var(--radius-sm);
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 0.88rem;
+}
+
 /* Tone modifiers: give any card/icon/chip its own accent colour by adding one
    of these classes — components read --tone / --tone-bg. */
 .tone-primary {

@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlaskConical } from 'lucide-react';
-import { api, ApiError } from '../../lib/api.js';
+import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
@@ -37,6 +37,14 @@ export default function WorkshopPage() {
   const [selected, setSelected] = useState([]);
   const [comparison, setComparison] = useState(null);
   const [error, setError] = useState(null);
+  const formRef = useRef(null);
+
+  // Opening a simulator was easy to miss: its form appears below a grid of
+  // cards that can run long, with no other sign that anything happened. The
+  // page now scrolls to it, the same way a "go to this simulator" link would.
+  useEffect(() => {
+    if (chosen) formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [chosen]);
 
   // Memoised because the search filters it: `?? []` would be a new array on
   // every render and would refilter the catalogue each time.
@@ -58,10 +66,16 @@ export default function WorkshopPage() {
   if (catalogue.status === 'loading') return <LoadingState />;
   if (catalogue.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={catalogue.reload} />;
 
-  const toggle = (id) =>
+  // Scenarios of different simulators CAN compare, on whatever figures they
+  // happen to share — the server decides that, not a guess made here from
+  // the simulator's name alone. Only the submit can know for sure, so this
+  // just clears any previous error rather than pre-judging the pick.
+  const toggle = (id) => {
+    setError(null);
     setSelected((previous) =>
       previous.includes(id) ? previous.filter((other) => other !== id) : previous.length >= MAX_COMPARED ? previous : [...previous, id],
     );
+  };
 
   async function compare() {
     setError(null);
@@ -69,7 +83,15 @@ export default function WorkshopPage() {
     try {
       setComparison(await api.post('/tools/scenarios/comparaison', { ids: selected }));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('state.loadError'));
+      const reason = err?.details?.reason;
+      setError(
+        t(
+          errorKey(err, {
+            409: reason === 'unplayable' ? 'workshop.errors.unplayable' : 'workshop.errors.nothingInCommon',
+            400: reason === 'currency' ? 'workshop.errors.currency' : 'errors.invalid',
+          }),
+        ),
+      );
     }
   }
 
@@ -81,7 +103,7 @@ export default function WorkshopPage() {
       setComparison(null);
       mine.reload();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('state.loadError'));
+      setError(t(errorKey(err)));
     }
   }
 
@@ -129,9 +151,11 @@ export default function WorkshopPage() {
 
       {chosen && (
         <Section>
-          <h2>{t(`simulators.list.${chosen.key}.title`)}</h2>
-          {/* The same runner as the simulator's own page: one form, one place. */}
-          <SimulatorRunner simulator={chosen} onSaved={() => mine.reload()} />
+          <div ref={formRef} className="workshop-chosen-anchor">
+            <h2>{t(`simulators.list.${chosen.key}.title`)}</h2>
+            {/* The same runner as the simulator's own page: one form, one place. */}
+            <SimulatorRunner simulator={chosen} onSaved={() => mine.reload()} />
+          </div>
         </Section>
       )}
 

@@ -51,7 +51,7 @@ export default function TrustCenterPage() {
 
   return (
     <>
-      <PageHeader icon={ShieldCheck} title={t('trust.title')} subtitle={t('trust.intro')} />
+      <PageHeader icon={ShieldCheck} title={t('trust.title')} subtitle={t('trust.intro')} maxWidth={760} />
       <div className="trust-page">
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">

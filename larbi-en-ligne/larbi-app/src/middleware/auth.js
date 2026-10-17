@@ -2,6 +2,7 @@ import { prisma } from '../config/prisma.js';
 import { HttpError } from '../utils/httpError.js';
 import { SESSION_COOKIE, verifySession } from '../services/token.service.js';
 import { hasAccessLevel } from '../constants/roles.js';
+import { isAdultAgeRange } from '../constants/finPublics.js';
 
 // Loads the user from the DB on every request (not from token claims), so a
 // role/level change or account deletion takes effect immediately.
@@ -38,6 +39,26 @@ export const requireAccessLevel = (level) => (req, res, next) =>
   hasAccessLevel(req.user?.accessLevel, level)
     ? next()
     : next(new HttpError(403, 'Premium access required'));
+
+// Functions reserved to adults (FINCLUDIA, P3-18 / rule 18 of TASKS.md): refused
+// server-side, never only hidden in the UI. Deny by default — an account that
+// has not given its age bracket yet (isAdultAgeRange -> null) is treated the
+// same as a minor, not the same as an adult.
+//
+// The refusal says WHICH of the two cases it is (`reason`), because they need
+// opposite answers on screen: a minor is told the function is not for them,
+// while an adult who simply never filled their profile is told to state their
+// age bracket — and can then come back. Without that distinction the second
+// case is a dead end, which is how a protection rule turns into a lock-out.
+export const requireAdult = (req, res, next) => {
+  const adult = isAdultAgeRange(req.user?.finAgeRange);
+  if (adult === true) return next();
+  return next(
+    adult === null
+      ? new HttpError(403, 'Age bracket required', { reason: 'ageUnknown' })
+      : new HttpError(403, 'Reserved to adults', { reason: 'adultsOnly' }),
+  );
+};
 
 // For public routes whose answer depends on WHO asks (blog: premium articles).
 // Never rejects: no cookie, an expired session or a deleted account simply mean

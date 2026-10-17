@@ -307,3 +307,9 @@
     margin-block-start: 6px;
   }
 }
+
+/* Where the page scrolls to when a simulator is opened from the workshop's
+   card grid — offset so the sticky header never covers its heading. */
+.workshop-chosen-anchor {
+  scroll-margin-block-start: calc(var(--header-height) + 16px);
+}

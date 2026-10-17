@@ -8,9 +8,28 @@ export const TOOLS = [
   // 2026-10-04: the client's workbooks set no access rule for the comparator, so
   // it is in free access (the user's decision, see TASKS.md P4-06).
   { key: 'comparateur-bancaire', status: 'available', access: 'public' },
+  // FINCLUDIA simulators (P4-10). Free access: they are pure calculators that
+  // read no stored data and keep nothing, and the client's own screen C18 says
+  // the simulation workshop works "en mode découverte", without a profile.
+  // Requiring an account is one word here if the client decides otherwise.
+  { key: 'simulateurs', status: 'available', access: 'public' },
+  // Multi-criteria comparison and job-offer comparator (P4-12). Free access for
+  // the same reason: they compare the figures the person types, and read nothing.
+  { key: 'comparaisons', status: 'available', access: 'public' },
   // Cahier des charges: "Outils : accès authentifié et selon les droits".
   { key: 'simulateur-credit', status: 'planned', access: 'authenticated' },
-  { key: 'generateur-facture', status: 'planned', access: 'authenticated' },
+  // "Explorer" (P4-13, écran C20) : réservé aux 18 ans et plus (P3-18), donc
+  // un compte est nécessaire pour connaître l'âge — la route ajoute en plus
+  // `requireAdult`, que `authenticated` seul ne couvre pas.
+  { key: 'explorateur-financier', status: 'available', access: 'authenticated' },
+  // Invoice generator (P4-03): needs an account, per the specification.
+  { key: 'generateur-facture', status: 'available', access: 'authenticated' },
+  // Référentiel Algérie Poste / CCP (P4-17). Libre d'accès comme le
+  // comparateur bancaire, et pour la même raison : ce sont des données de
+  // référence, pas des données de compte. Ce qui n'est PAS libre, c'est le
+  // tarif : aucune ligne n'est publiable tant que la grille officielle datée
+  // n'est pas fournie, et la vue publique les retire (voir finPostal.service).
+  { key: 'referentiel-postal', status: 'available', access: 'public' },
 ];
 
 export const toolByKey = (key) => TOOLS.find((tool) => tool.key === key) ?? null;

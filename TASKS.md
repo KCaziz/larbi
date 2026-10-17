@@ -1105,6 +1105,8 @@ Défaut trouvé et corrigé lors de cet audit : **le résolveur était inatteign
 
 Limites : les intentions sont livrées en **brouillon**, avec leurs libellés du fichier client mais sans réponses rédigées — elles restent à écrire et à valider (`P6-01` point 10). Les modèles de réponse ne lisent pas encore de variable dans les API de calcul : ils sont du texte pré-écrit, ce qui est la partie prudente de la spécification.
 
+**Mise à jour du 2026-10-17** : le client a fourni 25 intentions complètes (déclencheurs, questions, réponses, garde-fous — voir `P6-01` point 10 et `P6-22`), contre les 8 intentions brouillon actuellement en base. Intégration restant à faire dans `P6-22`.
+
 ### P4-01 — Architecture commune des outils
 - Statut : `✅ done`
 - Priorité : `🔴 high`
@@ -1329,9 +1331,9 @@ Prolonge le comparateur existant (`P4-06` à `P4-08`) sans toucher à ses donné
 - **Pas de test unitaire/fonctionnel dédié supplémentaire, de scénario de cohérence globale ni de parcours navigateur** au-delà de ce qui est listé ci-dessus.
 
 ### P4-14 — FINCLUDIA : décodeur de fiche de paie
-- Statut : `⛔ blocked`
+- Statut : `❌ todo`
 - Priorité : `🟡 medium`
-- Dépendances : `P4-09`, `P6-01`
+- Dépendances : `P4-09`, `P6-01`, `P6-22`
 - Durée cible : 2 jours (estimation, une fois les règles reçues)
 - Origine : direction FINCLUDIA du 2026-10-09 (écran C15)
 
@@ -1339,19 +1341,19 @@ Prolonge le comparateur existant (`P4-06` à `P4-08`) sans toucher à ses donné
 - Net = brut + éléments positifs − retenues **seulement selon la structure saisie** ; **aucune déduction légale inventée**, ne prétend jamais certifier la fiche.
 - Import d'un document et extraction automatique : phase ultérieure (le client le note lui-même).
 
-Blocage : les **règles de paie et barèmes (cotisations, IRG), datés et versionnés**, doivent être fournis par le client (`P6-01`) avant tout calcul autre qu'une simple addition des lignes saisies.
+**Déblocage du 2026-10-17** : SNMG, barème IRG et cotisations (employeur/salarié, par branche, datés et sourcés) reçus — voir `P6-01` point 6 et `P6-22`. Plus `⛔ blocked` ; reste à implémenter.
 
 ### P4-15 — FINCLUDIA : comparer un financement (conventionnel / islamique)
-- Statut : `⛔ blocked`
+- Statut : `❌ todo`
 - Priorité : `🟢 low`
-- Dépendances : `P4-12`, `P4-11`, `P6-01`
+- Dépendances : `P4-12`, `P4-11`, `P6-01`, `P6-22`
 - Durée cible : 2 jours (estimation, une fois les données reçues)
 - Origine : direction FINCLUDIA du 2026-10-09 (écran JA09)
 
 - Besoin, montant, durée, apport, préférence **conventionnelle ou islamique**, revenu, garanties → mensualité / coût, apport, frais, conditions, impact sur la trésorerie, source et date.
 - Taux d'intérêt et parts de bénéfices **jamais assimilés** (même règle que le comparateur, `P4-06`) ; pas de classement opaque ; pas d'éligibilité garantie.
 
-Blocage : offres de financement et leurs règles de calcul **à fournir par le client** (les classeurs actuels donnent des conditions, pas des formules — voir `P4-02`).
+**Déblocage du 2026-10-17** : 25 fiches produits réelles et leurs formules de calcul reçues — voir `P6-01` point 6 et `P6-22`. Plus `⛔ blocked` ; reste à implémenter **en respectant le garde-fou du client** : la quasi-totalité de ces 25 fiches est marquée « audit primaire requis » dans sa propre source (statut déclaré, pas une vérification indépendante) et un produit (`ODT-CR-015`, Al Salam Bank « Tayssir véhicule ») est explicitement signalé en conflit — à bloquer en production tant que la banque n'a pas confirmé.
 
 ### P4-17 — Référentiel Algérie Poste / CCP (comparateur et pédagogie)
 - Statut : `✅ done`
@@ -1608,19 +1610,53 @@ Les deux documents sont très détaillés sur les écrans, mais plusieurs points
 1. ~~**Nom et identité**~~ — **tranché le 2026-10-09 : la plateforme s'appelle FINCLUDIA.** Renommage appliqué dans tout le code, les textes fr/en/ar, les tests et la documentation (détail et points d'attention : « Renommage en FINCLUDIA » ci-dessous). **Restent à fournir** : logo, charte graphique, nom de domaine. **Reste à trancher** : que deviennent l'e-learning, le blog et les outils actuels — intégrés comme modules « Apprendre » / « Explorer » (hypothèse retenue dans ce plan) ou site séparé ? Le texte de présentation de la page d'accueil décrit encore l'ancien positionnement (« formations, blog et outils pour auto-entrepreneurs, PME, PMI ») : il n'a **pas** été réécrit, parce que le nouveau positionnement est une décision commerciale, pas un renommage. **Reçu le 2026-10-16 : le logo et la charte graphique officielle** (« Positionnement officiel aperçu charte graphique.odt ») — positionnement, signature, palette, dégradé officiel, typographies et logo. Détail, écarts avec l'existant et travail restant : `P1-13`. **Reste à fournir : le nom de domaine.** Le sort commercial de l'e-learning, du blog et des outils n'est toujours **pas** tranché, mais la charte y répond en partie : elle décrit une plateforme « d'éducation, d'inclusion et d'intelligence financières », donc un seul produit.
 2. **Périmètre de la première livraison** : les 8 publics d'un coup ou d'abord quelques-uns (ex. étudiant + jeune actif + salarié) ? Quels lots du backlog client ?
 3. ~~**Types de compte existants**~~ (auto-entrepreneur, PME, PMI) face aux 8 publics (voir `P3-18`) — **tranché le 2026-10-11 : un seul profil actif à la fois, jamais deux en même temps.** Pas de coexistence en deux axes indépendants.
-4. **Devises** : DZD seulement ou plusieurs (EUR, USD…) ? Source et fréquence des taux de change si plusieurs.
-5. **Seuils** que le document laisse « à valider » : taux d'effort dette, cibles de réserve, pondérations de l'indice de santé financière (F053) et de l'indice de préparation au financement, seuils d'alertes.
-6. **Règles de paie** (cotisations, IRG) datées, pour `P4-14` ; **offres de financement** pour `P4-15` ; données **CCP** pour `P4-13`. **Les données CCP sont fournies depuis le 2026-10-16** (classeur `FINCLUDIA_ALGERIE_POSTE_CCP_REFERENTIEL_COMPARATEUR.xlsx`, voir `P4-17`) — mais le classeur déclare lui-même **aucune ligne publiable** faute de pièce officielle datée. Le modèle et l'import sont débloqués, **la publication des tarifs ne l'est pas**. Les barèmes de paie et les offres de financement restent attendus.
-7. **Mineurs** : âge minimum d'inscription, consentement parental, fonctions exactes réservées aux 18 ans et plus.
+4. ~~**Devises**~~ — **reçu le 2026-10-17** (`FINCLUDIA_REFERENTIEL_MAITRE_EXCEL_BLOCAGES_AZIZ.xlsx`, onglet `08_Devises`) : **DZD comme devise de base**, et une liste fermée de devises prises en charge (USD, EUR, GBP, JPY, CNY, CHF, CAD, DKK, SEK, NOK, AED, SAR, KWD, TND, MAD, LYD, MRU, SDR). Source du taux : Banque d'Algérie, taux de change journalier officiel, un seul cours par jour ouvrable ; alerte de fraîcheur au-delà de **2 jours ouvrables** ; jamais de taux de marché parallèle. Si l'utilisateur connaît le taux réellement appliqué par sa banque, ce taux se stocke **séparément**, sans écraser le taux de référence. Voir `P6-22` pour la mise en œuvre.
+5. **Seuils** que le document laisse « à valider » — **substantiellement reçu le 2026-10-17**, mêmes onglets du référentiel maître : `09_Sante_Poids`/`10_Sante_Baremes` (pondérations et grilles de sous-scores de l'indice de santé financière F053 — **barème « B », 7 dimensions** : équilibre mensuel 25 %, réserve 20 %, dette 20 %, épargne 15 %, objectifs 10 %, stabilité des revenus 5 %, qualité des données 5 %, avec le détail de normalisation de chaque dimension et les paliers de score global 0-39/40-59/60-79/80-100), `11_Readiness` (indice de préparation au financement, version A : 6 critères pondérés 30/20/15/15/10/10 et leurs normalisations), `12_Reserve` (cibles de réserve par profil, deux grilles), `13_Alertes` (seuils complets budget/dette/réserve/objectifs/échéances/fraîcheur), `25_Constantes` (constantes versionnées : `DEBT_WATCH`=20 %, `EMERGENCY_CRITICAL/STANDARD/ROBUST_MONTHS`=1/3/6, `ENVELOPE_WARNING`=80 %, `ENVELOPE_EXCEEDED`=100 % — **ces deux derniers correspondent déjà exactement** aux seuils implémentés dans `P6-05`). **Réserve non close** : le document nomme lui-même un second barème de santé financière à 6 dimensions sans en donner le détail, et plusieurs grilles de réserve/readiness coexistent sans arbitrage explicite entre elles — à signaler au client plutôt qu'à trancher seul. Mise en œuvre : voir `P6-22`.
+6. ~~**Règles de paie**~~ (cotisations, IRG) **reçues le 2026-10-17**, onglets `14_Paie_Regles`/`15_IRG_Tranches` : SNMG 24 000 DA/mois (décret présidentiel 26-01 du 2026-01-07), cotisations détaillées par branche et par part employeur/salarié (total salarié 9 %, total employeur 25 % + 0,5 % œuvres sociales, décret exécutif 15-236 du 2015-09-16, « à revalider si nouveau texte »), barème IRG par tranches daté (DGI, page consultée le 2026-10-12), exonération ≤30 000 DA/mois. Débloque `P4-14`. — **Offres de financement** pour `P4-15` **reçues le 2026-10-17**, onglet `03_Offres_Credit` : 25 fiches produits réelles (banque, taux, durée, DSR, apport, âge, revenu minimum, source), plus les formules de calcul (`04_Credit_Regles` : mensualité, capacité, apport requis, plafond légal 30 % pour le crédit à la consommation — décret exécutif 15-114 art. 16) et les règles de gouvernance avant publication (`24_Gouvernance` : revalidation hebdomadaire/mensuelle, retrait du comparateur actif au-delà de 30-90 jours sans revalidation). **Le client marque lui-même la quasi-totalité de ces 25 fiches « Audit primaire requis »** (statut déclaré dans sa propre source, non une vérification indépendante) et bloque explicitement un produit (`ODT-CR-015`, Al Salam Bank « Tayssir véhicule » : « Conflit officiel — bloquer production tant que banque non confirmée ») : l'implémentation de `P4-15` doit respecter ce garde-fou, pas le contourner. — Données **CCP** pour `P4-13` : toujours fournies depuis le 2026-10-16 sans ligne publiable (inchangé, voir `P4-17`).
+7. **Mineurs** : âge minimum d'inscription, consentement parental, fonctions exactes réservées aux adultes — **reçu le 2026-10-17**, onglet `19_Mineurs` et `25_Constantes` (`ADULT_AGE`). **Point d'attention majeur : la majorité retenue par le client est 19 ans (Code civil algérien, art. 40), pas 18.** Règle précise : moins de 13 ans → aucun compte autonome (profil enfant seulement, géré par un adulte dans son propre espace) ; 13-18 ans → « Mode Jeune » possible avec consentement **vérifié** du représentant légal avant tout traitement de données (loi 18-07 art. 8), budget réel, objectifs, sécurité, comparateurs informatifs, portefeuille fictif autorisés, **jamais** de crédit réel, financement, investissement exécuté ou transmission à un partenaire sans consentement légal ; 19 ans et plus → compte adulte complet. Tout le code actuel (`FIN_AGE_RANGES`, `requireAdult`, les textes « réservé aux personnes de 18 ans et plus » fr/en/ar) utilise encore **18** comme seuil : correction nécessaire, voir `P6-22`.
 8. ~~**Canaux de notification**~~ — **tranché le 2026-10-11 : pas de SMS.** Les notifications restent in-app ; l'e-mail reste une option future, dépendante du même choix de fournisseur que la newsletter (non fait).
 9. ~~**Textes légaux**~~ — **tranché le 2026-10-11 :** la mention « pas de conseil réglementé » et la politique de confidentialité sont rédigées par l'équipe. Une suppression de compte entraîne une suppression complète et immédiate des données (pas de durée de conservation à part).
-10. **Contenus restant à fournir** : missions (abandonné, voir `P2-10`), intentions de l'assistant déterministe (`P3-19`), modèles d'objectifs, référentiel de catégories (l'onglet `03_Categories` en donne une base). Le glossaire et les guides (`P2-08`) sont rédigés par l'équipe, plus attendus du client.
+10. **Contenus restant à fournir** : missions (abandonné, voir `P2-10`). ~~**Intentions de l'assistant déterministe**~~ (`P3-19`) — **reçues le 2026-10-17**, onglets `20_Assistant_25`/`21_Assistant_Complements` : **25 intentions** complètes (CB01 à CB24, plus le repli CB99 « intention inconnue »), chacune avec ses déclencheurs (mots-clés), ses questions/étapes, sa réponse-type et son garde-fou explicite — bien plus riche que les 8 intentions brouillon actuellement en base (voir limite notée dans `P3-19`). ~~**Modèles d'objectifs**~~ — **reçus le 2026-10-17**, onglet `22_Objectifs_20` : **20 modèles** (G01 à G20, cible par défaut, horizon, règle/condition) contre les 11 génériques actuellement dans `constants/finGoal.js` (`P6-08`). Référentiel de catégories (l'onglet `03_Categories` en donne une base, déjà implémenté par `P6-02`, confirmation seulement). Le glossaire et les guides (`P2-08`) sont rédigés par l'équipe, plus attendus du client. Intégration de ce contenu plus riche : voir `P6-22`.
 11. **Hébergement** : un hébergement mutualisé (cPanel, MariaDB) suffit pour une démonstration ; des données financières réelles demandent sauvegardes testées, chiffrement et disponibilité à confirmer (voir `P5-04`). **Précision contractuelle (contrat du 2026-09-14, article 6)** : les frais annexes — nom de domaine, hébergement, licences tierces, certificats de sécurité — sont **à la charge du prestataire**, sauf stipulation contraire. Le choix de l'hébergement reste une décision du client (il porte ses données), mais son coût n'est pas un argument pour le reporter.
 12. **Périmètre contractuel non couvert par ce plan** (contrat, Annexe 1) : le contrat annonce, au-delà de la gestion de budget des particuliers, un **ERP pour entreprises, PME, PMI, micro-entreprises, startupeurs, auto-entrepreneurs, micro-importateurs et professions libérales** avec tableaux de bord et **états financiers**, ainsi qu'un volet **diaspora et commerce international**. Rien de tout cela n'existe dans ce plan. Voir `P7-01` : c'est une décision de périmètre, pas une tâche à lancer.
 13. **Date de livraison cible** : le contrat la laisse **vide** (article « Date de livraison cible »), alors qu'il fixe le début au 14/09/2026, un paiement en quatre fois (25 % / 25 % / 25 % à la validation de la recette / 25 % à la livraison finale et à la levée des réserves) et une garantie de **90 jours**. Sans date, ni les jalons ni la recette n'ont d'échéance opposable.
 14. **Annexe 1 du contrat à compléter** : front-end, back-end, base de données, espace administrateur, gestion des rôles, hébergement, sécurité/sauvegardes, documentation/formation et mise en production y sont **tous laissés vides**. Ce plan en est la réponse de fait ; il vaut mieux l'y reporter que de laisser l'annexe muette.
 
-Livrable attendu : une note de réponses. Passer alors cette tâche à `✅ done`.
+Livrable attendu : une note de réponses. Passer alors cette tâche à `✅ done`. **Toujours `⛔ blocked`** malgré la réception du référentiel maître ci-dessous : les points 2 (périmètre de la première livraison), 12 (périmètre ERP, voir `P7-01`), 13 (date de livraison) et 14 (annexe 1 du contrat) restent sans réponse du client.
+
+#### Référentiel maître reçu du client (2026-10-17)
+
+`FINCLUDIA_REFERENTIEL_MAITRE_EXCEL_BLOCAGES_AZIZ.xlsx` (32 onglets) : reconstruction structurée, par le client, du document ODT déjà reçu — pas une vérification bancaire/fiscale indépendante (son propre onglet `01_Mode_Emploi` le dit explicitement). Répond en grande partie aux points 4, 5, 6, 7 et 10 de `P6-01` ci-dessus. Contenu par onglet, pour traçabilité :
+- `02_Identite` : marque, promesse, mission, positionnement et limites (ni banque ni prêteur), piliers de marque — déjà conformes à ce qui est implémenté.
+- `03_Offres_Credit`, `04_Credit_Regles`, `05_Credit_Criteres`, `06_Inputs_Credit`, `07_Schema_Import` : 25 fiches de crédit réelles, les formules de calcul (mensualité, capacité, apport, plafond légal 30 %), les critères d'incompatibilité (jamais une décision bancaire simulée) et un schéma cible d'import — matière de `P4-15` et renfort de `P4-11`.
+- `08_Devises`, `09_Sante_Poids`, `10_Sante_Baremes`, `11_Readiness`, `12_Reserve`, `13_Alertes`, `14_Paie_Regles`, `15_IRG_Tranches`, `19_Mineurs`, `25_Constantes` : les seuils, pondérations et règles de `P6-01` points 4 à 7 (devises, indice de santé financière, préparation au financement, réserve, alertes, paie/IRG, mineurs, constantes versionnées).
+- `16_Revenus_44`, `17_Depenses_125`, `18_Transactions` : catégories de revenus/dépenses — à comparer aux 91 catégories déjà livrées par `P6-02` (confirmation, pas un nouveau besoin a priori).
+- `20_Assistant_25`, `21_Assistant_Complements` : 25 intentions de l'assistant déterministe (`P3-19`).
+- `22_Objectifs_20`, `23_Objectifs_Variantes` : 20 modèles d'objectifs (`P6-08`).
+- `24_Gouvernance` : règles de fraîcheur et garde-fous de publication par type de donnée — contraintes à respecter par `P4-15`, `P4-13`, `P4-17` et le centre d'alertes `P6-18`.
+- `27_Plan_Action` : plan de lots proposé par le client pour « rendre le référentiel actionnable » — à lire comme une proposition de structuration, pas un donneur d'ordre : la plupart de ces lots sont déjà couverts, sous d'autres noms, par les phases 3/4/6 de ce plan.
+- `28_Inventaire_Source`, `29_Archive_Integrale`, `30_Notes_Source` : archive brute et notes de traçabilité (191, 1180 et 189 lignes) — matière de référence, non résumée ici ; à consulter au cas par cas si une valeur précise doit être retrouvée à sa source.
+- `31_Comparateur_Themes` : confirme que seules les données de crédit sont exploitables au niveau produit dans ce fichier ; les 13 autres familles tarifaires du comparateur restent à alimenter depuis d'autres documents (déjà le cas, voir `P4-06`/`P4-07`).
+
+**Nouvelle tâche créée pour absorber ce contenu : `P6-22`.**
+
+### P6-22 — FINCLUDIA : intégration du référentiel maître (seuils, paie, mineurs, assistant, objectifs)
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P6-01`
+- Durée cible : 5 jours (estimation)
+- Origine : `FINCLUDIA_REFERENTIEL_MAITRE_EXCEL_BLOCAGES_AZIZ.xlsx`, reçu le 2026-10-17
+
+Six chantiers distincts, listés séparément parce qu'ils touchent des modules différents et peuvent avancer indépendamment :
+
+1. **Correction de la majorité légale : 18 → 19 ans.** `FIN_AGE_RANGES` (`constants/finPublics.js`, actuellement `['under18', '18-24', ...]`), la fonction qui en déduit le statut adulte, `requireAdult` et tout texte fr/en/ar « réservé aux personnes de 18 ans et plus » (au moins 19 fichiers concernés côté serveur et client). **Tâche sensible** : une tranche d'âge mal reclassée changerait ce qu'un compte existant peut voir — prévoir une migration de données si des comptes réels sont déjà en tranche `18-24`.
+2. **Indice de santé financière (F053)** : implémenter le barème B (7 dimensions, pondérations et grilles de sous-scores de `09_Sante_Poids`/`10_Sante_Baremes`), actuellement non calculé. Signaler au client, avant de choisir seul, l'existence d'un second barème à 6 dimensions mentionné mais non détaillé dans son propre document.
+3. **Indice de préparation au financement et cibles de réserve** : implémenter la version A de `11_Readiness` (6 critères pondérés) et une cible de réserve par profil (`12_Reserve`) — actuellement `P6-09` n'a pas de cible versionnée par profil.
+4. **Seuils d'alertes du centre de notifications (`P6-18`)** : aligner les seuils déjà codés sur `13_Alertes` et `25_Constantes` (plusieurs correspondent déjà exactement, ex. enveloppe 80 %/100 % ; d'autres restent à vérifier un par un, ex. DSR 20/30/40/50 %, fraîcheur 30/60/90/180 jours selon le type de donnée).
+5. **Paie et IRG (`P4-14`)** et **offres de financement (`P4-15`)** : implémenter avec les données reçues (voir `P6-01` points 6), **en respectant le garde-fou du client** — pas de publication d'une offre marquée « audit primaire requis » sans contrôle, blocage explicite de `ODT-CR-015`.
+6. **Contenu plus riche de l'assistant (`P3-19`, 25 intentions) et des objectifs (`P6-08`, 20 modèles)** : remplacer les 8 intentions brouillon et les 11 modèles génériques actuels par le contenu complet du client, avec ses garde-fous (ex. CB22 « jamais demander un code PIN/OTP »).
+
+Aucun de ces six chantiers n'est commencé.
 
 #### Renommage en FINCLUDIA (2026-10-09)
 
@@ -1891,6 +1927,7 @@ Appliqué : titre de la page, nom de marque et textes d'accueil fr / en / ar, su
 - **Valeur nominale / réelle (inflation) et scénarios comparés** ne sont pas repris ici : l'outil autonome `/outils/simulateurs` (`P4-10`) couvre déjà cette exploration ; les reprendre dans la fiche objectif aurait dupliqué la même mécanique sans donnée supplémentaire.
 - **Alertes** (objectif en retard, jalon atteint, contribution oubliée) attendent le centre de notifications (`P6-18`).
 - **Pas encore de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur** — seule la sécurité est couverte pour l'instant, comme `P6-05` à sa livraison.
+- **Mise à jour du 2026-10-17** : le client a fourni un catalogue de 20 modèles (`22_Objectifs_20`, G01-G20, cible par défaut + horizon + règle), contre les 11 modèles génériques actuels. Intégration restant à faire dans `P6-22`.
 
 ### P6-09 — FINCLUDIA : réserve de sécurité
 - Statut : `✅ done`
@@ -2240,10 +2277,11 @@ Une seule barre : écrans, actions, transactions, objectifs, contenus « Apprend
 ### P6-21 — FINCLUDIA : validation de fin de phase
 - Statut : `❌ todo`
 - Priorité : `🔴 high`
-- Dépendances : `P6-03`, `P6-06`, `P6-07`, `P6-12`, `P6-15`, `P6-16`, `P6-17`, `P6-19`, `P6-20`, `P4-13`, `P4-14`, `P4-15`, `P4-16`, `P3-19`
+- Dépendances : `P6-03`, `P6-06`, `P6-07`, `P6-12`, `P6-15`, `P6-16`, `P6-17`, `P6-19`, `P6-20`, `P6-22`, `P4-13`, `P4-14`, `P4-15`, `P4-16`, `P3-19`
 - Durée cible : 2 jours (estimation)
 
 - Dépendance à `P2-10` retirée le 2026-10-14 : elle n'est pas une réserve en attente du client comme les autres, mais une tâche **abandonnée** par décision du client (2026-10-11, voir `P2-10`) — la laisser dans cette liste bloquerait la clôture de la Phase 6 sur un module que personne ne demande plus. Si elle est un jour reprise, elle sera réévaluée pour cette liste à ce moment-là.
+- Dépendance à `P6-22` ajoutée le 2026-10-17 : les données reçues ce jour-là ne servent à rien pour la recette tant qu'elles ne sont pas implémentées.
 
 Critères :
 - Les 10 parcours de bout en bout (J01 à J10, onglet `02_Parcours_E2E`) passent en navigateur pour chaque public concerné.
@@ -2254,7 +2292,7 @@ Critères :
 
 **Recette exécutée le 2026-10-14 — la tâche reste `❌ todo`, et pourquoi.**
 
-`P6-21` ne peut pas être déclarée terminée : deux de ses dépendances, `P4-14` (décodeur de fiche de paie) et `P4-15` (comparer un financement), sont `⛔ blocked` sur des **données que le client doit fournir** — barèmes de paie datés, offres de financement. Clore la validation de fin de phase en les laissant ouvertes dirait que la phase est recettée alors que deux de ses écrans n'existent pas. Les critères qui **ne dépendent pas** d'elles ont en revanche été exécutés, et voici leur état.
+`P6-21` ne peut pas être déclarée terminée : deux de ses dépendances, `P4-14` (décodeur de fiche de paie) et `P4-15` (comparer un financement), restaient `⛔ blocked` sur des **données que le client doit fournir** — barèmes de paie datés, offres de financement. **Mise à jour du 2026-10-17** : ces données sont reçues (voir `P6-01` point 6, `P6-22`) et les deux tâches sont repassées `❌ todo` — mais ni l'une ni l'autre n'est encore implémentée, donc `P6-21` reste tout autant hors de portée, pour une raison différente (du travail restant, plus un blocage client). Les critères qui **ne dépendent pas** d'elles ont en revanche été exécutés, et voici leur état.
 
 **Critère « aucune donnée privée visible hors de son propriétaire ou de son espace » — tenu.** Audit d'autorisation automatique (`tests/security/authorization.test.js`) : toute route non déclarée publique répond 401 à un appel anonyme, toute route d'administration répond 403 à un compte standard, et le préfixe d'administration n'est joignable par aucune autre orthographe. Plus les suites dédiées : espaces partagés (24 tests sur la matrice de permissions), patrimoine, dettes, calendrier, portefeuille fictif, parcours.
 
@@ -2270,7 +2308,7 @@ Les données sont posées par l'API (rapide et sans ambiguïté) ; ce que le nav
 
 **Et ce fichier a lui-même failli ne rien prouver.** `b.hasText(x)` du pilote de navigateur ne renvoie pas un booléen mais **la chaîne de l'expression** à évaluer : écrit `assert.ok(await b.hasText(x))`, il affirme qu'une chaîne non vide est vraie, ce qui l'est toujours. Vingt assertions étaient donc vraies par construction, et le premier verdict « 9 verts sur 10 » ne valait rien. Le seul échec était, ironiquement, la seule assertion qui testait quelque chose (un `!hasText`, donc `!"chaîne"`). Corrigé par deux helpers dont le nom rend l'oubli impossible, `shows()` et `hides()`, qui évaluent l'expression — et par la vérification que l'échec de `J08` ne cachait **pas** une vraie fuite (l'API du patrimoine ne contient pas le support fictif, et le patrimoine net y est bien `null`).
 
-**Reste pour clore la tâche :** les huit scénarios par public de l'onglet QA (lycéen, étudiant, jeune actif, salarié, colocation, couple, famille, épargnant) n'ont pas de parcours navigateur dédié — ils recoupent largement les dix chaînes ci-dessus, mais pas exactement. Et les deux dépendances bloquées (`P4-14`, `P4-15`) restent la vraie raison pour laquelle cette tâche n'est pas `✅ done`.
+**Reste pour clore la tâche :** les huit scénarios par public de l'onglet QA (lycéen, étudiant, jeune actif, salarié, colocation, couple, famille, épargnant) n'ont pas de parcours navigateur dédié — ils recoupent largement les dix chaînes ci-dessus, mais pas exactement. Et `P4-14`, `P4-15` (désormais `❌ todo`, données reçues le 2026-10-17) ainsi que `P6-22` restent la vraie raison pour laquelle cette tâche n'est pas `✅ done` : il reste à les implémenter.
 
 **Défauts trouvés par la recette et corrigés :**
 - **Le total réel valait 0 au lieu de « non calculé »** sur un ensemble vide (`totalsByReality`, `services/finance/dataModel.js`). L'asymétrie était parlante : le total **fictif** était protégé par `fictional.length === 0 ? null : …`, le total **réel** ne l'était pas. Conséquence concrète : un espace partagé dont la seule ligne avait un statut illisible affichait « 0 » comme revenu partagé d'un membre — ce qui se lit « cette personne n'a rien », alors que nous n'avions simplement pas pu classer sa ligne. C'est exactement le défaut que la grille du client existe pour attraper.
@@ -2493,7 +2531,7 @@ Blocages / informations manquantes signalées (non bloquantes pour continuer, ma
 - Décision (2026-10-11) : **un utilisateur a un seul profil actif à la fois.** Les types de compte actuels (auto-entrepreneur, PME, PMI) et les 8 publics FINCLUDIA ne se cumulent jamais sur un même compte (pas de double étiquette) ; voir `P3-18`.
 - Décision (2026-10-11) : **pas de SMS.** Les notifications restent dans le site (in-app) ; un envoi par e-mail reste possible plus tard, mais dépend du même choix de fournisseur que la newsletter (toujours non choisi, voir ci-dessus).
 - Décision (2026-10-11) : la mention « pas de conseil financier réglementé » et les textes de confidentialité propres aux données financières sont **rédigés par l'équipe**, pas par le client. Une demande de suppression de compte entraîne une **suppression complète et immédiate** des données : pas de durée de conservation à définir.
-- FINCLUDIA, données encore à fournir par le client : barèmes de paie (`P4-14`), offres de financement et leurs formules (`P4-15`), données CCP (`P4-13`), instruments et prix de référence du portefeuille fictif (`P6-12`), intentions et réponses de l'assistant déterministe (`P3-19`), modèles d'objectifs financiers, **confirmation** du référentiel de catégories (`P6-02` l'a implémenté tel quel depuis l'onglet `03_Categories` ; il reste à confirmer, pas à fournir) et l'échelle du niveau de confiance, que le client n'énumère pas. Le glossaire et les mini-guides (`P2-08`) sont désormais rédigés par l'équipe, pas attendus du client.
+- FINCLUDIA, données encore à fournir par le client : données CCP publiables (`P4-13` — le modèle existe, aucune ligne n'est publiable faute de pièce officielle datée), instruments et prix de référence du portefeuille fictif (`P6-12`), et l'échelle du niveau de confiance, que le client n'énumère pas. Le glossaire et les mini-guides (`P2-08`) sont désormais rédigés par l'équipe, pas attendus du client. **Mise à jour du 2026-10-17 :** les barèmes de paie (`P4-14`), les offres de financement (`P4-15`), les intentions de l'assistant déterministe (`P3-19`, 25 intentions) et les modèles d'objectifs financiers (`P6-08`, 20 modèles) sont **reçus** — reste à les implémenter (`P6-22`), pas à les obtenir. Le référentiel de catégories (`P6-02`, implémenté tel quel depuis l'onglet `03_Categories`) reste à confirmer, pas à fournir.
 - FINCLUDIA, hébergement : l'hébergement mutualisé actuel (cPanel, MariaDB) convient à une démonstration, pas à des données financières réelles sans sauvegardes testées, chiffrement et disponibilité confirmés (voir `P5-04` et point 11 de `P6-01`).
 
 Point de vérification manuelle recommandé pour l'utilisateur : ouvrir `http://localhost:5173` après `npm run dev` dans `client/` et tester le menu mobile sous 860px de large (non vérifié visuellement par Claude faute d'outil navigateur dans cette session).

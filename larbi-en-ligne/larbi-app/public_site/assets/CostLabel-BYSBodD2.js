@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-BfnMFHTv.js";var t=e();function n({cost:e,t:n}){return e==null?(0,t.jsx)(`span`,{className:`cost-null`,children:n(`comparator.noCost`)}):e===0?(0,t.jsx)(`span`,{className:`cost-free`,children:n(`comparator.free`)}):(0,t.jsx)(`span`,{children:n(`comparator.perYear`,{amount:e.toLocaleString(`fr-DZ`)})})}export{n as t};

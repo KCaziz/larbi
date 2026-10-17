@@ -97,5 +97,13 @@ export function errorKey(err, overrides = {}) {
   if (status === 413) return 'errors.fileTooLarge';
   if (status === 415) return 'errors.fileUnsupported';
   if (status === 429) return 'errors.tooMany';
+  // Falling all the way through to "errors.generic" hides which status and
+  // server message actually caused it — logged in dev only (never to the
+  // person, and never a 401, which is the routine "please log in" case) so
+  // the next report of "generic error" can be traced to a real cause.
+  if (import.meta.env.DEV && status !== 401) {
+    // eslint-disable-next-line no-console
+    console.error(`[api] Unmapped error status ${status}: ${err?.message}`, err?.details);
+  }
   return 'errors.generic';
 }

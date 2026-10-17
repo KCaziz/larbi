@@ -1,17 +1,13 @@
 /* FINCLUDIA profile (P3-18). Tokens only, logical properties (RTL). */
 .fin-profile-page {
-  max-width: 640px;
+  max-width: 920px;
   margin-inline: auto;
 }
 
 .fin-profile-form {
   display: grid;
   gap: 18px;
-  max-width: 560px;
-  /* The page itself is centred at 1200px (AccountLayout's <Section>); without
-     this, a 560px form just sits flush to the start edge of that wide column
-     instead of looking centred on the page. */
-  margin-inline: auto;
+  max-width: 100%;
 }
 
 .fin-secondary-field {
@@ -44,8 +40,8 @@
 
 .fin-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 14px 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px 20px;
 }
 
 .fin-grid .form-field label {
@@ -85,8 +81,6 @@
 
 .fin-transitions {
   margin-block-start: 28px;
-  max-width: 560px;
-  margin-inline: auto;
 }
 
 .fin-transitions h3 {

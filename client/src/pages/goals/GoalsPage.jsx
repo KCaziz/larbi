@@ -53,7 +53,7 @@ export default function GoalsPage() {
 
   return (
     <>
-      <PageHeader icon={Flag} title={t('goals.title')} subtitle={t('goals.intro')} />
+      <PageHeader icon={Flag} title={t('goals.title')} subtitle={t('goals.intro')} maxWidth={1040} />
       <div className="goals-page">
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">

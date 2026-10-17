@@ -1,11 +1,39 @@
-- top bar en mode admin totalement incompréhensible le contenu contenu se superpose 
-- ajouter la langue tamazight 
-- le client m'a dit que l'on doit rendre la landing page je cite "dynamique" esseye de mettre du mouvement (n'ajoute surtout pas l'effet que t'adore de changement de mots c de la merde)
-- les infos sur la landing page sont erronée car elle parle de juste pme pmi et auto entreprenneur alors que comme tu sais on a ajouter d'autre parcours 
-- aussi comme infos la sollution va etre couper en deux (theoriquement pour le moment) on includia pour particulier avec les 8 parcours que tu a ajouter puis on a fincludia entreprise pour les pme pmi et auto entreprenneur
-- le client m'a indiquer qu'on devais suggerer des formations (certif) en fonction du type de compte (car il y'a un truc a calculer si le client fait une formation ou non )
-- la page Mon profil FINCLUDIA est nul pas centrer les champs dépasse du cadre et il ne soint pas alligner
-- la bar de navigation dans le compte n'est pas ergonomique repense a comment améliorer l'xp user pour la navigation dans son espace
-- aussi certaine catégorie (mon-argent, aujord'hui, budget, objectifs, calendrier) nous sortent carrement de la navigation entre les section et nous emmene vers une page dedier je ne suis pas contre mais il faut etre coherent soit c'est un index qui nous emmene vers d'autre page soit c'est une navigation entre section mais l'on est pas rediriger tu comprend aussi si c'est mieux de changer de page ajoute un boutton retour
-- j'ai remarquer que beaucoup de bouttons et de petite rebrique sont coller a d'autre ellement ajoute du margin quand c'est le cas
-- bref de maniére gobale améliore l'ergonomie et l'xp user surtout sur la navigation et la clareter des ecrans repense ton systémes 
+ICI JE SI JE NE PRECISE PAS LE RESULTAT DU TEST C QUE IL EST PASSER
+
+- a l'inscription il se passer rien juste des erruer front Une erreur est survenue. Réessayez plus tard. mais quand j'ouvre un autre onglet il me dit compte crée il me dit compte existant puis quand je me connecte il me dit invalide mais j'ai réeseeyer avec une autre boite le compte a ete crée 
+- la top bar a la connexion est illisible tu doit trouver un moyen pour soit la refonter ou la supprimer 
+- sur la sidebar il faut crée des sections et des sous sections en toggle car il y'a trop d'onglet 
+- il y'a des onglets qui font disparaitre la side bar ce doit etre impossible (les onglets investir & simuler et les onglets explorer et apprendre (je precise que meme leurs sous onglet fait disparaitre la sidebar)) 
+- je veut que la sidebar ne s'en va jamais quand un ser est connecter au pire elle va juste se cacher mais est activable via bouttons de toggle 
+- l'onglet mon entreprise ne marche pas 
+- la page passeport de connaissance est moche et cassé
+- aussi la side bar a des un scrolle lateral que je deteste eneleve le 
+- a la creation d'une enveloppes dans le budgets j'ai ceci 
+Request URL
+http://localhost:5173/api/fin/budgets/eb1a8c58-c6dc-4494-81ee-ca690e3a2b50/enveloppes
+Request method
+POST
+Status code
+422 Unprocessable Entity
+
+- quand il y'a une erreur il faut la mettre dans un badge rouge pas quelque chose de trés voyant mais quand meme pas du text simple 
+- dettes le bouttons Comparer avalanche / boule de neige ne marche pas j meme pas compris c quoi 
+- dans la sidebar on a Préparation au financement eneleve et met juste financement
+- page patrimoine champ libelleé cassé va en dessous de type de banque 
+- non les notification ne marche pas 
+
+NDT: test 6 fini quand tu corrige je continue avec les autres test
+
+
+- le formulaires de la page Mon profil FINCLUDIA est trop petits agrandis le 
+- il y'a un problémes avec certaine page tu voit l'entete que tu met avec l'icone le nom et la description de la page des fois il sont petit et ne suivent pas la taille réel de la page ils sont fixe met les de maniére a ce qu'ils suivent la taille de la page
+- change le nom de la sections explorer par outils et met touts les outils dedans 
+- l'onglet /outils/comparateur/adequation ne marche pas je ne sais pas si c'est du au manque de compte publique (je ne sais pas comment en crée)
+- l'onglet /outils/explorateur ne marche pas ou n'est pas clair ajoute un exemple de recherche a faire 
+- l'onglet outils/atelier est trés mal fait tu dois repenser la page quand on ouvre un atelier on doit soit aller dans une autre page soit scoller vers le formulaires bref repense la page pour ajouter de la clareté 
+- quand on sauvegarde un scenarions puis on va selectionner un autre scenarion la page plante sur une erreur POST /api/tools/scenarios/comparaison 409
+- un truc super important on doit trouver une solutions pour la top bar elle doit rester mais on doit trouver un moyen pour comment l'afficher quand un user ou un admin est connecter car actuellement elle est illisble peut etre mettre un menu deroulant ou la mettre en sous bar je ne sais pas inspire toi des autres 
+
+
+- normalise les marge entre element surtout entre le header page de chaque page et le premier element (bouttons ou sections)
+-  

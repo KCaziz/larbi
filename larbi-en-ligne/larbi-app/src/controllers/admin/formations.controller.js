@@ -1,6 +1,7 @@
 import { prisma } from '../../config/prisma.js';
 import { FORMATION_STATUS } from '../../constants/elearning.js';
 import { toAdminFormation, toMedia } from '../../serializers/cms.js';
+import { accountTypeExists } from '../../services/accountTypes.service.js';
 import { formationReadiness } from '../../services/readiness.service.js';
 import { uniqueSlug } from '../../services/slug.service.js';
 import { removeStored } from '../../services/storage.service.js';
@@ -72,6 +73,11 @@ export async function updateFormation(req, res) {
   if (rest.categoryId) {
     const category = await prisma.formationCategory.findUnique({ where: { id: rest.categoryId } });
     if (!category) throw new HttpError(400, 'Unknown category');
+  }
+
+  if (rest.targetAccountTypes !== undefined) {
+    const unknown = (await Promise.all(rest.targetAccountTypes.map(async (slug) => ((await accountTypeExists(slug)) ? null : slug)))).filter(Boolean);
+    if (unknown.length) throw new HttpError(400, 'Unknown account type', { types: unknown });
   }
 
   const data = { ...rest };

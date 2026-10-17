@@ -60,7 +60,7 @@ export default function DebtsPage() {
 
   return (
     <>
-      <PageHeader icon={Landmark} title={t('debts.title')} subtitle={t('debts.intro')} />
+      <PageHeader icon={Landmark} title={t('debts.title')} subtitle={t('debts.intro')} maxWidth={1040} />
       <div className="debts-page">
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
@@ -92,18 +92,23 @@ export default function DebtsPage() {
           </Button>
         </div>
 
-        {showComparison && comparison.data && (
+        {showComparison && (
           <div className="debts-comparison">
-            {comparison.data.avertissements.map((warning, index) => (
-              <p key={index} className="fin-hint">
-                {warning}
-              </p>
-            ))}
-            {comparison.data.avalanche && (
+            <p className="debts-comparison-intro">{t('debts.compareIntro')}</p>
+            {comparison.status === 'loading' && !comparison.data && <LoadingState />}
+            {comparison.data && comparison.data.avalanche ? (
               <div className="debts-comparison-cols">
                 <PayoffPlan title={t('debts.avalanche')} plan={comparison.data.avalanche} currency={currency} />
                 <PayoffPlan title={t('debts.snowball')} plan={comparison.data.bouleDeNeige} currency={currency} />
               </div>
+            ) : (
+              comparison.data && (
+                <Notice variant="action-needed">
+                  {comparison.data.avertissements.map((warning, index) => (
+                    <p key={index}>{warning}</p>
+                  ))}
+                </Notice>
+              )
             )}
           </div>
         )}

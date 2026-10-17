@@ -36,7 +36,13 @@ export default function BudgetDetailPage() {
 
   const formulas = useMemo(() => new Map((references.data?.formulas ?? []).map((formula) => [formula.id, formula])), [references.data]);
   const flatCategories = useMemo(
-    () => (categories.data?.groups ?? []).flatMap((group) => group.categories.map((category) => ({ ...category, family: group.label }))),
+    () =>
+      (categories.data?.groups ?? [])
+        // Le serveur refuse une enveloppe sur une catégorie de revenu (on ne
+        // budgétise pas son salaire) : ce groupe n'a rien à faire dans ce
+        // sélecteur, sous peine d'un 422 que l'utilisateur ne peut pas deviner.
+        .filter((group) => group.code !== 'income')
+        .flatMap((group) => group.categories.map((category) => ({ ...category, family: group.label }))),
     [categories.data],
   );
   const usedCategoryIds = useMemo(() => new Set((view.data?.vue?.enveloppes ?? []).map((line) => line.categoryId).filter(Boolean)), [view.data]);
@@ -62,7 +68,7 @@ export default function BudgetDetailPage() {
 
   return (
     <>
-      <PageHeader icon={PiggyBank} title={budget.label} subtitle={t('budget.detailSubtitle')} />
+      <PageHeader icon={PiggyBank} title={budget.label} subtitle={t('budget.detailSubtitle')} maxWidth={1040} />
       <div className="budget-page">
         <p>
           <Link to="/budget" className="budget-plain">

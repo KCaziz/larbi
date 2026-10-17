@@ -1,5 +1,7 @@
 import {
+  Award,
   Banknote,
+  Building,
   Building2,
   BookOpen,
   Briefcase,
@@ -8,14 +10,18 @@ import {
   CreditCard,
   FlaskConical,
   GraduationCap,
+  LayoutDashboard,
   Landmark,
   LifeBuoy,
   PiggyBank,
   Receipt,
   ShieldCheck,
   Sparkles,
+  Star,
+  Tag,
   Target,
   TrendingUp,
+  UserRound,
   Users,
   Wallet,
 } from 'lucide-react';
@@ -74,17 +80,18 @@ export const ROUTE_LABELS = {
 };
 
 // The account's own pages. They are not part of any journey — an account is not
-// a public — so they are listed here and never filtered.
+// a public — so they are listed here and never filtered. Every entry carries
+// its own icon: the collapsed, icon-only rail has nothing else to show.
 export const ACCOUNT_LINKS = [
-  { labelKey: 'account.nav.profile', to: '/compte/profil' },
-  { labelKey: 'account.nav.dashboard', to: '/compte/tableau-de-bord' },
-  { labelKey: 'account.nav.formations', to: '/compte/formations' },
-  { labelKey: 'account.nav.certificates', to: '/compte/certificats' },
-  { labelKey: 'account.nav.type', to: '/compte/type' },
-  { labelKey: 'account.nav.premium', to: '/compte/premium' },
-  { labelKey: 'account.nav.payments', to: '/compte/paiements' },
-  { labelKey: 'account.nav.fincludia', to: '/compte/fincludia' },
-  { labelKey: 'account.nav.onboarding', to: '/compte/premiers-pas' },
-  { labelKey: 'account.nav.categories', to: '/compte/categories' },
-  { labelKey: 'nav.trust', to: '/confiance' },
+  { labelKey: 'account.nav.profile', to: '/compte/profil', icon: UserRound },
+  { labelKey: 'account.nav.dashboard', to: '/compte/tableau-de-bord', icon: LayoutDashboard },
+  { labelKey: 'account.nav.formations', to: '/compte/formations', icon: GraduationCap },
+  { labelKey: 'account.nav.certificates', to: '/compte/certificats', icon: Award },
+  { labelKey: 'account.nav.type', to: '/compte/type', icon: Building },
+  { labelKey: 'account.nav.premium', to: '/compte/premium', icon: Star },
+  { labelKey: 'account.nav.payments', to: '/compte/paiements', icon: CreditCard },
+  { labelKey: 'account.nav.fincludia', to: '/compte/fincludia', icon: Wallet },
+  { labelKey: 'account.nav.onboarding', to: '/compte/premiers-pas', icon: Compass },
+  { labelKey: 'account.nav.categories', to: '/compte/categories', icon: Tag },
+  { labelKey: 'nav.trust', to: '/confiance', icon: ShieldCheck },
 ];

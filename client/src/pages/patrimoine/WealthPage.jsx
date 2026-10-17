@@ -59,7 +59,7 @@ export default function WealthPage() {
 
   return (
     <>
-      <PageHeader icon={Landmark} title={t('wealth.title')} subtitle={t('wealth.intro')} />
+      <PageHeader icon={Landmark} title={t('wealth.title')} subtitle={t('wealth.intro')} maxWidth={1040} />
       <div className="wealth-page">
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
@@ -134,25 +134,27 @@ export default function WealthPage() {
               {view.actifs.map((row) => (
                 <li key={row.id} className={row.valeurAncienne ? 'wealth-row wealth-row-stale' : 'wealth-row'}>
                   <span className="wealth-row-label">{row.label}</span>
-                  <span className="wealth-tag">{t(`wealth.kinds.${row.kind}`, row.kind)}</span>
-                  <span className="wealth-tag">{t(`wealth.liquidity.${row.liquidity}`)}</span>
-                  <span className="wealth-row-amount">{formatAmount(i18n.language, row.value, row.currency)}</span>
-                  <span className="wealth-row-date">
-                    {formatDate(i18n.language, row.valuedAt)}
-                    {row.valeurAncienne && (
-                      <span className="wealth-stale-flag">
-                        <AlertTriangle size={13} aria-hidden="true" /> {t('wealth.staleValue', { days: row.ageJours })}
-                      </span>
-                    )}
+                  <span className="wealth-row-meta">
+                    <span className="wealth-tag">{t(`wealth.kinds.${row.kind}`, row.kind)}</span>
+                    <span className="wealth-tag">{t(`wealth.liquidity.${row.liquidity}`)}</span>
+                    <span className="wealth-row-amount">{formatAmount(i18n.language, row.value, row.currency)}</span>
+                    <span className="wealth-row-date">
+                      {formatDate(i18n.language, row.valuedAt)}
+                      {row.valeurAncienne && (
+                        <span className="wealth-stale-flag">
+                          <AlertTriangle size={13} aria-hidden="true" /> {t('wealth.staleValue', { days: row.ageJours })}
+                        </span>
+                      )}
+                    </span>
+                    <button
+                      type="button"
+                      className="wealth-icon"
+                      onClick={() => run(() => api.delete(`/fin/actifs/${row.id}`), 'wealth.deleted')}
+                      aria-label={t('wealth.delete', { label: row.label })}
+                    >
+                      <Trash2 size={15} aria-hidden="true" />
+                    </button>
                   </span>
-                  <button
-                    type="button"
-                    className="wealth-icon"
-                    onClick={() => run(() => api.delete(`/fin/actifs/${row.id}`), 'wealth.deleted')}
-                    aria-label={t('wealth.delete', { label: row.label })}
-                  >
-                    <Trash2 size={15} aria-hidden="true" />
-                  </button>
                 </li>
               ))}
             </ul>

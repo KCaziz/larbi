@@ -24,6 +24,7 @@
     "privacy": "Politique de confidentialité",
     "menuOpen": "Ouvrir le menu",
     "menuClose": "Fermer le menu",
+    "more": "Plus",
     "accountNav": "Navigation du compte",
     "journeyNav": "Navigation FINCLUDIA",
     "main": "Navigation principale",
@@ -42,11 +43,13 @@
     "wealth": "Patrimoine",
     "paper": "Entraînement",
     "spaces": "À plusieurs",
-    "funding": "Préparation au financement",
+    "funding": "Financement",
     "notifications": "Notifications",
     "trust": "Confiance et données",
     "passport": "Passeport de connaissances",
     "fincludiaNav": "Navigation de mon espace",
+    "collapseMenu": "Réduire le menu",
+    "expandMenu": "Développer le menu",
     "accountGroup": "Mon compte",
     "menuUnavailable": "Le menu de votre parcours n’a pas pu être chargé. Vos pages restent accessibles depuis ce menu réduit.",
     "assistant": "Aide",
@@ -2338,6 +2341,7 @@
     "noResults": "Aucun résultat pour « {{query}} ».",
     "noResultsHint": "Essayez un autre mot, ou une autre rubrique.",
     "typeToSearch": "Tapez au moins deux caractères, ou choisissez une rubrique, pour lancer la recherche.",
+    "tryExample": "Essayez par exemple :",
     "reservedToAdults": "Explorer est réservé aux personnes de 18 ans et plus. Votre tranche d'âge ne permet pas d'y accéder.",
     "neverEligibility": "Un résultat affiché ici n'est jamais une garantie d'éligibilité : vérifiez toujours les conditions exactes auprès de l'établissement."
   },
@@ -2358,7 +2362,12 @@
     "figure": "Chiffre",
     "noScoreNote": "Aucune note globale : il n’existe pas de façon défendable de peser un reste à vivre contre un nombre de mois. Les chiffres sont mis côte à côte, vous les lisez.",
     "versionChanged": "Calculé avec {{formula}} version {{saved}} ; la formule est aujourd’hui en version {{current}}.",
-    "stale": "Les paramètres enregistrés ne correspondent plus à ce que ce simulateur accepte : les chiffres ne sont pas recalculés."
+    "stale": "Les paramètres enregistrés ne correspondent plus à ce que ce simulateur accepte : les chiffres ne sont pas recalculés.",
+    "errors": {
+      "nothingInCommon": "Ces scénarios n’ont aucun chiffre en commun à comparer.",
+      "unplayable": "Au moins un de ces scénarios ne peut plus être recalculé et ne peut pas entrer dans une comparaison.",
+      "currency": "Ces scénarios ne sont pas dans la même devise : ils ne peuvent pas être comparés."
+    }
   },
   "chatbot": {
     "title": "Questions fréquentes",
@@ -3012,6 +3021,7 @@
     "effortRate": "Taux d’effort (indicateur pédagogique)",
     "debtToIncome": "Dette / revenu annuel",
     "compareStrategies": "Comparer avalanche / boule de neige",
+    "compareIntro": "Deux ordres possibles pour rembourser vos dettes en priorité : « avalanche » rembourse d’abord la dette au taux le plus élevé (le moins d’intérêts au total), « boule de neige » rembourse d’abord le plus petit solde (des victoires plus rapides). Seules les dettes avec un taux et une mensualité connus peuvent être comparées.",
     "avalanche": "Avalanche (taux le plus élevé d’abord)",
     "snowball": "Boule de neige (plus petit solde d’abord)",
     "notPayable": "Non remboursable dans l’horizon de simulation avec les mensualités actuelles.",

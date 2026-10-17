@@ -28,6 +28,38 @@
   line-height: 1.55;
 }
 
+.explorer-idle {
+  margin-block-end: 24px;
+}
+
+.explorer-examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 8px;
+}
+
+.explorer-examples-label {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.explorer-example-chip {
+  padding: 5px 12px;
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.explorer-example-chip:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
 .comparator-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

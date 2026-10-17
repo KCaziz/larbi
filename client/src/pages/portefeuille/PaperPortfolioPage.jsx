@@ -60,7 +60,7 @@ export default function PaperPortfolioPage() {
 
   return (
     <>
-      <PageHeader icon={FlaskConical} title={t('paper.title')} subtitle={t('paper.intro')} />
+      <PageHeader icon={FlaskConical} title={t('paper.title')} subtitle={t('paper.intro')} maxWidth={1040} />
       <div className="paper-page">
         {/* Permanent, and the first thing on the page. */}
         <p className="fin-badge-simulation paper-badge">{t('fincludia.simulationBadge')}</p>

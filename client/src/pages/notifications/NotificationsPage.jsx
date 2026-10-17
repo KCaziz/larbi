@@ -44,7 +44,7 @@ export default function NotificationsPage() {
 
   return (
     <>
-      <PageHeader icon={Bell} title={t('notifications.title')} subtitle={t('notifications.intro')} />
+      <PageHeader icon={Bell} title={t('notifications.title')} subtitle={t('notifications.intro')} maxWidth={760} />
       <div className="notifications-page">
         <div className="notifications-toolbar">
           <label className="sr-only" htmlFor="notif-category">

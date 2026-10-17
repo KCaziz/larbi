@@ -38,7 +38,7 @@ export default function PassportPage() {
   return (
     <div className="passport-wrap">
       <div className="passport-actions">
-        <PageHeader icon={BookOpen} title={title} subtitle={t('passport.intro')} />
+        <PageHeader icon={BookOpen} title={title} subtitle={t('passport.intro')} maxWidth={980} />
         <Button onClick={() => window.print()}>
           <Printer size={16} strokeWidth={1.9} aria-hidden="true" />
           {t('passport.print')}
@@ -74,7 +74,7 @@ export default function PassportPage() {
 
         <h2>{t('passport.completedTitle')}</h2>
         {p.formationsTerminees.length === 0 ? (
-          <p className="comparator-disclaimer">{t('passport.noCompleted')}</p>
+          <p className="passport-empty">{t('passport.noCompleted')}</p>
         ) : (
           <ul className="passport-list">
             {p.formationsTerminees.map((row, index) => (
@@ -93,7 +93,7 @@ export default function PassportPage() {
 
         <h2>{t('passport.nextStepsTitle')}</h2>
         {p.etapesSuivantes.length === 0 ? (
-          <p className="comparator-disclaimer">
+          <p className="passport-empty">
             {t('passport.noNextSteps')} <Link to="/catalogue">{t('passport.browseCatalogue')}</Link>
           </p>
         ) : (
@@ -113,7 +113,7 @@ export default function PassportPage() {
 
         <h2>{t('passport.quizzesTitle')}</h2>
         {p.quizReussis.length === 0 ? (
-          <p className="comparator-disclaimer">{t('passport.noQuizzes')}</p>
+          <p className="passport-empty">{t('passport.noQuizzes')}</p>
         ) : (
           <ul className="passport-list">
             {p.quizReussis.map((quiz, index) => (

@@ -2,6 +2,8 @@ import { prisma } from '../config/prisma.js';
 import { COMPARATOR_THEMES, themeByKey } from '../constants/comparator.js';
 import { TOOLS } from '../constants/tools.js';
 import { sortConditions, toPublicCondition, toThemeInfo } from '../serializers/comparator.js';
+import { buildUsageFit } from '../services/bankUsage.service.js';
+import { HttpError } from '../utils/httpError.js';
 
 // Tools catalogue (P4-01) and the PUBLIC bank comparator (P4-06): read only.
 // Same answer for everyone, always revalidated (an edit in the administration
@@ -55,4 +57,14 @@ export async function getSegment(req, res) {
     conditions: sortConditions(rows.filter((r) => r.theme === theme.key)).map(toPublicCondition),
   })).filter((group) => group.conditions.length > 0);
   res.json({ segment: req.params.segment, groups, updatedAt });
+}
+
+// "Adéquation à l'usage" (P4-13, écran ET06) : compute à la demande, rien
+// d'écrit ; les comptes comparés restent les données publiques du comparateur.
+export async function postUsageFit(req, res) {
+  res.set('Cache-Control', 'no-store');
+  const { conditionIds, weights } = req.body;
+  const comparison = await buildUsageFit({ conditionIds, weights: weights ?? null });
+  if (comparison === null) throw new HttpError(400, 'Invalid input: conditionIds');
+  res.json({ comparison });
 }

@@ -56,7 +56,7 @@ export default function SpacesPage() {
 
   return (
     <>
-      <PageHeader icon={Users} title={t('spaces.title')} subtitle={t('spaces.intro')} />
+      <PageHeader icon={Users} title={t('spaces.title')} subtitle={t('spaces.intro')} maxWidth={1040} />
       <div className="spaces-page">
         {/* The promise, first thing on the page. */}
         <p className="spaces-rule">

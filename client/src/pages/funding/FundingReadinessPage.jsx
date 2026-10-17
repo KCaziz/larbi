@@ -61,7 +61,7 @@ export default function FundingReadinessPage() {
 
   return (
     <>
-      <PageHeader icon={FileCheck} title={t('funding.title')} subtitle={t('funding.intro')} />
+      <PageHeader icon={FileCheck} title={t('funding.title')} subtitle={t('funding.intro')} maxWidth={1040} />
       <div className="funding-page">
         <Notice variant="info">{t('funding.disclaimer')}</Notice>
 

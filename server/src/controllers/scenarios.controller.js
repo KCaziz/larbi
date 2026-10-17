@@ -99,19 +99,26 @@ export async function compareScenarios(req, res) {
 
   const scenarios = ids.map((id) => toScenario(rows.find((row) => row.id === id)));
   const unplayable = scenarios.filter((scenario) => scenario.resultats === null);
-  if (unplayable.length > 0) throw new HttpError(409, 'Scenario cannot be recomputed');
+  // A `reason` the client can switch on: an English sentence in the body is
+  // not something a French (or Arabic) screen can show, and matching it as
+  // text would break the moment either wording changes.
+  if (unplayable.length > 0) throw new HttpError(409, 'Scenario cannot be recomputed', { reason: 'unplayable' });
 
   // The named results shared by every scenario compared. A figure only one of
-  // them has would be a row with a single cell: nothing to compare.
+  // them has would be a row with a single cell: nothing to compare — which in
+  // practice means two scenarios of DIFFERENT simulators, since each one's
+  // results are named after its own formulas.
   const shared = Object.keys(scenarios[0].resultats).filter((name) =>
     scenarios.every((scenario) => scenario.resultats[name] !== undefined),
   );
-  if (shared.length === 0) throw new HttpError(409, 'Nothing in common to compare');
+  if (shared.length === 0) {
+    throw new HttpError(409, 'Nothing in common to compare', { reason: 'nothingInCommon' });
+  }
 
   // Same rule as the engine: amounts in two currencies are refused, never
   // converted at a rate nobody dated.
   const currencies = new Set(scenarios.map((scenario) => scenario.currency));
-  if (currencies.size > 1) throw new HttpError(400, 'Not comparable: currency');
+  if (currencies.size > 1) throw new HttpError(400, 'Not comparable: currency', { reason: 'currency' });
 
   const rowsOut = shared.map((name) => {
     const answers = scenarios.map((scenario) => scenario.resultats[name]);

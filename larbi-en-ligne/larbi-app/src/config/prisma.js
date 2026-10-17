@@ -20,7 +20,12 @@ const adapter = new PrismaMariaDb({
   sessionVariables: { sql_mode: 'ANSI_QUOTES' },
 });
 
-export const prisma = new PrismaClient({ adapter });
+// Several writes are deliberately queued one after the other with a row lock
+// (SELECT ... FOR UPDATE: lesson blocks, payment notifications, enrolments).
+// Prisma's default limits (2 s to get a connection, 5 s per transaction) count
+// the time spent WAITING for that lock, so a burst of edits on one lesson ended
+// in "expired transaction" errors (P2028) instead of simply waiting its turn.
+export const prisma = new PrismaClient({ adapter, transactionOptions: { maxWait: 10_000, timeout: 20_000 } });
 
 export async function checkDatabaseConnection() {
   await prisma.$queryRaw`SELECT 1`;

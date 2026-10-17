@@ -11,6 +11,7 @@ import {
 } from '../serializers/learner.js';
 import { claimCertificate, completeCourse, recordCourseOpened, reopenCourse } from '../services/progress.service.js';
 import { sendStoredMedia } from '../services/mediaResponse.js';
+import { isTargetedAt } from '../services/blogAccess.js';
 import { HttpError } from '../utils/httpError.js';
 import { logSecurityEvent } from '../utils/securityLog.js';
 
@@ -51,6 +52,10 @@ export function assertCanRead(user, formation, enrollment) {
   }
 }
 
+// Suggested by account type (simple suggestion, no calculated score — the
+// client's own wording): formations targeted at this account type are
+// listed first; everything else keeps its usual newest-first order. Array.sort
+// is stable, so ties never reorder the underlying `publishedAt desc` list.
 export async function listCatalog(req, res) {
   const formations = await prisma.formation.findMany({
     where: { status: FORMATION_STATUS.PUBLISHED },
@@ -62,9 +67,14 @@ export async function listCatalog(req, res) {
     include: ENROLLMENT_INCLUDE,
   });
   const byFormation = new Map(enrollments.map((e) => [e.formationId, e]));
+  const ordered = [...formations].sort((a, b) => Number(isTargetedAt(b, req.user)) - Number(isTargetedAt(a, req.user)));
   res.json({
-    formations: formations.map((f) =>
-      toCatalogItem(f, { accessible: accessibleTo(req.user, f), enrollment: byFormation.get(f.id) ?? null }),
+    formations: ordered.map((f) =>
+      toCatalogItem(f, {
+        accessible: accessibleTo(req.user, f),
+        enrollment: byFormation.get(f.id) ?? null,
+        recommended: isTargetedAt(f, req.user),
+      }),
     ),
   });
 }

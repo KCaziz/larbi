@@ -104,7 +104,7 @@ export default function MyMoneyPage() {
 
   return (
     <>
-      <PageHeader icon={Wallet} title={t('myMoney.title')} subtitle={t('myMoney.intro')} />
+      <PageHeader icon={Wallet} title={t('myMoney.title')} subtitle={t('myMoney.intro')} maxWidth={1040} />
       <div className="money-page">
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">

@@ -42,7 +42,7 @@ export default function BusinessPage() {
   if (isAdultRefusal(business.error)) {
     return (
       <>
-        <PageHeader icon={Building2} title={t('business.title')} subtitle={t('business.intro')} />
+        <PageHeader icon={Building2} title={t('business.title')} subtitle={t('business.intro')} maxWidth={1100} />
         <div className="business-page">
           <AdultOnly reason={adultRefusalReason(business.error)} />
         </div>
@@ -70,7 +70,7 @@ export default function BusinessPage() {
 
   return (
     <>
-      <PageHeader icon={Building2} title={t('business.title')} subtitle={t('business.intro')} />
+      <PageHeader icon={Building2} title={t('business.title')} subtitle={t('business.intro')} maxWidth={1100} />
       <div className="business-page">
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">

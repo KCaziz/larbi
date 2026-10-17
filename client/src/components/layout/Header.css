@@ -124,6 +124,73 @@
   font-size: 0.85rem;
 }
 
+/* The "More" dropdown that replaces the full public nav once signed in
+   (above): one button instead of seven links competing with the controls a
+   signed-in person actually uses — search, notifications, the assistant,
+   the account. */
+.nav-explore {
+  position: relative;
+}
+
+.nav-explore-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-h);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.nav-explore-toggle:hover {
+  background: var(--bg-alt);
+}
+
+.nav-explore-chevron {
+  transition: transform 0.15s;
+}
+
+.nav-explore-chevron.open {
+  transform: rotate(180deg);
+}
+
+.nav-explore-panel {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 100%;
+  z-index: 10;
+  margin-block-start: 4px;
+  min-width: 200px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
+.nav-explore-list.main-nav ul {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.nav-explore-list.main-nav a {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+}
+
+@media (max-width: 1341px) {
+  .nav-explore-panel {
+    position: static;
+    margin-block-start: 8px;
+    box-shadow: none;
+  }
+}
+
 /* Admins have one more button (Administration) than everyone else, on the
    same single fixed-height row (search, language, theme, admin, account,
    logout): past a point that extra button has nowhere to go and starts

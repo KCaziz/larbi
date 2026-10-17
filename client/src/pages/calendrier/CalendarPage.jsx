@@ -77,7 +77,7 @@ export default function CalendarPage() {
 
   return (
     <>
-      <PageHeader icon={CalendarDays} title={t('calendar.title')} subtitle={t('calendar.intro')} />
+      <PageHeader icon={CalendarDays} title={t('calendar.title')} subtitle={t('calendar.intro')} maxWidth={1040} />
       <div className="calendar-page">
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">

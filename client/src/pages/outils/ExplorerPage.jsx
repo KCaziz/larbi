@@ -12,6 +12,11 @@ import './Comparator.css';
 
 const THEME_KEYS = ['comptes', 'versements-retraits', 'carte-locale', 'epargne', 'coffres-forts', 'credits', 'virements', 'carte-internationale', 'devises', 'operations-diverses', 'cheques'];
 
+// A few real words the search understands, shown as a starting point: an
+// empty search box with only "type something" as a hint gives no idea of
+// what a query here even looks like (a bank name? a need? a theme?).
+const EXAMPLE_QUERIES = ['carte internationale', 'virement', 'épargne', 'retrait'];
+
 // "Explorer" (P4-13, écran C20) : recherche littérale sur les offres déjà
 // publiques du comparateur (P4-06), réservée aux 18 ans et plus (P3-18). Pas
 // de classement, pas de compatibilité calculée, pas d'affirmation
@@ -138,7 +143,24 @@ export default function ExplorerPage() {
               </>
             )}
 
-            {state.status === 'idle' && <p className="comparator-disclaimer">{t('explorer.typeToSearch')}</p>}
+            {state.status === 'idle' && (
+              <div className="explorer-idle">
+                <p className="comparator-disclaimer">{t('explorer.typeToSearch')}</p>
+                <div className="explorer-examples">
+                  <span className="explorer-examples-label">{t('explorer.tryExample')}</span>
+                  {EXAMPLE_QUERIES.map((example) => (
+                    <button
+                      key={example}
+                      type="button"
+                      className="explorer-example-chip"
+                      onClick={() => onQ(example)}
+                    >
+                      {example}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, LifeBuoy, LogOut, Menu, UserRound, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ChevronDown, LayoutDashboard, LifeBuoy, LogOut, Menu, UserRound, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth.js';
 import Navigation from './Navigation.jsx';
@@ -16,12 +16,38 @@ import './Header.css';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
   const [logoutFailed, setLogoutFailed] = useState(false);
   const { t } = useTranslation();
   const { status, user, logout } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const closeMenu = () => setMenuOpen(false);
+
+  // The auth pages (login, register, forgot password) are themselves the
+  // destination of "Se connecter" / "Créer un compte" — the full bar (every
+  // public link, search, notifications, an admin shortcut) has nothing to
+  // offer there and only competes with the one thing the page asks for. A
+  // minimal bar — the brand, and a way to leave — reads instead of crowding.
+  const isAuthPage = ['/connexion', '/inscription', '/mot-de-passe-oublie'].includes(pathname);
+
+  if (isAuthPage) {
+    return (
+      <header className="site-header site-header-auth">
+        <div className="site-header-inner">
+          <Link to="/" className="brand">
+            <img src={brandMark} className="brand-mark" alt="" aria-hidden="true" width="32" height="32" />
+            {t('common.brand')}
+          </Link>
+          <div className="header-controls">
+            <LanguageSwitcher />
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   // The assistant is a floating panel, not a page: the bar asks for it rather
   // than navigating to it (see <ChatbotWidget>).
@@ -65,7 +91,44 @@ export default function Header() {
         </button>
 
         <div id="primary-navigation" className={`nav-panel ${menuOpen ? 'open' : ''}`}>
-          <Navigation links={mainNavLinks} onLinkClick={closeMenu} />
+          {/* Signed in, the public marketing links (home, formations,
+              blog...) are not where this person is working — the FINCLUDIA
+              sidebar is — so they move behind one "More" button instead of
+              sitting in the bar at full length next to search, notifications,
+              the assistant and the account controls that ARE used here. */}
+          {status === 'authenticated' ? (
+            <div
+              className="nav-explore"
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) setExploreOpen(false);
+              }}
+            >
+              <button
+                type="button"
+                className="nav-explore-toggle"
+                aria-expanded={exploreOpen}
+                aria-controls="nav-explore-panel"
+                onClick={() => setExploreOpen((v) => !v)}
+              >
+                {t('nav.more')}
+                <ChevronDown size={14} strokeWidth={2} aria-hidden="true" className={exploreOpen ? 'nav-explore-chevron open' : 'nav-explore-chevron'} />
+              </button>
+              {exploreOpen && (
+                <div id="nav-explore-panel" className="nav-explore-panel">
+                  <Navigation
+                    links={mainNavLinks}
+                    onLinkClick={() => {
+                      closeMenu();
+                      setExploreOpen(false);
+                    }}
+                    className="nav-explore-list"
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            <Navigation links={mainNavLinks} onLinkClick={closeMenu} />
+          )}
           <div className="header-controls">
             <LanguageSwitcher />
             <ThemeToggle />

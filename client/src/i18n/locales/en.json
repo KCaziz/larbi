@@ -24,6 +24,7 @@
     "privacy": "Privacy policy",
     "menuOpen": "Open menu",
     "menuClose": "Close menu",
+    "more": "More",
     "accountNav": "Account navigation",
     "journeyNav": "FINCLUDIA navigation",
     "main": "Main navigation",
@@ -42,11 +43,13 @@
     "wealth": "Patrimony",
     "paper": "Practice",
     "spaces": "Together",
-    "funding": "Funding readiness",
+    "funding": "Funding",
     "notifications": "Notifications",
     "trust": "Trust and data",
     "passport": "Knowledge passport",
     "fincludiaNav": "My space navigation",
+    "collapseMenu": "Collapse menu",
+    "expandMenu": "Expand menu",
     "accountGroup": "My account",
     "menuUnavailable": "Your journey menu could not be loaded. Your pages are still reachable from this reduced menu.",
     "assistant": "Help",
@@ -2337,6 +2340,7 @@
     "noResults": "No result for \"{{query}}\".",
     "noResultsHint": "Try another word, or another rubric.",
     "typeToSearch": "Type at least two characters, or choose a rubric, to start the search.",
+    "tryExample": "Try for example:",
     "reservedToAdults": "Explorer is reserved to people aged 18 and over. Your age bracket does not allow access.",
     "neverEligibility": "A result shown here is never a guarantee of eligibility: always check the exact conditions with the provider."
   },
@@ -2357,7 +2361,12 @@
     "figure": "Figure",
     "noScoreNote": "No overall mark: there is no defensible way to weigh a living allowance against a number of months. The figures are shown side by side, for you to read.",
     "versionChanged": "Computed with {{formula}} version {{saved}}; the formula is now at version {{current}}.",
-    "stale": "The saved parameters no longer match what this simulator accepts: the figures are not recomputed."
+    "stale": "The saved parameters no longer match what this simulator accepts: the figures are not recomputed.",
+    "errors": {
+      "nothingInCommon": "These scenarios share no figure to compare.",
+      "unplayable": "At least one of these scenarios can no longer be recomputed and cannot enter a comparison.",
+      "currency": "These scenarios are not in the same currency: they cannot be compared."
+    }
   },
   "chatbot": {
     "title": "Frequently asked questions",
@@ -3011,6 +3020,7 @@
     "effortRate": "Effort rate (educational indicator)",
     "debtToIncome": "Debt / annual income",
     "compareStrategies": "Compare avalanche / snowball",
+    "compareIntro": "Two possible orders to pay off your debts first: \"avalanche\" pays the highest-rate debt first (the least interest overall), \"snowball\" pays the smallest balance first (quicker wins). Only debts with a known rate and instalment can be compared.",
     "avalanche": "Avalanche (highest rate first)",
     "snowball": "Snowball (smallest balance first)",
     "notPayable": "Not repayable within the simulation horizon at the current instalments.",
