@@ -8,6 +8,7 @@
 
 .wealth-page section {
   margin-block-start: 28px;
+  scroll-margin-block-start: calc(var(--header-height) + 16px);
 }
 
 .wealth-page h2 {

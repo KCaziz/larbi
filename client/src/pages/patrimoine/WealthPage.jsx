@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Landmark, Plus, Trash2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
@@ -15,6 +15,7 @@ import { adultRefusalReason, isAdultRefusal } from '../../lib/adultRefusal.js';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
+import NetWorthChart from '../../components/fincludia/NetWorthChart.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Wealth.css';
 
@@ -30,10 +31,12 @@ export default function WealthPage() {
   const currency = user?.finCurrency ?? 'DZD';
   const [message, setMessage] = useState(null);
   const [adding, setAdding] = useState(false);
+  const assetsRef = useRef(null);
   useDocumentMeta(t('wealth.title'), t('wealth.intro'));
 
   const wealth = useApi('/fin/patrimoine');
   const references = useApi('/fin/patrimoine/references');
+  const history = useApi('/fin/patrimoine/historique');
 
   async function run(action, okKey) {
     setMessage(null);
@@ -110,6 +113,13 @@ export default function WealthPage() {
           )}
         </section>
 
+        {history.data?.points?.length >= 2 && (
+          <section aria-labelledby="wealth-history">
+            <h2 id="wealth-history">{t('wealth.historyTitle')}</h2>
+            <NetWorthChart points={history.data.points} currency={view.currency} />
+          </section>
+        )}
+
         {view.parType.length > 0 && (
           <section aria-labelledby="wealth-allocation">
             <h2 id="wealth-allocation">{t('wealth.allocationTitle')}</h2>
@@ -125,7 +135,7 @@ export default function WealthPage() {
           </section>
         )}
 
-        <section aria-labelledby="wealth-assets">
+        <section aria-labelledby="wealth-assets" ref={assetsRef}>
           <h2 id="wealth-assets">{t('wealth.assetsTitle')}</h2>
           {view.actifs.length === 0 ? (
             <p className="wealth-empty">{t('wealth.noAsset')}</p>
@@ -163,7 +173,21 @@ export default function WealthPage() {
           <Button type="button" variant="secondary" onClick={() => setAdding((value) => !value)}>
             <Plus size={16} aria-hidden="true" /> {t('wealth.addAsset')}
           </Button>
-          {adding && <AssetForm t={t} currency={currency} references={references.data} run={run} onDone={() => setAdding(false)} />}
+          {adding && (
+            <AssetForm
+              t={t}
+              currency={currency}
+              references={references.data}
+              run={run}
+              onDone={() => {
+                setAdding(false);
+                // The confirmation and the updated list are both ABOVE the form:
+                // without this, adding from the bottom of a long page leaves the
+                // person exactly where they were, having seen neither.
+                assetsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+            />
+          )}
         </section>
       </div>
     </>

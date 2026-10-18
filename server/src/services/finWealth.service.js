@@ -11,6 +11,7 @@
 import { ASSET_KINDS, ASSET_LIQUIDITY, CONCENTRATION_NOTICE_SHARE, DEFAULT_LIQUIDITY, FORBIDDEN_WEALTH_STATUS, VALUATION_STALE_DAYS } from '../constants/finWealth.js';
 import { HttpError } from '../utils/httpError.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
+import { DEBT_ENTITY } from './finDebt.service.js';
 import { computed } from './finance/contract.js';
 import { isFictional } from './finance/dataModel.js';
 import { assetAllocation, dataAgeDays, maxConcentration, netWorth } from './finance/formulas.js';
@@ -308,6 +309,95 @@ export function buildWealthView({ assets = [], debts = [], currency, now = new D
     seuilValeurAncienneJours: staleDays,
     avertissements: warnings,
   };
+}
+
+// ---- history (P6-23) --------------------------------------------------------
+
+// Replays one entity's change events into a running total, one point per
+// event, in the given currency. An asset (or a debt) that is archived,
+// deleted, or in another currency stops contributing from that point on —
+// the same inclusion rule `buildWealthView` applies to the CURRENT figure,
+// so the series and the live number can never tell two different stories.
+function ledgerTotals(events, amountField, currency) {
+  const rows = new Map(); // entityId -> { amount, currency, active }
+  const contribution = new Map(); // entityId -> what it currently adds to `running`
+  const points = [];
+  let running = 0;
+
+  for (const event of events) {
+    const id = event.entityId;
+    const row = rows.get(id) ?? { amount: 0, currency: null, active: true };
+
+    if (event.action === 'create') {
+      row.amount = event.after?.[amountField] ?? 0;
+      row.currency = event.after?.currency ?? null;
+      row.active = true;
+    } else if (event.action === 'delete') {
+      row.active = false;
+    } else if (event.field === amountField) {
+      row.amount = event.after ?? 0;
+    } else if (event.field === 'currency') {
+      row.currency = event.after ?? null;
+    } else if (event.field === 'archivedAt') {
+      // `restore` sets it back to null; `archive` sets a date. Either way the
+      // row's OWN field name tells which, never the action string alone.
+      row.active = event.after === null;
+    }
+    rows.set(id, row);
+
+    const now = row.active && row.currency === currency ? row.amount : 0;
+    const delta = now - (contribution.get(id) ?? 0);
+    contribution.set(id, now);
+    // A row that never touches THIS currency (or an edit that leaves its
+    // contribution unchanged, e.g. a correction to an unrelated field) moves
+    // nothing: no point is added, rather than one recording a total that
+    // did not actually change.
+    if (delta === 0) continue;
+    running += delta;
+    points.push({ at: event.createdAt, total: running });
+  }
+  return points;
+}
+
+/**
+ * The patrimony's history (screen C16), ONE series built from the change
+ * journal both `fin_assets` and `fin_debts` already keep (P6-02) — never a
+ * new table recomputing the same facts a second time. Net worth is read as
+ * of the END of each day it moved: a chart of every single edit would be
+ * noise, not a history anyone reads.
+ *
+ * Mixed currencies are NOT converted, same rule as `buildWealthView`: a row
+ * in another currency simply does not contribute until it is in this one.
+ */
+export async function netWorthHistory(prisma, userId, currency) {
+  const changeWhere = (entity, amountField) => ({
+    userId,
+    entity,
+    OR: [{ action: 'create' }, { action: 'delete' }, { field: amountField }, { field: 'currency' }, { field: 'archivedAt' }],
+  });
+
+  const [assetEvents, debtEvents] = await Promise.all([
+    prisma.finChange.findMany({ where: changeWhere(ASSET_ENTITY, 'value'), orderBy: { createdAt: 'asc' } }),
+    prisma.finChange.findMany({ where: changeWhere(DEBT_ENTITY, 'outstandingPrincipal'), orderBy: { createdAt: 'asc' } }),
+  ]);
+
+  const assetPoints = ledgerTotals(assetEvents, 'value', currency).map((point) => ({ ...point, kind: 'asset' }));
+  const debtPoints = ledgerTotals(debtEvents, 'outstandingPrincipal', currency).map((point) => ({ ...point, kind: 'debt' }));
+  const merged = [...assetPoints, ...debtPoints].sort((a, b) => a.at - b.at);
+
+  let assetsTotal = 0;
+  let debtsTotal = 0;
+  // One point per DAY (the last that day moved), oldest first: a `Map` keeps
+  // insertion order and overwriting the same key moves nothing, so the final
+  // iteration order is already "one entry per day, in time order".
+  const byDay = new Map();
+  for (const point of merged) {
+    if (point.kind === 'asset') assetsTotal = point.total;
+    else debtsTotal = point.total;
+    byDay.set(point.at.toISOString().slice(0, 10), assetsTotal - debtsTotal);
+  }
+
+  return [...byDay.entries()].map(([date, net]) => ({ date, net }));
 }
 
 /**

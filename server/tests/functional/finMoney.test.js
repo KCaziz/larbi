@@ -394,3 +394,42 @@ describe('the synthesis of screen C05', () => {
     assert.equal(res.body.formulas[0].label, 'Total revenus', "the client's own wording");
   });
 });
+
+// Revenus vs dépenses, one point per month (P6-23), the curve "Mon argent"
+// shows above its current-month synthesis.
+describe('the revenus/dépenses history (P6-23)', () => {
+  const synthesisHistory = (query = '') => t.request('GET', `/fin/argent/synthese/historique${query}`, { user });
+
+  test('the recurring income reaches every month, the dated movement only its own', async () => {
+    await addIncome({ categoryId: salary.id });
+    await addMovement({ value: 250000, categoryId: food.id });
+
+    const res = await synthesisHistory();
+    assert.equal(res.status, 200);
+    assert.equal(res.body.points.length, 6, 'the default window');
+    assert.ok(
+      res.body.points.every((point) => point.revenus === 6000000),
+      'the recurring income is active every month since it started',
+    );
+    const current = res.body.points.at(-1);
+    assert.equal(current.depenses, 250000);
+    assert.ok(res.body.points.slice(0, -1).every((point) => point.depenses === null), 'only the current month has a dated expense');
+  });
+
+  test('an empty account says "not computed" for every month, never zero', async () => {
+    const res = await synthesisHistory();
+    assert.ok(res.body.points.every((point) => point.revenus === null && point.depenses === null));
+  });
+
+  test('the window is configurable, within bounds', async () => {
+    assert.equal((await synthesisHistory('?months=3')).body.points.length, 3);
+    assert.equal((await synthesisHistory('?months=1')).status, 400, 'below the minimum of 2');
+    assert.equal((await synthesisHistory('?months=13')).status, 400, 'above the maximum of 12');
+  });
+
+  test('a month resolved in another currency reports null rather than converting', async () => {
+    await addMovement({ value: 1000, currency: 'EUR' });
+    const res = await synthesisHistory();
+    assert.equal(res.body.points.at(-1).depenses, null);
+  });
+});

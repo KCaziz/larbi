@@ -372,9 +372,9 @@ Demandes :
 Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p1-11).
 
 ### P1-12 — FINCLUDIA : système de design et navigation de l'espace connecté (lot 0)
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
-- Dépendances : `P1-11`, `P6-01`
+- Dépendances : `P1-11`
 - Durée cible : 3 jours (estimation)
 - Origine : direction FINCLUDIA du 2026-10-09 (spécification § 2–3 et § 17, onglets `14_Etats_Alertes` et `19_Cartes_Parcours`)
 
@@ -391,7 +391,14 @@ Tâches :
 
 **Déjà livré par `P6-03` (2026-10-12), donc hors du reste à faire :** les **composants réutilisables** du troisième point — carte de chiffre avec « Pourquoi ? » (formule, version, données utilisées, date) et état **« non calculé » distinct de zéro**, champ montant entier à devise obligatoire, **badge « SIMULATION »** permanent avec séparation visuelle forte du fictif, champ « Pourquoi cette question ? » — dans `client/src/components/fincludia/`. Les **états UX communs** (vide, chargement, succès, erreur près du champ) existent depuis `P1-11` (`LoadingState`, `ErrorState`, `Notice`, `form-status` / `form-error`), et le défaut qui démontait la page à chaque écriture est corrigé dans `useApi` (voir `P6-04`).
 
-**Reste à faire, et ce qui le bloque :** la **navigation de l'espace connecté** (menu par public selon l'onglet `19_Cartes_Parcours`, latéral sur ordinateur, onglets sur téléphone) et la **barre supérieure** — elles dépendent du périmètre de la première livraison (`P6-01` point 2), de la recherche globale (`P6-20`) et des notifications (`P6-18`) ; plus le **sélecteur de période** et la **carte « Prochaine action »**, qui attendent les écrans qui les utilisent.
+**Réalisé partiellement (2026-10-17/18), sur retour utilisateur :**
+- **Sidebar classique refaite entièrement** (`FincludiaNav.jsx`/`.css`) : le bascule (icônes seules ↔ sections complètes) vit **dans la sidebar elle-même**, en haut à droite — jamais dans le composant parent — et l'état repliée reste une **colonne d'icônes**, jamais une disparition totale, comme demandé explicitement. Le panneau de contenu ne reprend plus la largeur totale quand la sidebar change d'état : `FincludiaLayout.css` est passé de `grid` à `flex`, avec la largeur de la sidebar portée par elle-même (`flex-basis`), pour éliminer le bug où le contenu « remplaçait » la sidebar visuellement.
+- **La sidebar ne disparaît plus sur certaines routes** : `FincludiaLayout` englobe maintenant à la fois les routes publiques d'outils/apprentissage et les routes du compte authentifié (`router/index.jsx`), donc un compte connecté garde son menu en changeant de page ; un visiteur anonyme ne voit, lui, aucun habillage supplémentaire. C'est ce même changement de structure qui corrige « Mon entreprise » (`/entreprise`, `P7-02`), qui perdait son cadre de navigation.
+- **Barre supérieure illisible une fois connecté, corrigée** : la cause réelle était 7 liens marketing + recherche + notifications + assistant + compte + déconnexion en concurrence sur une seule ligne. Pour un compte **authentifié seulement**, les liens marketing passent dans un menu déroulant « Plus » (`Header.jsx`/`.css`) ; un visiteur anonyme garde la navigation complète, dont il a besoin.
+
+**Correction du 2026-10-18, après vérification directe du code :** la note précédente disait le menu par public et la barre supérieure encore à câbler — c'était inexact. `FincludiaNav.jsx` lit déjà `GET /fin/parcours` et n'affiche que les routes que **le serveur** a déjà réduites au public et à l'âge du compte (commentaire du fichier : « WHAT IT SHOWS COMES FROM THE SERVER »), donc le filtrage par public (`P6-17`) est bien relié à cette sidebar. `Header.jsx` rend déjà `<GlobalSearch />` (`P6-20`) et `<NotificationBell />` (`P6-18`) pour tout compte authentifié, plus le bouton assistant (`P3-19`) — les trois sont des composants réels (176 et 39 lignes), pas des réserves. La dépendance à `P6-01` est donc levée : rien dans ce qui reste n'attend plus une décision du client.
+
+**Deuxième correction du 2026-10-18** : le **sélecteur de période** existe déjà (`components/fincludia/PeriodSelector.jsx`), utilisé sur `/mon-argent` — il n'attendait plus rien, il manquait seulement d'être signalé ici. **Reste réellement à faire, non bloquant :** l'étendre aux autres tableaux de bord qui pourraient s'en servir, et la **carte « Prochaine action »**, qui elle attend toujours un écran qui s'en serve.
 
 Important : le nom **FINCLUDIA** est tranché (décision du 2026-10-09, voir `P6-01` point 1 et le renommage documenté sous `P4-09`) ; le logo et la charte restent à fournir.
 
@@ -1278,6 +1285,8 @@ Tâches :
 
 Détails techniques : voir [`NOTES_TECHNIQUES.md`](NOTES_TECHNIQUES.md#p4-16).
 
+**Corrigé sur retour utilisateur (2026-10-17) :** l'atelier était « mal conçu » pour deux raisons concrètes. Ouvrir un simulateur depuis la grille de cartes ne menait nulle part visuellement (son formulaire apparaissait plus bas, sans défilement ni autre signe) — corrigé par un défilement automatique vers le formulaire ouvert. Comparer deux scénarios qui échouait (409) affichait le texte anglais brut du serveur — corrigé en ajoutant des codes `reason` structurés côté serveur (`unplayable`, `nothingInCommon`, `currency`) que le client traduit désormais en fr/en/ar au lieu de deviner depuis le texte.
+
 ### P4-10 — FINCLUDIA : calculateurs, lot 1 (budget, épargne, objectifs, inflation, simulations de vie)
 - Statut : `✅ done`
 - Priorité : `🔴 high`
@@ -1338,6 +1347,8 @@ Prolonge le comparateur existant (`P4-06` à `P4-08`) sans toucher à ses donné
 - **Interface** : lien « Adéquation à mon usage » depuis le comparateur (public, `/outils/comparateur/adequation`) ; écran « Explorer » dans le catalogue d'outils, réservé aux 18 ans et plus (`/outils/explorateur`) ; fr / en / ar.
 
 **Tests :** 6 fonctionnels (`tests/functional/comparator.test.js`, nouveau bloc « usage fit ») : quatre critères sans score par défaut, le score n'apparaît qu'avec des poids et porte sa formule (F054), le chiffre rejoint exactement le coût annuel déjà affiché par le comparateur, un identifiant qui n'est pas un compte ou qui est inconnu est refusé, la borne 2 à 3 est respectée, « paiement en ligne » n'apparaît jamais. 10 de sécurité (`tests/security/explorer.test.js`) : session requise, mineur refusé, âge non déclaré traité comme un mineur (refus par défaut), adulte accepté, aucun filtre réel → résultat vide, correspondance littérale, rubrique inconnue refusée, jamais de classement (`best`/`scores` absents de la réponse), fraîcheur réelle renvoyée.
+
+**Corrigé sur retour utilisateur (2026-10-17) :** l'état vide d'Explorer ne montrait qu'une phrase « tapez pour chercher », sans aucun exemple — une page de recherche sans suggestion ne dit pas à quoi ressemble une requête valable. Ajout de 4 exemples cliquables (« carte internationale », « virement », « épargne », « retrait ») qui lancent directement la recherche.
 
 **Limites et réserves déclarées :**
 - **CCP étudiant** : non ajouté, comme prévu — aucune donnée CCP dans le classeur actuel.
@@ -1468,7 +1479,7 @@ Critères :
 Durcir la plateforme et préparer une livraison exploitable.
 
 ### P5-01 — Audit d'authentification et autorisation
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P4-05`
 - Durée cible : 1 jour
@@ -1485,8 +1496,16 @@ Vérifications :
 - Contrôle serveur systématique.
 - Ajout FINCLUDIA (2026-10-09) : les données financières personnelles (revenus, transactions, dettes, patrimoine) sont les plus sensibles de la plateforme. Vérifier en plus : cloisonnement strict par propriétaire **et** par espace partagé (un membre ne voit que ce qui a été explicitement partagé, `P6-13`), accès refusé = écran neutre, droits Owner / Admin / Member / Viewer, contrôle d'âge côté serveur pour les fonctions 18+ (`P3-18`), recherche globale et assistant incapables de renvoyer une donnée d'un autre utilisateur (`P6-20`, `P3-19`), réauthentification pour les actions sensibles (export, suppression, retrait de consentement, `P6-19`).
 
+**Réalisé le 2026-10-18, sur preuve déjà existante plutôt que sur une relecture manuelle** — même principe que `P4-05` : un audit coché à l'œil se décoche à la modification suivante, celui-ci est mécanique.
+- **`tests/security/authorization.test.js`** balaie **toutes** les routes Express déclarées : toute route non listée publique répond 401 à un appel anonyme, toute route d'administration répond 403 à un compte standard, et le préfixe admin n'est joignable par aucune autre orthographe — exactement les points « RBAC », « accès admin » et « contrôle serveur systématique ».
+- **IDOR et cloisonnement par propriétaire** : vérifiés module par module plutôt qu'une fois pour toutes, parce que la vérification vit dans chaque service (`ownAsset`, `ownDebt`, etc.) — 38 fichiers `tests/security/*.test.js`, 364 cas, dont 24 dédiés aux espaces partagés (`finSpace.test.js`, matrice Owner/Admin/Member/Viewer, « totaux seuls » qui n'envoie pas les lignes).
+- **Accès refusé = écran neutre (404, jamais 403)** sur toute ressource d'un autre compte — règle tenue systématiquement depuis `P6-02` et vérifiée à chaque module financier.
+- **Contrôle d'âge serveur** (`requireAdult`) : testé dans le sens du refus et du **sur-refus** (`P6-17`, `P7-02`) — une garde posée sans son chemin refuserait tout, pas seulement ce qu'elle doit refuser.
+- **Réauthentification pour les actions sensibles** (export, suppression de compte, retrait de consentement) : couverte par `tests/security/finTrust.test.js` (`P6-19`).
+- **Accès aux formations / contenus premium / médias** : couvert depuis `P3-06`/`P3-16` (voir `P5-05`), inchangé depuis.
+
 ### P5-02 — Sécurité API et backend
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P5-01`
 - Durée cible : 1 jour
@@ -1503,8 +1522,17 @@ Vérifications / mesures :
 - Protection des endpoints sensibles.
 - Ajout du 2026-09-19 : si le paiement (`P3-09`, `P3-10`) est livré, y inclure la revue de la route de notification du fournisseur (signature, rejeu, doublons concurrents), de l'attribution d'accès et des secrets de paiement ; et l'API publique de l'assistant guidé (`P3-07`).
 
+**Réalisé le 2026-10-18, vérifié dans le code plutôt que décrété :**
+- **Validation stricte** : chaque route body passe par un schéma `zod` (`validateBody`/`validateQuery`), jamais une vérification manuelle éparpillée — c'est la même discipline qui a permis à `P4-05` de refuser systématiquement un corps vide ou un champ inconnu.
+- **Injections** : Prisma paramètre toutes les requêtes (aucun SQL concaténé dans `src/`) ; la seule famille de risque réelle de ce projet, l'injection de formule dans un export CSV/Excel (`=…`), est neutralisée à l'écriture (`P6-12`, `P6-04` et les autres exports).
+- **Rate limiting** : 10 limiteurs dédiés (`src/middleware/rateLimit.js`) — authentification, formulaire de contact, newsletter, liens de confirmation, quiz, médias protégés (volume ET tentatives refusées, par compte), lecture publique, notifications et commandes de paiement. Chacun documente le risque qu'il couvre plutôt que d'être une valeur copiée.
+- **CORS et en-têtes de sécurité** : `helmet()` et `cors({ origin: env.corsOrigin })` posés en tête de `app.js`, avant tout autre middleware.
+- **Erreurs** : `errorHandler` renvoie un message générique et masque la pile d'appel en production (`env.isProduction`), le détail complet seulement en développement.
+- **Secrets** : uniquement via variables d'environnement (`.env`, jamais côté navigateur) — règle déjà notée tenue par `P5-07`/article 13 du contrat.
+- **Endpoints sensibles et paiement** : revue déjà faite par les tests de sécurité de `P3-09`/`P3-10` (signature de notification, rejeu, doublons) et de `P3-07` (assistant public, aucune fuite inter-compte).
+
 ### P5-03 — Sécurité des fichiers et contenus
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P5-02`
 - Durée cible : 1 jour
@@ -1524,8 +1552,16 @@ Mesures :
 Limite :
 - La plateforme peut empêcher le téléchargement direct et réduire l'exposition, mais ne peut pas empêcher totalement une capture d'écran, un enregistrement d'écran ou une copie manuelle d'un contenu visible.
 
+**Réalisé le 2026-10-18, vérifié dans `src/services/storage.service.js` et `src/middleware/upload.js` :**
+- **Le type réel est reniflé dans le contenu du fichier** (`fileTypeFromFile`), jamais déduit du nom ou de l'en-tête envoyés par le navigateur — un `.pdf.exe` renommé ne trompe pas la validation.
+- **Nom de stockage aléatoire**, extension prise du type **reniflé** et non du nom d'origine ; le fichier est renommé au moment où il quitte le dossier temporaire.
+- **Stockage privé** (`PRIVATE_DIR`, hors du dossier servi statiquement) ; les médias ne sont accessibles que par une route authentifiée qui vérifie le droit avant de les servir, jamais par un chemin public direct.
+- **Taille plafonnée** par type (image / document / vidéo) en plus du plafond global de `multer`.
+- **Rate limiting dédié** sur les médias protégés (`mediaVolumeLimiter`, `mediaDenedLimiter` — volume et tentatives refusées, par compte).
+- **Antivirus et watermarking** : non faits, comme la tâche le permet elle-même (« si disponible et nécessaire », « éventuel, si validé par le client ») — aucune des deux conditions n'est posée aujourd'hui.
+
 ### P5-04 — Disponibilité et sauvegardes
-- Statut : `❌ todo`
+- Statut : `🚧 in-progress`
 - Priorité : `🔴 high`
 - Dépendances : `P5-03`
 - Durée cible : 1 jour
@@ -1541,6 +1577,18 @@ Tâches :
 - Vérification de restauration.
 - Sauvegarde des contenus médias.
 - Séparation des secrets et configurations.
+
+**État réel au 2026-10-18, pour ne pas laisser croire que c'est fait :**
+- **Fait** : `/api/health` (vérifie la connexion base, utilisé pendant la mise en ligne du 2026-10-17), logs (`morgan`), secrets séparés de la configuration (`.env`, jamais commité), restart géré par Passenger côté cPanel (relance automatique du process).
+- **Fait une fois, manuellement, pas encore systématisé** : une sauvegarde complète de la base de développement (`mariadb-dump`) a servi à repeupler la base de production le 2026-10-17 — ce n'était pas une sauvegarde programmée, et sa restauration n'a jamais été testée à vide (sans la base de départ).
+- **Pas fait** : sauvegardes programmées et vérifiées par restauration réelle, sauvegarde des médias uploadés, monitoring au-delà du health check, HTTPS vérifié sur l'hébergement réel choisi. Dépend en partie de `P6-01` point 11 (le client doit encore arbitrer l'hébergement définitif pour des données réelles).
+
+**Réalisé le 2026-10-18 — sauvegardes et vérification de restauration, codées et testées réellement :**
+- **`scripts/backup-database.js`** (`npm run backup`) : dump de la base avec `mariadb-dump` (repli sur `mysqldump` si absent — détecté, jamais supposé), **streamé directement vers gzip sans être chargé en mémoire** (le dump grossit avec la base, pas avec la machine qui sauvegarde). Le mot de passe passe par la variable d'environnement `MYSQL_PWD`, jamais sur la ligne de commande, où `ps` le verrait. Archive aussi les médias uploadés (`storage/private`) en `.tar.gz` le même run — une sauvegarde de base sans les fichiers qu'elle référence n'en est qu'une moitié. **Rotation automatique** : garde les `BACKUP_KEEP` (défaut 14) dernières exécutions, supprime le reste.
+- **`scripts/verify-backup.js`** (`npm run backup:verify`) : restaure la **dernière** sauvegarde dans une base jetable (jamais la vraie), compte les tables obtenues, les compare au nombre de `@@map(...)` de `schema.prisma` (+1 pour `_prisma_migrations`), puis supprime la base jetable dans tous les cas. Une sauvegarde qu'on n'a jamais restaurée n'est qu'un fichier, pas une sauvegarde.
+- **Les deux scripts ont été exécutés pour de vrai** contre la base de développement (pas seulement relus) : dump réel, archive média réelle, restauration réelle avec comparaison de tables réussie (75 = 75, `_prisma_migrations` compris). Deux défauts trouvés en les faisant tourner : sous Windows, `spawn` sans `shell` ne trouve pas un `.cmd`/`.bat` sur le PATH (corrigé, conditionnel à la plateforme — sans effet sur la cible Linux de production) ; et le script de vérification comparait d'abord 75 tables restaurées à 74 attendues avant de compter `_prisma_migrations`, qui n'a pas de modèle Prisma mais existe bien dans tout dump réel.
+- **`/backups` ajouté au `.gitignore`** du serveur : contient des données réelles, jamais versionné, comme `/storage`.
+- **Toujours pas fait, et ça dépend du client** : où ces sauvegardes sont finalement conservées (un autre disque, un autre hébergeur) est une décision d'infrastructure qui attend `P6-01` point 11 ; le monitoring au-delà du health check et la vérification HTTPS attendent le même arbitrage.
 
 ### P5-05 — Tests fonctionnels et sécurité
 - Statut : `❌ todo`
@@ -1906,6 +1954,8 @@ Appliqué : titre de la page, nom de marque et textes d'accueil fr / en / ar, su
 
 **Tests :** 9 de sécurité (`tests/security/finBudget.test.js`, nouveaux dans cette session : isolation entre comptes sur budgets et enveloppes, 404 et non 403, journal de corrections non partagé, métadonnées serveur non pilotables, effacement de compte), plus les unitaires et fonctionnels déjà en place (`tests/unit/finBudget.test.js`, `tests/functional/finBudget.test.js`).
 
+**Corrigé sur retour utilisateur (2026-10-17) :** créer une enveloppe échouait (422) quand la catégorie choisie appartenait à la famille « revenus » — règle déjà appliquée côté serveur (`isBudgetableFamily`, `BUDGETABLE_FAMILY_EXCLUSIONS = ['income']`) mais jamais reproduite côté client : le sélecteur de catégorie proposait les catégories de revenu comme n'importe quelle autre, menant droit au refus serveur. `BudgetDetailPage.jsx` filtre maintenant les catégories de la famille « income » avant de les proposer.
+
 **Limites et réserves déclarées :**
 - **Pas encore de scénario dans la suite de cohérence globale** (`tests/consistency/data.test.js`) ni de **parcours navigateur** (`tests/e2e`) dédiés aux budgets — contrairement à `P6-04`. À ajouter si une revue plus poussée est demandée.
 - **Alertes configurables via `P6-18`** (centre de notifications) : les seuils existent et sont stockés par budget, mais rien ne pousse encore de notification — seul l'écran du budget les affiche.
@@ -2060,6 +2110,8 @@ Mois de réserve = épargne liquide / dépenses essentielles mensuelles ; cible 
 
 **Tests :** 6 de sécurité (`tests/security/finDebt.test.js` : isolation entre comptes, paiement plafonné, effacement de compte).
 
+**Corrigé sur retour utilisateur (2026-10-17) :** la comparaison avalanche / boule de neige « ne marchait pas » — en réalité, quand aucune dette éligible n'avait de taux connu, l'écran n'affichait strictement rien (ni plans, ni la raison), parce que l'ancien code exigeait `comparison.data.avalanche` pour afficher quoi que ce soit, y compris les avertissements. Corrigé : un état de chargement est affiché pendant le calcul, et si la comparaison ne peut pas se faire, les avertissements du serveur (ex. « dette sans taux connu exclue ») s'affichent désormais dans un encart visible plutôt que de disparaître silencieusement.
+
 **Limites et réserves déclarées :**
 - **Qualification productive / neutre / sous pression** : en attente des seuils du client (`P6-01` point 5), voir ci-dessus.
 - **Pas encore de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
@@ -2088,6 +2140,10 @@ Actifs (comptes, CCP, espèces, or, véhicule, immobilier, placements) et passif
 - **F035 était appelée avec deux totaux au lieu de ses listes d'entrées** (`netWorth(totalAssets, totalDebts)`) : la fonction attend `{ assets, liabilities, currency }` et sommait donc **deux listes vides**, si bien que le patrimoine net valait **0** quels que soient les montants. Quatre tests l'ont attrapé d'un coup.
 - **J'avais étiqueté les totaux bruts en F035** alors que F035 est le **net** : un total d'actifs portant l'identifiant du patrimoine net l'aurait mal attribué. Les deux totaux bruts sont désormais des données descriptives, comme la `repartition` de la synthèse, et seul le net porte F035.
 - **`sumAmounts` importé depuis `formulas.js`** où il n'existe pas (il est dans `finance/money.js`) : l'application ne démarrait plus. Trouvé en démarrant l'application, pas par un test — voir la note d'outillage sous `P6-12`.
+
+**Corrigé sur retour utilisateur (2026-10-17 et 2026-10-18) :**
+- **Un libellé d'actif long cassait la ligne** : `.wealth-row-label` portait `margin-inline-end: auto`, qui, dans une ligne en `flex-wrap`, poussait tout le reste (type, liquidité, montant, date, bouton supprimer) sur une ligne séparée en dessous. Corrigé en regroupant tout sauf le libellé dans un bloc `.wealth-row-meta` qui porte lui-même la marge automatique, pour que le libellé et le reste se répartissent indépendamment.
+- **Ajouter un actif donnait l'impression que « rien ne se passe » / qu'on ne retrouve pas l'actif ajouté** : le formulaire est en bas de la page, mais le message de confirmation et la liste des actifs sont en haut — en soumettant depuis le bas d'une longue page, la personne ne voyait ni l'un ni l'autre. Corrigé : après un ajout réussi, la page défile automatiquement jusqu'à la section « Mes actifs » pour montrer la nouvelle ligne.
 
 **Limites et réserves déclarées :**
 - **La réserve de sécurité (`P6-09`) ne lit pas encore `disponibleRapidement`.** Elle compte l'épargne marquée par les mouvements de la famille « objectifs », ce qui était la seule lecture possible avant cette tâche. Le brancher ferait changer un chiffre déjà affiché à des comptes existants : c'est une décision à prendre, pas un détail d'implémentation, et elle est signalée plutôt que prise seule.
@@ -2243,6 +2299,8 @@ Indice de **préparation** du dossier (complétude, stabilité, effort dette, ap
 
 **Tests :** 7 de sécurité (`tests/security/finFunding.test.js` : session requise, indice global jamais un nombre calculé, absence des mots interdits, complétude qui reflète les déclarations réelles, isolation entre comptes, export refusé sans consentement).
 
+**Corrigé sur retour utilisateur (2026-10-17) :** l'entrée de menu « Préparation au financement » était jugée trop longue — raccourcie en « Financement » (fr/en/ar) dans `fincludiaMenu.js`.
+
 **Limites et réserves déclarées :**
 - **L'indice global (F051) et la qualification forts/faibles restent bloqués** jusqu'aux pondérations et seuils du client (`P6-01` point 5) — déclaré sur l'écran lui-même, pas seulement ici.
 - **Pas de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
@@ -2363,8 +2421,60 @@ Une seule barre : écrans, actions, transactions, objectifs, contenus « Apprend
 - **Les objectifs et dépenses communs d'un espace** (`P6-15`) ne sont pas cherchés ici : leur visibilité suit l'appartenance à l'espace, une règle que ce fichier ne duplique pas.
 - **Pas de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
 
+### P6-23 — FINCLUDIA : visualisations graphiques des tableaux de bord
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-04`, `P6-05`, `P6-06`, `P6-11`
+- Durée cible : 3 jours (estimation)
+- Origine : retour utilisateur du 2026-10-18 (« il n'a pas trouvé les schémas courbe et illustrations des différents chiffres et tableaux de bord »)
+
+**Constat vérifié dans le code, pas supposé** : aucune bibliothèque de graphiques n'est installée (ni Recharts, ni Chart.js, ni D3 dans `client/package.json`) et aucune page n'affiche de courbe ou de graphique SVG. Les tableaux de bord actuels (`/aujourdhui`, `/mon-argent`, `/budget`, `/patrimoine`) affichent uniquement des chiffres en texte et des listes. Le retour du client est donc exact : il ne manque pas de les trouver, ils n'existent pas encore.
+
+Non bloqué par le client : c'est un choix d'outillage et de maquette, pas une donnée à obtenir. À construire :
+- Choisir une bibliothèque de graphiques (légère, accessible, compatible RTL) et l'ajouter aux dépendances.
+- Répartition du budget par catégorie (camembert ou barres) sur `/budget` et `/budget/:id`.
+- Évolution du patrimoine net dans le temps sur `/patrimoine` (à partir du journal de corrections déjà tenu par `P6-02`/`P6-11`, pas d'une nouvelle table).
+- Courbe revenus/dépenses sur `/mon-argent` et le tableau de bord « Aujourd'hui » (`P6-06`), par public.
+- **Règles à respecter, déjà posées par le projet** : jamais un total qui mélange réel et fictif (`P6-12`) sur le même graphique ; jamais la couleur seule pour porter un sens (règle d'accessibilité de `P1-12`) ; jetons CSS clair/sombre ; aucune valeur non calculable affichée comme un zéro silencieux sur un graphique.
+
+**Réalisé en partie (2026-10-18) — premier chantier, la répartition du budget :**
+- **Pas de bibliothèque ajoutée.** Une jauge SVG/CSS maison (`components/fincludia/BudgetMeter.jsx`) plutôt qu'une dépendance : la donnée à montrer (prévu vs réel d'une enveloppe, un seul ratio) ne justifie pas le poids d'une bibliothèque de graphiques, et un composant maison suit nativement les jetons CSS clair/sombre et les propriétés logiques (RTL) du reste du projet sans configuration supplémentaire. Une vraie bibliothèque reste à évaluer pour les chantiers plus complexes ci-dessous (courbes).
+- **Jauge prévu/réel par enveloppe** sur `/budget/:id` (`BudgetDetailPage.jsx`) : la couleur suit le niveau d'alerte déjà existant (`none`/`warning`/`reached`/`exceeded`), mais le pourcentage exact est **toujours écrit en texte** à côté — jamais seulement la couleur — et toute la jauge porte un `aria-label` qui dit le montant réel, le montant prévu et le pourcentage, pour un lecteur d'écran.
+- **Aucune donnée nouvelle requise** : `prevu`/`reel`/`alerte.niveau` existaient déjà dans la réponse de `/fin/budgets/:id`.
+
+- **Répartition du budget entre enveloppes** (`components/fincludia/BudgetDistribution.jsx`) : une barre empilée au-dessus de la liste des enveloppes sur `/budget/:id`, largeur de chaque segment proportionnelle à son montant prévu, quatre teintes de la charte (bleu profond / sarcelle / océan / menthe, jetons déjà existants) plutôt qu'une couleur inventée. **Purement décorative** (`aria-hidden="true"`) : les chiffres qu'elle résume sont déjà lisibles juste en dessous, dans la liste des enveloppes elle-même — la barre n'introduit aucun fait que le texte ne porte pas déjà.
+
+**Terminé le 2026-10-18 — deuxième chantier, l'évolution du patrimoine net :**
+- **Toujours aucune bibliothèque ajoutée** : une courbe SVG maison (`components/fincludia/NetWorthChart.jsx`) plutôt qu'une dépendance, pour la même raison que la jauge de budget.
+- **Nouveau point d'API, `GET /fin/patrimoine/historique`** (`finWealth.service.js:netWorthHistory`, routée dans `finWealth.routes.js`, même garde `requireAdult` que le reste de `/patrimoine`) : reconstruit le patrimoine net **à chaque jour où il a réellement bougé**, en relisant le journal de corrections (`fin_changes`) des actifs ET des dettes — jamais une nouvelle table recalculant les mêmes faits. Un actif archivé, supprimé, ou dans une autre devise que celle du compte cesse de compter à partir du moment où c'est le cas, exactement comme pour le chiffre affiché en direct (`buildWealthView`) : la courbe et le chiffre du jour ne peuvent jamais se contredire. Sans aucun mouvement réel, la série est **vide** — jamais un point à zéro fabriqué.
+- **Tests** : 6 fonctionnels ajoutés (`tests/functional/finWealth.test.js`, bloc « P6-23 — net worth history ») : correction qui déplace la série, dette soustraite et non ajoutée, actif archivé qui arrête de compter, devise étrangère qui ne compte jamais, compte vide qui donne une série vide, isolation entre comptes. Un défaut trouvé en écrivant ces tests : un évènement qui ne change rien dans la devise ciblée (ex. un actif créé dans une autre devise) ajoutait quand même un point « plat » à la série — corrigé en ne poussant un point que si le total a réellement changé.
+- **Interface** : `/patrimoine` affiche la courbe sous les chiffres principaux, avec un tableau des valeurs exactes replié par défaut (`<details>`) — le trait SVG est décoratif (`aria-hidden`), rien n'existe seulement comme une forme illisible à un lecteur d'écran.
+
+**Terminé le 2026-10-18 — troisième et dernier chantier, la courbe revenus/dépenses :**
+- **Nouveau point d'API, `GET /fin/argent/synthese/historique?months=`** (2 à 12, 6 par défaut) : relit la synthèse de chaque mois de la fenêtre avec les mêmes fonctions que la synthèse du mois courant déjà affichée (`loadSynthesisData` + `buildSynthesis`, `finSynthesis.service.js:monthlyMoneyHistory`) — jamais un second calcul qui pourrait diverger de ce que l'écran affiche déjà pour le mois en cours. Un mois résolu dans une autre devise que celle du compte répond `null` pour ce mois plutôt que de convertir ou de l'additionner en silence.
+- **Interface** : `/mon-argent` affiche la courbe (deux traits — vert pour les revenus, teinte « océan » de la charte pour les dépenses, **jamais le rouge d'alerte** pour une dépense normale) sous les trois chiffres de synthèse ; légende textuelle, jamais la couleur seule ; même tableau replié que pour le patrimoine.
+- **Tests** : 4 fonctionnels ajoutés (`tests/functional/finMoney.test.js`, bloc « the revenus/dépenses history »).
+
+**Réserve déclarée :** l'aperçu par public sur « Aujourd'hui » (`P6-06`) ne reprend pas encore ces courbes — ce tableau de bord a sa propre mise en page par public et mériterait sa propre revue plutôt qu'un ajout mécanique ; à faire si le client le demande.
+
+### P6-24 — FINCLUDIA : comptes financiers multiples et coordination des opérations
+- Statut : `⛔ blocked`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-04`, `P6-11`
+- Durée cible : non estimable tant que le périmètre n'est pas défini
+- Origine : retour utilisateur du 2026-10-18 (« je veux savoir si les comptes sont coordonnés, et qu'à chaque opération les comptes nécessaires seront impactés »)
+
+**Constat vérifié dans le code :** `fin_assets` (`P6-11`) permet déjà de déclarer plusieurs comptes nommés librement (compte courant, compte épargne, CCP…), mais ce sont des **valorisations déclarées**, pas des comptes **opérationnels** : aucune table financière de la plateforme (`schema.prisma`) ne porte de colonne reliant une transaction, un revenu ou une dépense (`P6-04`) à un compte précis. Une dépense enregistrée dans « Mon argent » ne fait donc baisser le solde d'aucun compte particulier, et rien ne se répercute automatiquement d'un compte à un autre.
+
+Ce qui bloque, concrètement :
+- **Aucun écran ni champ du cahier des charges client ne décrit ce mécanisme.** `P6-04` (revenus/transactions) et `P6-11` (patrimoine) sont, dans la spécification du client, deux modules séparés et volontairement non reliés par une clé technique — relier les transactions à un compte serait une extension du modèle de données, pas une implémentation de ce qui est déjà spécifié.
+- **La question a deux réponses possibles, très différentes à construire**, et seul le client peut choisir : (a) chaque dépense/revenu désigne un compte, et le solde de ce compte se recalcule à partir de son historique de mouvements — ce qui change `fin_transactions` et la façon dont `P6-04` calcule ses totaux ; ou (b) ce que la plateforme fait déjà (comptes déclarés dans le patrimoine, chiffres de budget et de trésorerie séparés) suffit, et seule la pédagogie ou la présentation doit mieux l'expliquer.
+- **Un virement entre deux comptes propres** (ex. compte courant → compte épargne) n'a pas de concept existant : ni une dépense, ni un revenu, ni un objectif ne le modélisent aujourd'hui.
+
+**Ce qu'il faut obtenir pour débloquer :** confirmation du client sur le comportement attendu (solution (a) ou (b) ci-dessus), et si (a), les écrans/champs précis — c'est exactement le genre de règle que ce projet ne construit jamais sans une source qui la décrit.
+
 ### P6-21 — FINCLUDIA : validation de fin de phase
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P6-03`, `P6-06`, `P6-07`, `P6-12`, `P6-15`, `P6-16`, `P6-17`, `P6-19`, `P6-20`, `P6-22`, `P4-13`, `P4-14`, `P4-15`, `P4-16`, `P3-19`
 - Durée cible : 2 jours (estimation)
@@ -2407,6 +2517,12 @@ Les données sont posées par l'API (rapide et sans ambiguïté) ; ce que le nav
 **Le garde-fou recommandé est en place.** `tests/setup.js` compare désormais les modèles de `prisma/schema.prisma` à ceux du schéma **embarqué dans le client généré** (`inlineSchema`, donc exact et sans base de données) et s'arrête en nommant les modèles manquants avec « Lancez : npx prisma generate ». Vérifié dans les deux sens : il passe en phase, il échoue avec le bon message dès qu'un modèle est ajouté au schéma sans régénérer. Le défaut qui a coûté deux sessions ne peut plus se présenter comme vingt erreurs `Cannot read properties of undefined`.
 
 **L'écran du refus réservé aux adultes est livré** : `components/fincludia/AdultOnly.jsx`, branché sur les pages dettes, patrimoine et financement, distingue les deux motifs que le serveur distingue (`adultsOnly` → rien à corriger ; `ageUnknown` → « il manque votre tranche d'âge », avec le lien vers le profil), en fr / en / ar. Sans cela, un adulte au profil incomplet n'avait qu'une porte fermée.
+
+**Mise à jour du 2026-10-18 — les deux vraies raisons de blocage sont levées.** `P4-14`, `P4-15` et `P6-22` sont maintenant `✅ done` (voir chacune). Une relance complète (`npm test`, 1792 tests) a trouvé deux défauts réels, corrigés le même jour : la migration `20261017090000_adult_age_19` (`P6-22`) n'avait jamais été appliquée à la base de développement (corrigé par `prisma migrate deploy`), et la matrice de recette ne listait pas encore `P7-03`/`P7-04`/`P7-05` (corrigé par `npm run deliverables`). Le seul échec restant connu (`P5-07` « en cours » dépend de `P5-06` « à faire ») est antérieur à cette session, sans lien avec `P6-21`, et concerne deux tâches de Phase 5.
+
+**Réalisé le 2026-10-18 — le dernier critère réel.** Les huit scénarios par public de l'onglet QA (lycéen, étudiant, jeune actif, salarié, colocataire, couple, famille, épargnant débutant) ont maintenant leur parcours navigateur dédié : `tests/e2e/fin-qa-publics-journey.test.js`, **8 parcours, 8 réussis** du premier coup. Délibérément **pas** une onzième répétition des chaînes J01-J10 : ce fichier teste l'autre axe, celui du PUBLIC plutôt que de la chaîne fonctionnelle — pour chacun des 8, un compte est créé avec ce public (et, pour le seul public qui peut être mineur, le lycéen, une tranche d'âge qui l'est réellement), puis l'écran « Aujourd'hui » est ouvert et son sous-titre est vérifié contre le texte **propre à ce public** (`finDashboard.js`, `P6-06`) — jamais le texte par défaut, qui révélerait un embranchement tombé en silence sur le cas générique.
+
+**Ce que ce fichier ne vérifie délibérément pas** : qu'un écran hors de la carte des parcours d'un public lui est **inaccessible**. `finNavigation.js` le dit lui-même dans son propre commentaire — masquer une route du menu est un confort, jamais la protection ; la garde réelle est `requireAdult` côté API, déjà couverte par les suites de sécurité. Un test qui affirmerait un 404 sur une route que le code ne protège pas affirmerait quelque chose que le produit n'a jamais promis.
 
 ### Impact sur le délai (FINCLUDIA, ajout du 2026-10-09)
 
@@ -2461,6 +2577,8 @@ Tant que ce point n'est pas tranché, **aucune ligne de code ne doit être écri
 
 **Ce qu'il faut obtenir pour débloquer la suite :** le plan comptable et les règles de présentation applicables, le régime d'imposition et les taux de TVA datés, les durées et modes d'amortissement admis, la méthode de valorisation des stocks — et le cahier des charges « produit par produit » que l'annexe 1 annonce pour cette partie.
 
+**Éclaté en tâches suivies séparément le 2026-10-18**, pour que chaque blocage reste traçable individuellement plutôt que noyé dans une seule tâche : `P7-03` (déclinaison par segment : PME/PMI, start-up, micro-entreprise, auto-entrepreneur, micro-importateur, profession libérale), `P7-04` (états financiers réglementaires), `P7-05` (diaspora et commerce international). Cette tâche (`P7-01`) reste l'alerte de périmètre globale ; `P7-02` reste le seul lot livré.
+
 ### P7-02 — Espace entreprise : socle de trésorerie (tiers, ventes, achats, règlements)
 - Statut : `✅ done`
 - Priorité : `🔴 high`
@@ -2480,6 +2598,55 @@ Le premier lot de l'ERP : **tout ce qui se calcule sans référentiel comptable*
 - **Page `/entreprise`**, réservée aux majeurs, avec la garde **liée à son chemin** : un `router.use(requireAdult)` sans chemin aurait refusé toutes les routes `/fin/*` déclarées ensuite, le défaut qui avait enfermé les mineurs hors de leur propre argent en `P6-17`. Un test vérifie le **sur-refus**, pas seulement le refus.
 - **Dixième entrée de menu**, ajoutée **après** les neuf du client et déclarée comme nôtre (`EXTRA_ROUTES`, origine « contrat, annexe 1 ») : `SCREEN_ROUTES` est généré depuis le classeur des parcours, et y ajouter un écran de notre fait corromprait la matrice de provenance de `P6-21`.
 - **Tests** : 26 unitaires, 18 de sécurité. Verts du premier coup.
+
+### P7-03 — Espace entreprise : déclinaison par segment (PME/PMI, start-up, micro-entreprise, auto-entrepreneur, micro-importateur, profession libérale)
+- Statut : `⛔ blocked`
+- Priorité : `🔴 high`
+- Dépendances : `P7-01`, `P7-02`
+- Durée cible : non estimable tant que le périmètre n'est pas défini
+- Origine : demande du 2026-10-18 (confirmée sur `P7-01`, contrat annexe 1) ; décision du client du 2026-10-16 que cette partie est bien demandée
+
+Le socle livré par `P7-02` (tiers, documents de vente/achat, règlements, trésorerie) est **générique** : il traite une entreprise comme une entreprise, sans distinguer une PME d'un auto-entrepreneur. Le contrat et la charte nomment pourtant des publics **distincts** : PME, PMI, start-up, micro-entreprise, auto-entrepreneur, micro-importateur, profession libérale — chacun avec vraisemblablement ses propres statuts juridiques, obligations déclaratives, seuils et besoins de tableau de bord (ex. un micro-importateur suit des opérations de douane et de change qu'un cabinet libéral n'a pas).
+
+Ce qui bloque, concrètement :
+- **Aucun cahier des charges « produit par produit » par segment n'a été fourni** — l'annexe 1 l'annonce mais ne le détaille pas, et le classeur `FINCLUDIA_Cahier_des_Charges_Complet.xlsx` reçu ne couvre que les 8 publics **personnels**.
+- Sans ce document, il n'y a **aucun écran, aucun champ et aucun calcul propre à un segment** qui puisse être construit sans être inventé — même règle que `P4-14`/`P4-15`/`P6-01` : ce projet ne fabrique pas un barème ou une règle métier qui n'existe pas dans une source.
+- Le **statut juridique de chaque segment** (seuils de chiffre d'affaires, régime fiscal applicable) doit être confirmé avant de décider si un compte déclare un segment librement ou si des règles de seuil s'appliquent.
+
+**Ce qu'il faut obtenir pour débloquer :** le cahier des charges détaillé par segment (écrans, champs, calculs attendus pour chacun des six profils cités), et la liste des statuts/seuils qui les distinguent légalement.
+
+### P7-04 — Espace entreprise : états financiers réglementaires (bilan, compte de résultat, TVA, amortissements, stocks)
+- Statut : `⛔ blocked`
+- Priorité : `🔴 high`
+- Dépendances : `P7-01`, `P7-02`
+- Durée cible : non estimable tant que le référentiel n'est pas fourni
+- Origine : contrat, annexe 1 « Fonctionnalités principales » ; isolé de `P7-01` le 2026-10-18 pour suivi individuel
+
+Extrait de `P7-01` en tâche propre, pour qu'il reste traçable séparément de la question des segments (`P7-03`) et de celle de la diaspora (`P7-05`). Ce que `P7-02` livre (trésorerie, créances, dettes) ne suppose aucune convention comptable ; un bilan et un compte de résultat en supposent une, datée et officielle.
+
+Ce qui bloque, concrètement, et c'est resté identique depuis le 2026-10-16 :
+- Le **plan comptable et les règles de présentation** du Système Comptable Financier algérien applicables à chaque segment.
+- Le **régime d'imposition et les taux de TVA datés**.
+- Les **durées et modes d'amortissement admis**.
+- La **méthode de valorisation des stocks**.
+
+**Ce qu'il faut obtenir pour débloquer :** ces quatre référentiels, fournis ou validés par le client — jamais composés ici, pour la même raison que les barèmes de paie (`P4-14`) ou les offres de financement (`P4-15`) ne le sont pas.
+
+### P7-05 — Diaspora et commerce international
+- Statut : `⛔ blocked`
+- Priorité : `🟡 medium`
+- Dépendances : `P7-01`
+- Durée cible : non estimable tant que le périmètre n'est pas défini
+- Origine : contrat, annexe 1 « Fonctionnalités principales » ; charte graphique (ses publics incluent « commerce international et diaspora ») ; isolé de `P7-01` le 2026-10-18
+
+Volet entier, cité deux fois par le client (contrat et charte) sans qu'aucun écran, champ ou calcul ne soit décrit nulle part. Contrairement à `P7-03` et `P7-04`, ce n'est même pas une extension d'un module existant : rien dans `P7-02` ne couvre une opération en devise étrangère, un transfert international ou un besoin propre à un compte à l'étranger.
+
+Ce qui bloque, concrètement :
+- **Aucun cahier des charges** ne décrit ce volet — pas un onglet du classeur reçu, pas une ligne de l'annexe 1 au-delà de la mention de son existence.
+- **Ce que « diaspora » doit couvrir n'est pas défini** : un espace dédié aux Algériens résidant à l'étranger (épargne, transferts, investissement au pays) ? Des règles de change réglementées ? Les deux ?
+- **Ce que « commerce international » doit couvrir n'est pas défini** : import/export documentaire, douane, lettres de crédit — chacun est un domaine réglementé qui suppose ses propres règles, datées et officielles.
+
+**Ce qu'il faut obtenir pour débloquer :** une définition écrite du périmètre attendu pour chacun des deux volets, puis le cahier des charges produit par produit comme pour le reste de la Phase 7.
 
 **Les règles qui ne pouvaient pas être des contraintes SQL**, et où elles vivent :
 - « un règlement est dans la devise de son document » référence une colonne de clé étrangère — MariaDB refuse (erreur 1901) : service + test de sécurité ;

@@ -14,6 +14,7 @@ import Notice from '../../components/ui/Notice.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import PeriodSelector from '../../components/fincludia/PeriodSelector.jsx';
+import IncomeExpenseChart from '../../components/fincludia/IncomeExpenseChart.jsx';
 import { periodRange } from '../../lib/finControls.js';
 import { toMinorUnits } from '../../lib/money.js';
 import './MyMoney.css';
@@ -70,6 +71,9 @@ export default function MyMoneyPage() {
   const loaded = synthesis.data ?? kept;
   const refreshing = synthesis.status === 'loading' && !synthesis.data;
   const history = useApi(`/fin/transactions?${query}`);
+  // Revenus vs dépenses over the last few months (P6-23) — independent of the
+  // period selector above, which only moves the CURRENT synthesis.
+  const moneyHistory = useApi('/fin/argent/synthese/historique');
   const categories = useApi('/fin/categories');
   const references = useApi('/fin/argent/references');
 
@@ -129,6 +133,10 @@ export default function MyMoneyPage() {
             <FigureCard label={t('myMoney.expenses')} answer={s.depenses} formula={formulas.get('F003')} />
             <FigureCard label={t('myMoney.netFlow')} answer={s.fluxNet} formula={formulas.get('F004')} />
           </div>
+
+          {moneyHistory.data?.points && (
+            <IncomeExpenseChart points={moneyHistory.data.points} currency={moneyHistory.data.currency} />
+          )}
 
           {/* Real and fictional are never added: the simulation block is a
               separate card with a permanent badge. */}

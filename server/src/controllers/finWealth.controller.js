@@ -16,6 +16,7 @@ import {
   deleteAsset,
   getAsset,
   listAssets,
+  netWorthHistory,
   setAssetArchived,
   updateAsset,
   valuationHistory,
@@ -76,6 +77,14 @@ export async function getAssetHistory(req, res) {
 // second table of the same facts.
 export async function getAssetValuations(req, res) {
   res.json({ valuations: await valuationHistory(prisma, req.user.id, req.params.id) });
+}
+
+// The history behind the patrimony's net-worth curve (P6-23). Same currency
+// default as `getWealth`, so a caller who never passes `?currency=` sees the
+// series line up with the figure it leads to.
+export async function getWealthHistory(req, res) {
+  const currency = req.query.currency ?? req.user.finCurrency;
+  res.json({ currency, points: await netWorthHistory(prisma, req.user.id, currency) });
 }
 
 export async function getWealth(req, res) {

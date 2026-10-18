@@ -410,3 +410,97 @@
   color: var(--text);
   font-size: 0.88rem;
 }
+
+/* Shared chart shell (P6-23): a decorative SVG curve plus an accessible
+   table of the exact points, collapsed by default. Only the SVG's time axis
+   is forced left-to-right (same treatment as the formula code blocks of the
+   simulators) — the summary text and the table stay in the page's own
+   direction, dates and amounts included. */
+.wealth-chart {
+  margin-block: 16px;
+}
+
+.wealth-chart-svg {
+  direction: ltr;
+  unicode-bidi: isolate;
+  inline-size: 100%;
+  block-size: 160px;
+  overflow: visible;
+}
+
+.wealth-chart-line {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.wealth-chart-line-income {
+  stroke: var(--green);
+}
+
+/* Not `--danger`: a normal expense is not an error, and that token is
+   reserved for the project's actual alerts. */
+.wealth-chart-line-expense {
+  stroke: var(--clay);
+}
+
+.wealth-chart-zero {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.wealth-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-block-end: 6px;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.wealth-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wealth-chart-swatch {
+  display: inline-block;
+  inline-size: 12px;
+  block-size: 3px;
+  border-radius: 2px;
+}
+
+.wealth-chart-swatch-income {
+  background: var(--green);
+}
+
+.wealth-chart-swatch-expense {
+  background: var(--clay);
+}
+
+.wealth-chart-details {
+  margin-block-start: 8px;
+  font-size: 0.86rem;
+}
+
+.wealth-chart-details summary {
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.wealth-chart-table {
+  margin-block-start: 8px;
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.wealth-chart-table th,
+.wealth-chart-table td {
+  padding: 4px 8px;
+  text-align: start;
+  border-block-end: 1px solid var(--border);
+}

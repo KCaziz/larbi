@@ -7,5 +7,9 @@ node_modules
 # Private uploaded media (never versioned, never served statically)
 /storage
 
+# Database/media backups written by scripts/backup-database.js (P5-04):
+# contains real data, never versioned.
+/backups
+
 # Screenshots written by the end-to-end tests (debugging aid)
 /tests/e2e/screenshots

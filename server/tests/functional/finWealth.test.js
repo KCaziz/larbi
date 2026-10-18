@@ -219,3 +219,54 @@ describe('P6-11 — the patrimony view', () => {
     }
   });
 });
+
+// The history behind the net-worth curve (P6-23): built from the change
+// journal, never a second table of the same facts.
+describe('P6-23 — net worth history', () => {
+  const history = (query = '') => t.request('GET', `/fin/patrimoine/historique${query}`, { user });
+
+  test('one asset moves the series, and the running total reflects a correction', async () => {
+    const created = await addAsset({ value: 1000000 });
+    await t.request('PATCH', `/fin/actifs/${created.body.asset.id}`, { user, json: { value: 1500000, valuedAt: iso(ago(1)) } });
+
+    const res = await history();
+    assert.equal(res.status, 200);
+    assert.ok(res.body.points.length >= 1, 'at least today');
+    assert.equal(res.body.points.at(-1).net, 1500000, 'the LAST point of the day carries the corrected value');
+  });
+
+  test('a debt is subtracted, not added', async () => {
+    await addAsset({ value: 1000000 });
+    await addDebt({ outstandingPrincipal: 300000 });
+
+    const res = await history();
+    assert.equal(res.body.points.at(-1).net, 700000);
+  });
+
+  test('an archived asset stops contributing from then on', async () => {
+    const created = await addAsset({ value: 1000000 });
+    await t.request('PUT', `/fin/actifs/${created.body.asset.id}/archive`, { user, json: { archived: true } });
+
+    const res = await history();
+    assert.equal(res.body.points.at(-1).net, 0, 'archived is excluded, same as the live figure');
+  });
+
+  test('a row in another currency never contributes', async () => {
+    await addAsset({ value: 1000000, currency: 'EUR' });
+    const res = await history();
+    assert.equal(res.body.points.length, 0, 'nothing in DZD ever moved');
+  });
+
+  test('with nothing recorded, the series is simply empty — never a fabricated zero point', async () => {
+    const res = await history();
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.body.points, []);
+  });
+
+  test('isolated between accounts', async () => {
+    await addAsset({ value: 1000000 });
+    const other = await t.adult();
+    const res = await t.request('GET', '/fin/patrimoine/historique', { user: other });
+    assert.deepEqual(res.body.points, []);
+  });
+});

@@ -202,3 +202,36 @@ export function breakdown(rows) {
     .map(([categoryId, total]) => ({ categoryId, total }))
     .sort((a, b) => b.total - a.total);
 }
+
+// ---- history (P6-23) --------------------------------------------------------
+
+/**
+ * Revenus vs dépenses, one point per month, for the last `months` calendar
+ * months (this one included) — read the same way as "Mon argent"'s own
+ * figures (`loadSynthesisData` + `buildSynthesis`), never a parallel count
+ * that could drift from the screen that already shows the current month.
+ *
+ * A month resolved in another currency than the account's own is reported as
+ * `null` for both figures rather than converted or silently summed with the
+ * rest — the same rule `buildSynthesis` itself applies within one month.
+ */
+export async function monthlyMoneyHistory(prisma, userId, { months = 6, currency } = {}) {
+  const now = new Date();
+  const periods = Array.from({ length: months }, (_, index) => {
+    const monthsAgo = months - 1 - index;
+    return currentMonth(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - monthsAgo, 1)));
+  });
+
+  return Promise.all(
+    periods.map(async (period) => {
+      const { incomes, movements } = await loadSynthesisData(prisma, userId, period);
+      const synthesis = buildSynthesis({ incomes, movements, previous: [], fallbackCurrency: currency, period });
+      const inCurrency = !synthesis.mixedCurrencies && synthesis.currency === currency;
+      return {
+        month: period.start.toISOString().slice(0, 7),
+        revenus: inCurrency ? synthesis.revenus.resultat : null,
+        depenses: inCurrency ? synthesis.depenses.resultat : null,
+      };
+    }),
+  );
+}

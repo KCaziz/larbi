@@ -4,6 +4,7 @@ import {
   getIncomeHistory,
   getIncomes,
   getMoneyReferences,
+  getMoneySynthesisHistory,
   getReceipt,
   getSynthesis,
   getTransactionHistory,
@@ -30,6 +31,7 @@ import {
   createTransactionSchema,
   deleteSchema,
   historyQuerySchema,
+  moneyHistoryQuerySchema,
   synthesisQuerySchema,
   updateIncomeSchema,
   updateTransactionSchema,
@@ -45,6 +47,9 @@ router.param('id', uuidParam);
 
 router.get('/argent/references', getMoneyReferences);
 router.get('/argent/synthese', validateQuery(synthesisQuerySchema), asyncRoute(getSynthesis));
+// Revenus vs dépenses, plusieurs mois (P6-23). Pas de paramètre `from`/`to` :
+// c'est toujours une fenêtre glissante se terminant au mois courant.
+router.get('/argent/synthese/historique', validateQuery(moneyHistoryQuerySchema), asyncRoute(getMoneySynthesisHistory));
 
 // Recurring resources.
 router.get('/revenus', asyncRoute(getIncomes));

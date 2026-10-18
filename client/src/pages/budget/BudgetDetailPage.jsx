@@ -13,6 +13,8 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
+import BudgetMeter from '../../components/fincludia/BudgetMeter.jsx';
+import BudgetDistribution from '../../components/fincludia/BudgetDistribution.jsx';
 import { toMinorUnits } from '../../lib/money.js';
 import '../../components/fincludia/Fincludia.css';
 import './Budget.css';
@@ -125,6 +127,8 @@ export default function BudgetDetailPage() {
             </div>
           </div>
 
+          {vue.enveloppes.length > 0 && <BudgetDistribution envelopes={vue.enveloppes} />}
+
           {showProposal && <Proposal budgetId={id} currency={currency} usedCategoryIds={usedCategoryIds} categories={flatCategories} run={run} />}
 
           {addingEnvelope && (
@@ -187,6 +191,7 @@ function EnvelopeRow({ budgetId, line, currency, run }) {
         })}
         {line.cap !== null && <span className="budget-row-tag">{t('budget.cap', { amount: formatAmount(i18n.language, line.cap, currency) })}</span>}
       </p>
+      <BudgetMeter prevu={line.prevu} reel={line.reel} currency={currency} alertLevel={line.alerte.niveau} />
       <FigureCard label={t('budget.gap')} answer={line.ecart} />
       {line.note && <p className="budget-envelope-note">{line.note}</p>}
     </li>

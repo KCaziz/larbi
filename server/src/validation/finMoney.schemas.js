@@ -133,3 +133,8 @@ export const synthesisQuerySchema = z
   .strict()
   .refine((query) => Boolean(query.from) === Boolean(query.to), { message: 'A period needs both ends' })
   .refine((query) => !query.from || query.to >= query.from, { message: 'to is before from', path: ['to'] });
+
+// Revenus vs dépenses sur plusieurs mois (P6-23). Bornes mêmes que le contrôleur
+// (2 à 12) : ici pour que la requête soit refusée avant d'atteindre le service,
+// pas seulement écrêtée en silence.
+export const moneyHistoryQuerySchema = z.object({ months: z.coerce.number().int().min(2).max(12).optional() }).strict();
