@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Info } from 'lucide-react';
 import { api, ApiError } from '../../lib/api.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { formatAmount, formatNumber, formatRatio } from '../../lib/format.js';
@@ -75,8 +76,6 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
   const [sent, setSent] = useState(null);
   const [title, setTitle] = useState('');
   const [saved, setSaved] = useState(null);
-
-  const formulas = useMemo(() => new Map((simulator?.formulas ?? []).map((f) => [f.id, f])), [simulator]);
 
   // A repeated field always shows at least one row: an empty list would leave
   // nothing to type into.
@@ -316,7 +315,6 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
 
           <ul className="simulator-result-list">
             {Object.entries(answer.resultats).map(([name, result]) => {
-              const formula = formulas.get(result.formule_id);
               return (
                 <li className="simulator-result" key={name}>
                   <div className="simulator-result-head">
@@ -361,35 +359,16 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
                     </ul>
                   )}
 
-                  {/* "Pourquoi ?" — the client requires every figure to expose
-                      its formula, its variables and its date of calculation. */}
+                  {/* A small, discreet trigger rather than the formula/
+                      variables/hypotheses panel this used to open onto — see
+                      `FigureCard.jsx` for the same change and why. */}
                   <details className="simulator-why">
-                    <summary>{t('simulators.why')}</summary>
-                    <dl>
-                      <dt>{t('simulators.whyFormula')}</dt>
-                      <dd>
-                        {formula.label} — <code>{formula.rule}</code>
-                      </dd>
-                      <dt>{t('simulators.whyReference')}</dt>
-                      <dd>
-                        {result.formule_id} · {t('simulators.whyVersion', { version: result.formule_version })}
-                      </dd>
-                      {/* The client's workbook gives an algorithm a name and a
-                          rule, but no condition column: nothing is invented to
-                          fill the gap. */}
-                      {formula.condition !== null && (
-                        <>
-                          <dt>{t('simulators.whyCondition')}</dt>
-                          <dd>{formula.condition}</dd>
-                        </>
-                      )}
-                      <dt>{t('simulators.whyInputs')}</dt>
-                      <dd>
-                        {Object.entries(result.entrees_snapshot)
-                          .map(([inputName, value]) => `${inputName} = ${typeof value === 'object' && value !== null ? JSON.stringify(value) : value}`)
-                          .join(' · ') || '—'}
-                      </dd>
-                    </dl>
+                    <summary aria-label={t('simulators.why')} title={t('simulators.why')}>
+                      <Info size={13} aria-hidden="true" />
+                    </summary>
+                    <p className="simulator-why-text">
+                      {t(`fincludia.whyByFormula.${result.formule_id}`, { defaultValue: t('fincludia.whyGeneric') })}
+                    </p>
                     {result.avertissements && (
                       <ul className="simulator-warnings">
                         {result.avertissements.map((warning) => (

@@ -123,10 +123,10 @@ describe('FINCLUDIA money, end to end', { skip: findChrome() ? false : 'no Chrom
     const net = await figureOf(on.result.fluxNet);
     assert.match(net.replace(/ | /g, ' '), /35\s?000/);
 
-    // "Pourquoi ?" shows the formula, in the client's own wording.
+    // "Pourquoi ?" opens a short, discreet explanation — the formula itself
+    // is no longer shown on screen (2026-10-19, see FigureCard and TASKS.md).
     assert.ok(await b.ev("(() => { const d = [...document.querySelectorAll('.fin-why summary')]; if (!d.length) return false; d[0].click(); return true; })()"));
-    assert.ok(await b.waitText('Total revenus'), "the client's own label");
-    assert.ok(await b.waitText('F002'));
+    assert.ok(await b.waitText(fr.fincludia.whyByFormula.F002), 'the plain-language sentence for F002');
 
     // And it really wrote a resource, not just a number on screen.
     const incomes = await t.prisma.finIncome.findMany({ where: { userId: user.id } });

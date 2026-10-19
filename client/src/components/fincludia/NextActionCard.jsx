@@ -46,7 +46,7 @@ export default function NextActionCard({ action, titleKey = 'fincludia.nextActio
         <ArrowRight size={16} aria-hidden="true" className="icon-dir" />
       </Link>
 
-      <details className="fin-why">
+      <details className="fin-next-action-why">
         <summary>{t('fincludia.why')}</summary>
         <dl>
           <dt>{t('fincludia.nextAction.whyPriority')}</dt>

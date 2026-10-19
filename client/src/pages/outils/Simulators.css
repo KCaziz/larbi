@@ -147,42 +147,41 @@
   font-size: 0.9rem;
 }
 
+/* A small, discreet trigger (an icon, not the formula/variables panel it
+   used to open onto) — same treatment as `fin-why` in Fincludia.css. */
 .simulator-why {
-  margin-block-start: 10px;
-  font-size: 0.88rem;
+  margin-block-start: 6px;
 }
 
 .simulator-why summary {
-  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 20px;
+  block-size: 20px;
+  border-radius: 50%;
   cursor: pointer;
-}
-
-.simulator-why dl {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 12px;
-  margin: 10px 0 0;
-}
-
-.simulator-why dt {
-  color: var(--text-h);
-  font-weight: 500;
-}
-
-.simulator-why dd {
-  margin: 0;
   color: var(--text);
+  opacity: 0.6;
+  list-style: none;
 }
 
-.simulator-why code {
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: var(--bg-alt);
-  font-size: 0.85em;
-  /* Formulas read left to right even in an Arabic page. */
-  direction: ltr;
-  unicode-bidi: isolate;
-  display: inline-block;
+.simulator-why summary::-webkit-details-marker {
+  display: none;
+}
+
+.simulator-why summary:hover,
+.simulator-why[open] summary {
+  opacity: 1;
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.simulator-why-text {
+  margin: 6px 0 0;
+  max-inline-size: 32ch;
+  color: var(--text);
+  font-size: 0.82rem;
 }
 
 .simulator-warnings {
@@ -296,16 +295,6 @@
 .comparison-aside dd {
   margin: 0 0 8px;
   color: var(--text);
-}
-
-@media (max-width: 600px) {
-  .simulator-why dl {
-    grid-template-columns: 1fr;
-  }
-
-  .simulator-why dt {
-    margin-block-start: 6px;
-  }
 }
 
 /* Where the page scrolls to when a simulator is opened from the workshop's

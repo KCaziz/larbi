@@ -10,8 +10,9 @@ import { SERVER_DIR } from '../helpers/env.js';
 // covered on the engine (unit/finance.test.js) and on the API
 // (functional/simulations.test.js); what matters here is what a person actually
 // gets: a form drawn from what the server declares, figures in dinars and
-// percentages, a "Pourquoi ?" that shows the formula, and "non calculé" instead
-// of a zero when a value cannot be worked out.
+// percentages, a discreet "Pourquoi ?" that explains the figure in one plain
+// sentence (2026-10-19, see FigureCard/SimulatorRunner), and "non calculé"
+// instead of a zero when a value cannot be worked out.
 
 const fr = JSON.parse(readFileSync(path.resolve(SERVER_DIR, '../client/src/i18n/locales/fr.json'), 'utf8'));
 const s = fr.simulators;
@@ -80,8 +81,13 @@ describe('simulators, end to end', { skip: findChrome() ? false : 'no Chrome/Chr
     assert.equal(await valueOf(s.results.tauxEpargne), '10 %');
   });
 
-  test('"Pourquoi ?" shows the formula, its reference and the values used', async () => {
+  test('"Pourquoi ?" opens a short, discreet explanation — never the formula itself', async () => {
     // Self-contained: a test must not depend on the state another one left.
+    // Rewritten 2026-10-19 along with the component: the panel used to show
+    // the formula, its reference and the raw inputs (the client's own
+    // requirement, P1-12) — a deliberate departure now shows one plain-
+    // language sentence instead, looked up by `formule_id` (see
+    // `fincludia.whyByFormula` and TASKS.md's 2026-10-19 note on FigureCard).
     await b.goto(`${site.url}/outils/simulateurs/autonomie-etudiant`);
     assert.ok(await b.waitText(s.list['autonomie-etudiant'].title));
     await fill('ownIncome', 30000);
@@ -96,8 +102,9 @@ describe('simulators, end to end', { skip: findChrome() ? false : 'no Chrome/Chr
       return open ? open.innerText : null;
     })()`);
     assert.ok(why, 'a "Pourquoi ?" panel is open');
-    assert.ok(why.includes(s.whyFormula) && why.includes(s.whyCondition) && why.includes(s.whyInputs));
-    assert.match(why, /F0\d\d/, "the client's formula reference is shown");
+    // F047 — studentAutonomy, the formula this simulator actually uses.
+    assert.ok(why.includes(fr.fincludia.whyByFormula.F047), 'shows the plain-language sentence for its own formula');
+    assert.doesNotMatch(why, /F0\d\d/, 'the formula reference itself is no longer shown');
   });
 
   test('what cannot be computed says "non calculé", never 0', async () => {
