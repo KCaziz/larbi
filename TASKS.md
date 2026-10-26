@@ -69,6 +69,7 @@ Plateforme web composée de quatre grands domaines :
    - modules : Mon argent (revenus, transactions, budgets, calendrier), Mes objectifs, Ma sécurité (réserve, dettes), Mon patrimoine, Investir & simuler (portefeuille **fictif**), À plusieurs (espaces partagés), Explorer / comparer, Apprendre, atelier de simulation, décodeur de fiche de paie, assistant **déterministe** (aucune IA générative)
    - principes imposés par le client : ne demander une donnée que lorsqu'elle sert (en expliquant pourquoi) ; tout score ou calcul affiche ses variables, hypothèses, date et version de formule ; **le réel et le fictif ne partagent jamais un total** ; une valeur non calculable s'affiche « non calculé », jamais 0 ; jamais de « score de crédit », de promesse d'accord ou de « meilleure offre » opaque ; fonctions réservées aux 18 ans et plus interdites aux mineurs ; 3 actions prioritaires au maximum à l'accueil
    - ce que l'existant couvre déjà : comptes et connexion (C01, partiel), Apprendre (C21 : formations, quiz, certificats, blog), comparateur banque (base d'ET06 / C20), types de compte (base des 8 publics), assistant à questions prédéfinies (base de C26, `P3-07`)
+   - **restructuration demandée par le client le 2026-10-26** (Phase 8) : le produit s'organise en **trois solutions distinctes**, chacune avec sa page d'entrée et son tableau de bord — *Formation*, *Gestion budgétaire* (personnelle, mêmes compartiments pour tous), *Gestion collective* (dépenses et tâches à plusieurs, nouveau cahier des charges `FINCLUDIA_Partage_Gestion_Collective_Depenses_Taches.xlsx`, qui fait foi pour cette partie). Les personas sont conservés mais repensés : ils adaptent l'expérience, ils ne retirent plus de compartiments (`P8-01`, `P8-07`)
 
 ## Gestion des comptes
 
@@ -183,6 +184,8 @@ Security Layer
 | Phase 4 | Semaine 7 | Outils : crédit + générateur de facture |
 | Phase 5 | Semaine 8 | Sécurité, intégration, tests, disponibilité et livraison |
 | Phase 6 | Hors des 8 semaines (ajout du 2026-10-09) | FINCLUDIA : gestion financière personnelle (voir « Impact sur le délai (FINCLUDIA) » en fin de Phase 6) |
+| Phase 7 | Non estimable (alerte de périmètre) | Espace entreprise / ERP, diaspora (cahiers des charges manquants) |
+| Phase 8 | Hors des 8 semaines (ajout du 2026-10-26) | Trois solutions distinctes (formation, gestion budgétaire, gestion collective), personas repensés, tâches collectives (voir « Impact sur le délai (Phase 8) ») |
 
 **Total : 8 semaines.**
 
@@ -1092,6 +1095,8 @@ Vérifié le 2026-10-11 (audit de ce qui était livré mais non documenté) : `t
 Défaut trouvé et corrigé lors de cet audit : **l'enregistrement du profil fonctionnait mais ne disait rien**. Le message de confirmation était tenu par le formulaire, alors que sauvegarder recharge le profil — et le premier enregistrement change en plus la clé de ce formulaire (`finOnboardedAt` cesse d'être nul), donc le message était détruit avant d'avoir été lu. La confirmation appartient désormais à la page, et un rechargement ne remplace plus l'écran par l'état de chargement.
 
 Limites : `requireAdult` existe, est testé, et **ne garde encore aucune route** — les fonctions réservées aux 18 ans et plus (crédit selon les règles des banques, offres, foyer contractuel) ne sont pas encore construites. Il sera appliqué en même temps qu'elles. L'âge minimum d'inscription et le consentement parental restent à trancher (`P6-01` point 7).
+
+**Remis en question le 2026-10-26 (retour du client, Phase 8).** Les 8 publics mélangent deux axes — étapes de vie (LYC, ETU, JAC, SAL, EPG) et façons de vivre à plusieurs (COL, COU, FAM) — et le profil principal unique oblige un salarié en colocation à choisir. Les rôles complémentaires sont stockés mais ne changent ni le menu ni le tableau de bord. Les personas sont **conservés et repensés** (consigne de l'utilisateur) : proposition et décision en `P8-01` point 2, mise en œuvre en `P8-07`. Ce qui est livré ici (consentements versionnés, tranche d'âge, changement de parcours proposé et jamais forcé) reste valable tel quel.
 
 ### P3-19 — FINCLUDIA : assistant déterministe (intentions, parcours à étapes, liens profonds)
 - Statut : `✅ done`
@@ -2285,6 +2290,8 @@ Actifs (comptes, CCP, espèces, or, véhicule, immobilier, placements) et passif
 - **Pas de test unitaire/fonctionnel dédié, de scénario de cohérence globale ni de parcours navigateur.**
 - **Enveloppes communes** : modélisées comme le même objet qu'un objectif commun (une cible et des contributions), par simplification délibérée plutôt qu'un budget par catégorie façon `P6-05` ; suffisant pour « mettre de côté pour quelque chose à plusieurs », pas pour un budget détaillé par poste.
 
+**Repris le 2026-10-26 (Phase 8).** Le nouveau cahier des charges collectif demande de vrais budgets communs par catégorie (onglet 06, COL-F06/F07) : la simplification ci-dessus est remplacée par `P8-11`. Et toutes les sections de cette tâche, aujourd'hui empilées dans le détail dépliable de `/espaces`, reçoivent chacune leur propre page sous `/collectif` (`P8-08`) — c'est l'une des causes directes du « je ne me suis pas retrouvé » du client.
+
 ### P6-16 — FINCLUDIA : préparation au financement
 - Statut : `✅ done`
 - Priorité : `🟢 low`
@@ -2329,6 +2336,8 @@ Une fois les moteurs stables : vocabulaire, navigation, écrans activés et tabl
 - **Les écrans communs sont réutilisés par configuration, jamais recopiés** — l'exigence explicite de la tâche. Les « écrans spécifiques restants » qu'elle cite existaient déjà, dispersés : **LY09** « Préparer mes études » est le simulateur de `P4-10`, **ET03** « Autonomie » est la carte F047 du tableau de bord de `P6-06`, **JA01** « Transition premier revenu » est son tableau « Premier revenu », **SA03** « Plan du mois » est la copie de plan de `P6-07`, **EP01** « Diagnostic épargne » sont les questions EP01 de l'onboarding `P6-03`. Cette tâche les **rattache**, elle n'en reconstruit aucun.
 - **`GET /fin/parcours`** publie la carte de l'appelant : tableau principal, navigation, et pour chaque écran s'il est servi, par quelle route, s'il est réservé aux adultes et s'il est autorisé. **`GET /fin/parcours/carte`** publie la carte entière — c'est la **matrice de provenance** que `P6-21` demande (onglet `18_Provenance`) : **71 écrans servis sur 78**, et les 7 autres disent ce qu'ils attendent plutôt que de manquer en silence (`C15` et `ET07` → `P4-14`, `JA09` → `P4-15`, `EP06` → instruments et prix à fournir, `LY03` → tâche abandonnée par le client, `LY11` → contenu à rédiger, `C22` → barre d'en-tête et non une route).
 - **La navigation lit cette carte** au lieu d'une liste en dur de 25 entrées montrée à tout le monde. Si la carte ne peut pas être lue, **toutes** les entrées restent affichées : masquer sur échec réseau ferait passer un incident pour un produit plus petit, et le serveur refuse de toute façon ce qui doit l'être.
+
+**Erreur d'interprétation reconnue le 2026-10-26 (Phase 8).** La carte des parcours a été appliquée comme une **liste d'accès** : selon le public, le menu montre 7 à 15 des 21 rubriques (« À plusieurs » invisible pour 5 publics sur 8, un colocataire sans « Aujourd'hui », réserve, dettes ni « Apprendre »). C'était le contraire de ce que voulait dire « masquer un écran est un confort » : on ne masquait pas un confort, on amputait le produit. Le client l'a vécu comme « beaucoup de compartiments sont absents ». Le filtrage par public est supprimé par `P8-05` (seul le filtre légal d'âge reste) et la carte devient une adaptation (`P8-07`). De même, « 71 écrans servis sur 78 » est exact en routes mais trompeur en pages : 21 de ces écrans partagent `/espaces` (voir `P8-18`).
 
 **La garde 18+ est enfin appliquée.** `requireAdult` existait depuis `P3-18`, était testé, et **ne gardait aucune route** — la limite était déclarée sous `P3-18` (« il sera appliqué en même temps que les fonctions réservées aux adultes »). Ces fonctions existent depuis `P6-10`, `P6-11` et `P6-16`, donc c'est ici. Elle garde désormais `/debts`, `/patrimoine`, `/actifs` et `/financement`, **côté serveur** : un mineur ne pouvait pas seulement les voir dans le menu, il pouvait **créer une dette ou un patrimoine réel par l'API**.
 
@@ -2529,6 +2538,8 @@ Les données sont posées par l'API (rapide et sans ambiguïté) ; ce que le nav
 
 **Réalisé le 2026-10-18 — le dernier critère réel.** Les huit scénarios par public de l'onglet QA (lycéen, étudiant, jeune actif, salarié, colocataire, couple, famille, épargnant débutant) ont maintenant leur parcours navigateur dédié : `tests/e2e/fin-qa-publics-journey.test.js`, **8 parcours, 8 réussis** du premier coup. Délibérément **pas** une onzième répétition des chaînes J01-J10 : ce fichier teste l'autre axe, celui du PUBLIC plutôt que de la chaîne fonctionnelle — pour chacun des 8, un compte est créé avec ce public (et, pour le seul public qui peut être mineur, le lycéen, une tranche d'âge qui l'est réellement), puis l'écran « Aujourd'hui » est ouvert et son sous-titre est vérifié contre le texte **propre à ce public** (`finDashboard.js`, `P6-06`) — jamais le texte par défaut, qui révélerait un embranchement tombé en silence sur le cas générique.
 
+**Limite reconnue le 2026-10-26 (Phase 8) :** ces parcours ouvrent chaque écran **par son adresse** ; ils prouvent qu'il s'affiche, pas qu'on peut le trouver depuis le menu. C'est exactement le trou par lequel le défaut « compartiments absents » est passé. Un critère « trouvable depuis la navigation de sa solution » est ajouté (règle V5, `P8-18`).
+
 **Ce que ce fichier ne vérifie délibérément pas** : qu'un écran hors de la carte des parcours d'un public lui est **inaccessible**. `finNavigation.js` le dit lui-même dans son propre commentaire — masquer une route du menu est un confort, jamais la protection ; la garde réelle est `requireAdult` côté API, déjà couverte par les suites de sécurité. Un test qui affirmerait un 404 sur une route que le code ne protège pas affirmerait quelque chose que le produit n'a jamais promis.
 
 ### Impact sur le délai (FINCLUDIA, ajout du 2026-10-09)
@@ -2671,6 +2682,273 @@ Ce qui bloque, concrètement :
 
 ---
 
+# PHASE 8 — FINCLUDIA : TROIS SOLUTIONS DISTINCTES ET CLARTÉ DES PARCOURS
+## Durée : hors des 8 semaines (estimation dans « Impact sur le délai (Phase 8) » ci-dessous)
+## Objectif
+
+Répondre au retour du client du 2026-10-26 : « je ne me suis pas retrouvé dans la partie budget […] beaucoup de compartiments sont absents […] il n'y avait pas de page, juste une seule page qui donnait à l'ensemble des solutions […] il faudrait que chaque solution donne à sa propre page et ses tableaux de bord ». Source reçue le même jour, à la racine du dépôt : `FINCLUDIA_Partage_Gestion_Collective_Depenses_Taches.xlsx` (20 onglets : la gestion collective des dépenses et des tâches comme **solution distincte**). La partie « gestion budgétaire » révisée est annoncée « sous peu » (`P8-06`). Consigne de l'utilisateur du 2026-10-26 : **ne pas supprimer les personas mais les repenser**, et apporter de la clarté à l'ensemble.
+
+### Diagnostic : où nous avons fauté (vérifié dans le code le 2026-10-26)
+
+Le client n'a pas mal regardé : il décrit exactement ce que le produit lui montre. Les chiffres ci-dessous sont mesurés dans le code, pas estimés.
+
+1. **Les personas servent de barrière, pas d'adaptation.** `menuFor()` (`server/src/constants/finNavigation.js`) applique la carte des parcours du client (`19_Cartes_Parcours`) comme une **liste d'accès** : selon le public, le menu montre **7 à 15 des 21 rubriques**. « À plusieurs » (`/espaces`) est invisible pour le lycéen, l'étudiant, le jeune actif, le salarié et l'épargnant ; un colocataire n'a ni « Aujourd'hui », ni réserve, ni dettes, ni « Apprendre » (7 rubriques en tout) ; un lycéen n'a pas de page budget. Quiconque teste avec un seul profil ne voit qu'une partie du produit — d'où « beaucoup de compartiments sont absents », et d'où la demande d'une « gestion budgétaire sans public cible » : le client veut le budget complet pour tout le monde. **Notre faute : avoir lu une carte de parcours *recommandés* comme une matrice de *droits*.**
+2. **Deux axes différents sont mélangés dans les 8 publics.** LYC, ETU, JAC, SAL, EPG sont des **étapes de vie** ; COL, COU, FAM sont des **façons de vivre à plusieurs**. Avec un seul profil principal (`P3-18`), un salarié en colocation doit choisir l'un ou l'autre ; les rôles complémentaires (`finSecondaryPublics`) sont enregistrés mais **ignorés** par le menu et le tableau de bord (seules les recommandations d'« Apprendre » les lisent). Le nouveau fichier du client tranche lui-même ce point : colocation, couple et famille y sont des **types d'espace** (SP-01 à SP-03), plus un quatrième, « groupe / amis » (SP-04).
+3. **Des écrans comptés « servis » alors qu'ils sont fusionnés.** Les 70 écrans servis du client (`P6-17`, « 71 sur 78 ») tiennent sur **23 routes**. `/espaces` porte à lui seul **21 écrans** (CO01-CO06, CP01-CP04, FA01-FA06, P01-P05) dans une page de 1 254 lignes où chaque espace s'ouvre en accordéon : pas d'adresse par espace, pas de tableau de bord d'espace. `/aujourdhui` porte 8 tableaux de bord différents. Le compteur disait vrai sur les routes, faux sur l'expérience.
+4. **Aucune porte d'entrée par solution.** Après connexion, l'utilisateur arrive sur `/compte/profil`. Une seule barre latérale mélange 10 groupes (budget, collectif, outils, apprentissage, entreprise) et 11 liens de compte. La formation est éclatée sur 7 adresses (`/formations`, `/catalogue`, `/compte/formations`, `/compte/certificats`, `/compte/tableau-de-bord`, `/apprendre`, `/passeport`) et son tableau de bord s'appelle simplement « Tableau de bord », rangé parmi les pages du compte. C'est littéralement « une seule page qui donnait à l'ensemble des solutions ».
+5. **Notre mesure de « terminé » regardait l'API et les tests, pas ce que voit le client.** La section 7 disait le produit personnel « fonctionnellement complet » : vrai côté serveur, faux côté expérience. Les parcours navigateur (J01-J10, 8 publics) ouvrent les pages **par leur adresse directe** : ils prouvent qu'un écran s'affiche, jamais qu'on peut le **trouver** depuis le menu.
+6. **De vrais manques fonctionnels** face au nouveau cahier des charges collectif (le reste existe déjà, `P6-13` à `P6-15`) : gestion des tâches (onglet 08, en entier), calendrier collectif unifié (09), budgets communs **par catégorie** (06, COL-F06/F07 — `P6-15` les avait simplifiés en objectifs, réserve déclarée), type « groupe / amis » et espace temporaire, répartition par poids et par usage (R-04, R-05), justificatif, statut « prévue / annulée », lien sans doublon vers une transaction personnelle (COL-PR-03, COL-F13), seuil de petit solde, activité récente, alertes collectives (nouvelle dépense, budget 80/100 %, facture J-7/J-3/J, tâche), contribution requise (COL-F08), rapports et export.
+
+Ce que le nouveau fichier **confirme sans rien changer** (déjà construit et testé) : rôles Owner / Admin / Member / Viewer, privé par défaut et matrice de permissions, invitations, dépense partagée avec payeur non bénéficiaire, répartition égale / % / montants / revenus avec consentement, soldes nets et règlements minimisés (ALG-C01 = notre ALG-02), règlements déclaratifs sans paiement, objectifs communs et contributions, provisions annuelles (COL-F09 = F045), factures récurrentes sans doublon, données enfant minimales.
+
+### Vision unifiée (règles de la phase)
+
+- **V1 — Trois solutions, chacune avec sa porte, sa page d'entrée, son tableau de bord et sa navigation** : *Formation*, *Gestion budgétaire* (personnelle), *Gestion collective*. Les outils (simulateurs, comparateurs) restent transverses ; l'espace entreprise (`P7-02`) reste une entrée à part pour les comptes concernés. Un hub « Mes solutions » est la page d'arrivée après connexion.
+- **V2 — Un persona est une lentille, jamais une barrière.** Tous les adultes ont les mêmes compartiments. Le persona change le vocabulaire, l'ordre, les valeurs par défaut, les questions d'accueil, les actions proposées et ce qui est mis en avant — il ne retire rien. Seule la loi retire des fonctions (mineurs, `P6-22` : moins de 13 ans, 13-18 ans « Mode Jeune », 19 ans et plus), et toujours côté serveur.
+- **V3 — Vivre à plusieurs relève de la solution collective, pas du persona** (proposition, à valider en `P8-01`) : les personas deviennent les 5 étapes de vie ; « je vis en colocation / en couple / en famille » devient une **situation** déclarée qui propose de créer l'espace correspondant.
+- **V4 — Un écran du client = un endroit adressable** (une route, ou un onglet avec sa propre adresse), jamais une section dépliable au milieu d'une autre page.
+- **V5 — « Terminé » veut dire « trouvable »** : une tâche n'est `✅ done` que si chacun de ses écrans est atteignable **depuis la navigation de sa solution**, en deux clics au plus, pour chaque persona concerné — vérifié par un parcours navigateur qui part du menu (`P8-18`), pas d'une adresse tapée.
+- **V6 — Pas de formule en double** : les identifiants du nouveau fichier (COL-F01 à COL-F13, ALG-C01 à ALG-C04) sont rattachés aux formules existantes quand elles existent (`P8-17`).
+
+### Ce qui sera supprimé ou remplacé (pas seulement ajouté)
+
+- Le **filtrage du menu par persona** (`menuFor`, partie « public ») : supprimé au profit de V2 ; seul le filtre légal d'âge reste (`P8-05`).
+- La **barre latérale unique** : remplacée par une navigation propre à chaque solution et un sélecteur de solution ; les liens du compte quittent la barre latérale pour le menu du profil (`P8-03`).
+- `/compte/tableau-de-bord` (un tableau de bord de formation qui ne dit pas son nom) : remplacé par le tableau de bord de la solution Formation, avec redirection (`P8-04`).
+- La **page accordéon `/espaces`** : éclatée en pages par espace sous `/collectif`, avec redirection des anciennes adresses (`P8-08`).
+- La simplification **« enveloppe commune = objectif commun »** de `P6-15` : remplacée par de vrais budgets communs par catégorie (`P8-11`).
+- Le compteur « 71 écrans servis sur 78 » : remplacé par un décompte qui distingue un écran **servi par sa propre page** d'un écran **regroupé** dans la page d'un autre (`P8-18`).
+
+### P8-01 — Restructuration : décisions à obtenir du client
+- Statut : `⛔ blocked`
+- Priorité : `🔴 high`
+- Dépendances : `P6-21`
+- Durée cible : 0 jour de développement (décisions du client)
+- Origine : retour du client du 2026-10-26 et `FINCLUDIA_Partage_Gestion_Collective_Depenses_Taches.xlsx`
+
+À trancher par le client ; une proposition de notre part accompagne chaque point :
+1. **Noms et adresses des trois solutions** (proposition : « Formation » `/formation`, « Gestion budgétaire » `/gestion`, « Gestion collective » `/collectif`) et ce que montre le hub « Mes solutions ».
+2. **Personas repensés** (V2, V3) : garder les 5 étapes de vie comme personas et faire de colocation / couple / famille une situation qui ouvre un espace collectif — ou une autre répartition si le client la préfère. Que deviennent les comptes existants dont le public principal est COL, COU ou FAM (proposition : ils choisissent leur étape de vie à la prochaine connexion, leurs espaces restent intacts) ?
+3. **Mineurs et collectif** : le fichier dit « tous membres adultes ou selon politique produit » pour la colocation et « données enfant minimales » pour la famille. Un 13-18 ans en « Mode Jeune » peut-il être membre d'un espace (famille, groupe d'amis), et avec quels droits ?
+4. **Catégories collectives** : les 19 catégories de l'onglet 12 recoupent presque toutes les 91 catégories personnelles (`P6-02`). Un seul référentiel commun, ou un catalogue collectif séparé ?
+5. **Espace temporaire (groupe / amis)** : durée, clôture, ce qui reste visible après.
+6. **Le cahier des charges révisé de la gestion budgétaire**, annoncé « sous peu » : bloque `P8-06`.
+7. **« Pourquoi ? »** : depuis le 2026-10-19, les cartes de chiffres n'affichent plus la formule mais une phrase simple (écart assumé, voir `P1-12`). À confirmer dans le même échange, puisque la clarté est l'objet de cette phase.
+
+### P8-02 — Hub « Mes solutions » et page d'arrivée après connexion
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P1-12`
+- Durée cible : 2 jours (estimation)
+- Origine : retour du client du 2026-10-26 (« chaque solution donne à sa propre page »)
+
+- Après connexion et après inscription, arrivée sur un hub qui présente les solutions : une carte par solution (titre, promesse en une phrase, un état **réel** — « 2 formations en cours », « budget du mois : non calculé », « 1 espace, 3 tâches à faire » —, un bouton principal). Plus jamais `/compte/profil` par défaut (`LoginPage.jsx`, `RegisterPage.jsx`, `router/index.jsx`).
+- Les outils transverses et l'espace entreprise (si le compte y a droit) apparaissent sous les trois solutions, plus discrètement.
+- La barre supérieure garde recherche, notifications et assistant ; le profil devient un menu (profil, type de compte, premium, paiements, catégories, confiance, déconnexion).
+- Tests : hub d'un compte neuf (états vides utiles, un seul appel à l'action par carte), redirections après connexion et inscription, fr / en / ar, 375 et 1280 px.
+
+### P8-03 — Navigation propre à chaque solution
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P8-02`
+- Durée cible : 2 jours (estimation)
+- Origine : retour du client du 2026-10-26
+
+- La barre latérale ne montre que les rubriques de la solution ouverte ; un sélecteur de solution, toujours visible, ramène aussi au hub.
+- Les liens du compte (`ACCOUNT_LINKS`, `client/src/config/fincludiaMenu.js`) quittent la barre latérale pour le menu du profil (`P8-02`).
+- Le serveur continue de publier ce qui est autorisé (`GET /fin/parcours`), mais groupé par solution et sans filtrage par persona (`P8-05`).
+- Tests : chaque rubrique de chaque solution est atteignable depuis son menu ; sélecteur utilisable au clavier ; RTL.
+
+### P8-04 — Solution Formation : page d'entrée et tableau de bord dédiés
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-03`
+- Durée cible : 2 jours (estimation)
+- Origine : retour du client du 2026-10-26 (« formation avec sa propre page et tableau de bord »)
+
+- Regrouper sous une même solution ce qui tient aujourd'hui sur 7 adresses : catalogue, mes formations, certificats, « Apprendre » (glossaire, guides), passeports et indice de connaissances (`P2-09`).
+- Tableau de bord : formations en cours et progression, prochaine leçon, certificats, passeport, articles recommandés. Le contenu actuel de `DashboardPage.jsx` en est la base : déplacé et complété, pas réécrit.
+- Redirections des anciennes adresses : aucun lien existant, ni la vérification publique d'un certificat (`/verification`), ne doit casser.
+- Tests : parcours navigateur du hub jusqu'à une leçon et un certificat ; balayage du site mis à jour.
+
+### P8-05 — Solution Gestion budgétaire : entrée, tableau de bord unique et compartiments visibles pour tous
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P8-03`
+- Durée cible : 3 jours (estimation)
+- Origine : retour du client du 2026-10-26 (« gestion budgétaire standard sans public cible », « beaucoup de compartiments sont absents »)
+
+- **Supprimer le filtrage par persona du menu** : tout adulte voit tous les compartiments (Aujourd'hui, Mon argent, Budget, Calendrier, Objectifs, Réserve, Dettes, Patrimoine, Financement, Investir & simuler). Seul le filtre légal d'âge reste — côté serveur (`requireAdult`, `P6-22`), et donc dans le menu.
+- **Un seul tableau de bord**, dont le persona règle l'ordre des blocs, le vocabulaire et les actions proposées (V2), au lieu de 8 tableaux sur une même route.
+- Ce qui relève du collectif (« Notre mois », revue Moi / Nous) part dans la solution collective (`P8-08`).
+- Tests : pour **chaque** persona adulte et pour un compte sans persona, les mêmes compartiments sont présents dans le menu — c'est le test qui aurait révélé le défaut n°1 du diagnostic ; un mineur ne voit toujours pas les fonctions réservées, et l'API les refuse toujours.
+
+### P8-06 — Gestion budgétaire : intégration du cahier des charges révisé (à recevoir)
+- Statut : `⛔ blocked`
+- Priorité : `🔴 high`
+- Dépendances : `P8-01`, `P8-05`
+- Durée cible : non estimable avant réception du fichier
+- Origine : retour du client du 2026-10-26 (« je t'enverrai la partie gestion budgétaire comme solution distincte sous peu […] annuler les publics cible, la rendre plus fluide et intégrer ce qu'il reste du cahier des charges »)
+
+Bloquée sur le fichier annoncé. À sa réception : le confronter onglet par onglet à ce qui existe (`P6-02` à `P6-12`, `P6-16`, `P6-23`, `P6-24`) avec la même méthode que pour le fichier collectif — ce qui est confirmé, ce qui manque vraiment, ce qui existe mais reste introuvable — puis le découper en tâches dans cette phase. « Annuler les publics cible » se lit à la lumière de la consigne de l'utilisateur du 2026-10-26 : les personas sont **repensés** (`P8-07`), pas supprimés.
+
+### P8-07 — Personas repensés : une lentille d'adaptation, plus une barrière
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P8-01`, `P8-05`
+- Durée cible : 3 jours (estimation)
+- Origine : consigne de l'utilisateur du 2026-10-26 (« il ne faut pas retirer les personas mais les repenser »)
+
+Selon la décision `P8-01` point 2 (proposition ci-dessous) :
+- Les personas deviennent les **étapes de vie** (lycéen, étudiant, jeune actif, salarié, épargnant débutant). Chacun règle vocabulaire, ordre, valeurs par défaut, questions d'accueil (`P6-03`) et actions proposées — sans retirer de compartiment.
+- La **situation de vie** (seul, en colocation, en couple, en famille) devient une question à part, qui propose de créer l'espace collectif correspondant. Elle remplace l'usage aujourd'hui inerte de `finSecondaryPublics`.
+- Migration douce des comptes dont le public principal est COL / COU / FAM : rien n'est perdu, leurs espaces restent.
+- Le changement de parcours (`P3-18`, « proposé, jamais forcé ») est conservé.
+- La carte des parcours (`finJourneys.js`) est mise à jour en gardant la trace de la source du client (`19_Cartes_Parcours`) et de l'écart.
+- Tests : fonctionnels (migration ; chaque persona a un tableau de bord complet), navigateur (un salarié en colocation voit son budget **et** sa colocation).
+
+### P8-08 — Solution Gestion collective : page d'entrée, une adresse par espace, tableau de bord d'espace
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P8-03`
+- Durée cible : 4 jours (estimation)
+- Origine : fichier collectif, onglets 03 (CD-01 à CD-09), 02, 11 ; retour du client du 2026-10-26
+
+- Éclater `client/src/pages/espaces/SpacesPage.jsx` (1 254 lignes, un accordéon par espace) en pages : `/collectif` (mes espaces, créer, rejoindre), `/collectif/:id` (tableau de bord de l'espace), puis une page par compartiment — dépenses, soldes et règlements, budgets, tâches, calendrier, objectifs, membres et permissions, accord financier. Redirection de `/espaces`.
+- Tableau de bord d'espace selon l'onglet 03 : solde du groupe (sans aucune donnée privée), dépenses du mois par catégorie, qui a payé, qui doit quoi, budgets communs, prochaines factures, tâches à faire, objectif commun, activité récente. Le vocabulaire suit le type d'espace (colocation, couple, famille, groupe) : un seul écran, configuré.
+- La solution collective devient accessible à **tous** les adultes (aujourd'hui invisible pour 5 personas sur 8, défaut n°1).
+- Carte des parcours : chaque écran CO / CP / FA / P pointe vers sa propre page.
+- Les blocs dont les données n'existent pas encore (budgets par catégorie, tâches, activité) montrent un état vide utile qui annonce la fonction, plutôt que d'être cachés, jusqu'à `P8-11`, `P8-12`, `P8-15`.
+- Tests : parcours navigateur QC-01, QC-02, QC-03, QC-05 depuis le menu ; les suites de sécurité existantes des espaces (`P6-13` à `P6-15`) restent vertes.
+
+### P8-09 — Collectif : espace « groupe / amis » et espace temporaire
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-08`, `P8-01`
+- Durée cible : 1 jour (estimation)
+- Origine : fichier collectif, onglet 02 (SP-04)
+
+- Quatrième type d'espace (`SPACE_KINDS`, `server/src/constants/finSpace.js`, aujourd'hui `flatshare`, `couple`, `household`) : voyage, sortie, cadeau, événement.
+- Espace temporaire : clôture selon `P8-01` point 5 — historique et soldes restent lisibles, plus aucune écriture.
+
+### P8-10 — Collectif : dépenses partagées — champs et règles manquants
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-08`
+- Durée cible : 3 jours (estimation)
+- Origine : fichier collectif, onglets 04, 05, 07, 12 ; QC-08
+
+- Répartition **par poids** (R-04, COL-F03) et **par usage** (R-05, « explicable, pas de calcul caché ») en plus des quatre modes existants (`SPLIT_MODES`).
+- Champs : sous-catégorie, **justificatif** (image / PDF, dans le stockage privé de `P5-03`, jamais par une adresse publique), statut « réalisée / prévue / annulée », rattachement à un budget commun.
+- Catégories collectives selon `P8-01` point 4.
+- **Annuler une dépense déjà répartie** recalcule les soldes et en garde la trace (QC-08).
+- **Petit solde** : seuil configurable sous lequel une dette n'est plus proposée en remboursement, sans être effacée des soldes (onglet 07).
+- Tests : unitaires (poids, usage, arrondis), sécurité (justificatif invisible hors de l'espace), QC-08 en navigateur.
+
+### P8-11 — Collectif : budgets communs par catégorie
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-10`
+- Durée cible : 3 jours (estimation)
+- Origine : fichier collectif, onglet 06, COL-F06, COL-F07, ALG-C02, QC-06 ; réserve déclarée dans `P6-15`
+
+- Enveloppes communes par catégorie et par période, distinctes des objectifs communs (qui restent `FinSpaceGoal`) : reste (COL-F06, peut être négatif), taux de consommation (COL-F07), rattachement d'une dépense au budget le plus spécifique (ALG-C02, aucune écriture financière créée).
+- Alertes à 80 % et 100 %, mêmes seuils que les budgets personnels (`ENVELOPE_WARNING` / `ENVELOPE_EXCEEDED`).
+- **Aucun effet sur un budget personnel** (QC-06), vérifié par test.
+
+### P8-12 — Collectif : gestion des tâches
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P8-08`
+- Durée cible : 4 jours (estimation)
+- Origine : fichier collectif, onglet 08, COL-F11, COL-F12, ALG-C04, QC-07 — le module que le client nomme dans le titre même du fichier, et qui n'existe pas du tout aujourd'hui
+
+- Tâche : titre, description, catégorie (ménage, courses, factures, enfants, administratif, entretien, projet, animal, autre), responsable, participants, échéance, priorité, récurrence, checklist, statut, rappel.
+- Lien **informatif** vers une dépense ou une facture : une tâche ne crée **jamais** de mouvement financier (QC-07).
+- Taux de tâches terminées (COL-F11) et répartition de la charge (COL-F12), formulés comme un constat d'organisation, jamais comme un jugement (règle des messages neutres de la Phase 6).
+- Tests : unitaires (récurrence, ALG-C04), sécurité (tâches invisibles hors de l'espace, droits par rôle), QC-07 en navigateur.
+
+### P8-13 — Collectif : calendrier unifié
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-11`, `P8-12`
+- Durée cible : 2 jours (estimation)
+- Origine : fichier collectif, onglet 09
+
+Une seule vue, filtrable : factures, tâches, règlements, objectifs. Une facture prévue reste prévue jusqu'à confirmation, puis devient une dépense réelle sans doublon (mécanisme de `P6-15` réutilisé).
+
+### P8-14 — Collectif : lien sans doublon vers le budget personnel
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-10`, `P6-24`
+- Durée cible : 2 jours (estimation)
+- Origine : fichier collectif, COL-PR-03, COL-F13, QC-04, onglet 11
+
+- Une dépense collective payée avec l'argent personnel **référence** la transaction personnelle au lieu d'en créer une seconde (contrainte d'unicité) ; le compte source n'est visible que de son propriétaire.
+- Dépend de `P6-24` (comptes financiers coordonnés, en attente du choix du client) pour la partie « compte » ; la seule référence à une transaction pourrait être livrée avant, si le client le souhaite.
+
+### P8-15 — Collectif : alertes, activité récente et contribution requise
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-11`, `P8-12`, `P8-13`
+- Durée cible : 3 jours (estimation)
+- Origine : fichier collectif, onglets 14, 03 (CD-09), COL-F08
+
+- Alertes, dans le centre de `P6-18` : invitation, nouvelle dépense, budget 80 / 100 %, règlement à faire ou confirmé, facture J-7 / J-3 / J, tâche proche ou en retard, contribution attendue, changement de permission.
+- Activité récente de l'espace (dépenses, règlements, tâches, changements de règles), selon les droits de chacun.
+- Contribution requise (COL-F08), présentée comme une proposition, sans toucher aux comptes personnels.
+
+### P8-16 — Collectif : rapports et export
+- Statut : `❌ todo`
+- Priorité : `🟢 low`
+- Dépendances : `P8-11`
+- Durée cible : 1 jour (estimation)
+- Origine : fichier collectif, onglet 15 (Rapports, priorité P1)
+
+Synthèse d'un espace sur une période et export, avec le même principe de consentement explicite que l'export de `P6-16`.
+
+### P8-17 — Formules collectives : correspondance avec le moteur existant
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P4-09`
+- Durée cible : 1 jour (estimation)
+- Origine : fichier collectif, onglets 13 et 13B
+
+- Table de correspondance publiée : COL-F01 ↔ F041, COL-F04 ↔ F042, COL-F05 ↔ F043, COL-F09 ↔ F045, COL-F10 ↔ F025 / F026, ALG-C01 ↔ ALG-02, ALG-C03 ↔ arrondi au plus grand reste déjà publié (`P6-14`). Chaque équivalence est vérifiée contre les exemples QC-01 à QC-03 du client avant d'être déclarée.
+- N'écrire que les formules réellement nouvelles (COL-F02 si elle diffère, COL-F03, COL-F06, COL-F07, COL-F08, COL-F11, COL-F12, COL-F13, ALG-C02, ALG-C04), versionnées dans le moteur, avec leur phrase « Pourquoi ? » fr / en / ar.
+
+### P8-18 — « Terminé » veut dire « trouvable » : contrôles et parcours depuis le menu
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P8-05`, `P8-08`
+- Durée cible : 2 jours (estimation)
+- Origine : diagnostic du 2026-10-26, défauts n°3 et n°5
+
+- Contrôle automatique : pour chaque persona et chaque solution, chaque compartiment est atteignable depuis le menu de sa solution.
+- La matrice de provenance (`GET /fin/parcours/carte`) distingue un écran servi par sa propre page d'un écran regroupé dans une autre.
+- Les 8 scénarios QC-01 à QC-08 du fichier collectif deviennent un parcours navigateur qui **part du hub et du menu**.
+- La règle V5 rejoint les critères généraux de qualité (section 6).
+
+### P8-19 — Restructuration : validation de fin de phase
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P8-02`, `P8-03`, `P8-04`, `P8-05`, `P8-06`, `P8-07`, `P8-08`, `P8-09`, `P8-10`, `P8-11`, `P8-12`, `P8-13`, `P8-14`, `P8-15`, `P8-16`, `P8-17`, `P8-18`
+- Durée cible : 1 jour (estimation)
+
+Critères : chaque solution a sa page d'entrée et son tableau de bord ; aucun compartiment n'est masqué par un persona ; chaque écran du client a sa propre adresse ; QC-01 à QC-08 passent en navigateur depuis le menu ; démonstration au client sur trois comptes (salarié seul, étudiant en colocation, couple avec enfants).
+
+### Impact sur le délai (Phase 8, ajout du 2026-10-26)
+
+Estimation grossière, tests compris, hors temps de décision du client et hors `P8-06` (non estimable avant le fichier) : `P8-02` à `P8-05` 9 j, `P8-07` 3 j, `P8-08` 4 j, `P8-09` à `P8-17` 20 j, `P8-18` et `P8-19` 3 j — **environ 39 jours ouvrés, de l'ordre de 8 semaines** pour une personne.
+
+Ordre recommandé, parce que la plupart des compartiments **existent déjà** et que le premier besoin du client est de les trouver :
+- **Lot A — clarté** (`P8-02`, `P8-03`, `P8-05`, `P8-08`, `P8-18`, environ 13 j) : hub, navigation par solution, plus aucun compartiment masqué, collectif éclaté en pages. Répond à lui seul à « je ne me suis pas retrouvé » et « une seule page ».
+- **Lot B — personas et formation** (`P8-04`, `P8-07`), dès que `P8-01` est tranché.
+- **Lot C — fonctions collectives manquantes** (`P8-09` à `P8-17`), tâches et budgets communs en premier.
+- `P8-06` dès réception du fichier budgétaire révisé.
+
+---
+
 # 4. Fonctionnalités volontairement hors MVP 8 semaines
 
 Ces éléments ne doivent pas être développés avant les fonctionnalités prioritaires :
@@ -2737,13 +3015,17 @@ Une tâche ne peut passer à `✅ done` que si :
 
 Règle ajoutée le 2026-10-09 (FINCLUDIA) : tout écran FINCLUDIA doit traiter les cinq états exigés par le client (vide, chargement, partiel / donnée ancienne, succès, erreur près du champ — onglet `14_Etats_Alertes`), afficher la date et la version de chaque valeur calculée, et rester utilisable au clavier sans dépendre de la couleur seule. Un écran livré sans son état vide ni son état « non calculé » n'est pas terminé.
 
+Règle ajoutée le 2026-10-26 (Phase 8, retour du client) : un écran n'est terminé que s'il est **trouvable** — atteignable depuis la navigation de sa solution, en deux clics au plus, pour chaque persona concerné, et vérifié par un parcours qui part du menu, pas d'une adresse tapée. Un persona ne masque jamais un compartiment ; seules les restrictions légales (mineurs) en retirent, côté serveur. Un écran du client a sa propre adresse, jamais une section dépliable dans la page d'un autre.
+
 Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau composant texte, à partir de maintenant, doit utiliser `useTranslation()`/`t()` (i18next) dès sa création — jamais de texte en dur. Les traductions français/anglais/arabe correspondantes doivent être ajoutées dans le même changement (le tamazight reste volontairement en repli vers le français). Les couleurs doivent utiliser les tokens CSS existants (`index.css`), pas de couleurs codées en dur, pour rester compatibles avec le mode clair/sombre. Les icônes sont des composants `lucide-react` (jamais d'emoji ni de caractère décoratif) ; les flèches directionnelles utilisent la classe `icon-dir` pour s'inverser en RTL.
 
 # 7. État actuel
 
 **Réécrit en entier le 2026-10-19** — cette section décrivait encore la Phase 3 (blog), avec des tâches listées « bloquées » qui étaient en réalité terminées depuis des semaines (`P4-02`, `P4-14`, `P4-15`, `P6-16`...). C'est resté ainsi trop longtemps et c'est, concrètement, la source la plus probable de la question « est-ce qu'on a fait les bonnes choses » : le résumé en tête de fichier racontait une autre phase du projet. Ce qui suit reflète l'état réel, task par task, aujourd'hui.
 
-**En une phrase : le produit personnel FINCLUDIA (Phases 1 à 6) est fonctionnellement complet et testé.** Il ne reste, pour la partie particuliers, que des décisions de cadrage que seul le client peut trancher (`P6-01`, `P6-24`) et la préparation d'une vraie mise en production (`P5-04` à `P5-06`). La partie entreprise/ERP de l'annexe 1 du contrat (`P7-01`/`03`/`04`/`05`) est, elle, volontairement non commencée : aucun cahier des charges ne la décrit.
+**Mise à jour du 2026-10-26 — la phrase qui suivait était fausse du point de vue du client.** Elle disait le produit personnel « fonctionnellement complet et testé ». C'est vrai côté serveur et tests ; c'est faux côté expérience : le client, en le parcourant, « ne s'est pas retrouvé », a trouvé « beaucoup de compartiments absents » et « une seule page » pour toutes les solutions. Le diagnostic chiffré (personas utilisés comme barrières, 21 écrans sur une seule page, aucune porte par solution, tests qui ouvrent les pages par leur adresse) et la réponse sont en **Phase 8**.
+
+**En une phrase, corrigée : les fonctions FINCLUDIA des Phases 1 à 6 sont construites et testées, mais leur organisation ne correspond pas à la vision du client** — trois solutions distinctes (formation, gestion budgétaire, gestion collective), chacune avec sa page et son tableau de bord. C'est désormais le travail prioritaire (`P8-02` à `P8-19`), avant la préparation d'une vraie mise en production (`P5-04` à `P5-06`). La partie entreprise/ERP de l'annexe 1 du contrat (`P7-01`/`03`/`04`/`05`) reste volontairement non commencée : aucun cahier des charges ne la décrit.
 
 ## Où en est chaque phase
 
@@ -2754,9 +3036,11 @@ Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau
 - **Phase 5 (sécurité, disponibilité, livraison)** — la sécurité est faite (`P5-01`, `P5-02`, `P5-03` `✅ done`, audités sur preuve le 2026-10-18 : 38 fichiers de tests de sécurité, 364 cas). `P5-04` (sauvegardes) `🚧 in-progress` : les scripts existent et ont été testés réellement (`npm run backup`, `npm run backup:verify`), mais où les conserver dépend encore de l'hébergement définitif. `P5-05`/`P5-06` restent `❌ todo`, en attente de `P5-04`. `P5-07` (livrables contractuels) `🚧 in-progress`.
 - **Phase 6 (FINCLUDIA, gestion financière personnelle)** — **`✅ done` sur 22 des 24 tâches.** Les deux modules financiers de P6-02 à P6-20, P6-22 et P6-23 sont faits et testés (onboarding, « Mon argent », budgets, objectifs, réserve, dettes, patrimoine, portefeuille fictif, espaces partagés, notifications, centre de confiance, recherche globale, personnalisation des 8 parcours, graphiques de tableaux de bord). `P6-21` (validation de fin de phase) est close depuis le 2026-10-18 : les 10 parcours J01-J10 **et** les 8 scénarios par public passent en navigateur. Restent `⛔ blocked` : `P6-01` (cadrage, voir plus bas) et `P6-24` (comptes financiers coordonnés, voir plus bas).
 - **Phase 7 (périmètre contractuel ERP)** — alerte de périmètre, pas un planning. `P7-02` (socle de trésorerie) est fait. `P7-01`, `P7-03`, `P7-04`, `P7-05` sont `⛔ blocked`, chacun en attente d'un cahier des charges ou d'un référentiel que le client n'a pas encore fourni pour cette partie.
+- **Phase 8 (trois solutions distinctes, personas repensés, collectif complet)** — ouverte le 2026-10-26, rien de commencé. `P8-01` (décisions du client) et `P8-06` (cahier des charges budgétaire révisé, annoncé « sous peu ») sont `⛔ blocked` ; tout le reste est `❌ todo`. Le lot A (`P8-02`, `P8-03`, `P8-05`, `P8-08`, `P8-18`, environ 13 jours) ne dépend d'aucune décision et répond directement au retour du client : à faire en premier.
 
 ## Ce qui bloque encore réellement, et qui doit trancher
 
+- **`P8-01` (restructuration, ajouté le 2026-10-26)** — sept points, chacun avec notre proposition : noms et adresses des trois solutions, personas repensés (5 étapes de vie, la vie à plusieurs passant dans le collectif), mineurs dans un espace collectif, catégories collectives communes ou séparées, espace temporaire, cahier des charges budgétaire révisé (bloque `P8-06`), et confirmation de l'écart « Pourquoi ? » du 2026-10-19 (`P1-12`). Le lot A de la Phase 8 n'attend aucun de ces points.
 - **`P6-01` (cadrage FINCLUDIA)** — la quasi-totalité de ses points sont répondus (voir la liste complète dans la tâche). **Quatre restent ouverts, et ce sont les seuls qui comptent encore** :
   - point 2 : périmètre de la première livraison (les 8 publics d'un coup, ou quelques-uns d'abord ?) ;
   - point 12 : le périmètre ERP de l'annexe 1 (voir `P7-01`) ;
@@ -2779,4 +3063,4 @@ Le 2026-10-18, plusieurs tâches marquées comme terminées ont été re-vérifi
 - Le paquet de déploiement `larbi-en-ligne/` a été régénéré et mis en ligne le 2026-10-17 (confirmé fonctionnel via `/api/health`) ; à régénérer de nouveau avant toute nouvelle mise en ligne si le code a changé depuis.
 
 Objectif final :
-Livrer FINCLUDIA, en respectant l'ordre des phases ci-dessus. Le MVP d'origine (e-learning/blog/outils) est entièrement livré ; ce qui reste à faire pour une livraison finale dépend presque uniquement de décisions du client, pas de développement.
+Livrer FINCLUDIA, en respectant l'ordre des phases ci-dessus. Le MVP d'origine (e-learning/blog/outils) est entièrement livré. **Corrigé le 2026-10-26** : il ne reste pas seulement des décisions du client — la Phase 8 est du vrai développement (environ 8 semaines estimées), dont le lot A (environ 13 jours) est la priorité, parce qu'il rend trouvable ce qui existe déjà.

@@ -1,12 +1,12 @@
 # Matrice des livrables et recette
 
-> Généré le 2026-10-19 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
+> Généré le 2026-10-26 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
 
 Livrable de l'**annexe 2** du contrat, dont le tableau est fourni vide (livrable / prévu / livré / test / réserve).
 
 La colonne « Test / résultat » renvoie à la suite automatisée : `npm test` dans `server/`. La colonne « Réserve » reprend ce que le plan déclare bloqué, sans l'adoucir — l'article 7 distingue les anomalies bloquantes, majeures et mineures, et une donnée que le client doit fournir n'est aucune des trois : c'est une réserve.
 
-**81 livrables sur 95** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
+**81 livrables sur 114** sont terminés et vérifiés. **9** sont bloqués par une décision ou une donnée du client.
 
 Suite de tests : 128 fichiers (consistency : 2, e2e : 24, functional : 34, security : 38, unit : 30).
 
@@ -107,6 +107,25 @@ Suite de tests : 128 fichiers (consistency : 2, e2e : 24, functional : 34, secur
 | `P7-03` — Espace entreprise : déclinaison par segment (PME/PMI, start-up, micro-entreprise, auto-entrepreneur, micro-importateur, profession libérale) | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P7-04` — Espace entreprise : états financiers réglementaires (bilan, compte de résultat, TVA, amortissements, stocks) | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P7-05` — Diaspora et commerce international | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
+| `P8-01` — Restructuration : décisions à obtenir du client | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
+| `P8-02` — Hub « Mes solutions » et page d'arrivée après connexion | Oui | Non | — | Non commencé |
+| `P8-03` — Navigation propre à chaque solution | Oui | Non | — | Non commencé |
+| `P8-04` — Solution Formation : page d'entrée et tableau de bord dédiés | Oui | Non | — | Non commencé |
+| `P8-05` — Solution Gestion budgétaire : entrée, tableau de bord unique et compartiments visibles pour tous | Oui | Non | — | Non commencé |
+| `P8-06` — Gestion budgétaire : intégration du cahier des charges révisé (à recevoir) | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
+| `P8-07` — Personas repensés : une lentille d'adaptation, plus une barrière | Oui | Non | — | Non commencé |
+| `P8-08` — Solution Gestion collective : page d'entrée, une adresse par espace, tableau de bord d'espace | Oui | Non | — | Non commencé |
+| `P8-09` — Collectif : espace « groupe / amis » et espace temporaire | Oui | Non | — | Non commencé |
+| `P8-10` — Collectif : dépenses partagées — champs et règles manquants | Oui | Non | — | Non commencé |
+| `P8-11` — Collectif : budgets communs par catégorie | Oui | Non | — | Non commencé |
+| `P8-12` — Collectif : gestion des tâches | Oui | Non | — | Non commencé |
+| `P8-13` — Collectif : calendrier unifié | Oui | Non | — | Non commencé |
+| `P8-14` — Collectif : lien sans doublon vers le budget personnel | Oui | Non | — | Non commencé |
+| `P8-15` — Collectif : alertes, activité récente et contribution requise | Oui | Non | — | Non commencé |
+| `P8-16` — Collectif : rapports et export | Oui | Non | — | Non commencé |
+| `P8-17` — Formules collectives : correspondance avec le moteur existant | Oui | Non | — | Non commencé |
+| `P8-18` — « Terminé » veut dire « trouvable » : contrôles et parcours depuis le menu | Oui | Non | — | Non commencé |
+| `P8-19` — Restructuration : validation de fin de phase | Oui | Non | — | Non commencé |
 
 ## Réserves, en clair
 
@@ -119,4 +138,6 @@ Ces livrables ne sont pas en retard : ils attendent une information que seul le 
 - `P7-03` — Espace entreprise : déclinaison par segment (PME/PMI, start-up, micro-entreprise, auto-entrepreneur, micro-importateur, profession libérale)
 - `P7-04` — Espace entreprise : états financiers réglementaires (bilan, compte de résultat, TVA, amortissements, stocks)
 - `P7-05` — Diaspora et commerce international
+- `P8-01` — Restructuration : décisions à obtenir du client
+- `P8-06` — Gestion budgétaire : intégration du cahier des charges révisé (à recevoir)
 

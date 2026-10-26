@@ -182,9 +182,16 @@ describe('FINCLUDIA money, end to end', { skip: findChrome() ? false : 'no Chrom
     assert.ok(await b.click(mm.save));
     assert.ok(await b.waitText(mm.added));
 
-    // The synthesis recomputed server-side.
-    const expenses = await figureOf(mm.expenses);
-    assert.match(expenses.replace(/ | /g, ' '), /2\s?500/);
+    // The synthesis recomputes server-side, after the "added" toast — this
+    // waits for the new figure instead of reading it once and racing the reload.
+    assert.ok(
+      await b.waitFor(`(() => {
+        const card = [...document.querySelectorAll('.fin-figure')].find((e) => e.querySelector('.fin-figure-label')?.textContent.includes(${JSON.stringify(mm.expenses)}));
+        const text = card ? card.querySelector('.fin-figure-value').textContent.trim().replace(/ | /g, ' ') : '';
+        return /2\\s?500/.test(text);
+      })()`),
+      'the synthesis recomputed with the new expense',
+    );
 
     // And the movement is in the history, with its note.
     assert.ok(await b.waitText('Courses de la semaine'));
