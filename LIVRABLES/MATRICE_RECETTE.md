@@ -1,12 +1,12 @@
 # Matrice des livrables et recette
 
-> Généré le 2026-10-26 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
+> Généré le 2026-10-27 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
 
 Livrable de l'**annexe 2** du contrat, dont le tableau est fourni vide (livrable / prévu / livré / test / réserve).
 
 La colonne « Test / résultat » renvoie à la suite automatisée : `npm test` dans `server/`. La colonne « Réserve » reprend ce que le plan déclare bloqué, sans l'adoucir — l'article 7 distingue les anomalies bloquantes, majeures et mineures, et une donnée que le client doit fournir n'est aucune des trois : c'est une réserve.
 
-**81 livrables sur 114** sont terminés et vérifiés. **9** sont bloqués par une décision ou une donnée du client.
+**83 livrables sur 131** sont terminés et vérifiés. **6** sont bloqués par une décision ou une donnée du client.
 
 Suite de tests : 128 fichiers (consistency : 2, e2e : 24, functional : 34, security : 38, unit : 30).
 
@@ -100,32 +100,49 @@ Suite de tests : 128 fichiers (consistency : 2, e2e : 24, functional : 34, secur
 | `P6-19` — FINCLUDIA : centre de confiance et de données | Oui | Oui | Suite automatisée verte |  |
 | `P6-20` — FINCLUDIA : recherche globale | Oui | Oui | Suite automatisée verte |  |
 | `P6-23` — FINCLUDIA : visualisations graphiques des tableaux de bord | Oui | Oui | Suite automatisée verte |  |
-| `P6-24` — FINCLUDIA : comptes financiers multiples et coordination des opérations | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
+| `P6-24` — FINCLUDIA : comptes financiers multiples et coordination des opérations | Oui | Non | — | Non commencé |
 | `P6-21` — FINCLUDIA : validation de fin de phase | Oui | Oui | Suite automatisée verte |  |
 | `P7-01` — ERP entreprises, diaspora et commerce international | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P7-02` — Espace entreprise : socle de trésorerie (tiers, ventes, achats, règlements) | Oui | Oui | Suite automatisée verte |  |
 | `P7-03` — Espace entreprise : déclinaison par segment (PME/PMI, start-up, micro-entreprise, auto-entrepreneur, micro-importateur, profession libérale) | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P7-04` — Espace entreprise : états financiers réglementaires (bilan, compte de résultat, TVA, amortissements, stocks) | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P7-05` — Diaspora et commerce international | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
-| `P8-01` — Restructuration : décisions à obtenir du client | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
-| `P8-02` — Hub « Mes solutions » et page d'arrivée après connexion | Oui | Non | — | Non commencé |
-| `P8-03` — Navigation propre à chaque solution | Oui | Non | — | Non commencé |
-| `P8-04` — Solution Formation : page d'entrée et tableau de bord dédiés | Oui | Non | — | Non commencé |
-| `P8-05` — Solution Gestion budgétaire : entrée, tableau de bord unique et compartiments visibles pour tous | Oui | Non | — | Non commencé |
-| `P8-06` — Gestion budgétaire : intégration du cahier des charges révisé (à recevoir) | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
-| `P8-07` — Personas repensés : une lentille d'adaptation, plus une barrière | Oui | Non | — | Non commencé |
-| `P8-08` — Solution Gestion collective : page d'entrée, une adresse par espace, tableau de bord d'espace | Oui | Non | — | Non commencé |
-| `P8-09` — Collectif : espace « groupe / amis » et espace temporaire | Oui | Non | — | Non commencé |
-| `P8-10` — Collectif : dépenses partagées — champs et règles manquants | Oui | Non | — | Non commencé |
-| `P8-11` — Collectif : budgets communs par catégorie | Oui | Non | — | Non commencé |
-| `P8-12` — Collectif : gestion des tâches | Oui | Non | — | Non commencé |
-| `P8-13` — Collectif : calendrier unifié | Oui | Non | — | Non commencé |
-| `P8-14` — Collectif : lien sans doublon vers le budget personnel | Oui | Non | — | Non commencé |
-| `P8-15` — Collectif : alertes, activité récente et contribution requise | Oui | Non | — | Non commencé |
-| `P8-16` — Collectif : rapports et export | Oui | Non | — | Non commencé |
-| `P8-17` — Formules collectives : correspondance avec le moteur existant | Oui | Non | — | Non commencé |
-| `P8-18` — « Terminé » veut dire « trouvable » : contrôles et parcours depuis le menu | Oui | Non | — | Non commencé |
-| `P8-19` — Restructuration : validation de fin de phase | Oui | Non | — | Non commencé |
+| `P8-01` — Moteur budgétaire unique : décisions de cadrage | Oui | Oui | Suite automatisée verte |  |
+| `P8-02` — Une application dans sa propre fenêtre, distincte de la vitrine, avec la navigation finale | Oui | Non | — | Non commencé |
+| `P8-03` — Lot 0 : comptes, transactions, transferts et anti-doublon | Oui | Non | — | Non commencé |
+| `P8-04` — Corriger dès maintenant les calculs faux (diagnostic n°2) | Oui | Non | — | Non commencé |
+| `P8-05` — Mes comptes | Oui | Non | — | Non commencé |
+| `P8-06` — Accueil centralisé, le même pour tous | Oui | Non | — | Non commencé |
+| `P8-07` — Mouvements : revenus, dépenses, transferts et pointage | Oui | Non | — | Non commencé |
+| `P8-08` — Catégories universelles | Oui | Non | — | Non commencé |
+| `P8-09` — Budgets : une allocation, rattachée automatiquement, et des méthodes facultatives | Oui | Non | — | Non commencé |
+| `P8-10` — Synthèse, rapport mensuel et téléchargement | Oui | Non | — | Non commencé |
+| `P8-11` — Calendrier financier : trois onglets et revenus à confirmer | Oui | Non | — | Non commencé |
+| `P8-12` — Objectifs & sécurité : un seul compartiment, et des objectifs qui simulent | Oui | Non | — | Non commencé |
+| `P8-13` — Dettes et créances | Oui | Non | — | Non commencé |
+| `P8-14` — Patrimoine réel et portefeuille fictif | Oui | Non | — | Non commencé |
+| `P8-15` — Outils : un seul catalogue | Oui | Non | — | Non commencé |
+| `P8-16` — Santé financière : une page à part entière | Oui | Non | — | Non commencé |
+| `P8-17` — Formation, progression et certificats : la seule couche qui varie selon le profil | Oui | Non | — | Non commencé |
+| `P8-18` — Alertes et états du moteur personnel | Oui | Non | — | Non commencé |
+| `P8-19` — Recherche et assistant adaptés au moteur unique | Oui | Non | — | Non commencé |
+| `P8-20` — Paramètres : données et confiance | Oui | Non | — | Non commencé |
+| `P8-21` — Contrôles du client et règle « trouvable » | Oui | Non | — | Non commencé |
+| `P8-23` — Premiers pas : le parcours de premier démarrage (P0 à P7) | Oui | Non | — | Non commencé |
+| `P8-22` — Moteur budgétaire unique : validation de fin de phase | Oui | Non | — | Non commencé |
+| `P9-01` — Gestion commune : décisions de cadrage | Oui | Oui | Suite automatisée verte |  |
+| `P9-02` — Gestion commune : une solution à part, une adresse par espace, un tableau de bord d'espace | Oui | Non | — | Non commencé |
+| `P9-03` — Espace « groupe / amis » et espace temporaire | Oui | Non | — | Non commencé |
+| `P9-04` — Dépenses partagées : champs et règles manquants | Oui | Non | — | Non commencé |
+| `P9-05` — Budgets communs par catégorie | Oui | Non | — | Non commencé |
+| `P9-06` — Gestion des tâches | Oui | Non | — | Non commencé |
+| `P9-07` — Calendrier collectif unifié | Oui | Non | — | Non commencé |
+| `P9-08` — Lien sans doublon vers le budget personnel | Oui | Non | — | Non commencé |
+| `P9-09` — Alertes, activité récente et contribution requise | Oui | Non | — | Non commencé |
+| `P9-10` — Rapports et export d'un espace | Oui | Non | — | Non commencé |
+| `P9-11` — Formules collectives : un moteur collectif, sans doublon | Oui | Non | — | Non commencé |
+| `P9-12` — Contrôles du client et règle « trouvable » | Oui | Non | — | Non commencé |
+| `P9-13` — Gestion commune : validation de fin de phase | Oui | Non | — | Non commencé |
 
 ## Réserves, en clair
 
@@ -133,11 +150,8 @@ Ces livrables ne sont pas en retard : ils attendent une information que seul le 
 
 - `P3-08` — Paiement : décisions à préciser (recherches à mener par le client)
 - `P6-01` — FINCLUDIA : décisions de cadrage à obtenir du client
-- `P6-24` — FINCLUDIA : comptes financiers multiples et coordination des opérations
 - `P7-01` — ERP entreprises, diaspora et commerce international
 - `P7-03` — Espace entreprise : déclinaison par segment (PME/PMI, start-up, micro-entreprise, auto-entrepreneur, micro-importateur, profession libérale)
 - `P7-04` — Espace entreprise : états financiers réglementaires (bilan, compte de résultat, TVA, amortissements, stocks)
 - `P7-05` — Diaspora et commerce international
-- `P8-01` — Restructuration : décisions à obtenir du client
-- `P8-06` — Gestion budgétaire : intégration du cahier des charges révisé (à recevoir)
 

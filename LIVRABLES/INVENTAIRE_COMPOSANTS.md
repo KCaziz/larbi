@@ -1,6 +1,6 @@
 # Inventaire des composants tiers et de leurs licences
 
-> Généré le 2026-10-26 par `node server/scripts/generate-deliverables.js`. Ne pas modifier à la main.
+> Généré le 2026-10-27 par `node server/scripts/generate-deliverables.js`. Ne pas modifier à la main.
 
 Livrable de l'**article 14** du contrat : « Le Prestataire communique au Client la liste des bibliothèques, frameworks, plugins, API et composants tiers intégrés […]. Les composants tiers restent soumis à leurs licences respectives. »
 
