@@ -1,6 +1,13 @@
 import { Router } from 'express';
 import {
   exportTransactions,
+  getClearing,
+  getTags,
+  patchTag,
+  postDuplicateCheck,
+  postTag,
+  putClearing,
+  removeTag,
   getIncomeHistory,
   getIncomes,
   getMoneyReferences,
@@ -27,6 +34,11 @@ import { validateBody, validateQuery } from '../middleware/validate.js';
 import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
 import {
   archiveSchema,
+  clearingQuerySchema,
+  clearingSchema,
+  createTagSchema,
+  duplicateCheckSchema,
+  updateTagSchema,
   createIncomeSchema,
   createTransactionSchema,
   deleteSchema,
@@ -64,6 +76,13 @@ router.get('/revenus/:id/historique', asyncRoute(getIncomeHistory));
 router.get('/transactions/export', validateQuery(historyQuerySchema), asyncRoute(exportTransactions));
 router.get('/transactions', validateQuery(historyQuerySchema), asyncRoute(getTransactions));
 router.post('/transactions', validateBody(createTransactionSchema), asyncRoute(postTransaction));
+router.post('/transactions/doublons', validateBody(duplicateCheckSchema), asyncRoute(postDuplicateCheck));
+router.put('/transactions/:id/pointage', validateBody(clearingSchema), asyncRoute(putClearing));
+router.get('/pointage', validateQuery(clearingQuerySchema), asyncRoute(getClearing));
+router.get('/etiquettes', asyncRoute(getTags));
+router.post('/etiquettes', validateBody(createTagSchema), asyncRoute(postTag));
+router.patch('/etiquettes/:id', validateBody(updateTagSchema), asyncRoute(patchTag));
+router.delete('/etiquettes/:id', validateBody(deleteSchema), asyncRoute(removeTag));
 router.patch('/transactions/:id', validateBody(updateTransactionSchema), asyncRoute(patchTransaction));
 router.delete('/transactions/:id', validateBody(deleteSchema), asyncRoute(removeTransaction));
 router.get('/transactions/:id/historique', asyncRoute(getTransactionHistory));

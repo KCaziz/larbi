@@ -57,6 +57,12 @@ function clientRoutes() {
       routes.add(full === '/*' ? '/*' : full.replace(/\/$/, '') || '/');
     }
   }
+  // The former addresses of the connected space (P8-02) are routes too: the
+  // router builds them from LEGACY_REDIRECTS, so they are read from there.
+  for (const [, from, prefix] of read(CLIENT, 'src/config/appNavigation.js').matchAll(/from:\s*'([^']+)'[^}]*?(prefix:\s*true)?\s*}/g)) {
+    routes.add(`/${from}`);
+    if (prefix) routes.add(`/${from}/*`);
+  }
   return [...routes];
 }
 
@@ -65,7 +71,7 @@ describe('client <-> server contract', () => {
     assert.ok(serverRoutes.length >= 45, `${serverRoutes.length} server routes`);
     const routes = clientRoutes();
     assert.ok(routes.length >= 25, `${routes.length} client routes`);
-    for (const expected of ['/blog', '/blog/:slug', '/catalogue/:slug/cours/:courseId', '/admin/articles/:id', '/verification/:number']) assert.ok(routes.includes(expected), expected);
+    for (const expected of ['/blog', '/blog/:slug', '/app/formation/:slug/cours/:courseId', '/admin/articles/:id', '/verification/:number', '/budget/*']) assert.ok(routes.includes(expected), expected);
   });
 
   test('every API address written in the client exists on the server', () => {
@@ -124,36 +130,20 @@ describe('client <-> server contract', () => {
 
   test('every navigation entry (main menu, footer, account tabs, admin menu) leads to a route', () => {
     const specific = clientRoutes().filter((r) => r !== '/*').map((r) => patternToRegex(r));
-    const sources = ['src/config/navigation.js', 'src/config/adminNav.js', 'src/config/fincludiaMenu.js'];
+    const sources = ['src/config/navigation.js', 'src/config/adminNav.js', 'src/config/appNavigation.js'];
     const targets = sources.flatMap((s) => [...read(CLIENT, s).matchAll(/to:\s*'(\/[^']*)'/g)].map((m) => m[1]));
     assert.ok(targets.length >= 15);
     assert.deepEqual(targets.filter((tg) => !specific.some((re) => re.test(tg))), []);
   });
 
-  // Since P1-12 the SERVER decides the menu of the connected space: it sends
-  // the routes, the client only writes their label. So the check that matters
-  // is no longer on a client array — it is that every route the server can put
-  // in a menu is a route the client actually serves.
-  //
-  // Without this, a menu entry pointing at nothing is only visible to whoever
-  // clicks it, for the public that has it. That is exactly how the assistant's
-  // dead link survived in the journey registry.
-  test('every route the server can put in the menu leads to a client route', async () => {
+  // Since P8-02 the application's menu is the client's final one, the same for
+  // everyone, written in client/src/config/appNavigation.js (checked by the
+  // test above). Every former address must still arrive somewhere real.
+  test('every former address of the connected space redirects to a client route', () => {
     const specific = clientRoutes().filter((r) => r !== '/*').map((r) => patternToRegex(r));
-    const { MENU_GROUPS, OUT_OF_MENU_ROUTES } = await import('../../src/constants/finNavigation.js');
-    const targets = [...MENU_GROUPS.flatMap((group) => group.routes), ...OUT_OF_MENU_ROUTES];
-    assert.ok(targets.length >= 20, `only ${targets.length} routes in the menu`);
+    const targets = [...read(CLIENT, 'src/config/appNavigation.js').matchAll(/from:\s*'[^']+',\s*to:\s*'([^']+)'/g)].map((m) => m[1]);
+    assert.ok(targets.length >= 20, `only ${targets.length} redirects`);
     assert.deepEqual(targets.filter((tg) => !specific.some((re) => re.test(tg))), []);
-  });
-
-  // And the label side of the same contract: a route the server sends falls
-  // back to its raw path when the client has no label for it, which is better
-  // than hiding a page the account is entitled to — but it should never happen.
-  test('every route the server can put in the menu has a label in the client', async () => {
-    const { MENU_GROUPS } = await import('../../src/constants/finNavigation.js');
-    const labels = read(CLIENT, 'src/config/fincludiaMenu.js');
-    const missing = MENU_GROUPS.flatMap((group) => group.routes).filter((route) => !labels.includes(`'${route}':`));
-    assert.deepEqual(missing, []);
   });
 
   // Every screen of the client's map that we serve must be reachable without

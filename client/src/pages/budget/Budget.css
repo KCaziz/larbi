@@ -352,3 +352,39 @@
   gap: 10px;
   font-size: 0.9rem;
 }
+
+/* P8-09: the carry-over switch, the optional methods and their mapping. */
+.budget-carry {
+  flex-wrap: wrap;
+}
+.budget-methods {
+  display: grid;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.budget-methods h2 {
+  margin: 0;
+}
+.budget-mapping ul {
+  display: grid;
+  gap: var(--space-xs);
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.budget-mapping li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+.budget-mapping summary {
+  min-block-size: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}

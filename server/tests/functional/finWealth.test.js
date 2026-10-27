@@ -158,7 +158,7 @@ describe('P6-11 — the patrimony view', () => {
     assert.equal(res.body.patrimoine.totalActifs, 5000000);
     assert.equal(res.body.patrimoine.totalDettes, 2000000);
     assert.equal(res.body.patrimoine.patrimoineNet.resultat, 3000000);
-    assert.equal(res.body.patrimoine.patrimoineNet.formule_id, 'F035');
+    assert.equal(res.body.patrimoine.patrimoineNet.formule_id, 'PB-F024') // the client's final rule since P8-14;
   });
 
   test('an empty patrimony is not a patrimony of zero', async () => {

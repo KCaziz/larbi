@@ -325,7 +325,7 @@ export const SIMULATORS = [
     key: 'simulation-logement',
     example: { price: da(9_000_000), downPayment: da(1_500_000), annualRate: 0.055, periodsPerYear: 12, durationMonths: 240, fees: da(50_000), insurance: da(3_000), netIncome: da(180_000), currentLivingAllowance: da(90_000), currentDebtService: da(0), liquidSavings: da(2_000_000) },
     calculator: 'CAL-30',
-    formulas: ['F009', 'F020', 'F021', 'F022', 'F023', 'F056'],
+    formulas: ['F007', 'F020', 'F021', 'F022', 'F023', 'F056'],
     publics: ['jeune_actif', 'salarie', 'famille'],
     fields: [
       money('price', { required: true, min: 1 }),

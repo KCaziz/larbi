@@ -1,5 +1,7 @@
 // Financial goals (P6-08): the writes and the trajectory, screens C09-C11.
 // Everything here is scoped to ONE account, exactly like budgets (P6-05).
+import { SAVINGS_ACCOUNT_TYPE, accountType } from '../constants/finAccounts.js';
+import { accountsWithBalances, createTransfer, usableAccount } from './finAccount.service.js';
 import { GOAL_TEMPLATE_KEYS } from '../constants/finGoal.js';
 import { goalReachDate } from './finance/algorithms.js';
 import { computed } from './finance/contract.js';
@@ -19,6 +21,8 @@ const GOAL_SELECT = {
   targetDate: true,
   allocated: true,
   monthlyContribution: true,
+  progressStatus: true,
+  accountId: true,
   rate: true,
   priority: true,
   note: true,
@@ -34,8 +38,10 @@ const GOAL_SELECT = {
 // A fictional goal plays with money that was never really saved — the same
 // exemption the budget's status already carries. Everyone else's "capital
 // déjà affecté" must fit inside what this account has actually set aside.
-async function assertAllocationFits(prisma, userId, { currency, allocated, status, exceptId = null }) {
-  if (status === 'fictional' || allocated === 0) return;
+async function assertAllocationFits(prisma, userId, { currency, allocated, status, accountId = null, exceptId = null }) {
+  // A goal on its own account (P8-12) holds what that account holds: no
+  // declared capital to bound.
+  if (status === 'fictional' || allocated === 0 || accountId) return;
   const [pool, claimed] = await Promise.all([
     markedSavings(prisma, userId, currency),
     allocatedByOtherGoals(prisma, userId, currency, exceptId),
@@ -65,7 +71,8 @@ export async function createGoal(prisma, userId, body) {
   }
   const status = body.status ?? 'declared';
   const allocated = body.allocated ?? 0;
-  await assertAllocationFits(prisma, userId, { currency: body.currency, allocated, status });
+  if (body.accountId) await usableAccount(prisma, userId, body.accountId, body.currency);
+  await assertAllocationFits(prisma, userId, { currency: body.currency, allocated, status, accountId: body.accountId ?? null });
 
   return prisma.$transaction(async (tx) => {
     const goal = await tx.finGoal.create({
@@ -78,6 +85,8 @@ export async function createGoal(prisma, userId, body) {
         targetDate: body.targetDate ?? null,
         allocated,
         monthlyContribution: body.monthlyContribution ?? null,
+        progressStatus: body.progressStatus ?? 'active',
+        accountId: body.accountId ?? null,
         rate: body.rate ?? null,
         priority: body.priority ?? 0,
         note: body.note ?? null,
@@ -105,11 +114,13 @@ export async function updateGoal(prisma, userId, id, body) {
   if (fields.templateKey !== undefined && fields.templateKey !== null && !GOAL_TEMPLATE_KEYS.includes(fields.templateKey)) {
     throw new HttpError(422, 'Unknown goal template', { reason: 'unknownTemplate' });
   }
+  if (fields.accountId) await usableAccount(prisma, userId, fields.accountId, fields.currency ?? before.currency);
   if (fields.allocated !== undefined || fields.currency !== undefined || fields.status !== undefined) {
     await assertAllocationFits(prisma, userId, {
       currency: fields.currency ?? before.currency,
       allocated: fields.allocated ?? before.allocated,
       status: fields.status ?? before.status,
+      accountId: fields.accountId === undefined ? before.accountId : fields.accountId,
       exceptId: id,
     });
   }
@@ -173,11 +184,140 @@ export function buildGoalView(goal, { now = new Date() } = {}) {
         : answer('F028', paymentWithoutReturn({ target: goal.target, capital: goal.allocated, monthsLeft }));
   }
 
+  // PB-F014 — progress, its display capped at 100 % with the excess apart;
+  // PB-F015 — what is left; PB-F016 — the minimum months at the planned
+  // contribution, not computable without one.
+  const progress = goalProgress(goal.allocated, goal.target);
+  const left = goalRemaining(goal.target, goal.allocated);
+  const minimumMonths = left === null || !(goal.monthlyContribution > 0) ? null : Math.ceil(left / goal.monthlyContribution);
   return {
-    progres: answer('F025', goalProgress(goal.allocated, goal.target)),
-    reste: answer('F026', goalRemaining(goal.target, goal.allocated)),
+    progres: answer('PB-F014', progress === null ? null : Math.min(1, progress)),
+    excedent: progress !== null && progress > 1 ? goal.allocated - goal.target : 0,
+    reste: answer('PB-F015', left),
+    moisMinimum: answer('PB-F016', minimumMonths),
     trajectoire: { mois: trajectory?.completed ? trajectory.months : null, dateEstimee: estimatedDate, atteignable: trajectory?.completed ?? null },
     contributionRequise: requiredContribution,
     avertissements: warnings,
+  };
+}
+
+// ---- P8-12: the goal's account, its contributions, its scenarios -------------
+
+/**
+ * The goals with their capital: a goal on its own account holds that
+ * account's balance (PB-F001) — a contribution is then a transfer, never a
+ * figure typed twice (« jamais déduite deux fois »); a goal without an account
+ * keeps the capital declared on it.
+ */
+export async function goalsWithCapital(prisma, userId, goals) {
+  if (!goals.some((goal) => goal.accountId)) return goals.map((goal) => ({ ...goal, capitalSource: 'declared' }));
+  const { accounts } = await accountsWithBalances(prisma, userId, { includeArchived: true });
+  const balances = new Map(accounts.map((account) => [account.id, account.solde.resultat]));
+  return goals.map((goal) =>
+    goal.accountId && balances.has(goal.accountId)
+      ? { ...goal, allocated: Math.max(0, balances.get(goal.accountId) ?? 0), capitalSource: 'account' }
+      : { ...goal, capitalSource: 'declared' },
+  );
+}
+
+/**
+ * The contributions of one goal (tab 10B): the transfers into its account,
+ * each with the account it came from.
+ */
+export async function listGoalContributions(prisma, userId, id) {
+  const goal = await ownGoal(prisma, userId, id);
+  if (!goal.accountId) return [];
+  const incoming = await prisma.finTransaction.findMany({
+    where: { userId, accountId: goal.accountId, kind: 'transfer_in', deletedAt: null },
+    select: { id: true, transferId: true, value: true, currency: true, occurredAt: true, note: true, status: true },
+    orderBy: { occurredAt: 'desc' },
+    take: 100,
+  });
+  const sources = await prisma.finTransaction.findMany({
+    where: { userId, transferId: { in: incoming.map((row) => row.transferId) }, kind: 'transfer_out' },
+    select: { transferId: true, account: { select: { id: true, label: true } } },
+  });
+  const from = new Map(sources.map((row) => [row.transferId, row.account]));
+  return incoming.map((row) => ({ ...row, fromAccount: from.get(row.transferId) ?? null }));
+}
+
+/**
+ * A real contribution (ARC-04): a transfer from one of the person's accounts
+ * to the goal's account. A goal with no account yet receives its own savings
+ * account (AC-04) on its first contribution — named after it, so the person
+ * finds it in « Mes comptes ».
+ */
+export async function addGoalContribution(prisma, userId, id, body) {
+  const goal = await ownGoal(prisma, userId, id);
+  if (goal.status === 'fictional') throw new HttpError(422, 'A fictional goal takes no real money', { reason: 'fictionalGoal' });
+  let accountId = goal.accountId;
+  if (!accountId) {
+    const type = accountType(SAVINGS_ACCOUNT_TYPE);
+    const account = await prisma.finAccount.create({
+      data: {
+        userId,
+        label: goal.label,
+        type: SAVINGS_ACCOUNT_TYPE,
+        currency: goal.currency,
+        includeInTotal: type.includeInTotal,
+        includeInNetWorth: type.includeInNetWorth,
+        source: 'computed',
+        status: 'declared',
+      },
+      select: { id: true },
+    });
+    accountId = account.id;
+    // What was declared on the goal before it had an account stays declared
+    // on it: the account starts at 0 and only real transfers fill it.
+    await prisma.finGoal.update({ where: { id }, data: { accountId, version: { increment: 1 } } });
+  }
+  const transfer = await createTransfer(prisma, userId, {
+    fromAccountId: body.fromAccountId,
+    toAccountId: accountId,
+    value: body.value,
+    occurredAt: body.occurredAt,
+    note: body.note ?? goal.label,
+  });
+  return { transfer, accountId };
+}
+
+/**
+ * A scenario (C11, in red; tab 10B « simulation avec rendement si activée »):
+ * the person's own parameters — monthly contribution, horizon, inflation,
+ * hypothetical return, yearly raise of the contribution — month by month
+ * (ALG-03). Read-only: nothing is written, and every parameter travels back
+ * in `hypotheses`.
+ */
+export function goalScenario(goal, params, { now = new Date() } = {}) {
+  const monthlyRate = params.rate ? Math.pow(1 + params.rate, 1 / 12) - 1 : 0;
+  const inflation = params.inflation ?? 0;
+  const raise = params.annualIncrease ?? 0;
+  const horizon = params.months ?? null;
+  const limit = horizon ?? 600;
+  let capital = goal.allocated;
+  let contribution = params.monthlyContribution ?? goal.monthlyContribution ?? 0;
+  let reachedAt = null;
+  for (let month = 1; month <= limit; month += 1) {
+    capital = capital * (1 + monthlyRate) + contribution;
+    if (month % 12 === 0) contribution = contribution * (1 + raise);
+    // The target in the money of that month: inflation raises it over time.
+    const target = goal.target * Math.pow(1 + inflation, month / 12);
+    if (reachedAt === null && capital >= target) reachedAt = month;
+  }
+  const finalTarget = Math.round(goal.target * Math.pow(1 + inflation, limit / 12));
+  const hypotheses = {
+    contribution_mensuelle: params.monthlyContribution ?? goal.monthlyContribution ?? 0,
+    horizon_mois: horizon,
+    inflation_annuelle: inflation,
+    rendement_annuel_hypothetique: params.rate ?? 0,
+    hausse_annuelle_contribution: raise,
+  };
+  const answer = (result) => computed('ALG-03', result, { inputs: { cible: goal.target, capital: goal.allocated }, hypotheses, now });
+  return {
+    moisPourAtteindre: answer(reachedAt),
+    dateAtteinte: reachedAt === null ? null : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + reachedAt, now.getUTCDate())),
+    capitalFinHorizon: horizon === null ? null : Math.round(capital),
+    cibleFinHorizon: horizon === null ? null : finalTarget,
+    hypotheses,
   };
 }

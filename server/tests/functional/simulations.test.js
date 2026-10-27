@@ -370,7 +370,7 @@ describe('debt and credit (lot 2)', () => {
     });
     assert.equal(res.status, 200, JSON.stringify(res.body));
     assert.equal(res.body.resultats.reserveApresApport.resultat, DA(500_000));
-    assert.equal(res.body.resultats.reserveApresApport.formule_id, 'F009');
+    assert.equal(res.body.resultats.reserveApresApport.formule_id, 'F007');
   });
 
   test('an early repayment shortens the plan and the saving is the interest avoided', async () => {

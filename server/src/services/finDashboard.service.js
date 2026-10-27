@@ -152,7 +152,9 @@ export function buildDashboard({
   const available = new Map();
   if (synthesis) {
     available.set('netFlow', synthesis.fluxNet);
-    available.set('monthlyResources', synthesis.revenus);
+    // « Ressources du mois » : the declared resources, expected (F001). The
+    // income actually received is `revenus` (PB-F004), never added to them.
+    available.set('monthlyResources', synthesis.revenusPrevus);
     available.set('monthExpenses', synthesis.depenses);
   }
   if (budgetView) {
@@ -238,7 +240,8 @@ export function buildDashboard({
       debtRatio: debts?.tauxEffort?.resultat ?? null,
       savingsRate: available.get('savingsRate')?.resultat ?? null,
       goalsGap: null,
-      incomeMonths: null,
+      // P8-16: real spending over the active budget's envelopes.
+      budgetConsumption: budgetConsumptionOf(budgetView),
       dataQuality: {},
     },
     { now },
@@ -272,4 +275,13 @@ export function buildDashboard({
     periode: synthesis ? { debut: null, fin: null } : null,
     calculeLe: now.toISOString(),
   };
+}
+
+// « Respect des budgets » (P8-16): what the envelopes really consumed over
+// what they allocate — null without a budget or without any allocation.
+function budgetConsumptionOf(view) {
+  if (!view?.enveloppes?.length) return null;
+  const allocated = view.enveloppes.reduce((sum, line) => sum + line.prevu + (line.report ?? 0), 0);
+  if (allocated <= 0) return null;
+  return view.enveloppes.reduce((sum, line) => sum + line.reel, 0) / allocated;
 }

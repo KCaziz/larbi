@@ -10,7 +10,7 @@ import { themeByKey } from '../constants/comparator.js';
 import { CATEGORY_FAMILY_CODES, STANDARD_CATEGORIES } from '../constants/finCategories.js';
 import { CHANGE_ACTIONS, FINANCIAL_TABLES } from '../constants/finData.js';
 import { FREQUENCIES } from '../constants/finance.js';
-import { TRANSACTION_KINDS } from '../constants/finMoney.js';
+import { TRANSACTION_KINDS, TRANSFER_KINDS } from '../constants/finMoney.js';
 import { ENVELOPE_KINDS } from '../constants/finBudget.js';
 import { ASSET_KINDS, ASSET_LIQUIDITY, FORBIDDEN_WEALTH_STATUS } from '../constants/finWealth.js';
 import { SHARING_LEVELS, SHAREABLE_KINDS, SPACE_KINDS, SPACE_ROLES, SPLIT_RULES } from '../constants/finSpace.js';
@@ -307,12 +307,16 @@ export async function checkConsistency(prisma, { privateDir }) {
   const transactions = await prisma.finTransaction.findMany({
     select: { id: true, userId: true, kind: true, value: true, currency: true, occurredAt: true, categoryId: true, planned: true, status: true, deletedAt: true },
   });
-  add('a movement is money in or money out', transactions.filter((row) => !TRANSACTION_KINDS.includes(row.kind)), (row) => `transaction ${row.id}: ${row.kind}`);
+  add(
+    'a movement is money in, money out, or one side of a transfer',
+    transactions.filter((row) => !TRANSACTION_KINDS.includes(row.kind) && !TRANSFER_KINDS.includes(row.kind)),
+    (row) => `transaction ${row.id}: ${row.kind}`,
+  );
   // The client's rule, and the one thing SQL cannot check on its own because it
   // needs to know what "now" is: only a PLANNED EXPENSE may be dated ahead.
   add(
-    'only a planned expense is dated in the future',
-    transactions.filter((row) => !row.deletedAt && row.occurredAt > new Date() && !(row.planned && row.kind === 'expense')),
+    'only a planned expense or a planned transfer is dated in the future',
+    transactions.filter((row) => !row.deletedAt && row.occurredAt > new Date() && !(row.planned && row.kind !== 'income')),
     (row) => `transaction ${row.id}`,
   );
   // A planned movement has not happened: calling it "real" would put it in a

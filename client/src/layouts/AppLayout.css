@@ -1,0 +1,339 @@
+/* The application's own window (P8-02). Breakpoints from the client's tab
+   03B: fixed sidebar from 1 200 px, collapsible from 768 px, bottom bar below.
+   Logical properties only, so the same rules hold in Arabic (RTL). */
+
+.app-shell {
+  --app-topbar: 56px;
+  --app-sidebar: 260px;
+  --app-rail: 64px;
+  --app-bottom: 64px;
+  min-block-size: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.skip-link {
+  position: absolute;
+  inset-inline-start: var(--space-sm);
+  inset-block-start: -100px;
+  z-index: 100;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+.skip-link:focus {
+  inset-block-start: var(--space-sm);
+}
+
+/* ---- top bar ---------------------------------------------------------- */
+.app-topbar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  block-size: var(--app-topbar);
+  padding-inline: var(--space-md);
+  background: var(--surface);
+  border-block-end: 1px solid var(--border);
+}
+
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--display);
+  font-weight: 700;
+  color: var(--text-h);
+  text-decoration: none;
+}
+
+.app-switcher {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.app-switcher-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-block-size: 32px;
+  padding-inline: var(--space-sm);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--text);
+  text-decoration: none;
+}
+.app-switcher-current {
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.app-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-inline-start: auto;
+}
+
+/* 44 px touch targets (tab 03B). */
+.app-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  padding-inline: var(--space-xs);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-h);
+  text-decoration: none;
+  cursor: pointer;
+}
+.app-icon-button:hover,
+.app-icon-button:focus-visible {
+  background: var(--bg-alt);
+}
+
+.app-profile {
+  position: relative;
+}
+.app-profile-menu {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: calc(100% + 4px);
+  z-index: 40;
+  inline-size: min(300px, 90vw);
+  padding: var(--space-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+.app-profile-menu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.app-profile-title {
+  margin: 0 0 var(--space-xs);
+  font-weight: 700;
+  color: var(--text-h);
+}
+.app-profile-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  inline-size: 100%;
+  min-block-size: 40px;
+  padding-inline: var(--space-xs);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+.app-profile-link:hover,
+.app-profile-link:focus-visible {
+  background: var(--bg-alt);
+}
+.app-profile-controls {
+  display: flex;
+  gap: var(--space-xs);
+  padding-block: var(--space-xs);
+  margin-block: var(--space-xs);
+  border-block: 1px solid var(--border);
+}
+
+/* ---- sidebar and content -------------------------------------------- */
+.app-body {
+  display: flex;
+}
+
+.app-sidebar {
+  position: sticky;
+  inset-block-start: var(--app-topbar);
+  flex: 0 0 auto;
+  block-size: calc(100vh - var(--app-topbar));
+  inline-size: var(--app-sidebar);
+  overflow-y: auto;
+  padding: var(--space-sm);
+  background: var(--surface);
+  border-inline-end: 1px solid var(--border);
+}
+.app-sidebar-toggle {
+  display: none;
+}
+
+.app-nav-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.app-nav-learn {
+  margin-block-start: var(--space-sm);
+  padding-block-start: var(--space-sm);
+  border-block-start: 1px solid var(--border);
+}
+.app-nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-block-size: 44px;
+  padding-inline: var(--space-sm);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  text-decoration: none;
+}
+.app-nav-link:hover,
+.app-nav-link:focus-visible {
+  background: var(--bg-alt);
+}
+/* The current page is said by weight and a bar, not by colour alone. */
+.app-nav-link.active {
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+[dir='rtl'] .app-nav-link.active {
+  box-shadow: inset -3px 0 0 var(--accent);
+}
+
+.app-main {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+/* ---- tablet: collapsible sidebar ----------------------------------- */
+@media (max-width: 1199px) {
+  .app-sidebar {
+    inline-size: var(--app-rail);
+    padding-inline: var(--space-xs);
+  }
+  .app-sidebar .app-nav-text {
+    display: none;
+  }
+  .app-sidebar .app-nav-link {
+    justify-content: center;
+  }
+  .app-sidebar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 100%;
+    min-block-size: 44px;
+    margin-block-end: var(--space-xs);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-h);
+    cursor: pointer;
+  }
+  .app-sidebar-expanded {
+    inline-size: var(--app-sidebar);
+  }
+  .app-sidebar-expanded .app-nav-text {
+    display: inline;
+  }
+  .app-sidebar-expanded .app-nav-link {
+    justify-content: flex-start;
+  }
+  .app-profile-name {
+    display: none;
+  }
+}
+
+/* ---- phone: bottom bar and « Plus » sheet --------------------------- */
+.app-bottom-nav,
+.app-more-sheet {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .app-topbar {
+    padding-inline: var(--space-sm);
+  }
+  .app-brand span,
+  .app-switcher {
+    display: none;
+  }
+  /* The search takes what is left of the bar and never pushes the profile
+     out of the screen (which would widen the whole page). */
+  .app-topbar-actions {
+    flex: 1;
+    min-inline-size: 0;
+    gap: 0;
+  }
+  .app-topbar .global-search {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+  .app-icon-button {
+    min-inline-size: 40px;
+  }
+  .app-sidebar {
+    display: none;
+  }
+  .app-main {
+    padding-block-end: calc(var(--app-bottom) + var(--space-sm));
+  }
+  .app-bottom-nav {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    block-size: var(--app-bottom);
+    background: var(--surface);
+    border-block-start: 1px solid var(--border);
+  }
+  .app-bottom-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-block-size: 44px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.7rem;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .app-bottom-link.active {
+    color: var(--text-h);
+    font-weight: 700;
+  }
+  .app-more-sheet {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: var(--app-bottom);
+    z-index: 29;
+    display: block;
+    max-block-size: 70vh;
+    overflow-y: auto;
+    padding: var(--space-sm);
+    background: var(--surface);
+    border-block-start: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+  }
+  .app-more-sheet .app-nav-list + .app-nav-list {
+    margin-block-start: var(--space-sm);
+    padding-block-start: var(--space-sm);
+    border-block-start: 1px solid var(--border);
+  }
+}

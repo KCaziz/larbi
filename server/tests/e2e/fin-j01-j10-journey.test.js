@@ -171,10 +171,12 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
     const rent = await categoryId('fixed.loyer');
     const savings = await categoryId('goal.reserve_de_securite');
 
-    // Essential expenses, then money actually set aside (a real movement on a
-    // "goal" category is how P6-09 reads savings).
+    // Essential expenses, money actually set aside, then the emergency-fund
+    // goal that holds it: PB-F018 measures the reserve on that goal's capital
+    // (P8-04, diagnostic n°2, C3).
     await api('POST', '/fin/transactions', { kind: 'expense', value: 3000000, currency: 'DZD', occurredAt: iso(-5), categoryId: rent }, user);
     await api('POST', '/fin/transactions', { kind: 'expense', value: 6000000, currency: 'DZD', occurredAt: iso(-4), categoryId: savings }, user);
+    await api('POST', '/fin/goals', { label: 'Fonds d’urgence', templateKey: 'emergency', target: 18000000, currency: 'DZD', targetDate: iso(400), allocated: 6000000 }, user);
     // The target in months, which the person chooses.
     await api('PUT', '/fin/reserve/cible', { targetMonths: 6 }, user);
 

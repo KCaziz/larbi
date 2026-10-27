@@ -17,7 +17,10 @@ const tools = [
   { key: 'invoice', icon: Receipt, tone: 'tone-clay', to: '/outils/facture', available: true },
 ];
 
-export default function ToolsPresentationPage() {
+// The same catalogue serves the showcase (`/outils`) and the application
+// (`/app/outils`, P8-02): inside the application, `base` keeps every link in
+// it. P8-15 turns it into the single catalogue of the application.
+export default function ToolsPresentationPage({ base = '' }) {
   const { t } = useTranslation();
 
   return (
@@ -40,7 +43,7 @@ export default function ToolsPresentationPage() {
               <h3>{t(`toolsPresentation.${tool.key}.title`)}</h3>
               <p>{t(`toolsPresentation.${tool.key}.body`)}</p>
               {tool.available && (
-                <Button to={tool.to} variant="ghost" arrow>
+                <Button to={`${base}${tool.to}`} variant="ghost" arrow>
                   {t('comparator.browseTheme')}
                 </Button>
               )}

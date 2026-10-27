@@ -12,12 +12,20 @@ import { CHANGE_ACTIONS } from '../constants/finData.js';
 // is not journalled: that is how a future table says what matters, instead of
 // dumping whole rows (which would also copy data the trail does not need).
 export const JOURNALLED_FIELDS = {
-  category: ['family', 'label', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
+  category: ['family', 'label', 'essential', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
   // "Mon argent" (P6-04). The amount, the date and the category are what a
   // person actually corrects, and what an old total was built from.
   income: ['label', 'categoryId', 'value', 'currency', 'frequency', 'startDate', 'endDate', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
+  // Accounts (P8-03): what changes a balance or where it is counted.
+  account: ['label', 'type', 'openingBalance', 'openingDate', 'includeInTotal', 'includeInNetWorth', 'overdraftAllowed', 'archivedAt', 'deletedAt'],
+  tag: ['name', 'color', 'autoCategoryId', 'archivedAt', 'deletedAt'],
   transaction: [
     'kind',
+    'accountId',
+    'tagId',
+    'payer',
+    'place',
+    'clearing',
     'value',
     'currency',
     'occurredAt',

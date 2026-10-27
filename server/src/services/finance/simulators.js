@@ -344,10 +344,11 @@ export const SIMULATOR_FUNCTIONS = {
     return run(
       {
         ...resultats,
-        // The savings are the envelope, the down payment is what is taken out of
-        // it: that is exactly F009's shape, and it answers the client's "réserve
-        // après apport" without inventing a formula.
-        reserveApresApport: computed('F009', f.remainingBudget(input.liquidSavings, input.downPayment), {
+        // The down payment is a withdrawal from the savings: what is left is
+        // F007, net savings once the withdrawal is deducted. It used to carry
+        // F009 (« budget restant »), whose « Pourquoi ? » then spoke of a budget
+        // that does not exist here (diagnostic n°2, C6).
+        reserveApresApport: computed('F007', f.netSavings(input.liquidSavings, input.downPayment), {
           inputs: { liquidSavings: input.liquidSavings, downPayment: input.downPayment },
           ...ctx,
         }),

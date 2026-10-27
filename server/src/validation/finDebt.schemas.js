@@ -21,6 +21,7 @@ export const createDebtSchema = z
     rate: rate.nullable().optional(),
     knownTotalCost: positiveAmount.nullable().optional(),
     dueDate: isoDate.nullable().optional(),
+    debtType: z.enum(['D-01', 'D-02', 'D-03', 'D-04', 'D-05']).nullable().optional(),
     note,
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
@@ -40,6 +41,7 @@ export const updateDebtSchema = z
     rate: rate.nullable().optional(),
     knownTotalCost: positiveAmount.nullable().optional(),
     dueDate: isoDate.nullable().optional(),
+    debtType: z.enum(['D-01', 'D-02', 'D-03', 'D-04', 'D-05']).nullable().optional(),
     note,
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
@@ -49,9 +51,26 @@ export const updateDebtSchema = z
   .refine((body) => Object.keys(body).some((key) => key !== 'reason'), { message: 'Nothing to change' });
 
 export const createDebtPaymentSchema = z
-  .object({ amount: amountSchema.min(1), currency: currencySchema, paidAt: isoDate, note })
+  // `accountId` (P8-13): the person's account the payment leaves (or, for a
+  // receivable, arrives on) — the payment is then a real transfer.
+  .object({ amount: amountSchema.min(1), currency: currencySchema, paidAt: isoDate, accountId: z.string().uuid().optional(), note })
   .strict();
 
 export const payoffQuerySchema = z
   .object({ extraPayment: z.coerce.number().int().min(0).max(100_000_000).optional(), strategy: z.enum(DEBT_STRATEGIES).optional() })
+  .strict();
+
+// « J'ai prêté » / « On m'a prêté » (P8-13, D-01 / D-02): the loan and its
+// real movement, in one call.
+export const simpleLoanSchema = z
+  .object({
+    direction: z.enum(['lent', 'borrowed']),
+    counterparty: z.string().trim().min(1).max(60),
+    accountId: z.string().uuid(),
+    value: amountSchema.min(1),
+    occurredAt: isoDate,
+    dueDate: isoDate.nullable().optional(),
+    monthlyInstalment: amountSchema.min(0).optional(),
+    note,
+  })
   .strict();

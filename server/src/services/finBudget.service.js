@@ -7,6 +7,8 @@
 // never only of the object's identity: a budget that is not yours is "not
 // found".
 
+import { REFERENCE_CATEGORIES } from '../constants/finCategoryReference.js';
+import { buildBudgetView } from './finBudgetView.service.js';
 import { BUDGET_RECURRENCES, DEFAULT_ALERT_THRESHOLDS, ENVELOPE_KINDS } from '../constants/finBudget.js';
 import { HttpError } from '../utils/httpError.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
@@ -23,6 +25,8 @@ const BUDGET_SELECT = {
   currency: true,
   recurrence: true,
   alertThresholds: true,
+  carryOver: true,
+  methodMapping: true,
   note: true,
   scope: true,
   source: true,
@@ -37,6 +41,7 @@ const ENVELOPE_SELECT = {
   id: true,
   budgetId: true,
   categoryId: true,
+  categoryGroup: true,
   kind: true,
   value: true,
   currency: true,
@@ -132,6 +137,37 @@ async function envelopeCategory(prisma, userId, categoryId) {
   return row.id;
 }
 
+// The client category groups an envelope may cover (P8-09): the expense
+// groups of the universal reference (P8-08).
+const EXPENSE_GROUPS = new Set(REFERENCE_CATEGORIES.filter((c) => c.family !== 'income' && c.group).map((c) => c.group));
+
+/**
+ * What an envelope covers: ONE sub-category, or ONE client category group
+ * (« Logement »…), never both — and never nothing.
+ */
+async function envelopeTarget(prisma, userId, { categoryId, categoryGroup }) {
+  const hasCategory = categoryId !== null && categoryId !== undefined;
+  const hasGroup = categoryGroup !== null && categoryGroup !== undefined;
+  if (hasCategory === hasGroup) throw new HttpError(422, 'An envelope covers a category or a group', { reason: 'categoryRequired' });
+  if (hasGroup) {
+    if (!EXPENSE_GROUPS.has(categoryGroup)) throw new HttpError(422, 'Unknown category group', { reason: 'unknownGroup' });
+    return { categoryId: null, categoryGroup };
+  }
+  return { categoryId: await envelopeCategory(prisma, userId, categoryId), categoryGroup: null };
+}
+
+async function assertTargetFree(prisma, budgetId, target, exceptId = null) {
+  if (target.categoryGroup) {
+    const clash = await prisma.finEnvelope.findFirst({
+      where: { budgetId, categoryGroup: target.categoryGroup, deletedAt: null, ...(exceptId ? { id: { not: exceptId } } : {}) },
+      select: { id: true },
+    });
+    if (clash) throw new HttpError(422, 'This group already has an envelope', { reason: 'duplicateEnvelope', envelopeId: clash.id });
+    return;
+  }
+  await assertCategoryFree(prisma, budgetId, target.categoryId, exceptId);
+}
+
 // Two envelopes on the same category inside one budget would split the same
 // money in two and make every rate wrong.
 async function assertCategoryFree(prisma, budgetId, categoryId, exceptId = null) {
@@ -180,11 +216,11 @@ export async function createBudget(prisma, userId, body) {
   const envelopes = [];
   for (const envelope of body.envelopes ?? []) {
     if (!ENVELOPE_KINDS.includes(envelope.kind)) throw new HttpError(422, 'Unknown envelope kind', { reason: 'unknownKind' });
-    const categoryId = await envelopeCategory(prisma, userId, envelope.categoryId);
-    if (envelopes.some((other) => other.categoryId === categoryId)) {
+    const target = await envelopeTarget(prisma, userId, envelope);
+    if (envelopes.some((other) => (target.categoryId && other.categoryId === target.categoryId) || (target.categoryGroup && other.categoryGroup === target.categoryGroup))) {
       throw new HttpError(422, 'This category already has an envelope', { reason: 'duplicateEnvelope' });
     }
-    envelopes.push({ ...envelope, categoryId });
+    envelopes.push({ ...envelope, ...target });
   }
 
   return prisma.$transaction(async (tx) => {
@@ -197,6 +233,8 @@ export async function createBudget(prisma, userId, body) {
         currency: body.currency,
         recurrence: body.recurrence ?? 'monthly',
         alertThresholds: body.alertThresholds ?? DEFAULT_ALERT_THRESHOLDS,
+        carryOver: body.carryOver ?? false,
+        methodMapping: body.methodMapping ?? {},
         note: body.note ?? null,
         scope: body.scope ?? 'personal',
         consentUses: body.consentUses ?? [],
@@ -221,6 +259,7 @@ export async function createBudget(prisma, userId, body) {
           userId,
           budgetId: budget.id,
           categoryId: envelope.categoryId,
+          categoryGroup: envelope.categoryGroup,
           kind: envelope.kind,
           value: envelope.value,
           // The envelope's currency is the budget's, always: an envelope in
@@ -367,15 +406,15 @@ export async function duplicateBudget(prisma, userId, id, { label } = {}) {
 export async function createEnvelope(prisma, userId, budgetId, body) {
   const budget = await ownBudget(prisma, userId, budgetId);
   if (!ENVELOPE_KINDS.includes(body.kind)) throw new HttpError(422, 'Unknown envelope kind', { reason: 'unknownKind' });
-  const categoryId = await envelopeCategory(prisma, userId, body.categoryId);
-  await assertCategoryFree(prisma, budgetId, categoryId);
+  const target = await envelopeTarget(prisma, userId, body);
+  await assertTargetFree(prisma, budgetId, target);
 
   return prisma.$transaction(async (tx) => {
     const row = await tx.finEnvelope.create({
       data: {
         userId,
         budgetId,
-        categoryId,
+        ...target,
         kind: body.kind,
         value: body.value,
         currency: budget.currency,
@@ -413,9 +452,10 @@ export async function updateEnvelope(prisma, userId, budgetId, id, body) {
   const before = await ownEnvelope(prisma, userId, budgetId, id);
   const { reason, ...fields } = body;
   if (fields.kind !== undefined && !ENVELOPE_KINDS.includes(fields.kind)) throw new HttpError(422, 'Unknown envelope kind', { reason: 'unknownKind' });
-  if (fields.categoryId !== undefined) {
-    fields.categoryId = await envelopeCategory(prisma, userId, fields.categoryId);
-    await assertCategoryFree(prisma, budgetId, fields.categoryId, id);
+  if (fields.categoryId !== undefined || fields.categoryGroup !== undefined) {
+    const target = await envelopeTarget(prisma, userId, { categoryId: fields.categoryId ?? null, categoryGroup: fields.categoryGroup ?? null });
+    await assertTargetFree(prisma, budgetId, target, id);
+    Object.assign(fields, target);
   }
   // The ceiling is a ceiling: below the planned amount it would contradict it.
   const value = fields.value ?? before.value;
@@ -443,11 +483,21 @@ export async function deleteEnvelope(prisma, userId, budgetId, id, { reason } = 
 // Everything one budget's view needs, in one place so the page and the home
 // screen (P6-06) cannot read it two different ways.
 export async function loadBudgetData(prisma, userId, budget) {
-  const [envelopes, movements, incomes] = await Promise.all([
+  const [envelopes, movements, incomes, goals] = await Promise.all([
     listEnvelopes(prisma, userId, budget.id),
     prisma.finTransaction.findMany({
       where: { userId, deletedAt: null, occurredAt: { gte: budget.periodStart, lte: budget.periodEnd } },
-      select: { id: true, kind: true, value: true, currency: true, categoryId: true, planned: true, status: true, occurredAt: true },
+      select: {
+        id: true,
+        kind: true,
+        value: true,
+        currency: true,
+        categoryId: true,
+        planned: true,
+        status: true,
+        occurredAt: true,
+        category: { select: { family: true, group: true, essential: true } },
+      },
     }),
     prisma.finIncome.findMany({
       where: {
@@ -459,8 +509,39 @@ export async function loadBudgetData(prisma, userId, budget) {
       },
       select: { id: true, label: true, value: true, currency: true, frequency: true, status: true },
     }),
+    // The real goals' planned monthly contributions: what PB-F009 counts as
+    // allocated outside the budget. A fictional goal plays with money that
+    // was never planned, so it is left out.
+    prisma.finGoal.findMany({
+      where: { userId, deletedAt: null, archivedAt: null, status: { not: 'fictional' } },
+      select: { currency: true, monthlyContribution: true },
+    }),
   ]);
-  return { envelopes, movements, incomes };
+  return { envelopes, movements, incomes, goals, carry: budget.carryOver ? await carryFromPrevious(prisma, userId, budget) : null };
+}
+
+/**
+ * « Report du reste » (PB-F008's « ajustements de report »): the POSITIVE
+ * remainder of each envelope of the previous budget, by what it covered — the
+ * default retained until the client answers question C1 (an overspend is not
+ * carried as a debt). One period back only: a remainder carried from further
+ * back is already inside the previous budget's own figures.
+ */
+async function carryFromPrevious(prisma, userId, budget) {
+  const previous = await prisma.finBudget.findFirst({
+    where: { userId, deletedAt: null, currency: budget.currency, periodEnd: { lt: budget.periodStart } },
+    select: BUDGET_SELECT,
+    orderBy: { periodEnd: 'desc' },
+  });
+  if (!previous) return null;
+  const data = await loadBudgetData(prisma, userId, { ...previous, carryOver: false });
+  const view = buildBudgetView({ budget: previous, ...data, now: previous.periodEnd });
+  const carry = {};
+  for (const line of view.enveloppes) {
+    const left = line.ecart.resultat;
+    if (left !== null && left > 0) carry[line.categoryGroup ? `group:${line.categoryGroup}` : `category:${line.categoryId}`] = left;
+  }
+  return { fromBudget: previous.id, amounts: carry };
 }
 
 // The budget whose period contains `at` — what "my budget" means on a home

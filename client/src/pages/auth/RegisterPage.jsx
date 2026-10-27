@@ -53,7 +53,7 @@ export default function RegisterPage() {
         password: form.password,
         accountType,
       });
-      navigate('/compte', { replace: true });
+      navigate('/app', { replace: true });
     } catch (err) {
       setError(t(errorKey(err, { 409: 'auth.register.emailTaken' })));
       setSubmitting(false);

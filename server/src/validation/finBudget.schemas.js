@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { BUDGET_RECURRENCES, ENVELOPE_KINDS, MAX_ALERT_THRESHOLDS, MAX_PROPOSAL_MONTHS } from '../constants/finBudget.js';
 import { amountSchema, consentUsesSchema, currencySchema, reasonSchema, scopeSchema } from './finData.schemas.js';
+import { POCKET_RULES } from '../constants/finBudgetMethods.js';
 
 // Budgets and envelopes (P6-05). The vocabularies come from the constants, so
 // what the database refuses and what validation refuses are the same lists.
@@ -21,8 +22,17 @@ const alertThresholdsSchema = z
   .max(MAX_ALERT_THRESHOLDS)
   .refine((list) => new Set(list).size === list.length, { message: 'The same threshold is listed twice' });
 
+// The person's pocket for a client category group (tab 12B, editable).
+const methodMappingSchema = z.record(z.string().trim().min(1).max(60), z.enum(POCKET_RULES)).refine((value) => Object.keys(value).length <= 40, { message: 'Too many groups' });
+
+// The optional methods' analysis (P8-09).
+export const methodQuerySchema = z.object({ methode: z.enum(['M-01', 'M-02', 'M-03', 'M-04']) }).strict();
+
 const envelopeFields = {
-  categoryId: z.string().uuid(),
+  // A sub-category OR a client category group (« Logement »…, P8-09): one of
+  // the two, checked by the service.
+  categoryId: z.string().uuid().nullable().optional(),
+  categoryGroup: z.string().trim().min(1).max(60).nullable().optional(),
   kind: z.enum(ENVELOPE_KINDS),
   value: plannedAmount,
   // The optional « plafond » of the client's own wording. Null is "no ceiling",
@@ -40,6 +50,8 @@ export const createBudgetSchema = z
     currency: currencySchema,
     recurrence: z.enum(BUDGET_RECURRENCES).optional(),
     alertThresholds: alertThresholdsSchema.optional(),
+    carryOver: z.boolean().optional(),
+    methodMapping: methodMappingSchema.optional(),
     note,
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
@@ -64,6 +76,8 @@ export const updateBudgetSchema = z
     currency: currencySchema.optional(),
     recurrence: z.enum(BUDGET_RECURRENCES).optional(),
     alertThresholds: alertThresholdsSchema.optional(),
+    carryOver: z.boolean().optional(),
+    methodMapping: methodMappingSchema.optional(),
     note,
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
@@ -79,7 +93,8 @@ export const createEnvelopeSchema = z.object(envelopeFields).strict().refine(
 
 export const updateEnvelopeSchema = z
   .object({
-    categoryId: z.string().uuid().optional(),
+    categoryId: z.string().uuid().nullable().optional(),
+    categoryGroup: z.string().trim().min(1).max(60).nullable().optional(),
     kind: z.enum(ENVELOPE_KINDS).optional(),
     value: plannedAmount.optional(),
     cap: plannedAmount.nullable().optional(),

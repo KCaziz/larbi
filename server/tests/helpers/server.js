@@ -79,12 +79,15 @@ export async function boot({ production = false, extra = {} } = {}) {
     // put back. A database without them is not a valid state (the consistency
     // control says so), and every test that offers a category needs them.
     await replayMigrationInserts('_fin_data_model', 'fin_categories');
+    // And the client's 125 universal categories (P8-08): the old rows they
+    // absorb are updated in place, the others inserted.
+    await replayMigrationInserts('_fin_categories_125', 'fin_categories', { updates: true });
   }
 
   // Replays the INSERT statements a migration carries for ONE table. Used for
   // reference data that reset() has to restore; the statements only insert, with
   // fixed ids, so a test reads the data the client gave rather than a copy of it.
-  async function replayMigrationInserts(migrationSuffix, table) {
+  async function replayMigrationInserts(migrationSuffix, table, { updates = false } = {}) {
     const dir = path.join(SERVER_DIR, 'prisma', 'migrations');
     const name = readdirSync(dir).find((d) => d.endsWith(migrationSuffix));
     if (!name) throw new Error(`migration ${migrationSuffix} not found`);
@@ -92,8 +95,8 @@ export async function boot({ production = false, extra = {} } = {}) {
       .split('\n')
       .filter((line) => !line.startsWith('--'))
       .join('\n');
-    const wanted = `INSERT INTO \`${table}\``;
-    for (const statement of sql.split(/;\s*$/m).map((x) => x.trim()).filter((x) => x.startsWith(wanted))) {
+    const wanted = [`INSERT INTO \`${table}\``, ...(updates ? [`UPDATE \`${table}\``] : [])];
+    for (const statement of sql.split(/;\s*$/m).map((x) => x.trim()).filter((x) => wanted.some((start) => x.startsWith(start)))) {
       await prisma.$executeRawUnsafe(statement);
     }
   }

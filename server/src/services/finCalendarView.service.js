@@ -84,7 +84,7 @@ export function occurrencesOf(recurrence, from, to, { maxOccurrences = 400 } = {
  * `recurrences` confirmed recurrences, projected over the period
  * `provisions`  provisions whose due date falls in the period
  */
-export function collectEvents({ planned = [], recurrences = [], provisions = [], from, to, currency }) {
+export function collectEvents({ planned = [], recurrences = [], provisions = [], outcomes = [], debts = [], goals = [], from, to, currency, occurrencesOf: expand = null }) {
   const events = [];
 
   for (const row of planned) {
@@ -105,10 +105,21 @@ export function collectEvents({ planned = [], recurrences = [], provisions = [],
 
   for (const recurrence of recurrences) {
     if (recurrence.currency !== currency) continue;
-    for (const date of occurrencesOf(recurrence, from, to)) {
+    // P8-11: each occurrence with what was said about it (`expand`, from
+    // finOccurrence.service.js — injected to keep this module pure). A
+    // confirmed occurrence is a real movement now, and a missed one did not
+    // happen: neither is expected any more.
+    const occurrences = expand ? expand(recurrence, outcomes, from, to) : occurrencesOf(recurrence, from, to).map((date) => ({ dueDate: date, date, outcome: null }));
+    for (const occurrence of occurrences) {
+      if (occurrence.outcome === 'confirmed' || occurrence.outcome === 'missed') continue;
+      const date = occurrence.date;
       events.push({
         kind: 'recurrence',
         date,
+        dueDate: dayKey(occurrence.dueDate),
+        postponed: occurrence.outcome === 'postponed',
+        mode: recurrence.creationMode ?? 'confirm',
+        accountId: recurrence.accountId ?? null,
         label: recurrence.label,
         value: recurrence.value,
         currency: recurrence.currency,
@@ -117,9 +128,24 @@ export function collectEvents({ planned = [], recurrences = [], provisions = [],
         // The direction matters for the projection: a salary is a recurrence
         // too, and subtracting it would be the wrong sign.
         inflow: recurrence.kind === 'income',
-        confirmable: false,
+        // « Confirmer, Modifier, Pas reçu, Reporter » the day it falls, unless
+        // the person asked for it to be recorded on its own.
+        confirmable: (recurrence.creationMode ?? 'confirm') !== 'auto_real',
       });
     }
+  }
+
+  // « Échéances » (tab 08): a debt's due date and a goal's target date. They
+  // are reminders that open their object, not money of the period: they are
+  // never counted in the projected cash (an instalment that is a recurrence
+  // already is).
+  for (const debt of debts) {
+    if (debt.currency !== currency || !debt.dueDate || debt.dueDate < startOfDay(from) || debt.dueDate > to) continue;
+    events.push({ kind: 'debt_due', date: debt.dueDate, label: debt.label, value: debt.monthlyInstalment, currency, categoryId: null, sourceId: debt.id, confirmable: false, informational: true });
+  }
+  for (const goal of goals) {
+    if (goal.currency !== currency || !goal.targetDate || goal.targetDate < startOfDay(from) || goal.targetDate > to) continue;
+    events.push({ kind: 'goal_due', date: goal.targetDate, label: goal.label, value: goal.target, currency, categoryId: null, sourceId: goal.id, confirmable: false, informational: true });
   }
 
   for (const provision of provisions) {
@@ -164,8 +190,11 @@ export function buildCalendar({
   now = new Date(),
 }) {
   const warnings = [];
-  const outflows = events.filter((event) => !isInflow(event));
-  const inflows = events.filter(isInflow);
+  // Informational dates (a debt's due date, a goal's target) are listed, never
+  // counted as money of the period.
+  const moneyEvents = events.filter((event) => !event.informational);
+  const outflows = moneyEvents.filter((event) => !isInflow(event));
+  const inflows = moneyEvents.filter(isInflow);
 
   // A provision is not a payment of the period: the money is being set aside
   // for a dated expense, and the client says a provision creates no realised
@@ -194,7 +223,7 @@ export function buildCalendar({
   let running = openingBalance;
   if (openingBalance === null) {
     warnings.push(
-      "Aucun solde de départ n'a été indiqué : le cash projeté et les jours de tension ne sont pas calculés, car les déduire d'autre chose serait les inventer.",
+      "Aucun compte n'est encore compté dans le solde total : le cash projeté et les jours de tension ne sont pas calculés, car les déduire d'autre chose serait les inventer.",
     );
   }
   const byDay = new Map();
@@ -207,7 +236,7 @@ export function buildCalendar({
   const days = eachDay(from, to).map((date) => {
     const key = dayKey(date);
     const list = byDay.get(key) ?? [];
-    const dayOut = list.filter((event) => !isInflow(event) && event.kind !== 'provision').reduce((sum, event) => sum + event.value, 0);
+    const dayOut = list.filter((event) => !isInflow(event) && event.kind !== 'provision' && !event.informational).reduce((sum, event) => sum + event.value, 0);
     const dayIn = list.filter(isInflow).reduce((sum, event) => sum + event.value, 0);
     if (running !== null) running += dayIn - dayOut;
     return {

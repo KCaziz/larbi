@@ -156,7 +156,7 @@ describe('P6-05 — envelopes', () => {
   });
 
   test('an archived category cannot be chosen anew', async () => {
-    const own = await t.request('POST', '/fin/categories', { user, json: { family: 'variable', label: 'Sorties' } });
+    const own = await t.request('POST', '/fin/categories', { user, json: { family: 'variable', label: 'Sorties du jeudi' } });
     await t.request('PUT', `/fin/categories/${own.body.category.id}/archive`, { user, json: { archived: true } });
     const res = await t.request('POST', `/fin/budgets/${budget.id}/enveloppes`, {
       user,
@@ -291,7 +291,7 @@ describe('P6-05 — the figures of screen C06', () => {
   });
 
   test('spending no envelope covers is shown apart', async () => {
-    const other = await t.request('POST', '/fin/categories', { user, json: { family: 'variable', label: 'Sorties' } });
+    const other = await t.request('POST', '/fin/categories', { user, json: { family: 'variable', label: 'Sorties du jeudi' } });
     await addMovement({ value: 300000, categoryId: other.body.category.id });
     const vue = await view();
     assert.equal(vue.horsEnveloppe.resultat, 300000);
@@ -350,5 +350,55 @@ describe('P6-05 — the proposed distribution', () => {
     const line = res.body.proposition.find((row) => row.categoryId === charges.id);
     assert.equal(line.source, 'history');
     assert.equal(line.propose, 3000000, 'a measurement beats a guess');
+  });
+});
+
+describe('P8-09 — one allocation, attached to the most specific envelope', () => {
+  const daysAgo = (days) => new Date(Date.now() - days * 86_400_000).toISOString();
+  const monthStart = () => new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1));
+  const monthEnd = () => new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 0));
+  const category = async (key) => (await t.prisma.finCategory.findFirst({ where: { key, userId: null }, select: { id: true } })).id;
+
+  test('an expense goes to its sub-category’s envelope, else to its group’s, never both', async () => {
+    const owner = await t.adult({ name: 'Budget P8-09' });
+    const courses = await category('variable.alimentation_boissons');
+    const restaurant = await category('variable.restaurant');
+    const created = await t.request('POST', '/fin/budgets', {
+      user: owner,
+      json: {
+        label: 'Mois',
+        periodStart: monthStart().toISOString(),
+        periodEnd: monthEnd().toISOString(),
+        currency: 'DZD',
+        envelopes: [
+          { categoryId: courses, kind: 'variable', value: 2000000 },
+          { categoryGroup: 'Alimentation', kind: 'variable', value: 1000000 },
+        ],
+      },
+    });
+    assert.equal(created.status, 201, JSON.stringify(created.body).slice(0, 200));
+    const occurredAt = new Date(Math.min(Date.now(), monthStart().getTime() + 86_400_000)).toISOString();
+    await t.request('POST', '/fin/transactions', { user: owner, json: { kind: 'expense', value: 300000, currency: 'DZD', occurredAt, categoryId: courses } });
+    await t.request('POST', '/fin/transactions', { user: owner, json: { kind: 'expense', value: 80000, currency: 'DZD', occurredAt, categoryId: restaurant } });
+    const view = (await t.request('GET', `/fin/budgets/${created.body.budget.id}`, { user: owner })).body.vue;
+    const line = (match) => view.enveloppes.find(match);
+    assert.equal(line((l) => l.categoryId === courses).reel, 300000);
+    assert.equal(line((l) => l.categoryGroup === 'Alimentation').reel, 80000, 'the restaurant falls back on the group');
+    assert.equal(line((l) => l.categoryGroup === 'Alimentation').label, 'Alimentation');
+    assert.equal(view.moyenneJournaliere.formule_id, 'PB-F011');
+
+    const method = await t.request('GET', `/fin/budgets/${created.body.budget.id}/methode?methode=M-01`, { user: owner });
+    assert.equal(method.status, 200);
+    assert.equal(method.body.poches[0].part.formule_id, 'AN-F005');
+    assert.ok(method.body.rattachement.some((row) => row.groupe === 'Logement' && row.parDefaut === 'needs'), 'the mapping is visible');
+  });
+
+  test('an envelope needs a category or a group, not both, and the group must be the client’s', async () => {
+    const owner = await t.adult({ name: 'Budget P8-09 bis' });
+    const budget = (await t.request('POST', '/fin/budgets', { user: owner, json: { label: 'Mois', periodStart: monthStart().toISOString(), periodEnd: monthEnd().toISOString(), currency: 'DZD' } })).body.budget;
+    const add = (json) => t.request('POST', `/fin/budgets/${budget.id}/enveloppes`, { user: owner, json: { kind: 'variable', value: 1000, ...json } });
+    assert.equal((await add({})).status, 422);
+    assert.equal((await add({ categoryGroup: 'Inventé' })).status, 422);
+    assert.equal((await add({ categoryGroup: 'Logement' })).status, 201);
   });
 });

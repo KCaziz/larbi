@@ -28,7 +28,7 @@ import {
   updatePortfolio,
 } from '../services/finPaper.service.js';
 import { buildReserveView } from '../services/finReserve.service.js';
-import { buildSynthesis, currentMonth, loadSynthesisData } from '../services/finSynthesis.service.js';
+import { buildSynthesis, currentMonth, debtRatioIncome, loadSynthesisData } from '../services/finSynthesis.service.js';
 import { describeFormula } from '../services/finance/describe.js';
 
 // Paper portfolio and investment workshop (P6-12), screens C17 and EP03-EP07.
@@ -186,7 +186,7 @@ export async function getReadiness(req, res) {
     loadSynthesisData(prisma, req.user.id, period),
   ]);
   const synthesis = buildSynthesis({ ...synthesisData, fallbackCurrency: currency, period });
-  const debts = debtRows.length === 0 ? null : buildDebtSynthesis(debtRows, { netMonthlyIncome: synthesis.revenus.resultat, currency });
+  const debts = debtRows.length === 0 ? null : buildDebtSynthesis(debtRows, { netMonthlyIncome: debtRatioIncome(synthesis), currency });
 
   res.json({
     diagnostic: readiness({

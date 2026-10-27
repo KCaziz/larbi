@@ -195,7 +195,9 @@ describe('P6-07 — the calendar', () => {
     await addMovement({ planned: true, occurredAt: iso(inDays(5)), note: 'Loyer', categoryId: rent });
     await addProvision({ targetDate: iso(inDays(6)) });
 
-    const res = await t.request('GET', '/fin/calendrier', { user });
+    // An explicit window: « the month » alone made this test fail in the last
+    // days of a month, when J+5 is already the next one.
+    const res = await t.request('GET', `/fin/calendrier?from=${iso(ago(1))}&to=${iso(inDays(10))}`, { user });
     assert.equal(res.status, 200);
     const kinds = res.body.calendrier.jours.flatMap((day) => day.evenements.map((event) => event.kind));
     assert.ok(kinds.includes('recurrence'));
@@ -207,23 +209,29 @@ describe('P6-07 — the calendar', () => {
     assert.equal(planned.categoryLabel, 'Loyer');
   });
 
-  test('without a declared balance the projection says so instead of starting at zero', async () => {
-    await addMovement({ planned: true, occurredAt: iso(inDays(3)) });
+  // Since P8-11 (C23, diagnostic n°2 C7) the projection starts from the
+  // balance of the accounts (PB-F002), never from a figure typed by hand.
+  const addAccount = (openingBalance) =>
+    t.request('POST', '/fin/comptes', { user, json: { label: 'Courant', type: 'AC-02', currency: 'DZD', openingBalance, openingDate: iso(ago(60)) } });
+
+  test('without any account counted in the total the projection says so instead of starting at zero', async () => {
     const res = await t.request('GET', '/fin/calendrier', { user });
     assert.equal(res.body.calendrier.cashFinProjete, null);
     assert.equal(res.body.calendrier.premierJourTension, null);
-    assert.ok(res.body.calendrier.avertissements.some((text) => text.includes('solde de départ')));
+    assert.ok(res.body.calendrier.avertissements.some((text) => text.includes('compte')));
   });
 
-  test('a declared balance gives the projected cash and the days of tension', async () => {
-    await addMovement({ value: 500000, planned: true, occurredAt: iso(inDays(2)) });
-    const res = await t.request('GET', '/fin/calendrier?solde=300000', { user });
+  test('the balance of the accounts gives the projected cash and the days of tension', async () => {
+    const account = (await addAccount(300000)).body.account;
+    await addMovement({ value: 500000, planned: true, occurredAt: iso(inDays(2)), accountId: account.id });
+    const res = await t.request('GET', `/fin/calendrier?from=${iso(ago(1))}&to=${iso(inDays(10))}`, { user });
     assert.equal(res.body.calendrier.cashFinProjete, -200000);
     assert.ok(res.body.calendrier.premierJourTension, 'the day the money runs out is named');
   });
 
-  test('a negative declared balance is accepted: somebody may be in the red', async () => {
-    const res = await t.request('GET', '/fin/calendrier?solde=-50000', { user });
+  test('an account in the red starts the projection in the red', async () => {
+    await addAccount(-50000);
+    const res = await t.request('GET', '/fin/calendrier', { user });
     assert.equal(res.status, 200);
     assert.equal(res.body.calendrier.cashFinProjete, -50000);
   });

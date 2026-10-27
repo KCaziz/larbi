@@ -2644,7 +2644,8 @@
     "errors": {
       "labelTaken": "Vous avez déjà une catégorie de ce nom dans cette famille.",
       "tooMany": "Vous avez atteint le nombre maximal de catégories dans cette famille."
-    }
+    },
+    "essential": "Essentielle"
   },
   "fincludia": {
     "notComputed": "non calculé",
@@ -2735,14 +2736,27 @@
       "CR07": "Le montant maximal que la banque financerait selon sa part minimale d'apport.",
       "CR08": "Le montant maximal réellement empruntable, en tenant compte de toutes les limites de la banque.",
       "CR09": "Ce que ce crédit vous coûtera au total, frais et assurance compris.",
-      "CR10": "L'apport personnel minimal à prévoir pour ce financement."
+      "CR10": "L'apport personnel minimal à prévoir pour ce financement.",
+      "PB-F004": "La somme des revenus réellement reçus sur la période. Les revenus seulement prévus ne sont pas comptés, ni l’argent déplacé vers l’épargne.",
+      "PB-F005": "La somme des dépenses réellement payées sur la période. L’argent mis de côté pour un objectif n’est pas une dépense.",
+      "PB-F006": "Ce qui est réellement entré moins ce qui est réellement sorti sur la période.",
+      "PB-F007": "Le total des montants que vous avez prévus dans vos enveloppes pour cette période.",
+      "PB-F008": "Ce qui reste dans l’enveloppe : le montant prévu moins ce qui a été réellement dépensé. Négatif s’il y a dépassement.",
+      "PB-F009": "Vos revenus prévus, moins ce que vous avez déjà réparti dans vos enveloppes et dans vos apports prévus aux objectifs.",
+      "PB-F010": "La part de l’enveloppe déjà consommée.",
+      "PB-F013": "Ce qui reste dans vos enveloppes, divisé par les jours restants de la période.",
+      "PB-F017": "Vos dépenses essentielles d’un mois, multipliées par le nombre de mois que vous visez.",
+      "PB-F018": "Combien de mois de dépenses essentielles votre fonds d’urgence couvre aujourd’hui.",
+      "PB-F019": "Ce qu’il manque à votre fonds d’urgence pour atteindre sa cible."
     },
     "period": {
       "legend": "Période",
       "semaine": "Semaine",
       "mois": "Mois",
       "90jours": "90 jours",
-      "annee": "Année"
+      "annee": "Année",
+      "jour": "Jour",
+      "periode": "Période"
     },
     "reality": {
       "legend": "Réel ou fictif",
@@ -2886,7 +2900,7 @@
     "title": "Mon argent",
     "intro": "Vos ressources, vos dépenses et ce qu’il vous reste. Chaque chiffre indique la formule qui l’a produit.",
     "synthesisTitle": "Synthèse",
-    "income": "Revenus",
+    "income": "Revenus reçus",
     "expenses": "Dépenses",
     "netFlow": "Flux net",
     "monthlyTrendTitle": "Revenus et dépenses des derniers mois",
@@ -2962,7 +2976,9 @@
       "date_asc": "Plus anciennes",
       "amount_desc": "Montant décroissant",
       "amount_asc": "Montant croissant"
-    }
+    },
+    "expectedIncome": "Revenus prévus",
+    "incomeGroup": "Revenus · {{group}}"
   },
   "budget": {
     "title": "Budget",
@@ -3043,7 +3059,39 @@
     "noProposal": "Aucune proposition pour le moment.",
     "envelopeAdded": "Enveloppe ajoutée.",
     "envelopeDeleted": "Enveloppe supprimée.",
-    "deleteEnvelopeConfirm": "Supprimer cette enveloppe ?"
+    "deleteEnvelopeConfirm": "Supprimer cette enveloppe ?",
+    "overspent": "Les enveloppes sont dépassées de {{amount}}. Le budget par jour reste à 0 tant que ce dépassement dure.",
+    "saved": "Budget enregistré.",
+    "dailyAverage": "Dépense moyenne par jour",
+    "projection": "Projection fin de période",
+    "plannedVsRealGap": "Écart réel − prévu",
+    "carryOver": "Reporter le reste de la période précédente",
+    "carried": "report : {{amount}}",
+    "wholeGroups": "Catégories entières",
+    "subCategories": "Sous-catégories",
+    "mostSpecificHint": "Une dépense va à l’enveloppe de sa sous-catégorie si elle existe, sinon à celle de sa catégorie.",
+    "methods": {
+      "title": "Méthodes de budget (facultatif)",
+      "intro": "Une méthode compare votre mois à un cadre connu. Elle ne vous impose rien et ne déplace aucun argent.",
+      "choose": "Comparer avec",
+      "none": "Aucune méthode",
+      "respected": "Enveloppes respectées",
+      "mapping": "Quelle catégorie va dans quelle poche ?",
+      "defaultPocket": "Par défaut : {{pocket}}",
+      "pockets": {
+        "needs": "Besoins (cible {{target}} %)",
+        "wants": "Envies (cible {{target}} %)",
+        "savings": "Épargne (cible {{target}} %)",
+        "spending": "Dépenses (cible {{target}} %)"
+      },
+      "pocketNames": {
+        "needs": "Besoins",
+        "wants": "Envies",
+        "savings": "Épargne",
+        "unclassified": "À classer",
+        "byEssential": "Selon « essentielle »"
+      }
+    }
   },
   "goals": {
     "title": "Objectifs",
@@ -3077,6 +3125,39 @@
     "updated": "Mis à jour.",
     "errors": {
       "refused": "Cette action a été refusée. Le capital affecté ne peut pas dépasser votre épargne réellement constatée."
+    },
+    "emergencyTitle": "Fonds d’urgence",
+    "emergencyDetail": "Voir et régler mon fonds d’urgence",
+    "defaultTarget_one": "Cible proposée selon votre profil : {{count}} mois de dépenses essentielles. Vous pouvez la changer.",
+    "defaultTarget_other": "Cible proposée selon votre profil : {{count}} mois de dépenses essentielles. Vous pouvez la changer.",
+    "status": "Statut",
+    "statuses": {
+      "active": "En cours",
+      "reached": "Atteint",
+      "paused": "En pause",
+      "stopped": "Arrêté"
+    },
+    "capitalOverTarget": "{{capital}} sur {{target}}",
+    "excess": "excédent : {{amount}}",
+    "capitalFromAccount": "(le solde du compte de l’objectif)",
+    "minimumMonths": "Mois minimum à ce rythme",
+    "contributions": "Contributions",
+    "fromAccount": "depuis {{account}}",
+    "contributeFrom": "Depuis le compte",
+    "contribution": "Montant à mettre de côté",
+    "contribute": "Contribuer",
+    "contributed": "Contribution enregistrée : c’est un transfert vers le compte de l’objectif.",
+    "noSourceAccount": "Créez d’abord un compte dans « Mes comptes » pour contribuer à cet objectif.",
+    "scenario": {
+      "title": "Simuler un scénario",
+      "months": "Horizon (mois)",
+      "inflation": "Inflation annuelle (%)",
+      "rate": "Rendement hypothétique annuel (%)",
+      "raise": "Hausse annuelle de la contribution (%)",
+      "run": "Simuler",
+      "monthsToReach": "Mois pour atteindre la cible",
+      "atHorizon": "À l’horizon : {{capital}} pour une cible de {{target}} (inflation comprise).",
+      "disclaimer": "Une simulation avec vos hypothèses : ni une promesse, ni un conseil. Rien n’est enregistré."
     }
   },
   "debts": {
@@ -3117,6 +3198,23 @@
     "deleted": "Supprimé.",
     "errors": {
       "refused": "Cette action a été refusée. Vérifiez les informations saisies."
+    },
+    "outstanding": "Encours (ce que je dois)",
+    "receivables": "Créances : ce qu’on me doit ({{amount}})",
+    "recordRepaymentReceived": "Remboursement reçu",
+    "fromAccount": "Depuis le compte",
+    "toAccount": "Vers le compte",
+    "loans": {
+      "lent": "J’ai prêté",
+      "borrowed": "On m’a prêté",
+      "lentHint": "L’argent quitte votre compte aujourd’hui ; la somme qu’on vous doit est suivie à part, jamais comptée comme une dépense.",
+      "borrowedHint": "L’argent arrive sur votre compte ; la dette est suivie à part, jamais comptée comme un revenu.",
+      "lentWho": "À qui ?",
+      "borrowedWho": "Qui vous a prêté ?",
+      "amount": "Montant",
+      "dueDate": "Remboursement prévu le (facultatif)",
+      "saved": "Prêt enregistré, avec le mouvement réel sur votre compte.",
+      "noAccount": "Créez d’abord un compte dans « Mes comptes »."
     }
   },
   "reserve": {
@@ -3125,7 +3223,7 @@
     "months": "Mois de réserve",
     "targetAmount": "Montant cible",
     "gap": "Manque",
-    "liquidSavings": "Épargne liquide",
+    "liquidSavings": "Capital du fonds d’urgence",
     "essentialExpenses": "Dépenses essentielles mensuelles",
     "chooseTarget": "Votre cible, en mois",
     "chooseTargetHint": "À vous de la choisir : aucune valeur n’est proposée par défaut.",
@@ -3162,7 +3260,9 @@
       "planned_expense": "Dépense planifiée",
       "planned_income": "Entrée planifiée",
       "recurrence": "Récurrence",
-      "provision": "Provision"
+      "provision": "Provision",
+      "debt_due": "Échéance de dette",
+      "goal_due": "Date d’objectif"
     },
     "planTitle": "Plan du mois",
     "planHelp": "Reprend les paiements planifiés du mois précédent, décalés d'un mois. Les dépenses déjà réalisées ne sont jamais copiées : ce serait inventer un paiement.",
@@ -3217,7 +3317,13 @@
       "amount": "Montant",
       "kind": "Type",
       "frequency": "Fréquence",
-      "nextDate": "Prochaine échéance"
+      "nextDate": "Prochaine échéance",
+      "realDate": "Date réelle",
+      "newDate": "Nouvelle date",
+      "salaryDay": "Prochaine date (pour un salaire : le jour du mois où vous le recevez)",
+      "creationMode": "Le jour venu",
+      "weekendRule": "Si ce jour tombe un week-end",
+      "reminders": "Me le rappeler"
     },
     "save": "Enregistrer",
     "cancel": "Annuler",
@@ -3225,6 +3331,41 @@
       "amount": "Indiquez un montant en nombre entier.",
       "provisionedAboveValue": "Le montant déjà provisionné dépasse la dépense prévue.",
       "refused": "Cette opération a été refusée. Vérifiez les dates et les montants."
+    },
+    "fromAccounts": "Le cash projeté part du solde de vos comptes comptés dans le total.",
+    "tabsLabel": "Que montrer",
+    "tabs": {
+      "all": "Tout",
+      "income": "Revenus",
+      "expense": "Dépenses",
+      "due": "Échéances"
+    },
+    "open": "Ouvrir",
+    "postponedFrom": "reporté (prévu le {{date}})",
+    "occurrence": {
+      "confirm": "Confirmer",
+      "modify": "Modifier",
+      "missed": "Pas reçu",
+      "postpone": "Reporter",
+      "confirmDone": "Confirmé : le mouvement est enregistré.",
+      "modifyDone": "Enregistré avec le montant ou la date corrigés.",
+      "missedDone": "Noté : rien n’a été enregistré.",
+      "postponeDone": "Reporté."
+    },
+    "creationModes": {
+      "confirm": "Me demander de confirmer",
+      "auto_real": "L’enregistrer comme réalisé",
+      "planned": "L’enregistrer comme prévu"
+    },
+    "weekendRules": {
+      "previous": "Jour ouvré précédent",
+      "next": "Jour ouvré suivant",
+      "none": "Garder la date"
+    },
+    "reminderLabels": {
+      "before": "{{count}} jours avant",
+      "day": "Le jour même",
+      "after": "Le lendemain"
     }
   },
   "today": {
@@ -3944,6 +4085,230 @@
     "rulesTitle": "Les règles qui s’appliquent",
     "errors": {
       "input": "Vérifiez les montants, le taux et la durée saisis."
+    }
+  },
+  "appNav": {
+    "label": "Navigation de l’application",
+    "skipToContent": "Aller au contenu",
+    "home": "Accueil",
+    "accounts": "Mes comptes",
+    "synthesis": "Synthèse",
+    "calendar": "Calendrier financier",
+    "goals": "Objectifs & sécurité",
+    "debts": "Dettes",
+    "wealth": "Patrimoine réel",
+    "paper": "Portefeuille fictif",
+    "tools": "Outils",
+    "health": "Santé financière",
+    "learning": "Formation",
+    "progress": "Progression",
+    "certificates": "Certificats",
+    "more": "Plus",
+    "mySpace": "Mon espace",
+    "switcher": "Changer d’application",
+    "budgetApp": "Gestion budgétaire",
+    "sharedApp": "Gestion commune",
+    "quickAdd": "Ajouter un mouvement",
+    "backToSite": "Retour au site",
+    "openApp": "Accéder à mon espace",
+    "settingsFinance": "Profil financier et devise",
+    "settingsCategories": "Catégories",
+    "settingsOnboarding": "Premiers pas",
+    "settingsNotifications": "Notifications",
+    "settingsTrust": "Confidentialité et données",
+    "settingsPayments": "Paiements",
+    "settingsPremium": "Accès premium"
+  },
+  "accounts": {
+    "title": "Mes comptes",
+    "intro": "Vos comptes, leur solde et ce qui est compté dans votre total.",
+    "total": "Solde total ({{currency}})",
+    "netPosition": "Position nette ({{currency}})",
+    "add": "Ajouter un compte",
+    "transfer": "Faire un transfert",
+    "transferHint": "Un transfert déplace de l’argent entre deux de vos comptes : ce n’est ni une dépense ni un revenu.",
+    "created": "Compte ajouté.",
+    "transferred": "Transfert enregistré.",
+    "empty": "Aucun compte pour l’instant. Votre premier mouvement crée un compte « Espèces ».",
+    "emptyLink": "Saisir un mouvement",
+    "notInTotal": "hors total",
+    "history": "Voir les mouvements",
+    "save": "Enregistrer",
+    "fields": {
+      "label": "Nom du compte",
+      "type": "Type de compte",
+      "opening": "Solde de départ ({{currency}})",
+      "openingDate": "Date de ce solde",
+      "from": "Depuis",
+      "to": "Vers",
+      "amount": "Montant",
+      "date": "Date",
+      "note": "Note (facultatif)",
+      "fee": "Frais (facultatif)",
+      "includeInTotal": "Compter dans le solde total",
+      "includeInNetWorth": "Compter dans le patrimoine",
+      "minBalanceAlert": "Me prévenir sous ce solde ({{currency}}, facultatif)",
+      "overdraftAllowed": "Découvert autorisé ({{currency}}, facultatif)"
+    },
+    "errors": {
+      "refused": "Cette opération n’a pas pu être enregistrée. Vérifiez les comptes et la devise.",
+      "amount": "Saisissez un montant valide."
+    },
+    "showArchived": "Afficher les comptes archivés",
+    "suggestions": "Comptes déclarés dans votre patrimoine",
+    "useSuggestion": "Créer ce compte",
+    "liabilities": "Dettes et cartes de crédit",
+    "liabilitiesHint": "Ces comptes sont des sommes dues : ils ne sont jamais ajoutés à votre solde disponible.",
+    "owed": "Dû :",
+    "archivedTag": "archivé",
+    "balanceCurve": "Évolution du solde",
+    "edit": "Modifier",
+    "archive": "Archiver",
+    "restore": "Réactiver",
+    "archived": "Compte archivé. Son historique est conservé.",
+    "restored": "Compte réactivé.",
+    "saved": "Compte enregistré.",
+    "feeHint": "Les frais sont une dépense du compte de départ ; le transfert lui-même n’en est pas une.",
+    "alerts": {
+      "overdrawn": "Ce compte est à découvert.",
+      "overdraftExceeded": "Ce compte dépasse le découvert autorisé.",
+      "belowMinimum": "Le solde est passé sous le seuil que vous avez choisi."
+    }
+  },
+  "health": {
+    "title": "Santé financière",
+    "intro": "Un indice sur 100, calculé à partir de ce que vous avez saisi. Une dimension non mesurée n’est jamais comptée à 0.",
+    "score": "Indice de santé financière",
+    "notForYouth": "L’indice de santé financière n’est pas proposé aux comptes jeunes.",
+    "partial": "Indice partiel : certaines dimensions ne sont pas encore mesurées, elles sont laissées de côté plutôt que comptées à 0.",
+    "notCredit": "Cet indice vous aide à vous situer ; ce n’est en aucun cas un score de crédit.",
+    "complete": "Compléter",
+    "why": {
+      "balance": "ce qui reste du mois une fois les dépenses payées",
+      "reserve": "combien de mois votre fonds d’urgence couvre",
+      "debt": "la part de vos revenus prise par les mensualités",
+      "savings": "la part de vos revenus mise de côté",
+      "goals": "si vos objectifs avancent comme prévu",
+      "budgets": "si vos dépenses restent dans vos budgets",
+      "dataQuality": "si vos données sont complètes et à jour"
+    }
+  },
+  "movements": {
+    "title": "Mouvements",
+    "intro": "Vos revenus, dépenses et transferts : saisir, corriger, pointer.",
+    "openFromSynthesis": "Voir, saisir et pointer les mouvements",
+    "tabsLabel": "Type de mouvements",
+    "tabs": {
+      "all": "Tous",
+      "income": "Revenus",
+      "expense": "Dépenses",
+      "transfers": "Transferts",
+      "clearing": "Pointage"
+    },
+    "kinds": {
+      "transfer_out": "Transfert sortant",
+      "transfer_in": "Transfert entrant"
+    },
+    "editTitle": "Corriger un mouvement",
+    "description": "Description",
+    "account": "Compte",
+    "defaultAccount": "Espèces (par défaut)",
+    "allAccounts": "Tous les comptes",
+    "tag": "Étiquette",
+    "noTag": "Aucune",
+    "allTags": "Toutes les étiquettes",
+    "payer": "Payé par",
+    "place": "Lieu",
+    "reason": "Motif de la correction (facultatif)",
+    "saveAndNew": "Enregistrer et nouveau",
+    "saveAnyway": "Enregistrer quand même",
+    "duplicateQuestion_one": "Un mouvement très proche existe déjà. Est-ce bien un nouveau mouvement ?",
+    "duplicateQuestion_other": "{{count}} mouvements très proches existent déjà. Est-ce bien un nouveau mouvement ?",
+    "corrected": "Mouvement corrigé.",
+    "cleared": "Pointage enregistré.",
+    "edit": "Corriger",
+    "duplicate": "Dupliquer",
+    "paidBy": "payé par {{payer}}",
+    "clearing": "Pointage",
+    "allClearing": "Tous les pointages",
+    "clearingStates": {
+      "unchecked": "Non pointée",
+      "checked": "Pointée",
+      "reconciled": "Rapprochée",
+      "to_verify": "À vérifier"
+    },
+    "clearingRate": "Taux de pointage",
+    "allCleared": "Tout est pointé : rien à vérifier.",
+    "minAmount": "Montant min.",
+    "maxAmount": "Montant max.",
+    "tagsTitle_one": "Étiquettes ({{count}})",
+    "tagsTitle_other": "Étiquettes ({{count}})",
+    "tagName": "Nom de l’étiquette",
+    "tagColor": "Couleur",
+    "tagAuto": "Appliquer automatiquement à la catégorie",
+    "tagAutoNone": "Jamais automatiquement",
+    "addTag": "Ajouter l’étiquette"
+  },
+  "appHome": {
+    "title": "Accueil",
+    "intro": "Votre argent en un coup d’œil : solde, mouvements, budgets, objectifs et échéances.",
+    "balance": "Solde",
+    "allAccounts": "Tous les comptes du total",
+    "shortcuts": "Raccourcis",
+    "expensesAndIncome": "Dépenses & revenus",
+    "netFlow": "Flux net",
+    "distribution": "Répartition",
+    "ringTabs": {
+      "accounts": "Comptes",
+      "expenses": "Dépenses",
+      "income": "Revenus",
+      "flow": "Flux"
+    },
+    "ringEmpty": "Rien à répartir sur cette période.",
+    "others": "Autres",
+    "total": "Total",
+    "receivedIncome": "Revenus reçus",
+    "paidExpenses": "Dépenses payées",
+    "allMovements": "Voir tous les mouvements",
+    "today": "Aujourd’hui",
+    "budgets": "Nos budgets",
+    "manageBudgets": "Gérer les budgets",
+    "noBudget": "Aucun budget sur cette période.",
+    "createBudget": "Créer un budget",
+    "createGoal": "Créer un objectif",
+    "emergencyFund": "Fonds d’urgence",
+    "upcoming": "Prochaines échéances",
+    "calendar": "Calendrier",
+    "seeWhy": "Voir pourquoi",
+    "learningIntro": "Les contenus adaptés à votre profil.",
+    "continueLearning": "Continuer ma formation"
+  },
+  "finProfile": {
+    "irregularIncome": "Mon revenu est irrégulier (il varie d’un mois à l’autre)",
+    "irregularIncomeHint": "Votre fonds d’urgence vise alors 6 mois de dépenses essentielles."
+  },
+  "synthesis": {
+    "title": "Synthèse",
+    "intro": "Votre mois, section par section, avec son rapport à télécharger.",
+    "month": "Mois",
+    "download": "Télécharger le rapport",
+    "version": "Rapport version {{version}}, généré le {{date}}.",
+    "today": "Aujourd’hui : ce qui reste à faire",
+    "vsPrevious": "Dépenses par rapport au mois précédent : {{expenses}}",
+    "toClear_one": "{{count}} mouvement à pointer",
+    "toClear_other": "{{count}} mouvements à pointer",
+    "sections": {
+      "R01": "Résumé du mois",
+      "R02": "Comptes",
+      "R03": "Dépenses",
+      "R04": "Budgets",
+      "R05": "Méthode budgétaire (50/30/20)",
+      "R07": "Objectifs",
+      "R08": "Fonds d’urgence",
+      "R09": "Dettes",
+      "R10": "Patrimoine réel",
+      "R11": "Qualité des données",
+      "R12": "Formation et actions"
     }
   }
 }

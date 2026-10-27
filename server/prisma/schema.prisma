@@ -74,6 +74,10 @@ model User {
   // recommendation, which the client's own wording ("cible choisie par
   // l'utilisateur") rules out — F015/F016 read null as "non calculé", not 0.
   finReserveTargetMonths  Int?
+  // « Revenu irrégulier » (GO-01, question C3): declared by the person in
+  // their profile, never detected. It raises the emergency fund's default
+  // target to 6 months.
+  finIrregularIncome      Boolean   @default(false)
   // Per-type enable/opt-in (P6-18): { [type]: { enabled, optedIn } }. Absent
   // keys fall back to the catalogue's own default (constants/finNotification.js)
   // — this column only ever holds what someone actually changed.
@@ -86,6 +90,9 @@ model User {
   finChanges              FinChange[]
   finIncomes              FinIncome[]
   finTransactions         FinTransaction[]
+  finAccounts             FinAccount[]
+  finOccurrences          FinOccurrence[]
+  finTags                 FinTag[]
   finOnboarding           FinOnboarding?
   finBudgets              FinBudget[]
   finEnvelopes            FinEnvelope[]
@@ -330,6 +337,17 @@ model FinCategory {
   key               String?            @unique @db.VarChar(80)
   baseKey           String?            @db.VarChar(80)
   label             String             @db.VarChar(80)
+  // From the client's universal reference (P8-08, `09_Categories`): the
+  // category a sub-category belongs to, its icon and colour, whether it is an
+  // essential expense, its typical recurrence, and the profiles it is SUGGESTED
+  // for (a display order, never a restriction). On a user's override,
+  // `essential` null means « as the reference says ».
+  group             String?            @db.VarChar(60)
+  icon              String?            @db.VarChar(16)
+  color             String?            @db.VarChar(9)
+  essential         Boolean?
+  recurrence        String?            @db.VarChar(40)
+  suggestedFor      Json               @default("[]")
   scope             String             @default("personal") @db.VarChar(20)
   source            String             @db.VarChar(20)
   sourceRef         String?            @db.VarChar(200)
@@ -349,6 +367,7 @@ model FinCategory {
   finProvisions     FinProvision[]
   finAssets         FinAsset[]
   finSharedExpenses FinSharedExpense[]
+  finTagsAuto       FinTag[]
 
   // One customisation of a given standard row per account, at most.
   @@unique([userId, baseKey])
@@ -441,12 +460,127 @@ model FinIncome {
 // C08 "Historique & recherche"). An uncategorised movement is legitimate and
 // kept apart rather than forced into a category (the client lists
 // « transactions non catégorisées à part »), so `categoryId` is nullable.
+// An account (P8-03, ARC-04): « les comptes sont la source de vérité des
+// soldes ». Its balance is never stored: it is PB-F001, computed from the
+// opening balance and the realised movements, so it can never drift from them.
+model FinAccount {
+  id                String           @id @default(uuid())
+  userId            String
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label             String           @db.VarChar(80)
+  // One of ACCOUNT_TYPES (AC-01 to AC-10, constants/finAccounts.js): it
+  // decides the nature (asset, liability...).
+  type              String           @db.VarChar(5)
+  currency          String           @db.VarChar(3)
+  openingBalance    Int              @default(0)
+  openingDate       DateTime         @default(now())
+  includeInTotal    Boolean
+  includeInNetWorth Boolean
+  // Null means the type's own colour and icon.
+  color             String?          @db.VarChar(9)
+  icon              String?          @db.VarChar(16)
+  minBalanceAlert   Int?
+  maxBalanceInfo    Int?
+  overdraftAllowed  Int?
+  note              String?          @db.VarChar(300)
+  // The metadata socle every financial row carries (P6-02).
+  scope             String           @default("personal") @db.VarChar(20)
+  source            String           @db.VarChar(20)
+  status            String           @db.VarChar(20)
+  confidence        String?          @db.VarChar(10)
+  consentUses       Json             @default("[]")
+  effectiveAt       DateTime         @default(now())
+  collectedAt       DateTime         @default(now())
+  version           Int              @default(1)
+  archivedAt        DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  transactions      FinTransaction[]
+  recurrences       FinRecurrence[]
+  goals             FinGoal[]
+  debts             FinDebt[]
+
+  @@index([userId, deletedAt])
+  @@map("fin_accounts")
+}
+
+// What happened to ONE occurrence of a recurrence (P8-11): confirmed (with
+// the movement it created), not received, or postponed to another day. An
+// occurrence with no row here is simply still expected. One row per
+// recurrence and due date, so a salary can never be credited twice (QA-P05).
+model FinOccurrence {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recurrenceId  String
+  recurrence    FinRecurrence @relation(fields: [recurrenceId], references: [id], onDelete: Cascade)
+  dueDate       DateTime
+  // « confirmed » | « missed » | « postponed »
+  outcome       String        @db.VarChar(12)
+  postponedTo   DateTime?
+  transactionId String?       @db.VarChar(191)
+  scope         String        @default("personal") @db.VarChar(20)
+  source        String        @db.VarChar(20)
+  status        String        @db.VarChar(20)
+  confidence    String?       @db.VarChar(10)
+  consentUses   Json          @default("[]")
+  effectiveAt   DateTime      @default(now())
+  collectedAt   DateTime      @default(now())
+  version       Int           @default(1)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([recurrenceId, dueDate])
+  @@index([userId])
+  @@map("fin_occurrences")
+}
+
+// A tag (« étiquette », P8-07, tab 07B): a name and a colour, across
+// categories and accounts. `autoCategoryId` is the client's « option
+// d'appliquer automatiquement aux nouveaux enregistrements similaires »:
+// a new movement in that category, entered without a tag, receives it.
+model FinTag {
+  id             String           @id @default(uuid())
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String           @db.VarChar(40)
+  color          String           @db.VarChar(9)
+  autoCategoryId String?
+  autoCategory   FinCategory?     @relation(fields: [autoCategoryId], references: [id], onDelete: SetNull)
+  scope          String           @default("personal") @db.VarChar(20)
+  source         String           @db.VarChar(20)
+  status         String           @db.VarChar(20)
+  confidence     String?          @db.VarChar(10)
+  consentUses    Json             @default("[]")
+  effectiveAt    DateTime         @default(now())
+  collectedAt    DateTime         @default(now())
+  version        Int              @default(1)
+  archivedAt     DateTime?
+  deletedAt      DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  transactions   FinTransaction[]
+
+  @@index([userId, deletedAt])
+  @@map("fin_tags")
+}
+
 model FinTransaction {
   id            String       @id @default(uuid())
   userId        String
   user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  // "income" | "expense" (TRANSACTION_KINDS).
-  kind          String       @db.VarChar(10)
+  // "income" | "expense" (TRANSACTION_KINDS), or one side of a transfer:
+  // "transfer_out" | "transfer_in" (TRANSFER_KINDS, P8-03).
+  kind          String       @db.VarChar(12)
+  // The account credited or debited (ARC-04). Nullable in the database only
+  // so the rows written before P8-03 could be migrated; the service always
+  // sets it.
+  accountId     String?
+  account       FinAccount?  @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  // The two writes of one transfer share this id (PB-PR-06), and are written
+  // together in one database transaction.
+  transferId    String?      @db.VarChar(36)
   value         Int
   currency      String       @db.VarChar(3)
   occurredAt    DateTime
@@ -456,9 +590,19 @@ model FinTransaction {
   // and gives no reference list for it, so inventing a closed one would refuse
   // answers it means to accept.
   subcategory   String?      @db.VarChar(60)
-  // One of PAYMENT_METHODS (constants/finMoney.js), a list of OURS: the client
-  // asks for the field and enumerates nothing.
+  // One of PM-01 to PM-10 (constants/finAccounts.js, the client's tab
+  // `05B_Moyens_Paiement`, P8-07) — an instrument, never an account.
   paymentMethod String?      @db.VarChar(20)
+  // « Étiquette » (P8-07): a free cross-cutting mark, name and colour.
+  tagId         String?
+  tag           FinTag?      @relation(fields: [tagId], references: [id], onDelete: SetNull)
+  // Who paid, when it was someone else; never a share (that is Gestion
+  // commune, Phase 9). And where, as the person typed it.
+  payer         String?      @db.VarChar(80)
+  place         String?      @db.VarChar(120)
+  // « Pointage » (tab 08C): unchecked, checked, reconciled, to_verify. It
+  // never changes a balance, only how far the figures can be trusted.
+  clearing      String       @default("unchecked") @db.VarChar(12)
   note          String?      @db.VarChar(300)
   // Marked for a shared space by an explicit action, never by default: the
   // phase rule is « rien n'entre dans un espace partagé sans action explicite ».
@@ -487,6 +631,9 @@ model FinTransaction {
   @@index([userId, occurredAt])
   @@index([userId, kind, value, occurredAt])
   @@index([categoryId])
+  @@index([accountId])
+  @@index([transferId])
+  @@index([tagId])
   @@map("fin_transactions")
 }
 
@@ -557,6 +704,13 @@ model FinBudget {
   // budget because the client asks for them to be configurable, and visible in
   // every answer because the engine must never hold a hidden coefficient.
   alertThresholds Json          @default("[0.8, 1]")
+  // « Report du reste » (P8-09, PB-F008): the positive remainder of the
+  // previous period's envelopes is added to the same envelopes here (the
+  // default retained until the client answers question C1).
+  carryOver       Boolean       @default(false)
+  // The person's own pocket for a client category group, for the optional
+  // methods (tab 12B: « le mapping est éditable »). Empty = the defaults.
+  methodMapping   Json          @default("{}")
   note            String?       @db.VarChar(300)
   scope           String        @default("personal") @db.VarChar(20)
   source          String        @db.VarChar(20)
@@ -596,6 +750,12 @@ model FinEnvelope {
   budget      FinBudget    @relation(fields: [budgetId], references: [id], onDelete: Cascade)
   categoryId  String?
   category    FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  // A client category (« Logement », « Alimentation »…, P8-09) instead of one
+  // sub-category: the envelope then covers every sub-category of the group
+  // that has no envelope of its own (« le plus spécifique », tab 10B). An
+  // envelope has a category OR a group, never both (checked in the service:
+  // MariaDB refuses a CHECK on a foreign-key column).
+  categoryGroup String?      @db.VarChar(60)
   // One of ENVELOPE_KINDS: the client's own « fixe / variable ».
   kind        String       @db.VarChar(10)
   value       Int
@@ -650,6 +810,13 @@ model FinGoal {
   // for a fictional goal, which plays with money that was never really saved.
   allocated           Int       @default(0)
   monthlyContribution Int?
+  // « En cours / Atteint / En pause / Arrêté » (P8-12, tab 10B). Separate
+  // from the socle's `status`, which says how the row is known.
+  progressStatus      String    @default("active") @db.VarChar(10)
+  // The account the goal's money sits on (P8-12, ARC-04): a contribution is
+  // a TRANSFER to it, and the goal's capital is then that account's balance.
+  accountId           String?
+  account             FinAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
   // Annual expected return, a RATIO (0.05 = 5 %), for ALG-03's trajectory. Null
   // means a simple cash goal: no return is assumed, never invented.
   rate                Float?
@@ -696,6 +863,15 @@ model FinDebt {
   // by the lender (a store credit's fixed total, for instance).
   knownTotalCost       Int?
   dueDate              DateTime?
+  // P8-13 (tab 09_Dettes): « owed » — what I owe (D-02 to D-05) — or « lent »
+  // — a receivable, what is owed to me (D-01). Always kept apart.
+  direction            String           @default("owed") @db.VarChar(5)
+  // D-01 to D-05, when the person said which kind it is.
+  debtType             String?          @db.VarChar(4)
+  // The account that carries it (P8-13, ARC-04): a receivable (AC-09) or a
+  // loan (AC-08). Lending and repaying are then real transfers.
+  accountId            String?
+  account              FinAccount?      @relation(fields: [accountId], references: [id], onDelete: SetNull)
   note                 String?          @db.VarChar(300)
   scope                String           @default("personal") @db.VarChar(20)
   source               String           @db.VarChar(20)
@@ -776,6 +952,17 @@ model FinRecurrence {
   // socle's `source` (which says HOW the value entered) because the client asks
   // specifically for a detection that is proposed then confirmed.
   detected     Boolean      @default(false)
+  // P8-11 (tab 08B): the account credited or debited, how an occurrence
+  // becomes real — « confirm » (asked the day it falls, recommended for
+  // income), « auto_real » (recorded as realised on its own), « planned »
+  // (shown as planned until marked paid) — and what to do when the usual day
+  // falls on a weekend (PB-F021's « règle jour »; « previous » working day by
+  // default, the value retained until the client answers question C4).
+  accountId    String?
+  account      FinAccount?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  creationMode String       @default("confirm") @db.VarChar(12)
+  weekendRule  String       @default("previous") @db.VarChar(10)
+  occurrences  FinOccurrence[]
   note         String?      @db.VarChar(300)
   scope        String       @default("personal") @db.VarChar(20)
   source       String       @db.VarChar(20)

@@ -1,4 +1,6 @@
 import { prisma } from '../config/prisma.js';
+import { accountsWithBalances } from '../services/finAccount.service.js';
+import { occurrencesWithOutcome, recordOccurrence, settleAutomatic } from '../services/finOccurrence.service.js';
 import {
   CALENDAR_EVENT_KINDS,
   CALENDAR_MAX_DAYS,
@@ -77,18 +79,23 @@ export async function getCalendar(req, res) {
       ? weekRange()
       : monthRange();
 
-  const { planned, recurrences, provisions, realised } = await loadCalendarData(prisma, req.user.id, range);
-  const events = collectEvents({ planned, recurrences, provisions, from: range.from, to: range.to, currency });
+  // « Créer automatiquement comme réalisé »: the due occurrences become real
+  // before the calendar is read, so it shows them as done (P8-11).
+  await settleAutomatic(prisma, req.user.id);
+  const data = await loadCalendarData(prisma, req.user.id, range);
+  const events = collectEvents({ ...data, from: range.from, to: range.to, currency, occurrencesOf: occurrencesWithOutcome });
+  // C23 (in red) and diagnostic n°2, C7: the projected cash starts from the
+  // balance of the accounts (PB-F002), never from a figure typed by hand.
+  const { totals } = await accountsWithBalances(prisma, req.user.id);
+  const openingBalance = totals.find((total) => total.currency === currency)?.soldeTotal.resultat ?? null;
   const calendar = buildCalendar({
     events,
     from: range.from,
     to: range.to,
     currency,
-    // Declared by the caller, never inferred: there is no account balance in
-    // FINCLUDIA to take it from.
-    openingBalance: req.query.solde ?? null,
+    openingBalance,
     tensionFloor: req.query.seuilTension ?? DEFAULT_TENSION_FLOOR,
-    realised,
+    realised: data.realised,
   });
 
   // The events carry category ids; the labels are joined here so the interface
@@ -106,6 +113,10 @@ export async function getCalendar(req, res) {
 }
 
 // ---- recurrences -----------------------------------------------------------
+
+export async function postOccurrence(req, res) {
+  res.status(201).json({ occurrence: await recordOccurrence(prisma, req.user.id, req.body) });
+}
 
 export async function getRecurrences(req, res) {
   const recurrences = await listRecurrences(prisma, req.user.id, { includeArchived: req.query.includeArchived === 'true' });

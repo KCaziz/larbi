@@ -14,8 +14,8 @@
 import { DEFAULT_ALERT_THRESHOLDS } from '../constants/finBudget.js';
 import { computed } from './finance/contract.js';
 import { isReal } from './finance/dataModel.js';
+import { isSavingsMovement } from './finSynthesis.service.js';
 import {
-  dailyBudget,
   envelopeProjection,
   envelopeUsageRate,
   monthlyAmount,
@@ -80,6 +80,30 @@ export function alertLevel(rate, thresholds = DEFAULT_ALERT_THRESHOLDS) {
 // Real, realised expenses of the period, per category. A planned movement has
 // not happened (F009's own input is « dépenses réelles »), and a fictional one
 // is never added to a real total — the phase rule.
+/**
+ * Which envelope each real expense goes to (tab 10B, « le plus spécifique »):
+ * the envelope of its own sub-category, otherwise the envelope of its client
+ * category group, otherwise none — spending outside every envelope, shown
+ * apart. An expense is counted once, in one envelope at most (PB-F026).
+ */
+export function assignToEnvelopes(movements, envelopes) {
+  const byCategory = new Map(envelopes.filter((envelope) => envelope.categoryId).map((envelope) => [envelope.categoryId, envelope.id]));
+  const byGroup = new Map(envelopes.filter((envelope) => envelope.categoryGroup).map((envelope) => [envelope.categoryGroup, envelope.id]));
+  const spent = new Map(envelopes.map((envelope) => [envelope.id, 0]));
+  let outside = 0;
+  let outsideCount = 0;
+  for (const row of movements) {
+    if (row.kind !== 'expense' || row.planned || !isReal(row)) continue;
+    const target = byCategory.get(row.categoryId ?? null) ?? byGroup.get(row.category?.group ?? null) ?? null;
+    if (target) spent.set(target, spent.get(target) + row.value);
+    else if (!row.category || row.category.family !== 'goal') {
+      outside += row.value;
+      outsideCount += 1;
+    }
+  }
+  return { spent, outside: outsideCount === 0 ? null : outside };
+}
+
 export function consumedByCategory(movements) {
   const byCategory = new Map();
   for (const row of movements) {
@@ -97,8 +121,11 @@ export function consumedByCategory(movements) {
  * `envelopes` its envelopes (planned amount, kind, optional cap)
  * `movements` the movements dated inside the period
  * `incomes`   the recurring resources active over the period
+ * `goals`     the real goals, for their planned monthly contribution — the
+ *             « allocations hors budget explicitement planifiées » of PB-F009
+ *             (default retained until the client answers, P8-01 question C2)
  */
-export function buildBudgetView({ budget, envelopes = [], movements = [], incomes = [], now = new Date() }) {
+export function buildBudgetView({ budget, envelopes = [], movements = [], incomes = [], goals = [], carry = null, now = new Date() }) {
   const currency = budget.currency;
   const warnings = [];
 
@@ -121,7 +148,7 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
   const remaining = daysRemaining(period.start, period.end, now);
   const months = wholeCalendarMonths(period.start, period.end);
 
-  const consumed = consumedByCategory(inCurrency(movements));
+  const assigned = assignToEnvelopes(inCurrency(movements), envelopes);
   const thresholds = Array.isArray(budget.alertThresholds) ? budget.alertThresholds : DEFAULT_ALERT_THRESHOLDS;
 
   const baseInputs = {
@@ -135,23 +162,29 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
   const answer = (id, result, extra = {}) => computed(id, result, { inputs: baseInputs, currency, warnings, now, ...extra });
 
   const lines = envelopes.map((envelope) => {
-    const spent = consumed.get(envelope.categoryId ?? null) ?? 0;
-    const rate = envelopeUsageRate(spent, envelope.value);
-    const inputs = { ...baseInputs, enveloppe: envelope.id, prevu: envelope.value, reel: spent, plafond: envelope.cap ?? null };
+    const spent = assigned.spent.get(envelope.id) ?? 0;
+    // « Ajustements de report » (PB-F008): what was left of the same envelope
+    // last period, when this budget carries it over.
+    const carried = carry?.amounts?.[envelope.categoryGroup ? `group:${envelope.categoryGroup}` : `category:${envelope.categoryId}`] ?? 0;
+    const allocated = envelope.value + carried;
+    const rate = envelopeUsageRate(spent, allocated);
+    const inputs = { ...baseInputs, enveloppe: envelope.id, prevu: envelope.value, report: carried, reel: spent, plafond: envelope.cap ?? null };
     return {
       id: envelope.id,
       categoryId: envelope.categoryId,
+      categoryGroup: envelope.categoryGroup ?? null,
+      report: carried,
       kind: envelope.kind,
       recurring: envelope.recurring,
       cap: envelope.cap ?? null,
       note: envelope.note ?? null,
       prevu: envelope.value,
       reel: spent,
-      // F009 — the client's own row for « écart réel / prévu ». Positive is
-      // what is left, negative is the overspend: one number, both readings.
-      ecart: computed('F009', remainingBudget(envelope.value, spent), { inputs, currency, warnings, now }),
-      // F010 — consumption rate, a decimal shown × 100.
-      tauxConsommation: computed('F010', rate, { inputs, currency, warnings, now }),
+      // PB-F008 — what is left of this envelope: allocated minus real
+      // spending. Negative is the overspend (« peut être négatif »).
+      ecart: computed('PB-F008', remainingBudget(allocated, spent), { inputs, currency, warnings, now }),
+      // PB-F010 — consumption rate, a decimal shown × 100.
+      tauxConsommation: computed('PB-F010', rate, { inputs, currency, warnings, now }),
       // F011 — where this envelope lands at the end of the period if it keeps
       // going at this pace. A PROJECTION, and the formula's own condition says
       // so; it is not a forecast of what the person will do.
@@ -169,17 +202,30 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
   });
 
   const plannedEntries = envelopes.map((envelope) => ({ amount: envelope.value, currency }));
-  // F003 — the planned total of the period. `null` over no envelope at all: an
-  // empty budget has no total, it has nothing in it yet.
+  const carriedTotal = lines.reduce((sum, line) => sum + line.report, 0);
+  // PB-F007 — what the period allocates in all. `null` over no envelope at
+  // all: an empty budget has no total, it has nothing in it yet.
   const totalPrevu = envelopes.length === 0 ? null : totalExpenses(plannedEntries, { currency });
-  const realEntries = [...consumed.values()].map((amount) => ({ amount, currency }));
-  const totalReel = realEntries.length === 0 ? null : totalExpenses(realEntries, { currency });
 
-  // F002 then F001 — the resources of the period. Normalised to the month first
-  // (a yearly grant is a twelfth of itself), then multiplied by the number of
-  // whole calendar months the period covers. When the period is not a whole
-  // number of months the comparison is NOT made: stretching a monthly income
-  // over 45 days would be an invented figure.
+  // Real, realised movements of the period, savings excluded: PB-F004 and
+  // PB-F005 leave transfers out of income and expenses (diagnostic n°2, C2).
+  const counted = inCurrency(movements).filter((row) => !row.planned && isReal(row) && !isSavingsMovement(row));
+  const realExpenseRows = counted.filter((row) => row.kind === 'expense');
+  const realIncomeRows = counted.filter((row) => row.kind === 'income');
+  const asEntries = (rows) => rows.map((row) => ({ amount: row.value, currency }));
+  const totalReel = realExpenseRows.length === 0 ? null : totalExpenses(asEntries(realExpenseRows), { currency });
+  const realIncome = realIncomeRows.length === 0 ? null : totalIncome(asEntries(realIncomeRows), { currency });
+
+  // What the envelopes have really consumed: the « dépenses réelles
+  // éligibles » of PB-F008. Spending in a category no envelope covers is not
+  // taken from any envelope; it is shown apart, in `horsEnveloppe`.
+  const consumedByEnvelopes = lines.reduce((sum, line) => sum + line.reel, 0);
+
+  // The resources EXPECTED over the period, the « revenus prévus » of
+  // PB-F009. Normalised to the month first (F001: a yearly grant is a twelfth
+  // of itself), then multiplied by the whole calendar months the period
+  // covers. When the period is not a whole number of months the comparison is
+  // NOT made: stretching a monthly income over 45 days would be invented.
   const resourceEntries = [];
   for (const income of inCurrency(incomes)) {
     const amount = monthlyAmount(income.value, income.frequency);
@@ -205,41 +251,72 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
     warnings.push('Le budget prévu dépasse les ressources de la période. C’est autorisé : il est seulement signalé.');
   }
 
-  // F012 — what is left per remaining day, once the fixed envelopes still to be
-  // paid are set aside. `null` once the period is over (no remaining day to
-  // divide by), which the formula's own condition states.
-  const remainingFixed = lines.filter((line) => line.kind === 'fixed').reduce((sum, line) => sum + Math.max(0, line.prevu - line.reel), 0);
-  const balance = totalPrevu === null ? null : totalPrevu - (totalReel ?? 0);
+  // PB-F009 — the planned monthly contributions to real goals count as
+  // allocated outside the budget, over the same whole months.
+  const contributions = goals.filter(
+    (goal) => goal.currency === currency && Number.isInteger(goal.monthlyContribution) && goal.monthlyContribution > 0,
+  );
+  const plannedOutside = months === null ? null : contributions.reduce((sum, goal) => sum + goal.monthlyContribution, 0) * months;
+  const resteAAffecter = periodResources === null || plannedOutside === null ? null : periodResources - (totalPrevu ?? 0) - plannedOutside;
+
+  // PB-F008 summed over the envelopes, then PB-F013: what is left per
+  // remaining day, never below zero; an overspend is reported apart instead
+  // of producing a negative daily budget. The previous version (F012) took
+  // the fixed envelopes still to pay away a SECOND time from a remainder that
+  // already contained them (diagnostic n°2, C5).
+  const restant = totalPrevu === null ? null : remainingBudget(totalPrevu + carriedTotal, consumedByEnvelopes);
+  const dailyAvailable = restant === null || remaining <= 0 ? null : Math.floor(Math.max(0, restant) / remaining);
+  const overspend = restant === null ? null : Math.max(0, -restant);
 
   // Spending of the period that no envelope covers. Shown apart, never forced
   // into an envelope: the person decides whether it belongs in one.
-  const covered = new Set(envelopes.map((envelope) => envelope.categoryId ?? null));
-  const outside = [...consumed.entries()].filter(([categoryId]) => !covered.has(categoryId));
+  // PB-F011 / PB-F012 — the real spending per elapsed day, and where the
+  // period lands at that pace (indicative); PB-F022 — real minus planned.
+  const dailyAverage = totalReel === null ? null : Math.round(totalReel / Math.max(1, elapsed));
+  const projected = dailyAverage === null ? null : dailyAverage * totalDays;
+  const plannedVsReal = totalPrevu === null || totalReel === null ? null : totalReel - totalPrevu;
 
   return {
     currency,
     periode: { debut: period.start, fin: period.end, jours: totalDays, joursEcoules: elapsed, joursRestants: remaining, mois: months },
     enveloppes: lines,
-    totalPrevu: answer('F003', totalPrevu),
-    totalReel: answer('F003', totalReel),
-    // F004 — the net flow of the budget: resources of the period minus what was
-    // really spent. Not the same thing as the remaining budget (F009), and the
-    // client insists the two are different readings.
-    fluxNet: answer('F004', netFlow(periodResources, totalReel)),
-    ressources: answer('F002', periodResources),
-    // What is still free to allocate — the « Non affecté » of screens JA03 /
-    // JA04, which must always remain possible. Negative means the person has
-    // planned more than they expect to receive: the signalled case above.
-    resteAAffecter: answer('F009', remainingBudget(periodResources, totalPrevu)),
-    ecart: answer('F009', remainingBudget(totalPrevu, totalReel)),
-    budgetJournalier: answer('F012', dailyBudget({ balance, remainingObligations: remainingFixed, remainingDays: remaining })),
+    totalPrevu: answer('PB-F007', totalPrevu),
+    totalReel: answer('PB-F005', totalReel),
+    // PB-F006 — income really received minus expenses really paid over the
+    // period. It used to be EXPECTED resources minus real expenses, which is
+    // neither the client's net flow nor a remaining budget (diagnostic n°2, C1).
+    fluxNet: answer('PB-F006', netFlow(realIncome, totalReel)),
+    // The expected resources of the period (F001 × whole months): the base of
+    // PB-F009, shown as « prévu », never as received.
+    ressources: answer('F001', periodResources),
+    // PB-F009 — still free to allocate, the « Non affecté » of screens JA03 /
+    // JA04, which must always remain possible. Planning, not a bank balance;
+    // negative means more is planned than expected: the signalled case above.
+    resteAAffecter: answer('PB-F009', resteAAffecter, {
+      inputs: {
+        ...baseInputs,
+        revenus_prevus: periodResources,
+        budgets_alloues: totalPrevu,
+        allocations_hors_budget: plannedOutside,
+        objectifs_contribuant: contributions.length,
+      },
+    }),
+    ecart: answer('PB-F008', restant),
+    budgetJournalier: answer('PB-F013', dailyAvailable, { inputs: { ...baseInputs, budget_restant: restant } }),
+    // « Afficher dépassement séparément » (PB-F013): by how much the envelopes
+    // are overspent, 0 when they are not, null without a budget.
+    depassement: overspend,
     // Collected for the home screen (P6-06): the envelopes that crossed one of
     // their thresholds, worst first.
     alertes: lines
       .filter((line) => line.alerte.niveau !== 'none')
       .sort((a, b) => (b.tauxConsommation.resultat ?? 0) - (a.tauxConsommation.resultat ?? 0))
       .map((line) => ({ enveloppe: line.id, categoryId: line.categoryId, niveau: line.alerte.niveau, taux: line.tauxConsommation.resultat })),
-    horsEnveloppe: answer('F003', outside.length === 0 ? null : totalExpenses(outside.map(([, amount]) => ({ amount, currency })), { currency })),
+    horsEnveloppe: answer('PB-F005', assigned.outside),
+    moyenneJournaliere: answer('PB-F011', dailyAverage),
+    projectionFinPeriode: answer('PB-F012', projected),
+    ecartPrevuReel: answer('PB-F022', plannedVsReal),
+    report: carry ? { depuisBudget: carry.fromBudget, total: carriedTotal } : null,
     depassementRessources: overCommitted,
     avertissements: warnings,
   };

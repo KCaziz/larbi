@@ -11,14 +11,16 @@ import './Fincludia.css';
 // consequence is free keyboard behaviour (arrow keys move between options) and
 // a state a screen reader announces as "mois, 2 sur 4" rather than as four
 // unrelated buttons.
-export default function PeriodSelector({ value, onChange, name = 'fin-period', label = null }) {
+// `custom` / `onCustomChange`: the two dates of « Période » (ACC-05). A
+// screen that does not offer a free range simply passes `periods` without it.
+export default function PeriodSelector({ value, onChange, name = 'fin-period', label = null, periods = PERIODS.filter((p) => p !== 'periode'), custom = null, onCustomChange = null }) {
   const { t } = useTranslation();
 
   return (
     <fieldset className="fin-period">
       <legend>{label ?? t('fincludia.period.legend')}</legend>
       <div className="fin-period-options">
-        {PERIODS.map((period) => (
+        {periods.map((period) => (
           <label key={period} className={value === period ? 'fin-period-option checked' : 'fin-period-option'}>
             <input
               type="radio"
@@ -31,6 +33,18 @@ export default function PeriodSelector({ value, onChange, name = 'fin-period', l
           </label>
         ))}
       </div>
+      {value === 'periode' && onCustomChange && (
+        <div className="fin-period-custom">
+          <label>
+            {t('myMoney.from')}
+            <input type="date" value={custom?.from ?? ''} onChange={(event) => onCustomChange({ ...custom, from: event.target.value })} />
+          </label>
+          <label>
+            {t('myMoney.to')}
+            <input type="date" value={custom?.to ?? ''} onChange={(event) => onCustomChange({ ...custom, to: event.target.value })} />
+          </label>
+        </div>
+      )}
     </fieldset>
   );
 }

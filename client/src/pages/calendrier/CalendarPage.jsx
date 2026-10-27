@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { AlertTriangle, CalendarDays, Check, PiggyBank, Plus, Repeat, Trash2, Wand2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
@@ -14,6 +15,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import '../../components/fincludia/Fincludia.css';
+import '../mouvements/Movements.css';
 import './Calendar.css';
 
 // Financial calendar and recurring expenses (P6-07), screens C23 / SA03 / SA04.
@@ -30,23 +32,22 @@ export default function CalendarPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const currency = user?.finCurrency ?? 'DZD';
-  // The opening balance is DECLARED: there is no account balance anywhere in
-  // FINCLUDIA, so without it the server does not project the cash — it says so
-  // instead of starting from an imaginary zero.
-  const [balance, setBalance] = useState('');
+  // The projected cash starts from the balance of the accounts (P8-11, C23):
+  // nothing to type here any more.
   const [view, setView] = useState('month');
+  // The client's three tabs (tab 08): Revenus | Dépenses | Échéances.
+  const [tab, setTab] = useState('all');
   const [message, setMessage] = useState(null);
   useDocumentMeta(t('calendar.title'), t('calendar.intro'));
 
-  const declared = toMinorUnits(balance, currency, { allowZero: true });
   const query = new URLSearchParams({ vue: view });
-  if (declared !== null) query.set('solde', String(declared));
 
   const calendar = useApi(`/fin/calendrier?${query}`);
   const recurrences = useApi('/fin/recurrences');
   const provisions = useApi('/fin/provisions');
   const subscriptions = useApi('/fin/recurrences/abonnements');
   const references = useApi('/fin/calendrier/references');
+  const accounts = useApi('/fin/comptes');
 
   function reloadAll() {
     calendar.reload();
@@ -108,19 +109,8 @@ export default function CalendarPage() {
               ))}
             </div>
 
-            <label className="calendar-balance" htmlFor="calendar-balance">
-              {t('calendar.balanceLabel')}
-              <input
-                id="calendar-balance"
-                type="text"
-                inputMode="numeric"
-                value={balance}
-                onChange={(event) => setBalance(event.target.value)}
-                placeholder={t('calendar.balancePlaceholder')}
-              />
-              <span className="calendar-currency">{currency}</span>
-            </label>
           </div>
+          <p className="fin-hint">{t('calendar.fromAccounts')}</p>
 
           <div className="fin-cards">
             <FigureCard label={t('calendar.plannedOut')} answer={cal.totalPrevuSorties} formula={formula('F003')} />
@@ -151,7 +141,15 @@ export default function CalendarPage() {
             </ul>
           )}
 
-          <DayList days={cal.jours} currency={cal.currency} language={i18n.language} t={t} run={run} />
+          <div className="movements-tabs" role="tablist" aria-label={t('calendar.tabsLabel')}>
+            {['all', 'income', 'expense', 'due'].map((key) => (
+              <button key={key} type="button" role="tab" aria-selected={tab === key} className={tab === key ? 'movements-tab active' : 'movements-tab'} onClick={() => setTab(key)}>
+                {t(`calendar.tabs.${key}`)}
+              </button>
+            ))}
+          </div>
+
+          <DayList days={cal.jours} tab={tab} currency={cal.currency} language={i18n.language} t={t} run={run} />
         </section>
 
         <PlanSection t={t} run={run} />
@@ -163,6 +161,7 @@ export default function CalendarPage() {
           subscriptions={subscriptions.data?.abonnements ?? null}
           formula={formula}
           references={references.data}
+          accounts={accounts.data?.accounts ?? []}
           run={run}
         />
         <ProvisionSection
@@ -180,8 +179,16 @@ export default function CalendarPage() {
 
 // The days that have something on them. A calendar of thirty empty rows tells
 // nobody anything; the empty days are counted in the period instead.
-function DayList({ days, currency, language, t, run }) {
-  const busy = days.filter((day) => day.evenements.length > 0);
+// Which tab an event belongs to: money in, money out, or a due date that
+// opens its object (a debt, a goal, a provision).
+const DUE_KINDS = ['debt_due', 'goal_due', 'provision'];
+const tabOf = (event) => (DUE_KINDS.includes(event.kind) ? 'due' : event.sens === 'in' ? 'income' : 'expense');
+const DUE_LINKS = { debt_due: '/app/dettes', goal_due: '/app/objectifs' };
+
+function DayList({ days, tab, currency, language, t, run }) {
+  const busy = days
+    .map((day) => ({ ...day, evenements: day.evenements.filter((event) => tab === 'all' || tabOf(event) === tab) }))
+    .filter((day) => day.evenements.length > 0);
   if (busy.length === 0) return <p className="calendar-empty">{t('calendar.nothingPlanned')}</p>;
 
   return (
@@ -213,7 +220,7 @@ function DayList({ days, currency, language, t, run }) {
                 {/* « Marquer payé »: the same row becomes real. Only a planned
                     movement can be confirmed — a recurrence occurrence is not a
                     row yet, and a provision is not a payment. */}
-                {event.confirmable && (
+                {event.confirmable && event.kind !== 'recurrence' && (
                   <button
                     type="button"
                     className="calendar-pay"
@@ -222,12 +229,85 @@ function DayList({ days, currency, language, t, run }) {
                     <Check size={14} aria-hidden="true" /> {t('calendar.markPaid')}
                   </button>
                 )}
+                {event.kind === 'recurrence' && event.confirmable && <OccurrenceActions event={event} day={day.jour} currency={currency} t={t} run={run} />}
+                {event.postponed && <span className="calendar-event-note">{t('calendar.postponedFrom', { date: formatDate(language, event.dueDate) })}</span>}
+                {DUE_LINKS[event.kind] && (
+                  <Link className="calendar-event-note" to={DUE_LINKS[event.kind]}>
+                    {t('calendar.open')}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
         </li>
       ))}
     </ul>
+  );
+}
+
+// The day an occurrence falls (tab 02, step P2): « Confirmer, Modifier, Pas
+// reçu, Reporter ». Nothing real happens before the person says so, and an
+// occurrence is credited once (QA-P05).
+function OccurrenceActions({ event, day, currency, t, run }) {
+  const [mode, setMode] = useState(null);
+  const [amount, setAmount] = useState('');
+  const [date, setDate] = useState(day);
+  const due = new Date(`${day}T00:00:00.000Z`) <= new Date();
+  const send = (action, extra = {}) =>
+    run(() => api.post('/fin/calendrier/occurrences', { recurrenceId: event.sourceId, dueDate: new Date(`${event.dueDate}T00:00:00.000Z`).toISOString(), action, ...extra }), `calendar.occurrence.${action}Done`).then(
+      (res) => res.ok && setMode(null),
+    );
+
+  return (
+    <span className="calendar-occurrence">
+      {due && (
+        <button type="button" className="calendar-pay" onClick={() => send('confirm')}>
+          <Check size={14} aria-hidden="true" /> {t('calendar.occurrence.confirm')}
+        </button>
+      )}
+      {due && (
+        <button type="button" className="calendar-pay" onClick={() => setMode(mode === 'modify' ? null : 'modify')}>
+          {t('calendar.occurrence.modify')}
+        </button>
+      )}
+      {due && (
+        <button type="button" className="calendar-pay" onClick={() => send('missed')}>
+          {t('calendar.occurrence.missed')}
+        </button>
+      )}
+      <button type="button" className="calendar-pay" onClick={() => setMode(mode === 'postpone' ? null : 'postpone')}>
+        {t('calendar.occurrence.postpone')}
+      </button>
+      {mode === 'modify' && (
+        <span className="calendar-occurrence-form">
+          <AmountField id={`occ-amount-${event.sourceId}-${day}`} label={t('calendar.fields.amount')} value={amount} onChange={setAmount} currency={currency} />
+          <label htmlFor={`occ-date-${event.sourceId}-${day}`}>
+            {t('calendar.fields.realDate')}
+            <input id={`occ-date-${event.sourceId}-${day}`} type="date" value={date} max={new Date().toISOString().slice(0, 10)} onChange={(e) => setDate(e.target.value)} />
+          </label>
+          <Button
+            type="button"
+            onClick={() => {
+              const value = toMinorUnits(amount, currency);
+              send('modify', { ...(value ? { value } : {}), occurredAt: new Date(`${date}T12:00:00.000Z`).toISOString() });
+            }}
+          >
+            {t('calendar.save')}
+          </Button>
+        </span>
+      )}
+      {mode === 'postpone' && (
+        <span className="calendar-occurrence-form">
+          <label htmlFor={`occ-post-${event.sourceId}-${day}`}>
+            {t('calendar.fields.newDate')}
+            <input id={`occ-post-${event.sourceId}-${day}`} type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </label>
+          <Button type="button" onClick={() => send('postpone', { postponedTo: new Date(`${date}T00:00:00.000Z`).toISOString() })}>
+            {t('calendar.save')}
+          </Button>
+        </span>
+      )}
+    </span>
   );
 }
 
@@ -268,7 +348,7 @@ function PlanSection({ t, run }) {
 // Confirmed recurrences, their monthly and yearly cost, and the candidates
 // ALG-04 proposes. The two are never mixed: a candidate is a proposal the
 // person confirms, and the client requires exactly that.
-function RecurrenceSection({ t, language, currency, recurrences, subscriptions, formula, references, run }) {
+function RecurrenceSection({ t, language, currency, recurrences, subscriptions, formula, references, accounts, run }) {
   const [adding, setAdding] = useState(false);
   const [showDetection, setShowDetection] = useState(false);
   const detection = useApi(showDetection ? '/fin/recurrences/detection' : null);
@@ -324,7 +404,7 @@ function RecurrenceSection({ t, language, currency, recurrences, subscriptions, 
         </Button>
       </div>
 
-      {adding && <RecurrenceForm t={t} currency={currency} references={references} run={run} onDone={() => setAdding(false)} />}
+      {adding && <RecurrenceForm t={t} currency={currency} references={references} accounts={accounts} run={run} onDone={() => setAdding(false)} />}
 
       {showDetection && (
         <div className="calendar-detection">
@@ -374,7 +454,13 @@ function RecurrenceSection({ t, language, currency, recurrences, subscriptions, 
   );
 }
 
-function RecurrenceForm({ t, currency, references, run, onDone }) {
+const REMINDERS = [7, 3, 0, -1];
+
+function RecurrenceForm({ t, currency, references, accounts = [], run, onDone }) {
+  const [accountId, setAccountId] = useState('');
+  const [creationMode, setCreationMode] = useState('confirm');
+  const [weekendRule, setWeekendRule] = useState('previous');
+  const [reminders, setReminders] = useState([7, 0]);
   const [label, setLabel] = useState('');
   const [amount, setAmount] = useState('');
   const [frequency, setFrequency] = useState('mensuel');
@@ -391,7 +477,19 @@ function RecurrenceForm({ t, currency, references, run, onDone }) {
       return;
     }
     const outcome = await run(
-      () => api.post('/fin/recurrences', { label: label.trim(), kind, value, currency, frequency, nextDate: new Date(nextDate).toISOString() }),
+      () =>
+        api.post('/fin/recurrences', {
+          label: label.trim(),
+          kind,
+          value,
+          currency,
+          frequency,
+          nextDate: new Date(nextDate).toISOString(),
+          accountId: accountId || null,
+          creationMode,
+          weekendRule,
+          reminderDays: reminders,
+        }),
       'calendar.recurrenceAdded',
     );
     if (outcome.ok) onDone();
@@ -423,10 +521,56 @@ function RecurrenceForm({ t, currency, references, run, onDone }) {
           </select>
         </label>
         <label htmlFor="rec-next">
-          {t('calendar.fields.nextDate')}
+          {kind === 'income' ? t('calendar.fields.salaryDay') : t('calendar.fields.nextDate')}
           <input id="rec-next" type="date" value={nextDate} onChange={(event) => setNextDate(event.target.value)} required />
         </label>
+        <label htmlFor="rec-account">
+          {t('movements.account')}
+          <select id="rec-account" value={accountId} onChange={(event) => setAccountId(event.target.value)}>
+            <option value="">{t('movements.defaultAccount')}</option>
+            {accounts
+              .filter((row) => !row.archivedAt && row.currency === currency)
+              .map((row) => (
+                <option key={row.id} value={row.id}>
+                  {row.label}
+                </option>
+              ))}
+          </select>
+        </label>
+        <label htmlFor="rec-mode">
+          {t('calendar.fields.creationMode')}
+          <select id="rec-mode" value={creationMode} onChange={(event) => setCreationMode(event.target.value)}>
+            {['confirm', 'auto_real', 'planned'].map((option) => (
+              <option key={option} value={option}>
+                {t(`calendar.creationModes.${option}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label htmlFor="rec-weekend">
+          {t('calendar.fields.weekendRule')}
+          <select id="rec-weekend" value={weekendRule} onChange={(event) => setWeekendRule(event.target.value)}>
+            {['previous', 'next', 'none'].map((option) => (
+              <option key={option} value={option}>
+                {t(`calendar.weekendRules.${option}`)}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
+      <fieldset className="calendar-reminders">
+        <legend>{t('calendar.fields.reminders')}</legend>
+        {REMINDERS.map((offset) => (
+          <label key={offset} className="money-check">
+            <input
+              type="checkbox"
+              checked={reminders.includes(offset)}
+              onChange={(event) => setReminders(event.target.checked ? [...reminders, offset] : reminders.filter((day) => day !== offset))}
+            />
+            {t(`calendar.reminderLabels.${offset < 0 ? 'after' : offset === 0 ? 'day' : 'before'}`, { count: Math.abs(offset) })}
+          </label>
+        ))}
+      </fieldset>
       {error && <p className="form-error">{error}</p>}
       <div className="calendar-actions">
         <Button type="submit">{t('calendar.save')}</Button>

@@ -25,7 +25,7 @@ import { buildGoalView, listGoals } from '../services/finGoal.service.js';
 import { completeness } from '../services/finOnboarding.service.js';
 import { buildReserveView } from '../services/finReserve.service.js';
 import { markedSavingsInPeriod } from '../services/finSavings.service.js';
-import { buildSynthesis, currentMonth, loadSynthesisData } from '../services/finSynthesis.service.js';
+import { buildSynthesis, currentMonth, debtRatioIncome, loadSynthesisData } from '../services/finSynthesis.service.js';
 import { autonomy, buildDashboard, dataQuality } from '../services/finDashboard.service.js';
 import { describeFormula } from '../services/finance/describe.js';
 import { monthlyAmount } from '../services/finance/formulas.js';
@@ -98,7 +98,7 @@ export async function getToday(req, res) {
   const goalRows = await listGoals(prisma, req.user.id);
   const goals = goalRows.map((goal) => ({ id: goal.id, label: goal.label, priority: goal.priority, view: buildGoalView(goal, { now }) }));
   const debtRows = await listDebts(prisma, req.user.id);
-  const debts = debtRows.length === 0 ? null : buildDebtSynthesis(debtRows, { netMonthlyIncome: synthesis.revenus.resultat, currency, now });
+  const debts = debtRows.length === 0 ? null : buildDebtSynthesis(debtRows, { netMonthlyIncome: debtRatioIncome(synthesis), currency, now });
 
   // ---- F047, for the student dashboard ------------------------------------
   // The monthly amount of each resource, with the category key the versioned

@@ -2643,7 +2643,8 @@
     "errors": {
       "labelTaken": "You already have a category with that name in this family.",
       "tooMany": "You have reached the maximum number of categories in this family."
-    }
+    },
+    "essential": "Essential"
   },
   "fincludia": {
     "notComputed": "not computed",
@@ -2734,14 +2735,27 @@
       "CR07": "The maximum amount the bank would finance under its minimum down-payment share.",
       "CR08": "The maximum amount really borrowable, accounting for every limit the bank sets.",
       "CR09": "What this loan will cost you in total, fees and insurance included.",
-      "CR10": "The minimum down payment to plan for this financing."
+      "CR10": "The minimum down payment to plan for this financing.",
+      "PB-F004": "The total income actually received over the period. Income that is only expected is not counted, nor is money moved to savings.",
+      "PB-F005": "The total spending actually paid over the period. Money set aside for a goal is not spending.",
+      "PB-F006": "What actually came in minus what actually went out over the period.",
+      "PB-F007": "The total amount you planned in your envelopes for this period.",
+      "PB-F008": "What is left in the envelope: the planned amount minus what was actually spent. Negative when overspent.",
+      "PB-F009": "Your expected income, minus what you already allocated to your envelopes and to your planned goal contributions.",
+      "PB-F010": "The share of the envelope already used.",
+      "PB-F013": "What is left in your envelopes, divided by the days remaining in the period.",
+      "PB-F017": "Your essential expenses for one month, times the number of months you aim for.",
+      "PB-F018": "How many months of essential expenses your emergency fund covers today.",
+      "PB-F019": "What your emergency fund still lacks to reach its target."
     },
     "period": {
       "legend": "Period",
       "semaine": "Week",
       "mois": "Month",
       "90jours": "90 days",
-      "annee": "Year"
+      "annee": "Year",
+      "jour": "Day",
+      "periode": "Custom"
     },
     "reality": {
       "legend": "Real or fictional",
@@ -2885,7 +2899,7 @@
     "title": "My money",
     "intro": "Your resources, your spending, and what is left. Every figure names the formula that produced it.",
     "synthesisTitle": "Synthesis",
-    "income": "Income",
+    "income": "Income received",
     "expenses": "Expenses",
     "netFlow": "Net flow",
     "monthlyTrendTitle": "Income and expenses over the last few months",
@@ -2961,7 +2975,9 @@
       "date_asc": "Oldest",
       "amount_desc": "Largest amount",
       "amount_asc": "Smallest amount"
-    }
+    },
+    "expectedIncome": "Expected income",
+    "incomeGroup": "Income · {{group}}"
   },
   "budget": {
     "title": "Budget",
@@ -3042,7 +3058,39 @@
     "noProposal": "No proposal yet.",
     "envelopeAdded": "Envelope added.",
     "envelopeDeleted": "Envelope deleted.",
-    "deleteEnvelopeConfirm": "Delete this envelope?"
+    "deleteEnvelopeConfirm": "Delete this envelope?",
+    "overspent": "Your envelopes are overspent by {{amount}}. The budget per day stays at 0 while this lasts.",
+    "saved": "Budget saved.",
+    "dailyAverage": "Average spending per day",
+    "projection": "End-of-period projection",
+    "plannedVsRealGap": "Real − planned gap",
+    "carryOver": "Carry over what was left last period",
+    "carried": "carried: {{amount}}",
+    "wholeGroups": "Whole categories",
+    "subCategories": "Sub-categories",
+    "mostSpecificHint": "An expense goes to its sub-category’s envelope if there is one, otherwise to its category’s.",
+    "methods": {
+      "title": "Budgeting methods (optional)",
+      "intro": "A method compares your month with a known framework. It imposes nothing and moves no money.",
+      "choose": "Compare with",
+      "none": "No method",
+      "respected": "Envelopes within budget",
+      "mapping": "Which category goes in which pocket?",
+      "defaultPocket": "Default: {{pocket}}",
+      "pockets": {
+        "needs": "Needs (target {{target}} %)",
+        "wants": "Wants (target {{target}} %)",
+        "savings": "Savings (target {{target}} %)",
+        "spending": "Spending (target {{target}} %)"
+      },
+      "pocketNames": {
+        "needs": "Needs",
+        "wants": "Wants",
+        "savings": "Savings",
+        "unclassified": "To classify",
+        "byEssential": "By « essential »"
+      }
+    }
   },
   "goals": {
     "title": "Goals",
@@ -3076,6 +3124,39 @@
     "updated": "Updated.",
     "errors": {
       "refused": "This action was refused. The allocated capital cannot exceed your actually recorded savings."
+    },
+    "emergencyTitle": "Emergency fund",
+    "emergencyDetail": "See and set my emergency fund",
+    "defaultTarget_one": "Target suggested for your profile: {{count}} month of essential expenses. You can change it.",
+    "defaultTarget_other": "Target suggested for your profile: {{count}} months of essential expenses. You can change it.",
+    "status": "Status",
+    "statuses": {
+      "active": "In progress",
+      "reached": "Reached",
+      "paused": "Paused",
+      "stopped": "Stopped"
+    },
+    "capitalOverTarget": "{{capital}} of {{target}}",
+    "excess": "excess: {{amount}}",
+    "capitalFromAccount": "(the balance of the goal’s account)",
+    "minimumMonths": "Minimum months at this pace",
+    "contributions": "Contributions",
+    "fromAccount": "from {{account}}",
+    "contributeFrom": "From the account",
+    "contribution": "Amount to set aside",
+    "contribute": "Contribute",
+    "contributed": "Contribution saved: it is a transfer to the goal’s account.",
+    "noSourceAccount": "First create an account in « My accounts » to contribute to this goal.",
+    "scenario": {
+      "title": "Simulate a scenario",
+      "months": "Horizon (months)",
+      "inflation": "Yearly inflation (%)",
+      "rate": "Hypothetical yearly return (%)",
+      "raise": "Yearly raise of the contribution (%)",
+      "run": "Simulate",
+      "monthsToReach": "Months to reach the target",
+      "atHorizon": "At the horizon: {{capital}} for a target of {{target}} (inflation included).",
+      "disclaimer": "A simulation with your assumptions: neither a promise nor advice. Nothing is saved."
     }
   },
   "debts": {
@@ -3116,6 +3197,23 @@
     "deleted": "Deleted.",
     "errors": {
       "refused": "This action was refused. Check the information entered."
+    },
+    "outstanding": "Outstanding (what I owe)",
+    "receivables": "Receivables: what I am owed ({{amount}})",
+    "recordRepaymentReceived": "Repayment received",
+    "fromAccount": "From the account",
+    "toAccount": "To the account",
+    "loans": {
+      "lent": "I lent money",
+      "borrowed": "Someone lent me money",
+      "lentHint": "The money leaves your account today; what you are owed is followed apart, never counted as spending.",
+      "borrowedHint": "The money arrives on your account; the debt is followed apart, never counted as income.",
+      "lentWho": "To whom?",
+      "borrowedWho": "Who lent it?",
+      "amount": "Amount",
+      "dueDate": "Repayment expected on (optional)",
+      "saved": "Loan saved, with the real movement on your account.",
+      "noAccount": "First create an account in « My accounts »."
     }
   },
   "reserve": {
@@ -3124,7 +3222,7 @@
     "months": "Months of reserve",
     "targetAmount": "Target amount",
     "gap": "Gap",
-    "liquidSavings": "Liquid savings",
+    "liquidSavings": "Emergency fund capital",
     "essentialExpenses": "Essential monthly expenses",
     "chooseTarget": "Your target, in months",
     "chooseTargetHint": "Yours to choose: no value is suggested by default.",
@@ -3161,7 +3259,9 @@
       "planned_expense": "Planned expense",
       "planned_income": "Planned income",
       "recurrence": "Recurrence",
-      "provision": "Provision"
+      "provision": "Provision",
+      "debt_due": "Debt due date",
+      "goal_due": "Goal date"
     },
     "planTitle": "Plan of the month",
     "planHelp": "Copies last month's planned payments, shifted by one month. Spending that already happened is never copied: that would invent a payment.",
@@ -3216,7 +3316,13 @@
       "amount": "Amount",
       "kind": "Type",
       "frequency": "Frequency",
-      "nextDate": "Next due date"
+      "nextDate": "Next due date",
+      "realDate": "Actual date",
+      "newDate": "New date",
+      "salaryDay": "Next date (for a salary: the day of the month you receive it)",
+      "creationMode": "On the day",
+      "weekendRule": "If that day falls on a weekend",
+      "reminders": "Remind me"
     },
     "save": "Save",
     "cancel": "Cancel",
@@ -3224,6 +3330,41 @@
       "amount": "Enter an amount as a whole number.",
       "provisionedAboveValue": "More has been set aside than the expense itself.",
       "refused": "This operation was refused. Check the dates and the amounts."
+    },
+    "fromAccounts": "The projected cash starts from the balance of the accounts counted in your total.",
+    "tabsLabel": "What to show",
+    "tabs": {
+      "all": "All",
+      "income": "Income",
+      "expense": "Spending",
+      "due": "Due dates"
+    },
+    "open": "Open",
+    "postponedFrom": "postponed (due on {{date}})",
+    "occurrence": {
+      "confirm": "Confirm",
+      "modify": "Change",
+      "missed": "Not received",
+      "postpone": "Postpone",
+      "confirmDone": "Confirmed: the movement is recorded.",
+      "modifyDone": "Recorded with the corrected amount or date.",
+      "missedDone": "Noted: nothing was recorded.",
+      "postponeDone": "Postponed."
+    },
+    "creationModes": {
+      "confirm": "Ask me to confirm",
+      "auto_real": "Record it as done",
+      "planned": "Record it as planned"
+    },
+    "weekendRules": {
+      "previous": "Previous working day",
+      "next": "Next working day",
+      "none": "Keep the date"
+    },
+    "reminderLabels": {
+      "before": "{{count}} days before",
+      "day": "On the day",
+      "after": "The day after"
     }
   },
   "today": {
@@ -3943,6 +4084,230 @@
     "rulesTitle": "The rules that apply",
     "errors": {
       "input": "Check the amounts, the rate and the term you typed."
+    }
+  },
+  "appNav": {
+    "label": "Application navigation",
+    "skipToContent": "Skip to content",
+    "home": "Home",
+    "accounts": "My accounts",
+    "synthesis": "Summary",
+    "calendar": "Financial calendar",
+    "goals": "Goals & safety",
+    "debts": "Debts",
+    "wealth": "Real assets",
+    "paper": "Practice portfolio",
+    "tools": "Tools",
+    "health": "Financial health",
+    "learning": "Learning",
+    "progress": "Progress",
+    "certificates": "Certificates",
+    "more": "More",
+    "mySpace": "My space",
+    "switcher": "Switch application",
+    "budgetApp": "Budget management",
+    "sharedApp": "Shared management",
+    "quickAdd": "Add a movement",
+    "backToSite": "Back to the site",
+    "openApp": "Open my space",
+    "settingsFinance": "Financial profile and currency",
+    "settingsCategories": "Categories",
+    "settingsOnboarding": "First steps",
+    "settingsNotifications": "Notifications",
+    "settingsTrust": "Privacy and data",
+    "settingsPayments": "Payments",
+    "settingsPremium": "Premium access"
+  },
+  "accounts": {
+    "title": "My accounts",
+    "intro": "Your accounts, their balance and what counts in your total.",
+    "total": "Total balance ({{currency}})",
+    "netPosition": "Net position ({{currency}})",
+    "add": "Add an account",
+    "transfer": "Make a transfer",
+    "transferHint": "A transfer moves money between two of your accounts: it is neither spending nor income.",
+    "created": "Account added.",
+    "transferred": "Transfer saved.",
+    "empty": "No account yet. Your first movement creates a « Cash » account.",
+    "emptyLink": "Record a movement",
+    "notInTotal": "not in total",
+    "history": "See the movements",
+    "save": "Save",
+    "fields": {
+      "label": "Account name",
+      "type": "Account type",
+      "opening": "Opening balance ({{currency}})",
+      "openingDate": "Date of this balance",
+      "from": "From",
+      "to": "To",
+      "amount": "Amount",
+      "date": "Date",
+      "note": "Note (optional)",
+      "fee": "Fees (optional)",
+      "includeInTotal": "Count in the total balance",
+      "includeInNetWorth": "Count in net worth",
+      "minBalanceAlert": "Warn me below this balance ({{currency}}, optional)",
+      "overdraftAllowed": "Authorised overdraft ({{currency}}, optional)"
+    },
+    "errors": {
+      "refused": "This could not be saved. Check the accounts and the currency.",
+      "amount": "Enter a valid amount."
+    },
+    "showArchived": "Show archived accounts",
+    "suggestions": "Accounts declared in your assets",
+    "useSuggestion": "Create this account",
+    "liabilities": "Debts and credit cards",
+    "liabilitiesHint": "These accounts are amounts owed: they are never added to your available balance.",
+    "owed": "Owed:",
+    "archivedTag": "archived",
+    "balanceCurve": "Balance over time",
+    "edit": "Edit",
+    "archive": "Archive",
+    "restore": "Reactivate",
+    "archived": "Account archived. Its history is kept.",
+    "restored": "Account reactivated.",
+    "saved": "Account saved.",
+    "feeHint": "Fees are an expense of the source account; the transfer itself is not.",
+    "alerts": {
+      "overdrawn": "This account is overdrawn.",
+      "overdraftExceeded": "This account is beyond its authorised overdraft.",
+      "belowMinimum": "The balance is below the threshold you chose."
+    }
+  },
+  "health": {
+    "title": "Financial health",
+    "intro": "A score out of 100, computed from what you entered. A dimension that is not measured is never counted as 0.",
+    "score": "Financial health index",
+    "notForYouth": "The financial health index is not offered to youth accounts.",
+    "partial": "Partial index: some dimensions are not measured yet; they are left out rather than counted as 0.",
+    "notCredit": "This index helps you see where you stand; it is in no way a credit score.",
+    "complete": "Complete",
+    "why": {
+      "balance": "what is left of the month once spending is paid",
+      "reserve": "how many months your emergency fund covers",
+      "debt": "the share of your income taken by instalments",
+      "savings": "the share of your income set aside",
+      "goals": "whether your goals progress as planned",
+      "budgets": "whether your spending stays within your budgets",
+      "dataQuality": "whether your data is complete and up to date"
+    }
+  },
+  "movements": {
+    "title": "Movements",
+    "intro": "Your income, spending and transfers: record, correct, check.",
+    "openFromSynthesis": "See, record and check movements",
+    "tabsLabel": "Kind of movements",
+    "tabs": {
+      "all": "All",
+      "income": "Income",
+      "expense": "Spending",
+      "transfers": "Transfers",
+      "clearing": "Checking"
+    },
+    "kinds": {
+      "transfer_out": "Outgoing transfer",
+      "transfer_in": "Incoming transfer"
+    },
+    "editTitle": "Correct a movement",
+    "description": "Description",
+    "account": "Account",
+    "defaultAccount": "Cash (default)",
+    "allAccounts": "All accounts",
+    "tag": "Tag",
+    "noTag": "None",
+    "allTags": "All tags",
+    "payer": "Paid by",
+    "place": "Place",
+    "reason": "Reason for the correction (optional)",
+    "saveAndNew": "Save and new",
+    "saveAnyway": "Save anyway",
+    "duplicateQuestion_one": "A very similar movement already exists. Is this really a new one?",
+    "duplicateQuestion_other": "{{count}} very similar movements already exist. Is this really a new one?",
+    "corrected": "Movement corrected.",
+    "cleared": "Check saved.",
+    "edit": "Correct",
+    "duplicate": "Duplicate",
+    "paidBy": "paid by {{payer}}",
+    "clearing": "Check",
+    "allClearing": "All check states",
+    "clearingStates": {
+      "unchecked": "Not checked",
+      "checked": "Checked",
+      "reconciled": "Reconciled",
+      "to_verify": "To verify"
+    },
+    "clearingRate": "Check rate",
+    "allCleared": "Everything is checked: nothing to verify.",
+    "minAmount": "Min. amount",
+    "maxAmount": "Max. amount",
+    "tagsTitle_one": "Tags ({{count}})",
+    "tagsTitle_other": "Tags ({{count}})",
+    "tagName": "Tag name",
+    "tagColor": "Colour",
+    "tagAuto": "Apply automatically to the category",
+    "tagAutoNone": "Never automatically",
+    "addTag": "Add the tag"
+  },
+  "appHome": {
+    "title": "Home",
+    "intro": "Your money at a glance: balance, movements, budgets, goals and due dates.",
+    "balance": "Balance",
+    "allAccounts": "All accounts in the total",
+    "shortcuts": "Shortcuts",
+    "expensesAndIncome": "Spending & income",
+    "netFlow": "Net flow",
+    "distribution": "Breakdown",
+    "ringTabs": {
+      "accounts": "Accounts",
+      "expenses": "Spending",
+      "income": "Income",
+      "flow": "Flow"
+    },
+    "ringEmpty": "Nothing to break down over this period.",
+    "others": "Others",
+    "total": "Total",
+    "receivedIncome": "Income received",
+    "paidExpenses": "Spending paid",
+    "allMovements": "See all movements",
+    "today": "Today",
+    "budgets": "Our budgets",
+    "manageBudgets": "Manage budgets",
+    "noBudget": "No budget for this period.",
+    "createBudget": "Create a budget",
+    "createGoal": "Create a goal",
+    "emergencyFund": "Emergency fund",
+    "upcoming": "Coming up",
+    "calendar": "Calendar",
+    "seeWhy": "See why",
+    "learningIntro": "Content suited to your profile.",
+    "continueLearning": "Continue learning"
+  },
+  "finProfile": {
+    "irregularIncome": "My income is irregular (it varies from month to month)",
+    "irregularIncomeHint": "Your emergency fund then aims at 6 months of essential expenses."
+  },
+  "synthesis": {
+    "title": "Summary",
+    "intro": "Your month, section by section, with its report to download.",
+    "month": "Month",
+    "download": "Download the report",
+    "version": "Report version {{version}}, produced on {{date}}.",
+    "today": "Today: what is left to do",
+    "vsPrevious": "Spending compared with the previous month: {{expenses}}",
+    "toClear_one": "{{count}} movement to check",
+    "toClear_other": "{{count}} movements to check",
+    "sections": {
+      "R01": "Summary of the month",
+      "R02": "Accounts",
+      "R03": "Spending",
+      "R04": "Budgets",
+      "R05": "Budgeting method (50/30/20)",
+      "R07": "Goals",
+      "R08": "Emergency fund",
+      "R09": "Debts",
+      "R10": "Real assets",
+      "R11": "Data quality",
+      "R12": "Learning and actions"
     }
   }
 }

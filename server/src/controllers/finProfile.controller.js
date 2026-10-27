@@ -7,7 +7,7 @@ import { HttpError } from '../utils/httpError.js';
 // "aucune donnée financière demandée avant le consentement", and consent
 // itself needs a known account. No admin side: this is entirely self-service.
 
-const FIN_FIELDS = ['finPublic', 'finSecondaryPublics', 'finAgeRange', 'finCountry', 'finSituation', 'finMainIntention', 'finHorizon'];
+const FIN_FIELDS = ['finPublic', 'finSecondaryPublics', 'finAgeRange', 'finCountry', 'finSituation', 'finMainIntention', 'finHorizon', 'finIrregularIncome'];
 
 function toProfile(user, consented) {
   return {
@@ -19,6 +19,7 @@ function toProfile(user, consented) {
     finSituation: user.finSituation,
     finMainIntention: user.finMainIntention,
     finHorizon: user.finHorizon,
+    finIrregularIncome: user.finIrregularIncome,
     finOnboardedAt: user.finOnboardedAt,
     isAdult: isAdultAgeRange(user.finAgeRange),
     consented,

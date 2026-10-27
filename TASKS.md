@@ -2838,8 +2838,17 @@ Application point par point :
 
 **À présenter au client à la recette, sans bloquer le travail :** les 17 modèles d'objectifs du point 2 et les poids par défaut du point 4. Les formules PB-F ne sont plus à confirmer : elles viennent du client.
 
+**Questions envoyées au client le 2026-10-27 — en attente de réponse, sans bloquer le travail.** Chacune a une valeur par défaut, appliquée tant que le client n'a pas répondu, versionnée et modifiable, et listée dans la recette pour qu'il la confirme ou la corrige :
+- **C1 — Report (PB-F008)** : par défaut, seul un reste **positif** est reporté sur la période suivante ; un dépassement n'est pas reporté en négatif.
+- **C2 — « Allocations hors budget explicitement planifiées » (PB-F009)** : par défaut, les apports mensuels **planifiés** vers les objectifs et le fonds d'urgence.
+- **C3 — Revenu irrégulier (GO-01, cible 6 mois)** : par défaut, c'est l'utilisateur qui le **déclare** dans son profil ; aucune détection automatique.
+- **C4 — Salaire tombant un jour non ouvré (PB-F021)** : par défaut, l'utilisateur choisit la règle ; « jour ouvré précédent » est présélectionné.
+- **C5 — Sous-score « budgets » de la santé financière** : par défaut 100 tant que les dépenses restent dans les budgets, puis baisse proportionnelle jusqu'à 0 à 200 % de consommation. Précise le point 4 ci-dessus.
+- **E — Contenus pédagogiques** (missions et contenus par profil, onglets 02 et 22) : par défaut, nous rédigeons une **première version que le client valide** avant publication (`P8-17`). Aucun contenu n'est publié sans cette validation.
+- Pour rappel, les points 2, 4, 6, 9, 10, 11 et 12 ci-dessus lui sont soumis en même temps, pour confirmation (question D).
+
 ### P8-02 — Une application dans sa propre fenêtre, distincte de la vitrine, avec la navigation finale
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P1-12`
 - Durée cible : 3 jours (estimation)
@@ -2852,8 +2861,18 @@ Application point par point :
 - Redirection de toutes les anciennes adresses.
 - Tests : QA-V7-01 (un lycéen et un salarié ont la même navigation financière), QA-V7-05 (Accueil sous 768 px), parcours clavier, RTL, fr / en / ar.
 
+**Réalisé le 2026-10-27.**
+- **L'application vit sous `/app`**, avec sa propre mise en page (`client/src/layouts/AppLayout.jsx`), sans en-tête ni pied de page de la vitrine. Le bouton « Accéder à mon espace » de la vitrine l'ouvre ; la connexion et l'inscription arrivent sur l'Accueil (`/app`).
+- **Navigation finale, identique pour tous** (`client/src/config/appNavigation.js`) : les 13 entrées dans l'ordre du client, Formation / Progression / Certificats en bas de barre. Seul un mineur **déclaré** ne voit pas Dettes et Patrimoine (nouveau champ `mineurDeclare` de `GET /api/fin/parcours`) ; le serveur les refuse de toute façon. Un compte dont l'âge n'est pas renseigné garde ces entrées, et la page lui dit quoi compléter.
+- **Barre supérieure** : sélecteur « Gestion budgétaire / Gestion commune » (vers `/app/espaces` en attendant `P9-02`), recherche, ajout rapide (+), notifications, aide, et « Mon espace » (profil, profil financier et devise, catégories, premiers pas, notifications, confidentialité, formations, paiements, premium, espace entreprise pour les majeurs).
+- **Responsive (onglet 03B)** : barre latérale fixe à partir de 1 200 px, rétractable de 768 à 1 199 px, barre basse (Accueil, Comptes, Synthèse, Calendrier, Plus) sous 768 px ; cibles de 44 px ; propriétés logiques (arabe vérifié).
+- **Toutes les anciennes adresses redirigent** (`LEGACY_REDIRECTS`, 30 adresses, chemin et paramètres conservés). Les pages publiques (outils, glossaire) restent ouvertes aux visiteurs dans la vitrine ; une personne connectée y est renvoyée vers la même page dans l'application.
+- **Nouvelles pages** : « Mes comptes » (`/app/comptes`, base de `P8-05`), « Santé financière » (`/app/sante`, base de `P8-16`), « Mon espace » (`/app/parametres`). L'ancienne coque (FincludiaLayout, FincludiaNav, AccountLayout, fincludiaMenu) est supprimée.
+- Test navigateur `server/tests/e2e/app-shell.test.js` : QA-V7-01 (même menu pour un lycéen et un salarié), mineur déclaré, QA-V7-05 (téléphone, sans défilement horizontal), redirections, arabe.
+- **Restent ailleurs** : l'Accueil affiche encore l'ancien tableau « Aujourd'hui » jusqu'à `P8-06` (qui y ajoute aussi la liste « Aujourd'hui » de l'onglet 03B) ; le filtrage par public `menuFor()` du serveur n'est plus lu par le client et sera retiré avec `P8-21` ; les liens internes des pages pointent encore vers les anciennes adresses, qui redirigent.
+
 ### P8-03 — Lot 0 : comptes, transactions, transferts et anti-doublon
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P6-04`
 - Durée cible : 5 jours (estimation)
@@ -2869,8 +2888,16 @@ Application point par point :
 - Tests : QA-P01, QA-P03, QA-P04, QA-P06, QA-P08, QA-P09, QA-P10 du client, plus la sécurité (un compte n'est lisible que de son propriétaire, y compris par l'API).
 - **Précisions du 2026-10-27** (dernier fichier, onglets `01_Principes`, `05_Transactions`, `13_Formules`, `17_API_Donnees`) : un transfert porte un `transfer_id` commun à ses deux écritures (PB-PR-06) et passe par sa propre route `/transfers` ; anti-double impact par `transaction_id` (PB-F026) ; solde d'une carte de crédit (PB-F027).
 
+**Réalisé le 2026-10-27 (le socle du lot 0).**
+- **Comptes** : table `fin_accounts` ; les 10 types AC-01 à AC-10 sont générés depuis l'onglet `04_Comptes` (`server/scripts/generate-accounts.py` → `constants/finAccounts.js`), avec leur nature et leurs inclusions par défaut ; champs de l'onglet 04B ; archivage sans effacement. API : `GET/POST /api/fin/comptes`, `PATCH /api/fin/comptes/:id`, `PUT /api/fin/comptes/:id/archive`.
+- **Soldes calculés, jamais stockés** : PB-F001 par compte (seuls les mouvements réalisés comptent), PB-F002 solde total (comptes inclus, hors passifs), PB-F003 position nette ; un passif se lit à l'envers (PB-F027). Plusieurs devises ne s'additionnent jamais.
+- **Un compte par mouvement** : `accountId` ; sans compte choisi, le compte « Espèces » de la devise, créé au premier mouvement (PB-PR-04) ; devise du mouvement = devise du compte.
+- **Transferts** : `POST /api/fin/transferts`, deux écritures `transfer_out` / `transfer_in` liées par un `transferId`, dans une seule transaction de base ; même devise obligatoire ; exclus des revenus et des dépenses ; supprimés ensemble (`DELETE /api/fin/transferts/:transferId`) ; un côté ne se corrige pas seul.
+- **Migration sans perte** (`20261027120000_fin_accounts`, vérifiée sur données d'essai) : un compte « Espèces » par personne et devise reçoit tous les mouvements ; chaque mouvement « épargne » (famille `goal`) devient un transfert vers un compte « Épargne » (AC-04). L'épargne nette (F007) lit désormais ces transferts.
+- **Reporté vers `P8-07`** (champs de saisie de l'écran Mouvements) : moyens de paiement PM-01 à PM-10, étiquettes, payeur, lieu, statuts « à confirmer » / « annulé », pointage, type « ajustement ». **Vers `P8-05`** : proposer les comptes déclarés du patrimoine (`P6-11`) comme comptes. **Vers `P8-11`** : comptabilisation automatique d'une échéance (PB-PR-08).
+
 ### P8-04 — Corriger dès maintenant les calculs faux (diagnostic n°2)
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P6-04`
 - Durée cible : 2 jours (estimation)
@@ -2885,8 +2912,18 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - Puis contrôle de tout ce qui en dépend : F004, F008, F018, F053, l'indice de préparation (`P6-16`), l'accueil et les tableaux de bord.
 - **Méthode** : pour chaque erreur, un test qui la reproduit d'abord (rouge), puis la correction (vert). C2, C3, C5 (le solde) et C7 sont corrigés avec les comptes (`P8-03`, `P8-05`, `P8-11`).
 
+**Réalisé le 2026-10-27.**
+- Les 27 formules PB-F sont dans le moteur, générées depuis l'onglet `13_Formules` (`server/scripts/generate-budget-formulas.py` → `constants/finBudgetFormulas.js`), et reconnues par le contrat de réponse.
+- **C1** : la synthèse et l'historique comptent les revenus **reçus** seulement (PB-F004 à PB-F006) ; les ressources déclarées sont affichées à côté, « Revenus prévus » (F001). Le taux d'effort des dettes reste calculé sur les ressources déclarées (ratio structurel, comme la page Dettes).
+- **C2 (en partie)** : l'argent mis de côté (famille `goal`) n'est plus compté ni en dépense ni en revenu, dans la synthèse, l'historique et les budgets. Sa transformation en vrai transfert entre comptes reste dans `P8-03`.
+- **C3** : la réserve se mesure sur le capital de l'objectif « Fonds d'urgence » (PB-F017 à PB-F019). Sans cet objectif, elle est « non calculée » et l'écran dit comment le créer.
+- **C4 (en partie)** : les dépenses essentielles sont la moyenne sur les mois **complets** réellement couverts (1 à 3) ; à moins d'un mois, la déclaration d'inscription, sinon « non calculé ». Le drapeau « Essentielle ? » par catégorie arrive avec les 125 catégories (`P8-08`).
+- **C5** : budget quotidien = max(0, budget restant) / jours restants (PB-F013), dépassement affiché à part ; reste à affecter selon PB-F009, apports mensuels prévus des objectifs compris (question C2, valeur par défaut).
+- **C6** : la vue budget porte ses PB-F (PB-F005 à PB-F010, PB-F013) ; la « réserve après apport » du simulateur logement porte F007. Restent les totaux prévus du calendrier, repris avec `P8-11`.
+- Reportés, comme prévu : C2 (transferts), solde de C5 et C7 avec `P8-03`, `P8-05`, `P8-11`.
+
 ### P8-05 — Mes comptes
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P8-02`, `P8-03`
 - Durée cible : 3 jours (estimation)
@@ -2897,8 +2934,12 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - Alertes : solde sous le seuil choisi, compte débiteur — rouge **et** texte, jamais la couleur seule.
 - **Formules du client** : PB-F001 (solde d'un compte), PB-F002 (solde total, comptes actifs / liquides inclus seulement), PB-F025 (effet d'un transfert sur le total) — calculateurs CAL-P01 et CAL-P02.
 
+**Commencé le 2026-10-27 (avec `P8-02`).** La page `/app/comptes` existe : liste des comptes avec leur solde (PB-F001), solde total (PB-F002) et position nette (PB-F003) par devise, ajout d'un compte (les 10 types du client, leur règle affichée), transfert entre deux comptes, et « Voir les mouvements » qui ouvre la Synthèse filtrée sur le compte. Reste : modifier et archiver un compte, l'alerte de solde minimum, et proposer les comptes déclarés du patrimoine (`P6-11`).
+
+**Terminé le 2026-10-27.** Comptes actifs ou archivés ; dettes et cartes de crédit affichées à part, jamais ajoutées au disponible ; modification (nom, inclusions, seuil d'alerte, découvert autorisé, note) et archivage / réactivation ; détail d'un compte avec son solde à la fin de chacun des six derniers mois (`GET /api/fin/comptes/:id/historique`, PB-F001 à chaque date) ; alertes AL-P02 / AL-P03 (sous le seuil choisi, à découvert, au-delà du découvert autorisé) écrites en toutes lettres avec une icône ; frais d'un transfert enregistrés comme une dépense du compte de départ (catégorie « Frais de transfert ») ; comptes déclarés dans le patrimoine (`P6-11`) proposés, jamais créés d'office. Écart assumé : pas d'assistant pas à pas sur téléphone, le formulaire tient sur une colonne.
+
 ### P8-06 — Accueil centralisé, le même pour tous
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P8-04`, `P8-05`
 - Durée cible : 4 jours (estimation)
@@ -2908,9 +2949,18 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Ajout rapide** (ACC-02) : revenu, dépense ou transfert, en feuille glissante sur téléphone ; un brouillon, sans aucun effet avant « Enregistrer ».
 - Ce que le profil change ici : uniquement le bloc formation.
 - **Précisions du 2026-10-27** (onglet `03_Accueil_Synthese`) : trois raccourcis centraux toujours visibles, « Mes comptes | Dépenses & revenus | Flux net » ; le graphique circulaire change selon l'onglet actif (comptes, dépenses, revenus, flux) ; un clic sur « Revenus » ou « Dépenses » ouvre toutes les transactions avec leurs filtres ; le solde se met à jour dès qu'une transaction est confirmée. Flux net = PB-F006.
+**Réalisé le 2026-10-27.** Un seul Accueil (`/app`, `client/src/pages/accueil/HomePage.jsx`), le même pour tous, servi par **une requête** `GET /api/fin/accueil` qui rassemble ce que chaque module calcule déjà :
+- solde total en grand, ou un compte choisi, avec clic vers « Mes comptes » ; « Synthèse » juste à côté (ACC-01, ACC-02) ;
+- les trois raccourcis toujours visibles « Mes comptes | Dépenses & revenus | Flux net » (ACC-03) ;
+- période Jour / Semaine / Mois / 90 jours / Année / Période (dates libres) qui pilote toute la page (ACC-05) ;
+- revenus, dépenses et flux net (PB-F004 à PB-F006) ;
+- **anneau** selon l'onglet actif (comptes, dépenses, revenus, flux), couleur fixe par catégorie (celle du client), au plus cinq parts plus « Autres », légende avec montant et part, clic sur une part (ou sa ligne de légende) qui filtre les mouvements affichés dessous et le lien « Voir tous les mouvements » (ACC-04, ACC-07, ACC-08) ; petit carré « Outils » à gauche (ACC-06) ;
+- « Aujourd'hui » (la prochaine action) ; « Nos budgets » avec un « + » qui ouvre la gestion des budgets ; au plus trois objectifs prioritaires et le fonds d'urgence ; prochaines échéances et lien vers le calendrier ; santé financière avec « Voir pourquoi » ; bloc formation ; prévu / réel / tendance (ACC-09).
+- Vérifié dans un navigateur, ordinateur et téléphone (sans défilement horizontal).
+- **Restent** : l'ancien écran par public reste servi sous `/app/aujourdhui` en attendant d'être réduit à la seule liste « Aujourd'hui » (`P8-21`) ; l'ajout rapide en feuille glissante sur téléphone ouvre la page Mouvements ; l'anneau qui se change en mini-courbe au défilement n'est pas fait.
 
 ### P8-07 — Mouvements : revenus, dépenses, transferts et pointage
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P8-02`, `P8-03`
 - Durée cible : 3 jours (estimation)
@@ -2922,8 +2972,16 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - Écran de pointage : taux de pointage (AN-F004), opérations non pointées, gestes de glissement sur téléphone.
 - Ce qui disparaît des filtres de l'ancien C08 : « membre », qui relève du collectif.
 
+**Réalisé le 2026-10-27.** Nouvelle page « Mouvements » (`/app/mouvements`), atteinte depuis la Synthèse, « Mes comptes » (« Voir les mouvements ») et le + de la barre supérieure ; la Synthèse garde ses chiffres.
+- **Onglets** Tous / Revenus / Dépenses / Transferts / Pointage ; filtres texte, compte, catégorie, étiquette, pointage, période, montant min. / max., sans catégorie ; totaux du jeu filtré, transferts exclus ; export.
+- **Saisie complète** (onglet 08) : description, catégorie et sous-catégorie, compte, moyen de paiement, étiquette, payé par, lieu ; « Enregistrer » et « Enregistrer et nouveau ». **Moyens de paiement du client** PM-01 à PM-10 (générés depuis `05B_Moyens_Paiement`), anciennes valeurs migrées (`20261027140000_fin_movements`).
+- **Correction** avec motif facultatif, **duplication**, suppression logique (un transfert part avec ses deux côtés). **Doublon suspect demandé avant d'enregistrer** (`POST /api/fin/transactions/doublons`, qui n'écrit rien) : « Enregistrer quand même » ou annuler ; jamais rien supprimé d'office.
+- **Étiquettes** (`/api/fin/etiquettes`) : nom, couleur, et option d'application automatique à une catégorie.
+- **Pointage** (onglet 08C) : non pointée / pointée / rapprochée / à vérifier, sur chaque ligne et dans l'onglet dédié, avec le **taux de pointage AN-F004** et les opérations restant à vérifier ; sans aucun effet sur un solde. Les 16 formules d'analyse AN-F001 à AN-F016 sont générées dans le moteur depuis l'onglet `24_Formules`.
+- **Écarts assumés** : pas de gestes de glissement sur téléphone (des boutons à la place) ; le type « ajustement » et les statuts « à confirmer » / « annulé » arrivent avec `P8-11` (revenus à confirmer) ; le rattachement à un budget reste par catégorie (`P8-09`).
+
 ### P8-08 — Catégories universelles
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P8-01`, `P6-02`
 - Durée cible : 2 jours (estimation)
@@ -2933,8 +2991,15 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - « Autre » et les catégories personnelles toujours possibles ; drapeau « essentielle » modifiable par l'utilisateur.
 - Migration depuis les 91 catégories de `P6-02` (décision `P8-01` point 6) : celles qui recouvrent une catégorie nouvelle y sont fusionnées, les autres et toutes les catégories des utilisateurs restent, sans perdre une seule transaction catégorisée.
 
+**Réalisé le 2026-10-27.**
+- Les 125 catégories de l'onglet `09_Categories` (identique à l'onglet `07_Categories` du dernier classeur) sont générées par `server/scripts/generate-categories.py`, qui écrit à la fois `constants/finCategoryReference.js` et la migration `20261027130000_fin_categories_125`. Chaque catégorie porte son groupe (« Logement », « Alimentation »…), son icône, sa couleur, « Essentielle ? », sa récurrence typique et « Suggéré pour » (ordre d'affichage seulement).
+- **Fusion** (décision `P8-01` point 6) : 27 anciennes catégories recouvrent une nouvelle et en prennent la définition **en place** — même clé, même identifiant, donc aucun mouvement ne bouge. Exemples : « Habillement » → « Vêtements », « Alimentation / boissons » → « Courses alimentaires », « Revenu locatif » → « Loyer reçu ». La liste complète est dans le script (`MERGES`) ; dans le doute, l'ancienne reste. 98 nouvelles catégories sont ajoutées ; les 64 anciennes non recouvertes (objectifs, actifs, dettes, partagées, saisonnières…) et toutes les catégories des utilisateurs restent : 189 catégories standard.
+- **« Essentielle ? » modifiable** : par l'utilisateur, sur une catégorie standard (sa personnalisation) comme sur les siennes, depuis la page des catégories. La réserve lit désormais ce drapeau : plus aucune liste de catégories essentielles codée en dur (fin de C4, `P8-04`).
+- Le sélecteur de catégorie de « Mon argent » est regroupé par groupe du client, avec les icônes.
+- La famille d'une nouvelle dépense (fixe / variable / saisonnière) est lue dans sa récurrence typique ; elle ne sert qu'à proposer un type d'enveloppe.
+
 ### P8-09 — Budgets : une allocation, rattachée automatiquement, et des méthodes facultatives
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P8-03`, `P8-08`
 - Durée cible : 4 jours (estimation)
@@ -2945,9 +3010,15 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Méthodes facultatives** : 50 / 30 / 20, 80 / 20, base zéro, enveloppes, répartition personnalisée — avec un rattachement des catégories **visible et modifiable** (onglet 12B). L'écran compare, il ne juge pas (ARC-08).
 - Le « plan du mois » de l'ancien SA03 (copier le mois précédent, éviter le double comptage) se retrouve ici et dans le calendrier (`P8-11`).
 - **Formules du client** : PB-F007 (budget alloué total), PB-F008 (budget restant, report compris), PB-F009 (reste à allouer), PB-F010 (taux de consommation), PB-F011 et PB-F012 (moyenne par jour, projection), PB-F013 (budget quotidien disponible), PB-F022 (écart prévu / réel), PB-F026 (une dépense n'est comptée qu'une fois) — calculateurs CAL-P04 à CAL-P08 et CAL-P14 ; route `/budget-lines` pour les lignes d'un budget.
+**Réalisé le 2026-10-27.**
+- **Une enveloppe couvre une sous-catégorie OU une catégorie entière du client** (« Logement », « Alimentation »…) ; une dépense va à l'enveloppe la plus spécifique (sa sous-catégorie, sinon son groupe), sinon elle reste « hors enveloppe » — jamais comptée deux fois (PB-F026). Un budget créé après des dépenses les agrège aussitôt (lecture par période) ; un dépassement s'affiche sans rien bloquer.
+- **Report du reste** (case à cocher par budget) : le reste **positif** de chaque enveloppe de la période précédente s'ajoute à la même enveloppe (valeur par défaut de la question C1) ; PB-F008 en tient compte.
+- **Rythme de la période** : moyenne réelle par jour (PB-F011), projection de fin de période (PB-F012), écart réel − prévu (PB-F022), en plus de PB-F007 à PB-F010 et PB-F013 (`P8-04`).
+- **Méthodes facultatives** (onglets 12 et 12B, générées par `server/scripts/generate-budget-methods.py`) : 50/30/20 (AN-F005 à AN-F008), 80/20, base zéro (reste à allouer visant 0), enveloppes (AN-F003). Le rattachement catégorie → poche est **affiché et modifiable par budget** ; les lignes « Configurable » du client ont une poche par défaut lisible dans le script. `GET /api/fin/budgets/:id/methode?methode=M-01`.
+- **Écarts assumés** : pas de périmètre de comptes par budget ni de statut « pause » ; la répartition personnalisée (M-05) attend une définition des poches par l'utilisateur ; « copier le mois précédent » reste la duplication existante (`P6-05`).
 
 ### P8-10 — Synthèse, rapport mensuel et téléchargement
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P8-06`, `P8-09`
 - Durée cible : 4 jours (estimation)
@@ -2958,9 +3029,15 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - Les 12 graphiques du catalogue (onglet 13), en reprenant ceux de `P6-23` ; la cascade mensuelle (revenus → charges → dette → épargne → reste).
 - Les indicateurs de l'onglet 11 et les formules AN-F001 à AN-F016, toutes versionnées dans le moteur, chacune avec sa phrase « Pourquoi ? ».
 - **Précisions du 2026-10-27** : la Synthèse contient « Aujourd'hui » (actions non réalisées, questions manquantes, revenus à confirmer, échéances, cours du parcours) ; l'icône de téléchargement est en haut à droite (onglet `03B_Navigation`) ; écart prévu / réel PB-F022 et tendance PB-F023 (calculateurs CAL-P14 et CAL-P15). **« Aujourd'hui »** reprend la logique d'actions de l'actuelle page `/aujourdhui` (`P6-06`), qui devient cette liste de choses à faire plutôt qu'un tableau de bord.
+**Réalisé le 2026-10-27.**
+- **Page Synthèse** (`/app/synthese`, `client/src/pages/synthese/SynthesisPage.jsx`) servie par le **rapport mensuel** `GET /api/fin/rapport?mois=AAAA-MM` : sections R-01 (résumé, comparaison au mois précédent par **PB-F023**), R-02 (soldes de début et de fin par compte), R-03 (top catégories, moyenne par jour PB-F011), R-04 (budget), R-05 (lecture 50/30/20), R-07 (objectifs), R-08 (fonds d'urgence), R-09 (dettes), R-10 (patrimoine PB-F024), R-11 (taux de pointage AN-F004, à pointer, sans catégorie), R-12 (formation) — chaque bloc ouvre l'écran d'où il vient ; lien « Aujourd'hui ».
+- **Versionné** (ARC-10) : le rapport porte sa version et sa date de production, et chaque chiffre son identifiant et sa version de formule.
+- **Téléchargement** en haut à droite : CSV et XLSX (`/api/fin/rapport/export`, montants en centimes, cellules protégées contre les formules), PDF par l'impression du navigateur (feuille d'impression sans la coque de l'application) — aucune dépendance nouvelle.
+- L'ancienne page « Mon argent » est remplacée (la saisie et l'historique sont dans « Mouvements », `P8-07`).
+- **Restent** : la section R-06 (scénarios d'épargne), la cascade mensuelle et les autres graphiques du catalogue (onglet 13 : seuls G-01, G-02, G-05, G-07 existent) ; une comparaison de deux mois au choix (aujourd'hui : le mois précédent) ; des instantanés de rapport conservés (aujourd'hui : régénéré à la demande, versionné).
 
 ### P8-11 — Calendrier financier : trois onglets et revenus à confirmer
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P8-03`
 - Durée cible : 3 jours (estimation)
@@ -2972,9 +3049,16 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - Une échéance ouvre directement son objet (dette, objectif) avec « Marquer payé », « Reporter », « Modifier » ; un événement prévu ne touche jamais le réel avant confirmation.
 - Cash projeté = solde des comptes + revenus planifiés − dépenses planifiées (C23, en rouge), sans solde saisi à la main.
 - **Précisions du 2026-10-27** (étape P2 de `02_Premier_Demarrage`, onglet `08B_Recurrences`) : pour un salaire, demander aussi la **règle si le jour tombe un week-end** et le compte destinataire ; le jour venu, quatre réponses : **Confirmer, Modifier, Pas reçu, Reporter**. Prochaine occurrence = PB-F021 (calculateur CAL-P13).
+**Réalisé le 2026-10-27.**
+- **Onglets** Tout / Revenus / Dépenses / Échéances (vues mois et semaine ; la liste par jour sert de vue agenda sur téléphone). Les échéances de dettes et les dates d'objectifs y apparaissent avec un lien « Ouvrir » vers leur objet, sans être comptées dans le cash.
+- **Récurrences complètes** (onglet 08B) : compte, mode de création (« me demander de confirmer » par défaut, « enregistrer comme réalisé », « comme prévu »), **règle de week-end** (jour ouvré précédent par défaut — question C4 ; le week-end algérien est vendredi-samedi), rappels J-7 / J-3 / J / J+1 (désormais réellement générés à ces jours-là, par occurrence).
+- **Le jour venu : Confirmer, Modifier, Pas reçu, Reporter** (`POST /api/fin/calendrier/occurrences`). Rien de réel avant confirmation ; une occurrence n'est créditée qu'**une seule fois** (table `fin_occurrences`, unique par récurrence et date — QA-P05). Le mode « réalisé » crée seul les occurrences échues (sur 62 jours au plus).
+- **Cash projeté = solde des comptes (PB-F002) + entrées prévues − sorties prévues**, plus aucun solde saisi à la main (fin de C7, `P8-04`).
+- PB-F021 (prochaine date, règle du jour) appliqué à chaque occurrence. Migration `20261027160000_fin_calendar_occurrences`.
+- **Restent** : la question « Quel jour recevez-vous votre salaire ? » posée au premier démarrage (`P8-23`), et le salaire comme premier revenu de l'Accueil (`P8-06`).
 
 ### P8-12 — Objectifs & sécurité : un seul compartiment, et des objectifs qui simulent
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P8-03`, `P8-04`
 - Durée cible : 3 jours (estimation)
@@ -2986,9 +3070,18 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Détail** : anneau avec le pourcentage au centre et le montant déjà affecté sur la cible, reste à atteindre, mois minimum, historique des contributions avec leur compte source, projection (retard ou avance, contribution nécessaire) — et des **scénarios** : contribution, horizon, inflation, rendement hypothétique, hausse annuelle de l'épargne (C11, en rouge), paramètres que l'utilisateur saisit lui-même dans le formulaire du scénario ; le « Pourquoi ? » de ces chiffres garde sa phrase courte (`P8-01` point 7).
 - Une contribution réelle est un transfert vers le compte de l'objectif (ARC-04).
 - **Formules du client** : PB-F014 (progression, affichage plafonné à 100 % et excédent à part), PB-F015 (reste), PB-F016 (mois minimum), PB-F017 à PB-F019 (fonds d'urgence, mesuré sur le **capital de son objectif**) — calculateurs CAL-P09 et CAL-P10 ; routes `/goals` et `/goal-contributions`. Une contribution qui est un transfert entre deux comptes inclus n'est **jamais déduite deux fois** (étape P6). Le client a ajouté à la main « épargne » sous la liste des objectifs (onglet `10_Objectifs_Urgence`) : couvert par le modèle G17 « épargne long terme », gardé (`P8-01` point 2).
+**Réalisé le 2026-10-27.**
+- **Un seul compartiment** : la page Objectifs (`/app/objectifs`) s'ouvre sur le **fonds d'urgence** (mois couverts, cible, manque — PB-F017 à PB-F019) avec son détail sous `/app/objectifs/fonds-urgence` ; l'ancienne adresse `/reserve` y redirige.
+- **Cible du fonds d'urgence selon le profil** quand la personne n'en a pas choisi : lycéen 1 mois, étudiant 2, jeune actif ou salarié 3, **revenu irrégulier 6** — case « Mon revenu est irrégulier » ajoutée au profil financier (déclaré, jamais détecté : question C3). Un profil que le client ne nomme pas (épargnant) n'a pas de cible imposée. Toujours modifiable.
+- **17 modèles** (`server/scripts/generate-goal-catalog.py` pour GO-01 à GO-11, plus G09, G10, G13, G16, G17, G19) ; un GO qui recouvre un ancien modèle en garde la clé, donc aucun objectif existant ne change. Montant **et horizon demandés à la création** (C09).
+- **Statuts** en cours / atteint / en pause / arrêté.
+- **Détail** : anneau de progression (% au centre, capital sur cible, excédent à part), PB-F014 (affiché plafonné à 100 %), PB-F015, PB-F016 (mois minimum), contribution nécessaire, historique des contributions avec leur compte source.
+- **Une contribution réelle est un transfert** vers le compte de l'objectif (`POST /api/fin/goals/:id/contributions`), compte d'épargne créé au premier versement et visible dans « Mes comptes » ; le capital de l'objectif est alors le solde de ce compte — jamais saisi, jamais compté deux fois, et le solde total ne bouge pas.
+- **Scénarios** (`POST /api/fin/goals/:id/scenario`, ALG-03) : contribution, horizon, inflation, rendement hypothétique, hausse annuelle, saisis par la personne ; rien n'est enregistré, toutes les hypothèses reviennent avec la réponse.
+- Migration `20261027170000_fin_goals_accounts`.
 
 ### P8-13 — Dettes et créances
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P8-03`
 - Durée cible : 3 jours (estimation)
@@ -2998,9 +3091,15 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - Créances et dettes toujours séparées ; encours = somme des capitaux restants, taux d'effort = mensualités obligatoires / revenus nets (C13, en rouge).
 - Stratégies : dette la plus coûteuse d'abord, petite dette d'abord, paiement supplémentaire ; date sans dette et économie. Taux inconnu → seul le capital est simulé. Jamais « bonne » ou « mauvaise » dette.
 - **Formules du client** : PB-F020 (ratio dette / revenu), PB-F027 (solde d'une carte de crédit), ALG-P01 (stratégie de remboursement) — calculateurs CAL-P11, CAL-P12 et CAL-P16 ; routes `/debts`, `/receivables`, `/debt-payments`. Chaque échéance se lie au calendrier **et au budget** (étape P7).
+**Réalisé le 2026-10-27.**
+- **« J'ai prêté » (D-01) et « On m'a prêté » (D-02)** (`POST /api/fin/debts/pret`) : l'argent bouge réellement le jour même, entre le compte de la personne et un compte propre au prêt — une créance (AC-09) ou un prêt (AC-08) — par un transfert : ni revenu ni dépense. Le remboursement est aussi un transfert (`/paiements` avec le compte choisi), et l'encours suit.
+- **Créances et dettes toujours séparées** : sens « owed » / « lent » et type D-01 à D-05 sur chaque ligne (migration `20261027180000_fin_debts_receivables`) ; l'encours, le taux d'effort (désormais **PB-F020**) et les stratégies ne portent que sur les dettes ; les créances ont leur propre total et leur propre section.
+- **Carte de crédit (D-04)** et **découvert (D-05)** : déjà portés par les comptes (`P8-03`, `P8-05`) — une carte est un compte passif (PB-F027), un découvert un attribut du compte courant (« découvert autorisé »).
+- Stratégies (dette la plus coûteuse d'abord, petite dette d'abord, paiement supplémentaire) inchangées depuis `P6-10` (ALG-01) ; taux inconnu → la dette est exclue de la simulation, et l'écran le dit.
+- **Reste** : le rattachement d'une échéance de dette au budget (étape P7 du premier démarrage) arrive avec `P8-23`.
 
 ### P8-14 — Patrimoine réel et portefeuille fictif
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P8-05`, `P8-13`
 - Durée cible : 2 jours (estimation)
@@ -3009,6 +3108,14 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - Les liquidités viennent **automatiquement** des comptes inclus au patrimoine ; les autres classes (immobilier, or et métaux, véhicule, entreprise, placements réels, créances) restent déclarées et datées ; les passifs viennent des dettes, des cartes et des découverts.
 - Le portefeuille fictif est placé sous le patrimoine (ou garde une entrée dédiée, selon l'onglet 03), avec le badge « Simulation pédagogique » permanent, son journal daté et un export toujours marqué ; il ne modifie jamais le solde, le patrimoine ni la santé financière (QA-V7-04).
 - **Formules du client** : PB-F003 (position nette des comptes) et PB-F024 (patrimoine net issu des comptes, complété par les autres actifs) — calculateur CAL-P17. Les cartes de paiement ne sont jamais des actifs séparés (PB-PR-09).
+**Réalisé le 2026-10-27.** Le patrimoine réel lit les comptes (`wealthFromAccounts`, `server/src/controllers/finWealth.controller.js`) :
+- les **liquidités viennent automatiquement** des comptes comptés dans le patrimoine (leur solde PB-F001) ; un actif déclaré « espèces / compte / CCP » n'est alors plus compté, le compte le porte déjà ;
+- les autres classes (immobilier, or, véhicule, entreprise, placements) restent déclarées et datées ;
+- les **passifs** sont les dettes et les comptes passifs (cartes, prêts) ; une dette portée par un compte n'est comptée qu'une fois, par lui ;
+- une **créance** (« J'ai prêté ») est un actif, jamais une dette ;
+- patrimoine net = **PB-F024** (au lieu de F035).
+- Le portefeuille fictif garde son entrée dédiée (onglet 03 : « sous Patrimoine ou entrée dédiée »), son badge « Simulation » permanent et sa séparation (`P6-12`) : il ne touche ni le solde, ni le patrimoine, ni la santé financière.
+- **Reste** : l'historique du patrimoine net (`/patrimoine/historique`) lit encore les seuls actifs déclarés.
 
 ### P8-15 — Outils : un seul catalogue
 - Statut : `❌ todo`
@@ -3022,13 +3129,18 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Précisions du 2026-10-27** : les 17 calculateurs CAL-P01 à CAL-P17 du dernier fichier (onglet `12_Calculateurs`) rejoignent le catalogue, chacun branché sur sa formule PB-F ; le client a ajouté à la main « réserve de sécurité » sous cette liste : un calculateur de réserve y figure (CAL-P10 fonds d'urgence, ou l'actuel CAL-05 du consolidé).
 
 ### P8-16 — Santé financière : une page à part entière
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P8-04`, `P8-09`
 - Durée cible : 2 jours (estimation)
 - Origine : cahier consolidé, HEA-01, onglet 21, F053 ; ancien cahier SA02 surligné
 
 - L'indice, ses sous-scores (décision `P8-01` point 4 : équilibre du mois 25, réserve 20, dette 20, épargne 15, objectifs 10, budgets 5 — sous-score AN-F003 —, qualité des données 5 ; « stabilité des revenus » retirée ; poids par défaut, versionnés), l'historique, « Voir pourquoi » (la phrase courte, sans poids ni formule, `P8-01` point 7) et « Compléter ». Indice partiel quand des dimensions manquent ; jamais un score de crédit.
+**Réalisé le 2026-10-27.**
+- Les **sept dimensions du consolidé** (version de barème `B-8`) : équilibre 25, réserve 20, dette 20, épargne 15, objectifs 10, **budgets 5** (remplace « stabilité des revenus »), qualité 5 — poids par défaut versionnés, présentés au client à la recette.
+- Sous-score **« Respect des budgets »** = dépenses réelles des enveloppes / montants alloués (report compris), ramené sur 100 : **100 tant qu'on reste dans les budgets, puis baisse proportionnelle jusqu'à 0 à 200 %** (question C5, valeur par défaut) ; sans budget, non mesuré.
+- Page `/app/sante` : l'indice, « indice partiel » quand des dimensions manquent (elles sortent du calcul, jamais 0), chaque sous-score avec sa phrase courte « Pourquoi ? » **sans poids ni formule** (`P8-01` point 7), « Compléter » vers l'écran qui mesurerait une dimension absente, et la mention « ce n'est pas un score de crédit ». L'Accueil y renvoie par « Voir pourquoi ».
+- **Restent** : l'historique de l'indice (aucun instantané n'est encore conservé), et les dimensions « objectifs » et « qualité des données » qui ne sont pas encore mesurées par leurs modules.
 
 ### P8-17 — Formation, progression et certificats : la seule couche qui varie selon le profil
 - Statut : `❌ todo`
@@ -3134,6 +3246,12 @@ Faire de la gestion collective une **solution distincte**, comme le client le de
 3. **Catégories collectives** — **un seul référentiel** pour toute la plateforme, les 125 catégories du cahier consolidé : les 19 catégories de l'onglet 12 du fichier collectif y correspondent presque toutes ; elles servent de **sélection par défaut** dans un espace, avec les icônes et couleurs du référentiel. Deux catalogues parallèles finiraient par diverger.
 4. **Espace temporaire** (groupe / amis) — le propriétaire le clôture quand il veut ; un espace clos passe en lecture seule (historique, soldes et règlements lisibles, plus aucune écriture), reste consultable par ses membres et disparaît seulement à sa suppression.
 5. **Lien avec le budget personnel** — les deux cas que le fichier prévoit (« créer / référencer une transaction personnelle unique ») sont possibles : choisir un compte personnel crée la transaction dans ce compte, ou bien on désigne une transaction déjà saisie. Jamais les deux, et jamais deux transactions pour une même dépense (COL-F13).
+
+**Questions envoyées au client le 2026-10-27 — en attente de réponse, sans bloquer le travail.** Les points 1 à 5 ci-dessus lui sont soumis pour confirmation (question B). Quatre informations manquent au fichier collectif ; une valeur par défaut est appliquée en attendant, versionnée et modifiable :
+- **A1 — « Ressources communes »** (CD-01, COL-F08), non définies : par défaut, la somme des contributions **effectivement versées** par les membres.
+- **A2 — Poids des tâches** (COL-F12) : par défaut, une échelle de 1 à 3, réglée à 1.
+- **A3 — Répartition « par usage »** (R-05) : par défaut, chaque participant saisit librement ses unités, et la part est proportionnelle — calcul affiché, rien de caché.
+- **A4 — Seuil de « petit solde »** : par défaut 200 DA, modifiable par espace.
 
 ### P9-02 — Gestion commune : une solution à part, une adresse par espace, un tableau de bord d'espace
 - Statut : `❌ todo`
@@ -3268,6 +3386,22 @@ Soit **environ 85 jours ouvrés, de l'ordre de 4 mois** pour une personne. C'est
 4. **Phase 9**, à partir de `P9-02`, dès que `P8-02` existe.
 
 Les décisions de cadrage (`P8-01`, `P9-01`) sont prises depuis le 2026-10-27 : rien n'attend plus le client pour commencer. Les formules PB-F viennent du client (2026-10-27) ; seuls les 17 modèles d'objectifs et les poids de santé par défaut lui sont présentés à la recette.
+
+### Chronologie de travail retenue (2026-10-27)
+
+Ordre décidé avec l'utilisateur, tâche par tâche, en respectant les dépendances. Il précise l'« Ordre recommandé » ci-dessus sans le contredire.
+
+**Phase 8**
+1. Le moteur : `P8-04` → `P8-03` → `P8-08`. Les corrections de `P8-04` qui demandent des comptes (C2, C3, solde de C5, C7) se terminent avec `P8-03`.
+2. La fenêtre : `P8-02`.
+3. Le cœur du quotidien : `P8-05` → `P8-07` → `P8-09` → `P8-11` → `P8-06` (l'Accueil en dernier, puisqu'il affiche ce que construisent les quatre autres). **Première démonstration au client à la fin de cette étape.**
+4. Les compartiments : `P8-12` → `P8-13` → `P8-14` → `P8-10` → `P8-16`.
+5. Autour du moteur : `P8-15` → `P8-17` (missions de `P2-10` comprises) → `P8-23` → `P8-18` → `P8-19` → `P8-20`.
+6. Contrôle : `P8-21` → `P8-22`, puis démonstration au client.
+
+**Phase 9** : `P9-02` → `P9-11` → `P9-04` → `P9-08` → `P9-03` → `P9-05` → `P9-06` → `P9-07` → `P9-09` → `P9-10` → `P9-12` → `P9-13`.
+
+Entre les deux : `P8-02` retire la gestion collective du menu personnel, mais `/espaces` reste servi (hors menu) jusqu'à `P9-02`, pour qu'aucun espace existant ne devienne inaccessible. Les questions A à E (`P8-01`, `P9-01`) sont envoyées au client dès maintenant : ses réponses ne sont utiles qu'à partir de l'étape 3.
 
 ---
 

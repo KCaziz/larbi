@@ -34,7 +34,7 @@ describe('reading the reference', () => {
     );
     assert.equal(
       res.body.groups.reduce((total, g) => total + g.categories.length, 0),
-      91,
+      91 + 98,
     );
     assert.equal(familyOf(res.body, 'income').label, 'Revenus / ressources');
   });
@@ -81,6 +81,12 @@ describe('creating a category', () => {
         key: null,
         family: 'variable',
         label: 'Café du matin',
+        group: null,
+        icon: null,
+        color: null,
+        essential: false,
+        recurrence: null,
+        suggestedFor: [],
         origin: 'own',
         customised: false,
         archived: false,
@@ -303,10 +309,23 @@ describe("customising the client's reference", () => {
   });
 
   test('the customisation cannot take a name another category in the family already has', async () => {
-    assert.equal((await t.request('PATCH', standard, { user, json: { label: 'Habillement' } })).status, 409);
+    // « Vêtements » is the universal category that absorbed « Habillement » (P8-08).
+    assert.equal((await t.request('PATCH', standard, { user, json: { label: 'Vêtements' } })).status, 409);
   });
 
   test('an empty customisation is refused rather than writing an override that changes nothing', async () => {
     assert.equal((await t.request('PATCH', standard, { user, json: {} })).status, 400);
+  });
+});
+
+describe('P8-08 — « Essentielle ? » is the reference’s, and the person may change it', () => {
+  test('a standard category carries the client’s flag, and an override can change it', async () => {
+    const list = async () => (await t.request('GET', '/fin/categories', { user })).body;
+    const rent = (body) => body.groups.flatMap((g) => g.categories).find((c) => c.key === 'fixed.loyer');
+    assert.equal(rent(await list()).essential, true);
+    assert.equal(rent(await list()).group, 'Logement');
+
+    assert.equal((await t.request('PATCH', '/fin/categories/standard/fixed.loyer', { user, json: { essential: false } })).status, 200);
+    assert.equal(rent(await list()).essential, false, 'the person’s own reading');
   });
 });

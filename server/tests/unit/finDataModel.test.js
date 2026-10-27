@@ -30,9 +30,10 @@ const row = (over = {}) => ({
 });
 
 describe("the client's category reference", () => {
-  test('holds the 8 families and the 91 standard categories of onglet 03_Categories', () => {
+  test('holds the 8 families: the 91 rows of P6-02 plus the 98 universal categories none of them covered (P8-08)', () => {
     assert.equal(CATEGORY_FAMILIES.length, 8);
-    assert.equal(STANDARD_CATEGORIES.length, 91);
+    // 125 universal categories, 27 of which absorbed an old row in place.
+    assert.equal(STANDARD_CATEGORIES.length, 91 + 98);
   });
 
   test('every category belongs to a declared family, and every family has categories', () => {
@@ -70,7 +71,7 @@ describe("the client's category reference", () => {
   test('every family keeps an "Autre" category — the client\'s own rule', () => {
     for (const code of CATEGORY_FAMILY_CODES) {
       const others = standardCategoriesOfFamily(code).filter((c) => c.label.startsWith('Autre'));
-      assert.equal(others.length, 1, `${code} must offer exactly one "Autre" category`);
+      assert.ok(others.length >= 1, `${code} must offer an "Autre" category`);
     }
   });
 

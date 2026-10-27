@@ -542,3 +542,38 @@
   text-align: start;
   border-block-end: 1px solid var(--border);
 }
+
+/* A single-column page of the application (P8-02). */
+.fin-page-narrow {
+  display: grid;
+  gap: var(--space-md);
+  max-inline-size: 760px;
+  margin-inline: auto;
+  padding: var(--space-md);
+}
+
+/* The dimensions of the health index, one per line: label and score. */
+.fin-health-dimensions {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fin-health-dimensions li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* « Période » (P8-06, ACC-05): the two dates of a free range. */
+.fin-period-custom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-block-start: var(--space-xs);
+}

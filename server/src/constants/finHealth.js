@@ -31,7 +31,9 @@ const band = (min, max, score, label = null) => ({ min, max, score, label });
 // Indice de santé financière — barème B, 7 dimensions (`09_Sante_Poids`)
 // ---------------------------------------------------------------------------
 
-export const HEALTH_VERSION = 'B-7';
+// B-8 since P8-16: « budgets » replaces « stabilité des revenus » (decision
+// P8-01 point 4). A new version, so a score read later says which grid it used.
+export const HEALTH_VERSION = 'B-8';
 
 export const HEALTH_DIMENSIONS = [
   { key: 'balance', weight: 25, label: 'Solde et équilibre mensuel', basis: 'flux_net / revenu_net' },
@@ -39,7 +41,10 @@ export const HEALTH_DIMENSIONS = [
   { key: 'debt', weight: 20, label: 'Pression de dette', basis: 'taux d’effort total' },
   { key: 'savings', weight: 15, label: 'Épargne', basis: 'taux d’épargne nette' },
   { key: 'goals', weight: 10, label: 'Trajectoire des objectifs', basis: 'écart au plan' },
-  { key: 'incomeStability', weight: 5, label: 'Stabilité des revenus', basis: 'régularité + historique' },
+  // P8-16 (decision P8-01 point 4): the consolidated specification's seven
+  // dimensions — « stabilité des revenus » leaves, « budgets » takes its 5 %,
+  // measured as real spending over the active budgets (tab 11_Tableau_Bord).
+  { key: 'budgets', weight: 5, label: 'Respect des budgets', basis: 'dépenses réelles / budgets actifs' },
   { key: 'dataQuality', weight: 5, label: 'Qualité des données', basis: 'complétude + fraîcheur' },
 ];
 

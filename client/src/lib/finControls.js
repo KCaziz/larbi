@@ -6,7 +6,9 @@
 
 // The client's four windows, in the client's order. An arbitrary date range is
 // a different control answering a different question, and is not one of them.
-export const PERIODS = ['semaine', 'mois', '90jours', 'annee'];
+// P8-06 (ACC-05): « Jour | Semaine | Mois | 90 jours | Année | Période ».
+// « periode » is a free range the screen asks for with two dates.
+export const PERIODS = ['jour', 'semaine', 'mois', '90jours', 'annee', 'periode'];
 
 // Real and fictional, never both: the engine's rule is that the two are never
 // added together, so a screen shows one world at a time.
@@ -24,9 +26,11 @@ export const REALITIES = ['reel', 'fictif'];
 // (Monday, Saturday, Sunday), so a calendar week would silently change the
 // figure with the reading language. « année » is the calendar year, where no
 // such ambiguity exists.
-export function periodRange(period, now = new Date()) {
+export function periodRange(period, now = new Date(), custom = null) {
+  if (period === 'periode') return custom?.from && custom?.to ? { from: custom.from, to: custom.to } : null;
   const day = (d) => d.toISOString().slice(0, 10);
   const shift = (days) => day(new Date(now.getTime() - days * 24 * 3600 * 1000));
+  if (period === 'jour') return { from: day(now), to: day(now) };
   if (period === 'semaine') return { from: shift(6), to: day(now) };
   if (period === '90jours') return { from: shift(89), to: day(now) };
   if (period === 'annee') return { from: `${now.getUTCFullYear()}-01-01`, to: day(now) };

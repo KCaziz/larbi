@@ -23,10 +23,12 @@ import './Debts.css';
 // sous pression" the client asks for is deliberately absent: its thresholds
 // are still "à valider" (P6-01 point 5), so only the raw indicators are shown.
 export default function DebtsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [showArchived, setShowArchived] = useState(false);
   const [creating, setCreating] = useState(false);
+  // « J'ai prêté » / « On m'a prêté » (P8-13, D-01 / D-02).
+  const [loan, setLoan] = useState(null);
   const [showComparison, setShowComparison] = useState(false);
   const [message, setMessage] = useState(null);
   useDocumentMeta(t('debts.title'), t('debts.intro'));
@@ -35,6 +37,7 @@ export default function DebtsPage() {
   const debts = useApi(`/fin/debts${showArchived ? '?includeArchived=true' : ''}`);
   const references = useApi('/fin/debts/references');
   const comparison = useApi(showComparison ? `/fin/debts/comparaison?currency=${currency}` : null);
+  const accounts = useApi('/fin/comptes');
   const formulas = useMemo(() => new Map((references.data?.formulas ?? []).map((formula) => [formula.id, formula])), [references.data]);
 
   async function run(action, okKey) {
@@ -57,6 +60,8 @@ export default function DebtsPage() {
   if (debts.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={debts.reload} />;
 
   const { debts: list, synthese } = debts.data;
+  const owed = list.filter((debt) => debt.direction !== 'lent');
+  const lent = list.filter((debt) => debt.direction === 'lent');
 
   return (
     <>
@@ -71,6 +76,11 @@ export default function DebtsPage() {
         <div className="fin-figure-grid">
           <FigureCard label={t('debts.monthlyService')} answer={synthese.serviceMenuel} formula={formulas.get('F017')} />
           {synthese.tauxEffort && <FigureCard label={t('debts.effortRate')} answer={synthese.tauxEffort} formula={formulas.get('F018')} />}
+          {/* Outstanding (C13, in red): what I owe, and apart what is owed to me. */}
+          <div className="fin-figure">
+            <h3 className="fin-figure-label">{t('debts.outstanding')}</h3>
+            <p className="fin-figure-value">{formatAmount(i18n.language, synthese.encours, currency)}</p>
+          </div>
           <FigureCard label={t('debts.debtToIncome')} answer={synthese.detteRevenuAnnuel} formula={formulas.get('F019')} />
         </div>
         {synthese.avertissements.map((warning, index) => (
@@ -87,10 +97,18 @@ export default function DebtsPage() {
           <button type="button" className="debts-plain" onClick={() => setShowComparison((v) => !v)}>
             {t('debts.compareStrategies')}
           </button>
+          <Button variant="secondary" onClick={() => setLoan(loan === 'lent' ? null : 'lent')} aria-expanded={loan === 'lent'}>
+            {t('debts.loans.lent')}
+          </Button>
+          <Button variant="secondary" onClick={() => setLoan(loan === 'borrowed' ? null : 'borrowed')} aria-expanded={loan === 'borrowed'}>
+            {t('debts.loans.borrowed')}
+          </Button>
           <Button onClick={() => setCreating((v) => !v)}>
             <Plus size={16} aria-hidden="true" /> {t('debts.create')}
           </Button>
         </div>
+
+        {loan && <LoanForm direction={loan} accounts={accounts.data?.accounts ?? []} run={(action, key) => run(action, key).then((res) => (res.ok && setLoan(null), res))} />}
 
         {showComparison && (
           <div className="debts-comparison">
@@ -124,14 +142,26 @@ export default function DebtsPage() {
           />
         )}
 
-        {list.length === 0 ? (
+        {owed.length === 0 ? (
           <Notice variant="info">{t('debts.none')}</Notice>
         ) : (
           <ul className="debts-list">
-            {list.map((debt) => (
-              <DebtRow key={debt.id} debt={debt} run={run} />
+            {owed.map((debt) => (
+              <DebtRow key={debt.id} debt={debt} accounts={accounts.data?.accounts ?? []} run={run} />
             ))}
           </ul>
+        )}
+
+        {/* Receivables (D-01): money owed TO me — always apart from debts. */}
+        {lent.length > 0 && (
+          <section aria-labelledby="debts-receivables">
+            <h2 id="debts-receivables">{t('debts.receivables', { amount: formatAmount(i18n.language, synthese.creances?.encours ?? 0, currency) })}</h2>
+            <ul className="debts-list">
+              {lent.map((debt) => (
+                <DebtRow key={debt.id} debt={debt} accounts={accounts.data?.accounts ?? []} run={run} />
+              ))}
+            </ul>
+          </section>
         )}
       </div>
     </>
@@ -161,16 +191,19 @@ function formatAmount(language, amount, currency) {
   }
 }
 
-function DebtRow({ debt, run }) {
+function DebtRow({ debt, accounts, run }) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
+  const usable = accounts.filter((account) => !account.archivedAt && !account.liability && account.currency === debt.currency && account.id !== debt.accountId && account.type !== 'AC-09');
+  const [paymentAccount, setPaymentAccount] = useState(usable[0]?.id ?? '');
 
   const pay = (event) => {
     event.preventDefault();
     const amount = toMinorUnits(paymentAmount, debt.currency);
     if (amount === null) return;
-    run(() => api.post(`/fin/debts/${debt.id}/paiements`, { amount, currency: debt.currency, paidAt: new Date().toISOString() }), 'debts.paymentRecorded').then((res) => {
+    const body = { amount, currency: debt.currency, paidAt: new Date().toISOString(), ...(debt.accountId && paymentAccount ? { accountId: paymentAccount } : {}) };
+    run(() => api.post(`/fin/debts/${debt.id}/paiements`, body), 'debts.paymentRecorded').then((res) => {
       if (res.ok) setPaymentAmount('');
     });
   };
@@ -193,7 +226,27 @@ function DebtRow({ debt, run }) {
           {debt.purpose && <p className="debts-detail-line">{debt.purpose}</p>}
 
           <form className="debts-payment-form" onSubmit={pay}>
-            <AmountField id={`debt-pay-${debt.id}`} label={t('debts.recordPayment')} value={paymentAmount} currency={debt.currency} onChange={setPaymentAmount} required />
+            <AmountField
+              id={`debt-pay-${debt.id}`}
+              label={t(debt.direction === 'lent' ? 'debts.recordRepaymentReceived' : 'debts.recordPayment')}
+              value={paymentAmount}
+              currency={debt.currency}
+              onChange={setPaymentAmount}
+              required
+            />
+            {/* On its own account, a payment is a real transfer (P8-13). */}
+            {debt.accountId && usable.length > 0 && (
+              <div className="fin-field">
+                <label htmlFor={`debt-account-${debt.id}`}>{t(debt.direction === 'lent' ? 'debts.toAccount' : 'debts.fromAccount')}</label>
+                <select id={`debt-account-${debt.id}`} value={paymentAccount} onChange={(event) => setPaymentAccount(event.target.value)}>
+                  {usable.map((account) => (
+                    <option key={account.id} value={account.id}>
+                      {account.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <Button type="submit" variant="secondary">
               {t('debts.pay')}
             </Button>
@@ -224,6 +277,63 @@ function DebtRow({ debt, run }) {
         </div>
       )}
     </li>
+  );
+}
+
+// « J'ai prêté » (D-01) or « On m'a prêté » (D-02): the money really moves the
+// day it happens, between the person's account and the loan's own account.
+function LoanForm({ direction, accounts, run }) {
+  const { t } = useTranslation();
+  const usable = accounts.filter((account) => !account.archivedAt && !account.liability && account.type !== 'AC-09');
+  const [state, setState] = useState({ counterparty: '', accountId: usable[0]?.id ?? '', amount: '', date: new Date().toISOString().slice(0, 10), dueDate: '' });
+  const account = usable.find((row) => row.id === state.accountId);
+  if (usable.length === 0) return <p className="fin-hint">{t('debts.loans.noAccount')}</p>;
+  const submit = (event) => {
+    event.preventDefault();
+    const value = toMinorUnits(state.amount, account?.currency ?? 'DZD');
+    if (value === null) return;
+    run(
+      () =>
+        api.post('/fin/debts/pret', {
+          direction,
+          counterparty: state.counterparty.trim(),
+          accountId: state.accountId,
+          value,
+          occurredAt: new Date(`${state.date}T12:00:00.000Z`).toISOString(),
+          dueDate: state.dueDate ? new Date(state.dueDate).toISOString() : null,
+        }),
+      'debts.loans.saved',
+    );
+  };
+  return (
+    <form className="debts-create-form" onSubmit={submit}>
+      <h2>{t(`debts.loans.${direction}`)}</h2>
+      <p className="fin-hint">{t(`debts.loans.${direction}Hint`)}</p>
+      <div className="fin-field">
+        <label htmlFor="loan-who">{t(`debts.loans.${direction}Who`)}</label>
+        <input id="loan-who" value={state.counterparty} maxLength={60} required onChange={(event) => setState({ ...state, counterparty: event.target.value })} />
+      </div>
+      <div className="fin-field">
+        <label htmlFor="loan-account">{t(direction === 'lent' ? 'debts.fromAccount' : 'debts.toAccount')}</label>
+        <select id="loan-account" value={state.accountId} onChange={(event) => setState({ ...state, accountId: event.target.value })}>
+          {usable.map((row) => (
+            <option key={row.id} value={row.id}>
+              {row.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <AmountField id="loan-amount" label={t('debts.loans.amount')} value={state.amount} currency={account?.currency ?? 'DZD'} onChange={(amount) => setState({ ...state, amount })} required />
+      <div className="fin-field">
+        <label htmlFor="loan-date">{t('myMoney.date')}</label>
+        <input id="loan-date" type="date" value={state.date} max={new Date().toISOString().slice(0, 10)} onChange={(event) => setState({ ...state, date: event.target.value })} />
+      </div>
+      <div className="fin-field">
+        <label htmlFor="loan-due">{t('debts.loans.dueDate')}</label>
+        <input id="loan-due" type="date" value={state.dueDate} onChange={(event) => setState({ ...state, dueDate: event.target.value })} />
+      </div>
+      <Button type="submit">{t('debts.save')}</Button>
+    </form>
   );
 }
 

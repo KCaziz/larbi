@@ -4,6 +4,10 @@ import { FREQUENCIES } from '../constants/finance.js';
 import { TRANSACTION_KINDS } from '../constants/finMoney.js';
 import { amountSchema, consentUsesSchema, currencySchema, reasonSchema, scopeSchema } from './finData.schemas.js';
 
+// Tab 08B: how an occurrence becomes real, and the weekend rule (PB-F021).
+const CREATION_MODES = ['confirm', 'auto_real', 'planned'];
+const WEEKEND_RULES = ['previous', 'next', 'none'];
+
 // Calendar, recurrences and provisions (P6-07). The vocabularies come from the
 // constants, so what the database refuses and what validation refuses are the
 // same lists.
@@ -18,8 +22,9 @@ const positiveAmount = amountSchema.min(0);
 // Days before the due date to remind. « J-7 / J-1 configurables » — a bounded
 // list of distinct positive days, because each one becomes a reminder and the
 // same day twice would mean two identical reminders.
+// P8-11 adds « J » (0) and « J+1 » (-1) to the days before.
 const reminderDaysSchema = z
-  .array(z.number().int().min(1).max(MAX_REMINDER_DAY_VALUE))
+  .array(z.number().int().min(-1).max(MAX_REMINDER_DAY_VALUE))
   .max(MAX_REMINDER_DAYS)
   .refine((list) => new Set(list).size === list.length, { message: 'The same reminder day is listed twice' });
 
@@ -37,6 +42,9 @@ export const createRecurrenceSchema = z
     nextDate: isoDate,
     endDate: isoDate.nullable().optional(),
     reminderDays: reminderDaysSchema.optional(),
+    accountId: z.string().uuid().nullable().optional(),
+    creationMode: z.enum(CREATION_MODES).optional(),
+    weekendRule: z.enum(WEEKEND_RULES).optional(),
     note,
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
@@ -56,6 +64,9 @@ export const updateRecurrenceSchema = z
     nextDate: isoDate.optional(),
     endDate: isoDate.nullable().optional(),
     reminderDays: reminderDaysSchema.optional(),
+    accountId: z.string().uuid().nullable().optional(),
+    creationMode: z.enum(CREATION_MODES).optional(),
+    weekendRule: z.enum(WEEKEND_RULES).optional(),
     note,
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
@@ -119,6 +130,18 @@ const queryAmount = z.coerce.number().int().safe();
 // holds no account balance, so without it the projected cash is not computed
 // rather than started from an imaginary zero. It may be negative — somebody may
 // well be in the red, and refusing to say so would be the wrong answer.
+// « Confirmer, Modifier, Pas reçu, Reporter » (tab 02, step P2).
+export const occurrenceSchema = z
+  .object({
+    recurrenceId: z.string().uuid(),
+    dueDate: isoDate,
+    action: z.enum(['confirm', 'modify', 'missed', 'postpone']),
+    value: positiveAmount.min(1).optional(),
+    occurredAt: isoDate.optional(),
+    postponedTo: isoDate.optional(),
+  })
+  .strict();
+
 export const calendarQuerySchema = z
   .object({
     from: isoDate.optional(),

@@ -191,7 +191,63 @@ describe('P6-05 — the view of one budget', () => {
   test('once the period is over there is no daily budget left to compute', () => {
     const v = view({ now: D('2026-11-10') });
     assert.equal(v.periode.joursRestants, 0);
-    assert.equal(v.budgetJournalier.resultat, null, 'F012: « si jours restants > 0 »');
+    assert.equal(v.budgetJournalier.resultat, null, 'PB-F013: « si jours restants > 0 »');
+  });
+
+  // Diagnostic n°2, C5 (P8-04). The daily budget used to take the fixed
+  // envelopes still to pay away a SECOND time from a remainder that already
+  // contained them. PB-F013: max(0, budget restant) / jours restants.
+  test('the daily budget is what is left of the envelopes over the remaining days (PB-F013)', () => {
+    // 5 000 000 planned, nothing spent yet, 15 days left: the 3 000 000 fixed
+    // envelope is part of what is left, not taken away once more.
+    const untouched = view();
+    assert.equal(untouched.periode.joursRestants, 15);
+    assert.equal(untouched.budgetJournalier.resultat, Math.floor(5000000 / 15));
+    assert.equal(untouched.budgetJournalier.formule_id, 'PB-F013');
+
+    const spending = view({ movements: [spent({ categoryId: 'c2', value: 1000000 })] });
+    assert.equal(spending.budgetJournalier.resultat, Math.floor(4000000 / 15));
+  });
+
+  test('an overspend leaves a daily budget of 0, and is reported apart', () => {
+    const v = view({ movements: [spent({ categoryId: 'c2', value: 6000000 })] });
+    assert.equal(v.ecart.resultat, -1000000, 'PB-F008 may be negative');
+    assert.equal(v.budgetJournalier.resultat, 0, 'never a negative budget per day');
+    assert.equal(v.depassement, 1000000);
+    assert.equal(view().depassement, 0);
+  });
+
+  test('spending no envelope covers does not eat into the envelopes', () => {
+    const v = view({ movements: [spent({ categoryId: 'c9', value: 2000000 })] });
+    assert.equal(v.ecart.resultat, 5000000);
+    assert.equal(v.horsEnveloppe.resultat, 2000000, 'it is shown apart');
+  });
+
+  test('the planned goal contributions are allocated outside the budget (PB-F009)', () => {
+    const v = view({
+      incomes: [{ label: 'Salaire', value: 6000000, currency: 'DZD', frequency: 'mensuel' }],
+      goals: [{ currency: 'DZD', monthlyContribution: 500000 }, { currency: 'DZD', monthlyContribution: null }, { currency: 'EUR', monthlyContribution: 9000 }],
+    });
+    assert.equal(v.resteAAffecter.resultat, 6000000 - 5000000 - 500000);
+    assert.equal(v.resteAAffecter.formule_id, 'PB-F009');
+    assert.equal(v.resteAAffecter.entrees_snapshot.allocations_hors_budget, 500000);
+  });
+
+  test('the net flow is received income minus real spending, not expected income (PB-F006)', () => {
+    const incomes = [{ label: 'Salaire', value: 6000000, currency: 'DZD', frequency: 'mensuel' }];
+    const before = view({ incomes, movements: [spent({ categoryId: 'c2', value: 1000000 })] });
+    assert.equal(before.fluxNet.resultat, null, 'the salary has not arrived: nothing to compare yet');
+
+    const after = view({ incomes, movements: [spent({ categoryId: 'c2', value: 1000000 }), spent({ id: 'in', kind: 'income', categoryId: null, value: 6000000 })] });
+    assert.equal(after.fluxNet.resultat, 5000000);
+    assert.equal(after.fluxNet.formule_id, 'PB-F006');
+  });
+
+  test('money set aside is not part of the real spending total (PB-F005)', () => {
+    const v = view({ movements: [spent({ categoryId: 'c2', value: 400000 }), spent({ id: 's', categoryId: 'g', value: 900000, category: { family: 'goal' } })] });
+    assert.equal(v.totalReel.resultat, 400000);
+    assert.equal(v.totalReel.formule_id, 'PB-F005');
+    assert.equal(v.totalPrevu.formule_id, 'PB-F007');
   });
 
   test('a row in another currency is not converted and is reported', () => {

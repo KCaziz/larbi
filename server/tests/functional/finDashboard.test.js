@@ -71,7 +71,7 @@ describe('P6-06 — one request answers the screen', () => {
     const resources = view.kpis.find((kpi) => kpi.key === 'monthlyResources');
     assert.equal(resources.answer.resultat, 6000000);
     assert.equal(resources.invitation, null);
-    assert.equal(resources.answer.formule_id, 'F002');
+    assert.equal(resources.answer.formule_id, 'F001', 'the declared resources, expected (P8-04)');
     // Read from the engine, not recomputed: the contract travels with it.
     assert.ok(resources.answer.calcule_le);
     assert.ok(resources.answer.entrees_snapshot);
@@ -266,7 +266,7 @@ describe('P6-06 — what is declared rather than invented', () => {
     await setPublic('SAL', '25-34');
     const res = await today();
     const health = res.body.aujourdhui.santeFinanciere;
-    assert.equal(health.version, 'B-7');
+    assert.equal(health.version, 'B-8');
     assert.equal(health.answer.formule_id, 'F053');
     assert.ok(Array.isArray(health.dimensions) && health.dimensions.length === 7);
     assert.ok(!res.body.aujourdhui.kpis.some((kpi) => kpi.formule === 'F053'));

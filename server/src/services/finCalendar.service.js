@@ -5,6 +5,7 @@
 // Everything here is scoped to ONE account. `userId` is part of every filter,
 // never only of the object's identity: a row that is not yours is "not found".
 
+import { usableAccount } from './finAccount.service.js';
 import { DETECTION_DEFAULTS, DETECTION_WINDOW_DAYS } from '../constants/finCalendar.js';
 import { FREQUENCIES } from '../constants/finance.js';
 import { TRANSACTION_KINDS } from '../constants/finMoney.js';
@@ -29,6 +30,9 @@ const RECURRENCE_SELECT = {
   endDate: true,
   reminderDays: true,
   detected: true,
+  accountId: true,
+  creationMode: true,
+  weekendRule: true,
   note: true,
   scope: true,
   source: true,
@@ -87,6 +91,9 @@ export async function createRecurrence(prisma, userId, body) {
   if (!FREQUENCIES.includes(body.frequency)) throw new HttpError(422, 'Unknown frequency', { reason: 'unknownFrequency' });
   if (!TRANSACTION_KINDS.includes(body.kind)) throw new HttpError(422, 'Unknown kind', { reason: 'unknownKind' });
   const categoryId = await usableCategory(prisma, userId, body.categoryId ?? null);
+  // The account the occurrences go on (tab 08B): this person's, open, same
+  // currency. None chosen: the « Espèces » account when one is realised.
+  if (body.accountId) await usableAccount(prisma, userId, body.accountId, body.currency);
 
   return prisma.$transaction(async (tx) => {
     const row = await tx.finRecurrence.create({
@@ -101,6 +108,11 @@ export async function createRecurrence(prisma, userId, body) {
         nextDate: body.nextDate,
         endDate: body.endDate ?? null,
         reminderDays: body.reminderDays ?? [7, 1],
+        accountId: body.accountId ?? null,
+        // « À confirmer » is the client's recommendation for income, and the
+        // safe default for everything: nothing real happens without the person.
+        creationMode: body.creationMode ?? 'confirm',
+        weekendRule: body.weekendRule ?? 'previous',
         // `detected` is only ever set by confirming a detection, never by the
         // caller: it says where the row came from, and a client that could
         // claim it would make that trace worthless.
@@ -140,6 +152,7 @@ export async function updateRecurrence(prisma, userId, id, body) {
     throw new HttpError(422, 'Unknown frequency', { reason: 'unknownFrequency' });
   }
   if (fields.categoryId !== undefined) fields.categoryId = await usableCategory(prisma, userId, fields.categoryId);
+  if (fields.accountId) await usableAccount(prisma, userId, fields.accountId, fields.currency ?? before.currency);
   const nextDate = fields.nextDate ?? before.nextDate;
   const endDate = fields.endDate === undefined ? before.endDate : fields.endDate;
   if (endDate && endDate < nextDate) throw new HttpError(422, 'A recurrence never ends before its next date', { reason: 'dates' });
@@ -505,7 +518,20 @@ export async function loadCalendarData(prisma, userId, { from, to }) {
     }),
     prisma.finRecurrence.findMany({
       where: { userId, deletedAt: null, archivedAt: null, OR: [{ endDate: null }, { endDate: { gte: from } }] },
-      select: { id: true, label: true, kind: true, value: true, currency: true, frequency: true, nextDate: true, endDate: true, categoryId: true },
+      select: {
+        id: true,
+        label: true,
+        kind: true,
+        value: true,
+        currency: true,
+        frequency: true,
+        nextDate: true,
+        endDate: true,
+        categoryId: true,
+        accountId: true,
+        creationMode: true,
+        weekendRule: true,
+      },
     }),
     prisma.finProvision.findMany({
       where: { userId, deletedAt: null, archivedAt: null, targetDate: { gte: from, lte: to } },
@@ -516,5 +542,22 @@ export async function loadCalendarData(prisma, userId, { from, to }) {
       select: { id: true, kind: true, value: true, currency: true, planned: true, status: true },
     }),
   ]);
-  return { planned, recurrences, provisions, realised };
+  // P8-11: what was said about each occurrence (a month either side, for the
+  // postponed ones), and the « Échéances » of debts and goals.
+  const margin = 31 * 24 * 3600 * 1000;
+  const [outcomes, debts, goals] = await Promise.all([
+    prisma.finOccurrence.findMany({
+      where: { userId, OR: [{ dueDate: { gte: new Date(from.getTime() - margin), lte: new Date(to.getTime() + margin) } }, { postponedTo: { gte: from, lte: to } }] },
+      select: { recurrenceId: true, dueDate: true, outcome: true, postponedTo: true, transactionId: true },
+    }),
+    prisma.finDebt.findMany({
+      where: { userId, deletedAt: null, archivedAt: null, dueDate: { gte: from, lte: to } },
+      select: { id: true, label: true, dueDate: true, monthlyInstalment: true, currency: true },
+    }),
+    prisma.finGoal.findMany({
+      where: { userId, deletedAt: null, archivedAt: null, targetDate: { gte: from, lte: to } },
+      select: { id: true, label: true, targetDate: true, target: true, currency: true },
+    }),
+  ]);
+  return { planned, recurrences, provisions, realised, outcomes, debts, goals };
 }

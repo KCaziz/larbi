@@ -2,8 +2,8 @@ import { after, before, beforeEach, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { boot } from '../helpers/server.js';
 
-// The safety reserve (P6-09) is this account's own money movements and its
-// own chosen target: private, exactly like budgets, goals and debts.
+// The safety reserve (P6-09) is this account's own emergency-fund capital and
+// its own chosen target: private, exactly like budgets, goals and debts.
 
 let t;
 let owner;

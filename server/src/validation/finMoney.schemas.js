@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { FREQUENCIES } from '../constants/finance.js';
-import { PAYMENT_METHODS, TRANSACTION_KINDS, TRANSACTION_SORTS, TRANSACTIONS_MAX_PAGE_SIZE } from '../constants/finMoney.js';
+import { CLEARING_STATES, PAYMENT_METHODS, TRANSACTION_KINDS, TRANSACTION_SORTS, TRANSACTIONS_MAX_PAGE_SIZE, TRANSFER_KINDS } from '../constants/finMoney.js';
 import { amountSchema, consentUsesSchema, currencySchema, reasonSchema, scopeSchema, statusSchema } from './finData.schemas.js';
 
 // "Mon argent" (P6-04). The vocabularies come from the constants, so what the
@@ -53,6 +53,11 @@ export const updateIncomeSchema = z
 export const createTransactionSchema = z
   .object({
     kind: z.enum(TRANSACTION_KINDS),
+    // Optional: none chosen means the « Espèces » account (PB-PR-04).
+    accountId: z.string().uuid().optional(),
+    tagId: z.string().uuid().nullable().optional(),
+    payer: z.string().trim().min(1).max(80).nullable().optional(),
+    place: z.string().trim().min(1).max(120).nullable().optional(),
     value: positiveAmount,
     currency: currencySchema,
     occurredAt: isoDate,
@@ -73,6 +78,10 @@ export const createTransactionSchema = z
 export const updateTransactionSchema = z
   .object({
     kind: z.enum(TRANSACTION_KINDS).optional(),
+    accountId: z.string().uuid().optional(),
+    tagId: z.string().uuid().nullable().optional(),
+    payer: z.string().trim().min(1).max(80).nullable().optional(),
+    place: z.string().trim().min(1).max(120).nullable().optional(),
     value: positiveAmount.optional(),
     currency: currencySchema.optional(),
     occurredAt: isoDate.optional(),
@@ -84,6 +93,40 @@ export const updateTransactionSchema = z
     planned: z.boolean().optional(),
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
+    reason: reasonSchema.optional(),
+  })
+  .strict()
+  .refine((body) => Object.keys(body).some((key) => key !== 'reason'), { message: 'Nothing to change' });
+
+// « Doublon suspect demandé en confirmation » (P8-07): the same fields as an
+// entry, checked BEFORE anything is written.
+export const duplicateCheckSchema = z
+  .object({
+    kind: z.enum(TRANSACTION_KINDS),
+    value: positiveAmount,
+    currency: currencySchema,
+    occurredAt: isoDate,
+    categoryId: z.string().uuid().nullable().optional(),
+  })
+  .strict();
+
+export const clearingSchema = z.object({ clearing: z.enum(CLEARING_STATES) }).strict();
+
+export const clearingQuerySchema = z.object({ from: isoDate.optional(), to: isoDate.optional() }).strict();
+
+const tagName = z.string().trim().min(1).max(40);
+const tagColor = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
+
+export const createTagSchema = z
+  .object({ name: tagName, color: tagColor, autoCategoryId: z.string().uuid().nullable().optional() })
+  .strict();
+
+export const updateTagSchema = z
+  .object({
+    name: tagName.optional(),
+    color: tagColor.optional(),
+    autoCategoryId: z.string().uuid().nullable().optional(),
+    archived: z.boolean().optional(),
     reason: reasonSchema.optional(),
   })
   .strict()
@@ -104,7 +147,11 @@ const queryBoolean = z
 export const historyQuerySchema = z
   .object({
     text: z.string().trim().min(1).max(120).optional(),
-    kind: z.enum(TRANSACTION_KINDS).optional(),
+    kind: z.enum([...TRANSACTION_KINDS, ...TRANSFER_KINDS]).optional(),
+    accountId: z.string().uuid().optional(),
+    tagId: z.string().uuid().optional(),
+    clearing: z.enum(CLEARING_STATES).optional(),
+    tab: z.enum(['transfers']).optional(),
     status: statusSchema.optional(),
     source: z.enum(['manual', 'imported', 'document', 'partner', 'computed']).optional(),
     scope: scopeSchema.optional(),

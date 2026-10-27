@@ -82,7 +82,7 @@ describe('P6-06 — the registry', () => {
     // les fournit (P6-22, chantier 2). Ce qui reste vrai : un score partiel
     // s'annonce comme tel.
     const view = buildDashboard({ publicCode: 'SAL', ageRange: '25-34', synthesis: synthesisOf(), currency: 'DZD', now: NOW });
-    assert.equal(view.santeFinanciere.version, 'B-7');
+    assert.equal(view.santeFinanciere.version, 'B-8');
     assert.ok(view.santeFinanciere.answer.formule_id === 'F053');
     assert.ok(!DASHBOARDS.SAL.kpis.includes('healthIndex'), 'il n’est toujours pas une carte parmi les autres');
   });

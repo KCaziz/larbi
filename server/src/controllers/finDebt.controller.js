@@ -13,6 +13,7 @@ import {
   recordDebtPayment,
   setDebtArchived,
   updateDebt,
+  createSimpleLoan,
 } from '../services/finDebt.service.js';
 import { monthlyAmount, totalIncome } from '../services/finance/formulas.js';
 import { describeFormula } from '../services/finance/describe.js';
@@ -67,6 +68,12 @@ export async function putDebtArchived(req, res) {
 
 export async function removeDebt(req, res) {
   res.json(await deleteDebt(prisma, req.user.id, req.params.id, { reason: req.body?.reason }));
+}
+
+export async function postSimpleLoan(req, res) {
+  const count = await prisma.finDebt.count({ where: { userId: req.user.id, deletedAt: null } });
+  if (count >= MAX_DEBTS) throw new HttpError(422, 'Too many debts', { reason: 'tooManyDebts' });
+  res.status(201).json({ debt: await createSimpleLoan(prisma, req.user.id, req.body) });
 }
 
 export async function postDebtPayment(req, res) {

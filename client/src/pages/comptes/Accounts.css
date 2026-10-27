@@ -1,0 +1,181 @@
+.accounts-page {
+  display: grid;
+  gap: var(--space-md);
+  max-inline-size: 1040px;
+  margin-inline: auto;
+  padding: var(--space-md);
+}
+
+.accounts-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.accounts-form {
+  display: grid;
+  gap: var(--space-sm);
+  max-inline-size: 520px;
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.accounts-list {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* One card per account; the account's colour is a side bar, never the only
+   way to tell accounts apart (the name is always written). */
+.accounts-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-inline-start: 4px solid var(--account-color, var(--border-strong));
+  border-radius: var(--radius);
+}
+.accounts-icon {
+  font-size: 1.5rem;
+}
+.accounts-name {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-h);
+}
+.accounts-meta {
+  margin: 0;
+  font-size: 0.85rem;
+}
+.accounts-balance {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
+.accounts-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-block-size: 44px;
+  cursor: pointer;
+}
+
+.accounts-section-title {
+  margin-block: var(--space-md) var(--space-xs);
+  font-size: 1.1rem;
+  color: var(--text-h);
+}
+
+.accounts-card-archived {
+  opacity: 0.75;
+}
+.accounts-owed {
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
+/* The alerts: an icon and a sentence, on the warning tone. */
+.accounts-alerts {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: var(--space-xs) var(--space-sm);
+  list-style: none;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.accounts-card-actions {
+  grid-column: 2 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.85rem;
+}
+.accounts-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-block-size: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+}
+.accounts-card-panel {
+  grid-column: 1 / -1;
+}
+
+.accounts-suggestions {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-alt);
+  border-radius: var(--radius);
+}
+.accounts-suggestions h2 {
+  margin-block: 0 var(--space-xs);
+  font-size: 1rem;
+}
+.accounts-suggestions ul {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.accounts-suggestions li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+
+/* COM-03: the balance month by month — the value is always written. */
+.accounts-curve {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.accounts-curve li {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.85rem;
+}
+.accounts-curve-bar {
+  display: block;
+  block-size: 8px;
+  background: var(--bg-alt);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.accounts-curve-bar span {
+  display: block;
+  block-size: 100%;
+  background: var(--accent);
+}
+.accounts-curve-bar span.negative {
+  background: var(--danger);
+}
+.accounts-curve-value {
+  font-variant-numeric: tabular-nums;
+}

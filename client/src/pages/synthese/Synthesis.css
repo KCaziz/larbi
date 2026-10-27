@@ -1,0 +1,112 @@
+/* « Synthèse » (P8-10). */
+.synthesis-page {
+  display: grid;
+  gap: var(--space-md);
+  max-inline-size: 1100px;
+  margin-inline: auto;
+  padding: var(--space-md);
+}
+.synthesis-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+.synthesis-toolbar label {
+  display: grid;
+  gap: 4px;
+  font-weight: 600;
+}
+.synthesis-download {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-inline-start: auto;
+}
+.synthesis-download a,
+.synthesis-download button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-block-size: 40px;
+  padding-inline: var(--space-sm);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.synthesis-today {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-block-size: 44px;
+  font-weight: 600;
+}
+.synthesis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: var(--space-md);
+}
+.synthesis-block {
+  display: grid;
+  align-content: start;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.synthesis-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+.synthesis-block h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+.synthesis-block ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.synthesis-block li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  font-size: 0.9rem;
+}
+.synthesis-block p {
+  margin: 0;
+}
+.synthesis-alert {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* The PDF is this page printed: the application's chrome stays off paper. */
+@media print {
+  .app-topbar,
+  .app-sidebar,
+  .app-bottom-nav,
+  .synthesis-download,
+  .synthesis-today {
+    display: none !important;
+  }
+}
+.synthesis-toolbar input[type='month'] {
+  min-block-size: 40px;
+  padding-inline: var(--space-xs);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}

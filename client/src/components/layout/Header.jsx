@@ -156,15 +156,17 @@ export default function Header() {
                     {t('nav.admin')}
                   </Button>
                 )}
+                {/* « Accéder à mon espace » (P8-02): the showcase opens the
+                    application, in the same tab. */}
                 <Button
-                  to="/compte"
+                  to="/app"
                   variant="secondary"
                   className={user?.role === 'admin' ? 'btn-collapse' : ''}
-                  title={t('nav.account')}
+                  title={t('appNav.openApp')}
                   onClick={closeMenu}
                 >
                   <UserRound size={16} strokeWidth={1.75} aria-hidden="true" />
-                  <span className="btn-label">{t('nav.account')}</span>
+                  <span className="btn-label">{t('appNav.openApp')}</span>
                 </Button>
                 <Button variant="primary" onClick={handleLogout}>
                   <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />

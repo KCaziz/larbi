@@ -45,7 +45,7 @@ describe('P6-11 — net worth (F035)', () => {
     assert.equal(v.totalActifs, 5000000);
     assert.equal(v.totalDettes, 2000000);
     assert.equal(v.patrimoineNet.resultat, 3000000);
-    assert.equal(v.patrimoineNet.formule_id, 'F035');
+    assert.equal(v.patrimoineNet.formule_id, 'PB-F024') // the client's final rule since P8-14;
     assert.equal(v.patrimoineNet.unite, 'DZD');
   });
 

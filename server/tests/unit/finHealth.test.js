@@ -22,7 +22,7 @@ describe('P6-22 — les pondérations sont celles du client', () => {
     assert.equal(HEALTH_DIMENSIONS.reduce((total, row) => total + row.weight, 0), 100);
     assert.deepEqual(
       HEALTH_DIMENSIONS.map((row) => [row.key, row.weight]),
-      [['balance', 25], ['reserve', 20], ['debt', 20], ['savings', 15], ['goals', 10], ['incomeStability', 5], ['dataQuality', 5]],
+      [['balance', 25], ['reserve', 20], ['debt', 20], ['savings', 15], ['goals', 10], ['budgets', 5], ['dataQuality', 5]],
     );
   });
 
@@ -69,7 +69,7 @@ describe('P6-22 — une dimension absente n’est jamais un zéro', () => {
     debtRatio: 0.25,
     savingsRate: 0.12,
     goalsGap: 0,
-    incomeMonths: 18,
+    budgetConsumption: 0.9,
     dataQuality: { completeness: 80, freshness: 60 },
   };
 
@@ -236,5 +236,16 @@ describe('P6-22 — les cibles de réserve, grille A', () => {
 
   test('un public inconnu ne reçoit pas de cible inventée', () => {
     assert.equal(reserveTarget('XXX', 3), null);
+  });
+});
+
+describe('P8-16 — « respect des budgets »', () => {
+  test('100 within the budgets, then down to 0 at 200 %, not measured without a budget', async () => {
+    const { budgetsScore } = await import('../../src/services/finHealth.service.js');
+    assert.equal(budgetsScore(0.7), 100);
+    assert.equal(budgetsScore(1), 100);
+    assert.equal(budgetsScore(1.5), 50);
+    assert.equal(budgetsScore(2.5), 0);
+    assert.equal(budgetsScore(null), null);
   });
 });

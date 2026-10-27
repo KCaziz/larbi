@@ -104,9 +104,30 @@ export default function BudgetDetailPage() {
           <FigureCard label={t('budget.netFlow')} answer={vue.fluxNet} formula={formulas.get('F004')} />
           <FigureCard label={t('budget.remainingToAllocate')} answer={vue.resteAAffecter} formula={formulas.get('F009')} />
           <FigureCard label={t('budget.dailyBudget')} answer={vue.budgetJournalier} formula={formulas.get('F012')} />
+          {/* PB-F011 / PB-F012 / PB-F022 (tab 10B): the pace of the period. */}
+          <FigureCard label={t('budget.dailyAverage')} answer={vue.moyenneJournaliere} />
+          <FigureCard label={t('budget.projection')} answer={vue.projectionFinPeriode} />
+          <FigureCard label={t('budget.plannedVsRealGap')} answer={vue.ecartPrevuReel} />
         </div>
 
+        {/* « Report du reste » (PB-F008): the positive remainder of last
+            period's envelopes is added to the same envelopes here. */}
+        <label className="money-check budget-carry">
+          <input
+            type="checkbox"
+            checked={Boolean(budget.carryOver)}
+            onChange={(event) => run(() => api.patch(`/fin/budgets/${id}`, { carryOver: event.target.checked }), 'budget.saved')}
+          />
+          {t('budget.carryOver')}
+          {vue.report && vue.report.total > 0 && <span className="budget-row-tag">{t('budget.carried', { amount: formatAmount(i18n.language, vue.report.total, currency) })}</span>}
+        </label>
+
         {vue.depassementRessources && <Notice variant="action-needed">{t('budget.overResources')}</Notice>}
+        {/* PB-F013: the daily budget never goes below zero; an overspend is
+            said apart, with its amount. */}
+        {vue.depassement > 0 && (
+          <Notice variant="action-needed">{t('budget.overspent', { amount: formatAmount(i18n.language, vue.depassement, currency) })}</Notice>
+        )}
 
         {vue.horsEnveloppe?.resultat !== null && vue.horsEnveloppe?.resultat !== undefined && (
           <p className="budget-outside">
@@ -135,6 +156,8 @@ export default function BudgetDetailPage() {
             <EnvelopeForm
               budgetId={id}
               currency={currency}
+              groups={references.data?.categoryGroups ?? []}
+              usedGroups={new Set(vue.enveloppes.map((line) => line.categoryGroup).filter(Boolean))}
               categories={flatCategories}
               usedCategoryIds={usedCategoryIds}
               onDone={() => {
@@ -155,8 +178,85 @@ export default function BudgetDetailPage() {
             </ul>
           )}
         </section>
+
+        <MethodPanel budgetId={id} budget={budget} references={references.data} run={run} />
       </div>
     </>
+  );
+}
+
+// The optional methods (P8-09, tab 12): compare, never judge (ARC-08). The
+// category → pocket mapping is shown and can be changed here (tab 12B).
+function MethodPanel({ budgetId, budget, references, run }) {
+  const { t } = useTranslation();
+  const [method, setMethod] = useState('');
+  const analysis = useApi(method ? `/fin/budgets/${budgetId}/methode?methode=${method}` : null);
+  const methods = (references?.methods ?? []).filter((row) => row.id !== 'M-05');
+
+  const setPocket = (group, pocket) => {
+    const mapping = { ...(budget.methodMapping ?? {}) };
+    if (pocket) mapping[group] = pocket;
+    else delete mapping[group];
+    run(() => api.patch(`/fin/budgets/${budgetId}`, { methodMapping: mapping }), 'budget.saved').then(() => analysis.reload?.());
+  };
+
+  return (
+    <section className="budget-methods">
+      <h2>{t('budget.methods.title')}</h2>
+      <p className="fin-hint">{t('budget.methods.intro')}</p>
+      <div className="fin-field">
+        <label htmlFor="budget-method">{t('budget.methods.choose')}</label>
+        <select id="budget-method" value={method} onChange={(event) => setMethod(event.target.value)}>
+          <option value="">{t('budget.methods.none')}</option>
+          {methods.map((row) => (
+            <option key={row.id} value={row.id}>
+              {row.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {method && analysis.data && (
+        <>
+          <p className="fin-hint">{analysis.data.methode.rule}</p>
+          {analysis.data.poches && (
+            <div className="fin-figure-grid">
+              {analysis.data.poches.map((pocket) => (
+                <FigureCard key={pocket.cle} label={t(`budget.methods.pockets.${pocket.cle}`, { target: Math.round(pocket.cible * 100) })} answer={pocket.part ?? pocket.ecart} />
+              ))}
+            </div>
+          )}
+          {analysis.data.resteAAllouer && <FigureCard label={t('budget.remainingToAllocate')} answer={analysis.data.resteAAllouer} />}
+          {analysis.data.budgetsRespectes && <FigureCard label={t('budget.methods.respected')} answer={analysis.data.budgetsRespectes} />}
+
+          {(method === 'M-01' || method === 'M-02') && (
+            <details className="budget-mapping">
+              <summary>{t('budget.methods.mapping')}</summary>
+              <ul>
+                {analysis.data.rattachement.map((row) => (
+                  <li key={row.groupe}>
+                    <span>
+                      {row.groupe} <span className="fin-hint">({row.texteClient})</span>
+                    </span>
+                    <label className="sr-only" htmlFor={`pocket-${row.groupe}`}>
+                      {row.groupe}
+                    </label>
+                    <select id={`pocket-${row.groupe}`} value={row.choisi ?? ''} onChange={(event) => setPocket(row.groupe, event.target.value)}>
+                      <option value="">{t('budget.methods.defaultPocket', { pocket: t(`budget.methods.pocketNames.${row.parDefaut}`) })}</option>
+                      {(references?.pockets ?? []).map((pocket) => (
+                        <option key={pocket} value={pocket}>
+                          {t(`budget.methods.pocketNames.${pocket}`)}
+                        </option>
+                      ))}
+                    </select>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </>
+      )}
+    </section>
   );
 }
 
@@ -190,6 +290,7 @@ function EnvelopeRow({ budgetId, line, currency, run }) {
           real: formatAmount(i18n.language, line.reel, currency),
         })}
         {line.cap !== null && <span className="budget-row-tag">{t('budget.cap', { amount: formatAmount(i18n.language, line.cap, currency) })}</span>}
+        {line.report > 0 && <span className="budget-row-tag">{t('budget.carried', { amount: formatAmount(i18n.language, line.report, currency) })}</span>}
       </p>
       <BudgetMeter prevu={line.prevu} reel={line.reel} currency={currency} alertLevel={line.alerte.niveau} />
       <FigureCard label={t('budget.gap')} answer={line.ecart} />
@@ -198,21 +299,25 @@ function EnvelopeRow({ budgetId, line, currency, run }) {
   );
 }
 
-function EnvelopeForm({ budgetId, currency, categories, usedCategoryIds, onDone, onCancel }) {
+function EnvelopeForm({ budgetId, currency, groups, usedGroups, categories, usedCategoryIds, onDone, onCancel }) {
   const { t } = useTranslation();
   const available = categories.filter((category) => !usedCategoryIds.has(category.id));
-  const [form, setForm] = useState({ categoryId: available[0]?.id ?? '', kind: 'variable', value: '', cap: '', note: '' });
+  const availableGroups = groups.filter((row) => !usedGroups.has(row.group));
+  // `target` is « group:<name> » or « category:<id> »: a whole client category
+  // (« Logement ») or one sub-category (P8-09).
+  const [form, setForm] = useState({ target: availableGroups[0] ? `group:${availableGroups[0].group}` : `category:${available[0]?.id ?? ''}`, kind: 'variable', value: '', cap: '', note: '' });
   const [error, setError] = useState(null);
 
   const submit = async (event) => {
     event.preventDefault();
     setError(null);
     const value = toMinorUnits(form.value, currency);
-    if (value === null || !form.categoryId) return;
+    const [targetKind, targetValue] = [form.target.slice(0, form.target.indexOf(':')), form.target.slice(form.target.indexOf(':') + 1)];
+    if (value === null || !targetValue) return;
     const cap = form.cap ? toMinorUnits(form.cap, currency) : null;
     try {
       await api.post(`/fin/budgets/${budgetId}/enveloppes`, {
-        categoryId: form.categoryId,
+        ...(targetKind === 'group' ? { categoryGroup: targetValue } : { categoryId: targetValue }),
         kind: form.kind,
         value,
         cap,
@@ -230,14 +335,25 @@ function EnvelopeForm({ budgetId, currency, categories, usedCategoryIds, onDone,
       <div className="budget-create-grid">
         <div className="fin-field">
           <label htmlFor="env-category">{t('budget.category')}</label>
-          <select id="env-category" value={form.categoryId} required onChange={(event) => setForm({ ...form, categoryId: event.target.value })}>
+          <select id="env-category" value={form.target} required onChange={(event) => setForm({ ...form, target: event.target.value })}>
             <option value="">{t('budget.chooseCategory')}</option>
-            {available.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.family} · {category.label}
-              </option>
-            ))}
+            <optgroup label={t('budget.wholeGroups')}>
+              {availableGroups.map((row) => (
+                <option key={row.group} value={`group:${row.group}`}>
+                  {row.icon} {row.group}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label={t('budget.subCategories')}>
+              {available.map((category) => (
+                <option key={category.id} value={`category:${category.id}`}>
+                  {category.group ? `${category.group} · ` : ''}
+                  {category.label}
+                </option>
+              ))}
+            </optgroup>
           </select>
+          <p className="fin-hint">{t('budget.mostSpecificHint')}</p>
         </div>
         <div className="fin-field">
           <label htmlFor="env-kind">{t('budget.kind')}</label>

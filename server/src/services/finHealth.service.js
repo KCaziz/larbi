@@ -45,6 +45,18 @@ import { computed } from './finance/contract.js';
 const dimensionScore = (key, value) => scoreIn(HEALTH_SCALES[key], value);
 
 /**
+ * « Respect des budgets » (P8-16) — real spending over the active budgets,
+ * brought to 100 (question C5, default retained until the client answers):
+ * 100 while within the budgets, then a proportional decrease, reaching 0 at
+ * 200 % of the allocation. No budget: not measured, never 0.
+ */
+export function budgetsScore(consumption) {
+  if (consumption === null || consumption === undefined || !Number.isFinite(consumption)) return null;
+  if (consumption <= 1) return 100;
+  return Math.max(0, Math.round(100 * (2 - consumption)));
+}
+
+/**
  * La qualité des données : 60 % complétude + 40 % fraîcheur, chacune 0-100.
  * Si l'une des deux manque, l'autre ne suffit pas à la représenter : la
  * dimension entière devient absente plutôt que mesurée à moitié.
@@ -73,7 +85,7 @@ export function financialHealth(measures = {}, { now = new Date() } = {}) {
     debt: dimensionScore('debt', measures.debtRatio ?? null),
     savings: dimensionScore('savings', measures.savingsRate ?? null),
     goals: dimensionScore('goals', measures.goalsGap ?? null),
-    incomeStability: dimensionScore('incomeStability', measures.incomeMonths ?? null),
+    budgets: budgetsScore(measures.budgetConsumption ?? null),
     dataQuality: dataQualityScore(measures.dataQuality ?? {}),
   };
 

@@ -68,6 +68,7 @@ function FinProfileForm({ initial, onSaved }) {
     finSituation: initial.finSituation ?? '',
     finMainIntention: initial.finMainIntention ?? '',
     finHorizon: initial.finHorizon ?? '',
+    finIrregularIncome: Boolean(initial.finIrregularIncome),
   }));
   const [acceptConsents, setAcceptConsents] = useState(false);
   const [status, setStatus] = useState(null);
@@ -93,6 +94,7 @@ function FinProfileForm({ initial, onSaved }) {
         finSituation: form.finSituation.trim() || null,
         finMainIntention: form.finMainIntention.trim() || null,
         finHorizon: form.finHorizon.trim() || null,
+        finIrregularIncome: form.finIrregularIncome,
       };
       if (!consented) body.acceptConsents = true;
       await api.put('/profile/fin', body);
@@ -163,6 +165,14 @@ function FinProfileForm({ initial, onSaved }) {
         <div className="form-field">
           <label htmlFor="fin-horizon">{t('account.fin.horizonLabel')}</label>
           <input id="fin-horizon" maxLength={60} value={form.finHorizon} onChange={(e) => setForm((f) => ({ ...f, finHorizon: e.target.value }))} />
+        </div>
+        {/* GO-01 (question C3): declared here, never detected. */}
+        <div className="form-field">
+          <label className="money-check" htmlFor="fin-irregular">
+            <input id="fin-irregular" type="checkbox" checked={form.finIrregularIncome} onChange={(e) => setForm((f) => ({ ...f, finIrregularIncome: e.target.checked }))} />
+            {t('finProfile.irregularIncome')}
+          </label>
+          <p className="fin-hint">{t('finProfile.irregularIncomeHint')}</p>
         </div>
       </div>
 

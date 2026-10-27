@@ -80,7 +80,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
       assert.ok(await b.waitText(family), `family ${family}`);
     }
     assert.equal(await b.ev("document.querySelectorAll('.fincat-family').length"), 8);
-    assert.equal(await b.ev("document.querySelectorAll('.fincat-row').length"), 91, 'the 91 standard categories');
+    assert.equal(await b.ev("document.querySelectorAll('.fincat-row').length"), 91 + 98, 'the standard categories (P8-08)');
 
     // Every family offers an "Autre", so nothing has to be forced somewhere wrong.
     const goals = await labelsOf('Objectifs');
@@ -197,7 +197,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
     const labels = await labelsOf('Dépenses variables');
     assert.ok(labels.includes('Animaux'), "the other account's rename is invisible here");
     assert.ok(!labels.includes('Café'), "and so is the other account's own category");
-    assert.equal(await b.ev("document.querySelectorAll('.fincat-row').length"), 91);
+    assert.equal(await b.ev("document.querySelectorAll('.fincat-row').length"), 91 + 98);
   });
 
   test('the page works in Arabic, right to left', async () => {

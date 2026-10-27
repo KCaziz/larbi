@@ -24,6 +24,10 @@ import { algorithmById, formulaById } from '../../constants/finance.js';
 // est celui du classeur, et y mélanger des identifiants de notre fait le
 // rendrait impossible à relire face à sa source.
 import { businessFormulaById } from '../../constants/finBusiness.js';
+// Les règles de calcul définitives de la gestion budgétaire (PB-F001 à
+// PB-F027, P8-01 point 1) : un troisième catalogue, celui du dernier classeur
+// du client, gardé à part pour la même raison.
+import { budgetFormulaById } from '../../constants/finBudgetFormulas.js';
 
 // `unite` as the client wants it: a money result carries the currency actually
 // used, a rate says it is a decimal to be shown as a percentage.
@@ -31,6 +35,7 @@ const UNIT_LABELS = {
   ratio: 'ratio', // decimal, displayed × 100 as a percentage
   months: 'mois',
   days: 'jours',
+  date: 'date',
   points: 'points',
   count: 'nombre',
   composite: 'composite',
@@ -52,7 +57,7 @@ function resolveUnit(unit, currency) {
  * can say WHY instead of showing a zero.
  */
 export function computed(id, result, { inputs = {}, currency, hypotheses = null, warnings = [], sources = null, now = new Date() } = {}) {
-  const formula = formulaById(id) ?? businessFormulaById(id);
+  const formula = formulaById(id) ?? budgetFormulaById(id) ?? businessFormulaById(id);
   const algorithm = formula ? null : algorithmById(id);
   if (!formula && !algorithm) throw new Error(`Unknown formula or algorithm: ${id}`);
 

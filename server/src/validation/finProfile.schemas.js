@@ -21,6 +21,8 @@ export const updateFinProfileSchema = z
     finSituation: z.string().trim().max(120).nullable(),
     finMainIntention: z.string().trim().max(120).nullable(),
     finHorizon: z.string().trim().max(60).nullable(),
+    // « Revenu irrégulier » (GO-01, question C3): declared, never detected.
+    finIrregularIncome: z.boolean(),
     // Every required text must be accepted together (no financial data is
     // asked before consent) — true is the only accepted value, so a caller
     // cannot "silently" skip consent by omitting the field with a falsy default.

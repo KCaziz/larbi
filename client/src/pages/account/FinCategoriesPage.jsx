@@ -154,6 +154,10 @@ function CategoryRow({ category, historyOpen, onToggleHistory, run }) {
     if (res.ok) setEditing(false);
   };
 
+  // « Essentielle ? » (P8-08): what the reserve counts as an essential
+  // expense. The client's reference sets it; the person may change it.
+  const setEssential = (essential) => run(() => api.patch(path, { essential }), 'finCategories.saved');
+
   const setArchived = (archived) =>
     run(
       () => (standard ? api.patch(path, { hidden: archived }) : api.put(`${path}/archive`, { archived })),
@@ -187,8 +191,12 @@ function CategoryRow({ category, historyOpen, onToggleHistory, run }) {
         </form>
       ) : (
         <>
-          <span className="fincat-label">{category.label}</span>
+          <span className="fincat-label">
+            {category.icon && <span aria-hidden="true">{category.icon} </span>}
+            {category.label}
+          </span>
           <span className="fincat-tags">
+            {category.group && <span className="fincat-tag">{category.group}</span>}
             <span className="fincat-tag">{t(`finCategories.origin.${category.origin}`)}</span>
             {/* The client's own wording, kept visible under the person's label:
                 a standard category must stay findable under its reference name. */}
@@ -198,6 +206,12 @@ function CategoryRow({ category, historyOpen, onToggleHistory, run }) {
           </span>
 
           <span className="fincat-actions">
+            {category.family !== 'income' && (
+              <label className="fincat-essential">
+                <input type="checkbox" checked={category.essential} onChange={(event) => setEssential(event.target.checked)} />
+                {t('finCategories.essential')}
+              </label>
+            )}
             <button type="button" className="fincat-icon" title={t('finCategories.rename')} onClick={() => setEditing(true)}>
               <Pencil size={15} aria-hidden="true" />
               <span className="sr-only">{t('finCategories.rename')}</span>

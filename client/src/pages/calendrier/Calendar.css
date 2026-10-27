@@ -423,3 +423,25 @@
   margin: 0;
   font-variant-numeric: tabular-nums;
 }
+
+/* P8-11: the day an occurrence falls — its four answers, wrapping on a phone. */
+.calendar-occurrence {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.calendar-occurrence-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-xs);
+  inline-size: 100%;
+}
+.calendar-reminders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  min-inline-size: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}

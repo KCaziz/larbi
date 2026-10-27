@@ -2,6 +2,7 @@
 // signal feeds into — a budget threshold (P6-05), an overdue goal (P6-08), a
 // sharing change (P6-13), an upcoming calendar event (P6-07). This file only
 // ever writes and reads ONE account's own rows.
+import { occurrencesWithOutcome } from './finOccurrence.service.js';
 import { NOTIFICATIONS_PER_DAY_MAX, NOTIFICATION_PRIORITIES, NOTIFICATION_TYPE_KEYS, REMINDER_WINDOW_DAYS, notificationTypeByKey } from '../constants/finNotification.js';
 import { loadCalendarData } from './finCalendar.service.js';
 
@@ -126,31 +127,42 @@ export async function markAllRead(prisma, userId) {
  */
 export async function generateReminders(prisma, userId) {
   const now = new Date();
-  const to = new Date(now.getTime() + REMINDER_WINDOW_DAYS * 24 * 3600 * 1000);
-  const { planned, recurrences, provisions } = await loadCalendarData(prisma, userId, { from: now, to });
+  const DAY = 24 * 3600 * 1000;
+  const to = new Date(now.getTime() + REMINDER_WINDOW_DAYS * DAY);
+  // From yesterday: « J+1 » reminds of an occurrence due the day before.
+  const { planned, recurrences, provisions, outcomes } = await loadCalendarData(prisma, userId, { from: new Date(now.getTime() - DAY), to });
 
   for (const row of planned) {
+    if (row.occurredAt < now) continue;
     await createNotification(prisma, userId, {
       type: 'reminder_upcoming',
       params: { kind: 'planned', date: row.occurredAt },
-      link: '/calendrier',
+      link: '/app/calendrier',
       referenceId: `planned:${row.id}`,
     });
   }
+  // P8-11: each occurrence still expected, on the days the person chose
+  // (J-7, J-3, J, J+1 — `reminderDays`, a negative day is after the date).
+  const today = Math.floor(now.getTime() / DAY);
   for (const row of recurrences) {
-    if (!row.nextDate || row.nextDate > to) continue;
-    await createNotification(prisma, userId, {
-      type: 'reminder_upcoming',
-      params: { kind: 'recurrence', label: row.label, date: row.nextDate },
-      link: '/calendrier',
-      referenceId: `recurrence:${row.id}:${row.nextDate.toISOString().slice(0, 10)}`,
-    });
+    const days = Array.isArray(row.reminderDays) ? row.reminderDays : [];
+    for (const occurrence of occurrencesWithOutcome(row, outcomes, new Date(now.getTime() - DAY), to)) {
+      if (occurrence.outcome === 'confirmed' || occurrence.outcome === 'missed') continue;
+      const due = Math.floor(occurrence.date.getTime() / DAY);
+      if (!days.some((offset) => today === due - offset)) continue;
+      await createNotification(prisma, userId, {
+        type: 'reminder_upcoming',
+        params: { kind: 'recurrence', label: row.label, date: occurrence.date },
+        link: '/app/calendrier',
+        referenceId: `recurrence:${row.id}:${occurrence.date.toISOString().slice(0, 10)}:${today}`,
+      });
+    }
   }
   for (const row of provisions) {
     await createNotification(prisma, userId, {
       type: 'reminder_upcoming',
       params: { kind: 'provision', label: row.label, date: row.targetDate },
-      link: '/calendrier',
+      link: '/app/calendrier',
       referenceId: `provision:${row.id}`,
     });
   }

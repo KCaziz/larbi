@@ -1,0 +1,250 @@
+/* The Accueil (P8-06). Logical properties only (RTL), 44 px targets. */
+.home-page {
+  display: grid;
+  gap: var(--space-md);
+  max-inline-size: 1100px;
+  margin-inline: auto;
+  padding: var(--space-md);
+}
+
+.home-balance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.home-balance-main {
+  display: grid;
+  gap: var(--space-xs);
+}
+.home-balance-label {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.home-account-select {
+  max-inline-size: 260px;
+  min-block-size: 40px;
+  padding-inline: var(--space-xs);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+/* ACC-01: the balance in large. */
+.home-balance-value {
+  font-family: var(--display);
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 700;
+  color: var(--text-h);
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+.home-synthesis-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-block-size: 44px;
+  font-weight: 600;
+}
+
+.home-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: var(--space-sm);
+}
+.home-shortcuts a,
+.home-shortcuts button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-block-size: 52px;
+  padding-inline: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-h);
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.home-ring-section {
+  display: grid;
+  gap: var(--space-sm);
+}
+.home-ring-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+/* ACC-06: the small « Outils » square, left of the ring. */
+.home-tools-tile {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  inline-size: 88px;
+  block-size: 88px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-h);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.home-ring {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+  min-inline-size: 0;
+}
+.home-ring-svg {
+  inline-size: min(220px, 70vw);
+  block-size: auto;
+  flex: none;
+}
+.home-ring-arc {
+  cursor: pointer;
+  transition: stroke-width 120ms ease;
+}
+.home-ring-center-label {
+  font-size: 6px;
+  fill: var(--text);
+}
+.home-ring-center-value {
+  font-size: 7px;
+  font-weight: 700;
+  fill: var(--text-h);
+}
+.home-ring-legend {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-inline-size: min(260px, 100%);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.home-ring-legend-item {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-xs);
+  inline-size: 100%;
+  min-block-size: 40px;
+  padding-inline: var(--space-xs);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.home-ring-legend-item.active {
+  background: var(--accent-bg);
+  font-weight: 700;
+}
+.home-ring-legend-item:disabled {
+  cursor: default;
+}
+.home-ring-swatch {
+  inline-size: 12px;
+  block-size: 12px;
+  border-radius: 3px;
+}
+.home-ring-legend-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-h);
+}
+
+.home-movements {
+  display: grid;
+  gap: var(--space-xs);
+}
+.home-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-block-size: 44px;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: var(--space-md);
+}
+.home-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.home-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+.home-card-head h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin: 0;
+  font-size: 1rem;
+}
+.home-budget-lines {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.home-budget-lines li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 80px auto;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 0.9rem;
+}
+.home-meter {
+  display: block;
+  block-size: 8px;
+  background: var(--bg-alt);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.home-meter span {
+  display: block;
+  block-size: 100%;
+  background: var(--accent);
+}
+.home-meter span.over {
+  background: var(--danger);
+}
+.home-budget-rate {
+  font-variant-numeric: tabular-nums;
+}
+.home-reserve,
+.home-health-score {
+  margin: 0;
+}
+.home-health-score {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-h);
+}

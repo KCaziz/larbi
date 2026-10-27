@@ -165,3 +165,71 @@
   align-items: center;
   gap: 2px;
 }
+
+/* P8-12: the emergency fund heading the page, the progress ring, the
+   contributions and the scenarios. */
+.goals-emergency {
+  display: grid;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.goals-emergency h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.goals-detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+}
+.goals-ring {
+  inline-size: 96px;
+  block-size: 96px;
+  flex: none;
+}
+.goals-ring-text {
+  font-size: 18px;
+  font-weight: 700;
+  fill: var(--text-h);
+}
+.goals-capital {
+  margin: 0;
+  flex: 1;
+  min-inline-size: 0;
+}
+.goals-status {
+  display: grid;
+  gap: 4px;
+}
+.goals-contributions h3 {
+  margin: 0 0 var(--space-xs);
+  font-size: 1rem;
+}
+.goals-contributions ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.goals-contributions li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-sm);
+  font-size: 0.9rem;
+}
+.goals-scenario summary {
+  min-block-size: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+}
+.goals-scenario-result {
+  display: grid;
+  gap: var(--space-xs);
+}

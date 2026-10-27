@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { breakdown, buildSynthesis, currentMonth, previousMonth } from '../../src/services/finSynthesis.service.js';
+import { breakdown, buildSynthesis, currentMonth, debtRatioIncome, previousMonth } from '../../src/services/finSynthesis.service.js';
 import { foldTotals, historyWhere } from '../../src/services/finMoney.service.js';
 
 // "Mon argent" (P6-04): the synthesis of screen C05 and the filtered totals of
@@ -24,43 +24,110 @@ describe('the period', () => {
   });
 });
 
-describe('the three figures of screen C05', () => {
-  test('resources are normalised to the month and added to the income movements', () => {
+describe('the three figures of screen C05 (PB-F004 to PB-F006)', () => {
+  // Diagnostic n°2, C1 (P8-04). The synthesis used to ADD the declared
+  // resources to the income actually received: a salary declared once and
+  // recorded on arrival counted twice. The client's final rule is
+  // « Σ transactions type=Revenu et statut=Réalisé ».
+  test('a salary declared AND recorded on arrival is counted once', () => {
     const synthesis = build({
-      incomes: [income({ value: 1200000, frequency: 'trimestriel' })],
-      movements: [movement({ kind: 'income', value: 50000 })],
+      incomes: [income({ value: 6000000 })],
+      movements: [movement({ kind: 'income', value: 6000000 })],
     });
-    assert.equal(synthesis.revenus.resultat, 400000 + 50000);
-    assert.equal(synthesis.revenus.formule_id, 'F002');
+    assert.equal(synthesis.revenus.resultat, 6000000);
+    assert.equal(synthesis.revenus.formule_id, 'PB-F004');
+  });
+
+  test('a salary declared but not yet received is expected, not received', () => {
+    const synthesis = build({ incomes: [income()], movements: [] });
+    assert.equal(synthesis.revenus.resultat, null, 'nothing has arrived yet');
+    assert.equal(synthesis.revenusPrevus.resultat, 6000000, 'it is shown beside, as expected');
+    assert.equal(synthesis.depenses.resultat, null, 'nothing recorded is not zero spent');
+  });
+
+  test('the expected resources are normalised to the month (F001)', () => {
+    const synthesis = build({ incomes: [income({ value: 1200000, frequency: 'trimestriel' })] });
+    assert.equal(synthesis.revenusPrevus.resultat, 400000);
+    assert.equal(synthesis.revenusPrevus.formule_id, 'F001');
   });
 
   test('a resource with an unusable frequency is REPORTED, not guessed', () => {
     const synthesis = build({ incomes: [income({ frequency: 'quand-je-peux' })] });
-    assert.ok(synthesis.revenus.avertissements.some((warning) => warning.includes('fréquence inutilisable')));
+    assert.ok(synthesis.revenusPrevus.avertissements.some((warning) => warning.includes('fréquence inutilisable')));
     // Declared but unusable is NOT zero: showing 0 would tell someone who
     // declared a resource that they have none.
-    assert.equal(synthesis.revenus.resultat, null);
+    assert.equal(synthesis.revenusPrevus.resultat, null);
   });
 
   test('the usable resources still total when one of them is unusable', () => {
     const synthesis = build({ incomes: [income({ value: 600000 }), income({ id: 'j', frequency: 'quand-je-peux' })] });
-    assert.equal(synthesis.revenus.resultat, 600000);
-    assert.equal(synthesis.revenus.avertissements.length, 1, 'and the dropped one is named');
+    assert.equal(synthesis.revenusPrevus.resultat, 600000);
+    assert.equal(synthesis.revenusPrevus.avertissements.length, 1, 'and the dropped one is named');
   });
 
-  test('the net flow is resources minus REALISED expenses (F004)', () => {
+  test('the net flow is REALISED income minus REALISED expenses (PB-F006)', () => {
     const synthesis = build({
-      incomes: [income()],
-      movements: [movement({ value: 2000000 }), movement({ id: 'p', value: 9999999, planned: true })],
+      incomes: [income({ value: 9000000 })],
+      movements: [
+        movement({ kind: 'income', value: 6000000 }),
+        movement({ value: 2000000 }),
+        movement({ id: 'p', value: 9999999, planned: true }),
+      ],
     });
     assert.equal(synthesis.depenses.resultat, 2000000, 'a planned expense is not a realised one');
-    assert.equal(synthesis.fluxNet.resultat, 4000000);
+    assert.equal(synthesis.depenses.formule_id, 'PB-F005');
+    assert.equal(synthesis.fluxNet.resultat, 4000000, 'the declared resource is not part of it');
+    assert.equal(synthesis.fluxNet.formule_id, 'PB-F006');
   });
 
   test('nothing at all is "not computed", never zero', () => {
     const synthesis = build({ incomes: [], movements: [] });
     assert.equal(synthesis.revenus.resultat, null);
+    assert.equal(synthesis.revenusPrevus.resultat, null);
     assert.equal(synthesis.fluxNet.resultat, null);
+  });
+});
+
+describe('money set aside is neither income nor spending (PB-F004, PB-F005)', () => {
+  // Diagnostic n°2, C2: a deposit into savings was counted as an expense, a
+  // withdrawal as income. Both move money between the person's own pockets.
+  const savings = (over = {}) => movement({ category: { family: 'goal' }, categoryId: 'goal-cat', ...over });
+
+  test('a deposit into savings is not an expense', () => {
+    const synthesis = build({ movements: [movement({ value: 300000 }), savings({ id: 's', value: 1000000 })] });
+    assert.equal(synthesis.depenses.resultat, 300000);
+    assert.deepEqual(
+      synthesis.repartition.map((row) => row.categoryId),
+      [null],
+      'and it is not in the breakdown either',
+    );
+  });
+
+  test('a withdrawal from savings is not income', () => {
+    const synthesis = build({ movements: [movement({ kind: 'income', value: 500000 }), savings({ id: 's', kind: 'income', value: 200000 })] });
+    assert.equal(synthesis.revenus.resultat, 500000);
+  });
+
+  test('a month with savings movements only has no income and no spending', () => {
+    const synthesis = build({ movements: [savings()] });
+    assert.equal(synthesis.depenses.resultat, null);
+    assert.equal(synthesis.revenus.resultat, null);
+  });
+});
+
+describe('the income a debt ratio is divided by (PB-F020)', () => {
+  test('the declared resources, when there are some: a ratio of effort is structural', () => {
+    const synthesis = build({ incomes: [income({ value: 6000000 })], movements: [] });
+    assert.equal(debtRatioIncome(synthesis), 6000000, 'the salary not yet arrived still counts');
+  });
+
+  test('otherwise the income actually received', () => {
+    const synthesis = build({ movements: [movement({ kind: 'income', value: 2500000 })] });
+    assert.equal(debtRatioIncome(synthesis), 2500000);
+  });
+
+  test('without either, it is unknown', () => {
+    assert.equal(debtRatioIncome(build({})), null);
   });
 });
 
@@ -130,11 +197,6 @@ describe('planned versus real, and the trend', () => {
     assert.equal(build({ movements: [movement()] }).prevuReel.prevu, null);
   });
 
-  test('a resource with no one-off income is still a known total', () => {
-    const synthesis = build({ incomes: [income()], movements: [] });
-    assert.equal(synthesis.revenus.resultat, 6000000);
-    assert.equal(synthesis.depenses.resultat, null, 'nothing recorded is not zero spent');
-  });
 });
 
 describe('the breakdown', () => {
@@ -190,6 +252,16 @@ describe('the filtered totals of the history', () => {
     const totals = foldTotals([group('income', 'real', 100)]);
     assert.equal(totals.fictional, null);
     assert.equal(totals.planned, null);
+  });
+
+  test('savings movements stay in the counts but leave the sums (PB-F004, PB-F005)', () => {
+    const totals = foldTotals(
+      [group('expense', 'real', 1500, { count: 2 }), group('income', 'real', 800, { count: 2 })],
+      [group('expense', 'real', 1000), group('income', 'real', 300)],
+    );
+    assert.equal(totals.real.expense, 500);
+    assert.equal(totals.real.income, 500);
+    assert.equal(totals.counts.real, 4, 'the rows are still listed');
   });
 
   test('an empty set has no currency and no total to show', () => {

@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // Where the user was headed before being sent here by the route guard.
-  const destination = location.state?.from ?? '/compte';
+  const destination = location.state?.from ?? '/app';
 
   if (status === 'authenticated' && !submitting) {
     return <Navigate to={destination} replace />;

@@ -39,6 +39,7 @@ export const createCategorySchema = z
   .object({
     family: z.enum(CATEGORY_FAMILY_CODES),
     label: labelSchema,
+    essential: z.boolean().optional(),
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
   })
@@ -49,12 +50,13 @@ export const createCategorySchema = z
 export const updateCategorySchema = z
   .object({
     label: labelSchema.optional(),
+    essential: z.boolean().optional(),
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
     reason: reasonSchema.optional(),
   })
   .strict()
-  .refine((body) => ['label', 'scope', 'consentUses'].some((field) => field in body), {
+  .refine((body) => ['label', 'essential', 'scope', 'consentUses'].some((field) => field in body), {
     message: 'Nothing to change',
   });
 
@@ -64,10 +66,12 @@ export const customiseCategorySchema = z
   .object({
     label: labelSchema.optional(),
     hidden: z.boolean().optional(),
+    // « Essentielle ? », the person's own reading (P8-08).
+    essential: z.boolean().optional(),
     reason: reasonSchema.optional(),
   })
   .strict()
-  .refine((body) => 'label' in body || 'hidden' in body, { message: 'Nothing to change' });
+  .refine((body) => 'label' in body || 'hidden' in body || 'essential' in body, { message: 'Nothing to change' });
 
 export const archiveCategorySchema = z.object({ archived: z.boolean(), reason: reasonSchema.optional() }).strict();
 

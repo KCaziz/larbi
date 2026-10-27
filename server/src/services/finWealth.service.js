@@ -295,7 +295,9 @@ export function buildWealthView({ assets = [], debts = [], currency, now = new D
     totalActifs: totalAssets,
     totalDettes: totalDebts,
     // F035 — « patrimoine net = Σ actifs réels − Σ dettes réelles ».
-    patrimoineNet: answer('F035', net),
+    // PB-F024 — the net worth from the accounts, completed by the other
+    // declared assets (P8-14): the client's final rule.
+    patrimoineNet: answer('PB-F024', net),
     actifs: lines,
     parType: kinds,
     parLiquidite: byLiquidity,

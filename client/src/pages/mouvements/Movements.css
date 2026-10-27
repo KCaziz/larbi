@@ -1,0 +1,84 @@
+/* « Mouvements » (P8-07). The rest of the look comes from MyMoney.css. */
+.movements-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  border-block-end: 1px solid var(--border);
+}
+.movements-tab {
+  min-block-size: 44px;
+  padding-inline: var(--space-sm);
+  border: 0;
+  border-block-end: 3px solid transparent;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+/* The current tab: weight and an underline, not colour alone. */
+.movements-tab.active {
+  border-block-end-color: var(--accent);
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.movements-row-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.movements-clearing {
+  min-block-size: 36px;
+  font-size: 0.85rem;
+}
+/* The clearing state is written in the select; the border only repeats it. */
+.movements-clearing-checked {
+  border-color: var(--blue);
+}
+.movements-clearing-reconciled {
+  border-color: var(--green);
+}
+.movements-clearing-to_verify {
+  border-color: var(--warn);
+}
+
+.movements-tag {
+  border-inline-start: 4px solid var(--tag-color, var(--border-strong));
+}
+
+.movements-clearing-panel {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.movements-tags {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.movements-tags summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-block-size: 44px;
+  cursor: pointer;
+}
+.movements-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin: 0 0 var(--space-sm);
+  padding: 0;
+  list-style: none;
+}
+.movements-tag-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  align-items: end;
+  gap: var(--space-sm);
+}
+.money-to-movements {
+  margin: 0;
+}

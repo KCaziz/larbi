@@ -331,12 +331,24 @@ describe('the synthesis of screen C05', () => {
     const res = await t.request('GET', '/fin/argent/synthese', { user });
     assert.equal(res.status, 200);
     const s = res.body.synthese;
-    assert.equal(s.revenus.formule_id, 'F002');
-    assert.equal(s.depenses.formule_id, 'F003');
-    assert.equal(s.fluxNet.formule_id, 'F004');
-    assert.equal(s.fluxNet.resultat, 6000000 - 250000);
-    assert.equal(s.revenus.unite, 'DZD');
+    assert.equal(s.revenus.formule_id, 'PB-F004');
+    assert.equal(s.depenses.formule_id, 'PB-F005');
+    assert.equal(s.fluxNet.formule_id, 'PB-F006');
+    assert.equal(s.revenusPrevus.formule_id, 'F001');
+    assert.equal(s.revenusPrevus.resultat, 6000000, 'the declared salary is expected');
+    assert.equal(s.revenus.resultat, null, 'but it has not been received (P8-04, C1)');
+    assert.equal(s.fluxNet.resultat, null);
+    assert.equal(s.revenusPrevus.unite, 'DZD');
     assert.ok(s.revenus.calcule_le);
+  });
+
+  test('the salary counts once it is received, and only once (P8-04, C1)', async () => {
+    await addIncome({ categoryId: salary.id });
+    await addMovement({ kind: 'income', value: 6000000, categoryId: salary.id });
+    await addMovement({ value: 250000, categoryId: food.id });
+    const s = (await t.request('GET', '/fin/argent/synthese', { user })).body.synthese;
+    assert.equal(s.revenus.resultat, 6000000, 'declared AND recorded is not twice the salary');
+    assert.equal(s.fluxNet.resultat, 6000000 - 250000);
   });
 
   test('an empty account says "not computed", never zero', async () => {
@@ -349,7 +361,8 @@ describe('the synthesis of screen C05', () => {
   test('the breakdown carries the category labels', async () => {
     await addMovement({ value: 250000, categoryId: food.id });
     const s = (await t.request('GET', '/fin/argent/synthese', { user })).body.synthese;
-    assert.deepEqual(s.repartition, [{ categoryId: food.id, total: 250000, label: 'Alimentation / boissons' }]);
+    // « Courses alimentaires » absorbed « Alimentation / boissons » (P8-08).
+    assert.deepEqual(s.repartition, [{ categoryId: food.id, total: 250000, label: 'Courses alimentaires' }]);
   });
 
   test('fictional movements are a separate badged block, never added to the real total', async () => {
@@ -386,7 +399,8 @@ describe('the synthesis of screen C05', () => {
     const res = await t.request('GET', '/fin/argent/references', { user });
     assert.equal(res.status, 200);
     assert.deepEqual(res.body.kinds, ['income', 'expense']);
-    assert.ok(res.body.paymentMethods.includes('ccp'));
+    // The client's PM-01 to PM-10 (P8-07).
+    assert.ok(res.body.paymentMethods.includes('PM-03'));
     assert.deepEqual(
       res.body.formulas.map((formula) => formula.id),
       ['F002', 'F003', 'F004'],
@@ -400,18 +414,19 @@ describe('the synthesis of screen C05', () => {
 describe('the revenus/dépenses history (P6-23)', () => {
   const synthesisHistory = (query = '') => t.request('GET', `/fin/argent/synthese/historique${query}`, { user });
 
-  test('the recurring income reaches every month, the dated movement only its own', async () => {
+  test('each month shows what was received and spent in it, never what was only declared', async () => {
+    // P8-04, C1: the declared salary used to fill every month of the chart,
+    // received or not.
     await addIncome({ categoryId: salary.id });
+    await addMovement({ kind: 'income', value: 6000000, categoryId: salary.id });
     await addMovement({ value: 250000, categoryId: food.id });
 
     const res = await synthesisHistory();
     assert.equal(res.status, 200);
     assert.equal(res.body.points.length, 6, 'the default window');
-    assert.ok(
-      res.body.points.every((point) => point.revenus === 6000000),
-      'the recurring income is active every month since it started',
-    );
     const current = res.body.points.at(-1);
+    assert.equal(current.revenus, 6000000);
+    assert.ok(res.body.points.slice(0, -1).every((point) => point.revenus === null), 'nothing was received in the earlier months');
     assert.equal(current.depenses, 250000);
     assert.ok(res.body.points.slice(0, -1).every((point) => point.depenses === null), 'only the current month has a dated expense');
   });

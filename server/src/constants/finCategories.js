@@ -10,6 +10,8 @@
 //
 // Every family carries its own "Autre…" category, which is the client's rule
 // « « Autre » reste disponible »; a unit test checks it still holds.
+import { OLD_ESSENTIAL_KEYS, REFERENCE_CATEGORIES } from './finCategoryReference.js';
+
 export const CATEGORY_FAMILIES = [
   { code: 'income', label: 'Revenus / ressources' },
   { code: 'fixed', label: 'Dépenses fixes / obligatoires' },
@@ -27,7 +29,9 @@ export const categoryFamilyByCode = (code) => CATEGORY_FAMILIES.find((f) => f.co
 // The standard rows. `key` is `<family>.<slug of the label>`: labels repeat
 // across families (Loyer is both a fixed charge and a shared expense), so the
 // family is part of the key.
-export const STANDARD_CATEGORIES = [
+// The 91 rows of P6-02, as first extracted. Since P8-08 they are the starting
+// point only: see STANDARD_CATEGORIES below.
+const P6_02_CATEGORIES = [
   { key: 'income.salaire_net', family: 'income', label: 'Salaire net' },
   { key: 'income.salaire_brut_information', family: 'income', label: 'Salaire brut (information)' },
   { key: 'income.prime', family: 'income', label: 'Prime' },
@@ -119,6 +123,31 @@ export const STANDARD_CATEGORIES = [
   { key: 'shared.sorties', family: 'shared', label: 'Sorties' },
   { key: 'shared.projet_commun', family: 'shared', label: 'Projet commun' },
   { key: 'shared.autre', family: 'shared', label: 'Autre' },
+];
+
+// The standard reference since P8-08: the client's 125 universal categories
+// (generated, constants/finCategoryReference.js), plus the old rows none of
+// them covers. An old row a new one absorbed keeps its key — its movements do
+// not move — and takes the client's new definition.
+const absorbed = new Map(REFERENCE_CATEGORIES.filter((c) => c.mergedFrom).map((c) => [c.mergedFrom, c]));
+const fromReference = (c) => ({
+  key: c.key,
+  family: c.family,
+  label: c.label,
+  group: c.group,
+  icon: c.icon,
+  color: c.color,
+  essential: c.essential,
+  recurrence: c.recurrence,
+  suggestedFor: c.suggestedFor,
+});
+export const STANDARD_CATEGORIES = [
+  ...P6_02_CATEGORIES.map((c) =>
+    absorbed.has(c.key)
+      ? fromReference(absorbed.get(c.key))
+      : { ...c, group: null, icon: null, color: null, essential: OLD_ESSENTIAL_KEYS.includes(c.key), recurrence: null, suggestedFor: [] },
+  ),
+  ...REFERENCE_CATEGORIES.filter((c) => !c.mergedFrom).map(fromReference),
 ];
 
 export const STANDARD_CATEGORY_KEYS = STANDARD_CATEGORIES.map((c) => c.key);

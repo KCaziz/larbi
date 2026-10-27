@@ -1,4 +1,5 @@
 import { algorithmById, formulaById } from '../../constants/finance.js';
+import { budgetFormulaById } from '../../constants/finBudgetFormulas.js';
 
 // The client's own columns for a formula, so an interface can explain a result
 // in the client's wording instead of paraphrasing it. An algorithm (ALG-xx) has
@@ -9,7 +10,9 @@ import { algorithmById, formulaById } from '../../constants/finance.js';
 // P6-03, P6-04): one definition, so two screens cannot explain the same
 // formula differently.
 export function describeFormula(id) {
-  const formula = formulaById(id);
+  // The client's final rules PB-F and AN-F (P8-01 point 1) are described the
+  // same way.
+  const formula = formulaById(id) ?? budgetFormulaById(id);
   if (formula) {
     return { id, label: formula.label, rule: formula.rule, condition: formula.condition, unit: formula.unit, version: formula.version };
   }

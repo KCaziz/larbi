@@ -66,7 +66,7 @@ export default function ReservePage() {
 
         <dl className="reserve-composition">
           <dt>{t('reserve.liquidSavings')}</dt>
-          <dd>{formatAmount(i18n.language, r.epargneLiquide, currency)}</dd>
+          <dd>{r.epargneLiquide === null ? t('fincludia.notComputed') : formatAmount(i18n.language, r.epargneLiquide, currency)}</dd>
           <dt>{t('reserve.essentialExpenses')}</dt>
           <dd>{r.depensesEssentielles === null ? t('fincludia.notComputed') : formatAmount(i18n.language, r.depensesEssentielles, currency)}</dd>
         </dl>

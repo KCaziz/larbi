@@ -10,12 +10,13 @@ import {
   postDebtPayment,
   putDebtArchived,
   removeDebt,
+  postSimpleLoan,
 } from '../controllers/finDebt.controller.js';
 import { requireAdult, requireAuth } from '../middleware/auth.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
 import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
 import { archiveSchema, deleteSchema } from '../validation/finMoney.schemas.js';
-import { createDebtPaymentSchema, createDebtSchema, payoffQuerySchema, updateDebtSchema } from '../validation/finDebt.schemas.js';
+import { createDebtPaymentSchema, createDebtSchema, payoffQuerySchema, simpleLoanSchema, updateDebtSchema } from '../validation/finDebt.schemas.js';
 
 // Debts (P6-10), screens C13-C14. Private data, no admin side.
 const router = Router();
@@ -39,6 +40,8 @@ router.get('/debts/comparaison', validateQuery(payoffQuerySchema), asyncRoute(ge
 
 router.get('/debts', asyncRoute(getDebts));
 router.post('/debts', validateBody(createDebtSchema), asyncRoute(postDebt));
+// « J'ai prêté » / « On m'a prêté » (P8-13): the loan and its real movement.
+router.post('/debts/pret', validateBody(simpleLoanSchema), asyncRoute(postSimpleLoan));
 router.get('/debts/:id', asyncRoute(getDebt));
 router.patch('/debts/:id', validateBody(updateDebtSchema), asyncRoute(patchDebt));
 router.put('/debts/:id/archive', validateBody(archiveSchema), asyncRoute(putDebtArchived));

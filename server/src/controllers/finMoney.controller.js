@@ -1,5 +1,7 @@
 import { prisma } from '../config/prisma.js';
-import { EXPORT_COLUMNS, PAYMENT_METHODS, TRANSACTION_KINDS, TRANSACTION_SORTS } from '../constants/finMoney.js';
+import { CLEARING_STATES, EXPORT_COLUMNS, PAYMENT_METHODS, TRANSACTION_KINDS, TRANSACTION_SORTS } from '../constants/finMoney.js';
+import { PAYMENT_METHODS_REFERENCE } from '../constants/finAccounts.js';
+import { clearingView, createTag, deleteTag, listTags, setClearing, updateTag } from '../services/finMovement.service.js';
 import { FREQUENCIES } from '../constants/finance.js';
 import { listChanges } from '../services/finChange.service.js';
 import {
@@ -10,6 +12,7 @@ import {
   createTransaction,
   deleteIncome,
   deleteTransaction,
+  findDuplicates,
   getTransaction,
   listIncomes,
   listTransactions,
@@ -31,6 +34,9 @@ export function getMoneyReferences(req, res) {
   res.json({
     kinds: TRANSACTION_KINDS,
     paymentMethods: PAYMENT_METHODS,
+    // The client's own labels, icons and colours (PM-01 to PM-10, P8-07).
+    paymentMethodReference: PAYMENT_METHODS_REFERENCE,
+    clearingStates: CLEARING_STATES,
     frequencies: FREQUENCIES,
     sorts: TRANSACTION_SORTS,
     exportColumns: EXPORT_COLUMNS,
@@ -75,6 +81,37 @@ export async function postTransaction(req, res) {
   // The suspected duplicate travels with the created row: the client asks for
   // it to be SIGNALLED. Blocking would refuse two identical real movements.
   res.status(201).json({ transaction, duplicates });
+}
+
+// « Doublon suspect demandé en confirmation » (P8-07): checked BEFORE the
+// movement is written, so the person decides; nothing is ever removed for them.
+export async function postDuplicateCheck(req, res) {
+  const duplicates = await findDuplicates(prisma, req.user.id, { ...req.body, categoryId: req.body.categoryId ?? null });
+  res.json({ duplicates });
+}
+
+export async function putClearing(req, res) {
+  res.json(await setClearing(prisma, req.user.id, req.params.id, req.body.clearing));
+}
+
+export async function getClearing(req, res) {
+  res.json(await clearingView(prisma, req.user.id, { from: req.query.from ?? null, to: req.query.to ?? null }));
+}
+
+export async function getTags(req, res) {
+  res.json({ tags: await listTags(prisma, req.user.id) });
+}
+
+export async function postTag(req, res) {
+  res.status(201).json({ tag: await createTag(prisma, req.user.id, req.body) });
+}
+
+export async function patchTag(req, res) {
+  res.json({ tag: await updateTag(prisma, req.user.id, req.params.id, req.body) });
+}
+
+export async function removeTag(req, res) {
+  res.json(await deleteTag(prisma, req.user.id, req.params.id, { reason: req.body?.reason }));
 }
 
 export async function patchTransaction(req, res) {
