@@ -170,9 +170,16 @@ describe('account deletion', () => {
 
   test('once confirmed, erases the account completely and immediately', async () => {
     await t.request('POST', '/fin/revenus', { user: owner, json: { label: 'Salaire', value: 6000000, currency: 'DZD', frequency: 'mensuel', startDate: iso(new Date()) } });
+    // An account WITH movements (P8-03): while the movement's account key was
+    // Restrict, MariaDB refused this erasure.
+    const account = (await t.request('POST', '/fin/comptes', { user: owner, json: { label: 'Compte courant', type: 'AC-02', currency: 'DZD' } })).body.account;
+    const spent = await t.request('POST', '/fin/transactions', { user: owner, json: { kind: 'expense', value: 100000, currency: 'DZD', accountId: account.id, occurredAt: iso(new Date()) } });
+    assert.equal(spent.status, 201);
     const res = await t.request('POST', '/fin/confiance/suppression', { user: owner, json: { consent: true, currentPassword: PASSWORD, email: owner.email } });
     assert.equal(res.status, 200);
     assert.equal(await t.prisma.user.count({ where: { id: owner.id } }), 0);
     assert.equal(await t.prisma.finIncome.count({ where: { userId: owner.id } }), 0);
+    assert.equal(await t.prisma.finAccount.count({ where: { userId: owner.id } }), 0);
+    assert.equal(await t.prisma.finTransaction.count({ where: { userId: owner.id } }), 0);
   });
 });

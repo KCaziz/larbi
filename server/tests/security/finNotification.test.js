@@ -51,7 +51,9 @@ describe('the notification centre', () => {
 
     const res = await t.request('GET', '/fin/notifications', { user: owner });
     const priorities = res.body.notifications.map((n) => n.priority);
-    assert.deepEqual(priorities, ['echeance', 'budget'], 'échéance (goal_overdue) sorts before budget (budget_alert)');
+    // Since P8-18 the expense also puts the « Espèces » account (opened at 0)
+    // in the red: its alert (AL-P03, priority « sécurité ») comes first.
+    assert.deepEqual(priorities, ['securite', 'echeance', 'budget'], 'sécurité (account_alert), then échéance (goal_overdue), then budget (budget_alert)');
   });
 });
 

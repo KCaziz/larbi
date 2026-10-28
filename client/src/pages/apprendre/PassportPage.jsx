@@ -9,6 +9,8 @@ import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
+import EducationPanel from '../../components/fincludia/EducationPanel.jsx';
+import { useCatalogueBase } from '../../lib/useToolsBase.js';
 import '../../components/fincludia/Fincludia.css';
 import './Passport.css';
 
@@ -18,6 +20,7 @@ import './Passport.css';
 // tant que ses poids ne sont pas fournis (P6-01) : chaque dimension est
 // montrée seule, comme pour P6-06 et P6-16.
 export default function PassportPage() {
+  const catalogue = useCatalogueBase();
   const { t, i18n } = useTranslation();
   useDocumentMeta(t('passport.title'), t('passport.intro'));
   const { status, data, reload } = useApi('/fin/passeport');
@@ -44,6 +47,8 @@ export default function PassportPage() {
           {t('passport.print')}
         </Button>
       </div>
+      {/* The parcours of the profile and the missions (P8-17). */}
+      <EducationPanel mode="progress" />
 
       <Notice variant="info">{t('passport.disclaimer')}</Notice>
 
@@ -94,7 +99,7 @@ export default function PassportPage() {
         <h2>{t('passport.nextStepsTitle')}</h2>
         {p.etapesSuivantes.length === 0 ? (
           <p className="passport-empty">
-            {t('passport.noNextSteps')} <Link to="/catalogue">{t('passport.browseCatalogue')}</Link>
+            {t('passport.noNextSteps')} <Link to={catalogue}>{t('passport.browseCatalogue')}</Link>
           </p>
         ) : (
           <ul className="passport-list passport-next-steps">

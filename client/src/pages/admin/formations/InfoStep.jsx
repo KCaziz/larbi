@@ -8,8 +8,12 @@ import Field from '../../../components/cms/Field.jsx';
 import ImageField from '../../../components/cms/ImageField.jsx';
 import LinesInput from '../../../components/cms/LinesInput.jsx';
 
+// The client's six educational profiles (P8-17), in his order.
+const EDUCATION_PROFILES = ['LYC', 'ETU', 'JAC', 'SAL', 'EPG', 'AUT'];
+
 export default function InfoStep({ draft, setField, titleError, formation, categories, onCategoryCreated, onChanged }) {
   const { t } = useTranslation();
+  const profileLabel = (code) => (t('account.fin.publics', { returnObjects: true }).find((row) => row.code === code)?.label ?? code);
   const accountTypes = useAccountTypes();
   const [newCategory, setNewCategory] = useState(null); // null = closed, string = name being typed
   const [categoryError, setCategoryError] = useState(null);
@@ -142,6 +146,25 @@ export default function InfoStep({ draft, setField, titleError, formation, categ
           <option value="premium">{t('admin.info.accessPremium')}</option>
         </select>
       </Field>
+
+      {/* P8-17: the client's educational profiles it is recommended to.
+          None ticked = recommended to everyone. */}
+      <fieldset className="cms-fieldset">
+        <legend>{t('admin.info.educationProfiles')}</legend>
+        <small className="form-hint">{t('admin.info.educationProfilesHint')}</small>
+        {EDUCATION_PROFILES.map((code) => (
+          <label key={code} className="cms-check">
+            <input
+              type="checkbox"
+              checked={draft.educationProfiles.includes(code)}
+              onChange={(e) =>
+                setField('educationProfiles', e.target.checked ? [...draft.educationProfiles, code] : draft.educationProfiles.filter((v) => v !== code))
+              }
+            />
+            {profileLabel(code)}
+          </label>
+        ))}
+      </fieldset>
 
       <fieldset className="cms-fieldset">
         <legend>{t('admin.info.audience')}</legend>

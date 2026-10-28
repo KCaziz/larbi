@@ -106,7 +106,11 @@ export function buildSynthesis({ incomes = [], movements = [], previous = [], fa
   const counted = realised.filter((row) => !isSavingsMovement(row));
   const realExpenses = counted.filter((row) => row.kind === 'expense');
   const realIncome = counted.filter((row) => row.kind === 'income');
-  const resources = resolved.mixed || incomes.length === 0 ? { total: null, warnings: [] } : monthlyResources(incomes, { currency });
+  // Declared resources are split like movements: a lycéen's fictional pocket
+  // money is never part of the real « prévu », which also feeds the debt ratio.
+  const resourcesOf = (rows) => (resolved.mixed || rows.length === 0 ? { total: null, warnings: [] } : monthlyResources(rows, { currency }));
+  const fictionalIncomes = incomes.filter(isFictional);
+  const resources = resourcesOf(incomes.filter(isReal));
   const expenses = resolved.mixed ? null : totalOrNull(realExpenses, totalExpenses, { currency });
 
   // Diagnostic n°2, C1: this used to ADD the declared resources to the income
@@ -158,12 +162,13 @@ export function buildSynthesis({ incomes = [], movements = [], previous = [], fa
     // The fictional side, apart and badged. `null` when there is nothing
     // fictional at all: an empty simulation block would suggest one exists.
     simulation:
-      fictionalMovements.length === 0
+      fictionalMovements.length === 0 && fictionalIncomes.length === 0
         ? null
         : {
             badge: 'SIMULATION',
             depenses: resolved.mixed ? null : totalOrNull(fictionalMovements.filter((row) => row.kind === 'expense'), totalExpenses, { currency }),
             revenus: resolved.mixed ? null : totalOrNull(fictionalMovements.filter((row) => row.kind === 'income'), totalIncome, { currency }),
+            revenusPrevus: resourcesOf(fictionalIncomes).total,
           },
     nonCategorisees: counted.filter((row) => row.categoryId === null).length,
   };

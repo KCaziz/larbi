@@ -14,6 +14,7 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
+import { flowClass } from '../../lib/flows.js';
 import '../../components/fincludia/Fincludia.css';
 import '../mouvements/Movements.css';
 import './Calendar.css';
@@ -206,8 +207,8 @@ function DayList({ days, tab, currency, language, t, run }) {
           </div>
           <ul className="calendar-events">
             {day.evenements.map((event) => (
-              <li key={`${event.kind}-${event.sourceId}-${day.jour}`} className={`calendar-event calendar-event-${event.kind}`}>
-                <span className="calendar-event-kind">{t(`calendar.kinds.${event.kind}`)}</span>
+              <li key={`${event.kind}-${event.sourceId}-${day.jour}`} className={`calendar-event calendar-event-${event.kind} ${flowClass(eventFlow(event))}`}>
+                <span className="calendar-event-kind flow-label">{t(`calendar.kinds.${event.kind}`)}</span>
                 <span className="calendar-event-label">{event.label ?? event.categoryLabel ?? t('calendar.noLabel')}</span>
                 <span className="calendar-event-amount">
                   {event.sens === 'in' ? '+' : '−'} {formatAmount(language, event.value, currency)}
@@ -692,4 +693,12 @@ function ProvisionForm({ t, currency, run, onDone }) {
       </div>
     </form>
   );
+}
+
+// The flow of a calendar event (P8-27): money expected in, money going out,
+// or money set aside (a provision, a goal's date).
+function eventFlow(event) {
+  if (event.inflow) return 'income';
+  if (event.kind === 'provision' || event.kind === 'goal_due') return 'savings';
+  return 'expense';
 }

@@ -1,4 +1,10 @@
 {
+  "flows": {
+    "income": "دخل",
+    "expense": "مصروف",
+    "transfer": "تحويل",
+    "savings": "ادخار"
+  },
   "common": {
     "brand": "FINCLUDIA"
   },
@@ -328,6 +334,10 @@
       "title": "مقارنة البنوك",
       "body": "قارنوا الشروط البنكية لـ 13 بنكًا جزائريًا: رسوم الحسابات، البطاقات، الادخار، القروض والمزيد."
     },
+    "funding": {
+      "title": "تحضير تمويل",
+      "body": "قبل أي قرض جديد: ملفك ونسبك وما سينظر إليه البنك، انطلاقًا من أرقامك."
+    },
     "credit": {
       "title": "محاكي القرض",
       "body": "تقدير للقرض الذي يمكنكم الحصول عليه، حسب وضعكم المالي وشروط البنوك."
@@ -624,6 +634,10 @@
         {
           "code": "EPG",
           "label": "مدّخر مبتدئ — FINCLUDIA Épargne & Investissement"
+        },
+        {
+          "code": "AUT",
+          "label": "آخر / حر — مسار شخصي"
         }
       ],
       "ageRanges": [
@@ -655,7 +669,8 @@
           "code": "65plus",
           "label": "65 سنة فما فوق"
         }
-      ]
+      ],
+      "chooseAgain": "كان ملفك ضمن الإدارة المشتركة التي أصبح لها تطبيقها الخاص: اختر الملف الذي يوجّه تكوينك. لن تضيع أي من بياناتك."
     }
   },
   "notFound": {
@@ -796,7 +811,9 @@
       "prerequisites": "المتطلبات المسبقة",
       "prerequisitesHint": "ما يجب معرفته أو امتلاكه قبل البدء (اختياري).",
       "prerequisitesPlaceholder": "مثال: معرفة أساسيات المحاسبة",
-      "duration": "المدة الإجمالية المحسوبة: {{count}} د (مجموع مدة كل درس)."
+      "duration": "المدة الإجمالية المحسوبة: {{count}} د (مجموع مدة كل درس).",
+      "educationProfiles": "الملفات التعليمية",
+      "educationProfilesHint": "يُوصى به أولًا لهذه الملفات. إن لم يُحدَّد شيء: يُوصى به للجميع. التكوين ذو العنوان « parcours-avenir » أو « parcours-campus » أو « parcours-premier-revenu » أو « parcours-mon-argent » أو « parcours-epargne-investissement » هو مسار ملفه."
     },
     "courses": {
       "intro": "أضِف الدروس بالترتيب الذي سيتبعه المتعلمون.",
@@ -1919,7 +1936,15 @@
     "conditionCount_few": "{{count}} عروض",
     "conditionCount_many": "{{count}} عرضًا",
     "conditionCount_other": "{{count}} عرض",
-    "notDocumented": "متوفّرة قريبًا",
+    "notDocumented": "غير موثّق في المصدر — يُستكمل لاحقًا",
+    "extraThemes": {
+      "ccp": "الحساب البريدي الجاري / بريد الجزائر",
+      "insurance": "التأمينات والضمانات",
+      "onlineBanking": "إدارة الحسابات عبر الإنترنت"
+    },
+    "creditFiches": "بطاقات القروض الـ25 في المرجع (النسبة، المدة، المساهمة، السن، الدخل) مع مصدرها:",
+    "creditFichesLink": "الاطلاع عليها",
+    "bankTotal": "{{count}} بنكًا في المجموع",
     "browseTheme": "تصفّح",
     "estimatedCost": "التكلفة السنوية المقدّرة",
     "noCost": "متغيّرة",
@@ -2013,7 +2038,7 @@
     "resultCount_few": "{{count}} نتائج",
     "resultCount_many": "{{count}} نتيجة",
     "resultCount_other": "{{count}} نتيجة",
-    "notDocumentedBody": "سيُستكمل هذا القسم قريبًا.",
+    "notDocumentedBody": "لا يوثّق المصدر البنكي الذي قدّمه العميل هذا القسم: لا تُختلق أي بيانات. سيُستكمل حين يتوفّر مصدر بنكي.",
     "costNote": "تجمع التكلفة السنوية التقديرية الرسوم على مدى سنة: 800 دج تُخصم كل ثلاثة أشهر تعطي 3 200 دج في السنة. وعندما تتوقف التسعيرة على مبلغ العملية أو لا تكون مبلغًا ثابتًا، تُعرض كما هي وتُوصَف «متغيّرة».",
     "segmentNote": "تجمع هذه الصفحة العروض التي تخصّصها البنوك لهذه الحالة، قسمًا بقسم. أما العروض المتاحة لجميع العملاء فتبقى معروضة في كل قسم من المقارنة.",
     "noSegmentRows": "لا يوجد بعد أي عرض مخصّص لهذه الحالة.",
@@ -3185,6 +3210,8 @@
     "projection": "توقع نهاية الفترة",
     "plannedVsRealGap": "الفرق بين الفعلي والمخطط",
     "carryOver": "ترحيل ما تبقى من الفترة السابقة",
+    "carryOverspend": "ترحيل تجاوز الفترة السابقة أيضًا (يُخصم من هذه الميزانية)",
+    "carriedOverspend": "خُصم تجاوز قدره {{amount}}",
     "carried": "مرحّل: {{amount}}",
     "wholeGroups": "فئات كاملة",
     "subCategories": "فئات فرعية",
@@ -3219,7 +3246,9 @@
     "create": "إنشاء هدف",
     "createTitle": "هدف جديد",
     "template": "نموذج",
-    "customTemplate": "هدف مخصّص",
+    "customTemplate": "هدف آخر",
+    "icon": "الأيقونة",
+    "color": "اللون",
     "label": "الاسم",
     "target": "المبلغ المستهدف",
     "targetDate": "التاريخ المستهدف (اختياري)",
@@ -3285,6 +3314,7 @@
   },
   "debts": {
     "title": "الديون",
+    "prepareFunding": "تحضير تمويل",
     "intro": "ديونكم المصرّح بها: المتبقي، الدفعات الشهرية، وثقلها في ميزانيتكم.",
     "showArchived": "إظهار الديون المؤرشفة",
     "create": "التصريح بدين",
@@ -3493,7 +3523,37 @@
   },
   "today": {
     "title": "اليوم",
-    "intro": "أين أنت الآن، وما العمل.",
+    "intro": "ما تبقى عليك فعله: للتأكيد، للمطابقة، للإكمال.",
+    "nothing": "لا شيء للقيام به حاليًا. كل شيء محدّث.",
+    "confirmed": "تم التسجيل.",
+    "alreadyDone": "تم ذلك مسبقًا.",
+    "refused": "غير ممكن حاليًا.",
+    "incomeToConfirm": "مداخيل للتأكيد",
+    "paymentsToConfirm": "مدفوعات للتأكيد",
+    "confirmIncome": "تم الاستلام",
+    "confirmPayment": "تم الدفع",
+    "toClearTitle": "حركات للمطابقة",
+    "toClear_zero": "كل الحركات مطابَقة.",
+    "toClear_one": "حركة واحدة لم تُطابَق بعد.",
+    "toClear_two": "حركتان لم تُطابَقا بعد.",
+    "toClear_few": "{{count}} حركات لم تُطابَق بعد.",
+    "toClear_many": "{{count}} حركة لم تُطابَق بعد.",
+    "toClear_other": "{{count}} حركة لم تُطابَق بعد.",
+    "goClear": "مطابقة",
+    "questionsTitle": "أسئلة للإكمال",
+    "firstSteps_zero": "لا أسئلة من الخطوات الأولى",
+    "firstSteps_one": "سؤال واحد من الخطوات الأولى ينتظر إجابتك",
+    "firstSteps_two": "سؤالان من الخطوات الأولى ينتظران إجابتك",
+    "firstSteps_few": "{{count}} أسئلة من الخطوات الأولى تنتظر إجابتك",
+    "firstSteps_many": "{{count}} سؤالًا من الخطوات الأولى ينتظر إجابتك",
+    "firstSteps_other": "{{count}} سؤال من الخطوات الأولى ينتظر إجابتك",
+    "healthToComplete_zero": "كل أبعاد صحتك المالية مقيسة",
+    "healthToComplete_one": "بُعد واحد من صحتك المالية لم يُقَس بعد",
+    "healthToComplete_two": "بُعدان من صحتك المالية لم يُقاسا بعد",
+    "healthToComplete_few": "{{count}} أبعاد من صحتك المالية لم تُقَس بعد",
+    "healthToComplete_many": "{{count}} بُعدًا من صحتك المالية لم يُقَس بعد",
+    "healthToComplete_other": "{{count}} بُعد من صحتك المالية لم يُقَس بعد",
+    "learningTitle": "تكوينات للمتابعة",
     "dashboards": {
       "general": "أرقامك لهذا الشهر، وما يأتي بعدها.",
       "myWeek": "أسبوعي",
@@ -4001,7 +4061,15 @@
       "goal_overdue": "الأهداف المتأخرة",
       "goal_milestone": "مراحل الأهداف المُحقَّقة",
       "sharing_changed": "تغييرات المشاركة في فضاء",
-      "reminder_upcoming": "تذكيرات بالاستحقاقات القادمة"
+      "reminder_upcoming": "تذكيرات بالاستحقاقات القادمة",
+      "account_alert": "حساب تحت الحد أو مكشوف",
+      "income_to_confirm": "مداخيل للتأكيد",
+      "payment_to_confirm": "مدفوعات للتأكيد",
+      "debt_due": "آجال الديون",
+      "debt_ratio": "حصة الدخل التي تأخذها الديون",
+      "goal_contribution_missed": "مساهمة شهرية منسية",
+      "emergency_fund": "صندوق الطوارئ",
+      "learning_to_continue": "تكوين للاستئناف"
     },
     "messages": {
       "budgetAlert": {
@@ -4010,13 +4078,45 @@
         "exceeded": "تجاوز مظروف «{{label}}» ميزانيته."
       },
       "goalOverdue": "تجاوز الهدف «{{label}}» تاريخه المستهدف دون تحقيقه.",
-      "goalMilestone": "بلغ الهدف «{{label}}» مرحلة جديدة.",
+      "goalMilestone": "بلغ الهدف «{{label}}» {{percent}}% من قيمته.",
       "sharingChanged": "غيّر عضو في أحد فضاءاتكم ما يشاركه ({{kinds}}).",
       "reminder": {
         "planned": "نفقة مخطَّطة مستحقة في {{date}}.",
         "recurrence": "«{{label}}» تعود في {{date}}.",
         "provision": "المخصّص «{{label}}» يستحق في {{date}}."
-      }
+      },
+      "accountAlert": {
+        "overdraftExceeded": "الحساب «{{label}}» تجاوز السحب على المكشوف المسموح به.",
+        "overdrawn": "الحساب «{{label}}» مكشوف.",
+        "belowMinimum": "الحساب «{{label}}» نزل تحت الحد الذي اخترته."
+      },
+      "incomeToConfirm": "دخل متوقع في {{date}}: «{{label}}». هل استلمته؟",
+      "paymentToConfirm": "دفعة مبرمجة في {{date}}: «{{label}}». هل تمت؟",
+      "debtDue": {
+        "soon": "أجل بعد 3 أيام: «{{label}}» ({{date}}).",
+        "overdue": "تجاوز الأجل: حدّث حالة «{{label}}»."
+      },
+      "debtRatio": {
+        "watch": "حصة الأقساط أصبحت كبيرة.",
+        "high": "هامش ميزانيتك بعد الديون يتقلص بشدة.",
+        "critical": "أكثر من نصف الدخل مخصص للأقساط."
+      },
+      "goalContributionMissed": "لم تتم بعد المساهمة المبرمجة هذا الشهر لـ«{{label}}».",
+      "emergencyFund": {
+        "critical": "احتياطك يغطي أقل من شهر من المصاريف الأساسية.",
+        "below": "احتياطك تحت الهدف الذي اخترته.",
+        "reached": "بلغ صندوق الطوارئ هدفه."
+      },
+      "learningToContinue": "بدأت «{{label}}»: استأنف من حيث توقفت."
+    },
+    "families": {
+      "budgets": "الميزانيات والحسابات",
+      "revenus": "المداخيل",
+      "echeances": "الآجال",
+      "dettes": "الديون",
+      "objectifs": "الأهداف وصندوق الطوارئ",
+      "formation": "التكوين",
+      "securite": "الأمان والمشاركة"
     }
   },
   "trust": {
@@ -4120,6 +4220,7 @@
     "familyLabel": "العائلة",
     "allFamilies": "كلّ العائلات",
     "tariffWithheld": "التعريفة غير منشورة — في انتظار الجدول الرسمي المؤرّخ.",
+    "noTariff": "لم يذكر المصدر أي تعريفة",
     "undocumentedTitle": "ما هو غير موثّق",
     "blockedTitle": "الحسابات الموقوفة",
     "blockedIntro": "ثلاثة جداول منقولة دون تطبيق: قراءتان تعطيان سعرين مختلفين.",
@@ -4205,7 +4306,17 @@
     "capUnknown": "غير قابل للحساب",
     "capSource": "مصدر السقف:",
     "offersTitle": "عروض المرجع",
-    "offersIntro": "ما يُحصيه وثيقة العميل، وما ينقص لنشره.",
+    "offersIntro": "العروض الـ25 المدرجة في مرجع العميل، كما يصفها مصدره.",
+    "offersSource": "معلومة من المصدر الذي قدّمه العميل، لم تتحقق منها FINCLUDIA. يجب التأكد منها قبل أي قرار.",
+    "criteria": {
+      "taux": "النسبة / الهامش",
+      "duree": "المدة",
+      "effort": "نسبة الاقتطاع",
+      "apport": "المساهمة الشخصية",
+      "age": "السن",
+      "revenu": "الدخل / العمل"
+    },
+    "declaredStatus": "الحالة المصرّح بها في المصدر: {{status}} — {{source}}",
     "offersBlocked": "{{publishable}} عرض من أصل {{total}} قابل للنشر. شروط البنوك تنتظر مراجعة المطويات الرسمية: لا يُعرض هنا أيّ معدّل.",
     "islamic": "إسلامي",
     "conventional": "تقليدي",
@@ -4219,6 +4330,22 @@
     "skipToContent": "الانتقال إلى المحتوى",
     "home": "الرئيسية",
     "accounts": "حساباتي",
+    "today": "اليوم",
+    "toDo_zero": "لا شيء للقيام به",
+    "toDo_one": "أمر واحد للقيام به",
+    "toDo_two": "أمران للقيام بهما",
+    "toDo_few": "{{count}} أمور للقيام بها",
+    "toDo_many": "{{count}} أمرًا للقيام به",
+    "toDo_other": "{{count}} أمر للقيام به",
+    "movements": "الحركات",
+    "budgets": "الميزانيات",
+    "sections": {
+      "daily": "يوميًا",
+      "analyse": "التحليل",
+      "build": "البناء",
+      "tools": "الأدوات",
+      "learn": "التعلّم"
+    },
     "synthesis": "الملخص",
     "calendar": "الرزنامة المالية",
     "goals": "الأهداف والأمان",
@@ -4406,6 +4533,8 @@
     "paidExpenses": "المصاريف المدفوعة",
     "allMovements": "عرض كل الحركات",
     "today": "اليوم",
+    "suggestions": "اقتراحات",
+    "seeToday": "كل ما تبقى للقيام به",
     "budgets": "ميزانياتنا",
     "manageBudgets": "إدارة الميزانيات",
     "noBudget": "لا توجد ميزانية لهذه الفترة.",
@@ -4419,8 +4548,13 @@
     "continueLearning": "مواصلة التكوين"
   },
   "finProfile": {
-    "irregularIncome": "دخلي غير منتظم (يتغير من شهر لآخر)",
-    "irregularIncomeHint": "عندها يستهدف صندوق الطوارئ 6 أشهر من المصاريف الأساسية."
+    "incomeRegularity": "انتظام دخلي",
+    "regularity": {
+      "stable": "مستقر",
+      "irregular": "غير منتظم (يتغير من شهر لآخر)",
+      "seasonal": "موسمي"
+    },
+    "irregularIncomeHint": "غير منتظم أو موسمي: عندها يستهدف صندوق الطوارئ 6 أشهر من المصاريف الأساسية."
   },
   "synthesis": {
     "title": "الملخص",
@@ -4449,5 +4583,23 @@
       "R11": "جودة البيانات",
       "R12": "التكوين والإجراءات"
     }
+  },
+  "education": {
+    "yourParcours": "مسارك: {{name}}",
+    "freeTitle": "مكتبتك",
+    "chooseProfile": "اختر ملفك التعليمي: يوجّه ما يُقترح عليك تعلّمه دون أن ينقص شيئًا من إدارتك.",
+    "chooseLink": "اختيار ملفي",
+    "profile": "الملف: {{label}}",
+    "contents": "المحتويات ذات الأولوية",
+    "parcoursPreparing": "مسار {{name}} قيد التحرير: سيظهر هنا فور نشره.",
+    "coursesDone": "{{done}} من {{total}} دروس",
+    "continue": "مواصلة المسار",
+    "start": "بدء المسار",
+    "certificateObtained": "تم الحصول عليها (رقم {{number}})",
+    "certificateHow": "تُمنح في نهاية مسار {{name}}. لا تشهد على أي كفاءة منظَّمة.",
+    "missionsPreparing": "مهام مسارك قيد التحرير.",
+    "recommended": "موصى بها لك",
+    "forYou": "لملفك",
+    "done": "مكتملة"
   }
 }

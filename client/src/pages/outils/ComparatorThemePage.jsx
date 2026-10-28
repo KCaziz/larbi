@@ -11,6 +11,7 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import NotFoundPage from '../NotFoundPage.jsx';
 import { fieldLabel, isNotFound, labelHeader } from '../../lib/comparator.js';
 import CostLabel from './CostLabel.jsx';
+import { useToolsBase } from '../../lib/useToolsBase.js';
 import './Comparator.css';
 
 const NO_ROWS = [];
@@ -27,6 +28,7 @@ const byCost = (a, b) => {
 };
 
 export default function ComparatorThemePage() {
+  const base = useToolsBase();
   const { theme: themeKey } = useParams();
   const { t, i18n } = useTranslation();
   const { status, data, error, reload } = useApi(`/tools/comparator/themes/${themeKey}`);
@@ -74,7 +76,7 @@ export default function ComparatorThemePage() {
 
       <div className="comparator-page">
         <nav className="comparator-breadcrumb" aria-label={t('comparator.title')}>
-          <Link to="/outils/comparateur">{t('comparator.title')}</Link>
+          <Link to={`${base}/outils/comparateur`}>{t('comparator.title')}</Link>
           <span className="sep" aria-hidden="true">
             <ChevronRight className="icon-dir" size={14} />
           </span>
@@ -85,6 +87,14 @@ export default function ComparatorThemePage() {
           <span>{t('comparator.conditionCount', { count: conditions.length })}</span>
           {updatedAt && <span>{t('comparator.updatedAt', { date: formatDate(i18n.language, updatedAt) })}</span>}
         </p>
+
+        {/* P8-28: the 25 credit fiches of the client's referential, each with
+            its criteria and its source, live with the credit simulator. */}
+        {theme?.key === 'credits' && (
+          <p className="comparator-disclaimer">
+            {t('comparator.creditFiches')} <Link to={`${base}/outils/credit`}>{t('comparator.creditFichesLink')}</Link>
+          </p>
+        )}
 
         {conditions.length === 0 ? (
           <p className="comparator-disclaimer">{t('comparator.notDocumentedBody')}</p>
@@ -167,7 +177,12 @@ export default function ComparatorThemePage() {
                           <td className="bank-name">{c.bank.name}</td>
                           <td>{c.label}</td>
                           {theme.category && <td>{c.category ?? ''}</td>}
-                          {hasSegments && <td>{c.segment !== 'non_precise' && <span className="segment-badge">{t(`comparator.segments.${c.segment}`)}</span>}</td>}
+                          {hasSegments && (
+                            <td>
+                              {/* P8-28: « Non précisé » rather than an empty cell, as the client's source says. */}
+                              <span className={c.segment === 'non_precise' ? 'segment-badge segment-badge-unknown' : 'segment-badge'}>{t(`comparator.segments.${c.segment}`)}</span>
+                            </td>
+                          )}
                           {theme.fields.map((f) => (
                             <td key={f}>{c.values[f] ?? ''}</td>
                           ))}

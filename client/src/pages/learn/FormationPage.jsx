@@ -11,9 +11,11 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import ProgressBar from '../../components/learn/ProgressBar.jsx';
 import QuizCard from '../../components/quiz/QuizCard.jsx';
+import { useCatalogueBase } from '../../lib/useToolsBase.js';
 import './Learn.css';
 
 export default function FormationPage() {
+  const catalogue = useCatalogueBase();
   const { slug } = useParams();
   const { t, i18n } = useTranslation();
   const { status, data, error, reload, setData } = useApi(`/learn/formations/${slug}`);
@@ -78,7 +80,7 @@ export default function FormationPage() {
 
   return (
     <div className="learn-page">
-      <Link to="/catalogue" className="cms-back">
+      <Link to={catalogue} className="cms-back">
         <ArrowLeft className="icon-dir" size={16} strokeWidth={1.75} aria-hidden="true" />
         {t('learn.detail.back')}
       </Link>
@@ -191,7 +193,7 @@ export default function FormationPage() {
               return (
                 <li key={course.id}>
                   {canOpen ? (
-                    <Link to={`/catalogue/${slug}/cours/${course.id}`} className="learn-lesson is-link">
+                    <Link to={`${catalogue}/${slug}/cours/${course.id}`} className="learn-lesson is-link">
                       {body}
                     </Link>
                   ) : (
@@ -220,7 +222,7 @@ export default function FormationPage() {
                 )}
                 {f.accessible ? (
                   nextLesson && (
-                    <Button to={`/catalogue/${slug}/cours/${nextLesson.id}`} className="btn-lg" arrow>
+                    <Button to={`${catalogue}/${slug}/cours/${nextLesson.id}`} className="btn-lg" arrow>
                       {enrollment.progress.completed > 0 ? t('learn.detail.continue') : t('learn.detail.start')}
                     </Button>
                   )
@@ -269,7 +271,7 @@ export default function FormationPage() {
                         date: formatDate(i18n.language, enrollment.certification.issuedAt),
                       })}
                     </p>
-                    <Button to={`/catalogue/${slug}/certificat`} variant="secondary">
+                    <Button to={`${catalogue}/${slug}/certificat`} variant="secondary">
                       <Award size={16} strokeWidth={1.9} aria-hidden="true" />
                       {t('learn.certification.view')}
                     </Button>

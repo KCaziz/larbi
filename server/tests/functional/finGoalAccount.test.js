@@ -59,16 +59,43 @@ describe('P8-12 — a contribution is a transfer to the goal’s account', () =>
     assert.equal(res.body.goal.progressStatus, 'paused');
     const refs = (await t.request('GET', '/fin/goals/references', { user })).body;
     assert.equal(refs.catalogue.length, 17);
+    // The client's own codes, GO-01 to GO-17 (answer D1).
+    assert.deepEqual(
+      refs.catalogue.map((model) => model.code),
+      Array.from({ length: 17 }, (_, i) => `GO-${String(i + 1).padStart(2, '0')}`),
+    );
+    assert.ok(refs.catalogue.every((model) => model.icon && model.color), 'each model has its icon and colour');
+  });
+
+  test('« Autre objectif » keeps its own name, icon and colour (answer D1)', async () => {
+    const res = await t.request('POST', '/fin/goals', {
+      user,
+      json: { label: 'Mon atelier', templateKey: null, icon: '🪚', color: '#7C2D12', target: 3000000, currency: 'DZD', targetDate: '2027-06-01T00:00:00.000Z' },
+    });
+    assert.equal(res.status, 201, JSON.stringify(res.body).slice(0, 200));
+    assert.equal(res.body.goal.icon, '🪚');
+    assert.equal(res.body.goal.color, '#7C2D12');
+    const refused = await t.request('POST', '/fin/goals', { user, json: { label: 'X', color: 'rouge', target: 1000, currency: 'DZD' } });
+    assert.equal(refused.status, 400);
+    // A goal created under an old code before D1 is still valid once migrated.
+    assert.equal((await t.request('POST', '/fin/goals', { user, json: { label: 'Bébé', templateKey: 'GO-12', target: 1000, currency: 'DZD' } })).status, 201);
   });
 });
 
 describe('P8-12 — the emergency fund’s target by profile', () => {
   test('a student is offered 2 months, an irregular income 6, and the person can change it', async () => {
     assert.equal((await t.request('GET', '/fin/reserve?currency=DZD', { user })).body.cibleMois, 2);
-    await t.request('PUT', '/profile/fin', { user, json: { finIrregularIncome: true, acceptConsents: true } });
+    await t.request('PUT', '/profile/fin', { user, json: { finIncomeRegularity: 'irregular', acceptConsents: true } });
     const res = (await t.request('GET', '/fin/reserve?currency=DZD', { user })).body;
     assert.equal(res.cibleMois, 6);
     assert.equal(res.cibleParDefaut, true);
+    // « Stable | Irrégulier | Saisonnier » (answer C3): seasonal is 6 too.
+    await t.request('PUT', '/profile/fin', { user, json: { finIncomeRegularity: 'seasonal' } });
+    assert.equal((await t.request('GET', '/fin/reserve?currency=DZD', { user })).body.cibleMois, 6);
+    await t.request('PUT', '/profile/fin', { user, json: { finIncomeRegularity: 'stable' } });
+    assert.equal((await t.request('GET', '/fin/reserve?currency=DZD', { user })).body.cibleMois, 2);
+    assert.equal((await t.request('PUT', '/profile/fin', { user, json: { finIncomeRegularity: 'parfois' } })).status, 400);
+    await t.request('PUT', '/profile/fin', { user, json: { finIncomeRegularity: 'irregular' } });
     await t.request('PUT', '/fin/reserve/cible', { user, json: { targetMonths: 4 } });
     assert.equal((await t.request('GET', '/fin/reserve?currency=DZD', { user })).body.cibleMois, 4);
   });

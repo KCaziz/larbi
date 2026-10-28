@@ -218,6 +218,6 @@ describe('erasing an account erases its money', () => {
     }
     assert.equal(await t.prisma.media.count(), 0, 'and the receipt row with it');
     // The client's category reference is NOT part of the account's data.
-    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91);
+    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91 + 98, 'the 91 rows of P6-02 and the 98 universal categories of P8-08');
   });
 });

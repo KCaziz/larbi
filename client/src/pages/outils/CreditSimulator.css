@@ -129,3 +129,22 @@
   border-block-end: 1px solid var(--border);
   font-size: 0.9rem;
 }
+
+/* P8-28: the criteria of an offer, as its source writes them. */
+.credit-offer-criteria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 6px 16px;
+  margin: 8px 0;
+}
+.credit-offer-criteria dt {
+  color: var(--text);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.credit-offer-criteria dd {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 0.9rem;
+}

@@ -1,4 +1,10 @@
 {
+  "flows": {
+    "income": "Revenu",
+    "expense": "Dépense",
+    "transfer": "Transfert",
+    "savings": "Épargne"
+  },
   "common": {
     "brand": "FINCLUDIA"
   },
@@ -328,6 +334,10 @@
       "title": "Comparateur bancaire",
       "body": "Comparez les conditions bancaires de 13 banques algériennes : frais de tenue de compte, cartes, épargne, crédits et plus."
     },
+    "funding": {
+      "title": "Préparer un financement",
+      "body": "Avant un nouveau crédit : votre dossier, vos ratios et ce qu’une banque regardera, d’après vos propres chiffres."
+    },
     "credit": {
       "title": "Simulateur de crédit",
       "body": "Estimation du crédit que vous pouvez obtenir, selon votre profil financier et les conditions des banques."
@@ -620,6 +630,10 @@
         {
           "code": "EPG",
           "label": "Épargnant débutant — FINCLUDIA Épargne & Investissement"
+        },
+        {
+          "code": "AUT",
+          "label": "Autre / libre — parcours personnalisé"
         }
       ],
       "ageRanges": [
@@ -651,7 +665,8 @@
           "code": "65plus",
           "label": "65 ans et plus"
         }
-      ]
+      ],
+      "chooseAgain": "Votre profil faisait partie de la gestion commune, qui a désormais sa propre application : choisissez le profil qui oriente votre formation. Rien de vos données n’est perdu."
     }
   },
   "notFound": {
@@ -792,7 +807,9 @@
       "prerequisites": "Prérequis",
       "prerequisitesHint": "Ce qu’il faut savoir ou avoir avant de commencer (facultatif).",
       "prerequisitesPlaceholder": "Ex. : Connaître les bases de la comptabilité",
-      "duration": "Durée totale calculée : {{count}} min (somme de la durée de chaque leçon)."
+      "duration": "Durée totale calculée : {{count}} min (somme de la durée de chaque leçon).",
+      "educationProfiles": "Profils éducatifs",
+      "educationProfilesHint": "Recommandée en priorité à ces profils. Aucun coché : recommandée à tous. Une formation à l’adresse « parcours-avenir », « parcours-campus », « parcours-premier-revenu », « parcours-mon-argent » ou « parcours-epargne-investissement » est le parcours de son profil."
     },
     "courses": {
       "intro": "Ajoutez les cours dans l'ordre où les apprenants les suivront.",
@@ -1864,7 +1881,15 @@
     "bankCount_other": "{{count}} banques",
     "conditionCount_one": "{{count}} offre",
     "conditionCount_other": "{{count}} offres",
-    "notDocumented": "Bientôt disponible",
+    "notDocumented": "Non documenté par la source — à compléter",
+    "extraThemes": {
+      "ccp": "CCP / Algérie Poste",
+      "insurance": "Assurances et garanties",
+      "onlineBanking": "Gestion des comptes en ligne"
+    },
+    "creditFiches": "Les 25 fiches de crédit du référentiel (taux, durée, apport, âge, revenu), avec leur source :",
+    "creditFichesLink": "les consulter",
+    "bankTotal": "{{count}} banques au total",
     "browseTheme": "Consulter",
     "estimatedCost": "Coût annuel estimé",
     "noCost": "Variable",
@@ -1950,7 +1975,7 @@
     "sortLabel": "Ordre d'affichage",
     "resultCount_one": "{{count}} résultat",
     "resultCount_other": "{{count}} résultats",
-    "notDocumentedBody": "Cette rubrique sera complétée prochainement.",
+    "notDocumentedBody": "La source bancaire transmise par le client ne documente pas cette rubrique : aucune donnée n’est inventée. Elle sera complétée dès qu’une source bancaire sera fournie.",
     "costNote": "Le coût annuel estimé additionne les frais sur une année : par exemple 800 DA prélevés chaque trimestre donnent 3 200 DA par an. Lorsque le tarif dépend du montant de l'opération ou n'est pas un montant fixe, il est affiché tel quel et marqué « Variable ».",
     "segmentNote": "Cette page réunit les offres que les banques réservent à ce profil, rubrique par rubrique. Les offres ouvertes à tous les clients restent consultables dans chaque rubrique du comparateur.",
     "noSegmentRows": "Aucune offre n'est réservée à ce profil pour le moment.",
@@ -3066,6 +3091,8 @@
     "projection": "Projection fin de période",
     "plannedVsRealGap": "Écart réel − prévu",
     "carryOver": "Reporter le reste de la période précédente",
+    "carryOverspend": "Reporter aussi le dépassement de la période précédente (il est retiré de ce budget)",
+    "carriedOverspend": "{{amount}} de dépassement retiré",
     "carried": "report : {{amount}}",
     "wholeGroups": "Catégories entières",
     "subCategories": "Sous-catégories",
@@ -3100,7 +3127,9 @@
     "create": "Créer un objectif",
     "createTitle": "Nouvel objectif",
     "template": "Modèle",
-    "customTemplate": "Objectif personnalisé",
+    "customTemplate": "Autre objectif",
+    "icon": "Icône",
+    "color": "Couleur",
     "label": "Nom",
     "target": "Montant cible",
     "targetDate": "Date cible (optionnel)",
@@ -3162,6 +3191,7 @@
   },
   "debts": {
     "title": "Dettes",
+    "prepareFunding": "Préparer un financement",
     "intro": "Vos dettes déclarées : encours, mensualités, et ce qu’elles représentent dans votre budget.",
     "showArchived": "Afficher les dettes archivées",
     "create": "Déclarer une dette",
@@ -3370,7 +3400,25 @@
   },
   "today": {
     "title": "Aujourd'hui",
-    "intro": "Où vous en êtes, et quoi faire maintenant.",
+    "intro": "Ce qu’il vous reste à faire : à confirmer, à pointer, à compléter.",
+    "nothing": "Rien à faire pour l’instant. Tout est à jour.",
+    "confirmed": "C’est noté.",
+    "alreadyDone": "C’était déjà fait.",
+    "refused": "Impossible pour l’instant.",
+    "incomeToConfirm": "Revenus à confirmer",
+    "paymentsToConfirm": "Paiements à confirmer",
+    "confirmIncome": "Reçu",
+    "confirmPayment": "Payé",
+    "toClearTitle": "Mouvements à pointer",
+    "toClear_one": "{{count}} mouvement n’est pas encore pointé.",
+    "toClear_other": "{{count}} mouvements ne sont pas encore pointés.",
+    "goClear": "Pointer",
+    "questionsTitle": "Questions à compléter",
+    "firstSteps_one": "{{count}} question des premiers pas attend votre réponse",
+    "firstSteps_other": "{{count}} questions des premiers pas attendent votre réponse",
+    "healthToComplete_one": "{{count}} dimension de votre santé financière n’est pas encore mesurée",
+    "healthToComplete_other": "{{count}} dimensions de votre santé financière ne sont pas encore mesurées",
+    "learningTitle": "Formations à poursuivre",
     "dashboards": {
       "general": "Vos chiffres du mois, et la suite.",
       "myWeek": "Ma semaine",
@@ -3874,7 +3922,15 @@
       "goal_overdue": "Objectifs en retard",
       "goal_milestone": "Jalons d’objectifs atteints",
       "sharing_changed": "Changements de partage dans un espace",
-      "reminder_upcoming": "Rappels d’échéances à venir"
+      "reminder_upcoming": "Rappels d’échéances à venir",
+      "account_alert": "Compte sous le seuil ou à découvert",
+      "income_to_confirm": "Revenus à confirmer",
+      "payment_to_confirm": "Paiements à confirmer",
+      "debt_due": "Échéances de dettes",
+      "debt_ratio": "Part du revenu prise par les dettes",
+      "goal_contribution_missed": "Contribution mensuelle oubliée",
+      "emergency_fund": "Fonds d’urgence",
+      "learning_to_continue": "Formation à reprendre"
     },
     "messages": {
       "budgetAlert": {
@@ -3883,13 +3939,45 @@
         "exceeded": "L’enveloppe « {{label}} » a dépassé son budget."
       },
       "goalOverdue": "L’objectif « {{label}} » a dépassé sa date cible sans être atteint.",
-      "goalMilestone": "L’objectif « {{label}} » a franchi un nouveau jalon.",
+      "goalMilestone": "L’objectif « {{label}} » a atteint {{percent}} % de sa cible.",
       "sharingChanged": "Un membre d’un de vos espaces a changé ce qu’il partage ({{kinds}}).",
       "reminder": {
         "planned": "Une dépense planifiée est prévue le {{date}}.",
         "recurrence": "« {{label}} » revient le {{date}}.",
         "provision": "La provision « {{label}} » arrive à échéance le {{date}}."
-      }
+      },
+      "accountAlert": {
+        "overdraftExceeded": "Le compte « {{label}} » dépasse son découvert autorisé.",
+        "overdrawn": "Le compte « {{label}} » est à découvert.",
+        "belowMinimum": "Le compte « {{label}} » est passé sous le seuil que vous avez choisi."
+      },
+      "incomeToConfirm": "Revenu attendu le {{date}} : « {{label}} ». L’avez-vous reçu ?",
+      "paymentToConfirm": "Paiement prévu le {{date}} : « {{label}} ». A-t-il été fait ?",
+      "debtDue": {
+        "soon": "Échéance dans 3 jours : « {{label}} » ({{date}}).",
+        "overdue": "Échéance dépassée : mettez à jour le statut de « {{label}} »."
+      },
+      "debtRatio": {
+        "watch": "La part des mensualités devient importante.",
+        "high": "Votre marge budgétaire après dettes se réduit fortement.",
+        "critical": "Plus de la moitié du revenu est engagée dans les mensualités."
+      },
+      "goalContributionMissed": "La contribution prévue ce mois-ci pour « {{label}} » n’a pas encore été faite.",
+      "emergencyFund": {
+        "critical": "Votre réserve couvre moins d’un mois de dépenses essentielles.",
+        "below": "Votre réserve est sous la cible choisie.",
+        "reached": "Votre fonds d’urgence a atteint sa cible."
+      },
+      "learningToContinue": "Vous avez commencé « {{label}} » : reprenez là où vous vous êtes arrêté."
+    },
+    "families": {
+      "budgets": "Budgets et comptes",
+      "revenus": "Revenus",
+      "echeances": "Échéances",
+      "dettes": "Dettes",
+      "objectifs": "Objectifs et fonds d’urgence",
+      "formation": "Formation",
+      "securite": "Sécurité et partage"
     }
   },
   "trust": {
@@ -3993,6 +4081,7 @@
     "familyLabel": "Famille",
     "allFamilies": "Toutes les familles",
     "tariffWithheld": "Tarif non publié — en attente de la grille officielle datée.",
+    "noTariff": "Tarif non indiqué par la source",
     "undocumentedTitle": "Ce qui n’est pas documenté",
     "blockedTitle": "Les calculs bloqués",
     "blockedIntro": "Trois barèmes sont transcrits sans être appliqués : deux lectures donneraient deux prix différents.",
@@ -4078,7 +4167,17 @@
     "capUnknown": "Non calculable",
     "capSource": "Source du plafond :",
     "offersTitle": "Les offres du référentiel",
-    "offersIntro": "Ce que le document du client recense, et ce qui manque pour le publier.",
+    "offersIntro": "Les 25 offres recensées par le référentiel du client, telles que sa source les décrit.",
+    "offersSource": "Information issue de la source transmise par le client, non vérifiée par FINCLUDIA. À confirmer avant toute décision.",
+    "criteria": {
+      "taux": "Taux / marge",
+      "duree": "Durée",
+      "effort": "Effort / ratio",
+      "apport": "Apport / quotité",
+      "age": "Âge",
+      "revenu": "Revenu / emploi"
+    },
+    "declaredStatus": "Statut déclaré par la source : {{status}} — {{source}}",
     "offersBlocked": "{{publishable}} offre sur {{total}} est publiable. Les conditions des banques attendent le contrôle des brochures officielles : aucun taux n’est affiché ici.",
     "islamic": "Islamique",
     "conventional": "Conventionnel",
@@ -4092,6 +4191,18 @@
     "skipToContent": "Aller au contenu",
     "home": "Accueil",
     "accounts": "Mes comptes",
+    "today": "Aujourd’hui",
+    "toDo_one": "{{count}} chose à faire",
+    "toDo_other": "{{count}} choses à faire",
+    "movements": "Mouvements",
+    "budgets": "Budgets",
+    "sections": {
+      "daily": "Au quotidien",
+      "analyse": "Analyser",
+      "build": "Construire",
+      "tools": "Outils",
+      "learn": "Apprendre"
+    },
     "synthesis": "Synthèse",
     "calendar": "Calendrier financier",
     "goals": "Objectifs & sécurité",
@@ -4271,6 +4382,8 @@
     "paidExpenses": "Dépenses payées",
     "allMovements": "Voir tous les mouvements",
     "today": "Aujourd’hui",
+    "suggestions": "Suggestions",
+    "seeToday": "Tout ce qui reste à faire",
     "budgets": "Nos budgets",
     "manageBudgets": "Gérer les budgets",
     "noBudget": "Aucun budget sur cette période.",
@@ -4284,8 +4397,13 @@
     "continueLearning": "Continuer ma formation"
   },
   "finProfile": {
-    "irregularIncome": "Mon revenu est irrégulier (il varie d’un mois à l’autre)",
-    "irregularIncomeHint": "Votre fonds d’urgence vise alors 6 mois de dépenses essentielles."
+    "incomeRegularity": "Régularité de mon revenu",
+    "regularity": {
+      "stable": "Stable",
+      "irregular": "Irrégulier (il varie d’un mois à l’autre)",
+      "seasonal": "Saisonnier"
+    },
+    "irregularIncomeHint": "Irrégulier ou saisonnier : votre fonds d’urgence vise alors 6 mois de dépenses essentielles."
   },
   "synthesis": {
     "title": "Synthèse",
@@ -4310,5 +4428,23 @@
       "R11": "Qualité des données",
       "R12": "Formation et actions"
     }
+  },
+  "education": {
+    "yourParcours": "Votre parcours : {{name}}",
+    "freeTitle": "Votre bibliothèque",
+    "chooseProfile": "Choisissez votre profil éducatif : il oriente ce qui vous est proposé d’apprendre, sans rien retirer à votre gestion.",
+    "chooseLink": "Choisir mon profil",
+    "profile": "Profil : {{label}}",
+    "contents": "Contenus prioritaires",
+    "parcoursPreparing": "Le parcours {{name}} est en cours de rédaction : il apparaîtra ici dès sa publication.",
+    "coursesDone": "{{done}} cours sur {{total}}",
+    "continue": "Continuer le parcours",
+    "start": "Commencer le parcours",
+    "certificateObtained": "obtenu (n° {{number}})",
+    "certificateHow": "délivré à la fin du parcours {{name}}. Il ne certifie aucune aptitude réglementée.",
+    "missionsPreparing": "Les missions de votre parcours sont en cours de rédaction.",
+    "recommended": "Recommandées pour vous",
+    "forYou": "Pour votre profil",
+    "done": "Terminée"
   }
 }

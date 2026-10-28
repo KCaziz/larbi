@@ -7,11 +7,13 @@ import { formatDate } from '../../lib/format.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
+import { useToolsBase } from '../../lib/useToolsBase.js';
 import './Comparator.css';
 
 const SEGMENTS = ['particulier', 'professionnel', 'entreprise'];
 
 export default function ComparatorPage() {
+  const base = useToolsBase();
   const { t, i18n } = useTranslation();
   const summary = useApi('/tools/comparator');
 
@@ -28,14 +30,14 @@ export default function ComparatorPage() {
 
       <div className="comparator-home">
         <p className="comparator-meta">
-          <strong>{t('comparator.bankCount', { count: bankCount })}</strong>
+          <strong>{t('comparator.bankTotal', { count: bankCount })}</strong>
           <strong>{t('comparator.conditionCount', { count: conditionCount })}</strong>
           {updatedAt && <span>{t('comparator.updatedAt', { date: formatDate(i18n.language, updatedAt) })}</span>}
         </p>
 
         <p className="comparator-disclaimer">{t('comparator.disclaimer')}</p>
 
-        <Link to="/outils/comparateur/adequation" className="segment-card">
+        <Link to={`${base}/outils/comparateur/adequation`} className="segment-card">
           <span className="segment-card-icon" aria-hidden="true">
             <Landmark size={20} strokeWidth={1.7} />
           </span>
@@ -66,7 +68,7 @@ export default function ComparatorPage() {
               );
             }
             return (
-              <Link key={theme.key} to={`/outils/comparateur/${theme.key}`} className="theme-card">
+              <Link key={theme.key} to={`${base}/outils/comparateur/${theme.key}`} className="theme-card">
                 <h3>{t(`comparator.themes.${theme.key}`)}</h3>
                 {counts}
                 <span className="theme-card-action">
@@ -76,6 +78,22 @@ export default function ComparatorPage() {
               </Link>
             );
           })}
+          {/* The three other families of the client's comparator perimeter
+              (referential, tab 31 — 14 in all, P8-28): CCP / Algérie Poste has
+              its own tool; the two others have no data in any source yet. */}
+          <Link to={`${base}/outils/postal`} className="theme-card">
+            <h3>{t('comparator.extraThemes.ccp')}</h3>
+            <span className="theme-card-action">
+              {t('comparator.browseTheme')}
+              <ArrowRight className="icon-dir" size={14} strokeWidth={2} aria-hidden="true" />
+            </span>
+          </Link>
+          {['insurance', 'onlineBanking'].map((key) => (
+            <div key={key} className="theme-card theme-card-empty">
+              <h3>{t(`comparator.extraThemes.${key}`)}</h3>
+              <span className="theme-card-action">{t('comparator.notDocumented')}</span>
+            </div>
+          ))}
         </div>
 
         {/* A section of its own, not a filter: the same offers read differently
@@ -85,7 +103,7 @@ export default function ComparatorPage() {
           <p className="comparator-segments-intro">{t('comparator.segmentsIntro')}</p>
           <div className="segment-cards">
             {SEGMENTS.map((seg) => (
-              <Link key={seg} to={`/outils/comparateur/segments/${seg}`} className="segment-card">
+              <Link key={seg} to={`${base}/outils/comparateur/segments/${seg}`} className="segment-card">
                 <span className="segment-card-icon" aria-hidden="true">
                   <Users size={20} strokeWidth={1.7} />
                 </span>

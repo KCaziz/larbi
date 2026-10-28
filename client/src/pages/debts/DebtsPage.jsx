@@ -73,6 +73,14 @@ export default function DebtsPage() {
           </p>
         )}
 
+        {/* « Préparation au financement » (JA08): before a new credit, the
+            person's own file — reached from here and from the tools. */}
+        <p className="fin-hint">
+          <Button to="/app/financement" variant="ghost" arrow>
+            {t('debts.prepareFunding')}
+          </Button>
+        </p>
+
         <div className="fin-figure-grid">
           <FigureCard label={t('debts.monthlyService')} answer={synthese.serviceMenuel} formula={formulas.get('F017')} />
           {synthese.tauxEffort && <FigureCard label={t('debts.effortRate')} answer={synthese.tauxEffort} formula={formulas.get('F018')} />}

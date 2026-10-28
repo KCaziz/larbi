@@ -112,6 +112,17 @@
   cursor: pointer;
 }
 
+.goals-row-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-muted, #e5e7eb);
+  font-size: 15px;
+  flex: none;
+}
+
 .goals-row-title {
   display: flex;
   flex-wrap: wrap;

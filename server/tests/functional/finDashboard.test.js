@@ -179,7 +179,7 @@ describe('P6-06 — alerts and what is coming up', () => {
     const view = (await today()).body.aujourdhui;
     assert.equal(view.alertes.length, 1);
     assert.equal(view.alertes[0].level, 'exceeded');
-    assert.equal(view.alertes[0].categoryLabel, 'Alimentation / boissons', 'the interface never guesses a label');
+    assert.equal(view.alertes[0].categoryLabel, 'Courses alimentaires', 'the interface never guesses a label (label of the client’s 125 categories, P8-08)');
     assert.ok(view.actions.some((action) => action.key === 'envelopeExceeded'));
   });
 
@@ -237,7 +237,7 @@ describe('P6-06 — the priority goal and the savings rate', () => {
 
     const view = (await today()).body.aujourdhui;
     assert.equal(view.objectifPrioritaire.label, 'Ordinateur');
-    assert.equal(view.objectifPrioritaire.progres.formule_id, 'F025');
+    assert.equal(view.objectifPrioritaire.progres.formule_id, 'PB-F014', 'goal progress is the client’s PB-F014 since P8-12');
   });
 
   test('the savings rate reads the savings OF THE PERIOD', async () => {
@@ -306,5 +306,27 @@ describe('P6-06 — what is declared rather than invented', () => {
     const view = (await today()).body.aujourdhui;
     assert.equal(view.qualite.stale, null);
     assert.equal(view.qualite.age.resultat, null);
+  });
+});
+
+describe('« Aujourd’hui », the list of what is left to do (answer D3)', () => {
+  test('an income to confirm, a movement to clear, and the count; a confirmed income leaves the list', async () => {
+    // A working day in the past few days, so the weekend rule does not move it.
+    let due = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate()) - 2 * DAY);
+    while ([5, 6].includes(due.getUTCDay())) due = new Date(due.getTime() - DAY);
+    const recurrence = (
+      await t.request('POST', '/fin/recurrences', { user, json: { label: 'Salaire', kind: 'income', value: 6000000, currency: 'DZD', frequency: 'mensuel', nextDate: iso(due) } })
+    ).body.recurrence;
+    await addMovement({ value: 50000 });
+
+    let list = (await today()).body.aujourdhui.aFaire;
+    assert.equal(list.revenusAConfirmer.length, 1);
+    assert.equal(list.revenusAConfirmer[0].sourceId, recurrence.id);
+    assert.equal(list.aPointer, 1, 'the movement is not cleared yet');
+    assert.ok(list.total >= 2);
+
+    await t.request('POST', '/fin/calendrier/occurrences', { user, json: { recurrenceId: recurrence.id, dueDate: iso(due), action: 'confirm' } });
+    list = (await today()).body.aujourdhui.aFaire;
+    assert.equal(list.revenusAConfirmer.length, 0, 'confirmed: nothing left to do about it');
   });
 });

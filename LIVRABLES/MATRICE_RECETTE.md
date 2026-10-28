@@ -1,14 +1,14 @@
 # Matrice des livrables et recette
 
-> Généré le 2026-10-27 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
+> Généré le 2026-10-28 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
 
 Livrable de l'**annexe 2** du contrat, dont le tableau est fourni vide (livrable / prévu / livré / test / réserve).
 
 La colonne « Test / résultat » renvoie à la suite automatisée : `npm test` dans `server/`. La colonne « Réserve » reprend ce que le plan déclare bloqué, sans l'adoucir — l'article 7 distingue les anomalies bloquantes, majeures et mineures, et une donnée que le client doit fournir n'est aucune des trois : c'est une réserve.
 
-**83 livrables sur 131** sont terminés et vérifiés. **6** sont bloqués par une décision ou une donnée du client.
+**103 livrables sur 137** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
 
-Suite de tests : 128 fichiers (consistency : 2, e2e : 24, functional : 34, security : 38, unit : 30).
+Suite de tests : 145 fichiers (consistency : 2, e2e : 29, functional : 45, security : 38, unit : 31).
 
 | Livrable | Prévu | Livré | Test / résultat | Réserve / correction |
 | --- | --- | --- | --- | --- |
@@ -100,7 +100,7 @@ Suite de tests : 128 fichiers (consistency : 2, e2e : 24, functional : 34, secur
 | `P6-19` — FINCLUDIA : centre de confiance et de données | Oui | Oui | Suite automatisée verte |  |
 | `P6-20` — FINCLUDIA : recherche globale | Oui | Oui | Suite automatisée verte |  |
 | `P6-23` — FINCLUDIA : visualisations graphiques des tableaux de bord | Oui | Oui | Suite automatisée verte |  |
-| `P6-24` — FINCLUDIA : comptes financiers multiples et coordination des opérations | Oui | Non | — | Non commencé |
+| `P6-24` — FINCLUDIA : comptes financiers multiples et coordination des opérations | Oui | Oui | Suite automatisée verte |  |
 | `P6-21` — FINCLUDIA : validation de fin de phase | Oui | Oui | Suite automatisée verte |  |
 | `P7-01` — ERP entreprises, diaspora et commerce international | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P7-02` — Espace entreprise : socle de trésorerie (tiers, ventes, achats, règlements) | Oui | Oui | Suite automatisée verte |  |
@@ -108,27 +108,33 @@ Suite de tests : 128 fichiers (consistency : 2, e2e : 24, functional : 34, secur
 | `P7-04` — Espace entreprise : états financiers réglementaires (bilan, compte de résultat, TVA, amortissements, stocks) | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P7-05` — Diaspora et commerce international | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P8-01` — Moteur budgétaire unique : décisions de cadrage | Oui | Oui | Suite automatisée verte |  |
-| `P8-02` — Une application dans sa propre fenêtre, distincte de la vitrine, avec la navigation finale | Oui | Non | — | Non commencé |
-| `P8-03` — Lot 0 : comptes, transactions, transferts et anti-doublon | Oui | Non | — | Non commencé |
-| `P8-04` — Corriger dès maintenant les calculs faux (diagnostic n°2) | Oui | Non | — | Non commencé |
-| `P8-05` — Mes comptes | Oui | Non | — | Non commencé |
-| `P8-06` — Accueil centralisé, le même pour tous | Oui | Non | — | Non commencé |
-| `P8-07` — Mouvements : revenus, dépenses, transferts et pointage | Oui | Non | — | Non commencé |
-| `P8-08` — Catégories universelles | Oui | Non | — | Non commencé |
-| `P8-09` — Budgets : une allocation, rattachée automatiquement, et des méthodes facultatives | Oui | Non | — | Non commencé |
-| `P8-10` — Synthèse, rapport mensuel et téléchargement | Oui | Non | — | Non commencé |
-| `P8-11` — Calendrier financier : trois onglets et revenus à confirmer | Oui | Non | — | Non commencé |
-| `P8-12` — Objectifs & sécurité : un seul compartiment, et des objectifs qui simulent | Oui | Non | — | Non commencé |
-| `P8-13` — Dettes et créances | Oui | Non | — | Non commencé |
-| `P8-14` — Patrimoine réel et portefeuille fictif | Oui | Non | — | Non commencé |
+| `P8-02` — Une application dans sa propre fenêtre, distincte de la vitrine, avec la navigation finale | Oui | Oui | Suite automatisée verte |  |
+| `P8-03` — Lot 0 : comptes, transactions, transferts et anti-doublon | Oui | Oui | Suite automatisée verte |  |
+| `P8-04` — Corriger dès maintenant les calculs faux (diagnostic n°2) | Oui | Oui | Suite automatisée verte |  |
+| `P8-05` — Mes comptes | Oui | Oui | Suite automatisée verte |  |
+| `P8-06` — Accueil centralisé, le même pour tous | Oui | Oui | Suite automatisée verte |  |
+| `P8-07` — Mouvements : revenus, dépenses, transferts et pointage | Oui | Oui | Suite automatisée verte |  |
+| `P8-08` — Catégories universelles | Oui | Oui | Suite automatisée verte |  |
+| `P8-09` — Budgets : une allocation, rattachée automatiquement, et des méthodes facultatives | Oui | Oui | Suite automatisée verte |  |
+| `P8-10` — Synthèse, rapport mensuel et téléchargement | Oui | Oui | Suite automatisée verte |  |
+| `P8-11` — Calendrier financier : trois onglets et revenus à confirmer | Oui | Oui | Suite automatisée verte |  |
+| `P8-12` — Objectifs & sécurité : un seul compartiment, et des objectifs qui simulent | Oui | Oui | Suite automatisée verte |  |
+| `P8-13` — Dettes et créances | Oui | Oui | Suite automatisée verte |  |
+| `P8-14` — Patrimoine réel et portefeuille fictif | Oui | Oui | Suite automatisée verte |  |
 | `P8-15` — Outils : un seul catalogue | Oui | Non | — | Non commencé |
-| `P8-16` — Santé financière : une page à part entière | Oui | Non | — | Non commencé |
-| `P8-17` — Formation, progression et certificats : la seule couche qui varie selon le profil | Oui | Non | — | Non commencé |
-| `P8-18` — Alertes et états du moteur personnel | Oui | Non | — | Non commencé |
+| `P8-16` — Santé financière : une page à part entière | Oui | Oui | Suite automatisée verte |  |
+| `P8-17` — Formation, progression et certificats : la seule couche qui varie selon le profil | Oui | En cours | — |  |
+| `P8-18` — Alertes et états du moteur personnel | Oui | Oui | Suite automatisée verte |  |
 | `P8-19` — Recherche et assistant adaptés au moteur unique | Oui | Non | — | Non commencé |
 | `P8-20` — Paramètres : données et confiance | Oui | Non | — | Non commencé |
-| `P8-21` — Contrôles du client et règle « trouvable » | Oui | Non | — | Non commencé |
+| `P8-21` — Contrôles du client et règle « trouvable » | Oui | Oui | Suite automatisée verte |  |
 | `P8-23` — Premiers pas : le parcours de premier démarrage (P0 à P7) | Oui | Non | — | Non commencé |
+| `P8-24` — Reliquats des écrans livrés le 2026-10-27 | Oui | Non | — | Non commencé |
+| `P8-25` — Une adresse propre pour chaque écran regroupé | Oui | Non | — | Non commencé |
+| `P8-26` — Réponses du client du 2026-10-28 : corriger ce qui est déjà livré | Oui | Oui | Suite automatisée verte |  |
+| `P8-27` — Retours du client du 2026-10-28 : couleurs des catégories et des flux, et les 3 suggestions | Oui | Oui | Suite automatisée verte |  |
+| `P8-28` — Comparateurs et produits bancaires : affichage, rubriques vides, fiches du référentiel | Oui | Oui | Suite automatisée verte |  |
+| `P8-29` — Vitrine, compartiments et parcours de formation : refonte | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P8-22` — Moteur budgétaire unique : validation de fin de phase | Oui | Non | — | Non commencé |
 | `P9-01` — Gestion commune : décisions de cadrage | Oui | Oui | Suite automatisée verte |  |
 | `P9-02` — Gestion commune : une solution à part, une adresse par espace, un tableau de bord d'espace | Oui | Non | — | Non commencé |
@@ -154,4 +160,5 @@ Ces livrables ne sont pas en retard : ils attendent une information que seul le 
 - `P7-03` — Espace entreprise : déclinaison par segment (PME/PMI, start-up, micro-entreprise, auto-entrepreneur, micro-importateur, profession libérale)
 - `P7-04` — Espace entreprise : états financiers réglementaires (bilan, compte de résultat, TVA, amortissements, stocks)
 - `P7-05` — Diaspora et commerce international
+- `P8-29` — Vitrine, compartiments et parcours de formation : refonte
 

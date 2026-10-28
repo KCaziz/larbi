@@ -28,6 +28,7 @@ const toDraft = (f) => ({
   categoryId: f.category?.id ?? '',
   requiredAccessLevel: f.requiredAccessLevel,
   targetAccountTypes: f.targetAccountTypes ?? [],
+  educationProfiles: f.educationProfiles ?? [],
   certificationEnabled: f.certification.enabled,
   certificationTitle: f.certification.title ?? '',
   certificationDescription: f.certification.description ?? '',

@@ -475,3 +475,27 @@
     padding: 24px 18px;
   }
 }
+
+/* ---------- P8-28: the width the page really has ----------
+   Inside the application the menu takes 260 px: the screen may be 1 280 px
+   wide while the page has under 1 000. The switch to cards follows the PAGE's
+   width, not the screen's, so no column is ever cut off. */
+.comparator-page {
+  container: comparator / inline-size;
+}
+@container comparator (max-width: 1080px) {
+  .comparator-table-wrap {
+    display: none;
+  }
+  .comparator-cards {
+    display: block;
+  }
+  .comparator-controls > * {
+    flex: 1 1 220px;
+  }
+}
+.segment-badge-unknown {
+  background: transparent;
+  color: var(--text);
+  border: 1px dashed var(--border-strong);
+}

@@ -16,6 +16,8 @@ import Notice from '../../components/ui/Notice.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import CategoryOptions from '../../components/fincludia/CategoryOptions.jsx';
+import CategoryChip from '../../components/fincludia/CategoryChip.jsx';
+import { flowClass, flowOf } from '../../lib/flows.js';
 import '../argent/MyMoney.css';
 import './Movements.css';
 
@@ -300,6 +302,8 @@ function Entry({ currency, lookups, draft, onDone, run }) {
               <option value="">{t('myMoney.noCategory')}</option>
               <CategoryOptions groups={lookups.categoryGroups} />
             </select>
+            {/* P8-27: the chosen category with its colour, icon and group. */}
+            {form.categoryId && <CategoryChip category={lookups.categories.find((row) => row.id === form.categoryId)} />}
           </div>
 
           <div className="fin-field">
@@ -513,15 +517,19 @@ function Row({ transaction, lookups, run, onEdit, onDuplicate }) {
   const account = lookups.accounts.find((row) => row.id === transaction.accountId);
   const tag = lookups.tags.find((row) => row.id === transaction.tagId);
   const method = lookups.paymentMethods.find((row) => row.id === transaction.paymentMethod);
+  // P8-27: the row wears its flow's colour (income, expense, transfer,
+  // savings), and its category its own — never the colour alone.
+  const flow = flowOf(transaction, category);
 
   return (
-    <li className={transaction.status === 'fictional' ? 'money-row money-row-simulation' : 'money-row'}>
+    <li className={`${transaction.status === 'fictional' ? 'money-row money-row-simulation' : 'money-row'} movements-row ${flowClass(flow)}`}>
       <span className="money-row-date">{formatDate(i18n.language, transaction.occurredAt)}</span>
-      <span className={SIGN[transaction.kind] === '+' ? 'money-row-amount money-in' : 'money-row-amount'}>
+      <span className="money-row-amount flow-amount">
         {SIGN[transaction.kind]} {formatAmount(i18n.language, transaction.value, transaction.currency)}
       </span>
       <span className="money-row-category">
-        {transfer ? t(`movements.kinds.${transaction.kind}`) : category ? `${category.icon ?? ''} ${category.label}` : t('myMoney.noCategory')}
+        {transfer ? <span className="flow-label">{t(`movements.kinds.${transaction.kind}`)}</span> : <CategoryChip category={category} fallback={t('myMoney.noCategory')} />}
+        {!transfer && <span className="flow-label">{t(`flows.${flow}`)}</span>}
       </span>
       <span className="money-row-tags">
         {transaction.note && <span className="money-note">{transaction.note}</span>}
@@ -609,7 +617,9 @@ function ClearingPanel({ lookups, run }) {
               <li key={row.id} className="money-row">
                 <span className="money-row-date">{formatDate(i18n.language, row.occurredAt)}</span>
                 <span className="money-row-amount">{formatAmount(i18n.language, row.value, row.currency)}</span>
-                <span className="money-row-category">{category?.label ?? row.note ?? t('myMoney.noCategory')}</span>
+                <span className="money-row-category">
+                  <CategoryChip category={category} fallback={row.note ?? t('myMoney.noCategory')} compact />
+                </span>
                 <span className="movements-row-actions">
                   <button type="button" className="money-plain" onClick={() => set(row.id, 'checked')}>
                     <CheckCheck size={15} aria-hidden="true" /> {t('movements.clearingStates.checked')}

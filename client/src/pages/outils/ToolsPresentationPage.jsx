@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Briefcase, Calculator, Compass, CreditCard, FlaskConical, Landmark, Receipt, Wrench } from 'lucide-react';
+import { Briefcase, Calculator, Compass, CreditCard, FlaskConical, Landmark, Receipt, Wrench, ClipboardCheck } from 'lucide-react';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import Notice from '../../components/ui/Notice.jsx';
@@ -14,6 +14,10 @@ const tools = [
   { key: 'explorer', icon: Compass, tone: 'tone-green', to: '/outils/explorateur', available: true },
   { key: 'postal', icon: Landmark, tone: 'tone-green', to: '/outils/postal', available: true },
   { key: 'credit', icon: CreditCard, tone: 'tone-brass', to: '/outils/credit', available: true },
+  // « Préparation au financement » (JA08, in red in the annotated cahier: it
+  // existed but nothing led to it). Inside the application only: it reads the
+  // person's own figures.
+  { key: 'funding', icon: ClipboardCheck, tone: 'tone-brass', to: '/financement', available: true, appOnly: true },
   { key: 'invoice', icon: Receipt, tone: 'tone-clay', to: '/outils/facture', available: true },
 ];
 
@@ -33,7 +37,7 @@ export default function ToolsPresentationPage({ base = '' }) {
 
       <Section>
         <div className="feature-grid feature-grid-2">
-          {tools.map((tool) => {
+          {tools.filter((tool) => !tool.appOnly || base).map((tool) => {
             const Icon = tool.icon;
             return (
             <article className={`feature-card ${tool.tone}`} key={tool.key}>

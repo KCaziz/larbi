@@ -83,7 +83,7 @@ export default function BudgetsPage() {
           <ul className="budget-list">
             {list.map((budget) => (
               <li key={budget.id} className={budget.archivedAt ? 'budget-row budget-row-archived' : 'budget-row'}>
-                <Link to={`/budget/${budget.id}`} className="budget-row-main">
+                <Link to={`/app/budgets/${budget.id}`} className="budget-row-main">
                   <strong>{budget.label}</strong>
                   <span className="budget-row-period">
                     {formatDate(i18n.language, budget.periodStart)} – {formatDate(i18n.language, budget.periodEnd)}

@@ -2,7 +2,7 @@
 // completeness. Reuses FINANCIAL_TABLES (P6-02) as the single registry of
 // what "this account's financial data" means, rather than a second list that
 // could drift from the one the consistency control already checks against.
-import { FINANCIAL_TABLES, ownerFilter } from '../constants/finData.js';
+import { FINANCIAL_TABLES, liveFilter } from '../constants/finData.js';
 import { FIN_CONSENT_TEXTS } from '../constants/finPublics.js';
 import { COMPLETENESS_CHECKS, DELETION_POLICY, DEVICES_BLOCKED } from '../constants/finTrust.js';
 import { SHAREABLE_KINDS } from '../constants/finSpace.js';
@@ -22,7 +22,7 @@ export async function buildDataInventory(prisma, userId) {
         // Certaines tables du socle n'ont pas de `userId` : elles appartiennent
         // à un objet qui le porte. Le chemin est déclaré dans le registre, donc
         // aucun lecteur n'a à le deviner.
-        where: { ...ownerFilter(table, userId), deletedAt: null },
+        where: liveFilter(table, userId),
         select: { source: true, status: true, consentUses: true, collectedAt: true },
       });
       if (data.length === 0) return { label, count: 0, sources: [], statuses: [], usages: [], premiereCollecte: null, derniereCollecte: null };
@@ -115,7 +115,7 @@ export async function exportAccountData(prisma, userId) {
   const tables = await Promise.all(
     FINANCIAL_TABLES.map(async (table) => ({
       label: table.label,
-      rows: await prisma[table.model].findMany({ where: { ...ownerFilter(table, userId), deletedAt: null } }),
+      rows: await prisma[table.model].findMany({ where: liveFilter(table, userId) }),
     })),
   );
   const consents = await listConsents(prisma, userId);

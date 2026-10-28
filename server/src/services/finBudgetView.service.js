@@ -15,6 +15,7 @@ import { DEFAULT_ALERT_THRESHOLDS } from '../constants/finBudget.js';
 import { computed } from './finance/contract.js';
 import { isReal } from './finance/dataModel.js';
 import { isSavingsMovement } from './finSynthesis.service.js';
+import { buildProvisionView } from './finCalendarView.service.js';
 import {
   envelopeProjection,
   envelopeUsageRate,
@@ -123,9 +124,11 @@ export function consumedByCategory(movements) {
  * `incomes`   the recurring resources active over the period
  * `goals`     the real goals, for their planned monthly contribution — the
  *             « allocations hors budget explicitement planifiées » of PB-F009
- *             (default retained until the client answers, P8-01 question C2)
+ *             (the emergency fund is one of them)
+ * `provisions` the active provisions: their monthly amount (F045) is the third
+ *             allocation outside the budget (client's answer C2, 2026-10-28)
  */
-export function buildBudgetView({ budget, envelopes = [], movements = [], incomes = [], goals = [], carry = null, now = new Date() }) {
+export function buildBudgetView({ budget, envelopes = [], movements = [], incomes = [], goals = [], provisions = [], carry = null, now = new Date() }) {
   const currency = budget.currency;
   const warnings = [];
 
@@ -165,8 +168,11 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
     const spent = assigned.spent.get(envelope.id) ?? 0;
     // « Ajustements de report » (PB-F008): what was left of the same envelope
     // last period, when this budget carries it over.
-    const carried = carry?.amounts?.[envelope.categoryGroup ? `group:${envelope.categoryGroup}` : `category:${envelope.categoryId}`] ?? 0;
-    const allocated = envelope.value + carried;
+    // A carried OVERSPEND (negative, only when the person chose it — answer
+    // C1) lowers the envelope, never below zero.
+    const asked = carry?.amounts?.[envelope.categoryGroup ? `group:${envelope.categoryGroup}` : `category:${envelope.categoryId}`] ?? 0;
+    const allocated = Math.max(0, envelope.value + asked);
+    const carried = allocated - envelope.value;
     const rate = envelopeUsageRate(spent, allocated);
     const inputs = { ...baseInputs, enveloppe: envelope.id, prevu: envelope.value, report: carried, reel: spent, plafond: envelope.cap ?? null };
     return {
@@ -251,12 +257,20 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
     warnings.push('Le budget prévu dépasse les ressources de la période. C’est autorisé : il est seulement signalé.');
   }
 
-  // PB-F009 — the planned monthly contributions to real goals count as
-  // allocated outside the budget, over the same whole months.
+  // PB-F009 — allocated outside the budget, over the same whole months (the
+  // client's answer C2, 2026-10-28): the planned monthly contributions to the
+  // real goals, the emergency fund included, and the monthly provisions (F045,
+  // as of the start of the period). Debt instalments are not taken again: they
+  // are already in the budgets.
   const contributions = goals.filter(
     (goal) => goal.currency === currency && Number.isInteger(goal.monthlyContribution) && goal.monthlyContribution > 0,
   );
-  const plannedOutside = months === null ? null : contributions.reduce((sum, goal) => sum + goal.monthlyContribution, 0) * months;
+  const provisionMonthly = inCurrency(provisions)
+    .map((provision) => buildProvisionView(provision, { now: budget.periodStart }).provisionMensuelle.resultat)
+    .filter((amount) => Number.isInteger(amount) && amount > 0);
+  const goalsOutside = contributions.reduce((sum, goal) => sum + goal.monthlyContribution, 0);
+  const provisionsOutside = provisionMonthly.reduce((sum, amount) => sum + amount, 0);
+  const plannedOutside = months === null ? null : (goalsOutside + provisionsOutside) * months;
   const resteAAffecter = periodResources === null || plannedOutside === null ? null : periodResources - (totalPrevu ?? 0) - plannedOutside;
 
   // PB-F008 summed over the envelopes, then PB-F013: what is left per
@@ -298,7 +312,10 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
         revenus_prevus: periodResources,
         budgets_alloues: totalPrevu,
         allocations_hors_budget: plannedOutside,
+        contributions_objectifs: months === null ? null : goalsOutside * months,
+        provisions: months === null ? null : provisionsOutside * months,
         objectifs_contribuant: contributions.length,
+        provisions_actives: provisionMonthly.length,
       },
     }),
     ecart: answer('PB-F008', restant),

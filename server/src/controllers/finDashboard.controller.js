@@ -20,6 +20,10 @@ import { currentBudget, loadBudgetData } from '../services/finBudget.service.js'
 import { buildBudgetView } from '../services/finBudgetView.service.js';
 import { loadCalendarData } from '../services/finCalendar.service.js';
 import { collectEvents, recurringCost } from '../services/finCalendarView.service.js';
+import { generateAlerts } from '../services/finAlerts.service.js';
+import { clearingView } from '../services/finMovement.service.js';
+import { occurrencesWithOutcome } from '../services/finOccurrence.service.js';
+
 import { buildDebtSynthesis, listDebts } from '../services/finDebt.service.js';
 import { buildGoalView, listGoals } from '../services/finGoal.service.js';
 import { completeness } from '../services/finOnboarding.service.js';
@@ -29,6 +33,9 @@ import { buildSynthesis, currentMonth, debtRatioIncome, loadSynthesisData } from
 import { autonomy, buildDashboard, dataQuality } from '../services/finDashboard.service.js';
 import { describeFormula } from '../services/finance/describe.js';
 import { monthlyAmount } from '../services/finance/formulas.js';
+
+// How far back an unconfirmed income or payment is still asked about.
+const CONFIRM_LOOKBACK_DAYS = 31;
 
 // The "Aujourd'hui" home screen (P6-06), screens C04 / LY02 / ET02 / JA02 /
 // SA02. One request, one answer: the question is « où j'en suis, que faire
@@ -70,6 +77,9 @@ export async function getToday(req, res) {
   const now = new Date();
   const currency = req.user.finCurrency;
   const period = currentMonth(now);
+  // The alerts (P8-18) are raised when the day's list is read, too: it is the
+  // screen people open most.
+  await generateAlerts(prisma, req.user, { now });
 
   // ---- the money of the month (P6-04) -------------------------------------
   const { incomes, movements, previous } = await loadSynthesisData(prisma, req.user.id, period);
@@ -90,7 +100,9 @@ export async function getToday(req, res) {
   const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const horizon = new Date(startOfToday.getTime() + UPCOMING_DAYS * 24 * 3600 * 1000);
   const calendarData = await loadCalendarData(prisma, req.user.id, { from: startOfToday, to: horizon });
-  const upcoming = collectEvents({ ...calendarData, from: startOfToday, to: horizon, currency }).slice(0, 5);
+  // With what was said about each occurrence (P8-11): a salary already
+  // confirmed is not « coming up » any more.
+  const upcoming = collectEvents({ ...calendarData, from: startOfToday, to: horizon, currency, occurrencesOf: occurrencesWithOutcome }).slice(0, 5);
   const subscriptions = recurringCost(calendarData.recurrences, { currency, now });
 
   // ---- reserve (P6-09), goals (P6-08), debts (P6-10) ----------------------
@@ -155,6 +167,46 @@ export async function getToday(req, res) {
   );
   dashboard.alertes = dashboard.alertes.map((alert) => ({ ...alert, categoryLabel: alert.categoryId ? (labels.get(alert.categoryId) ?? null) : null }));
   dashboard.echeances = dashboard.echeances.map((event) => ({ ...event, categoryLabel: event.categoryId ? (labels.get(event.categoryId) ?? null) : null }));
+
+  // ---- « Aujourd'hui », the list of what is left to do (answer D3) ----------
+  // The client's own list: actions to finish, income to confirm, movements to
+  // clear, due dates, missing answers, alerts and courses to go on with. The
+  // Accueil shows the figures; this is the to-do list, with its count.
+  const lookBack = new Date(startOfToday.getTime() - CONFIRM_LOOKBACK_DAYS * 24 * 3600 * 1000);
+  const endOfToday = new Date(startOfToday.getTime() + 24 * 3600 * 1000 - 1);
+  const pastData = await loadCalendarData(prisma, req.user.id, { from: lookBack, to: endOfToday });
+  const toConfirm = collectEvents({ ...pastData, from: lookBack, to: endOfToday, currency, occurrencesOf: occurrencesWithOutcome }).filter(
+    (event) => event.confirmable && !event.informational,
+  );
+  const [clearing, courses] = await Promise.all([
+    clearingView(prisma, req.user.id, { now }),
+    prisma.enrollment.findMany({
+      where: { userId: req.user.id, completedAt: null, status: 'active' },
+      select: { id: true, formation: { select: { title: true, slug: true } } },
+      orderBy: { enrolledAt: 'desc' },
+      take: 5,
+    }),
+  ]);
+  const healthToComplete = (dashboard.santeFinanciere?.dimensions ?? []).filter((dimension) => dimension.score === null).map((dimension) => dimension.key);
+  const aFaire = {
+    actions: dashboard.actions,
+    revenusAConfirmer: toConfirm.filter((event) => event.inflow),
+    paiementsAConfirmer: toConfirm.filter((event) => !event.inflow),
+    aPointer: clearing.counts.unchecked + clearing.counts.to_verify,
+    echeances: dashboard.echeances,
+    questions: { premiersPas: onboarding.remaining, sante: healthToComplete },
+    alertes: dashboard.alertes,
+    formations: courses.map((row) => ({ id: row.id, title: row.formation.title, slug: row.formation.slug })),
+  };
+  // The count of the menu badge: things to do, not things to read.
+  aFaire.total =
+    aFaire.actions.length +
+    aFaire.revenusAConfirmer.length +
+    aFaire.paiementsAConfirmer.length +
+    (aFaire.aPointer > 0 ? 1 : 0) +
+    aFaire.alertes.length +
+    (aFaire.questions.premiersPas > 0 ? 1 : 0);
+  dashboard.aFaire = aFaire;
 
   res.json({
     aujourdhui: dashboard,

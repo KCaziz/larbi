@@ -141,11 +141,53 @@ const fromReference = (c) => ({
   recurrence: c.recurrence,
   suggestedFor: c.suggestedFor,
 });
+// The client's answer D4 (2026-10-28): the 125 REPLACE the 91. An old income
+// or expense category no new one absorbed is retired: its rows move to the
+// category of the 125 named here (migration 20261028130000, journalled), and
+// it can no longer be chosen. It stays in the table, archived, for the history
+// that names it. Where nothing among the 125 is close, « Autre dépense ».
+// Presented to the client at acceptance. Not here: the `goal` family (savings
+// still read it), « Autre charge fixe » and « Transport récurrent » (the
+// current first-run questions write on them, and they count as essential for
+// the reserve) — all retired with the new first-run journey, P8-23; the `asset`
+// and `debt` families (kinds of assets and debts, not categories of
+// movements) and the `shared` family (Phase 9, P9-05).
+export const RETIRED_CATEGORIES = {
+  'income.salaire_brut_information': 'income.salaire_net',
+  'fixed.assurance': 'fixed.assurance_mutuelle_sante',
+  'fixed.abonnement': 'variable.autre_depense_variable',
+  'variable.transport_automobile': 'variable.carburant',
+  'variable.sante_hygiene': 'variable.hygiene_soins',
+  'variable.maison_equipement': 'variable.petit_equipement',
+  'variable.culture_loisirs_sorties': 'variable.sorties',
+  'variable.dons_cadeaux': 'variable.cadeau_offert',
+  'variable.animaux': 'variable.alimentation_animal',
+  'variable.telecom_variable': 'fixed.telephone',
+  'seasonal.frais_d_etudes': 'fixed.scolarite_etudes',
+  'seasonal.rentree_scolaire': 'variable.etudes_fournitures',
+  'seasonal.assurance_annuelle': 'variable.autre_depense_variable',
+  'seasonal.entretien_reparation': 'variable.reparation',
+  'seasonal.vacances': 'variable.hebergement',
+  'seasonal.fetes': 'variable.autre_depense_variable',
+  'seasonal.mariage': 'variable.autre_depense_variable',
+  'seasonal.equipement': 'variable.petit_equipement',
+  'seasonal.autre_depense_annuelle': 'variable.autre_depense_variable',
+};
+
 export const STANDARD_CATEGORIES = [
   ...P6_02_CATEGORIES.map((c) =>
     absorbed.has(c.key)
       ? fromReference(absorbed.get(c.key))
-      : { ...c, group: null, icon: null, color: null, essential: OLD_ESSENTIAL_KEYS.includes(c.key), recurrence: null, suggestedFor: [] },
+      : {
+          ...c,
+          group: null,
+          icon: null,
+          color: null,
+          essential: OLD_ESSENTIAL_KEYS.includes(c.key),
+          recurrence: null,
+          suggestedFor: [],
+          ...(RETIRED_CATEGORIES[c.key] ? { retiredTo: RETIRED_CATEGORIES[c.key] } : {}),
+        },
   ),
   ...REFERENCE_CATEGORIES.filter((c) => !c.mergedFrom).map(fromReference),
 ];
@@ -153,3 +195,26 @@ export const STANDARD_CATEGORIES = [
 export const STANDARD_CATEGORY_KEYS = STANDARD_CATEGORIES.map((c) => c.key);
 export const standardCategoryByKey = (key) => STANDARD_CATEGORIES.find((c) => c.key === key) ?? null;
 export const standardCategoriesOfFamily = (family) => STANDARD_CATEGORIES.filter((c) => c.family === family);
+
+// « Des couleurs pour chaque catégorie, sous-catégorie » (the client,
+// 2026-10-28, P8-27). The 125 carry their own colour (a sub-category); a
+// group (the category) takes the colour of its first sub-category in the
+// client's order; a row with neither — an old category kept, a person's own —
+// takes its family's. Every category on screen therefore has a colour.
+export const FAMILY_COLORS = {
+  income: '#0B7A6C',
+  fixed: '#3A5F8A',
+  variable: '#2563A6',
+  seasonal: '#7C3AED',
+  goal: '#B7791F',
+  asset: '#087682',
+  debt: '#9F1239',
+  shared: '#C2410C',
+};
+export const GROUP_COLORS = Object.fromEntries(
+  REFERENCE_CATEGORIES.filter((c, index, all) => c.group && c.color && all.findIndex((other) => other.group === c.group && other.family === c.family) === index).map((c) => [
+    `${c.family}:${c.group}`,
+    c.color,
+  ]),
+);
+export const categoryColor = (row) => row.color ?? (row.group ? GROUP_COLORS[`${row.family}:${row.group}`] : null) ?? FAMILY_COLORS[row.family] ?? null;

@@ -432,6 +432,18 @@ describe('task tracking (TASKS.md)', () => {
     assert.deepEqual(undocumented, []);
   });
 
+  test('a finished task hands any remaining work to a task still open', () => {
+    // On 2026-10-27 four tasks were closed with a "**Restent** :" line that named
+    // no task, or only a task that was itself done: the leftovers belonged to
+    // nobody and would have been lost. Each such line must cite an open task.
+    const blocks = text.split(/^### /m).slice(1).filter((b) => /^P\d-\d\d/.test(b) && /- Statut : `✅ done`/.test(b));
+    const orphans = blocks.flatMap((b) =>
+      [...b.matchAll(/^- \*\*Rest(?:e|ent)\*\*[^\n]*/gm)]
+        .filter((m) => ![...m[0].matchAll(/`(P\d-\d\d)`/g)].some((d) => byId.get(d[1]) && byId.get(d[1]).status !== '✅ done'))
+        .map((m) => `${b.slice(0, 5)}: ${m[0].slice(0, 80)}`));
+    assert.deepEqual(orphans, []);
+  });
+
   test('the "current state" section only names tasks that still exist', () => {
     // Rewritten 2026-10-19 along with section 7 itself. The previous version
     // matched a fixed heading structure ("Dernières tâches terminées" ...
@@ -448,5 +460,38 @@ describe('task tracking (TASKS.md)', () => {
     const mentioned = [...new Set([...state.matchAll(/`(P\d-\d\d)`/g)].map((m) => m[1]))];
     assert.ok(mentioned.length >= 10, `${mentioned.length} tasks named`);
     assert.deepEqual(mentioned.filter((id) => !byId.has(id)), []);
+  });
+});
+
+describe('the screens of the budget management (P8-21, provenance matrix)', async () => {
+  const { APP_SCREENS, SERVED_KINDS } = await import('../../src/constants/finAppScreens.js');
+  const tasks = new Map(
+    [...read(ROOT, 'TASKS.md').matchAll(/^### (P\d-\d\d) — [^\n]*\r?\n- Statut : `([^`]+)`/gm)].map((m) => [m[1], m[2]]),
+  );
+  const navigation = read(CLIENT, 'src/config/appNavigation.js');
+  const menu = new Set([...navigation.slice(0, navigation.indexOf('LEGACY_REDIRECTS')).matchAll(/\bto: '([^']+)'/g)].map((m) => m[1]));
+
+  test('the 44 screens of the consolidated specification, each once', () => {
+    assert.equal(APP_SCREENS.length, 44);
+    assert.equal(new Set(APP_SCREENS.map((screen) => screen.code)).size, 44);
+    assert.deepEqual(APP_SCREENS.filter((screen) => !SERVED_KINDS.includes(screen.served)).map((s) => s.code), []);
+  });
+
+  test('a screen served by a page, or grouped in one, names an address the client serves', () => {
+    const routes = new Set(clientRoutes());
+    const missing = APP_SCREENS.filter((screen) => ['page', 'grouped'].includes(screen.served) && !routes.has(screen.to)).map((s) => `${s.code} ${s.to}`);
+    assert.deepEqual(missing, []);
+  });
+
+  test('« trouvable » : the first click is an entry of the navigation', () => {
+    const offMenu = APP_SCREENS.filter((screen) => screen.via !== null && !menu.has(screen.via)).map((s) => `${s.code} via ${s.via}`);
+    assert.deepEqual(offMenu, []);
+  });
+
+  test('a screen that is not its own page names the open task that owes it', () => {
+    const unowned = APP_SCREENS.filter((screen) => ['grouped', 'pending'].includes(screen.served))
+      .filter((screen) => !screen.owner || !tasks.has(screen.owner) || tasks.get(screen.owner) === '✅ done')
+      .map((s) => `${s.code} -> ${s.owner}`);
+    assert.deepEqual(unowned, []);
   });
 });

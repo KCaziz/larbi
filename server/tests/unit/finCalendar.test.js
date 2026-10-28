@@ -81,10 +81,12 @@ describe('P6-07 — collecting the events of a period', () => {
     );
   });
 
-  test('a planned movement is confirmable, the others are not', () => {
+  test('a planned movement and a recurrence to confirm are confirmable (P8-11)', () => {
     const events = collectEvents({ planned, recurrences: [recurrence()], provisions, from: D('2026-10-01'), to: D('2026-10-31'), currency: 'DZD' });
     assert.equal(events.find((event) => event.kind === 'planned_expense').confirmable, true, '« Marquer payé » applies to a plan the person wrote');
-    assert.equal(events.find((event) => event.kind === 'recurrence').confirmable, false);
+    assert.equal(events.find((event) => event.kind === 'recurrence').confirmable, true, '« Confirmer, Pas reçu, Reporter » the day it falls (P8-11)');
+    const auto = collectEvents({ planned: [], recurrences: [recurrence({ creationMode: 'auto_real' })], provisions: [], from: D('2026-10-01'), to: D('2026-10-31'), currency: 'DZD' });
+    assert.equal(auto[0].confirmable, false, 'one recorded on its own is not asked about');
   });
 
   test('a row in another currency is left out rather than converted', () => {
@@ -138,7 +140,7 @@ describe('P6-07 — the calendar of a period', () => {
     assert.equal(cal.cashFinProjete, null);
     assert.equal(cal.premierJourTension, null);
     assert.deepEqual(cal.joursTension, []);
-    assert.ok(cal.avertissements.some((text) => text.includes('solde de départ')), 'the screen asks instead of starting from an imaginary zero');
+    assert.ok(cal.avertissements.some((text) => text.includes('solde total')), 'the screen says no account is counted, instead of starting from an imaginary zero (P8-11)');
     for (const day of cal.jours) assert.equal(day.tension, null);
   });
 

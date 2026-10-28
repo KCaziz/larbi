@@ -402,3 +402,34 @@ describe('P8-09 — one allocation, attached to the most specific envelope', () 
     assert.equal((await add({ categoryGroup: 'Logement' })).status, 201);
   });
 });
+
+describe('the client’s answer C1 — what is carried to the next budget', () => {
+  // Last month: 30 000 DA on food. This month: 30 000 DA again.
+  const lastMonth = async (spent) => {
+    const created = await createBudget({ label: 'Mois dernier', periodStart: iso(monthStart(-1)), periodEnd: iso(monthEnd(-1)), envelopes: [{ categoryId: food, kind: 'variable', value: 3000000 }] });
+    assert.equal(created.status, 201, JSON.stringify(created.body).slice(0, 200));
+    await addMovement({ value: spent, categoryId: food, occurredAt: new Date(monthStart(-1).getTime() + 2 * DAY).toISOString() });
+  };
+  const thisMonth = async (json) => {
+    const created = await createBudget({ envelopes: [{ categoryId: food, kind: 'variable', value: 3000000 }], ...json });
+    assert.equal(created.status, 201, JSON.stringify(created.body).slice(0, 200));
+    return (await t.request('GET', `/fin/budgets/${created.body.budget.id}`, { user })).body.vue.enveloppes[0];
+  };
+
+  test('25 000 spent of 30 000: 5 000 carried', async () => {
+    await lastMonth(2500000);
+    assert.equal((await thisMonth({ carryOver: true })).report, 500000);
+  });
+
+  test('35 000 spent of 30 000: nothing carried, unless the person chooses to carry the overspend', async () => {
+    await lastMonth(3500000);
+    assert.equal((await thisMonth({ carryOver: true })).report, 0, 'report = max(0 ; reste)');
+  });
+
+  test('carrying the overspend takes it from this budget', async () => {
+    await lastMonth(3500000);
+    const line = await thisMonth({ carryOver: true, carryOverspend: true });
+    assert.equal(line.report, -500000);
+    assert.equal(line.ecart.resultat, 2500000, '30 000 − 5 000 left to spend');
+  });
+});

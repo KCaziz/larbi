@@ -4,6 +4,9 @@ import { GOAL_TEMPLATE_KEYS } from '../constants/finGoal.js';
 import { amountSchema, consentUsesSchema, currencySchema, reasonSchema, scopeSchema } from './finData.schemas.js';
 
 const label = z.string().trim().min(1).max(80);
+// « Autre objectif » (answer D1): its own icon (an emoji) and colour.
+const icon = z.string().trim().min(1).max(16).nullable().optional();
+const color = z.string().regex(/^#[0-9A-Fa-f]{6}$/).nullable().optional();
 const note = z.string().trim().min(1).max(300).nullable().optional();
 const isoDate = z.coerce.date();
 const targetAmount = amountSchema.min(1);
@@ -16,6 +19,8 @@ export const createGoalSchema = z
   .object({
     label,
     templateKey: z.enum(GOAL_TEMPLATE_KEYS).nullable().optional(),
+    icon,
+    color,
     target: targetAmount,
     currency: currencySchema,
     targetDate: isoDate.nullable().optional(),
@@ -38,6 +43,8 @@ export const updateGoalSchema = z
   .object({
     label: label.optional(),
     templateKey: z.enum(GOAL_TEMPLATE_KEYS).nullable().optional(),
+    icon,
+    color,
     target: targetAmount.optional(),
     currency: currencySchema.optional(),
     targetDate: isoDate.nullable().optional(),

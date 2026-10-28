@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { FIN_AGE_RANGES, FIN_PUBLIC_CODES } from '../constants/finPublics.js';
+import { FIN_INCOME_REGULARITIES } from '../constants/finGoal.js';
+import { EDUCATION_PROFILE_CODES, FIN_AGE_RANGES, FIN_PUBLIC_CODES } from '../constants/finPublics.js';
 
 // FINCLUDIA onboarding (P3-18, screen C02): "Profil principal; tranche d'âge;
 // situation; intention principale; horizon", buttons "Continuer / Je ne sais
@@ -9,7 +10,9 @@ const publicCode = z.enum(FIN_PUBLIC_CODES);
 
 export const updateFinProfileSchema = z
   .object({
-    finPublic: publicCode.nullable(),
+    // One of the six educational profiles (P8-17): the collective ones (COL,
+    // COU, FAM) moved to « Gestion commune » and can no longer be chosen.
+    finPublic: z.enum(EDUCATION_PROFILE_CODES).nullable(),
     finSecondaryPublics: z.array(publicCode).max(7),
     finAgeRange: z.enum(FIN_AGE_RANGES).nullable(),
     finCountry: z
@@ -21,8 +24,9 @@ export const updateFinProfileSchema = z
     finSituation: z.string().trim().max(120).nullable(),
     finMainIntention: z.string().trim().max(120).nullable(),
     finHorizon: z.string().trim().max(60).nullable(),
-    // « Revenu irrégulier » (GO-01, question C3): declared, never detected.
-    finIrregularIncome: z.boolean(),
+    // « Régularité du revenu » (GO-01, the client's answer C3): declared,
+    // never detected.
+    finIncomeRegularity: z.enum(FIN_INCOME_REGULARITIES),
     // Every required text must be accepted together (no financial data is
     // asked before consent) — true is the only accepted value, so a caller
     // cannot "silently" skip consent by omitting the field with a falsy default.

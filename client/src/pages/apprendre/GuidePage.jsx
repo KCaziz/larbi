@@ -8,9 +8,11 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import RichContent from '../../components/ui/RichContent.jsx';
+import { useToolsBase } from '../../lib/useToolsBase.js';
 import './Apprendre.css';
 
 export default function GuidePage() {
+  const toolsBase = useToolsBase();
   const { t, i18n } = useTranslation();
   const { slug } = useParams();
   const guide = useApi(withLang(`/apprendre/guides/${slug}`, i18n.language));
@@ -32,7 +34,7 @@ export default function GuidePage() {
         {/* "Simuler" (C21): shown only when an administrator attached a
             calculator to this guide. */}
         {g.simulator && (
-          <Link className="apprendre-simulate" to={`/outils/simulateurs/${g.simulator}`}>
+          <Link className="apprendre-simulate" to={`${toolsBase}/outils/simulateurs/${g.simulator}`}>
             <Calculator size={15} aria-hidden="true" /> {t('apprendre.simulate')}
           </Link>
         )}

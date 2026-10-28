@@ -2,9 +2,11 @@ import { Link } from 'react-router-dom';
 import { Award, CircleCheck, ImageOff, Lock, Sparkles, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ProgressBar from './ProgressBar.jsx';
+import { useCatalogueBase } from '../../lib/useToolsBase.js';
 
 // Card used by the catalogue and "my formations". `item` = catalogue item from the API.
 export default function FormationCard({ item }) {
+  const catalogue = useCatalogueBase();
   const { t } = useTranslation();
   const { enrollment } = item;
   const finished = enrollment?.status === 'completed';
@@ -12,7 +14,7 @@ export default function FormationCard({ item }) {
 
   return (
     <article className={`learn-card ${item.accessible ? '' : 'is-locked'}`}>
-      <Link to={`/catalogue/${item.slug}`} className="learn-card-cover" tabIndex={-1} aria-hidden="true">
+      <Link to={`${catalogue}/${item.slug}`} className="learn-card-cover" tabIndex={-1} aria-hidden="true">
         {item.coverUrl ? <img src={item.coverUrl} alt="" loading="lazy" /> : <ImageOff size={28} strokeWidth={1.4} />}
       </Link>
       <div className="learn-card-body">
@@ -44,7 +46,7 @@ export default function FormationCard({ item }) {
           )}
         </div>
         <h3>
-          <Link to={`/catalogue/${item.slug}`}>{item.title}</Link>
+          <Link to={`${catalogue}/${item.slug}`}>{item.title}</Link>
         </h3>
         {item.subtitle && <p className="learn-card-subtitle">{item.subtitle}</p>}
         {item.description && <p className="learn-card-text">{item.description}</p>}

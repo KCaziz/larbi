@@ -80,7 +80,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
       assert.ok(await b.waitText(family), `family ${family}`);
     }
     assert.equal(await b.ev("document.querySelectorAll('.fincat-family').length"), 8);
-    assert.equal(await b.ev("document.querySelectorAll('.fincat-row').length"), 91 + 98, 'the standard categories (P8-08)');
+    assert.equal(await b.ev("document.querySelectorAll('.fincat-row').length"), 91 + 98 - 19, 'the standard categories (P8-08)');
 
     // Every family offers an "Autre", so nothing has to be forced somewhere wrong.
     const goals = await labelsOf('Objectifs');
@@ -135,26 +135,26 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
 
   test("renaming one of the client's standard categories keeps its original name in view", async () => {
     await goToCategories();
-    assert.ok(await clickActionInRow('Animaux', c.rename));
+    assert.ok(await clickActionInRow('Alimentation animal', c.rename));
     await b.type('.fincat-edit input', 'Mon chat');
     assert.ok(await b.ev("(() => { const el = document.querySelector('.fincat-edit button[type=submit]'); if (!el) return false; el.click(); return true; })()"));
     assert.ok(await b.waitText(c.saved));
 
     assert.ok(await waitForLabel('Dépenses variables', 'Mon chat'));
     const labels = await labelsOf('Dépenses variables');
-    assert.ok(!labels.includes('Animaux'), 'the person sees their own label');
+    assert.ok(!labels.includes('Alimentation animal'), 'the person sees their own label');
     // The client's wording stays shown beside it: the category must remain
     // findable under the name the reference gives it.
-    assert.ok(await b.waitText(c.wasCalled.replace('{{label}}', 'Animaux')));
+    assert.ok(await b.waitText(c.wasCalled.replace('{{label}}', 'Alimentation animal')));
 
     // The reference row in the database was NOT touched.
-    const reference = await t.prisma.finCategory.findFirst({ where: { key: 'variable.animaux', userId: null } });
-    assert.equal(reference.label, 'Animaux');
+    const reference = await t.prisma.finCategory.findFirst({ where: { key: 'variable.alimentation_animal', userId: null } });
+    assert.equal(reference.label, 'Alimentation animal');
 
     // And it can go back to the client's name.
     assert.ok(await clickActionInRow('Mon chat', c.reset));
     assert.ok(await b.waitText(c.resetDone));
-    assert.ok(await waitForLabel('Dépenses variables', 'Animaux'));
+    assert.ok(await waitForLabel('Dépenses variables', 'Alimentation animal'));
   });
 
   test('a refused name is explained on the page instead of blanking it', async () => {
@@ -195,9 +195,9 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
     await b.send('Network.setCookie', { name: 'session', value: t.signSession(other.id), url: site.url, httpOnly: true });
     await goToCategories();
     const labels = await labelsOf('Dépenses variables');
-    assert.ok(labels.includes('Animaux'), "the other account's rename is invisible here");
+    assert.ok(labels.includes('Alimentation animal'), "the other account's rename is invisible here");
     assert.ok(!labels.includes('Café'), "and so is the other account's own category");
-    assert.equal(await b.ev("document.querySelectorAll('.fincat-row').length"), 91 + 98);
+    assert.equal(await b.ev("document.querySelectorAll('.fincat-row').length"), 91 + 98 - 19);
   });
 
   test('the page works in Arabic, right to left', async () => {
@@ -208,7 +208,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
     assert.ok(await b.waitText(ar.finCategories.title));
     assert.equal(await b.ev("document.documentElement.getAttribute('dir')"), 'rtl');
     // The category labels stay the client's own wording, untranslated.
-    assert.ok(await b.waitText('Animaux'));
+    assert.ok(await b.waitText('Alimentation animal'));
     await b.ev("localStorage.setItem('lang', 'fr')");
   });
 });

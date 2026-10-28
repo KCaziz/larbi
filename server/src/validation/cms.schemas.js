@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { FORMATION_LEVEL, FORMATION_STATUS } from '../constants/elearning.js';
+import { EDUCATION_PROFILE_CODES } from '../constants/finPublics.js';
 import { ACCESS_LEVELS } from '../constants/roles.js';
 
 // Optional text field coming from a form: "" means "cleared" -> null.
@@ -40,6 +41,11 @@ export const updateFormationSchema = z
       .array(z.string().trim().min(1).max(60))
       .max(20)
       .transform((types) => [...new Set(types)]),
+    // The educational profiles it is recommended to (P8-17).
+    educationProfiles: z
+      .array(z.enum(EDUCATION_PROFILE_CODES))
+      .max(6)
+      .transform((codes) => [...new Set(codes)]),
   })
   .partial()
   .strict();

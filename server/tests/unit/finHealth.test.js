@@ -69,7 +69,7 @@ describe('P6-22 — une dimension absente n’est jamais un zéro', () => {
     debtRatio: 0.25,
     savingsRate: 0.12,
     goalsGap: 0,
-    budgetConsumption: 0.9,
+    budgetLines: [{ allocated: 1000000, spent: 900000 }],
     dataQuality: { completeness: 80, freshness: 60 },
   };
 
@@ -247,5 +247,27 @@ describe('P8-16 — « respect des budgets »', () => {
     assert.equal(budgetsScore(1.5), 50);
     assert.equal(budgetsScore(2.5), 0);
     assert.equal(budgetsScore(null), null);
+  });
+
+  test('the client’s examples (answer C5): 110 % → 90, 125 % → 75, 180 % → 20, 200 % → 0', async () => {
+    const { budgetsScore } = await import('../../src/services/finHealth.service.js');
+    assert.deepEqual([0.9, 1, 1.1, 1.25, 1.5, 1.8, 2, 3].map(budgetsScore), [100, 100, 90, 75, 50, 20, 0, 0]);
+  });
+
+  test('several budgets: averaged by their allocation, not one budget one vote', async () => {
+    const { weightedBudgetsScore } = await import('../../src/services/finHealth.service.js');
+    // A 60 000 DA rent kept (100) and a 2 000 DA treat at 200 % (0):
+    // (100 × 60 000 + 0 × 2 000) / 62 000 = 96.8 → 97, not the plain mean of 50.
+    assert.equal(weightedBudgetsScore([{ allocated: 6000000, spent: 5500000 }, { allocated: 200000, spent: 400000 }]), 97);
+    assert.equal(weightedBudgetsScore([]), null, 'no budget: not measured');
+    assert.equal(weightedBudgetsScore(null), null);
+  });
+
+  test('without any budget the dimension is left out and its weight goes to the others', async () => {
+    const { financialHealth } = await import('../../src/services/finHealth.service.js');
+    const result = financialHealth({ balance: 0.12, reserveMonths: 4, debtRatio: 0.25, savingsRate: 0.12 });
+    const budgets = result.dimensions.find((dimension) => dimension.key === 'budgets');
+    assert.equal(budgets.score, null);
+    assert.equal(result.partiel, true);
   });
 });

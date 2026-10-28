@@ -45,15 +45,29 @@ import { computed } from './finance/contract.js';
 const dimensionScore = (key, value) => scoreIn(HEALTH_SCALES[key], value);
 
 /**
- * « Respect des budgets » (P8-16) — real spending over the active budgets,
- * brought to 100 (question C5, default retained until the client answers):
- * 100 while within the budgets, then a proportional decrease, reaching 0 at
- * 200 % of the allocation. No budget: not measured, never 0.
+ * « Respect des budgets » for ONE budget — the client's answer C5
+ * (2026-10-28): r = real spending / allocation; 100 if r ≤ 1, 100 × (2 − r)
+ * between 1 and 2, 0 from 2 (110 % → 90, 150 % → 50, 200 % → 0).
  */
 export function budgetsScore(consumption) {
   if (consumption === null || consumption === undefined || !Number.isFinite(consumption)) return null;
   if (consumption <= 1) return 100;
   return Math.max(0, Math.round(100 * (2 - consumption)));
+}
+
+/**
+ * The dimension over several budgets: each one's score, averaged WEIGHTED BY
+ * ITS ALLOCATION, so that a 2 000 DA budget does not weigh as much as a
+ * 60 000 DA rent (answer C5). `lines` = [{ allocated, spent }]. No budget
+ * with an allocation: not measured — its weight goes to the other dimensions,
+ * it is never 0 nor 100.
+ */
+export function weightedBudgetsScore(lines) {
+  const usable = (lines ?? []).filter((line) => Number.isFinite(line.allocated) && line.allocated > 0 && Number.isFinite(line.spent));
+  if (usable.length === 0) return null;
+  const totalAllocated = usable.reduce((sum, line) => sum + line.allocated, 0);
+  const weighted = usable.reduce((sum, line) => sum + budgetsScore(line.spent / line.allocated) * line.allocated, 0);
+  return Math.round(weighted / totalAllocated);
 }
 
 /**
@@ -76,6 +90,7 @@ export function dataQualityScore({ completeness = null, freshness = null } = {})
  *   savingsRate      taux d'épargne nette (décimal)
  *   goalsGap         écart au plan (décimal, 0 = dans la trajectoire)
  *   incomeMonths     mois d'historique de revenu régulier
+ *   budgetLines      [{ allocated, spent }] par budget de la période
  *   dataQuality      { completeness, freshness } sur 0-100
  */
 export function financialHealth(measures = {}, { now = new Date() } = {}) {
@@ -85,7 +100,7 @@ export function financialHealth(measures = {}, { now = new Date() } = {}) {
     debt: dimensionScore('debt', measures.debtRatio ?? null),
     savings: dimensionScore('savings', measures.savingsRate ?? null),
     goals: dimensionScore('goals', measures.goalsGap ?? null),
-    budgets: budgetsScore(measures.budgetConsumption ?? null),
+    budgets: weightedBudgetsScore(measures.budgetLines ?? null),
     dataQuality: dataQualityScore(measures.dataQuality ?? {}),
   };
 

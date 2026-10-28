@@ -1,3 +1,4 @@
+import '../helpers/setup-env.js';
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readdirSync } from 'node:fs';

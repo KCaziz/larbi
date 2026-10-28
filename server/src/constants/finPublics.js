@@ -6,11 +6,22 @@ export const FIN_PUBLICS = [
   { code: 'ETU', label: 'Étudiant', experience: 'FINCLUDIA Campus', mission: 'Piloter ressources, dépenses, études, réserve et transition vers l’emploi.' },
   { code: 'JAC', label: 'Jeune actif', experience: 'FINCLUDIA Premier Revenu', mission: 'Transformer le premier salaire en stabilité financière.' },
   { code: 'SAL', label: 'Salarié', experience: 'FINCLUDIA Mon Argent', mission: 'Piloter budget, sécurité, dettes, projets et patrimoine.' },
-  { code: 'COL', label: 'Colocataire', experience: 'FINCLUDIA Colocation', mission: 'Gérer les dépenses communes sans exposer les finances privées.' },
-  { code: 'COU', label: 'Couple', experience: 'FINCLUDIA Couple', mission: 'Organiser les finances communes et les objectifs partagés.' },
-  { code: 'FAM', label: 'Famille', experience: 'FINCLUDIA Famille', mission: 'Piloter le foyer, les enfants, les dépenses annuelles et les projets.' },
+  { code: 'COL', label: 'Colocataire', experience: 'FINCLUDIA Colocation', mission: 'Gérer les dépenses communes sans exposer les finances privées.', collective: true },
+  { code: 'COU', label: 'Couple', experience: 'FINCLUDIA Couple', mission: 'Organiser les finances communes et les objectifs partagés.', collective: true },
+  { code: 'FAM', label: 'Famille', experience: 'FINCLUDIA Famille', mission: 'Piloter le foyer, les enfants, les dépenses annuelles et les projets.', collective: true },
   { code: 'EPG', label: 'Épargnant débutant', experience: 'FINCLUDIA Épargne & Investissement', mission: 'Sécuriser, épargner, comprendre le risque et pratiquer en fictif.' },
+  // The sixth educational profile of the client's last file (tab
+  // 16_Education, P8-17): « bibliothèque complète ; recommandations
+  // éditoriales selon besoins saisis ».
+  { code: 'AUT', label: 'Autre / libre', experience: 'FINCLUDIA Parcours personnalisé', mission: 'Bibliothèque complète ; recommandations éditoriales selon besoins saisis.' },
 ];
+
+// Since the client's consolidated specification (P8-17), a profile only
+// shapes the educational layer, and the collective ones (COL, COU, FAM) left
+// for « Gestion commune » (Phase 9): a person who had one chooses one of these
+// six at their next visit; nothing of their data is lost.
+export const EDUCATION_PROFILE_CODES = ['LYC', 'ETU', 'JAC', 'SAL', 'EPG', 'AUT'];
+export const isCollectivePublic = (code) => Boolean(finPublicByCode(code)?.collective);
 
 export const FIN_PUBLIC_CODES = FIN_PUBLICS.map((p) => p.code);
 export const finPublicByCode = (code) => FIN_PUBLICS.find((p) => p.code === code) ?? null;

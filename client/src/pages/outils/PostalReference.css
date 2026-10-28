@@ -178,3 +178,11 @@
 .postal-control-impact {
   color: var(--text);
 }
+
+/* P8-28: the provenance of a tariff, under it. */
+.postal-source {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-style: italic;
+}

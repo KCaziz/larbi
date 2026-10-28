@@ -11,11 +11,13 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import NotFoundPage from '../NotFoundPage.jsx';
 import { fieldLabel, isNotFound, labelHeader } from '../../lib/comparator.js';
 import CostLabel from './CostLabel.jsx';
+import { useToolsBase } from '../../lib/useToolsBase.js';
 import './Comparator.css';
 
 // The client's tab 12 "Comparatif — Particuliers / Professionnels / Entreprises":
 // only the rows whose segment is stated in the source file, rubric by rubric.
 export default function ComparatorSegmentPage() {
+  const base = useToolsBase();
   const { segment } = useParams();
   const { t, i18n } = useTranslation();
   const { status, data, error, reload } = useApi(`/tools/comparator/segments/${segment}`);
@@ -38,7 +40,7 @@ export default function ComparatorSegmentPage() {
 
       <div className="comparator-page">
         <nav className="comparator-breadcrumb" aria-label={t('comparator.title')}>
-          <Link to="/outils/comparateur">{t('comparator.title')}</Link>
+          <Link to={`${base}/outils/comparateur`}>{t('comparator.title')}</Link>
           <span className="sep" aria-hidden="true">
             <ChevronRight className="icon-dir" size={14} />
           </span>
@@ -59,7 +61,7 @@ export default function ComparatorSegmentPage() {
           groups.map((group) => (
             <section key={group.theme.key} className="segment-group">
               <h2>
-                <Link to={`/outils/comparateur/${group.theme.key}`}>{t(`comparator.themes.${group.theme.key}`)}</Link>
+                <Link to={`${base}/outils/comparateur/${group.theme.key}`}>{t(`comparator.themes.${group.theme.key}`)}</Link>
               </h2>
 
               <div className="comparator-table-wrap">

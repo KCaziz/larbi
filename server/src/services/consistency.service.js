@@ -279,6 +279,11 @@ export async function checkConsistency(prisma, { privateDir }) {
     else if (reference.label !== row.label || reference.family !== row.family) {
       problems.push(violation(REFERENCE_RULE, `standard category ${key} differs`));
     }
+    // Retired (answer D4) exactly when the reference says so: archived, never
+    // offered; and only those.
+    if (reference && Boolean(reference.retiredTo) !== Boolean(row.archivedAt)) {
+      problems.push(violation('a standard category is archived exactly when the 125 replace it', `standard category ${key}`));
+    }
   }
   for (const key of expectedCategories.keys()) {
     if (!standardByKey.has(key)) problems.push(violation(REFERENCE_RULE, `missing standard category ${key}`));

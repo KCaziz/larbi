@@ -531,6 +531,9 @@ export async function loadCalendarData(prisma, userId, { from, to }) {
         accountId: true,
         creationMode: true,
         weekendRule: true,
+        // The reminders read it (P8-11): without it, no recurrence was ever
+        // reminded of (found by QA-P05, 2026-10-28).
+        reminderDays: true,
       },
     }),
     prisma.finProvision.findMany({

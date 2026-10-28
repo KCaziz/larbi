@@ -11,6 +11,8 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import NextActionCard from '../../components/fincludia/NextActionCard.jsx';
+import CategoryChip from '../../components/fincludia/CategoryChip.jsx';
+import { flowClass, flowOf } from '../../lib/flows.js';
 import PeriodSelector from '../../components/fincludia/PeriodSelector.jsx';
 import RingChart from '../../components/fincludia/RingChart.jsx';
 import '../../components/fincludia/Fincludia.css';
@@ -70,8 +72,8 @@ export default function HomePage() {
   const view = today.data?.aujourdhui ?? null;
 
   // The category of a movement, from the breakdowns the server already named.
-  const named = new Map([...synthese.depensesParCategorie, ...synthese.revenusParCategorie].filter((row) => row.categoryId).map((row) => [row.categoryId, `${row.icon ? `${row.icon} ` : ''}${row.label}`]));
-  const labelOf = (row) => (row.categoryId ? (named.get(row.categoryId) ?? null) : null);
+  const named = new Map([...synthese.depensesParCategorie, ...synthese.revenusParCategorie].filter((row) => row.categoryId).map((row) => [row.categoryId, row]));
+  const categoryOf = (row) => (row.categoryId ? (named.get(row.categoryId) ?? null) : null);
 
   const ringRows = {
     accounts: openAccounts
@@ -175,12 +177,15 @@ export default function HomePage() {
             <div className="home-movements">
               <ul className="money-list">
                 {movements.data.transactions.map((row) => (
-                  <li key={row.id} className="money-row">
+                  // P8-27: each movement in its flow's colour, its category as a chip.
+                  <li key={row.id} className={`money-row movements-row ${flowClass(flowOf(row, categoryOf(row)))}`}>
                     <span className="money-row-date">{formatDate(i18n.language, row.occurredAt)}</span>
-                    <span className={row.kind === 'income' || row.kind === 'transfer_in' ? 'money-row-amount money-in' : 'money-row-amount'}>
+                    <span className="money-row-amount flow-amount">
                       {row.kind === 'income' || row.kind === 'transfer_in' ? '+' : '−'} {formatAmount(i18n.language, row.value, row.currency)}
                     </span>
-                    <span className="money-row-category">{labelOf(row) ?? row.note ?? t('myMoney.noCategory')}</span>
+                    <span className="money-row-category">
+                      <CategoryChip category={categoryOf(row)} fallback={row.note ?? t('myMoney.noCategory')} compact />
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -192,11 +197,30 @@ export default function HomePage() {
           )}
         </section>
 
-        {/* « Aujourd'hui » (tab 03B): what is left to do. */}
+        {/* The client's « 1–3 actions » (screen C04), his « 3 suggestions »:
+            the first one as THE next action, the others beside it, in the
+            server's order (sécurité > échéance > budget > apprentissage). */}
         {view?.actions?.length > 0 && (
           <section aria-labelledby="home-today">
-            <h2 id="home-today">{t('appHome.today')}</h2>
-            <NextActionCard action={view.actions[0]} />
+            <h2 id="home-today">{t('appHome.suggestions')}</h2>
+            <div className="home-suggestions">
+              <NextActionCard action={view.actions[0]} />
+              {view.actions.length > 1 && (
+                <ul className="home-suggestion-list">
+                  {view.actions.slice(1, 3).map((action) => (
+                    <li key={action.key} className={`home-suggestion today-action-${action.priority}`}>
+                      <Link to={action.to}>
+                        <span>{t(`today.actions.${action.key}`, action.contexte ?? {})}</span>
+                        <ArrowRight size={16} aria-hidden="true" className="icon-dir" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <Link to="/app/aujourdhui" className="home-more">
+              {t('appHome.seeToday')} <ArrowRight size={14} aria-hidden="true" className="icon-dir" />
+            </Link>
           </section>
         )}
 

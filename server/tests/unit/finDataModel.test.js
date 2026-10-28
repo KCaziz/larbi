@@ -1,5 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
   CATEGORY_FAMILIES,
   CATEGORY_FAMILY_CODES,
@@ -154,6 +155,20 @@ describe('the metadata socle', () => {
       assert.equal(typeof entry.amounts, 'boolean');
     }
   });
+
+  test('a table read as « live rows » has a deletedAt column, unless it says it has none', () => {
+    // fin_occurrences (P8-11) joined the registry without a deletedAt, and the
+    // inventory and the export, which filter on it, answered 500.
+    const schema = readFileSync(new URL('../../prisma/schema.prisma', import.meta.url), 'utf8');
+    const columnsOf = new Map(
+      [...schema.matchAll(/^model \w+ \{([\s\S]*?)^\}/gm)].map((m) => [m[1].match(/@@map\("(\w+)"\)/)?.[1], m[1]]),
+    );
+    for (const entry of FINANCIAL_TABLES) {
+      const body = columnsOf.get(entry.table);
+      assert.ok(body, `${entry.table} is a mapped model`);
+      assert.equal(/^\s+deletedAt\s/m.test(body), entry.softDelete !== false, `${entry.table}: deletedAt and softDelete agree`);
+    }
+  });
 });
 
 describe('real and fictional are never added together', () => {
@@ -220,5 +235,18 @@ describe('the correction trail', () => {
   test('a list field is compared by content, not by identity', () => {
     const changes = diffFields('category', { consentUses: [] }, { consentUses: ['shared_space'] });
     assert.deepEqual(changes, [{ field: 'consentUses', before: [], after: ['shared_space'] }]);
+  });
+});
+
+describe('P8-27 — every category has a colour', () => {
+  test('each standard category, each group of the 125, each family', async () => {
+    const { STANDARD_CATEGORIES, GROUP_COLORS, FAMILY_COLORS, CATEGORY_FAMILY_CODES, categoryColor } = await import('../../src/constants/finCategories.js');
+    const hex = /^#[0-9A-Fa-f]{6}$/;
+    assert.deepEqual(STANDARD_CATEGORIES.filter((c) => !hex.test(categoryColor(c) ?? '')).map((c) => c.key), []);
+    assert.ok(CATEGORY_FAMILY_CODES.every((family) => hex.test(FAMILY_COLORS[family])), 'a colour per family');
+    const groups = new Set(STANDARD_CATEGORIES.filter((c) => c.group).map((c) => `${c.family}:${c.group}`));
+    assert.deepEqual([...groups].filter((key) => !GROUP_COLORS[key]), [], 'a colour per group');
+    // A person's own category without a colour takes its family's.
+    assert.equal(categoryColor({ family: 'variable', color: null, group: null }), FAMILY_COLORS.variable);
   });
 });

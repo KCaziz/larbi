@@ -8,6 +8,7 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
+import { useCatalogueBase } from '../../lib/useToolsBase.js';
 import '../../components/quiz/Quiz.css';
 import './Learn.css';
 
@@ -88,6 +89,7 @@ function Question({ question, index, answer, onChange, feedback }) {
 }
 
 export default function QuizPage() {
+  const catalogue = useCatalogueBase();
   const { slug, quizId } = useParams();
   const { t } = useTranslation();
   const summary = useApi(`/learn/formations/${slug}/quizzes/${quizId}`);
@@ -117,7 +119,7 @@ export default function QuizPage() {
         <div className="quiz-page">
           <ErrorState message={text} />
           <p className="center">
-            <Button to={`/catalogue/${slug}`} variant="secondary">
+            <Button to={`${catalogue}/${slug}`} variant="secondary">
               {t('learn.course.goToFormation')}
             </Button>
           </p>
@@ -179,7 +181,7 @@ export default function QuizPage() {
 
   return (
     <div className="quiz-page">
-      <Link to={`/catalogue/${slug}`} className="cms-back">
+      <Link to={`${catalogue}/${slug}`} className="cms-back">
         <ArrowLeft className="icon-dir" size={16} strokeWidth={1.75} aria-hidden="true" />
         {t('learn.course.goToFormation')}
       </Link>
@@ -260,7 +262,7 @@ export default function QuizPage() {
               </Button>
             )}
             {result.passed && (
-              <Button to={`/catalogue/${slug}`} variant="secondary" arrow>
+              <Button to={`${catalogue}/${slug}`} variant="secondary" arrow>
                 {t('learn.course.goToFormation')}
               </Button>
             )}

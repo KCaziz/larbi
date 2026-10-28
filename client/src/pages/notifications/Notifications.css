@@ -154,3 +154,15 @@
 .notifications-link:hover {
   text-decoration: underline;
 }
+
+/* P8-18: settings by family (answer D7). */
+.notifications-family {
+  margin: 0 0 var(--space-sm);
+  padding: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.notifications-family-toggle {
+  font-weight: 600;
+  color: var(--text-h);
+}

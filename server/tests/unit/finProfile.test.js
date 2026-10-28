@@ -74,11 +74,18 @@ describe('la majorité civile est 19 ans, pas 18 (P6-22)', () => {
   });
 });
 
-describe('the 8 publics', () => {
-  test('exactly the client\'s own list (01_Publics), nothing added or removed', () => {
-    assert.deepEqual(FIN_PUBLIC_CODES, ['LYC', 'ETU', 'JAC', 'SAL', 'COL', 'COU', 'FAM', 'EPG']);
-    assert.equal(FIN_PUBLICS.length, 8);
+describe('the publics', () => {
+  test('the client\'s 8 of 01_Publics, plus « autre / libre » of 16_Education (P8-17)', () => {
+    assert.deepEqual(FIN_PUBLIC_CODES, ['LYC', 'ETU', 'JAC', 'SAL', 'COL', 'COU', 'FAM', 'EPG', 'AUT']);
     assert.ok(FIN_PUBLICS.every((p) => p.label && p.experience && p.mission));
+    // The collective three left for « Gestion commune »: kept for the people
+    // who have them, never offered again.
+    assert.deepEqual(FIN_PUBLICS.filter((p) => p.collective).map((p) => p.code), ['COL', 'COU', 'FAM']);
+  });
+
+  test('a person chooses among the six educational profiles only', () => {
+    assert.equal(updateFinProfileSchema.safeParse({ finPublic: 'AUT' }).success, true);
+    assert.equal(updateFinProfileSchema.safeParse({ finPublic: 'COL' }).success, false);
   });
 });
 

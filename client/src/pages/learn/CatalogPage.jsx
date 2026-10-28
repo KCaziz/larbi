@@ -8,9 +8,12 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import EmptyState from '../../components/cms/EmptyState.jsx';
 import FormationCard from '../../components/learn/FormationCard.jsx';
+import EducationPanel from '../../components/fincludia/EducationPanel.jsx';
+import { useToolsBase } from '../../lib/useToolsBase.js';
 import './Learn.css';
 
 export default function CatalogPage() {
+  const inApp = Boolean(useToolsBase());
   const { t } = useTranslation();
   const { status, data, reload } = useApi('/learn/formations');
   const [query, setQuery] = useState('');
@@ -35,6 +38,8 @@ export default function CatalogPage() {
   return (
     <>
       <PageHeader icon={GraduationCap} title={t('learn.catalog.title')} subtitle={t('learn.catalog.subtitle')} />
+      {/* Inside the application, the person's own layer first (P8-17). */}
+      {inApp && <EducationPanel mode="formation" />}
       <Section>
         {status === 'loading' && <LoadingState />}
         {status === 'error' && <ErrorState message={t('learn.catalog.loadError')} onRetry={reload} />}

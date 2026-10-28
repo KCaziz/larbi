@@ -21,6 +21,9 @@ export async function getNotificationSettings(prisma, userId) {
     const saved = stored[key] ?? {};
     return {
       type: key,
+      // Its family (answer D7) and the client's alert it answers (P8-18).
+      family: type.family,
+      alert: type.alert,
       enabled: saved.enabled ?? type.defaultEnabled,
       optedIn: saved.optedIn ?? false,
       requiresOptIn: type.requiresOptIn,

@@ -16,6 +16,16 @@ export async function boot({ production = false, extra = {} } = {}) {
   const { prisma } = await import('../../src/config/prisma.js');
   const { signSession } = await import('../../src/services/token.service.js');
 
+  // Ask the database the client is REALLY connected to, not process.env. A test
+  // file that imports an application module at its top loads src/config/env.js
+  // before applyTestEnv() runs, and the Prisma client then stays on the
+  // development database: reset() below wiped larbi_dev that way (found
+  // 2026-10-28). Such a file must import '../helpers/setup-env.js' first.
+  const [{ db }] = await prisma.$queryRaw`SELECT DATABASE() AS db`;
+  if (!/_test$/.test(db ?? '')) {
+    throw new Error(`Refusing to boot: the Prisma client is connected to "${db}", not a test database. Import '../helpers/setup-env.js' on the first line of this test file.`);
+  }
+
   const app = createApp();
   const server = await new Promise((resolve) => {
     const s = app.listen(0, '127.0.0.1', () => resolve(s));
@@ -82,6 +92,8 @@ export async function boot({ production = false, extra = {} } = {}) {
     // And the client's 125 universal categories (P8-08): the old rows they
     // absorb are updated in place, the others inserted.
     await replayMigrationInserts('_fin_categories_125', 'fin_categories', { updates: true });
+    // And the old categories the 125 replace, archived (answer D4).
+    await replayMigrationInserts('_fin_categories_retired', 'fin_categories', { updates: true });
   }
 
   // Replays the INSERT statements a migration carries for ONE table. Used for

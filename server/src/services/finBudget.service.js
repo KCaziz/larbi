@@ -26,6 +26,7 @@ const BUDGET_SELECT = {
   recurrence: true,
   alertThresholds: true,
   carryOver: true,
+  carryOverspend: true,
   methodMapping: true,
   note: true,
   scope: true,
@@ -234,6 +235,7 @@ export async function createBudget(prisma, userId, body) {
         recurrence: body.recurrence ?? 'monthly',
         alertThresholds: body.alertThresholds ?? DEFAULT_ALERT_THRESHOLDS,
         carryOver: body.carryOver ?? false,
+        carryOverspend: body.carryOverspend ?? false,
         methodMapping: body.methodMapping ?? {},
         note: body.note ?? null,
         scope: body.scope ?? 'personal',
@@ -483,7 +485,7 @@ export async function deleteEnvelope(prisma, userId, budgetId, id, { reason } = 
 // Everything one budget's view needs, in one place so the page and the home
 // screen (P6-06) cannot read it two different ways.
 export async function loadBudgetData(prisma, userId, budget) {
-  const [envelopes, movements, incomes, goals] = await Promise.all([
+  const [envelopes, movements, incomes, goals, provisions] = await Promise.all([
     listEnvelopes(prisma, userId, budget.id),
     prisma.finTransaction.findMany({
       where: { userId, deletedAt: null, occurredAt: { gte: budget.periodStart, lte: budget.periodEnd } },
@@ -516,16 +518,25 @@ export async function loadBudgetData(prisma, userId, budget) {
       where: { userId, deletedAt: null, archivedAt: null, status: { not: 'fictional' } },
       select: { currency: true, monthlyContribution: true },
     }),
+    // The provisions still running at the start of the period: their monthly
+    // amount is allocated outside the budget too (PB-F009, answer C2).
+    prisma.finProvision.findMany({
+      where: { userId, deletedAt: null, archivedAt: null, status: { not: 'fictional' }, targetDate: { gte: budget.periodStart } },
+      select: { id: true, label: true, categoryId: true, value: true, provisioned: true, currency: true, targetDate: true },
+    }),
   ]);
-  return { envelopes, movements, incomes, goals, carry: budget.carryOver ? await carryFromPrevious(prisma, userId, budget) : null };
+  const carries = budget.carryOver || budget.carryOverspend;
+  return { envelopes, movements, incomes, goals, provisions, carry: carries ? await carryFromPrevious(prisma, userId, budget) : null };
 }
 
 /**
- * « Report du reste » (PB-F008's « ajustements de report »): the POSITIVE
- * remainder of each envelope of the previous budget, by what it covered — the
- * default retained until the client answers question C1 (an overspend is not
- * carried as a debt). One period back only: a remainder carried from further
- * back is already inside the previous budget's own figures.
+ * « Report du reste » (PB-F008's « ajustements de report »), by what each
+ * envelope of the previous budget covered. The client's answer C1
+ * (2026-10-28): report = max(0 ; reste) when `carryOver` is set; the
+ * OVERSPEND is carried (negative) only when the person chose `carryOverspend`
+ * — otherwise it stays visible in its own month and nowhere else. One period
+ * back only: a remainder carried from further back is already inside the
+ * previous budget's own figures.
  */
 async function carryFromPrevious(prisma, userId, budget) {
   const previous = await prisma.finBudget.findFirst({
@@ -534,12 +545,14 @@ async function carryFromPrevious(prisma, userId, budget) {
     orderBy: { periodEnd: 'desc' },
   });
   if (!previous) return null;
-  const data = await loadBudgetData(prisma, userId, { ...previous, carryOver: false });
+  const data = await loadBudgetData(prisma, userId, { ...previous, carryOver: false, carryOverspend: false });
   const view = buildBudgetView({ budget: previous, ...data, now: previous.periodEnd });
   const carry = {};
   for (const line of view.enveloppes) {
     const left = line.ecart.resultat;
-    if (left !== null && left > 0) carry[line.categoryGroup ? `group:${line.categoryGroup}` : `category:${line.categoryId}`] = left;
+    if (left === null) continue;
+    const kept = (left > 0 && budget.carryOver) || (left < 0 && budget.carryOverspend);
+    if (kept) carry[line.categoryGroup ? `group:${line.categoryGroup}` : `category:${line.categoryId}`] = left;
   }
   return { fromBudget: previous.id, amounts: carry };
 }

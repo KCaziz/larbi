@@ -12,16 +12,18 @@ import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
+import { useToolsBase } from '../../lib/useToolsBase.js';
 import './Apprendre.css';
 
 const LEVELS = ['beginner', 'intermediate', 'advanced'];
 
 // The four kinds of content the client's C21 groups, in the order it lists them.
-// `to` is where a card leads; the server already told us what is locked.
+// `to` is where a card leads, given the base of the application (`/app`) or
+// of the showcase (''); the server already told us what is locked.
 const GROUPS = [
-  { kind: 'course', key: 'courses', icon: GraduationCap, to: (c) => `/catalogue/${c.slug}` },
-  { kind: 'term', key: 'terms', icon: BookOpen, to: (c) => `/apprendre/termes/${c.slug}` },
-  { kind: 'guide', key: 'guides', icon: BookOpen, to: (c) => `/apprendre/guides/${c.slug}` },
+  { kind: 'course', key: 'courses', icon: GraduationCap, to: (c, base) => (base ? `${base}/formation/${c.slug}` : `/catalogue/${c.slug}`) },
+  { kind: 'term', key: 'terms', icon: BookOpen, to: (c, base) => `${base}/apprendre/termes/${c.slug}` },
+  { kind: 'guide', key: 'guides', icon: BookOpen, to: (c, base) => `${base}/apprendre/guides/${c.slug}` },
   { kind: 'article', key: 'articles', icon: FileText, to: (c) => `/blog/${c.slug}` },
 ];
 
@@ -30,6 +32,7 @@ const GROUPS = [
 // to search — a session only adds favourites and puts the content of your own
 // FINCLUDIA public first.
 export default function ApprendrePage() {
+  const toolsBase = useToolsBase();
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [params, setParams] = useSearchParams();
@@ -98,7 +101,7 @@ export default function ApprendrePage() {
     const id = `${item.kind}:${item.id}`;
     return (
       <li className="apprendre-card" key={item.id}>
-        <Link to={group.to(item)} className="apprendre-card-main">
+        <Link to={group.to(item, toolsBase)} className="apprendre-card-main">
           <Icon size={18} aria-hidden="true" />
           <span className="apprendre-card-title">{item.title}</span>
         </Link>
@@ -123,7 +126,7 @@ export default function ApprendrePage() {
           {/* "Simuler": only when an administrator attached a calculator to this
               entry. Nothing is guessed from the wording. */}
           {item.simulator && (
-            <Link className="apprendre-simulate" to={`/outils/simulateurs/${item.simulator}`}>
+            <Link className="apprendre-simulate" to={`${toolsBase}/outils/simulateurs/${item.simulator}`}>
               <Calculator size={15} aria-hidden="true" /> {t('apprendre.simulate')}
             </Link>
           )}

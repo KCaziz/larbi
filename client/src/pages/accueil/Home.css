@@ -248,3 +248,39 @@
   font-weight: 700;
   color: var(--text-h);
 }
+
+/* P8-27: the three suggestions — the next action, and up to two beside it. */
+.home-suggestions {
+  display: grid;
+  gap: var(--space-sm);
+}
+@media (min-width: 900px) {
+  .home-suggestions {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+}
+.home-suggestion-list {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.home-suggestion a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  min-block-size: 44px;
+  padding: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  text-decoration: none;
+}
+.home-suggestion a:hover,
+.home-suggestion a:focus-visible {
+  border-color: var(--accent-border);
+}

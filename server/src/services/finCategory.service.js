@@ -10,7 +10,7 @@
 // A standard row is NEVER written to: one account's choice must not change what
 // another account sees.
 
-import { CATEGORY_FAMILIES, categoryFamilyByCode } from '../constants/finCategories.js';
+import { CATEGORY_FAMILIES, GROUP_COLORS, categoryColor, categoryFamilyByCode } from '../constants/finCategories.js';
 import { DEFAULT_DATA_SCOPE } from '../constants/finData.js';
 import { HttpError } from '../utils/httpError.js';
 import { listChanges, recordChange, recordCorrection } from './finChange.service.js';
@@ -59,7 +59,9 @@ const toCategory = (row, { origin, customised = false, archived = false, referen
   // sees: their own choice when they made one, the reference's otherwise.
   group: row.group ?? null,
   icon: row.icon ?? null,
-  color: row.color ?? null,
+  // Never null (P8-27): its own, else its group's, else its family's.
+  color: categoryColor(row),
+  groupColor: row.group ? (GROUP_COLORS[`${row.family}:${row.group}`] ?? null) : null,
   essential: Boolean(row.essential),
   recurrence: row.recurrence ?? null,
   suggestedFor: row.suggestedFor ?? [],
@@ -92,7 +94,9 @@ export async function listCategories(prisma, userId, { includeArchived = false }
   const cards = [];
   for (const row of standard) {
     const override = overrides.get(row.key);
-    const archived = Boolean(override?.archivedAt);
+    // Hidden by the person, or retired for everyone: an old category the
+    // client's 125 replace (answer D4) is archived in the reference itself.
+    const archived = Boolean(override?.archivedAt) || Boolean(row.archivedAt);
     if (archived && !includeArchived) continue;
     // What the person sees comes from their override when there is one, and so
     // does its metadata: a label they typed is "declared", not the client's
@@ -147,7 +151,7 @@ async function assertLabelFree(prisma, userId, family, label, { exceptId = null 
   if (taken) throw new HttpError(409, 'Category label already used', { reason: 'labelTaken' });
 }
 
-export async function createCategory(prisma, userId, { family, label, essential = false, scope = DEFAULT_DATA_SCOPE, consentUses = [] }) {
+export async function createCategory(prisma, userId, { family, label, essential = false, color = null, scope = DEFAULT_DATA_SCOPE, consentUses = [] }) {
   if (!categoryFamilyByCode(family)) throw new HttpError(422, 'Unknown category family', { reason: 'unknownFamily' });
   const clean = cleanLabel(label);
   await assertLabelFree(prisma, userId, family, clean);
@@ -159,7 +163,7 @@ export async function createCategory(prisma, userId, { family, label, essential 
     const row = await tx.finCategory.create({
       // A category the person typed: source "manuelle", statut "déclarée".
       // Nothing here is official — only the client's reference is.
-      data: { userId, family, label: clean, essential, scope, consentUses, source: 'manual', status: 'declared' },
+      data: { userId, family, label: clean, essential, color, scope, consentUses, source: 'manual', status: 'declared' },
       select: SELECT,
     });
     await recordChange(tx, { userId, entity: ENTITY, entityId: row.id, action: 'create', after: { family, label: clean, scope, consentUses } });

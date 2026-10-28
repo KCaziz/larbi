@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { existsSync, mkdtempSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -43,17 +43,27 @@ export function assertTestDatabase(url) {
 
 // `production: true` boots the app the way it runs in production (no error
 // details, Secure cookies...). `extra` overrides any variable (small rate limits...).
+// The secret and the storage folder are made once per process: setup-env.js
+// applies the environment before a file's static imports, boot() applies it
+// again, and both must name the SAME folder (storage.service.js reads it once).
+let perProcess;
 export function applyTestEnv({ production = false, extra = {} } = {}) {
   const url = testDatabaseUrl();
   assertTestDatabase(url);
+  perProcess ??= {
+    JWT_SECRET: process.env.JWT_SECRET_TEST || randomBytes(32).toString('hex'),
+    STORAGE_DIR: mkdtempSync(path.join(tmpdir(), 'fincludia-test-storage-')),
+  };
+  // close() removes the folder; a file that boots a second time gets it back.
+  mkdirSync(perProcess.STORAGE_DIR, { recursive: true });
   Object.assign(process.env, {
     NODE_ENV: production ? 'production' : 'test',
     DATABASE_URL: url,
-    JWT_SECRET: process.env.JWT_SECRET_TEST || randomBytes(32).toString('hex'),
+    JWT_SECRET: perProcess.JWT_SECRET,
     JWT_EXPIRES_IN_SECONDS: '3600',
     LOG_REQUESTS: 'false',
     CORS_ORIGIN: 'http://localhost:5173',
-    STORAGE_DIR: mkdtempSync(path.join(tmpdir(), 'fincludia-test-storage-')),
+    STORAGE_DIR: perProcess.STORAGE_DIR,
     // Generous limits so functional tests never trip them; security tests lower them on purpose.
     AUTH_RATE_LIMIT: '100000',
     CONTACT_RATE_LIMIT: '100000',

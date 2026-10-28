@@ -199,9 +199,8 @@ export default function CreditSimulatorPage() {
           <LoadingState />
         ) : (
           <>
-            <Notice variant="action-needed">
-              {t('creditSim.offersBlocked', { publishable: offers.data?.publiables ?? 0, total: offers.data?.total ?? 0 })}
-            </Notice>
+            {/* Shown at the client's request (P8-28), each with its source. */}
+            <Notice variant="info">{offers.data?.affichage?.notice ?? t('creditSim.offersSource')}</Notice>
             <ul className="credit-offers">
               {(offers.data?.offres ?? []).map((offer) => (
                 <li key={offer.ref} className="credit-offer">
@@ -212,7 +211,17 @@ export default function CreditSimulatorPage() {
                       {offer.islamique ? t('creditSim.islamic') : t('creditSim.conventional')}
                     </span>
                   </div>
-                  <p className="credit-offer-reason">{offer.raisonNonPubliee}</p>
+                  {offer.criteres && (
+                    <dl className="credit-offer-criteria">
+                      {['taux', 'duree', 'effort', 'apport', 'age', 'revenu'].map((key) => (
+                        <div key={key}>
+                          <dt>{t(`creditSim.criteria.${key}`)}</dt>
+                          <dd>{offer.criteres[key]}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                  <p className="credit-offer-reason">{t('creditSim.declaredStatus', { status: offer.statutDeclare, source: offer.source })}</p>
                 </li>
               ))}
             </ul>

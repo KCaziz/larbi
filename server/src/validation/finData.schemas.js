@@ -40,6 +40,8 @@ export const createCategorySchema = z
     family: z.enum(CATEGORY_FAMILY_CODES),
     label: labelSchema,
     essential: z.boolean().optional(),
+    // The person's own colour for it (P8-27); else its family's.
+    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
   })

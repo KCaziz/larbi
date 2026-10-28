@@ -220,8 +220,41 @@ function writeMatrix() {
   return { total: rows.length, done, blocked: blocked.length, tests: files.length };
 }
 
+// ---------------------------------------------------------------------------
+// P8-21 — provenance des 44 écrans de la gestion budgétaire
+// ---------------------------------------------------------------------------
+
+const SERVED_LABEL = { page: 'Sa propre page', grouped: 'Regroupé dans une autre page', topbar: 'Barre supérieure', pending: 'Pas encore servi' };
+
+// Lue depuis src/constants/finAppScreens.js, que le test de cohérence confronte
+// au routeur du client et à TASKS.md.
+async function writeScreens() {
+  const { APP_SCREENS } = await import('../src/constants/finAppScreens.js');
+  const count = (kind) => APP_SCREENS.filter((screen) => screen.served === kind).length;
+  const code = (value) => (value ? `\`${value}\`` : '—');
+  const lines = [
+    '# Matrice des écrans de la gestion budgétaire',
+    '',
+    `> Généré le ${today} par \`node server/scripts/generate-deliverables.js\` depuis \`server/src/constants/finAppScreens.js\`. Ne pas modifier à la main.`,
+    '',
+    "Les 44 écrans du cahier consolidé (onglet `05_Ecrans_Detailles`) et la façon dont chacun est servi. La règle « trouvable » (TASKS.md, section 6) veut que chaque écran ait **sa propre adresse**, atteinte depuis le menu en deux clics au plus : un écran regroupé dans une autre page n'est donc pas terminé, et la tâche qui le doit est nommée.",
+    '',
+    `**${count('page')} écrans sur 44** ont leur propre page ; ${count('grouped')} sont regroupés dans une autre ; ${count('topbar')} vivent dans la barre supérieure ; ${count('pending')} ne sont pas encore servis.`,
+    '',
+    '| Code | Écran | Menu du client | Servi | Adresse | Premier clic | Tâche |',
+    '|---|---|---|---|---|---|---|',
+  ];
+  for (const screen of APP_SCREENS) {
+    lines.push(`| ${screen.code} | ${screen.label} | ${screen.menu} | ${SERVED_LABEL[screen.served]} | ${code(screen.to)} | ${code(screen.via)} | ${code(screen.owner)} |`);
+  }
+  writeFileSync(path.join(OUT_DIR, 'MATRICE_ECRANS.md'), `${lines.join('\n')}\n`, 'utf8');
+  return { total: APP_SCREENS.length, pages: count('page'), grouped: count('grouped') };
+}
+
 mkdirSync(OUT_DIR, { recursive: true });
 const inventory = writeInventory();
 const matrix = writeMatrix();
+const screens = await writeScreens();
 console.log(`LIVRABLES/INVENTAIRE_COMPOSANTS.md : ${inventory.total} composants, ${inventory.licences} licences, ${inventory.unknown} à vérifier`);
 console.log(`LIVRABLES/MATRICE_RECETTE.md       : ${matrix.total} livrables, ${matrix.done} terminés, ${matrix.blocked} bloqués, ${matrix.tests} fichiers de test`);
+console.log(`LIVRABLES/MATRICE_ECRANS.md        : ${screens.total} écrans, ${screens.pages} avec leur propre page, ${screens.grouped} regroupés`);

@@ -1,5 +1,6 @@
 import { prisma } from '../config/prisma.js';
-import { NOTIFICATION_CATEGORIES, NOTIFICATION_TYPES } from '../constants/finNotification.js';
+import { NOTIFICATION_CATEGORIES, NOTIFICATION_FAMILIES, NOTIFICATION_TYPES } from '../constants/finNotification.js';
+import { generateAlerts } from '../services/finAlerts.service.js';
 import {
   countUnread,
   generateReminders,
@@ -14,11 +15,14 @@ import {
 // always this account's own rows.
 
 export function getNotificationReferences(req, res) {
-  res.json({ categories: NOTIFICATION_CATEGORIES, types: NOTIFICATION_TYPES });
+  // The families the person sets one by one (answer D7), each with its types.
+  res.json({ categories: NOTIFICATION_CATEGORIES, families: NOTIFICATION_FAMILIES, types: NOTIFICATION_TYPES });
 }
 
 export async function getNotifications(req, res) {
   await generateReminders(prisma, req.user.id);
+  // The client's twelve alerts (P8-18), read here as the reminders are.
+  await generateAlerts(prisma, req.user);
   const notifications = await listNotifications(prisma, req.user.id, { category: req.query.category, read: req.query.read === undefined ? undefined : req.query.read === 'true' });
   res.json({ notifications, nonLues: notifications.filter((n) => !n.read).length });
 }

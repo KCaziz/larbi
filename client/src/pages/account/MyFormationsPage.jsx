@@ -6,10 +6,12 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import EmptyState from '../../components/cms/EmptyState.jsx';
 import FormationCard from '../../components/learn/FormationCard.jsx';
+import { useCatalogueBase } from '../../lib/useToolsBase.js';
 import '../learn/Learn.css';
 import '../Pages.css';
 
 export default function MyFormationsPage() {
+  const catalogue = useCatalogueBase();
   const { t } = useTranslation();
   const { status, data, reload } = useApi('/learn/enrollments');
 
@@ -22,7 +24,7 @@ export default function MyFormationsPage() {
       {status === 'error' && <ErrorState message={t('learn.mine.loadError')} onRetry={reload} />}
       {status === 'ready' && data.formations.length === 0 && (
         <EmptyState icon={GraduationCap} title={t('learn.mine.empty')}>
-          <Button to="/catalogue" arrow>
+          <Button to={catalogue} arrow>
             {t('learn.mine.browse')}
           </Button>
         </EmptyState>

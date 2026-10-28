@@ -12,6 +12,7 @@ import ProgressBar from '../../components/learn/ProgressBar.jsx';
 import BlockRenderer from '../../components/blocks/BlockRenderer.jsx';
 import QuizCard from '../../components/quiz/QuizCard.jsx';
 import RichContent from '../../components/ui/RichContent.jsx';
+import { useCatalogueBase } from '../../lib/useToolsBase.js';
 import './Learn.css';
 
 function formatSize(bytes) {
@@ -19,6 +20,7 @@ function formatSize(bytes) {
 }
 
 export default function CoursePage() {
+  const catalogue = useCatalogueBase();
   const { slug, courseId } = useParams();
   const { t } = useTranslation();
   const lesson = useApi(`/learn/formations/${slug}/courses/${courseId}`);
@@ -51,7 +53,7 @@ export default function CoursePage() {
     const err = lesson.error;
     const reason = err instanceof ApiError ? err.details?.reason : null;
     const backToFormation = (
-      <Button to={`/catalogue/${slug}`} variant="secondary">
+      <Button to={`${catalogue}/${slug}`} variant="secondary">
         {t('learn.course.goToFormation')}
       </Button>
     );
@@ -85,9 +87,9 @@ export default function CoursePage() {
   return (
     <div className="learn-page">
       <nav className="learn-breadcrumb" aria-label={t('learn.course.breadcrumb')}>
-        <Link to="/catalogue">{t('learn.catalog.title')}</Link>
+        <Link to={catalogue}>{t('learn.catalog.title')}</Link>
         <span aria-hidden="true">/</span>
-        <Link to={`/catalogue/${slug}`}>{formation.title}</Link>
+        <Link to={`${catalogue}/${slug}`}>{formation.title}</Link>
       </nav>
 
       <div className="learn-reader">
@@ -97,7 +99,7 @@ export default function CoursePage() {
             {f.courses.map((c, index) => (
               <li key={c.id}>
                 <Link
-                  to={`/catalogue/${slug}/cours/${c.id}`}
+                  to={`${catalogue}/${slug}/cours/${c.id}`}
                   className={c.id === course.id ? 'active' : undefined}
                   aria-current={c.id === course.id ? 'page' : undefined}
                 >
@@ -187,7 +189,7 @@ export default function CoursePage() {
                 <p className="cms-inline-message ok" role="status">
                   <Award size={16} strokeWidth={1.9} aria-hidden="true" /> {t('learn.course.certificateReady')}
                 </p>
-                <Button to={`/catalogue/${slug}/certificat`} variant="secondary">
+                <Button to={`${catalogue}/${slug}/certificat`} variant="secondary">
                   {t('learn.certification.view')}
                 </Button>
               </div>
@@ -216,7 +218,7 @@ export default function CoursePage() {
 
           <div className="learn-pager">
             {course.previousId ? (
-              <Button to={`/catalogue/${slug}/cours/${course.previousId}`} variant="secondary">
+              <Button to={`${catalogue}/${slug}/cours/${course.previousId}`} variant="secondary">
                 <ArrowLeft className="icon-dir" size={16} strokeWidth={1.9} aria-hidden="true" />
                 {t('learn.course.previous')}
               </Button>
@@ -224,12 +226,12 @@ export default function CoursePage() {
               <span />
             )}
             {course.nextId ? (
-              <Button to={`/catalogue/${slug}/cours/${course.nextId}`}>
+              <Button to={`${catalogue}/${slug}/cours/${course.nextId}`}>
                 {t('learn.course.next')}
                 <ArrowRight className="icon-dir" size={16} strokeWidth={1.9} aria-hidden="true" />
               </Button>
             ) : (
-              <Button to={`/catalogue/${slug}`}>{t('learn.course.finish')}</Button>
+              <Button to={`${catalogue}/${slug}`}>{t('learn.course.finish')}</Button>
             )}
           </div>
         </article>

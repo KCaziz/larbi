@@ -445,3 +445,12 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }
+
+/* P8-27: an event shows its flow on its leading edge. */
+.calendar-event.flow {
+  border-inline-start: 4px solid var(--flow);
+}
+.calendar-event.flow .calendar-event-amount {
+  color: var(--flow);
+  font-weight: 600;
+}

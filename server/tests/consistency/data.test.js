@@ -1,3 +1,4 @@
+import '../helpers/setup-env.js';
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { unlinkSync, writeFileSync } from 'node:fs';
@@ -13,11 +14,11 @@ import { checkConsistency, privateDirOf } from '../../src/services/consistency.s
 
 let t;
 let admin;
-// `eraseAccountReceipts` is imported AFTER boot(), not at the top of the file:
+// `deleteAccount` is imported AFTER boot(), not at the top of the file:
 // storage.service.js reads STORAGE_DIR when it is first imported, and boot() is
 // what points it at the test directory. A static import here would send every
 // upload of this file to the real storage directory instead.
-let eraseAccountReceipts;
+let deleteAccount;
 const check = () => checkConsistency(t.prisma, { privateDir: privateDirOf(t.storageDir) });
 const rules = async () => (await check()).map((p) => p.rule);
 const api = (method, path, opts) => t.request(method, path, { user: admin, ...opts });
@@ -27,7 +28,7 @@ before(async () => {
   t = await boot();
   await t.reset();
   admin = await t.admin();
-  ({ eraseAccountReceipts } = await import('../../src/services/finMoney.service.js'));
+  ({ deleteAccount } = await import('../../src/services/finTrust.service.js'));
 });
 after(() => t.close());
 
@@ -106,16 +107,16 @@ describe('a realistic history leaves the system consistent', () => {
     await t.request('DELETE', `/fin/categories/${sold.id}`, { user: person, json: { reason: 'vendue' } });
 
     // The client's reference, renamed then hidden for this account only, then reset.
-    await t.request('PATCH', '/fin/categories/standard/variable.animaux', { user: person, json: { label: 'Mon chat' } });
+    await t.request('PATCH', '/fin/categories/standard/variable.alimentation_animal', { user: person, json: { label: 'Mon chat' } });
     await t.request('PATCH', '/fin/categories/standard/goal.permis', { user: person, json: { hidden: true } });
-    await t.request('DELETE', '/fin/categories/standard/variable.animaux', { user: person });
+    await t.request('DELETE', '/fin/categories/standard/variable.alimentation_animal', { user: person });
 
     assert.deepEqual(await check(), []);
 
     // Erasing the account takes its categories and its trail with it, and leaves
     // the client's reference intact.
     await t.prisma.user.delete({ where: { id: person.id } });
-    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91);
+    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91 + 98, 'the 91 rows of P6-02 and the 98 universal categories of P8-08');
     assert.deepEqual(await check(), []);
   });
 });
@@ -182,12 +183,11 @@ describe('a realistic history of money leaves the system consistent (P6-03, P6-0
 
     // And erasing the account leaves the system consistent too: its rows, its
     // trail and its receipt go, the client's reference stays. The stored FILES
-    // have no foreign key, so the erasure sweeps them explicitly — that is what
-    // eraseAccountReceipts is for, and an account-deletion feature will call it.
-    await eraseAccountReceipts(t.prisma, person.id);
-    await t.prisma.user.delete({ where: { id: person.id } });
+    // have no foreign key, so the erasure sweeps them explicitly. This is the
+    // very function « Supprimer mon compte » calls.
+    await deleteAccount(t.prisma, person.id);
     assert.equal(await t.prisma.finTransaction.count(), 0);
-    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91);
+    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91 + 98, 'the 91 rows of P6-02 and the 98 universal categories of P8-08');
     assert.deepEqual(await check(), []);
   });
 
@@ -205,8 +205,12 @@ describe('a realistic history of money leaves the system consistent (P6-03, P6-0
     assert.ok((await t.prisma.finIncome.findMany({ where: { userId: minor.id } })).every((row) => row.status === 'fictional'));
 
     const synthesis = (await t.request('GET', '/fin/argent/synthese', { user: minor })).body.synthese;
-    assert.equal(synthesis.revenus.resultat, 100000, 'the fictional resource is the only resource');
+    // Since P8-04 (C1) `revenus` is money really received, and `revenusPrevus`
+    // the declared REAL resources: the fictional pocket money is in neither.
+    assert.equal(synthesis.revenus.resultat, null, 'nothing real was received');
+    assert.equal(synthesis.revenusPrevus.resultat, null, 'the fictional resource is no real expected income');
     assert.equal(synthesis.simulation.badge, 'SIMULATION');
+    assert.equal(synthesis.simulation.revenusPrevus, 100000, 'it is shown apart, as a simulation');
     assert.deepEqual(await check(), []);
     await t.prisma.user.delete({ where: { id: minor.id } });
   });
@@ -492,7 +496,7 @@ describe('the checker detects what it should (negative controls)', () => {
   test('an unplanned movement dated in the future', async () => {
     const person = await moneyUser();
     const row = await rawMovement(person.id, { occurredAt: new Date(Date.now() + 72 * 3600 * 1000) });
-    assert.ok((await rules()).includes('only a planned expense is dated in the future'));
+    assert.ok((await rules()).includes('only a planned expense or a planned transfer is dated in the future'));
     await t.prisma.finTransaction.delete({ where: { id: row.id } });
     await t.prisma.user.delete({ where: { id: person.id } });
     assert.deepEqual(await check(), []);

@@ -108,8 +108,8 @@ export async function buildReserveView(prisma, userId, { currency, targetMonths,
   // (decision P8-01 point 3) — always changeable.
   let defaultTarget = false;
   if (targetMonths === null || targetMonths === undefined) {
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { finPublic: true, finIrregularIncome: true } });
-    const months = defaultEmergencyMonths({ finPublic: user?.finPublic ?? null, irregularIncome: user?.finIrregularIncome ?? false });
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { finPublic: true, finIncomeRegularity: true } });
+    const months = defaultEmergencyMonths({ finPublic: user?.finPublic ?? null, incomeRegularity: user?.finIncomeRegularity ?? 'stable' });
     if (months !== null) {
       targetMonths = months;
       defaultTarget = true;

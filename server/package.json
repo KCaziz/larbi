@@ -22,9 +22,10 @@
     "test:functional": "node tests/setup.js && node --test --test-reporter=spec --test-concurrency=1 \"tests/functional/**/*.test.js\"",
     "test:security": "node tests/setup.js && node --test --test-reporter=spec --test-concurrency=1 \"tests/security/**/*.test.js\"",
     "test:consistency": "node tests/setup.js && node --test --test-reporter=spec --test-concurrency=1 \"tests/consistency/**/*.test.js\"",
-    "test:e2e": "node tests/setup.js && node --test --test-reporter=spec --test-concurrency=1 \"tests/e2e/**/*.test.js\"",
+    "test:e2e": "node tests/setup.js && node --test --test-reporter=spec --test-concurrency=1 --test-force-exit \"tests/e2e/**/*.test.js\"",
     "check:consistency": "node scripts/check-consistency.js",
-    "deliverables": "node scripts/generate-deliverables.js"
+    "deliverables": "node scripts/generate-deliverables.js",
+    "reprise": "node scripts/reprise.js"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "7.10.0",

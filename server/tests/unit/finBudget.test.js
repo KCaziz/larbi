@@ -233,6 +233,22 @@ describe('P6-05 — the view of one budget', () => {
     assert.equal(v.resteAAffecter.entrees_snapshot.allocations_hors_budget, 500000);
   });
 
+  test('the monthly provisions are allocated outside the budget too (client’s answer C2)', () => {
+    // 1 200 000 still to set aside, due in March 2027: 5 months from October
+    // (F045) → 240 000 a month.
+    const v = view({
+      incomes: [{ label: 'Salaire', value: 6000000, currency: 'DZD', frequency: 'mensuel' }],
+      goals: [{ currency: 'DZD', monthlyContribution: 500000 }],
+      provisions: [
+        { id: 'p1', label: 'Rentrée', value: 1500000, provisioned: 300000, currency: 'DZD', targetDate: D('2027-03-15') },
+        { id: 'p2', label: 'Déjà réunie', value: 100000, provisioned: 100000, currency: 'DZD', targetDate: D('2027-01-15') },
+      ],
+    });
+    assert.equal(v.resteAAffecter.resultat, 6000000 - 5000000 - 500000 - 240000);
+    assert.equal(v.resteAAffecter.entrees_snapshot.provisions, 240000);
+    assert.equal(v.resteAAffecter.entrees_snapshot.contributions_objectifs, 500000);
+  });
+
   test('the net flow is received income minus real spending, not expected income (PB-F006)', () => {
     const incomes = [{ label: 'Salaire', value: 6000000, currency: 'DZD', frequency: 'mensuel' }];
     const before = view({ incomes, movements: [spent({ categoryId: 'c2', value: 1000000 })] });

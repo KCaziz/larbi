@@ -74,10 +74,11 @@ model User {
   // recommendation, which the client's own wording ("cible choisie par
   // l'utilisateur") rules out — F015/F016 read null as "non calculé", not 0.
   finReserveTargetMonths  Int?
-  // « Revenu irrégulier » (GO-01, question C3): declared by the person in
-  // their profile, never detected. It raises the emergency fund's default
-  // target to 6 months.
-  finIrregularIncome      Boolean   @default(false)
+  // « Régularité du revenu = Stable | Irrégulier | Saisonnier » (the client's
+  // answer C3, 2026-10-28): declared by the person, never changed by the
+  // system. Irregular or seasonal raises the emergency fund's default target
+  // to 6 months. `stable` | `irregular` | `seasonal` (FIN_INCOME_REGULARITIES).
+  finIncomeRegularity     String    @default("stable") @db.VarChar(10)
   // Per-type enable/opt-in (P6-18): { [type]: { enabled, optedIn } }. Absent
   // keys fall back to the catalogue's own default (constants/finNotification.js)
   // — this column only ever holds what someone actually changed.
@@ -575,9 +576,13 @@ model FinTransaction {
   kind          String       @db.VarChar(12)
   // The account credited or debited (ARC-04). Nullable in the database only
   // so the rows written before P8-03 could be migrated; the service always
-  // sets it.
+  // sets it. Cascade, not Restrict (2026-10-28): the application never deletes
+  // an account, it archives it, so a real deletion only happens when the User
+  // is erased — and with Restrict MariaDB could reach the accounts before the
+  // movements and refuse the whole erasure (same defect as the category key,
+  // P6-04).
   accountId     String?
-  account       FinAccount?  @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  account       FinAccount?  @relation(fields: [accountId], references: [id], onDelete: Cascade)
   // The two writes of one transfer share this id (PB-PR-06), and are written
   // together in one database transaction.
   transferId    String?      @db.VarChar(36)
@@ -705,9 +710,13 @@ model FinBudget {
   // every answer because the engine must never hold a hidden coefficient.
   alertThresholds Json          @default("[0.8, 1]")
   // « Report du reste » (P8-09, PB-F008): the positive remainder of the
-  // previous period's envelopes is added to the same envelopes here (the
-  // default retained until the client answers question C1).
+  // previous period's envelopes is added to the same envelopes here —
+  // report = max(0 ; reste), the client's answer C1 (2026-10-28).
   carryOver       Boolean       @default(false)
+  // And, only if the person chooses it (answer C1), last period's overspend
+  // is taken from the same envelopes here. Off by default: an overspend stays
+  // visible in its own month, it does not silently shrink the next one.
+  carryOverspend  Boolean       @default(false)
   // The person's own pocket for a client category group, for the optional
   // methods (tab 12B: « le mapping est éditable »). Empty = the defaults.
   methodMapping   Json          @default("{}")
@@ -799,6 +808,10 @@ model FinGoal {
   // One of GOAL_TEMPLATES (constants/finGoal.js), or null for a fully custom
   // goal. Purely a starting label/icon; nothing here is read back as data.
   templateKey         String?   @db.VarChar(40)
+  // « Autre objectif » with its own name, icon and colour (the client's answer
+  // D1, 2026-10-28; C09 in red). Null = the model's icon and colour.
+  icon                String?   @db.VarChar(16)
+  color               String?   @db.VarChar(7)
   target              Int
   currency            String    @db.VarChar(3)
   // "Date future" the client asks for at creation. Nullable all the same: a
@@ -1775,6 +1788,9 @@ model Formation {
   // particular order. Same JSON-array shape as Article.targetAccountTypes,
   // same reason: no array column type on MySQL/MariaDB.
   targetAccountTypes  Json   @default("[]")
+  // The educational profiles it is recommended to (P8-17: LYC, ETU, JAC, SAL,
+  // EPG, AUT). Empty = for everyone. A recommendation, never a restriction.
+  educationProfiles   Json   @default("[]")
 
   categoryId String?
   category   FormationCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)

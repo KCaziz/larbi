@@ -1,3 +1,4 @@
+import '../helpers/setup-env.js';
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { boot } from '../helpers/server.js';

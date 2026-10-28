@@ -12,6 +12,7 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
+import CategoryChip from '../../components/fincludia/CategoryChip.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import BudgetMeter from '../../components/fincludia/BudgetMeter.jsx';
 import BudgetDistribution from '../../components/fincludia/BudgetDistribution.jsx';
@@ -73,7 +74,7 @@ export default function BudgetDetailPage() {
       <PageHeader icon={PiggyBank} title={budget.label} subtitle={t('budget.detailSubtitle')} maxWidth={1040} />
       <div className="budget-page">
         <p>
-          <Link to="/budget" className="budget-plain">
+          <Link to="/app/budgets" className="budget-plain">
             <ChevronLeft size={15} aria-hidden="true" /> {t('budget.backToList')}
           </Link>
         </p>
@@ -120,6 +121,19 @@ export default function BudgetDetailPage() {
           />
           {t('budget.carryOver')}
           {vue.report && vue.report.total > 0 && <span className="budget-row-tag">{t('budget.carried', { amount: formatAmount(i18n.language, vue.report.total, currency) })}</span>}
+        </label>
+        {/* The client's answer C1: an overspend is carried only if the person
+            asks for it, and it is then taken from this budget. */}
+        <label className="money-check budget-carry">
+          <input
+            type="checkbox"
+            checked={Boolean(budget.carryOverspend)}
+            onChange={(event) => run(() => api.patch(`/fin/budgets/${id}`, { carryOverspend: event.target.checked }), 'budget.saved')}
+          />
+          {t('budget.carryOverspend')}
+          {vue.report && vue.report.total < 0 && (
+            <span className="budget-row-tag">{t('budget.carriedOverspend', { amount: formatAmount(i18n.language, -vue.report.total, currency) })}</span>
+          )}
         </label>
 
         {vue.depassementRessources && <Notice variant="action-needed">{t('budget.overResources')}</Notice>}
@@ -173,7 +187,7 @@ export default function BudgetDetailPage() {
           ) : (
             <ul className="budget-envelope-list">
               {vue.enveloppes.map((line) => (
-                <EnvelopeRow key={line.id} budgetId={id} line={line} currency={currency} run={run} />
+                <EnvelopeRow key={line.id} budgetId={id} line={line} category={envelopeCategory(line, flatCategories)} currency={currency} run={run} />
               ))}
             </ul>
           )}
@@ -260,14 +274,22 @@ function MethodPanel({ budgetId, budget, references, run }) {
   );
 }
 
-function EnvelopeRow({ budgetId, line, currency, run }) {
+// What an envelope covers, as a chip (P8-27): its category, or for a whole
+// group of the client's, the group with the colour its categories share.
+function envelopeCategory(line, categories) {
+  if (line.categoryId) return categories.find((category) => category.id === line.categoryId) ?? null;
+  const member = categories.find((category) => category.group === line.categoryGroup);
+  return line.categoryGroup ? { label: line.categoryGroup, icon: member?.icon ?? null, color: member?.groupColor ?? member?.color ?? null } : null;
+}
+
+function EnvelopeRow({ budgetId, line, category, currency, run }) {
   const { t, i18n } = useTranslation();
   const alertClass = { none: '', warning: 'budget-alert-warning', reached: 'budget-alert-reached', exceeded: 'budget-alert-exceeded' }[line.alerte.niveau];
 
   return (
     <li className={`budget-envelope-row ${alertClass}`}>
       <div className="budget-envelope-head">
-        <strong>{line.label ?? t('budget.noCategory')}</strong>
+        <strong>{category ? <CategoryChip category={category} /> : (line.label ?? t('budget.noCategory'))}</strong>
         <span className="budget-row-tag">{t(`budget.envelopeKinds.${line.kind}`)}</span>
         {line.alerte.niveau !== 'none' && <span className="budget-row-tag budget-alert-tag">{t(`budget.alertLevels.${line.alerte.niveau}`)}</span>}
         <button

@@ -142,6 +142,13 @@ describe('real and fictional are never added together', () => {
     assert.equal(synthesis.simulation.depenses, 5000000);
   });
 
+  test('a fictional resource is never part of the real « prévu », nor of the debt ratio', () => {
+    const synthesis = build({ incomes: [income(), income({ id: 'p', value: 100000, status: 'fictional' })] });
+    assert.equal(synthesis.revenusPrevus.resultat, 6000000);
+    assert.equal(debtRatioIncome(synthesis), 6000000);
+    assert.equal(synthesis.simulation.revenusPrevus, 100000, 'shown apart, as a simulation');
+  });
+
   test('no fictional movement at all means no simulation block, not an empty one', () => {
     assert.equal(build({ movements: [movement()] }).simulation, null);
   });

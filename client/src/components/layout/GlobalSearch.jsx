@@ -115,17 +115,17 @@ export default function GlobalSearch() {
           {results?.mesDonnees && (results.mesDonnees.transactions.length > 0 || results.mesDonnees.budgets.length > 0 || results.mesDonnees.debts.length > 0) && (
             <SearchGroup title={t('search.groups.mesDonnees')}>
               {results.mesDonnees.transactions.map((row) => (
-                <Link key={`tx-${row.id}`} to="/mon-argent" className="global-search-item" onClick={close}>
+                <Link key={`tx-${row.id}`} to="/app/mouvements" className="global-search-item" onClick={close}>
                   {row.note || t('search.noLabel')} — {formatAmount(i18n.language, row.value, row.currency)} ({formatDate(i18n.language, row.occurredAt)})
                 </Link>
               ))}
               {results.mesDonnees.budgets.map((row) => (
-                <Link key={`bg-${row.id}`} to={`/budget/${row.id}`} className="global-search-item" onClick={close}>
+                <Link key={`bg-${row.id}`} to={`/app/budgets/${row.id}`} className="global-search-item" onClick={close}>
                   {row.label}
                 </Link>
               ))}
               {results.mesDonnees.debts.map((row) => (
-                <Link key={`dt-${row.id}`} to="/dettes" className="global-search-item" onClick={close}>
+                <Link key={`dt-${row.id}`} to="/app/dettes" className="global-search-item" onClick={close}>
                   {row.label}
                 </Link>
               ))}
@@ -135,7 +135,7 @@ export default function GlobalSearch() {
           {results?.objectifs?.length > 0 && (
             <SearchGroup title={t('search.groups.objectifs')}>
               {results.objectifs.map((row) => (
-                <Link key={row.id} to="/objectifs" className="global-search-item" onClick={close}>
+                <Link key={row.id} to="/app/objectifs" className="global-search-item" onClick={close}>
                   {row.label}
                 </Link>
               ))}

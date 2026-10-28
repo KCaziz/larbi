@@ -78,12 +78,13 @@ describe('P4-17 — rien n’est publiable, et le produit le dit', () => {
     assert.deepEqual(validated.map((r) => r.service_id), []);
   });
 
-  test('la vue publique retire tous les montants et dit pourquoi', () => {
+  test('la vue publique montre le tarif de la source, et dit qu’il n’est pas vérifié (P8-28)', () => {
     const view = publicView(postalService('AP-009'));
-    assert.equal(view.fee_amount_dzd, null);
-    assert.equal(view.raw_tariff_text, null);
-    assert.equal(view.tarifStatut, 'non_publie');
-    assert.match(view.tarifRaison, /pièce officielle datée/);
+    assert.equal(view.raw_tariff_text, postalService('AP-009').raw_tariff_text);
+    assert.equal(view.tarifStatut, 'source_client');
+    assert.match(view.tarifRaison, /non vérifiée par FINCLUDIA/);
+    // Shown, never computed with.
+    assert.equal(view.auto_compute, false);
   });
 
   test('mais elle garde le service, son canal et ses conditions', () => {
@@ -101,13 +102,11 @@ describe('P4-17 — rien n’est publiable, et le produit le dit', () => {
     assert.equal(view.verification_status, undefined);
   });
 
-  test('le catalogue public entier est dépourvu de montants', () => {
-    // Le test qui compte : pas « une fiche est masquée » mais « aucune ne
-    // laisse passer un montant ».
-    const leaked = publicCatalogue().filter(
-      (row) => row.fee_amount_dzd !== null || row.fee_rate_max !== null || row.raw_tariff_text !== null,
-    );
-    assert.deepEqual(leaked.map((r) => r.service_id), []);
+  test('chaque fiche du catalogue public porte sa provenance (P8-28)', () => {
+    // Since 2026-10-28 the amounts are shown: what counts now is that none is
+    // shown without saying where it comes from.
+    const unsourced = publicCatalogue().filter((row) => row.tarifStatut !== 'source_client' || !row.tarifRaison);
+    assert.deepEqual(unsourced.map((r) => r.service_id), []);
   });
 
   test('le catalogue se filtre par famille et par segment', () => {

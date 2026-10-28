@@ -1,7 +1,9 @@
+import '../helpers/setup-env.js';
 import { after, before, beforeEach, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { boot } from '../helpers/server.js';
 import { MAX_OWN_PER_FAMILY } from '../../src/services/finCategory.service.js';
+import { RETIRED_CATEGORIES } from '../../src/constants/finCategories.js';
 
 // The common financial data model (P6-02) through the real API and database:
 // the client's category reference, what a user adds to it, what they change
@@ -34,8 +36,14 @@ describe('reading the reference', () => {
     );
     assert.equal(
       res.body.groups.reduce((total, g) => total + g.categories.length, 0),
-      91 + 98,
+      91 + 98 - Object.keys(RETIRED_CATEGORIES).length,
+      'the standard categories, minus the old ones the 125 replace (answer D4)',
     );
+    // A retired category is never offered again, and a new movement cannot use it.
+    assert.ok(!res.body.groups.flatMap((g) => g.categories).some((c) => RETIRED_CATEGORIES[c.key]));
+    const retired = await t.prisma.finCategory.findFirst({ where: { key: 'seasonal.vacances', userId: null } });
+    const refused = await t.request('POST', '/fin/transactions', { user, json: { kind: 'expense', value: 1000, currency: 'DZD', occurredAt: new Date().toISOString(), categoryId: retired.id } });
+    assert.equal(refused.status, 422);
     assert.equal(familyOf(res.body, 'income').label, 'Revenus / ressources');
   });
 
@@ -83,7 +91,9 @@ describe('creating a category', () => {
         label: 'Café du matin',
         group: null,
         icon: null,
-        color: null,
+        // P8-27: no colour of its own, so its family's; no group of the client's.
+        color: '#2563A6',
+        groupColor: null,
         essential: false,
         recurrence: null,
         suggestedFor: [],
@@ -108,7 +118,7 @@ describe('creating a category', () => {
   });
 
   test('a name already taken in that family is refused (409), whether standard or own', async () => {
-    const standard = await create({ family: 'variable', label: 'Animaux' });
+    const standard = await create({ family: 'variable', label: 'Alimentation animal' });
     assert.equal(standard.status, 409);
     assert.deepEqual(standard.body.error.details, { reason: 'labelTaken' });
     // Case does not make two names different to a reader.
@@ -117,7 +127,7 @@ describe('creating a category', () => {
   });
 
   test('the same name in ANOTHER family is fine — the client repeats labels across families', async () => {
-    assert.equal((await create({ family: 'asset', label: 'Animaux' })).status, 201);
+    assert.equal((await create({ family: 'asset', label: 'Alimentation animal' })).status, 201);
   });
 
   test('an unknown family, an empty label and an unknown field are refused', async () => {
@@ -251,7 +261,7 @@ describe('archiving and deleting', () => {
 });
 
 describe("customising the client's reference", () => {
-  const standard = '/fin/categories/standard/variable.animaux';
+  const standard = '/fin/categories/standard/variable.alimentation_animal';
 
   test('a standard category can be renamed for this account only, and says so', async () => {
     const res = await t.request('PATCH', standard, { user, json: { label: 'Mon chat' } });
@@ -259,7 +269,7 @@ describe("customising the client's reference", () => {
     assert.equal(res.body.category.label, 'Mon chat');
     assert.equal(res.body.category.origin, 'standard', 'still a reference category');
     assert.equal(res.body.category.customised, true);
-    assert.equal(res.body.category.reference, 'Animaux', "the client's own wording stays visible");
+    assert.equal(res.body.category.reference, 'Alimentation animal', "the client's own wording stays visible");
     assert.equal(res.body.category.status, 'declared', 'the label is now the person\'s, not official');
 
     const other = await t.user();
@@ -267,26 +277,26 @@ describe("customising the client's reference", () => {
     assert.ok(
       theirs.body.groups
         .find((g) => g.code === 'variable')
-        .categories.some((c) => c.key === 'variable.animaux' && c.label === 'Animaux'),
+        .categories.some((c) => c.key === 'variable.alimentation_animal' && c.label === 'Alimentation animal'),
       'another account still sees the reference untouched',
     );
   });
 
   test('a standard category can be hidden, and brought back', async () => {
     await t.request('PATCH', standard, { user, json: { hidden: true } });
-    assert.ok(!labels((await list()).body, 'variable').includes('Animaux'));
-    assert.ok(labels((await list('?includeArchived=true')).body, 'variable').includes('Animaux'));
+    assert.ok(!labels((await list()).body, 'variable').includes('Alimentation animal'));
+    assert.ok(labels((await list('?includeArchived=true')).body, 'variable').includes('Alimentation animal'));
 
     await t.request('PATCH', standard, { user, json: { hidden: false } });
-    assert.ok(labels((await list()).body, 'variable').includes('Animaux'));
+    assert.ok(labels((await list()).body, 'variable').includes('Alimentation animal'));
   });
 
   test('resetting removes the customisation and the reference comes back', async () => {
     await t.request('PATCH', standard, { user, json: { label: 'Mon chat', hidden: true } });
     const res = await t.request('DELETE', standard, { user });
     assert.equal(res.status, 200);
-    const after = familyOf((await list()).body, 'variable').categories.find((c) => c.key === 'variable.animaux');
-    assert.equal(after.label, 'Animaux');
+    const after = familyOf((await list()).body, 'variable').categories.find((c) => c.key === 'variable.alimentation_animal');
+    assert.equal(after.label, 'Alimentation animal');
     assert.equal(after.customised, false);
     assert.equal(after.archived, false);
   });
@@ -302,8 +312,8 @@ describe("customising the client's reference", () => {
 
   test('a standard row itself is never written to, whatever the account does', async () => {
     await t.request('PATCH', standard, { user, json: { label: 'Mon chat' } });
-    const reference = await t.prisma.finCategory.findFirst({ where: { key: 'variable.animaux', userId: null } });
-    assert.equal(reference.label, 'Animaux');
+    const reference = await t.prisma.finCategory.findFirst({ where: { key: 'variable.alimentation_animal', userId: null } });
+    assert.equal(reference.label, 'Alimentation animal');
     assert.equal(reference.status, 'official');
     assert.equal(reference.version, 1);
   });
@@ -327,5 +337,19 @@ describe('P8-08 — « Essentielle ? » is the reference’s, and the person may
 
     assert.equal((await t.request('PATCH', '/fin/categories/standard/fixed.loyer', { user, json: { essential: false } })).status, 200);
     assert.equal(rent(await list()).essential, false, 'the person’s own reading');
+  });
+});
+
+describe('P8-27 — a colour for every category on screen', () => {
+  test('every category served has a colour; a group shares one; a person may choose their own', async () => {
+    const hex = /^#[0-9A-Fa-f]{6}$/;
+    const all = (await list()).body.groups.flatMap((g) => g.categories);
+    assert.deepEqual(all.filter((c) => !hex.test(c.color ?? '')).map((c) => c.key ?? c.label), []);
+    const food = all.filter((c) => c.group === 'Alimentation');
+    assert.ok(food.length > 1 && food.every((c) => c.groupColor === food[0].groupColor), 'the sub-categories of a group share its colour');
+    const own = await t.request('POST', '/fin/categories', { user, json: { family: 'variable', label: 'Mes plantes', color: '#15803D' } });
+    assert.equal(own.status, 201);
+    assert.equal(own.body.category.color, '#15803D');
+    assert.equal((await t.request('POST', '/fin/categories', { user, json: { family: 'variable', label: 'X', color: 'vert' } })).status, 400);
   });
 });

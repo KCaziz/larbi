@@ -106,7 +106,7 @@ export default function GoalsPage() {
         ) : (
           <ul className="goals-list">
             {list.map((goal) => (
-              <GoalRow key={goal.id} goal={goal} formulas={formulas} statuses={references.data?.progressStatuses ?? []} accounts={accounts.data?.accounts ?? []} run={run} />
+              <GoalRow key={goal.id} goal={goal} model={templates.find((tpl) => tpl.key === goal.templateKey)} formulas={formulas} statuses={references.data?.progressStatuses ?? []} accounts={accounts.data?.accounts ?? []} run={run} />
             ))}
           </ul>
         )}
@@ -115,7 +115,7 @@ export default function GoalsPage() {
   );
 }
 
-function GoalRow({ goal, formulas, statuses, accounts, run }) {
+function GoalRow({ goal, model, formulas, statuses, accounts, run }) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   // The detail — contributions and their source account — is read when the
@@ -127,6 +127,12 @@ function GoalRow({ goal, formulas, statuses, accounts, run }) {
     <li className={goal.archivedAt ? 'goals-row goals-row-archived' : 'goals-row'}>
       <button type="button" className="goals-row-head" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
         <span className="goals-row-title">
+          {/* The goal's own icon and colour (« Autre objectif », answer D1), else its model's. */}
+          {(goal.icon ?? model?.icon) && (
+            <span className="goals-row-icon" style={{ background: goal.color ?? model?.color ?? undefined }} aria-hidden="true">
+              {goal.icon ?? model?.icon}
+            </span>
+          )}
           <strong>{goal.label}</strong>
           {goal.status === 'fictional' && <span className="fin-badge-simulation">{t('fincludia.simulationBadge')}</span>}
           {goal.progressStatus && goal.progressStatus !== 'active' && <span className="goals-row-tag">{t(`goals.statuses.${goal.progressStatus}`)}</span>}
@@ -374,7 +380,7 @@ function EditGoalForm({ goal, run }) {
 
 function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel }) {
   const { t } = useTranslation();
-  const [form, setForm] = useState({ label: '', templateKey: '', target: '', targetDate: '', rate: '' });
+  const [form, setForm] = useState({ label: '', templateKey: '', icon: '', color: '#0F766E', target: '', targetDate: '', rate: '' });
   const [error, setError] = useState(null);
 
   const submit = async (event) => {
@@ -386,6 +392,9 @@ function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel }) {
       await api.post('/fin/goals', {
         label: form.label.trim(),
         templateKey: form.templateKey || null,
+        // « Autre objectif » (answer D1): its own icon and colour.
+        icon: form.templateKey ? null : form.icon.trim() || null,
+        color: form.templateKey ? null : form.color,
         target,
         currency: defaultCurrency,
         targetDate: form.targetDate ? new Date(form.targetDate).toISOString() : null,
@@ -421,6 +430,18 @@ function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel }) {
             ))}
           </select>
         </div>
+        {!form.templateKey && (
+          <>
+            <div className="fin-field">
+              <label htmlFor="new-goal-icon">{t('goals.icon')}</label>
+              <input id="new-goal-icon" value={form.icon} maxLength={16} placeholder="🎯" onChange={(event) => setForm({ ...form, icon: event.target.value })} />
+            </div>
+            <div className="fin-field">
+              <label htmlFor="new-goal-color">{t('goals.color')}</label>
+              <input id="new-goal-color" type="color" value={form.color} onChange={(event) => setForm({ ...form, color: event.target.value })} />
+            </div>
+          </>
+        )}
         <div className="fin-field">
           <label htmlFor="new-goal-label">{t('goals.label')}</label>
           <input id="new-goal-label" value={form.label} maxLength={80} required onChange={(event) => setForm({ ...form, label: event.target.value })} />

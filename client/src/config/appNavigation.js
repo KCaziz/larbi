@@ -1,5 +1,8 @@
 import {
+  ArrowLeftRight,
   Award,
+  ListChecks,
+  PiggyBank,
   BadgeCheck,
   Bell,
   Building2,
@@ -33,18 +36,33 @@ import {
 // point 8): same domain, same session, its own layout.
 export const APP_BASE = '/app';
 
-export const APP_NAV = [
-  { key: 'home', to: '/app', end: true, labelKey: 'appNav.home', icon: Home, mobile: true },
-  { key: 'accounts', to: '/app/comptes', labelKey: 'appNav.accounts', icon: Wallet, mobile: true },
-  { key: 'synthesis', to: '/app/synthese', labelKey: 'appNav.synthesis', icon: PieChart, mobile: true },
-  { key: 'calendar', to: '/app/calendrier', labelKey: 'appNav.calendar', icon: CalendarDays, mobile: true },
-  { key: 'goals', to: '/app/objectifs', labelKey: 'appNav.goals', icon: Target },
-  { key: 'debts', to: '/app/dettes', labelKey: 'appNav.debts', icon: CreditCard, adultsOnly: true },
-  { key: 'wealth', to: '/app/patrimoine', labelKey: 'appNav.wealth', icon: Landmark, adultsOnly: true },
-  { key: 'paper', to: '/app/portefeuille', labelKey: 'appNav.paper', icon: TrendingUp },
-  { key: 'tools', to: '/app/outils', labelKey: 'appNav.tools', icon: Wrench },
-  { key: 'health', to: '/app/sante', labelKey: 'appNav.health', icon: HeartPulse },
+// The client's definitive order (answer D3, 2026-10-28), with the improvements
+// retained the same day (TASKS.md, P8-01): « Mouvements » and « Budgets » in
+// the menu, « Santé financière » beside « Synthèse », and five sections.
+export const NAV_SECTIONS = [
+  { key: 'daily', labelKey: 'appNav.sections.daily' },
+  { key: 'analyse', labelKey: 'appNav.sections.analyse' },
+  { key: 'build', labelKey: 'appNav.sections.build' },
+  { key: 'tools', labelKey: 'appNav.sections.tools' },
   // « Bas de barre » in the client's words: the educational layer.
+  { key: 'learn', labelKey: 'appNav.sections.learn' },
+];
+
+export const APP_NAV = [
+  { key: 'home', to: '/app', end: true, labelKey: 'appNav.home', icon: Home, mobile: true, section: 'daily' },
+  // The list of what is left to do; the Accueil shows the figures.
+  { key: 'today', to: '/app/aujourdhui', labelKey: 'appNav.today', icon: ListChecks, mobile: true, section: 'daily' },
+  { key: 'accounts', to: '/app/comptes', labelKey: 'appNav.accounts', icon: Wallet, mobile: true, section: 'daily' },
+  { key: 'movements', to: '/app/mouvements', labelKey: 'appNav.movements', icon: ArrowLeftRight, mobile: true, section: 'daily' },
+  { key: 'budgets', to: '/app/budgets', labelKey: 'appNav.budgets', icon: PiggyBank, section: 'daily' },
+  { key: 'calendar', to: '/app/calendrier', labelKey: 'appNav.calendar', icon: CalendarDays, section: 'daily' },
+  { key: 'synthesis', to: '/app/synthese', labelKey: 'appNav.synthesis', icon: PieChart, section: 'analyse' },
+  { key: 'health', to: '/app/sante', labelKey: 'appNav.health', icon: HeartPulse, section: 'analyse' },
+  { key: 'goals', to: '/app/objectifs', labelKey: 'appNav.goals', icon: Target, section: 'build' },
+  { key: 'debts', to: '/app/dettes', labelKey: 'appNav.debts', icon: CreditCard, adultsOnly: true, section: 'build' },
+  { key: 'wealth', to: '/app/patrimoine', labelKey: 'appNav.wealth', icon: Landmark, adultsOnly: true, section: 'build' },
+  { key: 'paper', to: '/app/portefeuille', labelKey: 'appNav.paper', icon: TrendingUp, section: 'build' },
+  { key: 'tools', to: '/app/outils', labelKey: 'appNav.tools', icon: Wrench, section: 'tools' },
   { key: 'learning', to: '/app/formation', labelKey: 'appNav.learning', icon: GraduationCap, section: 'learn' },
   { key: 'progress', to: '/app/progression', labelKey: 'appNav.progress', icon: Award, section: 'learn' },
   { key: 'certificates', to: '/app/certificats', labelKey: 'appNav.certificates', icon: BadgeCheck, section: 'learn' },

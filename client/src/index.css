@@ -41,6 +41,12 @@
   --warn-bg: rgba(200, 138, 0, 0.12);
   --danger: #b42318;
   --danger-bg: rgba(180, 35, 24, 0.09);
+  /* The four flows (P8-27): one family of colours each, the same in the whole
+     engine. An expense is ocean, never the alert red. */
+  --flow-income: #0b7a6c;
+  --flow-expense: #2f5d8c;
+  --flow-transfer: #6b4fa0;
+  --flow-savings: #9a6700;
 
   /* Dark band (footer, CTA, auth panel) */
   --band-bg: #102A43;
@@ -132,6 +138,10 @@
     --warn-bg: rgba(240, 181, 74, 0.12);
     --danger: #f28b82;
     --danger-bg: rgba(242, 139, 130, 0.14);
+    --flow-income: #4fd1b8;
+    --flow-expense: #8db8e8;
+    --flow-transfer: #b9a3e8;
+    --flow-savings: #f0c060;
     --band-bg: #071726;
     --band-text: #8ea6bb;
     --band-heading: #f2fbfc;
@@ -168,6 +178,10 @@
   --warn-bg: rgba(240, 181, 74, 0.12);
   --danger: #f28b82;
   --danger-bg: rgba(242, 139, 130, 0.14);
+  --flow-income: #4fd1b8;
+  --flow-expense: #8db8e8;
+  --flow-transfer: #b9a3e8;
+  --flow-savings: #f0c060;
   --band-bg: #071726;
   --band-text: #8ea6bb;
   --band-heading: #f2fbfc;

@@ -7,17 +7,19 @@ import { useApi } from '../../lib/useApi.js';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
+import { useCatalogueBase } from '../../lib/useToolsBase.js';
 import './Certificate.css';
 
 // The certificate of the logged-in user for one formation. Printing (or "save
 // as PDF") is done by the browser: the print stylesheet keeps only the sheet.
 export default function CertificatePage() {
+  const catalogue = useCatalogueBase();
   const { slug } = useParams();
   const { t, i18n } = useTranslation();
   const { status, data, error, reload } = useApi(`/learn/formations/${slug}/certificate`);
 
   const back = (
-    <Link to={`/catalogue/${slug}`} className="cms-back">
+    <Link to={`${catalogue}/${slug}`} className="cms-back">
       <ArrowLeft className="icon-dir" size={16} strokeWidth={1.75} aria-hidden="true" />
       {t('certificate.back')}
     </Link>

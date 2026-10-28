@@ -13,6 +13,9 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import './Notifications.css';
 
+// The client's families of notifications (answer D7), in his order.
+const FAMILIES = ['budgets', 'revenus', 'echeances', 'dettes', 'objectifs', 'formation', 'securite'];
+
 // Notifications and alerts (P6-18), screen C24. In-app only for now (« canal
 // in-app d'abord ; e-mail / push selon P6-01 »).
 export default function NotificationsPage() {
@@ -113,11 +116,28 @@ function NotificationText({ t, language, notification: n }) {
     case 'goal_overdue':
       return t('notifications.messages.goalOverdue', { label: n.params.label });
     case 'goal_milestone':
-      return t('notifications.messages.goalMilestone', { label: n.params.label });
+      return t('notifications.messages.goalMilestone', { label: n.params.label, percent: Math.round(Number(n.params.niveau ?? 0) * 100) });
     case 'sharing_changed':
       return t('notifications.messages.sharingChanged', { kinds: (n.params.kinds ?? []).map((kind) => t(`spaces.dataKinds.${kind}`)).join(', ') });
     case 'reminder_upcoming':
       return t(`notifications.messages.reminder.${n.params.kind}`, { label: n.params.label ?? '', date: formatDate(language, n.params.date) });
+    // P8-18: the client's alerts AL-P01 to AL-P12.
+    case 'account_alert':
+      return t(`notifications.messages.accountAlert.${n.params.niveau}`, { label: n.params.label });
+    case 'income_to_confirm':
+      return t('notifications.messages.incomeToConfirm', { label: n.params.label ?? '', date: formatDate(language, n.params.date) });
+    case 'payment_to_confirm':
+      return t('notifications.messages.paymentToConfirm', { label: n.params.label ?? '', date: formatDate(language, n.params.date) });
+    case 'debt_due':
+      return t(`notifications.messages.debtDue.${n.params.niveau}`, { label: n.params.label, date: formatDate(language, n.params.date) });
+    case 'debt_ratio':
+      return t(`notifications.messages.debtRatio.${n.params.niveau}`);
+    case 'goal_contribution_missed':
+      return t('notifications.messages.goalContributionMissed', { label: n.params.label });
+    case 'emergency_fund':
+      return t(`notifications.messages.emergencyFund.${n.params.niveau}`);
+    case 'learning_to_continue':
+      return t('notifications.messages.learningToContinue', { label: n.params.label });
     default:
       return n.type;
   }
@@ -137,6 +157,17 @@ function NotificationSettings({ t, onDone }) {
     }
   }
 
+  // A whole family at once: every one of its types in one change.
+  async function toggleFamily(rows, enabled) {
+    setMessage(null);
+    try {
+      await api.put('/fin/notifications/parametres', Object.fromEntries(rows.map((setting) => [setting.type, { enabled }])));
+      settings.reload();
+    } catch {
+      setMessage({ text: t('notifications.errors.refused') });
+    }
+  }
+
   if (!settings.data) return null;
 
   return (
@@ -146,8 +177,23 @@ function NotificationSettings({ t, onDone }) {
           {message.text}
         </p>
       )}
+      {/* By family (the client's answer D7): budgets, revenus, échéances,
+          dettes, objectifs, formation, sécurité — each one on or off, and
+          its alerts one by one. */}
+      {FAMILIES.map((family) => {
+        const rows = settings.data.parametres.filter((setting) => setting.family === family);
+        if (rows.length === 0) return null;
+        const on = rows.some((setting) => setting.enabled);
+        return (
+          <fieldset key={family} className="notifications-family">
+            <legend>
+              <label className="notifications-check notifications-family-toggle">
+                <input type="checkbox" checked={on} onChange={(event) => toggleFamily(rows, event.target.checked)} />
+                {t(`notifications.families.${family}`)}
+              </label>
+            </legend>
       <ul className="notifications-settings-list">
-        {settings.data.parametres.map((setting) => (
+        {rows.map((setting) => (
           <li key={setting.type}>
             <span className="notifications-settings-label">{t(`notifications.typeLabels.${setting.type}`)}</span>
             <label className="notifications-check">
@@ -163,6 +209,9 @@ function NotificationSettings({ t, onDone }) {
           </li>
         ))}
       </ul>
+          </fieldset>
+        );
+      })}
       <button type="button" className="notifications-plain" onClick={onDone}>
         {t('notifications.close')}
       </button>

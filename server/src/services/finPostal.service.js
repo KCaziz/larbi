@@ -6,6 +6,7 @@ import {
   POSTAL_SERVICES,
   POSTAL_UNDOCUMENTED_FAMILIES,
 } from '../constants/finPostal.js';
+import { SOURCE_PUBLICATION } from '../constants/finPublication.js';
 
 /**
  * Référentiel Algérie Poste / CCP (P4-17).
@@ -15,29 +16,17 @@ import {
  * `auto_compute` valent FALSE sur les 75 fiches, parce que la source est un
  * texte transmis et non une brochure officielle datée.
  *
- * La conséquence n'est pas « on ne sert rien ». C'est que le PUBLIC voit le
- * catalogue — quels services existent, par quel canal, à quelles conditions —
- * sans les montants, et avec la raison écrite ; tandis que l'ÉQUIPE voit tout,
- * y compris le texte tarifaire brut, pour aller chercher les preuves.
- *
- * Servir un tarif invérifiable sur une page publique, ce serait publier une
- * information financière que personne n'a datée. C'est précisément ce que ce
- * projet ne fait pas.
+ * Jusqu'au 2026-10-28, le PUBLIC voyait le catalogue sans les montants. Depuis,
+ * à la demande du client (P8-28), les tarifs sont montrés, chacun avec sa
+ * provenance (`SOURCE_PUBLICATION`) : une information de la source du client,
+ * jamais présentée comme vérifiée par FINCLUDIA. Aucun CALCUL n'en est tiré
+ * (`auto_compute` reste faux) tant qu'une grille officielle datée manque.
  *
  * Aucune fonction ici ne touche la base : le référentiel est un fichier généré.
  */
 
-// Les champs qui portent un montant, un taux ou un plafond. Ce sont eux, et
-// eux seuls, que la vue publique retire tant que la ligne n'est pas publiable.
-const PRICED_FIELDS = [
-  'fee_amount_dzd',
-  'fee_amount_max_dzd',
-  'fee_rate_max',
-  'limit_min_dzd',
-  'limit_max_dzd',
-  'raw_tariff_text',
-];
-
+// Why no CALCULATION is made from these tariffs (they are shown since
+// 2026-10-28, see publicView).
 export const PUBLICATION_REASON =
   'Tarif transmis sans pièce officielle datée : non publié tant que la grille d’Algérie Poste n’est pas fournie (contrôle P01).';
 
@@ -51,13 +40,15 @@ export const PUBLICATION_REASON =
  */
 export function publicView(service) {
   const view = { ...service };
-  if (!service.publishable) {
-    for (const field of PRICED_FIELDS) view[field] = null;
-    view.tarifStatut = 'non_publie';
-    view.tarifRaison = PUBLICATION_REASON;
-  } else {
+  if (service.publishable) {
     view.tarifStatut = 'publie';
     view.tarifRaison = null;
+  } else {
+    // Shown at the client's request of 2026-10-28 (P8-28), with where it comes
+    // from: a tariff of the client's source, not one checked by FINCLUDIA.
+    // Still never computed with (`auto_compute` stays false).
+    view.tarifStatut = 'source_client';
+    view.tarifRaison = SOURCE_PUBLICATION.notice;
   }
   // Ces champs n'intéressent que l'équipe : ils décrivent l'état de la preuve,
   // pas le service.
@@ -161,6 +152,9 @@ export function referenceSummary() {
     publiables: POSTAL_SERVICES.filter((row) => row.publishable).length,
     calculables: POSTAL_SERVICES.filter((row) => row.auto_compute).length,
     raisonNonPublie: PUBLICATION_REASON,
+    // Shown with their provenance at the client's request (P8-28).
+    affichees: POSTAL_SERVICES.length,
+    affichage: SOURCE_PUBLICATION,
     controlesOuverts: POSTAL_CONTROLS.length,
     calculsBloques: POSTAL_BLOCKED_CALCULATIONS,
     famillesNonDocumentees: POSTAL_UNDOCUMENTED_FAMILIES,

@@ -108,6 +108,7 @@ export function toAdminFormation(formation) {
     status: formation.status,
     requiredAccessLevel: formation.requiredAccessLevel,
     targetAccountTypes: formation.targetAccountTypes ?? [],
+    educationProfiles: formation.educationProfiles ?? [],
     category: formation.category ? { id: formation.category.id, name: formation.category.name } : null,
     cover: toMedia(formation.coverImage),
     certification: {

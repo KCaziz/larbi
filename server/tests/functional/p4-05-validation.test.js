@@ -1,3 +1,4 @@
+import '../helpers/setup-env.js';
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -163,13 +164,13 @@ describe('P4-05 — critère 3 : le simulateur suit les règles fournies', () =>
     assert.ok(res.body.avertissements.includes('Ce calcul est une simulation mathématique et ne constitue pas une offre de crédit.'));
   });
 
-  test('aucun taux de banque n’est servi : les 25 offres restent non publiées', async () => {
+  test('les 25 offres sont montrées avec leur provenance, aucune ne sert à un calcul d’éligibilité (P8-28)', async () => {
     const res = await t.request('GET', '/tools/credit/offres', { user });
     assert.equal(res.status, 200);
-    assert.equal(res.body.publiables, 0);
-    // Et la liste ne laisse filtrer aucun critère chiffré.
-    const leaked = res.body.offres.filter((offer) => 'rateText' in offer || 'dsrText' in offer);
-    assert.deepEqual(leaked, []);
+    assert.equal(res.body.total, 25);
+    assert.equal(res.body.publiables, 0, 'none is computable: its criteria are text');
+    assert.ok(res.body.offres.every((offer) => typeof offer.criteres.taux === 'string' && offer.source), 'each fiche with its criteria and its source');
+    assert.match(res.body.affichage.notice, /non vérifiée par FINCLUDIA/);
   });
 });
 

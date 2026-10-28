@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getPasseport, getPasseportReferences } from '../controllers/finPasseport.controller.js';
+import { getEducation, getPasseport, getPasseportReferences } from '../controllers/finPasseport.controller.js';
 import { requireAuth } from '../middleware/auth.js';
 import { asyncRoute } from '../utils/asyncRoute.js';
 
@@ -9,5 +9,7 @@ router.use(requireAuth);
 
 router.get('/passeport/references', getPasseportReferences);
 router.get('/passeport', asyncRoute(getPasseport));
+// The educational layer of a profile (P8-17): parcours, recommendations.
+router.get('/formation/parcours', asyncRoute(getEducation));
 
 export default router;

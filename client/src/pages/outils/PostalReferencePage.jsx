@@ -108,9 +108,10 @@ export default function PostalReferencePage() {
                   {service.customer_segment} · {service.operation_channel}
                 </p>
                 {service.raw_conditions && <p className="postal-conditions">{service.raw_conditions}</p>}
-                {/* « Non publié » et « gratuit » ne doivent jamais se
-                    ressembler : l'état est écrit, pas suggéré par un vide. */}
-                <p className="postal-tariff">{t('postal.tariffWithheld')}</p>
+                {/* The tariff as the client's source gives it (P8-28), with where
+                    it comes from — never presented as checked by FINCLUDIA. */}
+                <p className="postal-tariff">{service.raw_tariff_text ?? t('postal.noTariff')}</p>
+                {service.tarifRaison && <p className="postal-source">{service.tarifRaison}</p>}
               </li>
             ))}
           </ul>

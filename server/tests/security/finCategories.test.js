@@ -107,7 +107,7 @@ describe('what an account may not decide about its own rows', () => {
       await t.request('PATCH', '/fin/categories/standard/goal.retraite', { user, json: { label: `Vu par ${user.id}` } });
     }
     const after = await t.prisma.finCategory.findMany({ where: { userId: null }, select: { key: true, label: true, status: true } });
-    assert.deepEqual(after, before, 'the 91 reference rows are byte-for-byte what they were');
+    assert.deepEqual(after, before, 'the reference rows are byte-for-byte what they were');
   });
 });
 
@@ -124,6 +124,6 @@ describe('erasing an account erases its financial data', () => {
 
     assert.equal(await t.prisma.finCategory.count({ where: { userId: owner.id } }), 0);
     assert.equal(await t.prisma.finChange.count({ where: { userId: owner.id } }), 0);
-    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91, 'the reference is untouched');
+    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91 + 98, 'the reference is untouched (91 rows of P6-02, 98 of P8-08)');
   });
 });

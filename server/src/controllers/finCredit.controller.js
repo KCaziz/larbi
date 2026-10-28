@@ -1,4 +1,5 @@
 import { CREDIT_OFFERS } from '../constants/finCreditOffers.js';
+import { SOURCE_PUBLICATION } from '../constants/finPublication.js';
 import { checkAgainstOffer, compareFinancing, creditRules, simulate } from '../services/finCredit.service.js';
 import { HttpError } from '../utils/httpError.js';
 
@@ -16,8 +17,11 @@ export function postSimulate(req, res) {
   res.json(simulate(req.body));
 }
 
-// La liste des offres, SANS leurs critères chiffrés : tant qu'aucune n'est
-// publiable, cette route dit ce qui existe et ce qui manque, pas des taux.
+// La liste des offres. Depuis le 2026-10-28, à la demande du client (P8-28),
+// chaque fiche est montrée avec ses critères tels que la source les écrit, son
+// statut déclaré et sa provenance — jamais comme vérifiée par FINCLUDIA.
+// `publiable` garde son sens : une offre dont les critères permettent un
+// calcul d'éligibilité, ce qu'aucune n'autorise encore.
 export function getOffers(req, res) {
   const { kind } = req.query;
   const rows = CREDIT_OFFERS.filter((row) => (kind ? row.kind === kind : true));
@@ -30,9 +34,20 @@ export function getOffers(req, res) {
       islamique: row.islamic,
       publiable: row.publishable,
       raisonNonPubliee: row.publishable ? null : row.blockedReason,
+      criteres: {
+        taux: row.rateText,
+        duree: row.durationText,
+        effort: row.dsrText,
+        apport: row.downPaymentText,
+        age: row.ageText,
+        revenu: row.incomeText,
+      },
+      statutDeclare: row.declaredStatus,
+      source: row.source,
     })),
     publiables: rows.filter((row) => row.publishable).length,
     total: rows.length,
+    affichage: SOURCE_PUBLICATION,
   });
 }
 

@@ -10,6 +10,9 @@ import Notice from '../../components/ui/Notice.jsx';
 import '../Pages.css';
 import './FinProfile.css';
 
+// The collective profiles left for « Gestion commune » (P8-17): no longer offered.
+const COLLECTIVE = ['COL', 'COU', 'FAM'];
+
 // FINCLUDIA onboarding and profile (P3-18, screen C02): "Profil principal;
 // tranche d'âge; situation; intention principale; horizon", "Continuer / Je ne
 // sais pas / Modifier plus tard" — every field stays optional, nothing is asked
@@ -61,14 +64,15 @@ export default function FinProfilePage() {
 function FinProfileForm({ initial, onSaved }) {
   const { t } = useTranslation();
   const [form, setForm] = useState(() => ({
-    finPublic: initial.finPublic ?? '',
+    // A former collective profile (COL, COU, FAM) is chosen again (P8-17).
+    finPublic: COLLECTIVE.includes(initial.finPublic) ? '' : (initial.finPublic ?? ''),
     finSecondaryPublics: initial.finSecondaryPublics ?? [],
     finAgeRange: initial.finAgeRange ?? '',
     finCountry: initial.finCountry ?? '',
     finSituation: initial.finSituation ?? '',
     finMainIntention: initial.finMainIntention ?? '',
     finHorizon: initial.finHorizon ?? '',
-    finIrregularIncome: Boolean(initial.finIrregularIncome),
+    finIncomeRegularity: initial.finIncomeRegularity ?? 'stable',
   }));
   const [acceptConsents, setAcceptConsents] = useState(false);
   const [status, setStatus] = useState(null);
@@ -94,7 +98,7 @@ function FinProfileForm({ initial, onSaved }) {
         finSituation: form.finSituation.trim() || null,
         finMainIntention: form.finMainIntention.trim() || null,
         finHorizon: form.finHorizon.trim() || null,
-        finIrregularIncome: form.finIrregularIncome,
+        finIncomeRegularity: form.finIncomeRegularity,
       };
       if (!consented) body.acceptConsents = true;
       await api.put('/profile/fin', body);
@@ -114,9 +118,10 @@ function FinProfileForm({ initial, onSaved }) {
     <form className="fin-profile-form form-card" onSubmit={submit}>
       <div className="form-field">
         <label htmlFor="fin-public">{t('account.fin.publicLabel')}</label>
+        {COLLECTIVE.includes(initial.finPublic) && <p className="form-status">{t('account.fin.chooseAgain')}</p>}
         <select id="fin-public" value={form.finPublic} onChange={(e) => setForm((f) => ({ ...f, finPublic: e.target.value }))}>
           <option value="">{t('account.fin.notSure')}</option>
-          {publics.map(({ code, label }) => (
+          {publics.filter(({ code }) => !COLLECTIVE.includes(code)).map(({ code, label }) => (
             <option key={code} value={code}>
               {label}
             </option>
@@ -166,12 +171,16 @@ function FinProfileForm({ initial, onSaved }) {
           <label htmlFor="fin-horizon">{t('account.fin.horizonLabel')}</label>
           <input id="fin-horizon" maxLength={60} value={form.finHorizon} onChange={(e) => setForm((f) => ({ ...f, finHorizon: e.target.value }))} />
         </div>
-        {/* GO-01 (question C3): declared here, never detected. */}
+        {/* GO-01, the client's answer C3: declared here, never changed by the system. */}
         <div className="form-field">
-          <label className="money-check" htmlFor="fin-irregular">
-            <input id="fin-irregular" type="checkbox" checked={form.finIrregularIncome} onChange={(e) => setForm((f) => ({ ...f, finIrregularIncome: e.target.checked }))} />
-            {t('finProfile.irregularIncome')}
-          </label>
+          <label htmlFor="fin-regularity">{t('finProfile.incomeRegularity')}</label>
+          <select id="fin-regularity" value={form.finIncomeRegularity} onChange={(e) => setForm((f) => ({ ...f, finIncomeRegularity: e.target.value }))}>
+            {['stable', 'irregular', 'seasonal'].map((value) => (
+              <option key={value} value={value}>
+                {t(`finProfile.regularity.${value}`)}
+              </option>
+            ))}
+          </select>
           <p className="fin-hint">{t('finProfile.irregularIncomeHint')}</p>
         </div>
       </div>

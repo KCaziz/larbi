@@ -11,7 +11,8 @@ import { SERVER_DIR } from '../helpers/env.js';
 // 768 px (QA-V7-05), and the former addresses still arriving.
 
 const fr = JSON.parse(readFileSync(path.resolve(SERVER_DIR, '../client/src/i18n/locales/fr.json'), 'utf8'));
-const FINANCIAL_ENTRIES = ['home', 'accounts', 'synthesis', 'calendar', 'goals', 'debts', 'wealth', 'paper', 'tools', 'health'].map((key) => fr.appNav[key]);
+// The order retained on 2026-10-28 (answer D3 and its improvements).
+const FINANCIAL_ENTRIES = ['home', 'today', 'accounts', 'movements', 'budgets', 'calendar', 'synthesis', 'health', 'goals', 'debts', 'wealth', 'paper', 'tools'].map((key) => fr.appNav[key]);
 
 describe('the application shell, end to end', { skip: findChrome() ? false : 'no Chrome/Chromium found (set CHROME_PATH)' }, () => {
   let t;
@@ -44,7 +45,7 @@ describe('the application shell, end to end', { skip: findChrome() ? false : 'no
     for (const finPublic of ['LYC', 'SAL']) {
       await signIn(await t.adult({ finPublic }));
       await b.goto(`${site.url}/app`);
-      await b.waitFor("document.querySelectorAll('.app-sidebar .app-nav-text').length >= 13", 'the sidebar');
+      await b.waitFor("document.querySelectorAll('.app-sidebar .app-nav-text').length >= 16", 'the sidebar');
       menus.push(await sidebarLabels());
     }
     assert.deepEqual(menus[0], menus[1]);
@@ -55,7 +56,9 @@ describe('the application shell, end to end', { skip: findChrome() ? false : 'no
   test('a declared minor does not see the adults-only entries', async () => {
     await signIn(await t.minor({ finPublic: 'LYC' }));
     await b.goto(`${site.url}/app`);
-    await b.waitFor("document.querySelectorAll('.app-sidebar .app-nav-text').length >= 11", 'the sidebar');
+    // The menu first renders before the account is loaded, with all 13 entries:
+    // wait for the account's own menu, not for the first one.
+    await b.waitFor("document.querySelectorAll('.app-sidebar .app-nav-text').length === 14", 'the sidebar of a minor');
     const labels = await sidebarLabels();
     assert.ok(!labels.includes(fr.appNav.debts) && !labels.includes(fr.appNav.wealth), labels.join(', '));
   });

@@ -1,6 +1,7 @@
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { boot } from '../helpers/server.js';
+import { POSTAL_SERVICES } from '../../src/constants/finPostal.js';
 
 // L'API du référentiel Algérie Poste / CCP (P4-17).
 //
@@ -34,26 +35,17 @@ describe('P4-17 — le référentiel postal par l’API', () => {
     assert.equal(res.body.services.length, 75);
   });
 
-  test('et aucun montant n’en sort, par aucun champ', async () => {
-    // Le test qui compte vraiment. Il ne regarde pas un champ choisi d'avance :
-    // il balaie la réponse entière à la recherche d'un nombre qui ressemble à
-    // un prix, parce qu'un champ ajouté plus tard ne serait pas couvert par une
-    // liste écrite aujourd'hui.
+  test('les tarifs sont montrés, à la demande du client (P8-28), tels que sa source les donne', async () => {
+    // Until 2026-10-28 every amount was withheld. The client asked for the
+    // referential to be integrated: the tariff is shown as its source says.
     const res = await t.request('GET', '/tools/postal/services');
-    const leaks = [];
-    for (const service of res.body.services) {
-      for (const [field, value] of Object.entries(service)) {
-        if (['fee_amount_dzd', 'fee_amount_max_dzd', 'fee_rate_max', 'limit_min_dzd', 'limit_max_dzd', 'raw_tariff_text'].includes(field) && value !== null) {
-          leaks.push(`${service.service_id}.${field} = ${value}`);
-        }
-      }
-    }
-    assert.deepEqual(leaks, []);
+    const edahabia = res.body.services.find((row) => row.service_id === 'AP-009');
+    assert.equal(edahabia.raw_tariff_text, POSTAL_SERVICES.find((row) => row.service_id === 'AP-009').raw_tariff_text);
   });
 
-  test('chaque fiche dit pourquoi son tarif est absent', async () => {
+  test('chaque fiche dit d’où vient son tarif, et qu’il n’est pas vérifié par FINCLUDIA', async () => {
     const res = await t.request('GET', '/tools/postal/services');
-    const silent = res.body.services.filter((row) => row.tarifStatut !== 'non_publie' || !row.tarifRaison);
+    const silent = res.body.services.filter((row) => row.tarifStatut !== 'source_client' || !/non vérifiée par FINCLUDIA/.test(row.tarifRaison ?? ''));
     assert.deepEqual(silent.map((r) => r.service_id), []);
   });
 
@@ -67,7 +59,8 @@ describe('P4-17 — le référentiel postal par l’API', () => {
     const ok = await t.request('GET', '/tools/postal/services/AP-009');
     assert.equal(ok.status, 200);
     assert.equal(ok.body.service.service_name, 'Création ou renouvellement EDAHABIA');
-    assert.equal(ok.body.service.fee_amount_dzd, null);
+    assert.equal(ok.body.service.fee_amount_dzd, POSTAL_SERVICES.find((row) => row.service_id === 'AP-009').fee_amount_dzd, 'the source’s tariff (P8-28)');
+    assert.equal(ok.body.service.tarifStatut, 'source_client');
 
     const missing = await t.request('GET', '/tools/postal/services/AP-999');
     assert.equal(missing.status, 404);

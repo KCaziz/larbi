@@ -240,8 +240,8 @@ export function buildDashboard({
       debtRatio: debts?.tauxEffort?.resultat ?? null,
       savingsRate: available.get('savingsRate')?.resultat ?? null,
       goalsGap: null,
-      // P8-16: real spending over the active budget's envelopes.
-      budgetConsumption: budgetConsumptionOf(budgetView),
+      // P8-16, answer C5: each budget of the period, scored then weighted.
+      budgetLines: budgetLinesOf(budgetView),
       dataQuality: {},
     },
     { now },
@@ -277,11 +277,10 @@ export function buildDashboard({
   };
 }
 
-// « Respect des budgets » (P8-16): what the envelopes really consumed over
-// what they allocate — null without a budget or without any allocation.
-function budgetConsumptionOf(view) {
+// « Respect des budgets » (P8-16, answer C5): one line per budget of the
+// period — its allocation (carry-over included) and what it really consumed.
+// null without a budget: the dimension is then not measured.
+function budgetLinesOf(view) {
   if (!view?.enveloppes?.length) return null;
-  const allocated = view.enveloppes.reduce((sum, line) => sum + line.prevu + (line.report ?? 0), 0);
-  if (allocated <= 0) return null;
-  return view.enveloppes.reduce((sum, line) => sum + line.reel, 0) / allocated;
+  return view.enveloppes.map((line) => ({ allocated: line.prevu + (line.report ?? 0), spent: line.reel }));
 }

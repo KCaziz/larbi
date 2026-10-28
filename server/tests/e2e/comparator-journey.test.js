@@ -55,15 +55,19 @@ describe('bank comparator, end to end', { skip: findChrome() ? false : 'no Chrom
     await t.close();
   });
 
-  test('from the tools page to the comparator: the 11 rubrics, the undocumented ones say so', async () => {
+  test('from the tools page to the comparator: the 14 families, the undocumented ones say so (P8-28)', async () => {
     await b.goto(`${site.url}/outils`);
     assert.ok(await b.clickWhere("e => e.getAttribute('href') === '/outils/comparateur'"));
     assert.ok(await b.waitText(c.bankCount_other.replace('{{count}}', '13')));
     assert.ok(await b.waitText(c.conditionCount_other.replace('{{count}}', '152')));
     const text = await b.text();
     for (const key of Object.keys(c.themes)) assert.ok(text.includes(c.themes[key]), `rubric ${key} is listed`);
-    assert.equal(await b.ev("document.querySelectorAll('.theme-card-empty').length"), 3, 'safe boxes, domestic transfers, cheques');
-    assert.equal(await b.ev("document.querySelectorAll('a.theme-card').length"), 8);
+    // The 11 rubrics with their data, CCP / Algérie Poste (its own tool), and
+    // the families no source documents: safe boxes, domestic transfers,
+    // cheques, insurance, online banking.
+    assert.equal(await b.ev("document.querySelectorAll('.theme-card-empty').length"), 5, 'the five undocumented families');
+    assert.equal(await b.ev("document.querySelectorAll('a.theme-card').length"), 9);
+    assert.ok(!text.includes('Bientôt disponible'), 'never « coming soon »: the source does not document them');
   });
 
   test('a rubric: the client texts as written, filters, search, sort by estimated yearly cost', async () => {
@@ -159,7 +163,7 @@ describe('bank comparator, end to end', { skip: findChrome() ? false : 'no Chrom
     await b.goto(`${site.url}/outils/comparateur/comptes`);
     assert.ok(await b.waitText('Compte Essai'));
     const mine = (await rows()).find((r) => r.includes(BANK));
-    assert.match(mine, /100 DA\tMensuel/);
+    assert.match(mine, /100 DA\s*Mensuel/);
     assert.match(mine, /1\s200 DA\/an/, '100 DA a month = 1 200 DA a year, computed by the server');
 
     await b.goto(`${site.url}/admin/comparateur`);

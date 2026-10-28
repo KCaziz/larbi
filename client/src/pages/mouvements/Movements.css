@@ -82,3 +82,18 @@
 .money-to-movements {
   margin: 0;
 }
+
+/* P8-27: each movement shows its flow on its leading edge. */
+.movements-row.flow {
+  border-inline-start: 4px solid var(--flow);
+  padding-inline-start: var(--space-sm);
+}
+.movements-row .money-row-category {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.movements-row.flow .flow-amount {
+  color: var(--flow);
+}

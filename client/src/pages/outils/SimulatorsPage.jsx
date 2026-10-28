@@ -8,12 +8,14 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import Section from '../../components/ui/Section.jsx';
+import { useToolsBase } from '../../lib/useToolsBase.js';
 import './Simulators.css';
 
 // Catalogue of the FINCLUDIA simulators (P4-10). The list comes from the server,
 // which is the single place that knows which calculators exist: adding one is a
 // line in the server registry, nothing here.
 export default function SimulatorsPage() {
+  const toolsBase = useToolsBase();
   const { t } = useTranslation();
   const list = useApi('/tools/simulations');
 
@@ -39,7 +41,7 @@ export default function SimulatorsPage() {
               <p className="simulator-formulas">
                 {t('simulators.formulaCount', { count: simulator.formulas.length })}
               </p>
-              <Button to={`/outils/simulateurs/${simulator.key}`} variant="ghost" arrow>
+              <Button to={`${toolsBase}/outils/simulateurs/${simulator.key}`} variant="ghost" arrow>
                 {t('simulators.open')}
               </Button>
             </article>

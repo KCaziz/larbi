@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { footerColumns } from '../../config/navigation.js';
 import { contactInfo, socialLinks } from '../../config/contact.js';
 import { usePublicSettings } from '../../lib/publicSettings.js';
+import brandMark from '../../assets/brand/fincludia-mark.png';
 import './Footer.css';
 
 // lucide-react ships no brand logos: the icon is picked by type of contact, the
@@ -35,9 +36,9 @@ export default function Footer() {
       <div className="site-footer-inner">
         <div className="footer-brand">
           <Link to="/" className="footer-logo">
-            <span className="brand-mark" aria-hidden="true">
-              L
-            </span>
+            {/* The FINCLUDIA mark, as in the header — not the placeholder letter of
+                the first branding (P8-28, seen by the client on 2026-10-28). */}
+            <img src={brandMark} className="brand-mark" alt="" aria-hidden="true" width="32" height="32" />
             {t('common.brand')}
           </Link>
           <p>{t('footer.tagline')}</p>
