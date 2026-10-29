@@ -109,6 +109,7 @@
   color: var(--text-h);
   font: inherit;
   text-align: start;
+  text-decoration: none;
   cursor: pointer;
 }
 

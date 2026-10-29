@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { Archive, ArchiveRestore, ChevronDown, ChevronUp, Landmark, Plus, Trash2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
@@ -22,21 +23,21 @@ import './Debts.css';
 // Debts (P6-10), screens C13-C14. The "qualification productive / neutre /
 // sous pression" the client asks for is deliberately absent: its thresholds
 // are still "à valider" (P6-01 point 5), so only the raw indicators are shown.
+//
+// P8-25: lending (DET-02), borrowing from someone (DET-03), a bank debt or a
+// card (DET-04) and the repayment strategies (DET-05) have their own addresses
+// under `/app/dettes/`; this page shows the debts and leads to them.
 export default function DebtsPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const location = useLocation();
   const [showArchived, setShowArchived] = useState(false);
-  const [creating, setCreating] = useState(false);
-  // « J'ai prêté » / « On m'a prêté » (P8-13, D-01 / D-02).
-  const [loan, setLoan] = useState(null);
-  const [showComparison, setShowComparison] = useState(false);
-  const [message, setMessage] = useState(null);
+  const [message, setMessage] = useState(location.state?.message ? { kind: 'ok', text: t(location.state.message) } : null);
   useDocumentMeta(t('debts.title'), t('debts.intro'));
 
   const currency = user?.finCurrency ?? 'DZD';
   const debts = useApi(`/fin/debts${showArchived ? '?includeArchived=true' : ''}`);
   const references = useApi('/fin/debts/references');
-  const comparison = useApi(showComparison ? `/fin/debts/comparaison?currency=${currency}` : null);
   const accounts = useApi('/fin/comptes');
   const formulas = useMemo(() => new Map((references.data?.formulas ?? []).map((formula) => [formula.id, formula])), [references.data]);
 
@@ -102,53 +103,19 @@ export default function DebtsPage() {
             <input id="debts-archived" type="checkbox" checked={showArchived} onChange={(event) => setShowArchived(event.target.checked)} />
             {t('debts.showArchived')}
           </label>
-          <button type="button" className="debts-plain" onClick={() => setShowComparison((v) => !v)}>
+          <Button variant="ghost" to="/app/dettes/strategies">
             {t('debts.compareStrategies')}
-          </button>
-          <Button variant="secondary" onClick={() => setLoan(loan === 'lent' ? null : 'lent')} aria-expanded={loan === 'lent'}>
+          </Button>
+          <Button variant="secondary" to="/app/dettes/pret">
             {t('debts.loans.lent')}
           </Button>
-          <Button variant="secondary" onClick={() => setLoan(loan === 'borrowed' ? null : 'borrowed')} aria-expanded={loan === 'borrowed'}>
+          <Button variant="secondary" to="/app/dettes/emprunt">
             {t('debts.loans.borrowed')}
           </Button>
-          <Button onClick={() => setCreating((v) => !v)}>
+          <Button to="/app/dettes/nouvelle">
             <Plus size={16} aria-hidden="true" /> {t('debts.create')}
           </Button>
         </div>
-
-        {loan && <LoanForm direction={loan} accounts={accounts.data?.accounts ?? []} run={(action, key) => run(action, key).then((res) => (res.ok && setLoan(null), res))} />}
-
-        {showComparison && (
-          <div className="debts-comparison">
-            <p className="debts-comparison-intro">{t('debts.compareIntro')}</p>
-            {comparison.status === 'loading' && !comparison.data && <LoadingState />}
-            {comparison.data && comparison.data.avalanche ? (
-              <div className="debts-comparison-cols">
-                <PayoffPlan title={t('debts.avalanche')} plan={comparison.data.avalanche} currency={currency} />
-                <PayoffPlan title={t('debts.snowball')} plan={comparison.data.bouleDeNeige} currency={currency} />
-              </div>
-            ) : (
-              comparison.data && (
-                <Notice variant="action-needed">
-                  {comparison.data.avertissements.map((warning, index) => (
-                    <p key={index}>{warning}</p>
-                  ))}
-                </Notice>
-              )
-            )}
-          </div>
-        )}
-
-        {creating && (
-          <CreateDebtForm
-            defaultCurrency={currency}
-            onDone={() => {
-              setCreating(false);
-              debts.reload();
-            }}
-            onCancel={() => setCreating(false)}
-          />
-        )}
 
         {owed.length === 0 ? (
           <Notice variant="info">{t('debts.none')}</Notice>
@@ -176,7 +143,7 @@ export default function DebtsPage() {
   );
 }
 
-function PayoffPlan({ title, plan, currency }) {
+export function PayoffPlan({ title, plan, currency }) {
   const { t, i18n } = useTranslation();
   const result = plan.resultat;
   return (
@@ -191,7 +158,7 @@ function PayoffPlan({ title, plan, currency }) {
   );
 }
 
-function formatAmount(language, amount, currency) {
+export function formatAmount(language, amount, currency) {
   try {
     return new Intl.NumberFormat(language === 'tzm' ? 'fr' : language, { style: 'currency', currency }).format(amount / 100);
   } catch {
@@ -290,7 +257,7 @@ function DebtRow({ debt, accounts, run }) {
 
 // « J'ai prêté » (D-01) or « On m'a prêté » (D-02): the money really moves the
 // day it happens, between the person's account and the loan's own account.
-function LoanForm({ direction, accounts, run }) {
+export function LoanForm({ direction, accounts, run }) {
   const { t } = useTranslation();
   const usable = accounts.filter((account) => !account.archivedAt && !account.liability && account.type !== 'AC-09');
   const [state, setState] = useState({ counterparty: '', accountId: usable[0]?.id ?? '', amount: '', date: new Date().toISOString().slice(0, 10), dueDate: '' });
@@ -345,7 +312,7 @@ function LoanForm({ direction, accounts, run }) {
   );
 }
 
-function CreateDebtForm({ defaultCurrency, onDone, onCancel }) {
+export function CreateDebtForm({ defaultCurrency, onDone, onCancel }) {
   const { t } = useTranslation();
   const [form, setForm] = useState({ label: '', lender: '', outstandingPrincipal: '', monthlyInstalment: '', rate: '', dueDate: '' });
   const [error, setError] = useState(null);

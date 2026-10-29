@@ -1,0 +1,200 @@
+/* Décodeur de fiche de paie (P8-15). Propriétés logiques (RTL), jetons CSS ;
+   le sens d'une ligne (gain, retenue, à confirmer) est écrit dans son type,
+   la bordure ne fait que le souligner. */
+
+.payslip-lines {
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+}
+
+.payslip-lines legend {
+  margin-block-end: 4px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.payslip-hint,
+.payslip-empty {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-size: 0.88rem;
+}
+
+.payslip-empty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.payslip-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  margin-block-end: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-inline-start-width: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.payslip-line-brut,
+.payslip-explained li.payslip-line-brut {
+  border-inline-start-color: var(--flow-income);
+}
+
+.payslip-line-retenue,
+.payslip-explained li.payslip-line-retenue {
+  border-inline-start-color: var(--flow-expense);
+}
+
+.payslip-line-inconnu,
+.payslip-explained li.payslip-line-inconnu {
+  border-inline-start-color: var(--border-strong);
+}
+
+.payslip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.payslip-remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .payslip-line {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .payslip-line > :not(.payslip-remove) {
+    grid-column: 1;
+  }
+  .payslip-remove {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+.payslip-match,
+.payslip-mismatch {
+  margin: 12px 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+.payslip-match {
+  background: var(--green-bg);
+  color: var(--green);
+}
+
+.payslip-mismatch {
+  background: var(--brass-bg);
+  color: var(--brass);
+}
+
+.payslip-subtitle {
+  margin: 20px 0 8px;
+  font-size: 1rem;
+}
+
+.payslip-explained,
+.payslip-history,
+.payslip-disclaimers {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.payslip-explained li {
+  margin-block-end: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-inline-start-width: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.payslip-explained-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.payslip-explained p {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 0.88rem;
+}
+
+.payslip-disclaimers li {
+  margin-block-end: 4px;
+  color: var(--text);
+  font-size: 0.84rem;
+}
+
+.payslip-actions,
+.payslip-keep,
+.payslip-confirm,
+.payslip-history-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.payslip-actions {
+  flex-direction: column;
+  align-items: flex-start;
+  margin-block-start: 16px;
+}
+
+.payslip-confirm p {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.payslip-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-inline-size: 60ch;
+  font-size: 0.9rem;
+}
+
+.payslip-consent input {
+  margin-block-start: 3px;
+}
+
+.payslip-history li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-block-end: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.payslip-history li > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+}

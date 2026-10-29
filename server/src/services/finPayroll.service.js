@@ -4,6 +4,7 @@ import {
   IRG_MONTHLY_REGIMES,
   IRG_SOURCE,
   PAYROLL_DISCLAIMERS,
+  PAYSLIP_LINE_KINDS,
   SNMG,
   SOCIAL_BRANCHES,
   SOCIAL_TOTALS,
@@ -172,6 +173,8 @@ function explain(kind) {
 export function payrollReference() {
   return {
     snmg: SNMG,
+    // The kinds of line a person can type, so the screen offers exactly these.
+    lignes: PAYSLIP_LINE_KINDS.map(({ key, label, sign, group }) => ({ key, label, sign, group })),
     cotisations: { branches: SOCIAL_BRANCHES, totaux: SOCIAL_TOTALS },
     irg: { bareme: IRG_BRACKETS, regimes: IRG_MONTHLY_REGIMES, primes: IRG_BONUS_RULE, source: IRG_SOURCE },
     avertissements: PAYROLL_DISCLAIMERS,
@@ -180,4 +183,35 @@ export function payrollReference() {
     limite:
       'Ce référentiel ne constitue pas un moteur de paie : les abattements, les régimes particuliers et les dates d’application restent à confirmer auprès des sources citées.',
   };
+}
+
+// ---- the history of payslips (P8-15, the client's answer D5) -----------------
+// Kept only when the person asks, with their consent; read and deleted by them
+// only. What is kept is what they typed and what the decoder made of it.
+const PAYSLIP_SELECT = { id: true, period: true, lines: true, gross: true, value: true, declaredNet: true, currency: true, createdAt: true };
+
+export async function keepPayslip(prisma, userId, { lines, declaredNet = null, period = null }) {
+  const decoded = decodePayslip({ lines, declaredNet, period });
+  return prisma.finPayslip.create({
+    data: {
+      userId,
+      period,
+      lines,
+      gross: decoded.brut.resultat ?? 0,
+      value: decoded.net.resultat ?? 0,
+      declaredNet,
+      source: 'manual',
+      status: 'declared',
+    },
+    select: PAYSLIP_SELECT,
+  });
+}
+
+export const listPayslips = (prisma, userId) =>
+  prisma.finPayslip.findMany({ where: { userId, deletedAt: null }, select: PAYSLIP_SELECT, orderBy: { createdAt: 'desc' } });
+
+// Deleted for real: a payslip kept by choice leaves when its owner says so.
+export async function deletePayslip(prisma, userId, id) {
+  const { count } = await prisma.finPayslip.deleteMany({ where: { id, userId } });
+  return count > 0;
 }

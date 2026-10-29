@@ -117,8 +117,12 @@ describe("another account's provisions", () => {
 
 describe("another account's calendar and plan", () => {
   test('their planned movements are not on the intruder s calendar', async () => {
-    const mine = await t.request('GET', '/fin/calendrier', { user: owner });
-    const theirs = await t.request('GET', '/fin/calendrier', { user: intruder });
+    // The period that holds the fixtures (in 3 and 5 days), not the current
+    // month: at the end of a month they fall in the next one, and the default
+    // view would then show nothing for anyone — the test failed every 27th.
+    const period = `?from=${encodeURIComponent(iso(ago(1)))}&to=${encodeURIComponent(iso(inDays(10)))}`;
+    const mine = await t.request('GET', `/fin/calendrier${period}`, { user: owner });
+    const theirs = await t.request('GET', `/fin/calendrier${period}`, { user: intruder });
     assert.ok(mine.body.calendrier.jours.some((day) => day.evenements.length > 0));
     assert.ok(theirs.body.calendrier.jours.every((day) => day.evenements.length === 0));
   });

@@ -56,8 +56,15 @@ export const createDebtPaymentSchema = z
   .object({ amount: amountSchema.min(1), currency: currencySchema, paidAt: isoDate, accountId: z.string().uuid().optional(), note })
   .strict();
 
+// `currency`: the controller compares the debts of this currency. It was read
+// but not declared, so the strict schema refused every call that sent it —
+// the strategies screen among them (found by P8-25).
 export const payoffQuerySchema = z
-  .object({ extraPayment: z.coerce.number().int().min(0).max(100_000_000).optional(), strategy: z.enum(DEBT_STRATEGIES).optional() })
+  .object({
+    extraPayment: z.coerce.number().int().min(0).max(100_000_000).optional(),
+    strategy: z.enum(DEBT_STRATEGIES).optional(),
+    currency: currencySchema.optional(),
+  })
   .strict();
 
 // « J'ai prêté » / « On m'a prêté » (P8-13, D-01 / D-02): the loan and its

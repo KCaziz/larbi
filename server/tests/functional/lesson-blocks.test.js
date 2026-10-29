@@ -486,3 +486,22 @@ describe('what the learner receives', () => {
 // MySQL/MariaDB (P4-06 follow-up, no production data yet) squashed the whole
 // history into one fresh baseline, which has no pre-block data to convert in
 // the first place. Removed rather than kept on a migration file that is gone.
+
+describe('a text saved while a file is uploaded into the same lesson (2026-10-29)', () => {
+  test('both succeed: the text is not lost to the renumbering of the upload', async () => {
+    // MariaDB 11.6+ refused the save with error 1020 (« record has changed
+    // since last read ») when the block was read before the lesson was locked.
+    const f = await t.formation({ status: 'draft' });
+    const courseId = f.courses[0].id;
+    const created = await t.request('POST', `/admin/courses/${courseId}/blocks`, { user: admin, json: { type: 'text', data: { html: '' } } });
+    const id = created.body.block.id;
+    const [saved, video, pdf] = await Promise.all([
+      t.request('PATCH', `/admin/blocks/${id}`, { user: admin, json: { data: { html: '<p>Bienvenue</p>' } } }),
+      t.request('POST', `/admin/courses/${courseId}/blocks/upload`, { user: admin, form: fileForm(MP4, { name: 'v.mp4', type: 'video/mp4' }) }),
+      t.request('POST', `/admin/courses/${courseId}/blocks/upload`, { user: admin, form: fileForm(PDF, { name: 'd.pdf', type: 'application/pdf' }) }),
+    ]);
+    assert.deepEqual([saved.status, video.status, pdf.status], [200, 201, 201]);
+    const stored = await t.prisma.lessonBlock.findUnique({ where: { id } });
+    assert.match(stored.data.html, /Bienvenue/);
+  });
+});

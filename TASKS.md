@@ -3146,7 +3146,7 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Reste** : l'historique du patrimoine net (`/patrimoine/historique`) lit encore les seuls actifs déclarés → `P8-24`.
 
 ### P8-15 — Outils : un seul catalogue
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P8-02`
 - Durée cible : 2 jours (estimation)
@@ -3157,6 +3157,18 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Précisions du 2026-10-27** : les 17 calculateurs CAL-P01 à CAL-P17 du dernier fichier (onglet `12_Calculateurs`) rejoignent le catalogue, chacun branché sur sa formule PB-F ; le client a ajouté à la main « réserve de sécurité » sous cette liste : un calculateur de réserve y figure (CAL-P10 fonds d'urgence, ou l'actuel CAL-05 du consolidé).
 - **Fiche de paie (réponse du client D5, 2026-10-28)** : constat du même jour, **aucun écran n’existe** — `P4-14` n’a livré que le calcul côté serveur (`POST /api/fin/paie/decoder`). À faire : l’outil « Décodeur de fiche de paie » dans le catalogue, complet : saisie ou import, brut, primes, cotisations, retenues, IRG, net théorique, rapprochement avec la fiche réelle, données extraites confirmées avant calcul, et **historique** des fiches (conservées avec le consentement de la personne, ce que `P4-14` ne faisait pas). +2 jours.
 - **JA09 « Comparer un financement »** (en rouge dans l’ancien cahier) : l’outil existe (`/app/outils/credit`) ; il doit apparaître sous ce nom dans le catalogue.
+
+**Avancement au 2026-10-29 (tâche toujours en cours).**
+- Fait — **décodeur de fiche de paie** (`/app/outils/fiche-de-paie`, `client/src/pages/outils/PayslipPage.jsx`), dans le catalogue des Outils de l’application : saisie des lignes (brut, primes, indemnités, cotisations, IRG, retenues, lignes à confirmer), explication de chaque ligne, brut / retenues / net calculé, rapprochement avec le net inscrit sur la fiche, contrôles (cotisation salarié, SNMG, IRG) ; **historique** des fiches conservées uniquement avec le consentement de la personne, revues ou supprimées par elle (modèle `FinPayslip`, migration `20261029090000_fin_payslips`, `GET`/`POST`/`DELETE /api/fin/paie/fiches`, inclus dans l’inventaire et l’export du centre de confiance) ; **« Ajouter au revenu mensuel »** après une confirmation, par `POST /api/fin/revenus`. Le référentiel `GET /api/fin/paie/reference` donne désormais les types de ligne.
+- Fait — le catalogue nomme l’outil de crédit **« Comparer un financement »** (JA09), et sa note « Le simulateur de crédit sera disponible prochainement », fausse, est remplacée.
+- Fait — **le catalogue unique** (`/app/outils`, `client/src/pages/outils/ToolsCataloguePage.jsx`, servi par `GET /api/fin/outils/catalogue` depuis `server/src/constants/finToolsCatalogue.js`) : 55 entrées — CAL-01 à CAL-30 (sauf CAL-21, collectif, exclu avec sa raison), CAL-V7-01 à 05, CAL-P01 à CAL-P17, le simulateur LY09 et les six outils qui ne sont pas des calculateurs ; recherche (accents ignorés), sept familles, chaque entrée avec son code et ses formules **recopiées du classeur du client**. Une entrée ouvre l’écran qui applique la formule aux données de la personne (« Sur mes données » : c’est ainsi que chaque CAL-P est branché sur sa PB-F, servie par l’écran nommé), un simulateur sur des chiffres saisis (« Simuler »), ou les deux. CAL-V7-02 (scénarios d’épargne) n’existe pas encore : il est montré « à venir », rattaché à `P8-24`. Les familles sont les nôtres : les deux onglets du client n’en donnent pas. La vitrine (`/outils`) garde sa page de présentation, sans les outils réservés à l’application.
+- Vérifié : `tests/functional/finPayslips.test.js` (5/5), `tests/consistency/toolsCatalogue.test.js` (5/5 : chaque calculateur du client listé ou exclu avec sa raison, chaque simulateur et chaque adresse existent, une entrée « à venir » nomme une tâche ouverte), `tests/e2e/fin-payslip-journey.test.js` (4/4), `tests/e2e/fin-tools-catalogue-journey.test.js` (3/3).
+- Fait — **C19, moteur de comparaison** : le moteur de `P4-12` (`POST /api/tools/comparaisons`) n’avait aucun écran générique, seulement ceux des offres d’emploi et de l’adéquation bancaire. Écran « Comparer des options » (`/app/outils/comparer`, `ComparePage.jsx`, entrée `OUT-COMPARER` du catalogue) : choix des critères de C19 (coût, frais, gain net, durée, liquidité et risque notés par la personne, compatibilité, conditions), 2 à 3 options, poids facultatifs — sans poids, pas de score, et la méthode s’affiche avec lui —, donnée manquante dite et jamais remplacée par zéro, **export CSV**, « Approfondir » vers le catalogue.
+- Fait — **SA05, préparation au financement** : chaque élément manquant a son lien « Compléter » vers l’écran qui le remplit ; « Simuler un crédit » et « Comparer des financements » mènent aux deux outils suivants. L’export du dossier existait déjà.
+- En passant : `tests/security/finCalendar.test.js` échouait chaque fin de mois (ses mouvements, à 3 et 5 jours, tombaient dans le mois suivant, hors de la vue par défaut) ; il demande désormais la période qui les contient.
+- Fait — **les favoris** du catalogue (OUT-01) : une étoile sur chaque outil (son état dans `aria-pressed` et dans la forme pleine, jamais la couleur seule), « Mes favoris » en tête du catalogue, un filtre « Favoris » ; propres au compte, partis avec lui (table `tool_favorites`, migration `20261029120000_tool_favorites`, `GET /api/fin/outils/favoris`, `PUT`/`DELETE /api/fin/outils/favoris/:code`, un code hors du catalogue refusé). Vérifié : `tests/functional/finToolFavorites.test.js` (4/4), `tests/e2e/fin-tools-catalogue-journey.test.js` (5/5).
+
+**Réalisé le 2026-10-29.** Reste l’**import** d’une fiche de paie (photo ou PDF, données extraites confirmées avant calcul) : il demande une bibliothèque d’extraction de texte que le projet n’a pas, donc un choix à part → `P8-30`.
 
 ### P8-16 — Santé financière : une page à part entière
 - Statut : `✅ done`
@@ -3190,7 +3202,8 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 **Avancement au 2026-10-28 (tâche toujours en cours).**
 - Fait : les six profils éducatifs du client (`server/src/constants/finEducation.js`, mots des onglets 22 et 16), dont « autre / libre » (`AUT`, migration `20261028140000`) ; les profils COL, COU, FAM ne sont plus proposés et leurs titulaires sont invités à choisir ; une formation se rattache à des profils (`educationProfiles`, case à cocher dans l’éditeur d’administration) ; un parcours est la formation à l’adresse convenue (`parcours-avenir`, `parcours-campus`, `parcours-premier-revenu`, `parcours-mon-argent`, `parcours-epargne-investissement`), avec son certificat existant ; `GET /api/fin/formation/parcours` ; le bloc « Mon parcours » sur Formation, Progression et Certificats ; les liens des pages de formation restent dans l’application (`useCatalogueBase`).
 - Vérifié : `tests/functional/finEducation.test.js` (5/5), `tests/e2e/fin-education-journey.test.js` (3/3), tests profil, formations, apprentissage et passeport verts.
-- **À reprendre en premier** : `tests/e2e/formation-journey.test.js` a 3 échecs non encore analysés (probablement les liens `/catalogue` devenus `/app/formation`, ou le bloc « Mon parcours » au-dessus du catalogue) ; puis lancer `npm test` et `npm run test:e2e` en entier avant de clore.
+- **Les 3 échecs de `formation-journey` (2026-10-29) n’étaient pas liés à cette tâche : un vrai bug de l’éditeur de cours, antérieur.** Un texte tapé dans une leçon puis suivi aussitôt de l’envoi d’un fichier était perdu (« Échec de l’enregistrement »). Cause : MariaDB 11.6 et suivantes isolent une transaction sur l’instantané de sa première lecture et refusent de modifier une ligne changée depuis (erreur 1020) ; la sauvegarde d’un bloc lisait le bloc avant de verrouiller la leçon, pendant que l’envoi renumérotait les blocs. Corrigé : `lockBlockLesson` (`server/src/services/blocks.service.js`) verrouille la leçon avant de lire le bloc, pour modifier, dupliquer et supprimer un bloc ; test de non-régression dans `tests/functional/lesson-blocks.test.js` ; `formation-journey` 14/14.
+- Validation complète (`npm test`, `npm run test:e2e`) lancée le 2026-10-29 avant de clore.
 - Restent dans le périmètre : les missions (contenus attendus du client, réponse E) et le parcours « Premier Revenu » côté saisie (`P8-23`).
 
 ### P8-18 — Alertes et états du moteur personnel
@@ -3284,13 +3297,14 @@ Remplace l'actuel accueil par questions propres à chaque public (`P6-03`) par l
 
 Ce que ces tâches livrées n'ont pas fini, rassemblé ici :
 - **Accueil** (`P8-06`) : l'ajout rapide en feuille glissante sur téléphone, au lieu d'ouvrir la page Mouvements ; l'anneau qui se change en mini-courbe au défilement ; le salaire comme premier revenu affiché (`P8-11`).
-- **Synthèse et rapport** (`P8-10`) : la section R-06 (scénarios d'épargne), la cascade mensuelle et les autres graphiques de l'onglet 13 (seuls G-01, G-02, G-05 et G-07 existent) ; la comparaison de deux mois au choix ; des instantanés de rapport conservés.
+- **Synthèse et rapport** (`P8-10`) : la section R-06 (scénarios d'épargne, qui est aussi le calculateur CAL-V7-02, montré « à venir » dans le catalogue des Outils de `P8-15`), la cascade mensuelle et les autres graphiques de l'onglet 13 (seuls G-01, G-02, G-05 et G-07 existent) ; la comparaison de deux mois au choix ; des instantanés de rapport conservés.
 - **Patrimoine** (`P8-14`) : l'historique du patrimoine net doit lire les comptes, pas seulement les actifs déclarés.
 - **Santé financière** (`P8-16`) : l'historique de l'indice (instantanés conservés) ; les dimensions « objectifs » et « qualité des données » mesurées par leurs modules.
 - **Alertes** (`P8-18`) : la notification du navigateur (Web Push) pour qui l’accepte, en plus de l’application.
+- **Revenus prévus** (relevé par `P8-15`, 2026-10-29) : les revenus déclarés (`fin_incomes`, la base de PB-F009 « reste à allouer ») ne se créent que par « Premiers pas » et par la fiche de paie ; **aucun écran ne les liste, ne les corrige ni ne les archive**, alors que l’API existe (`/api/fin/revenus`). Il faut leur écran (sous Mes comptes ou Budgets), et y faire mener le « Compléter » de la préparation au financement, qui renvoie pour l’instant à « Premiers pas ».
 
 ### P8-25 — Une adresse propre pour chaque écran regroupé
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P8-21`
 - Durée cible : 5 jours (estimation)
@@ -3301,6 +3315,21 @@ La matrice (`server/src/constants/finAppScreens.js`, `LIVRABLES/MATRICE_ECRANS.m
 - **Décision de l’utilisateur (2026-10-28)** : chaque écran a son adresse ; **seuls les petits éléments d’interface restent dans leur page** — confirmations, sélecteurs, filtres rapides, infobulles, petites fenêtres d’appoint. Un écran du cahier (formulaire complet, détail, rapport, stratégie) n’est jamais l’un d’eux.
 - Sur téléphone, un formulaire peut rester une feuille glissante, mais une feuille qui a son adresse.
 - La matrice passe chaque écran de « regroupé » à « page », et le parcours navigateur de `P8-21` l’atteint depuis le menu.
+
+**Réalisé le 2026-10-29 — les 18 écrans ont leur adresse.**
+- **Mes comptes** : COM-02 `/app/comptes/nouveau` et `/app/comptes/:id/modifier`, COM-03 `/app/comptes/:id`, COM-04 `/app/comptes/transfert`.
+- **Mouvements** : TRX-02 `/app/mouvements/nouveau` (`?copie=<id>` pour dupliquer), TRX-03 `/app/mouvements/:id` (avec l’historique des corrections) et `/app/mouvements/:id/modifier`, TRX-04 `/app/mouvements/pointage`. Ajouté côté serveur : `GET /api/fin/transactions/:id`.
+- **Budgets** : BUD-02 `/app/budgets/nouveau` et `/app/budgets/:id/modifier` (libellé, période, récurrence, note), BUD-04 `/app/budgets/:id/methode`, à un clic de la liste.
+- **Objectifs** : OBJ-02 `/app/objectifs/nouveau`, OBJ-03 `/app/objectifs/:id` (l’ancien accordéon de la liste).
+- **Dettes** : DET-02 `/app/dettes/pret`, DET-03 `/app/dettes/emprunt`, DET-04 `/app/dettes/nouvelle`, DET-05 `/app/dettes/strategies`.
+- **Patrimoine** : PAT-02 `/app/patrimoine/:id` — **écran nouveau** (il n’existait pas) : valeur et date d’évaluation, disponibilité, série des valorisations lue dans le journal des corrections, nouvelle valorisation toujours avec sa date, suppression.
+- **Calendrier** : CAL-02 `/app/calendrier/regulier`.
+- **Synthèse** : SYN-02 `/app/synthese/rapport/:mois` (le rapport d’un mois ; une adresse recopiée rouvre ce mois-là, pas le mois courant), REP-01 `/app/synthese/rapports` (les douze derniers mois, chacun avec son rapport, CSV et XLSX).
+- Partout : la page du menu mène à l’écran en un clic ; chaque écran a son lien de retour (`BackLink`) ; un enregistrement ramène à la page d’où l’on vient, qui dit ce qui s’est passé ; un identifiant inconnu ou d’un autre compte est dit, jamais un écran cassé.
+- **La matrice** (`server/src/constants/finAppScreens.js`, `LIVRABLES/MATRICE_ECRANS.md`) : 39 écrans sur 44 ont leur propre page ; restent regroupés ONB-01 et ONB-02 (`P8-23`) et ACC-02 (`P8-24`), plus la recherche et l’aide dans la barre du haut.
+- **Le parcours de `P8-21` est devenu exact** : il clique un lien dont l’adresse **est** celle de l’écran (un `:id` est un vrai identifiant, `:mois` un mois) — avant, le premier lien qui commençait pareil suffisait, et `/app/objectifs/nouveau` passait pour le détail d’un objectif.
+- **Trouvés en chemin, deux vrais défauts** : l’application `/app` n’était pas derrière la barrière de maintenance (corrigé dans `client/src/router/index.jsx`) ; la comparaison des stratégies de remboursement répondait toujours 400, le schéma strict refusant le paramètre `currency` que la page envoie (corrigé dans `server/src/validation/finDebt.schemas.js`, test ajouté dans `tests/functional/finLoan.test.js`).
+- Vérifié : `tests/e2e/fin-addresses-journey.test.js` (14/14), `fin-client-qa-journey` (5 profils, 37 écrans chacun), `fin-money-journey` (9/9), `app-shell` (8/8), `maintenance-journey` (4/4), `fin-j01-j10-journey` (10/10), `finClientQa` (16/16).
 
 ### P8-26 — Réponses du client du 2026-10-28 : corriger ce qui est déjà livré
 - Statut : `✅ done`
@@ -3395,13 +3424,30 @@ Ce qui a été constaté :
 
 **Bloquée : le client prépare lui-même ces éléments.** Ce qui est attendu de lui : la nouvelle vitrine (textes, structure des pages), la présentation des compartiments, et les parcours de formation par profil (avec les contenus de missions et de formation qu’il a dit fournir, réponse E). À réception : refonte de la vitrine (pages publiques, `client/src/pages/` hors `/app`), des pages de présentation des compartiments, et des parcours dans la couche éducative (`P8-17`).
 
+### P8-30 — Fiche de paie : import d’un document
+- Statut : `❌ todo`
+- Priorité : `🟢 low`
+- Dépendances : `P8-15`
+- Durée cible : 2 jours (estimation)
+- Origine : réponse du client D5 (2026-10-28) ; reste de `P8-15`, sortie le 2026-10-29
+
+Le décodeur (`P8-15`) se remplit à la main. Le client demande aussi l’**import** : une fiche en PDF ou en photo, dont les lignes sont extraites puis **confirmées par la personne avant tout calcul**. À décider avant de commencer : la bibliothèque d’extraction (texte d’un PDF ; reconnaissance de caractères pour une photo), qu’elle tourne sur le serveur ou dans le navigateur, et ce que devient le fichier (rien n’est conservé sans consentement, comme l’historique). Une fiche dont l’extraction échoue revient à la saisie manuelle, jamais à un calcul deviné.
+
 ### P8-22 — Moteur budgétaire unique : validation de fin de phase
 - Statut : `❌ todo`
 - Priorité : `🔴 high`
-- Dépendances : `P8-01`, `P8-02`, `P8-03`, `P8-04`, `P8-05`, `P8-06`, `P8-07`, `P8-08`, `P8-09`, `P8-10`, `P8-11`, `P8-12`, `P8-13`, `P8-14`, `P8-15`, `P8-16`, `P8-17`, `P8-18`, `P8-19`, `P8-20`, `P8-21`, `P8-23`, `P8-24`, `P8-25`, `P8-26`, `P8-27`, `P8-28`
+- Dépendances : `P8-01`, `P8-02`, `P8-03`, `P8-04`, `P8-05`, `P8-06`, `P8-07`, `P8-08`, `P8-09`, `P8-10`, `P8-11`, `P8-12`, `P8-13`, `P8-14`, `P8-15`, `P8-16`, `P8-17`, `P8-18`, `P8-19`, `P8-20`, `P8-21`, `P8-23`, `P8-24`, `P8-25`, `P8-26`, `P8-27`, `P8-28`, `P8-30`
 - Durée cible : 1 jour (estimation)
 
 Critères : les 44 écrans du consolidé sont livrés, chacun à sa propre adresse et atteignable depuis la navigation ; les seize contrôles QA du client passent ; aucun calcul du diagnostic n°2 n'est encore faux ; démonstration au client sur deux comptes, un lycéen et un salarié, pour montrer qu'ils ont la même application et une formation différente.
+
+**Préparé le 2026-10-29 — les parcours navigateur réalignés sur l’application `/app`.** La suite navigateur avait 34 échecs, dont 30 déjà présents la veille : des parcours écrits pour les écrans d’avant la Phase 8, jamais repris quand `P8-02` à `P8-26` les ont remplacés. Repris, chacun sur l’écran qui existe aujourd’hui et sans affaiblir ce qu’il prouve :
+- `fin-qa-publics-journey` : les huit publics ont **le même** « Aujourd’hui » et chacun **sa** couche de formation (les trois publics collectifs sont invités à choisir) — l’ancienne version cherchait un tableau de bord par public, conception remplacée par le client (ARC-03, QA-V7-01).
+- `fin-navigation-journey` (P1-12) : les cinq sections du client à côté de la page, la barre du bas et « Plus » sur téléphone, le clavier seul, le focus visible, `aria-current`, le mineur qui perd seulement les entrées réservées aux majeurs, la période qui change les chiffres répondus par le serveur, la cloche et l’assistant.
+- `fin-money-journey` (P6-03, P6-04) : premiers pas sous `/app/parametres/premiers-pas`, saisie sur Mouvements, synthèse recalculée, doublon **demandé avant** l’enregistrement (comportement de `P8-07`), date future refusée puis acceptée en « prévue », filtre, recatégorisation par « Corriger », fictif jamais dans les totaux réels, arabe.
+- `fin-j01-j10-journey`, `blog-journey`, `fincludia-journey`, `fin-categories-journey` : des vérifications qui lisaient la page avant l’arrivée des données (elles attendent désormais le texte), l’ancien titre d’« Aujourd’hui », l’adresse `/app/apprendre/…` d’une personne connectée, et le libellé d’une catégorie désormais précédé de son icône (`P8-27` ; le nom a maintenant son propre élément, `.fincat-name`).
+- **Un vrai défaut trouvé ainsi** : imprimer depuis l’application imprimait aussi la barre du haut, le menu et la barre du bas (une facture A4 sur deux pages). Règles d’impression communes ajoutées à `client/src/layouts/AppLayout.css`.
+- Une unité aussi : la cible de réserve du profil « autre / libre » (`AUT`, `P8-17`) manquait à la grille A ; elle y est, sans cible, avec la raison, comme EPG.
 
 ---
 
@@ -3694,7 +3740,7 @@ Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau
 - **Phase 5 (sécurité, disponibilité, livraison)** — la sécurité est faite (`P5-01`, `P5-02`, `P5-03` `✅ done`, audités sur preuve le 2026-10-18 : 38 fichiers de tests de sécurité, 364 cas). `P5-04` (sauvegardes) `🚧 in-progress` : les scripts existent et ont été testés réellement (`npm run backup`, `npm run backup:verify`), mais où les conserver dépend encore de l'hébergement définitif. `P5-05`/`P5-06` restent `❌ todo`, en attente de `P5-04`. `P5-07` (livrables contractuels) `🚧 in-progress`.
 - **Phase 6 (FINCLUDIA, gestion financière personnelle)** — **`✅ done` sur 23 des 24 tâches** (`P6-24` fermée le 2026-10-28). Les deux modules financiers de P6-02 à P6-20, P6-22 et P6-23 sont faits et testés (onboarding, « Mon argent », budgets, objectifs, réserve, dettes, patrimoine, portefeuille fictif, espaces partagés, notifications, centre de confiance, recherche globale, personnalisation des 8 parcours, graphiques de tableaux de bord). `P6-21` (validation de fin de phase) est close depuis le 2026-10-18 : les 10 parcours J01-J10 **et** les 8 scénarios par public passent en navigateur. Reste `⛔ blocked` : `P6-01` (cadrage, voir plus bas). `P6-24` (comptes financiers coordonnés) est **débloquée** depuis le 2026-10-27 : le client a choisi des comptes qui portent chaque opération ; réalisation par `P8-03` et `P8-05`. **Plusieurs tâches `✅ done` portent désormais un avertissement daté** (`P6-04`, `P6-05`, `P6-06`, `P6-08`, `P6-09`) : leurs erreurs ou écarts sont nommés sous la tâche, et corrigés en Phase 8.
 - **Phase 7 (périmètre contractuel ERP)** — alerte de périmètre, pas un planning. `P7-02` (socle de trésorerie) est fait. `P7-01`, `P7-03`, `P7-04`, `P7-05` sont `⛔ blocked`, chacun en attente d'un cahier des charges ou d'un référentiel que le client n'a pas encore fourni pour cette partie.
-- **Phase 8 (Gestion budgétaire, moteur budgétaire unique)** — **en cours depuis le 2026-10-27 : 16 tâches sur 25 terminées.** `P8-01` à `P8-14`, `P8-16` et `P8-21` (les seize contrôles du client et la règle « trouvable », 2026-10-28) sont faites : application sous `/app` avec la navigation finale, comptes et transferts, calculs faux corrigés, Mes comptes, Accueil, Mouvements, 125 catégories, budgets, Synthèse et rapport, Calendrier, Objectifs & sécurité, Dettes, Patrimoine, Santé financière. Restent `P8-15` (Outils), `P8-17` (Formation), `P8-18` à `P8-20`, `P8-23` (Premiers pas), `P8-24` (reliquats des écrans livrés), `P8-25` (une adresse pour les 18 écrans regroupés), `P8-26` (les réponses du client du 2026-10-28 appliquées aux écrans déjà livrés), `P8-27` (couleurs des catégories et des flux, 3 suggestions), `P8-28` (comparateurs et fiches bancaires), `P8-29` (refonte de la vitrine, bloquée en attente des éléments du client) et la validation `P8-22`. `P6-24` (comptes multiples) est fermée avec `P8-03` et `P8-05`.
+- **Phase 8 (Gestion budgétaire, moteur budgétaire unique)** — **en cours depuis le 2026-10-27 : 22 tâches sur 30 terminées (2026-10-29).** `P8-01` à `P8-16`, `P8-18`, `P8-21`, `P8-25`, `P8-26`, `P8-27` et `P8-28` sont faites : application sous `/app` avec la navigation finale, comptes et transferts, calculs faux corrigés, Mes comptes, Accueil, Mouvements, 125 catégories, budgets, Synthèse et rapport, Calendrier, Objectifs & sécurité, Dettes, Patrimoine, Santé financière, le catalogue unique des Outils (avec la fiche de paie, la comparaison C19 et les favoris), les alertes, les couleurs et les trois suggestions, les comparateurs et fiches bancaires, les seize contrôles du client. Restent `P8-17` (Formation, en cours : en attente de la validation complète), `P8-19`, `P8-20`, `P8-23` (Premiers pas), `P8-24` (reliquats des écrans livrés), `P8-30` (import d’une fiche de paie), `P8-29` (refonte de la vitrine, bloquée en attente des éléments du client) et la validation `P8-22`. `P6-24` (comptes multiples) est fermée avec `P8-03` et `P8-05`.
 - **Phase 9 (Gestion commune, gestion collective)** — ouverte le 2026-10-27 ; rien de commencé. Les décisions de cadrage sont prises (`P9-01` `✅ done`, 2026-10-27). Elle reprend `P6-13` à `P6-15` dans une solution séparée et y ajoute les tâches collectives, les budgets communs et le calendrier unifié.
 
 ## Ce qui bloque encore réellement, et qui doit trancher

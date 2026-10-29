@@ -1,14 +1,14 @@
 # Matrice des livrables et recette
 
-> Généré le 2026-10-28 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
+> Généré le 2026-10-29 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
 
 Livrable de l'**annexe 2** du contrat, dont le tableau est fourni vide (livrable / prévu / livré / test / réserve).
 
 La colonne « Test / résultat » renvoie à la suite automatisée : `npm test` dans `server/`. La colonne « Réserve » reprend ce que le plan déclare bloqué, sans l'adoucir — l'article 7 distingue les anomalies bloquantes, majeures et mineures, et une donnée que le client doit fournir n'est aucune des trois : c'est une réserve.
 
-**103 livrables sur 137** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
+**105 livrables sur 138** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
 
-Suite de tests : 145 fichiers (consistency : 2, e2e : 29, functional : 45, security : 38, unit : 31).
+Suite de tests : 151 fichiers (consistency : 3, e2e : 32, functional : 47, security : 38, unit : 31).
 
 | Livrable | Prévu | Livré | Test / résultat | Réserve / correction |
 | --- | --- | --- | --- | --- |
@@ -121,7 +121,7 @@ Suite de tests : 145 fichiers (consistency : 2, e2e : 29, functional : 45, secur
 | `P8-12` — Objectifs & sécurité : un seul compartiment, et des objectifs qui simulent | Oui | Oui | Suite automatisée verte |  |
 | `P8-13` — Dettes et créances | Oui | Oui | Suite automatisée verte |  |
 | `P8-14` — Patrimoine réel et portefeuille fictif | Oui | Oui | Suite automatisée verte |  |
-| `P8-15` — Outils : un seul catalogue | Oui | Non | — | Non commencé |
+| `P8-15` — Outils : un seul catalogue | Oui | Oui | Suite automatisée verte |  |
 | `P8-16` — Santé financière : une page à part entière | Oui | Oui | Suite automatisée verte |  |
 | `P8-17` — Formation, progression et certificats : la seule couche qui varie selon le profil | Oui | En cours | — |  |
 | `P8-18` — Alertes et états du moteur personnel | Oui | Oui | Suite automatisée verte |  |
@@ -130,11 +130,12 @@ Suite de tests : 145 fichiers (consistency : 2, e2e : 29, functional : 45, secur
 | `P8-21` — Contrôles du client et règle « trouvable » | Oui | Oui | Suite automatisée verte |  |
 | `P8-23` — Premiers pas : le parcours de premier démarrage (P0 à P7) | Oui | Non | — | Non commencé |
 | `P8-24` — Reliquats des écrans livrés le 2026-10-27 | Oui | Non | — | Non commencé |
-| `P8-25` — Une adresse propre pour chaque écran regroupé | Oui | Non | — | Non commencé |
+| `P8-25` — Une adresse propre pour chaque écran regroupé | Oui | Oui | Suite automatisée verte |  |
 | `P8-26` — Réponses du client du 2026-10-28 : corriger ce qui est déjà livré | Oui | Oui | Suite automatisée verte |  |
 | `P8-27` — Retours du client du 2026-10-28 : couleurs des catégories et des flux, et les 3 suggestions | Oui | Oui | Suite automatisée verte |  |
 | `P8-28` — Comparateurs et produits bancaires : affichage, rubriques vides, fiches du référentiel | Oui | Oui | Suite automatisée verte |  |
 | `P8-29` — Vitrine, compartiments et parcours de formation : refonte | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
+| `P8-30` — Fiche de paie : import d’un document | Oui | Non | — | Non commencé |
 | `P8-22` — Moteur budgétaire unique : validation de fin de phase | Oui | Non | — | Non commencé |
 | `P9-01` — Gestion commune : décisions de cadrage | Oui | Oui | Suite automatisée verte |  |
 | `P9-02` — Gestion commune : une solution à part, une adresse par espace, un tableau de bord d'espace | Oui | Non | — | Non commencé |

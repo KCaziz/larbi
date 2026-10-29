@@ -116,7 +116,8 @@ describe('the application shell, end to end', { skip: findChrome() ? false : 'no
     assert.ok(await b.waitText(fr.movements.tabs.clearing), 'the tabs');
     await b.waitFor("document.querySelectorAll('.money-row').length === 3", 'three movements');
     await b.shot('app-movements');
-    await b.ev("[...document.querySelectorAll('.movements-tab')].at(-1).click()");
+    // The clearing is its own screen now (TRX-04, P8-25), one click away.
+    assert.ok(await b.clickWhere("e => e.getAttribute('href') === '/app/mouvements/pointage'"), 'the clearing screen is offered');
     assert.ok(await b.waitText(fr.movements.clearingRate), 'the clearing rate');
   });
 

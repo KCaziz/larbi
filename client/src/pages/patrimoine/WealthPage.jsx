@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Landmark, Plus, Trash2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
@@ -29,7 +30,8 @@ export default function WealthPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const currency = user?.finCurrency ?? 'DZD';
-  const [message, setMessage] = useState(null);
+  const location = useLocation();
+  const [message, setMessage] = useState(location.state?.message ? { kind: 'ok', text: t(location.state.message) } : null);
   const [adding, setAdding] = useState(false);
   const assetsRef = useRef(null);
   useDocumentMeta(t('wealth.title'), t('wealth.intro'));
@@ -143,7 +145,10 @@ export default function WealthPage() {
             <ul className="wealth-list">
               {view.actifs.map((row) => (
                 <li key={row.id} className={row.valeurAncienne ? 'wealth-row wealth-row-stale' : 'wealth-row'}>
-                  <span className="wealth-row-label">{row.label}</span>
+                  {/* PAT-02: each asset opens at its own address (P8-25). */}
+                  <Link className="wealth-row-label" to={`/app/patrimoine/${row.id}`}>
+                    {row.label}
+                  </Link>
                   <span className="wealth-row-meta">
                     <span className="wealth-tag">{t(`wealth.kinds.${row.kind}`, row.kind)}</span>
                     <span className="wealth-tag">{t(`wealth.liquidity.${row.liquidity}`)}</span>

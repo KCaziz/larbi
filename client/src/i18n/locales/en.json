@@ -334,20 +334,16 @@
       "title": "Bank comparator",
       "body": "Compare banking conditions from 13 Algerian banks: account fees, cards, savings, loans and more."
     },
-    "funding": {
-      "title": "Prepare a loan application",
-      "body": "Before a new loan: your file, your ratios and what a bank will look at, from your own figures."
-    },
     "credit": {
-      "title": "Credit simulator",
-      "body": "Estimate of the credit you may obtain, based on your financial profile and the banks' conditions."
+      "title": "Compare a financing",
+      "body": "Simulate a loan on your own figures: instalment, total cost, debt-to-income ratio, and the banks’ offers with their criteria."
     },
     "invoice": {
       "title": "Invoice generator",
       "body": "Create invoices (client, provider, products/services, totals) with PDF and Excel export."
     },
     "accessNote": "The bank comparator and the simulators are free to use. The invoice generator needs an account.",
-    "notice": "The credit simulator will be available soon.",
+    "notice": "Simulations compute on the figures you enter: the bank alone makes the decision.",
     "simulators": {
       "title": "Simulators",
       "body": "Budget, savings, goals, inflation: explained calculations, every figure showing its formula."
@@ -3117,7 +3113,12 @@
         "unclassified": "To classify",
         "byEssential": "By « essential »"
       }
-    }
+    },
+    "editTitle": "Edit the budget",
+    "notFound": "This budget does not exist, or it is not yours.",
+    "backToBudget": "Back to the budget",
+    "created": "Budget created: add its envelopes.",
+    "edit": "Edit"
   },
   "goals": {
     "title": "Goals",
@@ -3186,7 +3187,10 @@
       "monthsToReach": "Months to reach the target",
       "atHorizon": "At the horizon: {{capital}} for a target of {{target}} (inflation included).",
       "disclaimer": "A simulation with your assumptions: neither a promise nor advice. Nothing is saved."
-    }
+    },
+    "backToList": "Back to goals",
+    "notFound": "This goal does not exist, or it is not yours.",
+    "created": "Goal created."
   },
   "debts": {
     "title": "Debts",
@@ -3244,7 +3248,9 @@
       "dueDate": "Repayment expected on (optional)",
       "saved": "Loan saved, with the real movement on your account.",
       "noAccount": "First create an account in « My accounts »."
-    }
+    },
+    "backToList": "Back to my debts",
+    "created": "Debt saved."
   },
   "reserve": {
     "title": "Safety reserve",
@@ -3395,7 +3401,8 @@
       "before": "{{count}} days before",
       "day": "On the day",
       "after": "The day after"
-    }
+    },
+    "backToCalendar": "Back to the calendar"
   },
   "today": {
     "title": "Today",
@@ -3527,14 +3534,22 @@
       "value": "Value",
       "valuedAt": "Valuation date",
       "liquidity": "Availability",
-      "holder": "Where / with whom"
+      "holder": "Where / with whom",
+      "reason": "Why (optional)"
     },
     "save": "Save",
     "cancel": "Cancel",
     "errors": {
       "amount": "Enter a value as a whole number.",
       "refused": "This operation was refused. Check the date and the amount."
-    }
+    },
+    "notFound": "This asset does not exist, or it is not yours.",
+    "backToList": "Back to wealth",
+    "valuationsTitle": "Its valuations",
+    "noValuation": "No revaluation since it was entered.",
+    "revalueTitle": "New valuation",
+    "revalued": "Value updated, with its date.",
+    "deleteShort": "Delete"
   },
   "paper": {
     "title": "Practice portfolio",
@@ -3854,7 +3869,10 @@
     "exportConsentHint": "The export needs your explicit consent every time.",
     "errors": {
       "refused": "This action was refused."
-    }
+    },
+    "complete": "Complete",
+    "simulate": "Simulate a loan",
+    "compare": "Compare financings"
   },
   "passport": {
     "title": "Financial knowledge passport",
@@ -4283,7 +4301,17 @@
       "overdrawn": "This account is overdrawn.",
       "overdraftExceeded": "This account is beyond its authorised overdraft.",
       "belowMinimum": "The balance is below the threshold you chose."
-    }
+    },
+    "addTitle": "New account",
+    "editTitle": "Edit the account",
+    "backToAccount": "Back to the account",
+    "backToList": "Back to my accounts",
+    "notFound": "This account does not exist, or it is not yours.",
+    "detailTitle": "Account detail",
+    "balance": "Balance",
+    "transferTitle": "New transfer",
+    "transferNeedsTwo": "A transfer needs at least two open accounts.",
+    "detail": "Detail"
   },
   "health": {
     "title": "Financial health",
@@ -4357,7 +4385,21 @@
     "tagColor": "Colour",
     "tagAuto": "Apply automatically to the category",
     "tagAutoNone": "Never automatically",
-    "addTag": "Add the tag"
+    "addTag": "Add the tag",
+    "backToList": "Back to movements",
+    "backToMovement": "Back to the movement",
+    "notFound": "This movement does not exist, or it is not yours.",
+    "detailTitle": "Movement detail",
+    "trailTitle": "Correction history",
+    "trailEmpty": "No correction: this movement is as it was entered.",
+    "trailActions": {
+      "create": "entered",
+      "correct": "corrected",
+      "archive": "archived",
+      "restore": "restored",
+      "delete": "deleted"
+    },
+    "clearingIntro": "What is left to check, one click per movement."
   },
   "appHome": {
     "title": "Home",
@@ -4426,7 +4468,16 @@
       "R10": "Real assets",
       "R11": "Data quality",
       "R12": "Learning and actions"
-    }
+    },
+    "reportTitle": "Monthly report — {{month}}",
+    "backToReports": "Back to reports",
+    "openReport": "Open this month’s report",
+    "allReports": "All reports",
+    "reportsTitle": "Reports & downloads",
+    "reportsIntro": "Each month has its report, to read or to download.",
+    "backToSynthesis": "Back to the overview",
+    "downloadAs": "Download {{month}} as {{format}}",
+    "pdfHint": "For a PDF: open a month’s report, then « PDF » prints it as it shows."
   },
   "education": {
     "yourParcours": "Your path: {{name}}",
@@ -4445,5 +4496,180 @@
     "recommended": "Recommended for you",
     "forYou": "For your profile",
     "done": "Completed"
+  },
+  "payslip": {
+    "title": "Payslip decoder",
+    "intro": "Enter the lines of your payslip: we explain each one, check the arithmetic and compare it with the net printed on it.",
+    "period": "Month of the payslip",
+    "declaredNet": "Net printed on the payslip",
+    "declaredNetHint": "Optional: to compare it with the computed net.",
+    "lines": "Payslip lines",
+    "linesHint": "Enter each amount as it appears on the payslip, as a positive number: a deduction is subtracted according to its type.",
+    "kind": "Line type",
+    "label": "Label on the payslip",
+    "value": "Amount",
+    "addLine": "Add a line",
+    "removeLine": "Remove line {{n}}",
+    "decode": "Decode the payslip",
+    "resultTitle": "Your payslip, explained",
+    "gross": "Gross",
+    "deductions": "Deductions",
+    "net": "Computed net",
+    "gap": "gap: {{gap}}",
+    "matches": "The computed net matches the net printed on the payslip ({{net}}).",
+    "differs": "The net printed on the payslip is {{net}}: a gap of {{gap}} with the computed net.",
+    "explained": "What each line means",
+    "toConfirm_one": "{{count}} line is not recognised: it is not counted until you give it a type.",
+    "toConfirm_other": "{{count}} lines are not recognised: they are not counted until you give them a type.",
+    "irgRegime": "Income tax (IRG) at this income level:",
+    "consent": "I agree that FINCLUDIA keeps this payslip in my history. I can delete it at any time.",
+    "keep": "Keep in my history",
+    "kept": "Payslip kept in your history.",
+    "addIncome": "Add to monthly income",
+    "confirmIncome": "Add a monthly income of {{net}} from today?",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "incomeAdded": "Monthly income added.",
+    "seeIncomes": "See my overview",
+    "incomeLabel": "Salary (payslip)",
+    "incomeLabelPeriod": "Salary (payslip {{period}})",
+    "historyTitle": "My kept payslips",
+    "historyIntro": "Only the ones you chose to keep.",
+    "historyEmpty": "No payslip kept.",
+    "reopen": "Review",
+    "delete": "Delete",
+    "deleteOne": "Delete payslip {{period}}",
+    "confirmDelete": "Delete permanently",
+    "errors": {
+      "input": "Check the amounts: at least one line, positive numbers."
+    },
+    "kinds": {
+      "base_salary": "Base salary",
+      "seniority": "Seniority allowance",
+      "bonus": "Bonus",
+      "allowance": "Allowance",
+      "overtime": "Overtime",
+      "social_employee": "Employee social contribution",
+      "irg": "Income tax (IRG)",
+      "advance": "Advance",
+      "other_deduction": "Other deduction",
+      "unknown": "Line to confirm"
+    }
+  },
+  "toolsCatalogue": {
+    "title": "Tools",
+    "intro": "All the calculators and tools of FINCLUDIA: on your own data, or to simulate with figures you enter.",
+    "search": "Search for a tool",
+    "families": "Tool families",
+    "family": {
+      "all": "All",
+      "favorites": "Favourites",
+      "budget": "Budget and spending",
+      "savings": "Savings and goals",
+      "debt": "Debts and financing",
+      "wealth": "Wealth and investments",
+      "income": "Income and work",
+      "analysis": "Analysis and health",
+      "practical": "Practical tools"
+    },
+    "count_one": "{{count}} tool",
+    "count_other": "{{count}} tools",
+    "formulas": "Formulas: {{formulas}}",
+    "pending": "Coming: this calculator is not built yet.",
+    "open": "Open",
+    "onMyData": "On my data",
+    "simulate": "Simulate",
+    "empty": "No tool matches this search.",
+    "items": {
+      "CAL-01": "Monthly budget",
+      "CAL-02": "Budget to the end of the month",
+      "CAL-03": "Budget envelope",
+      "CAL-04": "Savings capacity",
+      "CAL-05": "Safety reserve",
+      "CAL-06": "Goal without return",
+      "CAL-07": "Goal with return",
+      "CAL-08": "Inflation / purchasing power",
+      "CAL-09": "Debt-to-income ratio",
+      "CAL-10": "Financing instalment",
+      "CAL-11": "Early repayment",
+      "CAL-12": "Debt strategies",
+      "CAL-13": "Net worth",
+      "CAL-14": "Paper portfolio",
+      "CAL-15": "Student financial autonomy",
+      "CAL-16": "Study / yearly provision",
+      "CAL-17": "First salary",
+      "CAL-18": "Job offer comparator",
+      "CAL-19": "Subscriptions / recurring payments",
+      "CAL-24": "Funding readiness",
+      "CAL-25": "Compare a financing",
+      "CAL-26": "Educational risk profile",
+      "CAL-27": "Financial knowledge index",
+      "CAL-28": "Financial health index",
+      "CAL-29": "Indicative retirement projection",
+      "CAL-30": "Housing / property simulation",
+      "CAL-V7-01": "50/30/20 analysis",
+      "CAL-V7-02": "Monthly savings scenarios",
+      "CAL-V7-03": "Monthly clearing",
+      "CAL-V7-04": "End-of-month balance projection",
+      "CAL-V7-05": "Monthly report",
+      "CAL-P01": "Account balance",
+      "CAL-P02": "Total balance",
+      "CAL-P03": "Net flow",
+      "CAL-P04": "Remaining budget",
+      "CAL-P05": "Left to allocate",
+      "CAL-P06": "Daily average",
+      "CAL-P07": "End-of-period projection",
+      "CAL-P08": "Daily budget available",
+      "CAL-P09": "Goal",
+      "CAL-P10": "Emergency fund",
+      "CAL-P11": "Debt-to-income ratio",
+      "CAL-P12": "Repayment strategy",
+      "CAL-P13": "Regular payment",
+      "CAL-P14": "Planned vs actual",
+      "CAL-P15": "Trend",
+      "CAL-P16": "Loan instalment",
+      "CAL-P17": "Accounts net worth",
+      "LY09": "Prepare my studies",
+      "OUT-COMPARATEUR": "Bank comparator",
+      "OUT-POSTAL": "Algérie Poste / CCP",
+      "OUT-ATELIER": "Simulation workshop",
+      "OUT-PAIE": "Payslip decoder",
+      "OUT-FACTURE": "Invoice generator",
+      "OUT-EXPLORATEUR": "Explorer",
+      "OUT-COMPARER": "Compare options"
+    },
+    "myFavorites": "My favourites",
+    "favorite": "Add “{{name}}” to my favourites",
+    "unfavorite": "Remove “{{name}}” from my favourites",
+    "favoriteError": "The favourite could not be saved. Try again.",
+    "noFavorite": "No favourite yet: tap the star of a tool to keep it here."
+  },
+  "compare": {
+    "title": "Compare options",
+    "intro": "Two or three options — offers, scenarios, solutions — compared criterion by criterion.",
+    "disclaimer": "No hidden ranking: a score appears only if you give weights, and its method is shown with it. Missing data is flagged, never replaced by zero.",
+    "criteriaTitle": "Criteria to compare",
+    "optionNumber": "Option {{number}}",
+    "label": "Option name",
+    "addOption": "Add an option",
+    "units": {
+      "money": "{{currency}}",
+      "months": "months",
+      "points": "your grade out of 10",
+      "ratio": "%",
+      "text": "text"
+    },
+    "useScore": "Compute a weighted score",
+    "scoreNote": "Optional. You choose the weight of each criterion; without weights there is no score.",
+    "weightOf": "Weight of “{{criterion}}”",
+    "compare": "Compare",
+    "resultsTitle": "The comparison table",
+    "export": "Export (CSV)",
+    "deepen": "Go further with the tools",
+    "errors": {
+      "noCriterion": "Choose at least one criterion.",
+      "labels": "Give each option a name.",
+      "input": "These figures cannot be compared: check the values entered."
+    }
   }
 }

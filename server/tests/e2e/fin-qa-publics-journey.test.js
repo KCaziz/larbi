@@ -1,3 +1,4 @@
+import '../helpers/setup-env.js';
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -5,42 +6,36 @@ import path from 'node:path';
 import { Browser, findChrome, startSite } from '../helpers/browser.js';
 import { boot } from '../helpers/server.js';
 import { SERVER_DIR } from '../helpers/env.js';
+import { educationProfileByCode } from '../../src/constants/finEducation.js';
 
 // The 8 scenarios per public of the client's QA tab (`16_QA_Tests`), in a
-// real browser — the browser-journey half of `P6-21`'s remaining criterion.
-// They are deliberately NOT the ten J01-J10 chains again (`fin-j01-j10-
-// journey.test.js` already covers one full adult account through each
-// functional chain): this file walks the OTHER dimension, the account's
-// PUBLIC, and proves that each of the 8 gets its own working home screen
-// rather than one generic page pretending to be eight.
+// real browser.
+//
+// The rule they prove changed with the consolidated cahier (ARC-03,
+// QA-V7-01, P8-01): budget management is THE SAME for every profile — « toutes
+// les fonctions budget restent visibles ; l'utilisateur choisit ce qu'il
+// renseigne » — and the education layer is the only one that varies (P8-17).
+// The former version of this file asserted one dashboard per public, a design
+// the client has since replaced; it failed on screens that no longer exist.
 //
 // For each public, the test:
-//   1. creates an account carrying that public (and, for the one public that
-//      can be a minor — the lycéen — an age bracket that actually is one);
-//   2. opens "Aujourd'hui" and asserts the page renders ITS OWN dashboard
-//      subtitle (`finDashboard.js`'s `title` key, read from the SAME source
-//      the server uses, never retyped) — proving the per-public branch for
-//      that specific public does not crash and is not the default one.
-//
-// What this does NOT assert: that a screen outside a public's journey map is
-// UNREACHABLE. `finNavigation.js` says so itself — hiding a route from the
-// menu is a convenience, never the protection; the actual guard is
-// `requireAdult` on the API, already covered by the security suites. A
-// browser test asserting a 404 on a route that simply isn't gated would be
-// asserting something the code never promised.
+//   1. creates an account with that public (the lycéen with a minor's age
+//      bracket, the only public the client allows to be a minor);
+//   2. opens « Aujourd'hui » inside the application: the same screen for all;
+//   3. opens Formation: the parcours of THIS profile, read from the server's
+//      own constant — or, for the three collective publics that left for
+//      « Gestion commune », the invitation to choose one of the six.
 const fr = JSON.parse(readFileSync(path.resolve(SERVER_DIR, '../client/src/i18n/locales/fr.json'), 'utf8'));
 
-// One sensible age bracket per public — adult for all but the lycéen, who is
-// the only public the client's own map allows to be a minor (`19_Mineurs`).
 const PUBLICS = [
-  { code: 'LYC', finAgeRange: '13-18', dashboardKey: 'myWeek' },
-  { code: 'ETU', finAgeRange: '19-24', dashboardKey: 'student' },
-  { code: 'JAC', finAgeRange: '19-24', dashboardKey: 'firstIncome' },
-  { code: 'SAL', finAgeRange: '25-34', dashboardKey: 'health' },
-  { code: 'COL', finAgeRange: '19-24', dashboardKey: 'flatshare' },
-  { code: 'COU', finAgeRange: '25-34', dashboardKey: 'couple' },
-  { code: 'FAM', finAgeRange: '35-49', dashboardKey: 'household' },
-  { code: 'EPG', finAgeRange: '25-34', dashboardKey: 'savings' },
+  { code: 'LYC', finAgeRange: '13-18' },
+  { code: 'ETU', finAgeRange: '19-24' },
+  { code: 'JAC', finAgeRange: '19-24' },
+  { code: 'SAL', finAgeRange: '25-34' },
+  { code: 'COL', finAgeRange: '19-24' },
+  { code: 'COU', finAgeRange: '25-34' },
+  { code: 'FAM', finAgeRange: '35-49' },
+  { code: 'EPG', finAgeRange: '25-34' },
 ];
 
 describe(
@@ -55,6 +50,8 @@ describe(
       t = await boot();
       site = await startSite(t.baseUrl);
       b = await Browser.launch();
+      await b.goto(`${site.url}/a-propos`);
+      await b.ev("localStorage.setItem('lang', 'fr')");
     });
 
     after(async () => {
@@ -63,44 +60,30 @@ describe(
       await t?.close();
     });
 
-    const shows = (what) => b.ev(b.hasText(what));
-
-    const setSession = async (user) => {
+    const account = async ({ finPublic, finAgeRange }) => {
+      const user = await t.adult({ finPublic, finAgeRange, finCurrency: 'DZD', finOnboardedAt: new Date() });
       await b.clearCookies();
       await b.send('Network.setCookie', { name: 'session', value: t.signSession(user.id), url: site.url, httpOnly: true });
-    };
-
-    const account = async ({ finPublic, finAgeRange }) => {
-      const created = await t.user();
-      await t.prisma.user.update({ where: { id: created.id }, data: { finPublic, finCurrency: 'DZD', finAgeRange } });
-      const user = await t.prisma.user.findUnique({ where: { id: created.id } });
-      await setSession(user);
       return user;
     };
 
-    const open = async (route, bodyText, what) => {
-      await b.goto(`${site.url}${route}`);
-      assert.ok(await b.waitText(bodyText), `${what} s'affiche`);
-    };
-
-    for (const { code, finAgeRange, dashboardKey } of PUBLICS) {
-      test(`${code} — son propre tableau de bord « Aujourd'hui »`, async () => {
+    for (const { code, finAgeRange } of PUBLICS) {
+      test(`${code} — le même « Aujourd'hui » que tous, et sa propre couche de formation`, async () => {
         await t.reset();
         await account({ finPublic: code, finAgeRange });
 
-        // The generic proof first: the page itself renders (the figures
-        // section is there, not an error or an infinite skeleton).
-        await open('/aujourdhui', fr.today.figuresTitle, "l'accueil Aujourd'hui");
+        await b.goto(`${site.url}/app/aujourdhui`);
+        assert.ok(await b.waitText(fr.today.questionsTitle), `« Aujourd'hui » s'affiche pour ${code}`);
 
-        // Then the proof that matters for THIS test: the subtitle is the
-        // one this public's own dashboard carries, read from the client's
-        // own wording — never the default ("Vos chiffres du mois, et la
-        // suite.") that every public would show if the branch silently
-        // fell through to it.
-        const own = fr.today.dashboards[dashboardKey];
-        const fallback = fr.today.dashboards.general;
-        assert.ok(own && own !== fallback, `${code} a bien son propre texte de tableau de bord`);
-        assert.ok(await shows(own), `${code} affiche « ${own} »`);
+        await b.goto(`${site.url}/app/formation`);
+        const profile = educationProfileByCode(code);
+        if (profile) {
+          const parcours = fr.education.parcoursPreparing.replace('{{name}}', profile.parcours.name);
+          assert.ok(await b.waitText(parcours), `${code} voit son parcours ${profile.parcours.name}`);
+        } else {
+          // COL, COU, FAM: kept for the people who have them, never offered again.
+          assert.ok(await b.waitText(fr.education.chooseLink), `${code} est invité à choisir un des six profils`);
+        }
       });
     }
   },

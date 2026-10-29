@@ -1,25 +1,33 @@
+import '../helpers/setup-env.js';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Browser, findChrome, startSite } from '../helpers/browser.js';
 import { boot } from '../helpers/server.js';
+import { SERVER_DIR } from '../helpers/env.js';
 
-// The navigation of the connected space in a real browser (P1-12): the nine
-// entries, the two layouts, the top bar, and the keyboard path the client asks
-// for explicitly.
+// The navigation of the application in a real browser. P1-12 asked for it
+// first; P8-02 and P8-26 replaced its menu (« Mon argent », « Mes objectifs »…)
+// by the client's final one — five sections, the four daily entries in a
+// bottom bar on a phone (answer D3). The requirements did not change, so this
+// file keeps proving them on the menu that exists now:
+// - a side menu on a computer, beside the page;
+// - on a phone, a bottom bar and « Plus » for the rest;
+// - every entry reachable with the keyboard alone, visibly focused, the
+//   current one marked without colour alone;
+// - a declared minor loses the adults-only entries, and nothing else;
+// - the period drives the figures the server answers;
+// - the top bar carries the notifications and opens the assistant in place.
 //
-// Why a browser test and not only an API one: the menu's whole job is to be
-// usable. Three of its four requirements — side menu on a computer, tabs plus a
-// secondary menu on a phone, keyboard navigation — are statements about what a
-// person can do with it, and none of them can be checked from a JSON answer.
-//
-// `shows` / `hides` EVALUATE the expression. `b.hasText(x)` builds a string of
-// JavaScript, so `assert.ok(await b.hasText(x))` asserts that a non-empty
-// string is truthy, which it always is — twenty assertions were vacuously true
-// in the ten-journey suite before this was noticed.
+// `b.hasText(x)` builds a string of JavaScript: a text that must be there is
+// WAITED for (`b.waitText`), never asserted from that string.
 
+const fr = JSON.parse(readFileSync(path.resolve(SERVER_DIR, '../client/src/i18n/locales/fr.json'), 'utf8'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const DAY = 86_400_000;
 
-describe('P1-12 — the navigation of the connected space', { skip: findChrome() ? false : 'no Chrome/Chromium found (set CHROME_PATH)' }, () => {
+describe('P1-12 — the navigation of the application', { skip: findChrome() ? false : 'no Chrome/Chromium found (set CHROME_PATH)' }, () => {
   let t;
   let site;
   let b;
@@ -29,10 +37,12 @@ describe('P1-12 — the navigation of the connected space', { skip: findChrome()
   before(async () => {
     t = await boot();
     await t.reset();
-    adult = await t.adult({ name: 'Salima Salariée', finPublic: 'SAL' });
-    minor = await t.minor({ name: 'Lyes Lycéen', finPublic: 'LYC' });
+    adult = await t.adult({ name: 'Salima Salariée', finPublic: 'SAL', finCurrency: 'DZD', finOnboardedAt: new Date() });
+    minor = await t.minor({ name: 'Lyes Lycéen', finPublic: 'LYC', finCurrency: 'DZD', finOnboardedAt: new Date() });
     site = await startSite(t.baseUrl);
     b = await Browser.launch();
+    await b.goto(`${site.url}/a-propos`);
+    await b.ev("localStorage.setItem('lang', 'fr')");
   });
 
   after(async () => {
@@ -41,187 +51,138 @@ describe('P1-12 — the navigation of the connected space', { skip: findChrome()
     await t.close();
   });
 
-  const setSession = (user) =>
-    b.send('Network.setCookie', { name: 'session', value: t.signSession(user.id), url: site.url, httpOnly: true });
-
-  const shows = (what) => b.ev(b.hasText(what));
-  const hides = async (what) => !(await b.ev(b.hasText(what)));
+  const setSession = async (user) => {
+    await b.clearCookies();
+    await b.send('Network.setCookie', { name: 'session', value: t.signSession(user.id), url: site.url, httpOnly: true });
+  };
+  const sidebarRoutes = () => b.ev("[...document.querySelectorAll('.app-sidebar a')].map((a) => a.getAttribute('href'))");
 
   // One Tab press, as a person makes it: a real key event, so the browser's own
-  // focus order decides what comes next — not a `focus()` call that would prove
-  // nothing about the order.
-  const pressTab = async (shift = false) => {
+  // focus order decides what comes next.
+  const pressTab = async () => {
     for (const type of ['rawKeyDown', 'keyUp']) {
-      await b.send('Input.dispatchKeyEvent', { type, windowsVirtualKeyCode: 9, key: 'Tab', code: 'Tab', modifiers: shift ? 8 : 0 });
+      await b.send('Input.dispatchKeyEvent', { type, windowsVirtualKeyCode: 9, key: 'Tab', code: 'Tab' });
     }
     await sleep(40);
   };
-
   const pressEnter = async () => {
     for (const type of ['rawKeyDown', 'char', 'keyUp']) {
       await b.send('Input.dispatchKeyEvent', { type, windowsVirtualKeyCode: 13, key: 'Enter', code: 'Enter', text: '\r' });
     }
     await sleep(400);
   };
-
   const focused = () => b.ev("(() => { const e = document.activeElement; return e ? `${e.tagName}:${(e.getAttribute('href') ?? e.textContent ?? '').trim().slice(0, 40)}` : 'none'; })()");
 
-  test('a salariée adulte sees the client’s groups beside her page, on a computer', async () => {
+  test('on a computer, the five sections of the client stand beside the page', async () => {
     await setSession(adult);
     await b.setViewport(1280);
-    await b.goto(`${site.url}/aujourdhui`);
-    // The groups come FROM THE SERVER, so waiting for the navigation is not
-    // enough: the account block renders at once and the groups arrive after
-    // `GET /fin/parcours`. Waiting on the wrong element is how a menu test
-    // passes on a menu that is still empty.
-    assert.ok(await b.waitFor("!!document.querySelector('.fin-nav-groups')", 'the menu groups'), 'no menu rendered');
+    await b.goto(`${site.url}/app/aujourdhui`);
+    assert.ok(await b.waitFor("!!document.querySelector('.app-sidebar .app-nav-link')", 'the menu'), 'no menu rendered');
+    const headings = await b.ev("[...document.querySelectorAll('.app-sidebar .app-nav-heading')].map((h) => h.textContent.trim())");
+    assert.deepEqual(headings, Object.values(fr.appNav.sections), 'the five sections of the client, in order');
 
-    // The client's own entries, by name.
-    for (const label of ['Aujourd’hui', 'Mon argent', 'Mes objectifs', 'Ma sécurité', 'Mon patrimoine', 'Apprendre']) {
-      assert.ok(await shows(label), `missing group: ${label}`);
-    }
-
-    // On a computer every group is open: the entries of a group you are NOT in
-    // are visible too, which is the difference between a side menu and a
-    // vertical row of tabs.
-    const visibleEntries = await b.ev("[...document.querySelectorAll('.fin-nav-entry')].filter((e) => e.offsetParent !== null).length");
-    assert.ok(visibleEntries >= 8, `only ${visibleEntries} entries visible on a computer`);
-  });
-
-  test('and the navigation really is beside the page, not above it', async () => {
-    // The requirement is a LAYOUT, so it is measured: the menu and the content
-    // share a horizontal band instead of stacking.
     const sideBySide = await b.ev(`(() => {
-      const nav = document.querySelector('.fin-nav').getBoundingClientRect();
-      const main = document.querySelector('.fin-shell-main').getBoundingClientRect();
-      return nav.bottom > main.top + 40 && Math.abs(nav.width - main.width) > 100;
+      const nav = document.querySelector('.app-sidebar').getBoundingClientRect();
+      const main = document.querySelector('.app-main').getBoundingClientRect();
+      return nav.width > 0 && nav.right <= main.left + 1 && nav.bottom > main.top + 40;
     })()`);
     assert.ok(sideBySide, 'the menu is not beside the page at 1280px');
+    assert.ok((await sidebarRoutes()).includes('/app/dettes'), 'an adult has every entry');
   });
 
-  test('on a phone the groups are tabs, and only the current group shows its entries', async () => {
+  test('on a phone, the four daily entries are a bottom bar, and « Plus » opens the rest', async () => {
     await b.setViewport(375, 760);
-    await b.goto(`${site.url}/budget`);
-    assert.ok(await b.waitFor("!!document.querySelector('.fin-nav-group-current')", 'the current group'));
+    await b.goto(`${site.url}/app/budgets`);
+    assert.ok(await b.waitFor("!!document.querySelector('.app-bottom-nav .app-bottom-link')", 'the bottom bar'));
+    assert.equal(await b.ev("document.querySelector('.app-sidebar').offsetParent"), null, 'the side menu still shows on a phone');
+    const daily = await b.ev("[...document.querySelectorAll('.app-bottom-nav a')].map((a) => a.getAttribute('href'))");
+    assert.deepEqual(daily, ['/app', '/app/aujourdhui', '/app/comptes', '/app/mouvements']);
 
-    // "Mon argent" holds the budget, so its entries are the secondary menu.
-    const current = await b.ev("document.querySelector('.fin-nav-group-current .fin-nav-group-link').innerText.trim()");
-    assert.equal(current, 'Mon argent');
-
-    // A group you are not in costs no tab stop: hidden, not merely collapsed.
-    const hiddenElsewhere = await b.ev(`[...document.querySelectorAll('.fin-nav-group:not(.fin-nav-group-current) .fin-nav-entry')].every((e) => e.offsetParent === null)`);
-    assert.ok(hiddenElsewhere, 'a group that is not current still shows its entries on a phone');
-
-    const openHere = await b.ev("[...document.querySelectorAll('.fin-nav-group-current .fin-nav-entry')].filter((e) => e.offsetParent !== null).length");
-    assert.ok(openHere >= 2, `the current group shows only ${openHere} entries`);
+    assert.ok(await b.click(fr.appNav.more));
+    assert.ok(await b.waitFor("!!document.querySelector('#app-more a[href=\"/app/objectifs\"]')", 'the rest in « Plus »'));
   });
 
-  test('the whole menu is reachable with the Tab key alone, and Enter follows it', async () => {
+  test('every entry is reachable with the Tab key alone, and Enter follows it', async () => {
     await b.setViewport(1280);
-    await b.goto(`${site.url}/aujourdhui`);
-    await b.waitFor("!!document.querySelector('.fin-nav-groups')");
-    await b.ev('document.body.focus(); window.scrollTo(0, 0)');
+    await b.goto(`${site.url}/app/aujourdhui`);
+    await b.waitFor("!!document.querySelector('.app-sidebar .app-nav-link')");
+    await b.ev('document.activeElement?.blur(); window.scrollTo(0, 0)');
 
-    // Walk forward until the focus lands inside the menu, then on the entry we
-    // want. No `focus()` anywhere: if the order is wrong, this never arrives.
+    // Walk forward until the focus lands on the entry we want. No `focus()`
+    // anywhere: if the order is wrong, this never arrives.
     let reached = null;
     for (let i = 0; i < 80 && !reached; i += 1) {
       await pressTab();
-      const href = await b.ev("document.activeElement?.closest('.fin-nav') ? (document.activeElement.getAttribute('href') ?? '') : ''");
-      if (href === '/objectifs') reached = href;
+      const href = await b.ev("document.activeElement?.closest('.app-sidebar') ? (document.activeElement.getAttribute('href') ?? '') : ''");
+      if (href === '/app/objectifs') reached = href;
     }
-    assert.equal(reached, '/objectifs', `never reached the goals entry by keyboard (last focus: ${await focused()})`);
-
+    assert.equal(reached, '/app/objectifs', `never reached the goals entry by keyboard (last focus: ${await focused()})`);
     await pressEnter();
-    assert.ok(await b.waitFor("location.pathname === '/objectifs'", 'navigation to /objectifs'), 'Enter did not follow the focused entry');
+    assert.ok(await b.waitFor("location.pathname === '/app/objectifs'", 'navigation to /app/objectifs'), 'Enter did not follow the focused entry');
   });
 
   test('the focused entry is visibly focused, and the current one is marked without colour alone', async () => {
-    // The client asks for keyboard navigation AND for meaning never carried by
-    // colour alone. A focus ring that was removed, or an active entry marked
-    // only by a tint, breaks one of the two.
     const ring = await b.ev(`(() => {
-      const link = document.querySelector('.fin-nav-entry');
+      const link = document.querySelector('.app-sidebar .app-nav-link');
       link.focus();
       const s = getComputedStyle(link);
       return s.outlineStyle !== 'none' || s.boxShadow !== 'none';
     })()`);
     assert.ok(ring, 'a focused menu entry shows nothing');
-
-    const marked = await b.ev(`(() => {
-      const current = document.querySelector('.fin-nav-entry.active, .fin-nav-group-current > .fin-nav-group-link');
-      if (!current) return false;
-      const s = getComputedStyle(current);
-      return current.getAttribute('aria-current') === 'page' || Number(s.fontWeight) >= 600;
-    })()`);
-    assert.ok(marked, 'the current entry is distinguished by colour alone');
+    // `aria-current` is what a screen reader announces; the style follows it.
+    assert.equal(await b.ev("document.querySelector('.app-sidebar a[aria-current=\"page\"]')?.getAttribute('href')"), '/app/objectifs');
   });
 
-  test('a lycéen is offered no debt, no patrimony and no funding entry', async () => {
+  test('a declared minor loses the adults-only entries, and keeps their own money', async () => {
     await setSession(minor);
-    await b.goto(`${site.url}/aujourdhui`);
-    await b.waitFor("!!document.querySelector('.fin-nav-groups')");
-
-    assert.ok(await hides('Mon patrimoine'), 'a minor is offered the patrimony group');
-    const routes = await b.ev("[...document.querySelectorAll('.fin-nav a')].map((a) => a.getAttribute('href'))");
-    for (const route of ['/dettes', '/patrimoine', '/financement', '/outils/explorateur']) {
-      assert.ok(!routes.includes(route), `a minor is offered ${route}`);
-    }
-  });
-
-  test('but a lycéen keeps their own money in the menu', async () => {
-    // The failure to guard against is over-hiding: a menu that protects a minor
-    // by taking away their own pages is worse than the problem it solves.
-    const routes = await b.ev("[...document.querySelectorAll('.fin-nav a')].map((a) => a.getAttribute('href'))");
-    for (const route of ['/aujourdhui', '/mon-argent', '/objectifs', '/portefeuille', '/apprendre']) {
+    await b.goto(`${site.url}/app/aujourdhui`);
+    assert.ok(await b.waitFor("!!document.querySelector('.app-sidebar .app-nav-link')", 'the menu'));
+    // The menu learns that the person is a declared minor from the server
+    // (`GET /fin/parcours`, `mineurDeclare`): waited for, not read at once.
+    assert.ok(await b.waitFor("!document.querySelector('.app-sidebar a[href=\"/app/dettes\"]')", 'the adults-only entries to go'), 'a minor is offered /app/dettes');
+    const routes = await sidebarRoutes();
+    for (const route of ['/app/dettes', '/app/patrimoine']) assert.ok(!routes.includes(route), `a minor is offered ${route}`);
+    // The failure to guard against is over-hiding: a menu that protects a
+    // minor by taking away their own pages is worse than the problem.
+    for (const route of ['/app/aujourdhui', '/app/comptes', '/app/mouvements', '/app/budgets', '/app/objectifs', '/app/portefeuille', '/app/formation']) {
       assert.ok(routes.includes(route), `a minor lost ${route}`);
     }
   });
 
-  test('the period selector is a real radio group, and the server answers for the window chosen', async () => {
-    // The control is only worth having if choosing changes the figures. So the
-    // assertion is not "four options are on screen" but "the period the server
-    // answered for moved" — read from the dates the page prints, which come
-    // from the server's answer and not from the browser.
+  test('the period is a real radio group, and the server answers for the window chosen', async () => {
     await setSession(adult);
-    await b.setViewport(1280);
-    await b.goto(`${site.url}/mon-argent`);
-    assert.ok(await b.waitFor("!!document.querySelector('.fin-period')", 'the period selector'), 'no period selector');
-
-    const options = await b.ev("document.querySelectorAll('.fin-period input[type=radio]').length");
-    assert.equal(options, 4, 'the client asks for four windows');
+    // An expense 40 days ago: outside « ce mois », inside « 90 jours ».
+    await t.request('POST', '/fin/transactions', {
+      user: adult,
+      json: { kind: 'expense', value: 4_321_00, currency: 'DZD', occurredAt: new Date(Date.now() - 40 * DAY).toISOString() },
+    });
+    await b.goto(`${site.url}/app`);
+    assert.ok(await b.waitFor("!!document.querySelector('.fin-period input[type=radio]')", 'the period selector'), 'no period selector');
     assert.equal(await b.ev("document.querySelector('.fin-period input:checked').value"), 'mois');
+    const figures = () => b.ev("document.querySelector('.fin-figure-grid')?.innerText ?? ''");
+    assert.ok(await b.waitFor("!!document.querySelector('.fin-figure-grid')", 'the figures'));
+    const thisMonth = await figures();
 
-    const monthStart = await b.ev("document.querySelector('.money-period').innerText.trim()");
-    // Clicked on the radio itself, not on a button: the option is a label
-    // wrapping an input, which is what makes it a radio group with free
-    // keyboard behaviour. (`b.clickWhere` only looks at buttons, links and
-    // tabs — the control is clickable by a person, the helper simply does not
-    // see labels.)
+    // Clicked on the radio itself: a label wrapping an input is what makes it
+    // a radio group with free keyboard behaviour.
+    assert.ok(await b.ev(`(() => { const i = document.querySelector('.fin-period input[value="90jours"]'); if (!i) return false; i.click(); return true; })()`));
     assert.ok(
-      await b.ev(`(() => { const i = document.querySelector('.fin-period input[value="90jours"]'); if (!i) return false; i.click(); return true; })()`),
-      'the 90 days option is not there',
+      await b.waitFor(`(document.querySelector('.fin-figure-grid')?.innerText ?? '') !== ${JSON.stringify(thisMonth)}`, 'the figures to change'),
+      'choosing 90 days did not change the figures the server answered',
     );
-    assert.ok(
-      await b.waitFor(`document.querySelector('.money-period')?.innerText.trim() !== ${JSON.stringify(monthStart)}`, 'the period to change'),
-      'choosing 90 days did not change the period the figures cover',
-    );
+    assert.match(await figures(), /4\s?321/, 'the expense of 40 days ago is in the 90 days');
+    assert.doesNotMatch(thisMonth, /4\s?321/, 'and it was not in this month');
     assert.equal(await b.ev("document.querySelector('.fin-period input:checked').value"), '90jours');
   });
 
   test('the top bar carries the notifications and opens the assistant without leaving the page', async () => {
-    await setSession(adult);
-    await b.goto(`${site.url}/aujourdhui`);
+    await b.goto(`${site.url}/app/aujourdhui`);
     assert.ok(await b.waitFor("!!document.querySelector('.notif-bell')", 'the bell'), 'no notification entry in the top bar');
-
     // The count is in the accessible name, not only in a coloured disc.
-    const label = await b.ev("document.querySelector('.notif-bell').getAttribute('aria-label')");
-    assert.match(label, /Notifications/);
+    assert.match(await b.ev("document.querySelector('.notif-bell').getAttribute('aria-label')"), /Notifications/);
 
-    // The assistant is a panel, not a route: the bar asks for it and the page
-    // does not change.
-    assert.ok(await b.clickWhere("e => (e.getAttribute('title') ?? '') === 'Aide'"), 'no help entry in the top bar');
-    assert.ok(await b.waitFor("!!document.querySelector('.chatbot-panel, [class*=chatbot][class*=panel]')", 'the assistant panel'), 'the help entry opened nothing');
-    assert.equal(await b.ev('location.pathname'), '/aujourdhui', 'the help entry navigated away');
+    assert.ok(await b.clickWhere(`e => (e.getAttribute('title') ?? '') === ${JSON.stringify(fr.nav.assistant)}`), 'no help entry in the top bar');
+    assert.ok(await b.waitFor("!!document.querySelector('.chatbot-panel')", 'the assistant panel'), 'the help entry opened nothing');
+    assert.equal(await b.ev('location.pathname'), '/app/aujourdhui', 'the help entry navigated away');
   });
 });

@@ -67,6 +67,8 @@ export const FINANCIAL_TABLES = [
   // What was said about one occurrence of a recurrence (P8-11); its amount
   // lives on the movement it created.
   { model: 'finOccurrence', table: 'fin_occurrences', label: 'occurrence', amounts: false, currency: false, softDelete: false },
+  // Payslips kept by choice (P8-15): its `value` is the net the lines give.
+  { model: 'finPayslip', table: 'fin_payslips', label: 'payslip', amounts: true, currency: true },
   // An onboarding record holds SEVERAL declared amounts (in `answers`) rather
   // than one `value`, but it does carry the currency they are all expressed in,
   // so the currency rule applies to it and the amount rule does not.

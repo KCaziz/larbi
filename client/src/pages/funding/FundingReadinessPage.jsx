@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, FileCheck } from 'lucide-react';
+import { Calculator, Download, FileCheck, Scale } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
@@ -21,6 +22,16 @@ import './Funding.css';
 // agreement. The global index (F051) stays blocked until the client supplies
 // its weights (P6-01) — this page shows each dimension on its own instead,
 // exactly like the "santé financière" of the home dashboard (P6-06).
+// « Compléter » (SA05): where each missing element is filled in. The
+// stability dimension has no screen: it waits for the client's weights.
+const COMPLETE_AT = {
+  public: '/app/parametres/fincludia',
+  income: '/app/parametres/premiers-pas',
+  reserveTarget: '/app/objectifs/fonds-urgence',
+  wealth: '/app/patrimoine',
+  debtEffort: '/app/dettes',
+};
+
 export default function FundingReadinessPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -87,7 +98,15 @@ export default function FundingReadinessPage() {
             <h2>{t('funding.checklistTitle')}</h2>
             <ul className="funding-checklist">
               {r.piecesManquantes.map((key) => (
-                <li key={key}>{t(`funding.pieces.${key}`)}</li>
+                <li key={key}>
+                  {t(`funding.pieces.${key}`)}
+                  {COMPLETE_AT[key] && (
+                    <>
+                      {' — '}
+                      <Link to={COMPLETE_AT[key]}>{t('funding.complete')}</Link>
+                    </>
+                  )}
+                </li>
               ))}
             </ul>
           </>
@@ -98,6 +117,15 @@ export default function FundingReadinessPage() {
             <Download size={16} aria-hidden="true" /> {t('funding.export')}
           </Button>
           <p className="fin-hint">{t('funding.exportConsentHint')}</p>
+          {/* « Simuler » and « Comparer » (SA05): the two tools that come next. */}
+          <div className="funding-next">
+            <Button to="/app/outils/credit" variant="ghost">
+              <Calculator size={16} aria-hidden="true" /> {t('funding.simulate')}
+            </Button>
+            <Button to="/app/outils/comparer" variant="ghost">
+              <Scale size={16} aria-hidden="true" /> {t('funding.compare')}
+            </Button>
+          </div>
         </div>
       </div>
     </>

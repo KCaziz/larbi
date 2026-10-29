@@ -334,20 +334,16 @@
       "title": "Comparateur bancaire",
       "body": "Comparez les conditions bancaires de 13 banques algériennes : frais de tenue de compte, cartes, épargne, crédits et plus."
     },
-    "funding": {
-      "title": "Préparer un financement",
-      "body": "Avant un nouveau crédit : votre dossier, vos ratios et ce qu’une banque regardera, d’après vos propres chiffres."
-    },
     "credit": {
-      "title": "Simulateur de crédit",
-      "body": "Estimation du crédit que vous pouvez obtenir, selon votre profil financier et les conditions des banques."
+      "title": "Comparer un financement",
+      "body": "Simulez un crédit sur vos propres chiffres : mensualité, coût total, taux d’effort, et les offres des banques avec leurs critères."
     },
     "invoice": {
       "title": "Générateur de facture",
       "body": "Création de factures (client, prestataire, produits/services, totaux) avec export PDF et Excel."
     },
     "accessNote": "Le comparateur bancaire et les simulateurs sont en accès libre. Le générateur de facture nécessite un compte.",
-    "notice": "Le simulateur de crédit sera disponible prochainement.",
+    "notice": "Les simulations calculent sur les chiffres que vous saisissez : une banque reste seule décisionnaire.",
     "simulators": {
       "title": "Simulateurs",
       "body": "Budget, épargne, objectifs, inflation : des calculs expliqués, chaque chiffre affichant sa formule."
@@ -3118,7 +3114,12 @@
         "unclassified": "À classer",
         "byEssential": "Selon « essentielle »"
       }
-    }
+    },
+    "editTitle": "Modifier le budget",
+    "notFound": "Ce budget n’existe pas, ou il n’est pas le vôtre.",
+    "backToBudget": "Retour au budget",
+    "created": "Budget créé : ajoutez-lui ses enveloppes.",
+    "edit": "Modifier"
   },
   "goals": {
     "title": "Objectifs",
@@ -3187,7 +3188,10 @@
       "monthsToReach": "Mois pour atteindre la cible",
       "atHorizon": "À l’horizon : {{capital}} pour une cible de {{target}} (inflation comprise).",
       "disclaimer": "Une simulation avec vos hypothèses : ni une promesse, ni un conseil. Rien n’est enregistré."
-    }
+    },
+    "backToList": "Retour aux objectifs",
+    "notFound": "Cet objectif n’existe pas, ou il n’est pas le vôtre.",
+    "created": "Objectif créé."
   },
   "debts": {
     "title": "Dettes",
@@ -3245,7 +3249,9 @@
       "dueDate": "Remboursement prévu le (facultatif)",
       "saved": "Prêt enregistré, avec le mouvement réel sur votre compte.",
       "noAccount": "Créez d’abord un compte dans « Mes comptes »."
-    }
+    },
+    "backToList": "Retour à mes dettes",
+    "created": "Dette enregistrée."
   },
   "reserve": {
     "title": "Réserve de sécurité",
@@ -3396,7 +3402,8 @@
       "before": "{{count}} jours avant",
       "day": "Le jour même",
       "after": "Le lendemain"
-    }
+    },
+    "backToCalendar": "Retour au calendrier"
   },
   "today": {
     "title": "Aujourd'hui",
@@ -3528,14 +3535,22 @@
       "value": "Valeur",
       "valuedAt": "Date d’évaluation",
       "liquidity": "Disponibilité",
-      "holder": "Où / chez qui"
+      "holder": "Où / chez qui",
+      "reason": "Pourquoi (facultatif)"
     },
     "save": "Enregistrer",
     "cancel": "Annuler",
     "errors": {
       "amount": "Indiquez une valeur en nombre entier.",
       "refused": "Cette opération a été refusée. Vérifiez la date et le montant."
-    }
+    },
+    "notFound": "Cet actif n’existe pas, ou il n’est pas le vôtre.",
+    "backToList": "Retour au patrimoine",
+    "valuationsTitle": "Ses valorisations",
+    "noValuation": "Aucune réévaluation depuis sa saisie.",
+    "revalueTitle": "Nouvelle valorisation",
+    "revalued": "Valeur mise à jour, avec sa date.",
+    "deleteShort": "Supprimer"
   },
   "paper": {
     "title": "Portefeuille d’entraînement",
@@ -3855,7 +3870,10 @@
     "exportConsentHint": "L’export nécessite votre consentement explicite à chaque fois.",
     "errors": {
       "refused": "Cette action a été refusée."
-    }
+    },
+    "complete": "Compléter",
+    "simulate": "Simuler un crédit",
+    "compare": "Comparer des financements"
   },
   "passport": {
     "title": "Passeport de connaissances financières",
@@ -4284,7 +4302,17 @@
       "overdrawn": "Ce compte est à découvert.",
       "overdraftExceeded": "Ce compte dépasse le découvert autorisé.",
       "belowMinimum": "Le solde est passé sous le seuil que vous avez choisi."
-    }
+    },
+    "addTitle": "Nouveau compte",
+    "editTitle": "Modifier le compte",
+    "backToAccount": "Retour au compte",
+    "backToList": "Retour à mes comptes",
+    "notFound": "Ce compte n’existe pas, ou il n’est pas le vôtre.",
+    "detailTitle": "Détail du compte",
+    "balance": "Solde",
+    "transferTitle": "Nouveau transfert",
+    "transferNeedsTwo": "Un transfert demande au moins deux comptes ouverts.",
+    "detail": "Détail"
   },
   "health": {
     "title": "Santé financière",
@@ -4358,7 +4386,21 @@
     "tagColor": "Couleur",
     "tagAuto": "Appliquer automatiquement à la catégorie",
     "tagAutoNone": "Jamais automatiquement",
-    "addTag": "Ajouter l’étiquette"
+    "addTag": "Ajouter l’étiquette",
+    "backToList": "Retour aux mouvements",
+    "backToMovement": "Retour au mouvement",
+    "notFound": "Ce mouvement n’existe pas, ou il n’est pas le vôtre.",
+    "detailTitle": "Détail du mouvement",
+    "trailTitle": "Historique des corrections",
+    "trailEmpty": "Aucune correction : ce mouvement est tel qu’il a été saisi.",
+    "trailActions": {
+      "create": "saisi",
+      "correct": "corrigé",
+      "archive": "archivé",
+      "restore": "restauré",
+      "delete": "supprimé"
+    },
+    "clearingIntro": "Ce qui reste à vérifier, un clic par mouvement."
   },
   "appHome": {
     "title": "Accueil",
@@ -4427,7 +4469,16 @@
       "R10": "Patrimoine réel",
       "R11": "Qualité des données",
       "R12": "Formation et actions"
-    }
+    },
+    "reportTitle": "Rapport mensuel — {{month}}",
+    "backToReports": "Retour aux rapports",
+    "openReport": "Ouvrir le rapport du mois",
+    "allReports": "Tous les rapports",
+    "reportsTitle": "Rapports & téléchargements",
+    "reportsIntro": "Chaque mois a son rapport, à lire ou à télécharger.",
+    "backToSynthesis": "Retour à la synthèse",
+    "downloadAs": "Télécharger {{month}} en {{format}}",
+    "pdfHint": "Pour un PDF : ouvrez le rapport d’un mois, puis « PDF » l’imprime tel qu’il s’affiche."
   },
   "education": {
     "yourParcours": "Votre parcours : {{name}}",
@@ -4446,5 +4497,180 @@
     "recommended": "Recommandées pour vous",
     "forYou": "Pour votre profil",
     "done": "Terminée"
+  },
+  "payslip": {
+    "title": "Décodeur de fiche de paie",
+    "intro": "Saisissez les lignes de votre fiche : nous expliquons chacune, vérifions le calcul et le rapprochons du net inscrit.",
+    "period": "Mois de la fiche",
+    "declaredNet": "Net inscrit sur la fiche",
+    "declaredNetHint": "Facultatif : pour le rapprocher du net calculé.",
+    "lines": "Lignes de la fiche",
+    "linesHint": "Saisissez chaque montant tel qu’il figure sur la fiche, en positif : une retenue est soustraite d’après son type.",
+    "kind": "Type de ligne",
+    "label": "Libellé sur la fiche",
+    "value": "Montant",
+    "addLine": "Ajouter une ligne",
+    "removeLine": "Retirer la ligne {{n}}",
+    "decode": "Décoder la fiche",
+    "resultTitle": "Votre fiche, expliquée",
+    "gross": "Brut",
+    "deductions": "Retenues",
+    "net": "Net calculé",
+    "gap": "écart : {{gap}}",
+    "matches": "Le net calculé correspond au net inscrit sur la fiche ({{net}}).",
+    "differs": "Le net inscrit sur la fiche est {{net}} : écart de {{gap}} avec le net calculé.",
+    "explained": "Ce que veut dire chaque ligne",
+    "toConfirm_one": "{{count}} ligne n’est pas reconnue : elle n’est pas comptée tant que vous ne lui donnez pas un type.",
+    "toConfirm_other": "{{count}} lignes ne sont pas reconnues : elles ne sont pas comptées tant que vous ne leur donnez pas un type.",
+    "irgRegime": "IRG à ce niveau de revenu :",
+    "consent": "J’accepte que FINCLUDIA conserve cette fiche dans mon historique. Je peux la supprimer à tout moment.",
+    "keep": "Conserver dans mon historique",
+    "kept": "Fiche conservée dans votre historique.",
+    "addIncome": "Ajouter au revenu mensuel",
+    "confirmIncome": "Ajouter un revenu mensuel de {{net}} à partir d’aujourd’hui ?",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "incomeAdded": "Revenu mensuel ajouté.",
+    "seeIncomes": "Voir ma synthèse",
+    "incomeLabel": "Salaire (fiche de paie)",
+    "incomeLabelPeriod": "Salaire (fiche de paie {{period}})",
+    "historyTitle": "Mes fiches conservées",
+    "historyIntro": "Seulement celles que vous avez choisi de garder.",
+    "historyEmpty": "Aucune fiche conservée.",
+    "reopen": "Revoir",
+    "delete": "Supprimer",
+    "deleteOne": "Supprimer la fiche {{period}}",
+    "confirmDelete": "Supprimer définitivement",
+    "errors": {
+      "input": "Vérifiez les montants : au moins une ligne, des nombres positifs."
+    },
+    "kinds": {
+      "base_salary": "Salaire de base",
+      "seniority": "Indemnité d’ancienneté",
+      "bonus": "Prime ou gratification",
+      "allowance": "Indemnité",
+      "overtime": "Heures supplémentaires",
+      "social_employee": "Cotisation sociale salarié",
+      "irg": "IRG",
+      "advance": "Avance ou acompte",
+      "other_deduction": "Autre retenue",
+      "unknown": "Ligne à confirmer"
+    }
+  },
+  "toolsCatalogue": {
+    "title": "Outils",
+    "intro": "Tous les calculateurs et outils de FINCLUDIA : sur vos propres données, ou pour simuler avec des chiffres que vous saisissez.",
+    "search": "Rechercher un outil",
+    "families": "Familles d’outils",
+    "family": {
+      "all": "Tous",
+      "favorites": "Favoris",
+      "budget": "Budget et dépenses",
+      "savings": "Épargne et objectifs",
+      "debt": "Dettes et financement",
+      "wealth": "Patrimoine et placements",
+      "income": "Revenus et travail",
+      "analysis": "Analyse et santé",
+      "practical": "Outils pratiques"
+    },
+    "count_one": "{{count}} outil",
+    "count_other": "{{count}} outils",
+    "formulas": "Formules : {{formulas}}",
+    "pending": "À venir : ce calculateur n’est pas encore construit.",
+    "open": "Ouvrir",
+    "onMyData": "Sur mes données",
+    "simulate": "Simuler",
+    "empty": "Aucun outil ne correspond à cette recherche.",
+    "items": {
+      "CAL-01": "Budget mensuel",
+      "CAL-02": "Budget jusqu’à fin de mois",
+      "CAL-03": "Enveloppe budgétaire",
+      "CAL-04": "Capacité d’épargne",
+      "CAL-05": "Réserve de sécurité",
+      "CAL-06": "Objectif sans rendement",
+      "CAL-07": "Objectif avec rendement",
+      "CAL-08": "Inflation / pouvoir d’achat",
+      "CAL-09": "Taux d’effort dette",
+      "CAL-10": "Mensualité de financement",
+      "CAL-11": "Remboursement anticipé",
+      "CAL-12": "Stratégies de dettes",
+      "CAL-13": "Patrimoine net",
+      "CAL-14": "Portefeuille fictif",
+      "CAL-15": "Autonomie financière étudiant",
+      "CAL-16": "Provision études / annuelle",
+      "CAL-17": "Premier salaire",
+      "CAL-18": "Comparateur offres d’emploi",
+      "CAL-19": "Abonnements / récurrences",
+      "CAL-24": "Préparation au financement",
+      "CAL-25": "Comparer un financement",
+      "CAL-26": "Profil de risque pédagogique",
+      "CAL-27": "Indice de connaissances financières",
+      "CAL-28": "Indice de santé financière",
+      "CAL-29": "Projection retraite indicative",
+      "CAL-30": "Simulation logement / immobilier",
+      "CAL-V7-01": "Analyse 50/30/20",
+      "CAL-V7-02": "Scénarios d’épargne mensuelle",
+      "CAL-V7-03": "Pointage mensuel",
+      "CAL-V7-04": "Projection solde fin de mois",
+      "CAL-V7-05": "Rapport mensuel",
+      "CAL-P01": "Solde d’un compte",
+      "CAL-P02": "Solde total",
+      "CAL-P03": "Flux net",
+      "CAL-P04": "Budget restant",
+      "CAL-P05": "Reste à allouer",
+      "CAL-P06": "Moyenne journalière",
+      "CAL-P07": "Projection fin de période",
+      "CAL-P08": "Budget quotidien disponible",
+      "CAL-P09": "Objectif",
+      "CAL-P10": "Fonds d’urgence",
+      "CAL-P11": "Ratio dette/revenu",
+      "CAL-P12": "Stratégie remboursement",
+      "CAL-P13": "Paiement régulier",
+      "CAL-P14": "Prévu vs réel",
+      "CAL-P15": "Tendance",
+      "CAL-P16": "Mensualité crédit",
+      "CAL-P17": "Patrimoine comptes",
+      "LY09": "Préparer mes études",
+      "OUT-COMPARATEUR": "Comparateur bancaire",
+      "OUT-POSTAL": "Algérie Poste / CCP",
+      "OUT-ATELIER": "Atelier de simulation",
+      "OUT-PAIE": "Décodeur de fiche de paie",
+      "OUT-FACTURE": "Générateur de facture",
+      "OUT-EXPLORATEUR": "Explorateur",
+      "OUT-COMPARER": "Comparer des options"
+    },
+    "myFavorites": "Mes favoris",
+    "favorite": "Ajouter « {{name}} » à mes favoris",
+    "unfavorite": "Retirer « {{name}} » de mes favoris",
+    "favoriteError": "Le favori n’a pas pu être enregistré. Réessayez.",
+    "noFavorite": "Aucun favori pour l’instant : touchez l’étoile d’un outil pour le garder ici."
+  },
+  "compare": {
+    "title": "Comparer des options",
+    "intro": "Deux ou trois options — offres, scénarios, solutions — comparées critère par critère.",
+    "disclaimer": "Aucun classement caché : un score n’apparaît que si vous donnez des poids, et sa méthode s’affiche avec lui. Une donnée manquante est signalée, jamais remplacée par zéro.",
+    "criteriaTitle": "Critères à comparer",
+    "optionNumber": "Option {{number}}",
+    "label": "Nom de l’option",
+    "addOption": "Ajouter une option",
+    "units": {
+      "money": "{{currency}}",
+      "months": "mois",
+      "points": "votre note sur 10",
+      "ratio": "%",
+      "text": "texte"
+    },
+    "useScore": "Calculer un score pondéré",
+    "scoreNote": "Facultatif. Vous choisissez le poids de chaque critère ; sans poids, il n’y a pas de score.",
+    "weightOf": "Poids de « {{criterion}} »",
+    "compare": "Comparer",
+    "resultsTitle": "Le tableau comparatif",
+    "export": "Exporter (CSV)",
+    "deepen": "Approfondir avec les outils",
+    "errors": {
+      "noCriterion": "Choisissez au moins un critère.",
+      "labels": "Donnez un nom à chaque option.",
+      "input": "Ces données ne peuvent pas être comparées : vérifiez les valeurs saisies."
+    }
   }
 }

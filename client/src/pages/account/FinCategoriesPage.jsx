@@ -193,7 +193,7 @@ function CategoryRow({ category, historyOpen, onToggleHistory, run }) {
         <>
           <span className="fincat-label">
             {category.icon && <span aria-hidden="true">{category.icon} </span>}
-            {category.label}
+            <span className="fincat-name">{category.label}</span>
           </span>
           <span className="fincat-tags">
             {category.group && <span className="fincat-tag">{category.group}</span>}

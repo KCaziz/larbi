@@ -14,6 +14,7 @@ import {
   getMoneySynthesisHistory,
   getReceipt,
   getSynthesis,
+  getOneTransaction,
   getTransactionHistory,
   getTransactions,
   patchIncome,
@@ -26,8 +27,9 @@ import {
   removeReceipt,
   removeTransaction,
 } from '../controllers/finMoney.controller.js';
-import { getPayrollReference, postDecodePayslip } from '../controllers/finPayroll.controller.js';
-import { decodePayslipSchema } from '../validation/finPayroll.schemas.js';
+import { getPayrollReference, getPayslips, postDecodePayslip, postPayslip, removePayslip } from '../controllers/finPayroll.controller.js';
+import { decodePayslipSchema, keepPayslipSchema } from '../validation/finPayroll.schemas.js';
+import { getToolFavorites, getToolsCatalogue, putToolFavorite, removeToolFavorite } from '../controllers/finTools.controller.js';
 import { requireAuth } from '../middleware/auth.js';
 import { receiveFile } from '../middleware/upload.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
@@ -83,6 +85,7 @@ router.get('/etiquettes', asyncRoute(getTags));
 router.post('/etiquettes', validateBody(createTagSchema), asyncRoute(postTag));
 router.patch('/etiquettes/:id', validateBody(updateTagSchema), asyncRoute(patchTag));
 router.delete('/etiquettes/:id', validateBody(deleteSchema), asyncRoute(removeTag));
+router.get('/transactions/:id', asyncRoute(getOneTransaction));
 router.patch('/transactions/:id', validateBody(updateTransactionSchema), asyncRoute(patchTransaction));
 router.delete('/transactions/:id', validateBody(deleteSchema), asyncRoute(removeTransaction));
 router.get('/transactions/:id/historique', asyncRoute(getTransactionHistory));
@@ -92,11 +95,23 @@ router.post('/transactions/:id/justificatif', receiveFile, asyncRoute(postReceip
 router.get('/transactions/:id/justificatif', asyncRoute(getReceipt));
 router.delete('/transactions/:id/justificatif', asyncRoute(removeReceipt));
 
-// Décodeur de fiche de paie (P4-14, écran C15). Calcul pur : rien n'est lu ni
-// écrit en base, et la fiche n'est pas conservée — c'est une donnée sensible
-// que le client ne demande pas de garder. L'ajout au revenu mensuel passe par
-// les routes de revenus ci-dessus, après confirmation explicite.
+// Le catalogue unique des Outils (P8-15).
+router.get('/outils/catalogue', getToolsCatalogue);
+// Its favourites (OUT-01), the person's own.
+router.get('/outils/favoris', asyncRoute(getToolFavorites));
+router.put('/outils/favoris/:code', asyncRoute(putToolFavorite));
+router.delete('/outils/favoris/:code', asyncRoute(removeToolFavorite));
+
+// Décodeur de fiche de paie (P4-14, écran C15). Le calcul seul ne lit ni
+// écrit en base ; une fiche n'est conservée que si la personne le demande,
+// avec son consentement (historique, P8-15). L'ajout au revenu mensuel passe
+// par les routes de revenus ci-dessus, après confirmation explicite.
 router.get('/paie/reference', getPayrollReference);
 router.post('/paie/decoder', validateBody(decodePayslipSchema), asyncRoute(postDecodePayslip));
+// The history (P8-15, the client's answer D5): kept only with the person's
+// consent, read and deleted by them only.
+router.get('/paie/fiches', asyncRoute(getPayslips));
+router.post('/paie/fiches', validateBody(keepPayslipSchema), asyncRoute(postPayslip));
+router.delete('/paie/fiches/:id', asyncRoute(removePayslip));
 
 export default router;

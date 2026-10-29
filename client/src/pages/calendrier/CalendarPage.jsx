@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { AlertTriangle, CalendarDays, Check, PiggyBank, Plus, Repeat, Trash2, Wand2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
@@ -29,6 +29,9 @@ import './Calendar.css';
 // No figure is computed here. Every number comes from the server with its
 // formula, its version and its inputs (P4-09), which is also what the
 // « Pourquoi ? » panel of each card shows.
+//
+// P8-25: a new regular payment or income (CAL-02) has its own address,
+// `/app/calendrier/regulier`; this page leads to it.
 export default function CalendarPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
@@ -38,7 +41,8 @@ export default function CalendarPage() {
   const [view, setView] = useState('month');
   // The client's three tabs (tab 08): Revenus | Dépenses | Échéances.
   const [tab, setTab] = useState('all');
-  const [message, setMessage] = useState(null);
+  const location = useLocation();
+  const [message, setMessage] = useState(location.state?.message ? { kind: 'ok', text: t(location.state.message) } : null);
   useDocumentMeta(t('calendar.title'), t('calendar.intro'));
 
   const query = new URLSearchParams({ vue: view });
@@ -48,7 +52,6 @@ export default function CalendarPage() {
   const provisions = useApi('/fin/provisions');
   const subscriptions = useApi('/fin/recurrences/abonnements');
   const references = useApi('/fin/calendrier/references');
-  const accounts = useApi('/fin/comptes');
 
   function reloadAll() {
     calendar.reload();
@@ -161,8 +164,6 @@ export default function CalendarPage() {
           recurrences={recurrences.data?.recurrences ?? []}
           subscriptions={subscriptions.data?.abonnements ?? null}
           formula={formula}
-          references={references.data}
-          accounts={accounts.data?.accounts ?? []}
           run={run}
         />
         <ProvisionSection
@@ -349,8 +350,7 @@ function PlanSection({ t, run }) {
 // Confirmed recurrences, their monthly and yearly cost, and the candidates
 // ALG-04 proposes. The two are never mixed: a candidate is a proposal the
 // person confirms, and the client requires exactly that.
-function RecurrenceSection({ t, language, currency, recurrences, subscriptions, formula, references, accounts, run }) {
-  const [adding, setAdding] = useState(false);
+function RecurrenceSection({ t, language, currency, recurrences, subscriptions, formula, run }) {
   const [showDetection, setShowDetection] = useState(false);
   const detection = useApi(showDetection ? '/fin/recurrences/detection' : null);
 
@@ -397,15 +397,13 @@ function RecurrenceSection({ t, language, currency, recurrences, subscriptions, 
       <p className="calendar-help">{t('calendar.noCancellation')}</p>
 
       <div className="calendar-actions">
-        <Button type="button" variant="secondary" onClick={() => setAdding((value) => !value)}>
+        <Button variant="secondary" to="/app/calendrier/regulier">
           <Plus size={16} aria-hidden="true" /> {t('calendar.addRecurrence')}
         </Button>
         <Button type="button" variant="secondary" onClick={() => setShowDetection((value) => !value)}>
           <Wand2 size={16} aria-hidden="true" /> {t('calendar.detect')}
         </Button>
       </div>
-
-      {adding && <RecurrenceForm t={t} currency={currency} references={references} accounts={accounts} run={run} onDone={() => setAdding(false)} />}
 
       {showDetection && (
         <div className="calendar-detection">
@@ -457,7 +455,7 @@ function RecurrenceSection({ t, language, currency, recurrences, subscriptions, 
 
 const REMINDERS = [7, 3, 0, -1];
 
-function RecurrenceForm({ t, currency, references, accounts = [], run, onDone }) {
+export function RecurrenceForm({ t, currency, references, accounts = [], run, onDone }) {
   const [accountId, setAccountId] = useState('');
   const [creationMode, setCreationMode] = useState('confirm');
   const [weekendRule, setWeekendRule] = useState('previous');

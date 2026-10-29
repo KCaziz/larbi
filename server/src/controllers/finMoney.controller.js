@@ -122,6 +122,13 @@ export async function removeTransaction(req, res) {
   res.json(await deleteTransaction(prisma, req.user.id, req.params.id, { reason: req.body?.reason }));
 }
 
+// One movement, for its own screen (TRX-03, P8-25). Someone else's is a 404,
+// like every other verb on it.
+export async function getOneTransaction(req, res) {
+  const { userId, ...transaction } = await getTransaction(prisma, req.user.id, req.params.id);
+  res.json({ transaction });
+}
+
 export async function getTransactionHistory(req, res) {
   // Ownership first: the trail of a row that is not the caller's is a 404, like
   // every other verb on it.

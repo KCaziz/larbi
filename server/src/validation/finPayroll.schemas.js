@@ -29,3 +29,7 @@ export const decodePayslipSchema = z
     period: z.string().trim().max(20).optional().nullable(),
   })
   .strict();
+
+// Keeping a payslip (P8-15, the client's answer D5): the same entry, and the
+// person's explicit consent — `true` is the only accepted value.
+export const keepPayslipSchema = decodePayslipSchema.extend({ consent: z.literal(true) }).strict();

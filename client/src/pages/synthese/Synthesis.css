@@ -110,3 +110,42 @@
   color: var(--text);
   font: inherit;
 }
+
+/* P8-25: the monthly report (SYN-02) and the list of reports (REP-01), each
+   at its own address. */
+.synthesis-report-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-block-size: 44px;
+  font-weight: 600;
+}
+
+.synthesis-reports {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 var(--space-md);
+  padding: 0;
+  list-style: none;
+}
+
+.synthesis-reports li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.synthesis-reports li > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 44px;
+  font-weight: 600;
+  text-transform: capitalize;
+}

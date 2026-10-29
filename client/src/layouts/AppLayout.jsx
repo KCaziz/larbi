@@ -172,7 +172,7 @@ function AppTopBar({ settings }) {
 
       <div className="app-topbar-actions">
         <GlobalSearch />
-        <Link to="/app/mouvements#saisie" className="app-icon-button" title={t('appNav.quickAdd')}>
+        <Link to="/app/mouvements/nouveau" className="app-icon-button" title={t('appNav.quickAdd')}>
           <Plus size={18} aria-hidden="true" />
           <span className="sr-only">{t('appNav.quickAdd')}</span>
         </Link>

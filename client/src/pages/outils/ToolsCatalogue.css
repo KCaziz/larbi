@@ -1,0 +1,176 @@
+/* Le catalogue unique des Outils (P8-15). Propriétés logiques (RTL), jetons
+   CSS, cibles tactiles de 44 px. */
+
+.tools-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-block-end: 12px;
+}
+
+.tools-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-inline-size: 520px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.tools-search input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  min-block-size: 44px;
+  border: 0;
+  background: none;
+  color: var(--text-h);
+  font: inherit;
+}
+
+.tools-search input:focus {
+  outline: none;
+}
+
+.tools-search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.tools-families {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tools-family {
+  min-block-size: 36px;
+  padding: 5px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.tools-family:hover {
+  border-color: var(--accent);
+}
+
+.tools-family[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.tools-count,
+.tools-empty {
+  margin: 0 0 12px;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.tools-group h2 {
+  margin: 20px 0 10px;
+  font-size: 1.1rem;
+}
+
+.tools-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tools-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.tools-item-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-h);
+}
+
+.tools-item-head svg {
+  flex: none;
+  color: var(--accent);
+}
+
+.tools-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0;
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.tools-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-block-start: auto;
+}
+
+.tools-item-pending {
+  margin: auto 0 0;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* The star of a favourite (OUT-01): its state is in `aria-pressed` and in the
+   filled shape, never in the colour alone. */
+.tools-item-head strong {
+  flex: 1 1 auto;
+}
+
+.tools-star {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 36px;
+  min-block-size: 36px;
+  margin-block: -6px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.tools-star:hover,
+.tools-star:focus-visible {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.tools-star-on {
+  color: var(--accent);
+}
+
+.tools-star-on svg {
+  fill: currentColor;
+}
+
+.tools-favorites h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

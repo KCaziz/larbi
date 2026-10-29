@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { Download, ListChecks, PieChart, Printer } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Download, FileText, ListChecks, PieChart, Printer } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatRatio } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
@@ -9,6 +9,7 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
+import BackLink from '../../components/fincludia/BackLink.jsx';
 import IncomeExpenseChart from '../../components/fincludia/IncomeExpenseChart.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Synthesis.css';
@@ -17,10 +18,20 @@ import './Synthesis.css';
 // R-11, each block linking to the screen it comes from; « Aujourd'hui »; the
 // download icon top right (CSV, spreadsheet, or the page printed as PDF). The
 // report is served by the engine: nothing is computed here.
+//
+// P8-25: the same screen serves SYN-02 « Rapport mensuel » at its own address,
+// `/app/synthese/rapport/:mois` (one month, reopened as it was from a copied
+// address), and the list of reports (REP-01) is at `/app/synthese/rapports`.
+export const thisMonth = () => new Date().toISOString().slice(0, 7);
+
 export default function SynthesisPage() {
   const { t, i18n } = useTranslation();
-  useDocumentMeta(t('synthesis.title'), t('synthesis.intro'));
-  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const { mois } = useParams();
+  const navigate = useNavigate();
+  const isReport = Boolean(mois);
+  const month = /^\d{4}-\d{2}$/.test(mois ?? '') ? mois : thisMonth();
+  useDocumentMeta(isReport ? t('synthesis.reportTitle', { month }) : t('synthesis.title'), t('synthesis.intro'));
+  const setMonth = (value) => navigate(`/app/synthese/rapport/${value}`);
   const report = useApi(`/fin/rapport?mois=${month}`);
   const history = useApi('/fin/argent/synthese/historique');
   const [kept, setKept] = useState(null);
@@ -36,13 +47,23 @@ export default function SynthesisPage() {
 
   return (
     <>
-      <PageHeader icon={PieChart} title={t('synthesis.title')} subtitle={t('synthesis.intro')} maxWidth={1100} />
+      <PageHeader icon={isReport ? FileText : PieChart} title={isReport ? t('synthesis.reportTitle', { month }) : t('synthesis.title')} subtitle={t('synthesis.intro')} maxWidth={1100} />
       <div className="synthesis-page">
+        {isReport && <BackLink to="/app/synthese/rapports">{t('synthesis.backToReports')}</BackLink>}
         <div className="synthesis-toolbar">
           <label htmlFor="synthesis-month">
             {t('synthesis.month')}
-            <input id="synthesis-month" type="month" value={month} max={new Date().toISOString().slice(0, 7)} onChange={(event) => event.target.value && setMonth(event.target.value)} />
+            <input id="synthesis-month" type="month" value={month} max={thisMonth()} onChange={(event) => event.target.value && setMonth(event.target.value)} />
           </label>
+          {/* SYN-02 and REP-01, each at its own address (P8-25). */}
+          {!isReport && (
+            <Link to={`/app/synthese/rapport/${month}`} className="synthesis-report-link">
+              <FileText size={16} aria-hidden="true" /> {t('synthesis.openReport')}
+            </Link>
+          )}
+          <Link to="/app/synthese/rapports" className="synthesis-report-link">
+            {t('synthesis.allReports')}
+          </Link>
           {/* Tab 03B: the download icon, top right of the Synthèse. */}
           <div className="synthesis-download" role="group" aria-label={t('synthesis.download')}>
             <Download size={18} aria-hidden="true" />

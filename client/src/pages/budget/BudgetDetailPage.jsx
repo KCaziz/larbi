@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
-import { ChevronLeft, Lightbulb, PiggyBank, Plus, Trash2 } from 'lucide-react';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { ChevronLeft, Lightbulb, Pencil, PiggyBank, Plus, Scale, Trash2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate } from '../../lib/format.js';
@@ -24,10 +24,15 @@ import './Budget.css';
 // alerts at the declared thresholds, and what is still "non affecté". Nothing
 // here is recomputed in the browser — every figure is the server's own
 // engine answer (formula, version, inputs).
+//
+// P8-25: correcting the budget (BUD-02) and reading it through a method
+// (BUD-04) have their own addresses, `/app/budgets/:id/modifier` and
+// `/app/budgets/:id/methode`; this page leads to them.
 export default function BudgetDetailPage() {
   const { t, i18n } = useTranslation();
   const { id } = useParams();
-  const [message, setMessage] = useState(null);
+  const location = useLocation();
+  const [message, setMessage] = useState(location.state?.message ? { kind: 'ok', text: t(location.state.message) } : null);
   const [addingEnvelope, setAddingEnvelope] = useState(false);
   const [showProposal, setShowProposal] = useState(false);
 
@@ -78,6 +83,14 @@ export default function BudgetDetailPage() {
             <ChevronLeft size={15} aria-hidden="true" /> {t('budget.backToList')}
           </Link>
         </p>
+        <div className="budget-section-actions budget-screen-links">
+          <Link className="budget-plain" to={`/app/budgets/${id}/modifier`}>
+            <Pencil size={15} aria-hidden="true" /> {t('budget.edit')}
+          </Link>
+          <Link className="budget-plain" to={`/app/budgets/${id}/methode`}>
+            <Scale size={15} aria-hidden="true" /> {t('budget.methods.title')}
+          </Link>
+        </div>
 
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
@@ -193,7 +206,6 @@ export default function BudgetDetailPage() {
           )}
         </section>
 
-        <MethodPanel budgetId={id} budget={budget} references={references.data} run={run} />
       </div>
     </>
   );
@@ -201,7 +213,7 @@ export default function BudgetDetailPage() {
 
 // The optional methods (P8-09, tab 12): compare, never judge (ARC-08). The
 // category → pocket mapping is shown and can be changed here (tab 12B).
-function MethodPanel({ budgetId, budget, references, run }) {
+export function MethodPanel({ budgetId, budget, references, run }) {
   const { t } = useTranslation();
   const [method, setMethod] = useState('');
   const analysis = useApi(method ? `/fin/budgets/${budgetId}/methode?methode=${method}` : null);

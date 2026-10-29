@@ -1,0 +1,16 @@
+/* P8-25: the way back from a screen to the page of its menu. */
+.fin-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-block-size: 44px;
+  margin-block-end: var(--space-sm);
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.fin-back:hover,
+.fin-back:focus-visible {
+  text-decoration: underline;
+}

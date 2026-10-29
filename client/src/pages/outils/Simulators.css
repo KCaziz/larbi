@@ -302,3 +302,14 @@
 .workshop-chosen-anchor {
   scroll-margin-block-start: calc(var(--header-height) + 16px);
 }
+
+/* Moteur de comparaison (C19, P8-15) : les critères à comparer, en cases. */
+.compare-criteria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+}
+
+.compare-criteria .comparison-toggle {
+  min-block-size: 32px;
+}

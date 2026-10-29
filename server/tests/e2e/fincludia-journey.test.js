@@ -99,7 +99,8 @@ describe('FINCLUDIA foundations, end to end', { skip: findChrome() ? false : 'no
     assert.ok(await b.click(ap.search));
     assert.ok(await b.waitText('Taux d’effort'));
     assert.ok(await b.click('Taux d’effort'));
-    assert.ok(await b.waitFor("location.pathname.startsWith('/apprendre/termes/')"));
+    // A signed-in person reads it inside the application (P8-02): same page, under /app.
+    assert.ok(await b.waitFor("['/apprendre/termes/', '/app/apprendre/termes/'].some((prefix) => location.pathname.startsWith(prefix))", 'the term page'));
     assert.ok(await b.waitText('remboursement des crédits'));
     await b.shot('apprendre-term');
   });

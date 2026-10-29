@@ -52,3 +52,14 @@ describe('P8-13 — « J’ai prêté » and « On m’a prêté »', () => {
     assert.equal(synthesis.revenus.resultat, null, 'a loan received is not income');
   });
 });
+
+describe('DET-05 — the repayment strategies', () => {
+  test('compared in the currency asked for, which the screen sends (found by P8-25)', async () => {
+    await t.request('POST', '/fin/debts', { user, json: { label: 'Carte', outstandingPrincipal: 300000, monthlyInstalment: 50000, currency: 'DZD', rate: 0.2 } });
+    await t.request('POST', '/fin/debts', { user, json: { label: 'Voiture', outstandingPrincipal: 900000, monthlyInstalment: 60000, currency: 'DZD', rate: 0.08 } });
+    const res = await t.request('GET', '/fin/debts/comparaison?currency=DZD', { user });
+    assert.equal(res.status, 200, JSON.stringify(res.body));
+    assert.ok(res.body.avalanche && res.body.bouleDeNeige, 'both orders');
+    assert.equal((await t.request('GET', '/fin/debts/comparaison?inconnu=1', { user })).status, 400, 'an unknown parameter is still refused');
+  });
+});

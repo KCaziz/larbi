@@ -50,9 +50,10 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
   // ---- helpers -------------------------------------------------------------
 
   // `b.hasText(x)` returns the EXPRESSION to evaluate, not a boolean — an
-  // `assert.ok(await shows(x))` asserts a non-empty string and can never
-  // fail. These two evaluate it, so an assertion means something.
-  const shows = (what) => b.ev(b.hasText(what));
+  // `assert.ok(b.hasText(x))` asserts a non-empty string and can never fail.
+  // A text that must be there is WAITED for (`b.waitText`, a boolean): the
+  // lists load after the page title, and an immediate check raced them. A
+  // text that must NOT be there is checked once the page has settled.
   const hides = (what) => b.ev(`!${b.hasText(what)}`);
 
   const setSession = async (user) => {
@@ -106,11 +107,11 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
 
     await open('/compte/premiers-pas', fr.finOnboarding.resultTitle, 'le diagnostic progressif');
     // The first result exists, and it is a figure rather than a zero.
-    assert.ok(await shows(fr.finOnboarding.resultTitle), 'un premier résultat est affiché');
+    assert.ok(await b.waitText(fr.finOnboarding.resultTitle), 'un premier résultat est affiché');
 
-    // And the first dashboard.
-    await open('/aujourdhui', fr.today.figuresTitle, "l'accueil Aujourd'hui");
-    assert.ok(await shows(fr.today.figuresTitle));
+    // And the first screen of the day (P8-26: « Aujourd'hui », the same for
+    // every profile).
+    await open('/app/aujourdhui', fr.today.questionsTitle, "l'accueil Aujourd'hui");
   });
 
   // ---- J02 -----------------------------------------------------------------
@@ -146,7 +147,7 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
     // The budget's own screen: the chain ends on prévu / réel and the alerts.
     await b.goto(`${site.url}/budget/${budget.body.budget.id}`);
     assert.ok(await b.waitText(fr.budget.totalPlanned), 'le total prévu est affiché');
-    assert.ok(await shows(fr.budget.totalReal), 'et le total réel à côté');
+    assert.ok(await b.waitText(fr.budget.totalReal), 'et le total réel à côté');
   });
 
   // ---- J03 -----------------------------------------------------------------
@@ -159,8 +160,9 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
 
     await open('/objectifs', fr.goals.title, 'les objectifs');
     // The trajectory and the progress are what this chain is about.
-    assert.ok(await shows(fr.goals.title));
-    assert.ok(await shows('Ordinateur'), "l'objectif créé est dans la liste");
+    assert.ok(await b.waitText(fr.goals.title));
+    // Waited for: the list loads after the page title.
+    assert.ok(await b.waitText('Ordinateur'), "l'objectif créé est dans la liste");
   });
 
   // ---- J04 -----------------------------------------------------------------
@@ -181,7 +183,7 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
     await api('PUT', '/fin/reserve/cible', { targetMonths: 6 }, user);
 
     await open('/reserve', fr.reserve.title, 'la réserve de sécurité');
-    assert.ok(await shows(fr.reserve.title));
+    assert.ok(await b.waitText(fr.reserve.title));
   });
 
   // ---- J05 -----------------------------------------------------------------
@@ -199,11 +201,11 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
     assert.equal(debt.status, 201, 'la dette est créée');
 
     await open('/dettes', fr.debts.title, 'les dettes');
-    assert.ok(await shows('Crédit auto'));
+    assert.ok(await b.waitText('Crédit auto'), 'la dette créée est dans la liste');
     // The effort rate is the figure this chain exists for — and the client
     // forbids reading a threshold into it, so what is checked is that it is
     // SHOWN, not that it is judged.
-    assert.ok(await shows(fr.debts.title));
+    assert.ok(await b.waitText(fr.debts.title));
   });
 
   // ---- J06 -----------------------------------------------------------------
@@ -214,7 +216,7 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
     await api('POST', '/fin/revenus', { label: 'Salaire', value: 9000000, currency: 'DZD', frequency: 'mensuel', startDate: iso(-90) }, user);
 
     await open('/financement', fr.funding.title, 'la préparation au financement');
-    assert.ok(await shows(fr.funding.title));
+    assert.ok(await b.waitText(fr.funding.title));
     // The comparison of offers is P4-15, blocked on the client's data: the
     // chain stops where the data stops, and that is the honest end of it.
   });
@@ -229,10 +231,10 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
     await api('POST', '/fin/debts', { label: 'Crédit', outstandingPrincipal: 20000000, monthlyInstalment: 400000, currency: 'DZD' }, user);
 
     await open('/patrimoine', fr.wealth.figuresTitle, 'le patrimoine');
-    assert.ok(await shows(fr.wealth.netWorth), 'le patrimoine net est affiché');
-    assert.ok(await shows('Appartement'));
+    assert.ok(await b.waitText(fr.wealth.netWorth), 'le patrimoine net est affiché');
+    assert.ok(await b.waitText('Appartement'));
     // The client's own rule, visible on the page: no fictional value here.
-    assert.ok(await shows(fr.wealth.noFictional.slice(0, 30)), "la page dit qu'aucune valeur fictive n'y entre");
+    assert.ok(await b.waitText(fr.wealth.noFictional.slice(0, 30)), "la page dit qu'aucune valeur fictive n'y entre");
   });
 
   // ---- J08 -----------------------------------------------------------------
@@ -251,9 +253,9 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
 
     await open('/portefeuille', fr.paper.figuresTitle, "le portefeuille d'entraînement");
     // The badge the client requires to be permanent.
-    assert.ok(await shows(fr.fincludia.simulationBadge), 'le badge SIMULATION est visible');
+    assert.ok(await b.waitText(fr.fincludia.simulationBadge), 'le badge SIMULATION est visible');
     // The decision journal, with the reason the person typed.
-    assert.ok(await shows('premier essai'), 'le journal de décisions garde le pourquoi');
+    assert.ok(await b.waitText('premier essai'), 'le journal de décisions garde le pourquoi');
     // And nothing of it reaches the real patrimony.
     await open('/patrimoine', fr.wealth.figuresTitle, 'le patrimoine');
     assert.ok(await hides('Support A'), "le support fictif n'apparaît pas dans le patrimoine réel");
@@ -294,9 +296,9 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
 
     await setSession(owner);
     await open('/espaces', fr.spaces.mineTitle, "le hub À plusieurs");
-    assert.ok(await shows('Coloc Alger'));
+    assert.ok(await b.waitText('Coloc Alger'));
     // The promise the page must state: joining shares nothing.
-    assert.ok(await shows(fr.spaces.privateByDefault.slice(0, 30)), 'la page affiche la promesse de confidentialité');
+    assert.ok(await b.waitText(fr.spaces.privateByDefault.slice(0, 30)), 'la page affiche la promesse de confidentialité');
   });
 
   // ---- J10 -----------------------------------------------------------------
@@ -314,10 +316,10 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
     assert.equal(provision.status, 201, 'la provision est créée');
 
     await open('/calendrier', fr.calendar.provisionsTitle, 'le calendrier financier');
-    assert.ok(await shows('Rentrée scolaire'));
+    assert.ok(await b.waitText('Rentrée scolaire'));
     // The monthly amount to set aside — the figure the chain is about (F045).
-    assert.ok(await shows(fr.calendar.monthlyProvision), 'le montant à provisionner par mois est affiché');
+    assert.ok(await b.waitText(fr.calendar.monthlyProvision), 'le montant à provisionner par mois est affiché');
     // And the client's rule: a provision is not a realised expense.
-    assert.ok(await shows(fr.calendar.provisionsHelp.slice(0, 30)), "la page dit qu'une provision ne crée pas de dépense");
+    assert.ok(await b.waitText(fr.calendar.provisionsHelp.slice(0, 30)), "la page dit qu'une provision ne crée pas de dépense");
   });
 });

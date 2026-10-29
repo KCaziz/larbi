@@ -236,6 +236,8 @@ export const RESERVE_TARGETS = {
   FAM: { months: 4, alert: true, range: [1, 12], variant: { months: 6, when: 'Foyer à un seul revenu, revenus irréguliers ou personnes à charge' } },
   COL: { months: 3, alert: true, range: [1, 12], shared: { months: 1, label: 'charges partagées' }, note: 'Deux réserves séparées : personnelle et charges communes.' },
   EPG: { months: null, alert: true, note: 'Aucune cible par profil dans le référentiel du client ; la lecture commune en mois s’applique.' },
+  // « Autre / libre » (P8-17, onglet 16_Education) : absent de la grille A.
+  AUT: { months: null, alert: true, note: 'Aucune cible par profil dans le référentiel du client ; la lecture commune en mois s’applique.' },
 };
 
 // ---------------------------------------------------------------------------

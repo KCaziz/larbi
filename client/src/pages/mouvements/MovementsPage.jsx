@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { CheckCheck, Copy, Download, ListChecks, Paperclip, Pencil, Plus, Search, Tag, Trash2, TriangleAlert } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
@@ -25,7 +25,13 @@ import './Movements.css';
 // transfers by tab, the complete entry, correcting, duplicating and deleting a
 // movement, and the clearing screen (« pointage », AN-F004). Every total comes
 // from the server; nothing is recomputed here.
-const TABS = ['all', 'income', 'expense', 'transfers', 'clearing'];
+//
+// P8-25: the entry (TRX-02), a movement's detail and correction (TRX-03) and
+// the clearing (TRX-04) each have their own address — `/app/mouvements/nouveau`,
+// `/app/mouvements/:id`, `/app/mouvements/:id/modifier`,
+// `/app/mouvements/pointage` — built from the components exported here. This
+// page lists, filters and leads to them.
+const TABS = ['all', 'income', 'expense', 'transfers'];
 const EMPTY_FILTERS = {
   text: '',
   accountId: '',
@@ -54,27 +60,13 @@ export default function MovementsPage() {
   const [tab, setTab] = useState('all');
   const [filters, setFilters] = useState(startFilters);
   const [applied, setApplied] = useState(startFilters);
-  const [message, setMessage] = useState(null);
-  const [draft, setDraft] = useState(null);
+  const location = useLocation();
+  const [message, setMessage] = useState(location.state?.message ? { kind: 'ok', text: t(location.state.message) } : null);
   useDocumentMeta(t('movements.title'), t('movements.intro'));
 
   const query = useMemo(() => buildQuery(applied, tab, currency), [applied, tab, currency]);
   const history = useApi(`/fin/transactions?${query}`);
-  const categories = useApi('/fin/categories');
-  const references = useApi('/fin/argent/references');
-  const accounts = useApi('/fin/comptes');
-  const tags = useApi('/fin/etiquettes');
-
-  const lookups = useMemo(
-    () => ({
-      categories: (categories.data?.groups ?? []).flatMap((group) => group.categories),
-      categoryGroups: categories.data?.groups ?? [],
-      accounts: accounts.data?.accounts ?? [],
-      tags: tags.data?.tags ?? [],
-      paymentMethods: references.data?.paymentMethodReference ?? [],
-    }),
-    [categories.data, accounts.data, tags.data, references.data],
-  );
+  const { lookups, accounts, tags, references } = useMovementLookups();
 
   async function run(action, okKey) {
     setMessage(null);
@@ -100,7 +92,14 @@ export default function MovementsPage() {
           </p>
         )}
 
-        <Entry key={draft?.key ?? 'new'} currency={currency} lookups={lookups} draft={draft} onDone={() => setDraft(null)} run={run} />
+        <div className="movements-actions">
+          <Button to="/app/mouvements/nouveau">
+            <Plus size={16} aria-hidden="true" /> {t('myMoney.addTitle')}
+          </Button>
+          <Button to="/app/mouvements/pointage" variant="secondary">
+            <CheckCheck size={16} aria-hidden="true" /> {t('movements.tabs.clearing')}
+          </Button>
+        </div>
 
         <div className="movements-tabs" role="tablist" aria-label={t('movements.tabsLabel')}>
           {TABS.map((key) => (
@@ -110,10 +109,7 @@ export default function MovementsPage() {
           ))}
         </div>
 
-        {tab === 'clearing' ? (
-          <ClearingPanel lookups={lookups} run={run} />
-        ) : (
-          <section>
+        <section>
             <Filters filters={filters} setFilters={setFilters} lookups={lookups} references={references.data} query={query} onApply={() => setApplied(filters)} onClear={() => {
               setFilters(EMPTY_FILTERS);
               setApplied(EMPTY_FILTERS);
@@ -126,12 +122,9 @@ export default function MovementsPage() {
                 currency={currency}
                 lookups={lookups}
                 run={run}
-                onEdit={(transaction) => setDraft({ key: `edit-${transaction.id}-${Date.now()}`, mode: 'edit', transaction })}
-                onDuplicate={(transaction) => setDraft({ key: `copy-${transaction.id}-${Date.now()}`, mode: 'copy', transaction })}
               />
             )}
-          </section>
-        )}
+        </section>
 
         <TagManager lookups={lookups} reload={tags.reload} />
       </div>
@@ -159,6 +152,26 @@ function buildQuery(filters, tab, currency) {
   return params.toString();
 }
 
+// The lists the entry and the rows need to name things (categories, accounts,
+// tags, payment methods), shared by the list and the screens of P8-25.
+export function useMovementLookups() {
+  const categories = useApi('/fin/categories');
+  const references = useApi('/fin/argent/references');
+  const accounts = useApi('/fin/comptes');
+  const tags = useApi('/fin/etiquettes');
+  const lookups = useMemo(
+    () => ({
+      categories: (categories.data?.groups ?? []).flatMap((group) => group.categories),
+      categoryGroups: categories.data?.groups ?? [],
+      accounts: accounts.data?.accounts ?? [],
+      tags: tags.data?.tags ?? [],
+      paymentMethods: references.data?.paymentMethodReference ?? [],
+    }),
+    [categories.data, accounts.data, tags.data, references.data],
+  );
+  return { lookups, accounts, tags, references };
+}
+
 // ---- entry -------------------------------------------------------------------
 
 // The complete entry of TRX-02 (tab 08): amount, description, category and
@@ -166,7 +179,7 @@ function buildQuery(filters, tab, currency) {
 // et nouveau » keeps the context. A suspected duplicate is asked BEFORE saving
 // and never removed for the person (P8-07). The same form corrects a movement
 // (with an optional reason) and starts a copy of one.
-function Entry({ currency, lookups, draft, onDone, run }) {
+export function Entry({ currency, lookups, draft, onDone, run }) {
   const { t } = useTranslation();
   const today = new Date().toISOString().slice(0, 10);
   const source = draft?.transaction ?? null;
@@ -486,7 +499,7 @@ function Filters({ filters, setFilters, lookups, references, query, onApply, onC
   );
 }
 
-function History({ data, currency, lookups, run, onEdit, onDuplicate }) {
+function History({ data, currency, lookups, run }) {
   const { t, i18n } = useTranslation();
   const totals = data.totals;
   const money = (value) => (value === null ? t('fincludia.notComputed') : formatAmount(i18n.language, value, totals.currency ?? currency));
@@ -499,7 +512,7 @@ function History({ data, currency, lookups, run, onEdit, onDuplicate }) {
       ) : (
         <ul className="money-list">
           {data.transactions.map((transaction) => (
-            <Row key={transaction.id} transaction={transaction} lookups={lookups} run={run} onEdit={onEdit} onDuplicate={onDuplicate} />
+            <Row key={transaction.id} transaction={transaction} lookups={lookups} run={run} />
           ))}
         </ul>
       )}
@@ -510,7 +523,7 @@ function History({ data, currency, lookups, run, onEdit, onDuplicate }) {
 
 const SIGN = { income: '+', transfer_in: '+', expense: '−', transfer_out: '−' };
 
-function Row({ transaction, lookups, run, onEdit, onDuplicate }) {
+export function Row({ transaction, lookups, run, detail = true }) {
   const { t, i18n } = useTranslation();
   const transfer = Boolean(transaction.transferId);
   const category = lookups.categories.find((row) => row.id === transaction.categoryId);
@@ -523,7 +536,9 @@ function Row({ transaction, lookups, run, onEdit, onDuplicate }) {
 
   return (
     <li className={`${transaction.status === 'fictional' ? 'money-row money-row-simulation' : 'money-row'} movements-row ${flowClass(flow)}`}>
-      <span className="money-row-date">{formatDate(i18n.language, transaction.occurredAt)}</span>
+      <span className="money-row-date">
+        {detail ? <Link to={`/app/mouvements/${transaction.id}`}>{formatDate(i18n.language, transaction.occurredAt)}</Link> : formatDate(i18n.language, transaction.occurredAt)}
+      </span>
       <span className="money-row-amount flow-amount">
         {SIGN[transaction.kind]} {formatAmount(i18n.language, transaction.value, transaction.currency)}
       </span>
@@ -567,14 +582,14 @@ function Row({ transaction, lookups, run, onEdit, onDuplicate }) {
         </select>
         {!transfer && (
           <>
-            <button type="button" className="money-icon" title={t('movements.edit')} onClick={() => onEdit(transaction)}>
+            <Link className="money-icon" title={t('movements.edit')} to={`/app/mouvements/${transaction.id}/modifier`}>
               <Pencil size={15} aria-hidden="true" />
               <span className="sr-only">{t('movements.edit')}</span>
-            </button>
-            <button type="button" className="money-icon" title={t('movements.duplicate')} onClick={() => onDuplicate(transaction)}>
+            </Link>
+            <Link className="money-icon" title={t('movements.duplicate')} to={`/app/mouvements/nouveau?copie=${transaction.id}`}>
               <Copy size={15} aria-hidden="true" />
               <span className="sr-only">{t('movements.duplicate')}</span>
-            </button>
+            </Link>
           </>
         )}
         <button type="button" className="money-icon" title={t('myMoney.delete')} onClick={() => run(() => api.delete(`/fin/transactions/${transaction.id}`), 'myMoney.deleted')}>
@@ -588,7 +603,7 @@ function Row({ transaction, lookups, run, onEdit, onDuplicate }) {
 
 // ---- clearing (TRX-04) ---------------------------------------------------------
 
-function ClearingPanel({ lookups, run }) {
+export function ClearingPanel({ lookups, run }) {
   const { t, i18n } = useTranslation();
   const view = useApi('/fin/pointage');
   if (view.status === 'loading' && !view.data) return <LoadingState />;

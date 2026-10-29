@@ -26,7 +26,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
 
   // The row of one category, found by its visible label.
   const rowOf = (label) =>
-    `(() => { const li = [...document.querySelectorAll('.fincat-row')].find((e) => e.querySelector('.fincat-label')?.textContent.trim() === ${JSON.stringify(label)}); return li; })()`;
+    `(() => { const li = [...document.querySelectorAll('.fincat-row')].find((e) => e.querySelector('.fincat-name')?.textContent.trim() === ${JSON.stringify(label)}); return li; })()`;
 
   // Waits for a family's list to contain (or no longer contain) a label. The
   // list is refreshed by a reload that no longer blanks the page, so reading it
@@ -36,7 +36,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
       `(() => {
         const section = [...document.querySelectorAll('.fincat-family')].find((e) => e.querySelector('h3').textContent.includes(${JSON.stringify(family)}));
         if (!section) return false;
-        const labels = [...section.querySelectorAll('.fincat-label')].map((e) => e.textContent.trim());
+        const labels = [...section.querySelectorAll('.fincat-name')].map((e) => e.textContent.trim());
         return labels.includes(${JSON.stringify(label)}) === ${JSON.stringify(present)};
       })()`,
       `${label} ${present ? 'listed' : 'gone'} in ${family}`,
@@ -45,7 +45,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
   const labelsOf = (family) =>
     b.ev(`(() => {
       const section = [...document.querySelectorAll('.fincat-family')].find((e) => e.querySelector('h3').textContent.includes(${JSON.stringify(family)}));
-      return [...section.querySelectorAll('.fincat-label')].map((e) => e.textContent.trim());
+      return [...section.querySelectorAll('.fincat-name')].map((e) => e.textContent.trim());
     })()`);
 
   // Waits for the control, like a person would, instead of demanding that the
@@ -53,7 +53,7 @@ describe('FINCLUDIA categories, end to end', { skip: findChrome() ? false : 'no 
   const clickActionInRow = (label, title) =>
     b.clickWhere(
       `e => (e.title === ${JSON.stringify(title)} || e.textContent.trim() === ${JSON.stringify(title)})` +
-        ` && e.closest('.fincat-row')?.querySelector('.fincat-label')?.textContent.trim() === ${JSON.stringify(label)}`,
+        ` && e.closest('.fincat-row')?.querySelector('.fincat-name')?.textContent.trim() === ${JSON.stringify(label)}`,
     );
 
   before(async () => {

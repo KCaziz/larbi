@@ -362,3 +362,31 @@
     border-block-start: 1px solid var(--border);
   }
 }
+
+/* ---- print ---------------------------------------------------------- */
+/* A page printed from the application (an invoice, a report) prints the
+   page, not the application around it: the bars, the menu and the assistant
+   stay on screen. Found by the invoice journey: one A4 page became two. */
+@media print {
+  .skip-link,
+  .app-topbar,
+  .app-sidebar,
+  .app-bottom-nav,
+  .app-more-sheet,
+  .chatbot {
+    display: none !important;
+  }
+
+  .app-shell {
+    min-block-size: 0;
+    padding: 0;
+    background: none;
+  }
+
+  .app-body,
+  .app-main {
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+}

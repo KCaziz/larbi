@@ -97,3 +97,26 @@
 .movements-row.flow .flow-amount {
   color: var(--flow);
 }
+
+/* P8-25: the list leads to the entry, the detail and the clearing, each at
+   its own address. */
+.movements-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block: var(--space-sm);
+}
+
+.movements-trail-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block: var(--space-md) var(--space-xs);
+  font-size: 1.05rem;
+}
+
+.movements-trail {
+  margin: 0;
+  padding-inline-start: 20px;
+  font-size: 0.9rem;
+}

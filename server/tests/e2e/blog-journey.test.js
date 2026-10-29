@@ -238,7 +238,8 @@ describe('blog: from the editor to the reader', { skip: findChrome() ? false : '
       await b.clickWhere(`e => e.classList.contains('blog-tag') && e.textContent.trim() === 'TVA'`);
       assert.ok(await b.waitFor("location.pathname === '/blog' && new URLSearchParams(location.search).get('tag') === 'tva'"));
       assert.ok(await b.waitFor("document.title === 'Blog · FINCLUDIA'"));
-      assert.ok((await b.text()).includes('La TVA expliquée'));
+      // Waited for: the filtered list arrives after the address and the title.
+      assert.ok(await b.waitText('La TVA expliquée'), 'the filtered list');
     });
 
     test('a draft and an unknown address look exactly alike: "article not found"', async () => {

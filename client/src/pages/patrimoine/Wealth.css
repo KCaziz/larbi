@@ -259,3 +259,48 @@
   color: var(--text);
   font: inherit;
 }
+
+/* PAT-02, one asset at its own address (P8-25). */
+.wealth-detail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 12px;
+  margin: 0 0 var(--space-md);
+}
+
+.wealth-detail div {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.wealth-detail dt {
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.wealth-detail dd {
+  margin: 4px 0 0;
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.wealth-valuations {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 var(--space-md);
+  padding: 0;
+  list-style: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.wealth-valuations li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.wealth-detail-actions {
+  margin-block-start: var(--space-md);
+}

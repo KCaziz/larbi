@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { Archive, ArchiveRestore, ChevronDown, ChevronUp, Flag, Plus, Trash2 } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Archive, ArchiveRestore, ChevronRight, Flag, Plus, Trash2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
@@ -21,22 +21,24 @@ import './Goals.css';
 // Financial goals (P6-08), screens C09-C11. The client's catalogue of
 // templates only ever supplies a label — never a suggested amount, which the
 // client explicitly forbids as a preselected recommendation.
+//
+// P8-25: creating a goal (OBJ-02) and one goal's detail (OBJ-03) have their
+// own addresses, `/app/objectifs/nouveau` and `/app/objectifs/:id`; this page
+// lists the goals and leads to them.
 export default function GoalsPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const location = useLocation();
   const [showArchived, setShowArchived] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [message, setMessage] = useState(null);
+  const [message, setMessage] = useState(location.state?.message ? { kind: 'ok', text: t(location.state.message) } : null);
   useDocumentMeta(t('goals.title'), t('goals.intro'));
 
   const goals = useApi(`/fin/goals${showArchived ? '?includeArchived=true' : ''}`);
   const references = useApi('/fin/goals/references');
-  const formulas = useMemo(() => new Map((references.data?.formulas ?? []).map((formula) => [formula.id, formula])), [references.data]);
   // The 17 models since P8-12 (GO-01 to GO-11 and six kept models).
   const templates = references.data?.catalogue ?? references.data?.templates ?? [];
   // « Objectifs & sécurité »: the emergency fund heads the page (P8-12).
   const reserve = useApi(`/fin/reserve?currency=${user?.finCurrency ?? 'DZD'}`);
-  const accounts = useApi('/fin/comptes');
 
   async function run(action, okKey) {
     setMessage(null);
@@ -84,29 +86,17 @@ export default function GoalsPage() {
             <input id="goals-archived" type="checkbox" checked={showArchived} onChange={(event) => setShowArchived(event.target.checked)} />
             {t('goals.showArchived')}
           </label>
-          <Button onClick={() => setCreating((v) => !v)}>
+          <Button to="/app/objectifs/nouveau">
             <Plus size={16} aria-hidden="true" /> {t('goals.create')}
           </Button>
         </div>
-
-        {creating && (
-          <CreateGoalForm
-            templates={templates}
-            defaultCurrency={user?.finCurrency ?? 'DZD'}
-            onDone={() => {
-              setCreating(false);
-              goals.reload();
-            }}
-            onCancel={() => setCreating(false)}
-          />
-        )}
 
         {list.length === 0 ? (
           <Notice variant="info">{t('goals.none')}</Notice>
         ) : (
           <ul className="goals-list">
             {list.map((goal) => (
-              <GoalRow key={goal.id} goal={goal} model={templates.find((tpl) => tpl.key === goal.templateKey)} formulas={formulas} statuses={references.data?.progressStatuses ?? []} accounts={accounts.data?.accounts ?? []} run={run} />
+              <GoalRow key={goal.id} goal={goal} model={templates.find((tpl) => tpl.key === goal.templateKey)} />
             ))}
           </ul>
         )}
@@ -115,17 +105,14 @@ export default function GoalsPage() {
   );
 }
 
-function GoalRow({ goal, model, formulas, statuses, accounts, run }) {
+// One goal in the list: it leads to its own screen (OBJ-03, P8-25).
+function GoalRow({ goal, model }) {
   const { t, i18n } = useTranslation();
-  const [open, setOpen] = useState(false);
-  // The detail — contributions and their source account — is read when the
-  // goal is opened.
-  const detail = useApi(open ? `/fin/goals/${goal.id}` : null);
   const progress = Math.min(1, goal.vue.progres.resultat ?? 0);
 
   return (
     <li className={goal.archivedAt ? 'goals-row goals-row-archived' : 'goals-row'}>
-      <button type="button" className="goals-row-head" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
+      <Link className="goals-row-head" to={`/app/objectifs/${goal.id}`}>
         <span className="goals-row-title">
           {/* The goal's own icon and colour (« Autre objectif », answer D1), else its model's. */}
           {(goal.icon ?? model?.icon) && (
@@ -141,96 +128,101 @@ function GoalRow({ goal, model, formulas, statuses, accounts, run }) {
         <span className="goals-progress-track" aria-hidden="true">
           <span className="goals-progress-fill" style={{ width: `${progress * 100}%` }} />
         </span>
-        {open ? <ChevronUp size={16} aria-hidden="true" /> : <ChevronDown size={16} aria-hidden="true" />}
-      </button>
-
-      {open && (
-        <div className="goals-row-body">
-          {/* Tab 10B: the progress ring, % at the centre, capital over target. */}
-          <div className="goals-detail-head">
-            <ProgressRing value={goal.vue.progres.resultat} />
-            <p className="goals-capital">
-              {t('goals.capitalOverTarget', { capital: formatAmount(i18n.language, goal.allocated, goal.currency), target: formatAmount(i18n.language, goal.target, goal.currency) })}
-              {goal.vue.excedent > 0 && <span className="goals-row-tag">{t('goals.excess', { amount: formatAmount(i18n.language, goal.vue.excedent, goal.currency) })}</span>}
-              {goal.capitalSource === 'account' && <span className="fin-hint"> {t('goals.capitalFromAccount')}</span>}
-            </p>
-            <label className="goals-status" htmlFor={`goal-status-${goal.id}`}>
-              {t('goals.status')}
-              <select
-                id={`goal-status-${goal.id}`}
-                value={goal.progressStatus ?? 'active'}
-                onChange={(event) => run(() => api.patch(`/fin/goals/${goal.id}`, { progressStatus: event.target.value }), 'goals.updated')}
-              >
-                {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {t(`goals.statuses.${status}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <div className="fin-figure-grid">
-            <FigureCard label={t('goals.progress')} answer={goal.vue.progres} formula={formulas.get('F025')} />
-            <FigureCard label={t('goals.remaining')} answer={goal.vue.reste} formula={formulas.get('F026')} />
-            <FigureCard label={t('goals.minimumMonths')} answer={goal.vue.moisMinimum} />
-            {goal.vue.contributionRequise && (
-              <FigureCard label={t('goals.requiredContribution')} answer={goal.vue.contributionRequise} formula={formulas.get('F028')} />
-            )}
-          </div>
-
-          {goal.vue.trajectoire.atteignable === true && goal.vue.trajectoire.dateEstimee && (
-            <p className="goals-estimate">{t('goals.estimatedDate', { date: formatDate(i18n.language, goal.vue.trajectoire.dateEstimee) })}</p>
-          )}
-          {goal.vue.avertissements.map((warning, index) => (
-            <p key={index} className="fin-hint">
-              {warning}
-            </p>
-          ))}
-
-          <EditGoalForm goal={goal} run={run} />
-
-          {goal.status !== 'fictional' && <ContributionForm goal={goal} accounts={accounts} run={(action, key) => run(action, key).then((res) => (detail.reload(), res))} />}
-          {detail.data?.contributions?.length > 0 && (
-            <section className="goals-contributions">
-              <h3>{t('goals.contributions')}</h3>
-              <ul>
-                {detail.data.contributions.map((row) => (
-                  <li key={row.id}>
-                    <span>{formatDate(i18n.language, row.occurredAt)}</span>
-                    <span>{row.fromAccount ? t('goals.fromAccount', { account: row.fromAccount.label }) : ''}</span>
-                    <strong>{formatAmount(i18n.language, row.value, row.currency)}</strong>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-          <ScenarioForm goal={goal} />
-
-          <div className="goals-row-actions">
-            <button
-              type="button"
-              className="goals-icon"
-              title={goal.archivedAt ? t('goals.restore') : t('goals.archive')}
-              onClick={() => run(() => api.put(`/fin/goals/${goal.id}/archive`, { archived: !goal.archivedAt }), goal.archivedAt ? 'goals.restored' : 'goals.archived')}
-            >
-              {goal.archivedAt ? <ArchiveRestore size={15} aria-hidden="true" /> : <Archive size={15} aria-hidden="true" />}
-              <span className="sr-only">{goal.archivedAt ? t('goals.restore') : t('goals.archive')}</span>
-            </button>
-            <button
-              type="button"
-              className="goals-icon"
-              title={t('goals.delete')}
-              onClick={() => {
-                if (window.confirm(t('goals.deleteConfirm', { label: goal.label }))) run(() => api.delete(`/fin/goals/${goal.id}`), 'goals.deleted');
-              }}
-            >
-              <Trash2 size={15} aria-hidden="true" />
-              <span className="sr-only">{t('goals.delete')}</span>
-            </button>
-          </div>
-        </div>
-      )}
+        <ChevronRight className="icon-dir" size={16} aria-hidden="true" />
+      </Link>
     </li>
+  );
+}
+
+// One goal's detail (OBJ-03): the ring, the figures, its correction, its
+// contributions, the scenario, its status, archiving and deleting.
+export function GoalDetail({ goal, formulas, statuses, accounts, contributions, run }) {
+  const { t, i18n } = useTranslation();
+  return (
+    <div className="goals-row-body goals-detail">
+      {/* Tab 10B: the progress ring, % at the centre, capital over target. */}
+      <div className="goals-detail-head">
+        <ProgressRing value={goal.vue.progres.resultat} />
+        <p className="goals-capital">
+          {t('goals.capitalOverTarget', { capital: formatAmount(i18n.language, goal.allocated, goal.currency), target: formatAmount(i18n.language, goal.target, goal.currency) })}
+          {goal.vue.excedent > 0 && <span className="goals-row-tag">{t('goals.excess', { amount: formatAmount(i18n.language, goal.vue.excedent, goal.currency) })}</span>}
+          {goal.capitalSource === 'account' && <span className="fin-hint"> {t('goals.capitalFromAccount')}</span>}
+        </p>
+        <label className="goals-status" htmlFor={`goal-status-${goal.id}`}>
+          {t('goals.status')}
+          <select
+            id={`goal-status-${goal.id}`}
+            value={goal.progressStatus ?? 'active'}
+            onChange={(event) => run(() => api.patch(`/fin/goals/${goal.id}`, { progressStatus: event.target.value }), 'goals.updated')}
+          >
+            {statuses.map((status) => (
+              <option key={status} value={status}>
+                {t(`goals.statuses.${status}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <div className="fin-figure-grid">
+        <FigureCard label={t('goals.progress')} answer={goal.vue.progres} formula={formulas.get('F025')} />
+        <FigureCard label={t('goals.remaining')} answer={goal.vue.reste} formula={formulas.get('F026')} />
+        <FigureCard label={t('goals.minimumMonths')} answer={goal.vue.moisMinimum} />
+        {goal.vue.contributionRequise && (
+          <FigureCard label={t('goals.requiredContribution')} answer={goal.vue.contributionRequise} formula={formulas.get('F028')} />
+        )}
+      </div>
+
+      {goal.vue.trajectoire.atteignable === true && goal.vue.trajectoire.dateEstimee && (
+        <p className="goals-estimate">{t('goals.estimatedDate', { date: formatDate(i18n.language, goal.vue.trajectoire.dateEstimee) })}</p>
+      )}
+      {goal.vue.avertissements.map((warning, index) => (
+        <p key={index} className="fin-hint">
+          {warning}
+        </p>
+      ))}
+
+      <EditGoalForm goal={goal} run={run} />
+
+      {goal.status !== 'fictional' && <ContributionForm goal={goal} accounts={accounts} run={run} />}
+      {contributions.length > 0 && (
+        <section className="goals-contributions">
+          <h3>{t('goals.contributions')}</h3>
+          <ul>
+            {contributions.map((row) => (
+              <li key={row.id}>
+                <span>{formatDate(i18n.language, row.occurredAt)}</span>
+                <span>{row.fromAccount ? t('goals.fromAccount', { account: row.fromAccount.label }) : ''}</span>
+                <strong>{formatAmount(i18n.language, row.value, row.currency)}</strong>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      <ScenarioForm goal={goal} />
+
+      <div className="goals-row-actions">
+        <button
+          type="button"
+          className="goals-icon"
+          title={goal.archivedAt ? t('goals.restore') : t('goals.archive')}
+          onClick={() => run(() => api.put(`/fin/goals/${goal.id}/archive`, { archived: !goal.archivedAt }), goal.archivedAt ? 'goals.restored' : 'goals.archived')}
+        >
+          {goal.archivedAt ? <ArchiveRestore size={15} aria-hidden="true" /> : <Archive size={15} aria-hidden="true" />}
+          <span className="sr-only">{goal.archivedAt ? t('goals.restore') : t('goals.archive')}</span>
+        </button>
+        <button
+          type="button"
+          className="goals-icon"
+          title={t('goals.delete')}
+          onClick={() => {
+            if (window.confirm(t('goals.deleteConfirm', { label: goal.label }))) run(() => api.delete(`/fin/goals/${goal.id}`), 'goals.deleted');
+          }}
+        >
+          <Trash2 size={15} aria-hidden="true" />
+          <span className="sr-only">{t('goals.delete')}</span>
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -378,7 +370,7 @@ function EditGoalForm({ goal, run }) {
   );
 }
 
-function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel }) {
+export function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel }) {
   const { t } = useTranslation();
   const [form, setForm] = useState({ label: '', templateKey: '', icon: '', color: '#0F766E', target: '', targetDate: '', rate: '' });
   const [error, setError] = useState(null);
@@ -389,7 +381,7 @@ function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel }) {
     const target = toMinorUnits(form.target, defaultCurrency);
     if (target === null) return;
     try {
-      await api.post('/fin/goals', {
+      const created = await api.post('/fin/goals', {
         label: form.label.trim(),
         templateKey: form.templateKey || null,
         // « Autre objectif » (answer D1): its own icon and colour.
@@ -400,7 +392,7 @@ function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel }) {
         targetDate: form.targetDate ? new Date(form.targetDate).toISOString() : null,
         rate: form.rate ? Number(form.rate) / 100 : null,
       });
-      onDone();
+      onDone(created.goal);
     } catch (err) {
       setError(t(errorKey(err, { 422: 'goals.errors.refused' })));
     }

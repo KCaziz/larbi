@@ -93,6 +93,8 @@ model User {
   finTransactions         FinTransaction[]
   finAccounts             FinAccount[]
   finOccurrences          FinOccurrence[]
+  finPayslips             FinPayslip[]
+  toolFavorites           ToolFavorite[]
   finTags                 FinTag[]
   finOnboarding           FinOnboarding?
   finBudgets              FinBudget[]
@@ -279,6 +281,21 @@ model FinConsent {
 // would be a worse model than one typed reference, and a favourite pointing at
 // content that has since been deleted or unpublished is simply dropped when the
 // list is read.
+// The favourite tools of the single catalogue (P8-15, OUT-01). A code of
+// constants/finToolsCatalogue.js, not a foreign key: the catalogue is a
+// constant, and a code that leaves it simply stops being shown.
+model ToolFavorite {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code      String   @db.VarChar(20)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, code])
+  @@index([userId, createdAt])
+  @@map("tool_favorites")
+}
+
 model LearningFavorite {
   id        String   @id @default(uuid())
   userId    String
@@ -2568,4 +2585,36 @@ model FinBusinessPayment {
   @@index([businessId, receivedAt])
   @@index([documentId])
   @@map("fin_business_payments")
+}
+
+// A payslip the person chose to keep (P8-15, the client's answer D5:
+// « historique »). Kept only with their explicit consent — P4-14 kept none,
+// a payslip being sensitive. The lines as typed, and what the decoder made of
+// them; the net feeds the monthly income only when the person confirms.
+model FinPayslip {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  period      String?   @db.VarChar(20)
+  // [{ kind, label, value }] as the decoder accepts them.
+  lines       Json
+  // In centimes: the gross, the net the lines give, the net printed on it.
+  gross       Int
+  value       Int
+  declaredNet Int?
+  currency    String    @default("DZD") @db.VarChar(3)
+  scope       String    @default("personal") @db.VarChar(20)
+  source      String    @db.VarChar(20)
+  status      String    @db.VarChar(20)
+  confidence  String?   @db.VarChar(10)
+  consentUses Json      @default("[]")
+  effectiveAt DateTime  @default(now())
+  collectedAt DateTime  @default(now())
+  version     Int       @default(1)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId, deletedAt])
+  @@map("fin_payslips")
 }
