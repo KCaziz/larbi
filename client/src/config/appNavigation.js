@@ -100,7 +100,7 @@ export const LEGACY_REDIRECTS = [
   { from: 'patrimoine', to: '/app/patrimoine' },
   { from: 'financement', to: '/app/financement' },
   { from: 'portefeuille', to: '/app/portefeuille' },
-  { from: 'espaces', to: '/app/espaces' },
+  { from: 'espaces', to: '/partage' },
   { from: 'entreprise', to: '/app/entreprise' },
   { from: 'notifications', to: '/app/notifications' },
   { from: 'confiance', to: '/app/parametres/confiance' },

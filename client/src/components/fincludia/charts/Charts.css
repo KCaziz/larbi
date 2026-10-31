@@ -1,0 +1,166 @@
+/* The shared chart kit (P8-24: G-03, G-04, G-06, G-08, G-09, G-11).
+   Four fixed series colours, in a fixed order, never cycled; lines 2.5 px;
+   bars with a 2 px gap; the written legend and the table are never optional.
+   `direction: ltr` on the drawing keeps the time axis left to right in Arabic. */
+.chart {
+  margin-block: var(--space-md);
+}
+.chart-svg {
+  direction: ltr;
+  unicode-bidi: isolate;
+  inline-size: 100%;
+  block-size: 160px;
+  overflow: visible;
+}
+.chart-line,
+.chart-dot {
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+.chart-dot {
+  stroke: none;
+}
+.chart-zero {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+}
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin: 0 0 6px;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.chart-swatch {
+  display: inline-block;
+  inline-size: 14px;
+  block-size: 4px;
+  border-radius: 2px;
+}
+/* Series tones, in order: blue, green, clay, amber. */
+.chart-tone-0 {
+  stroke: var(--accent);
+  background: var(--accent);
+  fill: var(--accent);
+}
+.chart-tone-1 {
+  stroke: var(--green);
+  background: var(--green);
+  fill: var(--green);
+}
+.chart-tone-2 {
+  stroke: var(--clay);
+  background: var(--clay);
+  fill: var(--clay);
+}
+.chart-tone-3 {
+  stroke: var(--warn);
+  background: var(--warn);
+  fill: var(--warn);
+}
+.chart-details {
+  margin-block-start: 8px;
+  font-size: 0.86rem;
+}
+.chart-details summary {
+  color: var(--accent);
+  cursor: pointer;
+}
+.chart-table {
+  inline-size: 100%;
+  margin-block-start: 8px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.chart-table th,
+.chart-table td {
+  padding: 4px 8px;
+  border-block-end: 1px solid var(--border);
+  text-align: start;
+}
+
+/* Grouped bars */
+.chart-bars {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chart-bar-row {
+  display: grid;
+  gap: 2px;
+}
+.chart-bar-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.chart-bar-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.chart-bar-track {
+  display: block;
+  block-size: 10px;
+  background: var(--bg-alt);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.chart-bar {
+  display: block;
+  block-size: 100%;
+  /* The data end is rounded, the base is square: a bar grows from its baseline. */
+  border-start-end-radius: 5px;
+  border-end-end-radius: 5px;
+}
+.chart-bar-tone-0 {
+  background: var(--accent);
+}
+.chart-bar-tone-1 {
+  background: var(--green);
+}
+.chart-bar-value {
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  min-inline-size: 7ch;
+  text-align: end;
+}
+
+/* Gauge */
+.chart-gauge-track {
+  block-size: 14px;
+  background: var(--bg-alt);
+  border-radius: 7px;
+  overflow: hidden;
+}
+.chart-gauge-fill {
+  display: block;
+  block-size: 100%;
+  border-radius: 7px;
+}
+.chart-gauge-good {
+  background: var(--green);
+}
+.chart-gauge-warn {
+  background: var(--warn);
+}
+.chart-gauge-low {
+  background: var(--clay);
+}
+.chart-gauge-none {
+  background: var(--border-strong);
+}
+.chart-gauge-text {
+  margin: 6px 0 0;
+}

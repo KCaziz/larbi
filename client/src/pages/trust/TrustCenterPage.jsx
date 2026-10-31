@@ -116,7 +116,7 @@ export default function TrustCenterPage() {
         )}
 
         <h2>{t('trust.devicesTitle')}</h2>
-        {devices.data && !devices.data.disponible && <Notice variant="info">{t('trust.devicesUnavailable')}</Notice>}
+        {devices.data?.disponible && <DevicesList data={devices.data} t={t} language={i18n.language} onDone={(text) => { announce('ok', text); devices.reload(); }} onError={(text) => announce('error', text)} />}
 
         <h2>{t('trust.exportTitle')}</h2>
         <p className="fin-hint">{t('trust.exportHint')}</p>
@@ -178,6 +178,70 @@ function ShareConsentRow({ partage, t, onWithdraw }) {
         </form>
       )}
     </li>
+  );
+}
+
+// « Appareils et sessions connectés » (P8-20): every open session with its
+// device and its last activity; ending one asks for the password again.
+function DevicesList({ data, t, language, onDone, onError }) {
+  const [asking, setAsking] = useState(null); // a device id, or 'others'
+  const [password, setPassword] = useState('');
+  const others = data.appareils.filter((device) => !device.courant);
+
+  async function submit(event) {
+    event.preventDefault();
+    try {
+      const path = asking === 'others' ? '/fin/confiance/appareils/deconnecter-autres' : `/fin/confiance/appareils/${asking}/deconnecter`;
+      await api.post(path, { consent: true, currentPassword: password });
+      onDone(t('trust.devices.ended'));
+      setAsking(null);
+      setPassword('');
+    } catch (err) {
+      onError(t(errorKey(err, { 403: 'trust.errors.wrongPassword' })));
+    }
+  }
+
+  return (
+    <>
+      <p className="fin-hint">{t('trust.devices.intro')}</p>
+      {!data.sessionCourantSuivie && <Notice variant="info">{t('trust.devices.untracked')}</Notice>}
+      <ul className="trust-devices">
+        {data.appareils.map((device) => (
+          <li key={device.id}>
+            <span>
+              <strong>{device.device}</strong>
+              {device.courant && <span className="trust-tag"> {t('trust.devices.thisOne')}</span>}
+              <span className="fin-hint">
+                {' '}
+                — {t('trust.devices.lastSeen', { date: new Date(device.lastSeenAt).toLocaleString(language) })}
+              </span>
+            </span>
+            {!device.courant && (
+              <button type="button" className="trust-plain" onClick={() => setAsking(asking === device.id ? null : device.id)} aria-expanded={asking === device.id}>
+                {t('trust.devices.disconnect')}
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+      {others.length > 1 && (
+        <button type="button" className="trust-plain" onClick={() => setAsking(asking === 'others' ? null : 'others')} aria-expanded={asking === 'others'}>
+          {t('trust.devices.disconnectOthers')}
+        </button>
+      )}
+      {asking && (
+        <form className="trust-inline-form" onSubmit={submit}>
+          <label className="sr-only" htmlFor="device-password">
+            {t('trust.currentPassword')}
+          </label>
+          <input id="device-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder={t('trust.currentPassword')} required />
+          <Button type="submit">{t('trust.confirm')}</Button>
+          <button type="button" className="trust-plain" onClick={() => setAsking(null)}>
+            {t('trust.cancel')}
+          </button>
+        </form>
+      )}
+    </>
   );
 }
 

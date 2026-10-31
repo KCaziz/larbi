@@ -69,6 +69,13 @@ export default function EducationPanel({ mode = 'formation' }) {
       )}
 
       {mode === 'progress' && missions.statut === 'en_preparation' && <p className="fin-hint">{t('education.missionsPreparing')}</p>}
+      {mode === 'progress' && missions.statut === 'publiees' && (
+        <p>
+          <Link to="/app/apprendre/missions" className="education-link">
+            {t('education.missionsAvailable', { count: missions.total })} <ArrowRight size={14} aria-hidden="true" className="icon-dir" />
+          </Link>
+        </p>
+      )}
 
       {mode === 'formation' && recommandees.length > 0 && (
         <>

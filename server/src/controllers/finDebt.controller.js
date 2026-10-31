@@ -2,6 +2,8 @@ import { prisma } from '../config/prisma.js';
 import { MAX_DEBTS } from '../constants/finDebt.js';
 import { listChanges } from '../services/finChange.service.js';
 import {
+  DEBT_BUDGET_CATEGORY_KEYS,
+  budgetDebtInstalment,
   DEBT_ENTITY,
   buildDebtSynthesis,
   buildPayoffComparison,
@@ -22,8 +24,10 @@ import { HttpError } from '../utils/httpError.js';
 // Debts (P6-10), screens C13-C14. Session required everywhere; every read and
 // write is scoped to the caller's own rows.
 
-export function getDebtReferences(req, res) {
-  res.json({ formulas: ['F017', 'F018', 'F019', 'ALG-01'].map(describeFormula) });
+export async function getDebtReferences(req, res) {
+  // The categories an instalment is planned under in the budget (P8-24).
+  const budgetCategories = await prisma.finCategory.findMany({ where: { userId: null, deletedAt: null, key: { in: DEBT_BUDGET_CATEGORY_KEYS } }, select: { id: true, label: true, icon: true }, orderBy: { label: 'asc' } });
+  res.json({ formulas: ['F017', 'F018', 'F019', 'ALG-01'].map(describeFormula), budgetCategories });
 }
 
 // This account's net monthly income, normalised to the month (F001), the same
@@ -74,6 +78,10 @@ export async function postSimpleLoan(req, res) {
   const count = await prisma.finDebt.count({ where: { userId: req.user.id, deletedAt: null } });
   if (count >= MAX_DEBTS) throw new HttpError(422, 'Too many debts', { reason: 'tooManyDebts' });
   res.status(201).json({ debt: await createSimpleLoan(prisma, req.user.id, req.body) });
+}
+
+export async function postDebtBudget(req, res) {
+  res.status(201).json(await budgetDebtInstalment(prisma, req.user.id, req.params.id, { categoryId: req.body.categoryId }));
 }
 
 export async function postDebtPayment(req, res) {

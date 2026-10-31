@@ -63,6 +63,10 @@ export default function BudgetsPage() {
           <Button to="/app/budgets/nouveau">
             <Plus size={16} aria-hidden="true" /> {t('budget.create')}
           </Button>
+          {/* The declared incomes behind « reste à allouer » (P8-24). */}
+          <Button to="/app/budgets/revenus" variant="secondary">
+            {t('incomes.title')}
+          </Button>
         </div>
 
         {list.length === 0 ? (

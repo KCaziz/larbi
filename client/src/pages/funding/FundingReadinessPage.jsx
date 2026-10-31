@@ -26,7 +26,7 @@ import './Funding.css';
 // stability dimension has no screen: it waits for the client's weights.
 const COMPLETE_AT = {
   public: '/app/parametres/fincludia',
-  income: '/app/parametres/premiers-pas',
+  income: '/app/budgets/revenus',
   reserveTarget: '/app/objectifs/fonds-urgence',
   wealth: '/app/patrimoine',
   debtEffort: '/app/dettes',

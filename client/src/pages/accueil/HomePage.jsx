@@ -15,6 +15,8 @@ import CategoryChip from '../../components/fincludia/CategoryChip.jsx';
 import { flowClass, flowOf } from '../../lib/flows.js';
 import PeriodSelector from '../../components/fincludia/PeriodSelector.jsx';
 import RingChart from '../../components/fincludia/RingChart.jsx';
+import { QuickAddLink } from '../../components/fincludia/QuickAdd.jsx';
+import MiniFlow from './MiniFlow.jsx';
 import '../../components/fincludia/Fincludia.css';
 import '../argent/MyMoney.css';
 import '../mouvements/Movements.css';
@@ -42,6 +44,8 @@ export default function HomePage() {
   const periodQuery = range ? `from=${new Date(`${range.from}T00:00:00.000Z`).toISOString()}&to=${new Date(`${range.to}T23:59:59.999Z`).toISOString()}` : '';
   const home = useApi(`/fin/accueil?${periodQuery}`);
   const today = useApi('/fin/aujourdhui');
+  // The net flow of the last months: the mini-curve that follows the scroll (G-03).
+  const flowHistory = useApi('/fin/argent/synthese/historique');
   // Keep the previous answer on screen while a new period loads.
   const [kept, setKept] = useState(null);
   if (home.data && home.data !== kept) setKept(home.data);
@@ -124,9 +128,10 @@ export default function HomePage() {
           <Link to="/app/comptes">
             <Wallet size={18} aria-hidden="true" /> {t('appNav.accounts')}
           </Link>
-          <Link to="/app/mouvements">
+          {/* On a phone: the quick-add sheet over this page, not the Mouvements page. */}
+          <QuickAddLink>
             <Plus size={18} aria-hidden="true" /> {t('appHome.expensesAndIncome')}
-          </Link>
+          </QuickAddLink>
           <button type="button" onClick={() => setRingTab('flow')}>
             {t('appHome.netFlow')} :{' '}
             <strong>{synthese.fluxNet.resultat === null ? t('fincludia.notComputed') : formatAmount(i18n.language, synthese.fluxNet.resultat, currency)}</strong>
@@ -142,9 +147,32 @@ export default function HomePage() {
           <FigureCard label={t('appHome.netFlow')} answer={synthese.fluxNet} />
         </div>
 
+        {/* P8-24: the declared resources, the salary first — what is expected, apart
+            from what was received (the figures above). */}
+        {synthese.revenusDeclares?.length > 0 && (
+          <section className="home-resources" aria-labelledby="home-resources-title">
+            <h2 id="home-resources-title">{t('appHome.expectedIncome')}</h2>
+            <ul className="home-resources-list">
+              {synthese.revenusDeclares.map((row) => (
+                <li key={row.id}>
+                  <span>
+                    {row.label ?? t('myMoney.noCategory')}
+                    {row.salary && <span className="home-resources-tag">{t('appHome.salary')}</span>}
+                  </span>
+                  <span>
+                    {formatAmount(i18n.language, row.value, row.currency)} · {t(`calendar.frequencies.${row.frequency}`, row.frequency)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <Link to="/app/budgets/revenus">{t('appHome.manageIncome')}</Link>
+          </section>
+        )}
+
         {/* ACC-04 / ACC-06: the tools square, then the ring of the active tab;
             a slice filters the movements under it (ACC-07 / ACC-08). */}
-        <section className="home-ring-section" aria-labelledby="home-ring-title">
+        <MiniFlow targetId="home-ring-section" points={flowHistory.data?.points} currency={flowHistory.data?.currency ?? currency} />
+        <section id="home-ring-section" className="home-ring-section" aria-labelledby="home-ring-title">
           <h2 id="home-ring-title" className="sr-only">
             {t('appHome.distribution')}
           </h2>

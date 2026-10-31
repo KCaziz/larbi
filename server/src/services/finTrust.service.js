@@ -4,7 +4,7 @@
 // could drift from the one the consistency control already checks against.
 import { FINANCIAL_TABLES, liveFilter } from '../constants/finData.js';
 import { FIN_CONSENT_TEXTS } from '../constants/finPublics.js';
-import { COMPLETENESS_CHECKS, DELETION_POLICY, DEVICES_BLOCKED } from '../constants/finTrust.js';
+import { COMPLETENESS_CHECKS, DELETION_POLICY } from '../constants/finTrust.js';
 import { SHAREABLE_KINDS } from '../constants/finSpace.js';
 import { eraseAccountReceipts } from './finMoney.service.js';
 import { normaliseSharing, updateMySharing } from './finSpace.service.js';
@@ -130,8 +130,4 @@ export async function deleteAccount(prisma, userId) {
   await eraseAccountReceipts(prisma, userId);
   await prisma.user.delete({ where: { id: userId } });
   return { deleted: true, ...DELETION_POLICY };
-}
-
-export function connectedDevices() {
-  return { disponible: false, ...DEVICES_BLOCKED };
 }

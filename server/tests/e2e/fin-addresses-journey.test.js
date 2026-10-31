@@ -214,6 +214,18 @@ describe('each screen at its own address (P8-25)', { skip: findChrome() ? false 
     assert.ok(await b.waitFor("document.querySelector('#synthesis-month')?.value === '2026-01'", 'the month of the address'));
   });
 
+  test('ONB-01 and ONB-02: the profile and the first income, each at its address, linked from the steps', async () => {
+    await b.goto(`${site.url}/app/parametres/premiers-pas`);
+    assert.ok(await b.clickWhere("e => e.getAttribute('href') === '/app/parametres/premiers-pas/profil'"), 'the steps lead to the profile');
+    assert.ok(await b.waitFor("location.pathname === '/app/parametres/premiers-pas/profil'", 'ONB-01'));
+    assert.ok(await b.waitText(fr.firstSteps.backToSteps), 'its way back');
+
+    await b.goto(`${site.url}/app/parametres/premiers-pas`);
+    assert.ok(await b.clickWhere("e => e.getAttribute('href') === '/app/parametres/premiers-pas/premier-revenu'"), 'the steps lead to the first income');
+    assert.ok(await b.waitFor("location.pathname === '/app/parametres/premiers-pas/premier-revenu'", 'ONB-02'));
+    assert.ok(await b.waitFor("!!document.querySelector('main form, .fin-page-narrow form')", 'the income form, or the step already done'));
+  });
+
   test('TRX-04: the clearing at /app/mouvements/pointage', async () => {
     await b.goto(`${site.url}/app/mouvements`);
     assert.ok(await b.clickWhere("e => e.getAttribute('href') === '/app/mouvements/pointage'"));

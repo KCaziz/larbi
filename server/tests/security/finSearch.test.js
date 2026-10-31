@@ -65,3 +65,17 @@ describe('global search', () => {
     assert.equal(res.body.explorer.reason, 'notWiredYet');
   });
 });
+
+describe('the formations in the search (P8-24)', () => {
+  test('finds a PUBLISHED formation by its title, its description or the title of one of its courses — never a draft', async () => {
+    const published = await t.prisma.formation.create({ data: { slug: 'budget-pour-debuter', title: 'Le budget pour débuter', description: 'Premiers pas', status: 'published', publishedAt: new Date() } });
+    await t.prisma.course.create({ data: { formationId: published.id, title: 'Les enveloppes expliquées', position: 0 } });
+    await t.prisma.formation.create({ data: { slug: 'brouillon-budget', title: 'Budget brouillon', description: 'pas prêt', status: 'draft' } });
+
+    const byTitle = (await t.request('GET', '/fin/recherche?q=budget', { user: owner })).body.formations;
+    assert.deepEqual(byTitle.map((row) => row.slug), ['budget-pour-debuter'], 'the draft is never found');
+    const byCourse = (await t.request('GET', '/fin/recherche?q=enveloppes', { user: owner })).body.formations;
+    assert.deepEqual(byCourse.map((row) => row.slug), ['budget-pour-debuter']);
+    assert.deepEqual((await t.request('GET', '/fin/recherche?q=zzzzzz', { user: owner })).body.formations, []);
+  });
+});

@@ -119,10 +119,74 @@ describe('export', () => {
   });
 });
 
-describe('connected devices', () => {
-  test('is honestly declared unavailable rather than invented', async () => {
-    const res = await t.request('GET', '/fin/confiance/appareils', { user: owner });
-    assert.equal(res.body.disponible, false);
+describe('connected devices (P8-20)', () => {
+  // A real login, so the session row and its cookie exist exactly as in use.
+  const login = async () => {
+    const res = await t.request('POST', '/auth/login', { json: { email: owner.email, password: PASSWORD } });
+    assert.equal(res.status, 200);
+    const cookie = res.headers.get('set-cookie').split(';')[0].replace('session=', '');
+    return cookie;
+  };
+
+  test('a login creates a session that is listed, and the current one is marked', async () => {
+    const token = await login();
+    const res = await t.request('GET', '/fin/confiance/appareils', { token });
+    assert.equal(res.body.disponible, true);
+    assert.equal(res.body.appareils.length, 1);
+    assert.equal(res.body.appareils[0].courant, true);
+    assert.equal(res.body.sessionCourantSuivie, true);
+  });
+
+  test('ending another device needs the password, and then kills that session at once', async () => {
+    const first = await login();
+    const second = await login();
+    const listed = (await t.request('GET', '/fin/confiance/appareils', { token: second })).body.appareils;
+    const other = listed.find((row) => !row.courant);
+
+    const refused = await t.request('POST', `/fin/confiance/appareils/${other.id}/deconnecter`, { token: second, json: { consent: true, currentPassword: 'wrong' } });
+    assert.ok([400, 403].includes(refused.status), `refused with ${refused.status}`);
+    assert.equal((await t.request('GET', '/auth/me', { token: first })).status, 200, 'still signed in');
+
+    const done = await t.request('POST', `/fin/confiance/appareils/${other.id}/deconnecter`, { token: second, json: { consent: true, currentPassword: PASSWORD } });
+    assert.equal(done.status, 200);
+    assert.equal((await t.request('GET', '/auth/me', { token: first })).status, 401, 'that session ended on its next request');
+    assert.equal((await t.request('GET', '/auth/me', { token: second })).status, 200, 'this device stays');
+  });
+
+  test('« déconnecter les autres » keeps only this device', async () => {
+    const first = await login();
+    const second = await login();
+    const res = await t.request('POST', '/fin/confiance/appareils/deconnecter-autres', { token: second, json: { consent: true, currentPassword: PASSWORD } });
+    assert.equal(res.body.deconnectes, 1);
+    assert.equal((await t.request('GET', '/auth/me', { token: first })).status, 401);
+  });
+
+  test('another person cannot end my session, and learns nothing about it', async () => {
+    const mine = await login();
+    const id = (await t.request('GET', '/fin/confiance/appareils', { token: mine })).body.appareils[0].id;
+    const intruder = await t.user({ passwordHash: await bcrypt.hash(PASSWORD, 4) });
+    const res = await t.request('POST', `/fin/confiance/appareils/${id}/deconnecter`, { user: intruder, json: { consent: true, currentPassword: PASSWORD } });
+    assert.equal(res.status, 404);
+    assert.equal((await t.request('GET', '/auth/me', { token: mine })).status, 200);
+  });
+
+  test('logging out ends the session for good, even if the cookie is kept', async () => {
+    const token = await login();
+    assert.equal((await t.request('POST', '/auth/logout', { token, json: {} })).status, 204);
+    assert.equal((await t.request('GET', '/auth/me', { token })).status, 401);
+  });
+
+  test('changing the password signs out every other device', async () => {
+    const first = await login();
+    const second = await login();
+    const res = await t.request('POST', '/auth/password', { token: second, json: { currentPassword: PASSWORD, newPassword: 'Another-Passw0rd!' } });
+    assert.equal(res.status, 204, JSON.stringify(res.body));
+    assert.equal((await t.request('GET', '/auth/me', { token: first })).status, 401);
+    assert.equal((await t.request('GET', '/auth/me', { token: second })).status, 200);
+  });
+
+  test('a token from before sessions existed still works', async () => {
+    assert.equal((await t.request('GET', '/auth/me', { user: owner })).status, 200);
   });
 });
 

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Download, FileText, ListChecks, PieChart, Printer } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
-import { formatAmount, formatRatio } from '../../lib/format.js';
+import { formatAmount, formatDate, formatRatio } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
@@ -11,6 +11,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import BackLink from '../../components/fincludia/BackLink.jsx';
 import IncomeExpenseChart from '../../components/fincludia/IncomeExpenseChart.jsx';
+import LineChart from '../../components/fincludia/charts/LineChart.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Synthesis.css';
 
@@ -27,12 +28,18 @@ export const thisMonth = () => new Date().toISOString().slice(0, 7);
 export default function SynthesisPage() {
   const { t, i18n } = useTranslation();
   const { mois } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const isReport = Boolean(mois);
   const month = /^\d{4}-\d{2}$/.test(mois ?? '') ? mois : thisMonth();
   useDocumentMeta(isReport ? t('synthesis.reportTitle', { month }) : t('synthesis.title'), t('synthesis.intro'));
   const setMonth = (value) => navigate(`/app/synthese/rapport/${value}`);
-  const report = useApi(`/fin/rapport?mois=${month}`);
+  // R-06: the share of flexible spending the person imagines cutting — their
+  // own figure, simulation only.
+  const [reduction, setReduction] = useState('10');
+  // `?instantane=1`: the report AS IT WAS kept (P8-24), not recomputed.
+  const asKept = new URLSearchParams(location.search).get('instantane') === '1';
+  const report = useApi(asKept ? `/fin/rapport/instantane/${month}` : `/fin/rapport?mois=${month}&reduction=${Math.min(100, Math.max(0, Number(reduction) || 0))}`);
   const history = useApi('/fin/argent/synthese/historique');
   const [kept, setKept] = useState(null);
   if (report.data && report.data !== kept) setKept(report.data);
@@ -50,6 +57,11 @@ export default function SynthesisPage() {
       <PageHeader icon={isReport ? FileText : PieChart} title={isReport ? t('synthesis.reportTitle', { month }) : t('synthesis.title')} subtitle={t('synthesis.intro')} maxWidth={1100} />
       <div className="synthesis-page">
         {isReport && <BackLink to="/app/synthese/rapports">{t('synthesis.backToReports')}</BackLink>}
+        {asKept && data?.instantane && (
+          <p className="fin-hint" role="status">
+            {t('synthesis.keptBanner', { date: formatDate(i18n.language, data.instantane.capturedAt), version: data.instantane.version })}
+          </p>
+        )}
         <div className="synthesis-toolbar">
           <label htmlFor="synthesis-month">
             {t('synthesis.month')}
@@ -93,7 +105,36 @@ export default function SynthesisPage() {
             })}
           </p>
           {history.data?.points && <IncomeExpenseChart points={history.data.points} currency={history.data.currency} />}
+          {/* G-03: the net flow of each month, as the engine computed it. */}
+          {history.data?.points && (
+            <LineChart
+              series={[{ key: 'net', label: t('appHome.netFlow'), tone: 0, points: history.data.points.map((point) => ({ month: point.month, value: point.fluxNet ?? null })) }]}
+              currency={history.data.currency}
+              caption={t('synthesis.netFlowChart')}
+            />
+          )}
         </section>
+
+        {/* G-10: the month in one line — income, then what took it, then what is left. */}
+        {r.cascade.length > 0 && (
+          <section aria-labelledby="cascade-title" className="synthesis-cascade">
+            <h2 id="cascade-title">{t('synthesis.cascade.title')}</h2>
+            <ul>
+              {r.cascade.map((step) => {
+                const max = Math.max(...r.cascade.map((row) => Math.abs(row.montant)), 1);
+                return (
+                  <li key={step.cle}>
+                    <span>{t(`synthesis.cascade.${step.cle}`)}</span>
+                    <span className="synthesis-cascade-bar" aria-hidden="true">
+                      <span className={step.montant < 0 ? 'out' : 'in'} style={{ inlineSize: `${(Math.abs(step.montant) / max) * 100}%` }} />
+                    </span>
+                    <strong>{`${step.montant > 0 && step.cle !== 'income' ? '+' : ''}${money(step.montant)}`}</strong>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
 
         <div className="synthesis-grid">
           <Block id="r02" title={t('synthesis.sections.R02')} to="/app/comptes">
@@ -151,6 +192,33 @@ export default function SynthesisPage() {
               </ul>
             </Block>
           )}
+
+          <Block id="r06" title={t('synthesis.sections.R06')} to="/app/objectifs">
+            <p className="fin-hint">{t('synthesis.scenario.intro')}</p>
+            <label htmlFor="synthesis-reduction" className="synthesis-reduction">
+              {t('synthesis.scenario.reduction')}
+              <input id="synthesis-reduction" type="number" inputMode="numeric" min="0" max="100" value={reduction} onChange={(event) => setReduction(event.target.value)} />
+            </label>
+            <ul>
+              <li>
+                <span>{t('synthesis.scenario.flexible')}</span>
+                <strong>{money(s.R06.depensesFlexibles.resultat)}</strong>
+              </li>
+              <li>
+                <span>{t('synthesis.scenario.cut')}</span>
+                <strong>{money(s.R06.reductionSimulee.resultat)}</strong>
+              </li>
+              <li>
+                <span>{t('synthesis.scenario.saved')}</span>
+                <strong>{money(s.R06.epargneScenario.resultat)}</strong>
+              </li>
+              <li>
+                <span>{t('synthesis.scenario.rate')}</span>
+                <strong>{s.R06.tauxEpargneScenario.resultat === null ? t('fincludia.notComputed') : formatRatio(i18n.language, s.R06.tauxEpargneScenario.resultat)}</strong>
+              </li>
+            </ul>
+            <p className="fin-hint">{t('synthesis.scenario.disclaimer')}</p>
+          </Block>
 
           <Block id="r07" title={t('synthesis.sections.R07')} to="/app/objectifs">
             {s.R07.length === 0 ? (

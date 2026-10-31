@@ -12,6 +12,7 @@ import {
 import {
   acceptInvite,
   createSpace,
+  closeSpace,
   deleteSpace,
   inviteToSpace,
   leaveSpace,
@@ -86,6 +87,10 @@ export async function getSpace(req, res) {
 
 export async function patchSpace(req, res) {
   res.json({ space: await updateSpace(prisma, req.user.id, req.params.id, req.body) });
+}
+
+export async function postCloseSpace(req, res) {
+  res.json(await closeSpace(prisma, req.user.id, req.params.id, { reason: req.body?.reason }));
 }
 
 export async function removeSpace(req, res) {

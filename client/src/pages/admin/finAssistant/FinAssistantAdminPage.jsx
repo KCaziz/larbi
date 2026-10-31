@@ -108,6 +108,24 @@ function IntentsTab() {
         <form className="fa-admin-form" onSubmit={save}>
           <h2>{editing.label}</h2>
           <p className="form-hint">{t('admin.finAssistant.example', { example: editing.exampleQuery })}</p>
+          {/* What the client's own file allows (answer, questions, guard-rail): the
+              administrator's reference for the public text, never shown to the public. */}
+          {editing.reference && (
+            <aside className="fa-admin-reference" aria-label={t('admin.finAssistant.referenceTitle')}>
+              <h3>{t('admin.finAssistant.referenceTitle')}</h3>
+              <p>
+                <strong>{t('admin.finAssistant.referenceAnswer')}</strong> {editing.reference.answer}
+              </p>
+              {editing.reference.steps?.length > 0 && (
+                <p>
+                  <strong>{t('admin.finAssistant.referenceSteps')}</strong> {editing.reference.steps.join(' · ')}
+                </p>
+              )}
+              <p>
+                <strong>{t('admin.finAssistant.referenceGuardrail')}</strong> {editing.reference.guardrail}
+              </p>
+            </aside>
+          )}
           <Field label={t('admin.finAssistant.keywords')} htmlFor="fi-keywords" hint={t('admin.finAssistant.keywordsHint')}>
             <input id="fi-keywords" value={draft.keywords} onChange={(e) => setDraft((d) => ({ ...d, keywords: e.target.value }))} />
           </Field>

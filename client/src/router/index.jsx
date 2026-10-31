@@ -1,9 +1,10 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import RequireRole from '../components/auth/RequireRole.jsx';
 import RequireAuth from '../components/auth/RequireAuth.jsx';
 import MaintenanceGate from '../components/auth/MaintenanceGate.jsx';
 import MainLayout from '../layouts/MainLayout.jsx';
 import AppLayout from '../layouts/AppLayout.jsx';
+import SharedLayout from '../layouts/SharedLayout.jsx';
 import AppRedirectWhenSignedIn from '../components/auth/AppRedirectWhenSignedIn.jsx';
 import LegacyRedirect from '../components/auth/LegacyRedirect.jsx';
 import { LEGACY_REDIRECTS } from '../config/appNavigation.js';
@@ -77,6 +78,8 @@ const appRoutes = {
             { path: 'mouvements/:id/modifier', lazy: lazyPage(() => import('../pages/mouvements/MovementEntryPage.jsx')) },
             { path: 'budgets', lazy: lazyPage(() => import('../pages/budget/BudgetsPage.jsx')) },
             // P8-25: BUD-02 and BUD-04, each at its own address.
+            // The declared incomes, the base of « reste à allouer » (P8-24).
+            { path: 'budgets/revenus', lazy: lazyPage(() => import('../pages/budget/IncomesPage.jsx')) },
             { path: 'budgets/nouveau', lazy: lazyPage(() => import('../pages/budget/BudgetFormPage.jsx')) },
             { path: 'budgets/:id', lazy: lazyPage(() => import('../pages/budget/BudgetDetailPage.jsx')) },
             { path: 'budgets/:id/modifier', lazy: lazyPage(() => import('../pages/budget/BudgetFormPage.jsx')) },
@@ -125,18 +128,24 @@ const appRoutes = {
             { path: 'apprendre', lazy: lazyPage(() => import('../pages/apprendre/ApprendrePage.jsx')) },
             { path: 'apprendre/termes/:slug', lazy: lazyPage(() => import('../pages/apprendre/TermPage.jsx')) },
             { path: 'apprendre/guides/:slug', lazy: lazyPage(() => import('../pages/apprendre/GuidePage.jsx')) },
+            { path: 'apprendre/missions', lazy: lazyPage(() => import('../pages/apprendre/MissionsPage.jsx')) },
+            { path: 'apprendre/missions/:slug', lazy: lazyPage(() => import('../pages/apprendre/MissionPlayPage.jsx')) },
             { path: 'progression', lazy: lazyPage(() => import('../pages/apprendre/PassportPage.jsx')) },
             { path: 'certificats', lazy: lazyPage(() => import('../pages/account/MyCertificatesPage.jsx')) },
             { path: 'notifications', lazy: lazyPage(() => import('../pages/notifications/NotificationsPage.jsx')) },
-            // Gestion commune keeps its former screen, out of the menu, until it
-            // gets its own application (P9-02).
-            { path: 'espaces', lazy: lazyPage(() => import('../pages/espaces/SpacesPage.jsx')) },
+            // Gestion commune lives at `/partage` since P9-02.
+            { path: 'espaces', element: <Navigate to="/partage" replace /> },
             { path: 'entreprise', lazy: lazyPage(() => import('../pages/entreprise/BusinessPage.jsx')) },
             { path: 'parametres', lazy: lazyPage(() => import('../pages/parametres/SettingsPage.jsx')) },
             { path: 'parametres/profil', element: <ProfilePage /> },
             { path: 'parametres/fincludia', lazy: lazyPage(() => import('../pages/account/FinProfilePage.jsx')) },
             { path: 'parametres/categories', lazy: lazyPage(() => import('../pages/account/FinCategoriesPage.jsx')) },
-            { path: 'parametres/premiers-pas', lazy: lazyPage(() => import('../pages/account/FinOnboardingPage.jsx')) },
+            // « Premiers pas » (P8-23): the client's eight steps. The estimate
+            // questions of P6-03 stay available, apart, for whoever wants them.
+            { path: 'parametres/premiers-pas', lazy: lazyPage(() => import('../pages/premiersPas/FirstStepsPage.jsx')) },
+            { path: 'parametres/premiers-pas/profil', lazy: lazyScreen(() => import('../pages/premiersPas/FirstStepPage.jsx'), { screen: 'profil' }) },
+            { path: 'parametres/premiers-pas/premier-revenu', lazy: lazyScreen(() => import('../pages/premiersPas/FirstStepPage.jsx'), { screen: 'premier-revenu' }) },
+            { path: 'parametres/premiers-pas/estimations', lazy: lazyPage(() => import('../pages/account/FinOnboardingPage.jsx')) },
             { path: 'parametres/confiance', lazy: lazyPage(() => import('../pages/trust/TrustCenterPage.jsx')) },
             { path: 'parametres/formations', lazy: lazyPage(() => import('../pages/account/MyFormationsPage.jsx')) },
             { path: 'parametres/paiements', lazy: lazyPage(() => import('../pages/account/MyPaymentsPage.jsx')) },
@@ -150,8 +159,42 @@ const appRoutes = {
   ],
 };
 
+// Gestion commune (P9-02): a solution of its own, with its own window. Same
+// session, same gates; reached only through the switcher of the top bar.
+const sharedRoutes = {
+  path: '/partage',
+  element: <RequireAuth />,
+  errorElement: <ErrorPage />,
+  children: [
+    {
+      element: <MaintenanceGate />,
+      children: [
+        {
+          element: <SharedLayout />,
+          children: [
+            { index: true, lazy: lazyPage(() => import('../pages/espaces/SpacesListPage.jsx')) },
+            { path: ':id', lazy: lazyScreen(() => import('../pages/espaces/SpaceSection.jsx'), { section: 'dashboard' }) },
+            { path: ':id/depenses', lazy: lazyScreen(() => import('../pages/espaces/SpaceSection.jsx'), { section: 'expenses' }) },
+            { path: ':id/calendrier', lazy: lazyScreen(() => import('../pages/espaces/SpaceSection.jsx'), { section: 'calendar' }) },
+            { path: ':id/rapport', lazy: lazyScreen(() => import('../pages/espaces/SpaceSection.jsx'), { section: 'report' }) },
+            { path: ':id/ressources', lazy: lazyScreen(() => import('../pages/espaces/SpaceSection.jsx'), { section: 'pot' }) },
+            { path: ':id/taches', lazy: lazyScreen(() => import('../pages/espaces/SpaceSection.jsx'), { section: 'tasks' }) },
+            { path: ':id/budgets', lazy: lazyScreen(() => import('../pages/espaces/SpaceSection.jsx'), { section: 'budgets' }) },
+            { path: ':id/objectifs', lazy: lazyScreen(() => import('../pages/espaces/SpaceSection.jsx'), { section: 'goals' }) },
+            { path: ':id/foyer', lazy: lazyScreen(() => import('../pages/espaces/SpaceSection.jsx'), { section: 'household' }) },
+            { path: ':id/membres', lazy: lazyScreen(() => import('../pages/espaces/SpaceSection.jsx'), { section: 'members' }) },
+            { path: '*', element: <NotFoundPage /> },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
 export const router = createBrowserRouter([
   appRoutes,
+  sharedRoutes,
+  { path: '/espaces', element: <Navigate to="/partage" replace /> },
   {
     path: '/',
     element: <MainLayout />,
@@ -256,6 +299,10 @@ export const router = createBrowserRouter([
                       {
                         path: 'assistant',
                         lazy: lazyPage(() => import('../pages/admin/chatbot/ChatbotAdminPage.jsx')),
+                      },
+                      {
+                        path: 'missions-fincludia',
+                        lazy: lazyPage(() => import('../pages/admin/finMissions/FinMissionsAdminPage.jsx')),
                       },
                       {
                         path: 'assistant-fincludia',

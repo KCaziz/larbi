@@ -281,3 +281,85 @@
   gap: 14px;
   margin-block-start: 10px;
 }
+
+/* P9-02: the menu of one space — a page per compartment. The current page is
+   said by weight and an underline, never by colour alone. */
+.space-nav {
+  margin-block-end: var(--space-md);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  border-block-end: 1px solid var(--border);
+}
+.space-nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;
+  padding-inline: var(--space-sm);
+  border-block-end: 3px solid transparent;
+  color: var(--text);
+  text-decoration: none;
+}
+.space-nav-link.active {
+  border-block-end-color: var(--accent);
+  color: var(--text-h);
+  font-weight: 700;
+}
+.space-compartments {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: var(--space-sm);
+}
+.space-compartment {
+  display: grid;
+  gap: 4px;
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.space-compartment h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* P9-10: the report's spending table — figures aligned at the end, a row per category. */
+.spaces-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+}
+.spaces-table th,
+.spaces-table td {
+  padding: var(--space-xs) var(--space-sm);
+  border-block-end: 1px solid var(--border);
+  text-align: start;
+}
+.spaces-table td {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+/* P9-02: the dashboard of a space — cards that wrap, never a fixed grid. */
+.space-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: var(--space-sm);
+}
+.space-overview-figure {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.space-overview-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.space-overview-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}

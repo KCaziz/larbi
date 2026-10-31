@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { HeartPulse } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
+import LineChart from '../../components/fincludia/charts/LineChart.jsx';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
@@ -30,6 +31,8 @@ export default function HealthPage() {
   const { t } = useTranslation();
   useDocumentMeta(t('health.title'), t('health.intro'));
   const today = useApi('/fin/aujourdhui');
+  // The index kept month by month (P8-24): it moves, and its history is shown.
+  const history = useApi('/fin/sante/historique');
 
   if (today.status === 'loading' && !today.data) return <LoadingState />;
   if (today.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={today.reload} />;
@@ -48,6 +51,17 @@ export default function HealthPage() {
             <FigureCard label={t('health.score')} answer={health.answer} />
             {health.partiel && <p className="fin-hint">{t('health.partial')}</p>}
             <p className="fin-hint">{t('health.notCredit')}</p>
+            {history.data?.points?.length >= 2 && (
+              <section aria-labelledby="health-history-title">
+                <h2 id="health-history-title">{t('health.historyTitle')}</h2>
+                <LineChart
+                  series={[{ key: 'index', label: t('health.score'), tone: 0, points: history.data.points.map((point) => ({ month: point.month, value: point.valeur })) }]}
+                  format={(value) => `${value} / 100`}
+                  caption={t('health.historyTitle')}
+                />
+                <p className="fin-hint">{t('health.historyHint')}</p>
+              </section>
+            )}
             <ul className="fin-health-dimensions">
               {health.dimensions.map((dimension) => (
                 <li key={dimension.key}>

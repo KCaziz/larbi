@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import {
+  cancelExpense,
+  confirmExpense,
   getBalances,
   getSettlementHistory,
   getSettlements,
@@ -7,6 +9,8 @@ import {
   getSharedExpenses,
   getSharedRecurrences,
   getSharedReferences,
+  linkExpense,
+  unlinkExpense,
   postConfirmRecurrence,
   postSettlement,
   postSharedExpense,
@@ -16,7 +20,7 @@ import {
 import { requireAuth } from '../middleware/auth.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
 import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
-import { createSettlementSchema, createSharedExpenseSchema, deleteSharedSchema, sharedListQuerySchema } from '../validation/finShared.schemas.js';
+import { createSettlementSchema, createSharedExpenseSchema, deleteSharedSchema, linkPersonalSchema, sharedListQuerySchema } from '../validation/finShared.schemas.js';
 
 // Shared expenses and settlements (P6-14), screens P02 / P03. Every route is
 // scoped to one space, and membership is checked by P6-13's own helpers: a
@@ -37,6 +41,10 @@ router.post('/espaces/:id/depenses', validateBody(createSharedExpenseSchema), as
 router.get('/espaces/:id/depenses-recurrentes', asyncRoute(getSharedRecurrences));
 router.post('/espaces/:id/depenses-recurrentes/confirmer', validateBody(createSharedExpenseSchema), asyncRoute(postConfirmRecurrence));
 router.delete('/espaces/:id/depenses/:expenseId', validateBody(deleteSharedSchema), asyncRoute(removeSharedExpense));
+router.post('/espaces/:id/depenses/:expenseId/annuler', validateBody(deleteSharedSchema), asyncRoute(cancelExpense));
+router.post('/espaces/:id/depenses/:expenseId/confirmer', asyncRoute(confirmExpense));
+router.put('/espaces/:id/depenses/:expenseId/lien-personnel', validateBody(linkPersonalSchema), asyncRoute(linkExpense));
+router.delete('/espaces/:id/depenses/:expenseId/lien-personnel', asyncRoute(unlinkExpense));
 router.get('/espaces/:id/depenses/:expenseId/historique', asyncRoute(getSharedExpenseHistory));
 
 router.get('/espaces/:id/reglements', validateQuery(sharedListQuerySchema), asyncRoute(getSettlements));

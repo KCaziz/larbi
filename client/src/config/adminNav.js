@@ -1,4 +1,4 @@
-import { Award, BookOpen, FileImage, GraduationCap, Landmark, LayoutDashboard, Mail, MessageCircleQuestion, MessagesSquare, Newspaper, Receipt, Settings, Users } from 'lucide-react';
+import { Award, BookOpen, FileImage, GraduationCap, Landmark, LayoutDashboard, Mail, MessageCircleQuestion, MessagesSquare, Newspaper, Receipt, Settings, Users, Target } from 'lucide-react';
 
 // Entries of the CMS side menu. The CMS base is shared: each module (articles,
 // newsletter, users, media, certificates, settings...) simply adds its own entry
@@ -13,6 +13,7 @@ export const adminNavItems = [
   { to: '/admin/certificates', icon: Award, labelKey: 'admin.nav.certificates' },
   { to: '/admin/assistant', icon: MessageCircleQuestion, labelKey: 'admin.nav.chatbot' },
   { to: '/admin/assistant-fincludia', icon: MessagesSquare, labelKey: 'admin.nav.finAssistant' },
+  { to: '/admin/missions-fincludia', icon: Target, labelKey: 'admin.nav.missions' },
   { to: '/admin/paiements', icon: Receipt, labelKey: 'admin.nav.payments' },
   { to: '/admin/comparateur', icon: Landmark, labelKey: 'admin.nav.comparator' },
   { to: '/admin/users', icon: Users, labelKey: 'admin.nav.users' },

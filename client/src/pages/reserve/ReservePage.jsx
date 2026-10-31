@@ -11,6 +11,7 @@ import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
+import Gauge from '../../components/fincludia/charts/Gauge.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Reserve.css';
 
@@ -63,6 +64,9 @@ export default function ReservePage() {
           <FigureCard label={t('reserve.targetAmount')} answer={r.cibleMontant} formula={formulas.get('F015')} />
           <FigureCard label={t('reserve.gap')} answer={r.manque} formula={formulas.get('F016')} />
         </div>
+
+        {/* G-08: the months covered against the target, in colour and in words. */}
+        <Gauge value={r.moisReserve?.resultat ?? null} target={r.cibleMois ?? null} unitLabel={t('reserve.monthsUnit')} caption={t('reserve.gaugeCaption')} />
 
         <dl className="reserve-composition">
           <dt>{t('reserve.liquidSavings')}</dt>

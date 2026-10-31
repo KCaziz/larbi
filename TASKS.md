@@ -959,6 +959,16 @@ Tâches :
 
 Statut de blocage : ne peut commencer qu'après les décisions de `P3-08`.
 
+### P9-14 — Dépenses partagées : sous-catégorie et justificatif
+- Statut : `❌ todo`
+- Priorité : `🟢 low`
+- Dépendances : `P9-04`
+- Durée cible : 2 jours (estimation)
+- Origine : fichier collectif, onglet 04 (champs `sous_categorie` et `justificatif`) ; reliquat de `P9-04`
+
+- **Sous-catégorie** (facultative, « référentiel / personnalisée ») : le classeur ne donne aucune liste de sous-catégories pour les 19 catégories collectives ; à décider avec le client avant d'en écrire (une sous-catégorie personnalisée par espace est la version qui n'invente rien).
+- **Justificatif** (image ou PDF) : stockage privé de `P5-03`, lisible des seuls membres de l'espace, jamais lié à une pièce personnelle ; suppression avec la dépense.
+
 ### Impact sur le délai (ajouts du 2026-09-19)
 
 Le chatbot et le paiement n'étaient **pas** dans le plan initial de 8 semaines. Estimation, sans compter le temps de recherche du client (P3-08) :
@@ -3124,7 +3134,7 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Créances et dettes toujours séparées** : sens « owed » / « lent » et type D-01 à D-05 sur chaque ligne (migration `20261027180000_fin_debts_receivables`) ; l'encours, le taux d'effort (désormais **PB-F020**) et les stratégies ne portent que sur les dettes ; les créances ont leur propre total et leur propre section.
 - **Carte de crédit (D-04)** et **découvert (D-05)** : déjà portés par les comptes (`P8-03`, `P8-05`) — une carte est un compte passif (PB-F027), un découvert un attribut du compte courant (« découvert autorisé »).
 - Stratégies (dette la plus coûteuse d'abord, petite dette d'abord, paiement supplémentaire) inchangées depuis `P6-10` (ALG-01) ; taux inconnu → la dette est exclue de la simulation, et l'écran le dit.
-- **Reste** : le rattachement d'une échéance de dette au budget (étape P7 du premier démarrage) arrive avec `P8-23`.
+- **Reste** (confié à `P8-24`) : le rattachement d'une échéance de dette au budget (étape P7 du premier démarrage).
 
 ### P8-14 — Patrimoine réel et portefeuille fictif
 - Statut : `✅ done`
@@ -3185,7 +3195,7 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Restent** : l'historique de l'indice (aucun instantané n'est encore conservé), et les dimensions « objectifs » et « qualité des données » qui ne sont pas encore mesurées par leurs modules → `P8-24`.
 
 ### P8-17 — Formation, progression et certificats : la seule couche qui varie selon le profil
-- Statut : `🚧 in-progress`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P8-02`
 - Durée cible : 3 jours (estimation)
@@ -3205,6 +3215,8 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Les 3 échecs de `formation-journey` (2026-10-29) n’étaient pas liés à cette tâche : un vrai bug de l’éditeur de cours, antérieur.** Un texte tapé dans une leçon puis suivi aussitôt de l’envoi d’un fichier était perdu (« Échec de l’enregistrement »). Cause : MariaDB 11.6 et suivantes isolent une transaction sur l’instantané de sa première lecture et refusent de modifier une ligne changée depuis (erreur 1020) ; la sauvegarde d’un bloc lisait le bloc avant de verrouiller la leçon, pendant que l’envoi renumérotait les blocs. Corrigé : `lockBlockLesson` (`server/src/services/blocks.service.js`) verrouille la leçon avant de lire le bloc, pour modifier, dupliquer et supprimer un bloc ; test de non-régression dans `tests/functional/lesson-blocks.test.js` ; `formation-journey` 14/14.
 - Validation complète (`npm test`, `npm run test:e2e`) lancée le 2026-10-29 avant de clore.
 - Restent dans le périmètre : les missions (contenus attendus du client, réponse E) et le parcours « Premier Revenu » côté saisie (`P8-23`).
+
+**Réalisé (2026-10-31), suite et fin.** Migration `20261031220000_fin_missions` (tables `fin_missions` et `fin_mission_attempts`). **Les missions** (reprise de `P2-10`, décision `P8-01` point 5) : une mission est une série d'étapes, chacune avec deux à cinq choix, jouée sur une somme FICTIVE ; chaque choix porte trois effets écrits par l'auteur (argent, épargne, points de résilience) et une explication. La règle est la même pour toutes et lisible par la personne : argent final = somme de départ + effet de chaque choix ; épargne et résilience = sommes de leurs effets ; badge = le plus haut dont le seuil est atteint (aucun si aucun ne l'est). Le score est SÉPARÉ de l'indice de connaissances et une partie ne lit ni n'écrit aucun compte ni mouvement (vérifié). Côté apprenant (`/app/apprendre/missions`, `…/:slug`) : liste filtrée sur le profil (« autre / libre » voit tout), étapes sans les effets ni les explications avant le choix, résultat expliqué choix par choix avec la règle en mots et le badge, rejouer, meilleures parties gardées. Un jeu incomplet ou inconnu est refusé (422) plutôt que noté. Le panneau de progression et le passeport renvoient aux missions publiées, ou disent qu'elles sont en préparation. Côté administration (`/admin/missions-fincludia`) : le contenu du client se saisit comme un document de structure vérifiée par le serveur (clés uniques, 2 à 5 choix, seuils), brouillon puis publication ; une mission publiée ne se supprime qu'après dépublication. Vérifié par `tests/functional/finMissions.test.js` (9 tests), `tests/e2e/fin-missions-journey.test.js` (3 tests) et `finEducation` (5 tests + parcours navigateur). Ce qui reste n'est plus du code mais le CONTENU du client (réponse E) : les scénarios des missions et les contenus de formation de chaque profil, y compris la partie pédagogique du parcours « Premier Revenu » (JA01, JA03, JA04), à saisir par l'écran d'administration dès réception. La partie saisie du premier revenu est livrée par `P8-23`. L'écran de saisie est un document JSON validé, pas un formulaire pas à pas : suffisant pour charger les contenus, à remplacer par un formulaire si le client en écrit beaucoup lui-même.
 
 ### P8-18 — Alertes et états du moteur personnel
 - Statut : `✅ done`
@@ -3226,7 +3238,7 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Reste** : la notification du navigateur (Web Push, décision `P8-01` point 9) n’est pas branchée ; les alertes sont dans l’application → `P8-24`.
 
 ### P8-19 — Recherche et assistant adaptés au moteur unique
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟢 low`
 - Dépendances : `P8-02`
 - Durée cible : 1 jour (estimation)
@@ -3234,15 +3246,25 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 
 - La recherche couvre comptes, transactions, budgets, objectifs, outils et contenus ; liens profonds vers les nouvelles adresses.
 - Les intentions collectives quittent l'assistant personnel (décision `P8-01` point 10 : elles passent dans Gestion commune).
+**Réalisé le 2026-10-31.**
+- **Recherche** : le registre d'écrans (`client/src/config/searchScreens.js`) liste maintenant les adresses `/app/…` de **tous les compartiments** du menu du client, des écrans de saisie, des outils, de la santé, des rapports, des paramètres et des premiers pas ; les **comptes** sont cherchés par nom (`/api/fin/recherche`, `mesDonnees.accounts`) ; chaque résultat ouvre **sa page** — mouvement (`/app/mouvements/:id`), compte (`/app/comptes/:id`), budget, objectif (`/app/objectifs/:id`) ; les termes et guides s'ouvrent dans l'application.
+- **Assistant** : l'intention collective « Dépense partagée » **quitte l'assistant personnel** (décision `P8-01` point 10) — retirée du catalogue (7 intentions) et supprimée de la base (migration `20261031110000`) ; elle revient avec Gestion commune (Phase 9). Les liens profonds de l'assistant acceptent les écrans de l'application.
+- **Reste** (confié à `P8-24`) : la recherche ne couvre pas encore les contenus de formation ni les catalogues d'outils côté serveur (les outils sont atteints par le registre d'écrans) ; les intentions CB* de l'assistant n'ont pas été réécrites pour les nouvelles adresses.
 
 ### P8-20 — Paramètres : données et confiance
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P8-02`
 - Durée cible : 1 jour (estimation)
 - Origine : cahier consolidé, DATA-01, F055 ; ancien cahier C25 surligné (titre en rouge) ; reprise de `/confiance` (`P6-19`)
 
 - Revoir contre l'ancien C25 ce qui manque : inventaire des données (origine, date, statut, usage), consentements, exports, suppression, **appareils et sessions connectés** (« déconnecter un appareil »), fraîcheur, réauthentification avant une action sensible.
+**Réalisé le 2026-10-31.** Revu contre l'ancien C25 : l'inventaire des données (origine, date, statut, usage), les consentements, l'export, la suppression, la fraîcheur et la **réauthentification avant chaque action sensible** existaient déjà (`P6-19`) et couvrent les nouvelles tables (comptes, étiquettes, occurrences). Ce qui manquait, et qui est fait :
+- **Appareils et sessions connectés** : une session est désormais une ligne révocable (`user_sessions`, migration `20261031120000`) dont l'identifiant voyage dans le cookie (`jti`) et est vérifié à **chaque requête** : en terminer une la tue à sa prochaine action. On ne garde qu'une étiquette d'appareil lisible (« Chrome · Windows »), **ni adresse ni empreinte**.
+- **Centre de confiance** (`/app/parametres/confiance`) : liste des appareils avec leur dernière activité, l'appareil courant marqué ; **« Déconnecter »** un appareil ou **tous les autres**, avec le mot de passe redemandé (`POST /api/fin/confiance/appareils/:id/deconnecter` et `…/deconnecter-autres`), pour qu'une session volée ne puisse pas écarter le propriétaire.
+- **Se déconnecter termine vraiment la session** (pas seulement le cookie) ; **changer son mot de passe déconnecte tous les autres appareils**.
+- **Rien n'est déconnecté par la livraison** : un jeton émis avant cette tâche, sans identifiant de session, reste valide jusqu'à son expiration ; la liste le dit (« votre session actuelle date d'avant cette liste »).
+- Vérifié : tests de sécurité du centre de confiance (7 cas sur les sessions), authentification, autorisation et audit de cloisonnement verts.
 
 ### P8-21 — Contrôles du client et règle « trouvable »
 - Statut : `✅ done`
@@ -3267,9 +3289,9 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Écart signalé** : la règle « trouvable » de la section 6 veut une adresse propre pour chaque écran ; 18 écrans de formulaire ou de détail n’en ont pas. Le travail est décrit dans `P8-25` (environ 5 jours), dont le périmètre est à valider par l’utilisateur.
 
 ### P8-23 — Premiers pas : le parcours de premier démarrage (P0 à P7)
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
-- Dépendances : `P8-05`, `P8-09`, `P8-11`, `P8-17`
+- Dépendances : `P8-05`, `P8-09`, `P8-11`
 - Durée cible : 2 jours (estimation)
 - Origine : dernier fichier du client (2026-10-27), onglet `02_Premier_Demarrage` ; principe PB-PR-03 ; ancien cahier SA01 surligné ; reprise de `/compte/premiers-pas` (`P6-03`)
 
@@ -3287,9 +3309,16 @@ Remplace l'actuel accueil par questions propres à chaque public (`P6-03`) par l
 - **Premier salaire (JA01, JA03, JA04 de l’ancien cahier, en rouge : non intégrés)** : P1 et P2 en sont la saisie — premier revenu, jour du salaire, règle du week-end (« jour ouvré précédent » présélectionné, réponse C4 du 2026-10-28), compte crédité ; à la fin, un plan du premier salaire (budgets proposés, fonds d’urgence, objectif) que la personne accepte ou modifie.
 - **Régularité du revenu** (réponse C3) : demandée en P1, « Stable | Irrégulier | Saisonnier ».
 - **Catégories à retirer avec l’ancien accueil (réponse D4, reportées par `P8-26`)** : la famille `goal` (14 catégories : les contributions sont des transferts depuis `P8-12`, mais l’accueil actuel et la détection de l’épargne lisent encore cette famille) et « Autre charge fixe », « Transport récurrent » (essentielles pour la réserve) ; les ajouter à `RETIRED_CATEGORIES` une fois le nouvel accueil en place.
+**Réalisé le 2026-10-31.**
+- Page `/app/parametres/premiers-pas` (`client/src/pages/premiersPas/FirstStepsPage.jsx`) : les **huit étapes P0 à P7**, dans l'ordre que la personne veut, chacune facultative **sauf P0**. `GET /api/fin/premiers-pas` donne l'état : une étape est **faite** quand sa donnée existe (profil, revenu, compte créé par la personne — le compte « Espèces » automatique ne compte pas —, mouvement réel, budget, objectif, dette), **mise de côté** si la personne l'a choisi (`PUT /api/fin/premiers-pas/etape`, colonne `finFirstSteps`, migration `20261031100000`), et la suivante est proposée. Rien ne bloque : ce qui n'est pas renseigné reste « non calculé ».
+- **P0** profil éducatif et consentements ; **P1** premier revenu (`POST /api/fin/premiers-pas/revenu`) : saisi **une fois**, il devient la ressource attendue (base de PB-F009) **et** une récurrence à confirmer ; les revenus de la catégorie du profil (lycéen, étudiant, jeune actif, salarié) sont proposés en premier (★) ; compte à créditer, « Espèces » proposé sinon ; **P2** jour, règle de week-end (« jour ouvré précédent » présélectionné), compte, confirmation (« à confirmer » recommandé) ; **P3 à P7** mènent aux écrans dédiés (un seul formulaire par chose).
+- **Plan du premier revenu** (JA01, JA03, JA04) : une fois le revenu saisi, trois chemins — budget, fonds d'urgence (cible par défaut selon le profil), objectif — que la personne accepte ou modifie ; rien n'est créé à sa place. La régularité du revenu (stable / irrégulier / saisonnier) est déjà dans le profil financier.
+- Les questions d'estimation de `P6-03` restent disponibles à part (`/app/parametres/premiers-pas/estimations`).
+- **Dépendance revue le 2026-10-31** : `P8-17` a été retirée de ses dépendances. Seule la structure des six profils éducatifs (déjà construite) sert à l'étape P0 ; les contenus que le client doit fournir ne concernent que la formation, pas ce parcours.
+- **Reste** (confié à `P8-24`) : retirer de l'accueil les catégories `goal`, « Autre charge fixe » et « Transport récurrent » (`RETIRED_CATEGORIES`) une fois la détection de l'épargne et la réserve n'en dépendant plus ; donner au profil éducatif (ONB-01) et au premier revenu (ONB-02) chacun leur adresse.
 
 ### P8-24 — Reliquats des écrans livrés le 2026-10-27
-- Statut : `❌ todo`
+- Statut : `🚧 in-progress`
 - Priorité : `🟡 medium`
 - Dépendances : `P8-06`, `P8-10`, `P8-11`, `P8-14`, `P8-16`
 - Durée cible : 3 jours (estimation)
@@ -3302,6 +3331,25 @@ Ce que ces tâches livrées n'ont pas fini, rassemblé ici :
 - **Santé financière** (`P8-16`) : l'historique de l'indice (instantanés conservés) ; les dimensions « objectifs » et « qualité des données » mesurées par leurs modules.
 - **Alertes** (`P8-18`) : la notification du navigateur (Web Push) pour qui l’accepte, en plus de l’application.
 - **Revenus prévus** (relevé par `P8-15`, 2026-10-29) : les revenus déclarés (`fin_incomes`, la base de PB-F009 « reste à allouer ») ne se créent que par « Premiers pas » et par la fiche de paie ; **aucun écran ne les liste, ne les corrige ni ne les archive**, alors que l’API existe (`/api/fin/revenus`). Il faut leur écran (sous Mes comptes ou Budgets), et y faire mener le « Compléter » de la préparation au financement, qui renvoie pour l’instant à « Premiers pas ».
+**Avancement au 2026-10-31 (tâche toujours en cours).**
+- **Fait — Revenus prévus** : écran `/app/budgets/revenus` (lister, ajouter, corriger, archiver ; accessible depuis les Budgets et depuis « Premiers pas ») ; le « Compléter » de la préparation au financement y mène. Un revenu prévu ne change aucun solde.
+- **Fait — Patrimoine** : l'historique du patrimoine net (douze fins de mois) lit les comptes tels qu'ils étaient à chaque date, plus les actifs déclarés des autres classes ; un compte ouvert récemment ne compte pas avant son ouverture. Les dettes sans compte sont lues telles qu'elles sont aujourd'hui (leur historique n'est pas conservé en soldes datés).
+- **Fait — Synthèse** : section **R-06** (scénario d'épargne : dépenses flexibles AN-F002, réduction saisie par la personne AN-F010, épargne du scénario AN-F009, taux AN-F011 — simulation, rien n'est enregistré, `?reduction=`) et la **cascade mensuelle** (G-10 : revenus → charges essentielles → dettes → flexibles → épargne → reste) ; R-06 figure aussi dans le CSV / XLSX.
+- **Reste** : l'ajout rapide en feuille glissante et l'anneau qui devient mini-courbe (Accueil) ; les graphiques G-03, G-04, G-06, G-08, G-09, G-11, G-12 ; la comparaison de deux mois au choix et des instantanés de rapport conservés ; l'historique de l'indice de santé (instantanés) et les dimensions « objectifs » et « qualité des données » ; la notification du navigateur (Web Push : elle demande des clés et un service worker, donc un choix d'hébergement à faire) ; le salaire affiché comme premier revenu de l'Accueil ; le rattachement d'une échéance de dette au budget ; la recherche des contenus de formation et la réécriture des intentions CB* de l'assistant pour les nouvelles adresses ; les catégories à retirer (`goal`, « Autre charge fixe », « Transport récurrent ») et une adresse propre pour ONB-01 et ONB-02.
+
+**Avancement au 2026-10-31 (suite, graphiques de l'onglet 13).** Un kit de graphiques commun (`components/fincludia/charts/` : `LineChart`, `GroupedBars`, `Gauge`, `Charts.css`) qui suit les règles du projet : une seule échelle, une légende toujours écrite, chaque valeur écrite à côté de sa forme, un tableau des chiffres en alternative, un trou (jamais un zéro) quand un mois n'a pas de chiffre, quatre teintes fixes jamais cyclées. **Faits** : G-03 (flux net de chaque mois, dans la Synthèse ; `fluxNet` ajouté aux points de `/fin/argent/synthese/historique`, calculé par le moteur) ; G-04 (prévu et réel côte à côte par enveloppe, dans un budget) ; G-06 (évolution des soldes sur douze mois, avec le filtre « tous les comptes / un compte », sur Mes comptes et sur la fiche d'un compte) ; G-08 (jauge du fonds d'urgence : mois couverts face à la cible, dite en couleur ET en mots, « aucune cible choisie » plutôt qu'un faux 0 %) ; G-09 (part réellement dépensée face à la cible de la méthode, côte à côte, jamais un verdict) ; G-11 (dettes par type avec les mots du client D-01 à D-05, et, à part, ce qui m'est dû). G-12 existait (courbe du patrimoine net et répartition par classe). Vérifié dans un vrai navigateur par `tests/e2e/fin-charts-journey.test.js` (5 tests) et `finMoney.test.js` (43). **Reste de cette tâche, à jour** : l'ajout rapide en feuille glissante et l'anneau qui devient mini-courbe (Accueil) ; la comparaison de deux mois au choix et des instantanés de rapport conservés ; l'historique de l'indice de santé et les dimensions « objectifs » et « qualité des données » ; la notification du navigateur (Web Push, qui demande un choix d'hébergement) ; le salaire affiché comme premier revenu de l'Accueil ; le rattachement d'une échéance de dette au budget ; la recherche des contenus de formation et la réécriture des intentions CB* de l'assistant ; les catégories à retirer et une adresse propre pour ONB-01 et ONB-02. Le graphique de flux net est mensuel : le classeur parle de jour, semaine ou mois, et la courbe de l'Accueil qui devient mini-graphe au défilement reste dans le reste ci-dessus.
+
+**Avancement au 2026-10-31 (suite, Accueil et rapports).** **Fait — le salaire comme premier revenu de l'Accueil** : un bloc « Revenus prévus » liste les ressources déclarées, le groupe « Salaire & emploi » TOUJOURS en premier (étiqueté « Salaire »), même si une autre ressource est plus grande, puis les plus fortes ; sans ressource déclarée, le bloc est vide, jamais inventé (`revenusDeclares` dans `/fin/accueil`, `tests/functional/finHome.test.js`, 2 tests). **Fait — la comparaison de deux mois au choix** : `GET /fin/rapport/comparaison?mois=&avec=` (deux mois obligatoires et différents) compose le rapport mensuel de chacun, la variation étant PB-F023 (`(B − A) / |A|`, non calculable sur une base nulle, jamais un 0 %) ; section « Comparer deux mois » sur la page Rapports (revenus, dépenses, flux net, et les cinq premières catégories de chaque mois), sans aucun verdict (`finReport.test.js`, 6 tests). Il reste de cette tâche : l'ajout rapide en feuille glissante et l'anneau qui devient mini-courbe ; les instantanés de rapport conservés ; l'historique de l'indice de santé et ses deux dimensions ; le Web Push ; le rattachement d'une échéance de dette au budget ; la recherche des contenus de formation et les intentions CB* de l'assistant ; les catégories à retirer et une adresse propre pour ONB-01 et ONB-02.
+
+**Avancement au 2026-10-31 (suite, instantanés).** Migration `20261031190000_fin_snapshots` (table `fin_snapshots`, un instantané par personne, type et mois, jamais recalculé). **Fait — instantanés de rapport conservés** : `POST /fin/rapport/instantane` garde le rapport d'un mois tel qu'il est ce jour-là ; `GET …/instantanes` les liste, `GET …/instantane/:mois` le relit tel qu'il fut (un mouvement saisi après coup ne le réécrit pas) ; garder à nouveau remplace et monte la version. La page Rapports propose « Conserver » et « Conservé le … », qui rouvre le rapport tel qu'il était avec un bandeau qui le dit. **Fait — historique de l'indice de santé** : l'indice du mois est conservé à chaque lecture de la liste du jour (`GET /fin/sante/historique`), avec les dimensions retenues à l'époque ; un indice non mesurable n'est pas un point, un mineur n'en a aucun ; la page Santé trace la courbe (« chaque point est l'indice tel qu'il a été lu »). Vérifié par `tests/functional/finSnapshot.test.js` (6 tests). **Bloqué, question au client (H)** : les dimensions « objectifs » (écart au plan, aucune définition de la trajectoire) et « qualité des données » (complétude et fraîcheur, aucun seuil d'âge par type) restent ABSENTES de l'indice, qui se déclare partiel : les mesurer reviendrait à inventer leur règle. Il reste de cette tâche : l'ajout rapide en feuille glissante et l'anneau qui devient mini-courbe ; le Web Push ; le rattachement d'une échéance de dette au budget ; la recherche des contenus de formation et les intentions CB* de l'assistant ; les catégories à retirer et une adresse propre pour ONB-01 et ONB-02.
+
+**Avancement au 2026-10-31 (suite, Accueil sur téléphone).** **Fait — l'ajout rapide en feuille glissante** (`components/fincludia/QuickAdd.jsx`) : sur téléphone, le « + » de la barre supérieure et le raccourci « Dépenses et revenus » de l'Accueil ouvrent une feuille qui monte PAR-DESSUS la page, au lieu d'ouvrir Mouvements ; elle contient le même formulaire que la page, se ferme à Échap ou à la croix, garde le focus dedans (Tab y tourne) et le rend au bouton qui l'a ouverte, bloque le défilement de la page derrière, et, une fois la saisie enregistrée, la page derrière relit ses chiffres (événement `fin:data-changed`, écouté par `useApi`). Chaque ouvreur est un vrai lien vers `/app/mouvements/nouveau` : sur ordinateur, au clic du milieu ou sans script, il navigue vers la page. L'animation respecte « réduire les animations ». **Fait — l'anneau qui devient mini-courbe** : une fois l'anneau dépassé par le défilement, une barre mince reste en haut avec le flux net des derniers mois en petite courbe et le chiffre écrit à côté ; elle ne décale jamais la page (ancre sans hauteur) et se lit à chaque défilement sur l'élément tel qu'il est (un observateur lié au premier élément se perdait quand la page relit ses chiffres : défaut trouvé par le test). Vérifié dans un vrai navigateur à 390 px par `tests/e2e/fin-quickadd-journey.test.js` (3 tests : ouverture et retour du focus, enregistrement réel et rafraîchissement, mini-courbe) ; `app-shell` et `fin-shared-journey` restent verts. Il reste de cette tâche : le Web Push (choix d'hébergement) ; le rattachement d'une échéance de dette au budget ; la recherche des contenus de formation et les intentions CB* de l'assistant ; les catégories à retirer et une adresse propre pour ONB-01 et ONB-02.
+
+**Avancement au 2026-10-31 (suite, adresses ONB et catégories).** **Fait — une adresse propre pour ONB-01 et ONB-02** : « Profil éducatif » à `/app/parametres/premiers-pas/profil` et « Premier revenu » à `/app/parametres/premiers-pas/premier-revenu` (`pages/premiersPas/FirstStepPage.jsx`, mêmes formulaires que « Premiers pas » : un formulaire par chose) ; la liste des étapes y mène (« Ouvrir sur sa propre page »), une étape enregistrée revient à la liste qui le dit. Les deux écrans passent de « regroupé » à « page » dans `finAppScreens.js` (la matrice des écrans compte maintenant 41 pages propres sur 44) ; vérifié dans un vrai navigateur (`fin-addresses-journey`, 15 tests). **Décision prise de NE PAS faire — le retrait des catégories `goal`, « Autre charge fixe » et « Transport récurrent »** : ce n'est pas du ménage. La famille `goal` est ce que lisent encore la détection de l'épargne (`isSavingsMovement`), le budget par méthode, le rapport et le rattachement d'un virement d'épargne ; la retirer sans autre changement ferait compter l'épargne comme une dépense. « Autre charge fixe » et « Transport récurrent » sont toujours ce sur quoi écrivent les questions d'estimation de `P6-03` (`finOnboarding.js`, restées disponibles à part) et comptent dans les dépenses essentielles de la réserve (`OLD_ESSENTIAL_KEYS`). Les retirer demande d'abord de réécrire ces questions et de faire lire l'épargne par les virements vers un compte d'épargne (`P8-03`) seulement ; tant que ce n'est pas décidé avec le client, la bonne version est de ne rien casser. À présenter à la recette (question I). Il reste de cette tâche : le Web Push (choix d'hébergement) ; le rattachement d'une échéance de dette au budget ; la recherche des contenus de formation et les intentions CB* de l'assistant ; le retrait des trois catégories, en attente de la décision ci-dessus.
+
+**Avancement au 2026-10-31 (suite, dettes et budget).** Migration `20261031200000_fin_debt_budget_envelope` (colonne `budgetEnvelopeId` sur la dette). **Fait — le rattachement d'une échéance de dette au budget** (étape P7) : `POST /fin/debts/:id/budget` planifie la mensualité d'une dette dans le budget en cours, en UNE enveloppe fixe de la catégorie de dette choisie parmi les cinq du groupe « Dettes & engagements » ; recommencer la remet à jour sur la même enveloppe (jamais une seconde, rien n'est compté deux fois). Refusé en 422 : une créance (rien à planifier), une dette sans mensualité, une catégorie qui n'est pas une catégorie de dette, l'absence de budget en cours, une autre devise ; la dette d'une autre personne répond 404. Sur la fiche d'une dette, « Prévoir la mensualité au budget » (ou « mettre à jour »). Vérifié par `tests/functional/finDebtBudget.test.js` (4 tests) ; `finDebt` (sécurité) et `fin-addresses-journey` restent verts. Il reste de cette tâche : le Web Push (choix d'hébergement) ; la recherche des contenus de formation et les intentions CB* de l'assistant ; le retrait des trois catégories, en attente de la décision de la question I.
+
+**Avancement au 2026-10-31 (suite, assistant et recherche).** Migration `20261031210000_fin_intents_catalogue_codes`. **Fait — les 25 intentions du client rendues utilisables sur les nouvelles adresses.** Jusqu'ici le catalogue `CB01`-`CB24` + `CB99` n'était branché nulle part (le test de contenu le gardait, rien ne le lisait). Il est maintenant semé, comme les sept premières, en BROUILLONS à la première ouverture de l'écran d'administration : mots déclencheurs du client en mots-clés, et un lien vers l'adresse actuelle de l'application (`FIN_INTENT_LINKS` : budgets, fonds d'urgence, stratégies de dette, simulateur de crédit, fiche de paie, comparateur, Synthèse et rapports, Santé…), chaque lien étant une page qui existe (liste blanche étendue). Les intentions sans écran propre — droits d'un mineur (CB16), conseils de sécurité (CB22), repli (CB99) — ne mènent nulle part plutôt qu'à une mauvaise page. L'administrateur voit à côté de l'éditeur ce que le fichier du client autorise (réponse, questions, garde-fou) ; le TEXTE PUBLIC reste à écrire par lui avant toute publication (la « réponse autorisée » du client décrit une action, ce n'est pas un texte à afficher tel quel). Résolution et audit sous le code `CBnn`. Vérifié par `tests/functional/finAssistant.test.js` (14 tests, dont une intention du catalogue publiée puis résolue vers son adresse). **Fait — la recherche des contenus de formation** : `formations` dans `/fin/recherche` (titre, description ou titre d'un cours des formations PUBLIÉES, jamais un brouillon), un groupe « Formations » dans la recherche globale, lien vers `/app/formation/:slug` (`tests/security/finSearch.test.js`, 8 tests). Il reste de cette tâche : le Web Push (choix d'hébergement) et le retrait des trois catégories (question I, à trancher avec le client).
 
 ### P8-25 — Une adresse propre pour chaque écran regroupé
 - Statut : `✅ done`
@@ -3492,7 +3540,7 @@ Faire de la gestion collective une **solution distincte**, comme le client le de
 - **B5 lien personnel** : contrainte technique **1 dépense collective ↔ 0 ou 1 transaction personnelle** (`personal_transaction_id`), jamais deux débits d’un compte personnel (`P9-08`).
 
 ### P9-02 — Gestion commune : une solution à part, une adresse par espace, un tableau de bord d'espace
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P8-02`, `P9-01`
 - Durée cible : 4 jours (estimation)
@@ -3505,8 +3553,12 @@ Faire de la gestion collective une **solution distincte**, comme le client le de
 - Les blocs dont les données n'existent pas encore montrent un état vide qui annonce la fonction, jusqu'aux tâches qui les livrent.
 - Tests : QC-01, QC-02, QC-03, QC-05 depuis le menu ; les 47 tests de sécurité existants restent verts.
 
+**Avancement (2026-10-31).** Fait : fenêtre `/partage` (`SharedLayout`, barre supérieure avec le sélecteur dans les deux sens), liste des espaces (créer, rejoindre), cadre d'espace avec son menu et une page par compartiment (`/partage/:id`, `/depenses`, `/objectifs`, `/foyer`, `/membres`), redirections `/espaces` et `/app/espaces`, sélecteur, recherche et i18n fr/en/ar. Le code des écrans CO, CP, FA, P est déplacé dans `parts.jsx`, pas réécrit. Reste : le tableau de bord complet de l'onglet 03 (budgets communs, tâches, calendrier, activité récente, qui arrivent avec P9-04 à P9-08 ; état vide en attendant), la suppression de l'ancien `SpacesPage.jsx` (plus utilisé), les tests QC-01/02/03/05 et la suite de sécurité (après la fin de la suite complète en cours).
+
+**Réalisé (2026-10-31), suite et fin.** Tableau de bord d'espace complet (onglet 03, CD-01 à CD-09) : `services/finSpaceDashboard.service.js` et `GET /fin/espaces/:id/tableau-de-bord?mois=` composent en une requête le solde du groupe, les dépenses du mois avec la tendance sur le mois précédent (`null` sans mois à comparer, jamais un 0 inventé), qui a payé, qui doit quoi (plan de remboursement, petit solde masqué), les budgets communs, les prochaines factures, les tâches (en retard, du jour, prochaines) et un objectif commun ; l'activité récente (CD-09) a son propre bloc ; le vocabulaire suit le type d'espace. Vérifié par `tests/functional/finSpaceDashboard.test.js` (4 tests) et le parcours navigateur de `P9-12`. Les compartiments qui n'existaient pas encore quand cette tâche a commencé sont livrés par `P9-04` à `P9-10`. L'ancienne page `client/src/pages/espaces/SpacesPage.jsx` n'est plus utilisée par aucune route ; sa suppression a été refusée à l'outil et reste à faire par vos soins (aucune importation ne la référence).
+
 ### P9-03 — Espace « groupe / amis » et espace temporaire
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P9-02`
 - Durée cible : 1 jour (estimation)
@@ -3515,8 +3567,10 @@ Faire de la gestion collective une **solution distincte**, comme le client le de
 Quatrième type d'espace (`SPACE_KINDS` : aujourd'hui `flatshare`, `couple`, `household`) pour un voyage, une sortie, un cadeau, un événement ; clôture par le propriétaire, puis lecture seule : historique, soldes et règlements lisibles, plus aucune écriture (`P9-01` point 4).
 - **Règles du client (2026-10-28, B3)** : voir `P9-01`. Actif → Clôturé ; après clôture, plus aucune écriture ni modification ; historique, rapports et exports lisibles.
 
+**Réalisé (2026-10-31).** Migration `20261031180000_fin_space_group_closing` : quatrième type `group` (« Groupe / amis ») et colonne `closedAt`. `POST /fin/espaces/:id/cloturer` : le propriétaire seul, une fois, sans retour possible (Actif → Clôturé, B3) ; les invitations en attente sont révoquées, les membres sont prévenus, la clôture est tracée. Après la clôture, **toute écriture est refusée en 423** : le garde est centralisé dans `requireRole` (tous les écrivains passent par là) et `assertOpen` pour les quelques écrivains qui n'exigent pas de rôle (annuler ou supprimer une dépense, lier ou délier, supprimer un règlement ou une contribution) ; une invitation déjà donnée n'est plus acceptée. Restent lisibles : l'historique, les soldes, le calendrier, le rapport, l'activité, la caisse et l'export. Restent possibles : retirer ce que l'on partage, quitter l'espace (la clôture ne retient jamais les données d'une personne), et pour le propriétaire supprimer l'espace. Écran : bandeau « espace clôturé » sur chaque page, bouton « Clôturer cet espace » pour le propriétaire d'un groupe. Vérifié par `tests/security/finSpaceClosing.test.js` (7 tests : toutes les routes d'écriture de l'espace répondent 423). Le classeur ne fixe pas de durée : un espace temporaire est clôturé à la main, il ne l'est pas automatiquement.
+
 ### P9-04 — Dépenses partagées : champs et règles manquants
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P9-02`
 - Durée cible : 3 jours (estimation)
@@ -3527,8 +3581,12 @@ Quatrième type d'espace (`SPACE_KINDS` : aujourd'hui `flatshare`, `couple`, `ho
 - Annuler une dépense déjà répartie recalcule les soldes et garde la trace (QC-08) ; seuil de « petit solde » sous lequel une dette n'est plus proposée en remboursement, sans être effacée.
 - **Règles du client (2026-10-28, A3 et A4)** : la répartition par usage (unités libres, un libellé par espace, une seule unité par dépense) et le petit solde de 200 DA, modifiable, qui ne fait que masquer un règlement proposé, sans jamais effacer la dette. Voir `P9-01`.
 
+**Avancement (2026-10-31).** Fait, avec la migration `20261031130000_fin_shared_expenses_rules` et `tests/functional/finSharedRules.test.js` (9 tests) : répartition par poids et par usage (COL-F03, l'unité libre est nommée sur la dépense, le poids qui a produit chaque part est gardé) ; cycle de vie réalisée / prévue / annulée (une dépense prévue peut être datée dans le futur et ne compte pas ; une annulée garde sa ligne et sa trace, les soldes sont recalculés, QC-08) ; petit solde de 200 DA modifiable par espace (`PATCH /fin/espaces/:id`, `smallBalance`) : il masque une proposition de remboursement sans effacer la dette, et les propositions masquées restent annoncées. Écran : les deux modes, l'unité, la case « prévue », l'annulation, la confirmation et la mention des petits soldes. Reste : sous-catégorie, justificatif (stockage privé de `P5-03`), rattachement à un budget commun (livré avec `P9-05`, par la catégorie collective), les 19 catégories de l'onglet 12 en sélection par défaut.
+
+**Réalisé (2026-10-31), suite.** Le rattachement à un budget commun et la catégorie collective (les 19 de l'onglet 12) sont livrés par `P9-05` ; la contrainte d'unicité avec la transaction personnelle par `P9-08`. **Restent** : la sous-catégorie et le justificatif (image ou PDF, stockage privé), repris dans `P9-14`.
+
 ### P9-05 — Budgets communs par catégorie
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P9-04`
 - Durée cible : 3 jours (estimation)
@@ -3538,8 +3596,10 @@ Enveloppes par catégorie et par période, distinctes des objectifs communs : re
 - **Règle du client (2026-10-28, B4)** : `collective_default = true` sur les 19 catégories collectives, affichées en premier ; une catégorie créée dans un espace reste à cet espace.
 - **Catégories `shared` (réponse D4, reportée par `P8-26`)** : les 12 anciennes catégories partagées sont remappées vers les 125 (même mécanisme que `RETIRED_CATEGORIES`), et les 19 catégories collectives du client portent `collective_default = true`.
 
+**Réalisé (2026-10-31).** Migration `20261031140000_fin_space_budgets` (table `fin_space_budgets`, colonne `collectiveCategory` sur les dépenses partagées) ; `services/finSpaceBudget.service.js` et `routes/finSpaceBudget.routes.js` (`GET/PUT /fin/espaces/:id/budgets`, `DELETE …/:budgetId`) : une enveloppe par catégorie collective et par mois, reste (COL-F06, peut être négatif), taux de consommation (COL-F07), rattachement de la dépense à l'enveloppe de sa catégorie et de son mois à la lecture (ALG-C02, aucune écriture financière), alertes à 80 % et 100 %, dépenses hors enveloppe annoncées, seules les dépenses réalisées comptent. Seul un administrateur de l'espace fixe les enveloppes. Les 19 catégories collectives sont générées depuis l'onglet 12 (`scripts/generate-collective-categories.py`, COLC-01 à COLC-19, dans l'ordre du classeur, affichées en premier). Page « Budgets » de l'espace et choix de la catégorie sur la dépense. Vérifié par `tests/functional/finSpaceBudget.test.js` (8 tests), dont QC-06 : aucun budget personnel ni mouvement personnel n'est touché. **Écart assumé, question au client (F)** : les 19 catégories collectives sont un catalogue à part et non des drapeaux `collective_default` sur les 125, parce que le classeur ne donne aucune correspondance et qu'inventer « Gaz = Gaz, Enfants = quelle sous-catégorie ? » serait décider à sa place ; le remappage des 12 anciennes catégories partagées reste lié à cette réponse.
+
 ### P9-06 — Gestion des tâches
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P9-02`
 - Durée cible : 4 jours (estimation)
@@ -3550,8 +3610,10 @@ Enveloppes par catégorie et par période, distinctes des objectifs communs : re
 - Taux de tâches terminées (COL-F11) et répartition de la charge (COL-F12), formulés comme un constat, jamais comme un jugement.
 - **Règle du client (2026-10-28, A2)** : poids d’une tâche 1 / 2 / 3, défaut 1 ; charge d’un membre = Σ poids de ses tâches / Σ poids de toutes × 100.
 
+**Réalisé (2026-10-31).** Migration `20261031150000_fin_space_tasks` ; `services/finSpaceTask.service.js`, `routes/finSpaceTask.routes.js`, `constants/finSpaceTask.js` : titre, description, catégorie (les 9 du classeur), responsable, participants, échéance, priorité, répétition (aucune / jour / semaine / mois : « personnalisée » n'est pas offerte, la règle n'est pas donnée), liste de contrôle, poids 1 / 2 / 3 (défaut 1, règle A2), statut, rappel en jours, lien informatif vers une dépense partagée. Terminer une tâche qui se répète en recrée la suivante, liste décochée (ALG-C04, mois clampé à la fin du mois). COL-F11 (taux de tâches terminées) et COL-F12 (part de la charge) sont lus du serveur, `null` sans tâche, jamais 0, et formulés comme un constat à l'écran. Seuls le responsable, un participant, le créateur ou un administrateur modifient une tâche ; chaque changement est tracé. Page « Tâches » de l'espace. Vérifié par `tests/functional/finSpaceTask.test.js` (10 tests), dont QC-07 : ni lien, ni fin de tâche n'écrit de dépense ni de mouvement. **Restent** : l'envoi des rappels de tâche et des tâches en retard (`P9-09`) ; le formulaire n'expose pas encore la description, les participants et la liste de contrôle, que l'API accepte déjà (`P9-12`, contrôles du client).
+
 ### P9-07 — Calendrier collectif unifié
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P9-05`, `P9-06`
 - Durée cible : 2 jours (estimation)
@@ -3559,8 +3621,10 @@ Enveloppes par catégorie et par période, distinctes des objectifs communs : re
 
 Une vue filtrable : factures, tâches, règlements, objectifs. Une facture prévue reste prévue jusqu'à confirmation, puis devient une dépense réelle sans doublon (mécanisme de `P6-15`).
 
+**Réalisé (2026-10-31).** `services/finSpaceCalendar.service.js` et `GET /fin/espaces/:id/calendrier?mois=&types=` : une seule ligne du temps, dans l'ordre des dates, des factures (dépenses partagées prévues ou confirmées), des tâches, des règlements et des objectifs communs, filtrable par type. C'est une lecture : rien n'est créé. Une facture prévue le reste jusqu'à sa confirmation (`POST …/depenses/:id/confirmer`), puis la même ligne se lit « confirmée » : aucun doublon possible. Une dépense ou une tâche annulée n'y figure plus. Page « Calendrier » de l'espace avec filtres à cocher. Vérifié par `tests/functional/finSpaceCalendar.test.js` (5 tests). Les règlements affichés sont ceux déclarés (date du règlement) ; une date de règlement attendue n'existe pas dans le modèle, le classeur la nomme sans la définir.
+
 ### P9-08 — Lien sans doublon vers le budget personnel
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P9-04`, `P8-03`
 - Durée cible : 2 jours (estimation)
@@ -3569,8 +3633,10 @@ Une vue filtrable : factures, tâches, règlements, objectifs. Une facture prév
 Une dépense collective payée avec l'argent personnel est reliée à **une seule** transaction personnelle (contrainte d'unicité), créée dans le compte choisi ou désignée parmi les transactions déjà saisies, jamais les deux (`P9-01` point 5) ; le compte source n'est visible que de son propriétaire.
 - **Règle du client (2026-10-28, B5)** : contrainte d’unicité en base, 1 dépense collective ↔ 0 ou 1 transaction personnelle.
 
+**Réalisé (2026-10-31).** Migration `20261031160000_fin_shared_personal_link` : `personalTransactionId` sur la dépense partagée, **unique** en base (B5, COL-F13) et `ON DELETE SET NULL`. À la saisie, `personalLink: { accountId }` crée UNE dépense personnelle sur le compte choisi (marquée `shared`, même montant, même date), ou `personalLink: { transactionId }` désigne une dépense déjà saisie : les deux ensemble sont refusés (400), jamais de double comptage. Après coup : `PUT` et `DELETE /fin/espaces/:id/depenses/:expenseId/lien-personnel`. Seul le payeur relie son propre argent ; une dépense prévue n'est pas reliable ; la dépense personnelle désignée doit être réalisée, du même type et dans la devise de l'espace ; une même transaction ne peut pas servir deux dépenses collectives (409). Le lien et le compte ne sont visibles que du payeur (QC-05) : la réponse des autres membres ne contient même pas le champ. Annuler la dépense collective ne touche pas la dépense personnelle (l'argent est bien parti). Le formulaire propose le compte quand le payeur est la personne connectée. Vérifié par `tests/functional/finSharedPersonalLink.test.js` (8 tests), dont QC-04. Choix à confirmer avec le client (question G) : la dépense personnelle créée prend le montant payé en entier, le remboursement par les autres membres revenant ensuite par les règlements.
+
 ### P9-09 — Alertes, activité récente et contribution requise
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P9-05`, `P9-06`, `P9-07`
 - Durée cible : 3 jours (estimation)
@@ -3579,8 +3645,10 @@ Une dépense collective payée avec l'argent personnel est reliée à **une seul
 Alertes (invitation, nouvelle dépense, budget à 80 / 100 %, règlement, facture J-7 / J-3 / J, tâche, contribution, changement de permission) ; activité récente selon les droits de chacun ; contribution requise (COL-F08) présentée comme une proposition.
 - **Règle du client (2026-10-28, A1)** : ressources communes = solde initial + contributions confirmées + autres entrées confirmées ; solde du groupe = ressources − dépenses réalisées ; une contribution prévue ne compte pas.
 
+**Réalisé (2026-10-31).** Migration `20261031170000_fin_space_inflows` (table `fin_space_inflows`). **Règle A1** (`services/finSpaceResource.service.js`, `GET/POST /fin/espaces/:id/ressources`, `…/:inflowId/confirmer`) : ressources communes = solde initial + contributions confirmées + autres entrées confirmées ; solde du groupe = ressources − dépenses réalisées ; une contribution prévue ne compte pas et est annoncée à part. Seul un administrateur fixe le solde initial ; un membre n'enregistre que sa propre contribution. **Contribution requise** (`GET …/contribution-requise?besoin=`) : COL-F08 présentée comme une proposition, partagée par la règle de l'espace (parts égales, ou proportionnelle aux revenus avec le même consentement que la répartition d'une dépense) ; rien n'est écrit, aucun compte personnel n'est touché ; un besoin déjà couvert donne un vrai zéro. **Alertes** (8 types, famille « collectif », réglable comme les autres familles) : membre qui rejoint / quitte / est retiré, nouvelle dépense (aux autres, pas à son auteur), budget à 80 % et 100 % (une fois par niveau), règlement (à l'autre partie seulement), changement de droit (au membre concerné), puis, à la génération des alertes, facture à J-7 / J-3 / J, tâche proche ou en retard (celle du responsable) et contribution prévue dont la date est venue. **Activité récente** (`GET …/activite`) : dépenses, règlements, tâches, entrées de la caisse et arrivées de membres, du plus récent au plus ancien, identique pour tous les membres ; elle ne lit jamais une transaction personnelle et ne nomme jamais un compte. Pages « Ressources » (caisse, entrées, proposition) et activité sur la vue d'ensemble de l'espace. Vérifié par `tests/functional/finSpaceAlerts.test.js` (13 tests). **Écart** : le classeur prévoit aussi un canal « push » ; il n'existe pas dans l'application, seules les notifications dans l'application sont livrées. Cela solde les rappels de tâche que `P9-06` laissait à cette tâche. L'alerte « objectif commun » (contribution attendue, jalon, priorité P1 du classeur) n'est pas livrée : elle attend la réponse au sujet des contributions aux objectifs communs (`P9-12`, contrôles du client).
+
 ### P9-10 — Rapports et export d'un espace
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟢 low`
 - Dépendances : `P9-05`
 - Durée cible : 1 jour (estimation)
@@ -3588,8 +3656,10 @@ Alertes (invitation, nouvelle dépense, budget à 80 / 100 %, règlement, factur
 
 Synthèse d'un espace sur une période et export, avec un consentement explicite comme pour l'export de `P6-16`.
 
+**Réalisé (2026-10-31).** `services/finSpaceReport.service.js` et `routes/finSpaceReport.routes.js` : `GET /fin/espaces/:id/rapport?mois=` (dépenses réalisées du mois par catégorie collective, soldes cumulés des membres, budgets communs, caisse commune, tâches) et `POST /fin/espaces/:id/export` (CSV ou XLSX). Le rapport ne lit que ce que l'espace détient en commun : aucune transaction ni aucun compte personnel, vérifié par test ; il est identique pour tous les membres. L'export exige `consent: true` à CHAQUE appel (jamais mémorisé, comme celui de `P6-16`), et une cellule qui commence par `=`, `+`, `-` ou `@` est neutralisée. Page « Rapport » de l'espace : synthèse, case de consentement qui se décoche après chaque fichier, boutons CSV et XLSX. Vérifié par `tests/functional/finSpaceReport.test.js` (6 tests).
+
 ### P9-11 — Formules collectives : un moteur collectif, sans doublon
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P4-09`
 - Durée cible : 1 jour (estimation)
@@ -3600,8 +3670,10 @@ Synthèse d'un espace sur une période et export, avec un consentement explicite
 - Seules les formules réellement nouvelles sont écrites (COL-F02 si elle diffère, COL-F03, COL-F06, COL-F07, COL-F08, COL-F11 à COL-F13, ALG-C02, ALG-C04), chacune avec sa phrase « Pourquoi ? ».
 - **Formules précisées par le client le 2026-10-28** (A1 à A3) : ressources communes et solde du groupe, charge de tâches pondérée, part par usage. Voir `P9-01`.
 
+**Réalisé (2026-10-31).** Le catalogue collectif est généré depuis les onglets 13 et 13B (`scripts/generate-collective-formulas.py` → `constants/finCollectiveFormulas.js` : COL-F01 à COL-F13, ALG-C01 à ALG-C04, mot pour mot), résolu par le contrat de réponse et par `describeFormula`, qui publie la correspondance (`equivalent`) pour COL-F01/F04/F05/F09/F10 et ALG-C01/C03. Seules les formules nouvelles sont écrites (`services/finance/collective.js` : COL-F02, F03, F06, F07, F08, F11, F12, ALG-C02), testées dans `tests/unit/finCollective.test.js`. Deux écarts à connaître : F041 à F044 restent résolubles sous leur ancien identifiant (les réponses déjà émises et leurs tests y renvoient) au lieu d'être retirées du catalogue personnel ; les écrans collectifs passeront aux identifiants COL avec P9-04 et P9-05. COL-F13 (anti-doublon) est une contrainte de base, livrée avec P9-04 (dépenses liées à une transaction personnelle). Les phrases « Pourquoi ? » se branchent sur ces formules dans les tâches qui les affichent.
+
 ### P9-12 — Contrôles du client et règle « trouvable »
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
 - Dépendances : `P9-02`, `P9-04`, `P9-06`
 - Durée cible : 2 jours (estimation)
@@ -3609,13 +3681,17 @@ Synthèse d'un espace sur une période et export, avec un consentement explicite
 
 Les huit scénarios du client deviennent un parcours navigateur qui part de l'entrée de Gestion commune et de son menu ; un contrôle vérifie que chaque compartiment d'un espace est atteignable depuis sa navigation.
 
+**Réalisé (2026-10-31).** `tests/functional/finSharedQc.test.js` reprend QC-01, QC-02, QC-03 et QC-05 avec les chiffres du client (9 000 pour trois : 3 000 chacun, A +6 000 ; A paie 6 000 pour B et C : sa part est 0 ; soldes croisés : moins de virements, aucun net modifié ; B ne voit rien des transactions personnelles de A). QC-04, QC-06, QC-07 et QC-08 sont prouvés là où vit leur fonction (`finSharedPersonalLink`, `finSpaceBudget`, `finSpaceTask`, `finSharedRules`). `tests/e2e/fin-shared-journey.test.js`, dans un vrai navigateur : rien de Gestion commune dans le menu personnel ; le sélecteur de la barre supérieure est la seule porte ; il mène à `/partage` ; chacun des 9 compartiments d'un espace est atteint depuis son propre menu, à sa propre adresse ; le titre et le retour sont là ; sur téléphone, aucun défilement horizontal. **Défaut trouvé par ce parcours et corrigé** : sur téléphone le sélecteur était masqué dans les DEUX applications, donc Gestion commune n'avait aucune porte depuis un téléphone. Il reste maintenant, réduit à l'icône de l'autre application (nom conservé pour un lecteur d'écran, zone de 44 px).
+
 ### P9-13 — Gestion commune : validation de fin de phase
-- Statut : `❌ todo`
+- Statut : `🚧 in-progress`
 - Priorité : `🔴 high`
 - Dépendances : `P9-01`, `P9-02`, `P9-03`, `P9-04`, `P9-05`, `P9-06`, `P9-07`, `P9-08`, `P9-09`, `P9-10`, `P9-11`, `P9-12`
 - Durée cible : 1 jour (estimation)
 
 Critères : une solution à part, sans aucun lien depuis l'application personnelle ; chaque écran du fichier collectif a sa propre adresse ; QC-01 à QC-08 passent ; démonstration au client sur une colocation, un couple et un groupe d'amis.
+
+**Avancement (2026-10-31).** Les critères vérifiables par test le sont : une solution à part sans lien depuis le menu de l'application personnelle, le seul accès étant le sélecteur (parcours navigateur de `P9-12`) ; chaque compartiment du fichier collectif a sa propre adresse sous `/partage` ; QC-01 à QC-08 passent. **Reste** : la démonstration au client sur une colocation, un couple et un groupe d'amis, et son accord sur les écarts notés (questions F et G de `P9-05` et `P9-08`, correspondance des 19 catégories collectives, canal « push »). La suite complète n'a pas été relancée depuis la fin de `P9-02` : à lancer une fois, seule, avant la démonstration.
 
 ### Impact sur le délai (Phases 8 et 9, réécrit le 2026-10-27)
 

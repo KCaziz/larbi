@@ -81,3 +81,6 @@ export const simpleLoanSchema = z
     note,
   })
   .strict();
+
+// Plans the monthly instalment in the current budget (P8-24).
+export const debtBudgetSchema = z.object({ categoryId: z.string().uuid() }).strict();

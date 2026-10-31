@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { Archive, ArchiveRestore, Pencil, TriangleAlert, Wallet } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
+import AccountsBalanceChart from './AccountsBalanceChart.jsx';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
@@ -72,6 +73,8 @@ export default function AccountDetailPage() {
             ))}
           </ul>
         )}
+
+        {!account.liability && <AccountsBalanceChart accounts={[account]} />}
 
         <div className="accounts-card-actions">
           <Link to={`/app/mouvements?compte=${account.id}`}>{t('accounts.history')}</Link>

@@ -6,6 +6,7 @@ import { debtPayoffPlan } from './finance/algorithms.js';
 import { computed } from './finance/contract.js';
 import { debtEffortRate, debtToAnnualIncome, monthlyDebtService, periodicRate } from './finance/formulas.js';
 import { HttpError } from '../utils/httpError.js';
+import { createEnvelope, currentBudget, updateEnvelope } from './finBudget.service.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
 
 export const DEBT_ENTITY = 'debt';
@@ -25,6 +26,7 @@ const DEBT_SELECT = {
   dueDate: true,
   direction: true,
   debtType: true,
+  budgetEnvelopeId: true,
   accountId: true,
   note: true,
   scope: true,
@@ -147,6 +149,48 @@ export async function recordDebtPayment(prisma, userId, debtId, body) {
     await recordCorrection(tx, { userId, entity: DEBT_ENTITY, entityId: debtId, before: debt, after, reason: 'paiement enregistré' });
     return { payment, debt: after };
   });
+}
+
+// The categories an instalment is budgeted under: the client's « Dettes &
+// engagements » group, whose categories are the instalments themselves.
+export const DEBT_BUDGET_CATEGORY_KEYS = [
+  'fixed.remboursement_pret_personnel',
+  'fixed.credit_consommation',
+  'fixed.mensualite_financement_vehicule',
+  'fixed.remboursement_carte_de_credit',
+  'fixed.pension_engagement',
+];
+
+/**
+ * Plans a debt's monthly instalment in the current budget (P8-24, step P7 of
+ * the first steps: « chaque échéance se lie au calendrier ET AU BUDGET »).
+ *
+ * One fixed envelope, under the debt category the person picks, worth the
+ * instalment. Doing it again keeps the SAME envelope in step with the
+ * instalment instead of adding a second — nothing is counted twice. A debt I
+ * lent (a receivable) has no instalment to plan, and a debt with none says so.
+ */
+export async function budgetDebtInstalment(prisma, userId, debtId, { categoryId, now = new Date() }) {
+  const debt = await ownDebt(prisma, userId, debtId);
+  if (debt.direction === 'lent') throw new HttpError(422, 'A receivable has no instalment to plan', { reason: 'receivable' });
+  if (!debt.monthlyInstalment || debt.monthlyInstalment <= 0) throw new HttpError(422, 'This debt has no monthly instalment', { reason: 'noInstalment' });
+
+  const category = await prisma.finCategory.findFirst({ where: { id: categoryId, userId: null, deletedAt: null }, select: { id: true, key: true } });
+  if (!category || !DEBT_BUDGET_CATEGORY_KEYS.includes(category.key)) throw new HttpError(422, 'Pick one of the debt categories', { reason: 'notADebtCategory' });
+
+  const budget = await currentBudget(prisma, userId, now);
+  if (!budget) throw new HttpError(422, 'There is no budget for the current period', { reason: 'noBudget' });
+  if (budget.currency !== debt.currency) throw new HttpError(422, 'The budget is in another currency', { reason: 'currencyMismatch', expected: budget.currency });
+
+  // Still there, in THIS budget? Then it follows the instalment.
+  const existing = debt.budgetEnvelopeId
+    ? await prisma.finEnvelope.findFirst({ where: { id: debt.budgetEnvelopeId, budgetId: budget.id, userId, deletedAt: null }, select: { id: true } })
+    : null;
+  const envelope = existing
+    ? await updateEnvelope(prisma, userId, budget.id, existing.id, { categoryId: category.id, value: debt.monthlyInstalment, reason: 'mensualité de la dette' })
+    : await createEnvelope(prisma, userId, budget.id, { categoryId: category.id, kind: 'fixed', value: debt.monthlyInstalment, note: debt.label });
+  await prisma.finDebt.update({ where: { id: debtId }, data: { budgetEnvelopeId: envelope.id } });
+  return { envelope, budgetId: budget.id };
 }
 
 export function listDebtPayments(prisma, userId, debtId) {

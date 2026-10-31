@@ -6,7 +6,7 @@ import { SPACE_GOALS_MAX, SPACE_WRITE_MIN_ROLE } from '../constants/finSpaceGoal
 import { roleAtLeast } from '../constants/finSpace.js';
 import { HttpError } from '../utils/httpError.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
-import { ownMembership, requireRole } from './finSpace.service.js';
+import { assertOpen, ownMembership, requireRole } from './finSpace.service.js';
 import { incomesForSplit, liveMembers } from './finShared.service.js';
 import { goalProgress, goalRemaining, householdContribution } from './finance/formulas.js';
 import { computed } from './finance/contract.js';
@@ -100,7 +100,7 @@ export async function addContribution(prisma, userId, spaceId, goalId, body) {
 // Who may remove a contribution: the member who made it, or an admin — the
 // same rule P6-14 already uses for a shared expense.
 export async function deleteContribution(prisma, userId, spaceId, goalId, contributionId, { reason } = {}) {
-  const me = await ownMembership(prisma, userId, spaceId);
+  const me = assertOpen(await ownMembership(prisma, userId, spaceId));
   const contribution = await prisma.finSpaceGoalContribution.findFirst({
     where: { id: contributionId, spaceGoalId: goalId, deletedAt: null },
     select: { id: true, memberId: true },

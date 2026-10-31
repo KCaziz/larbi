@@ -1,0 +1,97 @@
+/* « Premiers pas » (P8-23). */
+.steps-list {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.steps-item {
+  display: grid;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+/* The next step: a thicker side bar AND the word « À faire maintenant ». */
+.steps-next {
+  border-inline-start: 4px solid var(--accent);
+}
+.steps-done {
+  background: var(--bg-alt);
+}
+.steps-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.steps-head h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.05rem;
+}
+.steps-mark {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.steps-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+.steps-form {
+  display: grid;
+  gap: var(--space-sm);
+  max-inline-size: 460px;
+}
+.steps-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+.steps-skip {
+  justify-self: start;
+  min-block-size: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+}
+.steps-value {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-h);
+}
+.steps-plan {
+  display: grid;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: var(--bg-alt);
+  border-radius: var(--radius);
+}
+.steps-plan h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.steps-plan ul {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+  padding-inline-start: 1.2rem;
+}
+
+.steps-own-page {
+  display: inline-block;
+  margin-block: var(--space-xs);
+  font-size: 0.85rem;
+}

@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Archive, ArchiveRestore, ArrowLeftRight, ChevronRight, Pencil, Plus, TriangleAlert, Wallet } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
+import AccountsBalanceChart from './AccountsBalanceChart.jsx';
 import { formatAmount } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
@@ -118,6 +119,7 @@ export default function AccountsPage() {
         ) : (
           <>
             <AccountList accounts={assets} types={types} run={run} />
+            <AccountsBalanceChart accounts={assets} />
             {liabilities.length > 0 && (
               <section aria-labelledby="accounts-liabilities-title">
                 <h2 id="accounts-liabilities-title" className="accounts-section-title">

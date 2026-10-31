@@ -1,0 +1,99 @@
+/* The quick-add sheet (P8-24): a bottom sheet over the page, on a phone. */
+.quick-add-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(10, 25, 41, 0.45);
+}
+.quick-add-sheet {
+  inline-size: 100%;
+  max-block-size: 92vh;
+  overflow-y: auto;
+  padding: var(--space-md);
+  background: var(--surface);
+  color: var(--text);
+  border-start-start-radius: 16px;
+  border-start-end-radius: 16px;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25);
+  animation: quick-add-up 0.22s ease-out;
+}
+.quick-add-sheet:focus {
+  outline: none;
+}
+.quick-add-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-block-end: var(--space-sm);
+}
+.quick-add-head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+.quick-add-close {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text);
+  cursor: pointer;
+}
+.quick-add-full {
+  display: inline-block;
+  margin-block-start: var(--space-sm);
+  font-size: 0.9rem;
+}
+.quick-add-notice {
+  position: fixed;
+  inset-inline: var(--space-md);
+  inset-block-end: 76px;
+  z-index: 61;
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--green);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+@keyframes quick-add-up {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quick-add-sheet {
+    animation: none;
+  }
+}
+/* A sheet is for a phone: from 768 px the buttons navigate to the page, and a
+   sheet that somehow stayed open would only be a wide dialog. */
+@media (min-width: 768px) {
+  .quick-add-backdrop {
+    align-items: center;
+    justify-content: center;
+  }
+  .quick-add-sheet {
+    inline-size: min(640px, 92vw);
+    border-radius: 16px;
+  }
+}
+
+/* The form carries its own heading; the sheet already has one (its dialog label). */
+.quick-add-sheet .money-entry {
+  border: 0;
+  padding: 0;
+}
+.quick-add-sheet .money-entry > h2 {
+  display: none;
+}

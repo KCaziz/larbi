@@ -1,6 +1,6 @@
 import { prisma } from '../config/prisma.js';
 import { EXPLORER_BLOCKED } from '../constants/finSearch.js';
-import { searchGoals, searchMyData } from '../services/finSearch.service.js';
+import { searchFormations, searchGoals, searchMyData } from '../services/finSearch.service.js';
 
 // Global search (P6-20), screen C22. Session required: every result here is
 // this account's own private financial data, strictly cloistered by owner —
@@ -9,10 +9,11 @@ import { searchGoals, searchMyData } from '../services/finSearch.service.js';
 
 export async function getSearch(req, res) {
   const query = req.query.q ?? '';
-  const [mesDonnees, objectifs] = await Promise.all([searchMyData(prisma, req.user.id, query), searchGoals(prisma, req.user.id, query)]);
+  const [mesDonnees, objectifs, formations] = await Promise.all([searchMyData(prisma, req.user.id, query), searchGoals(prisma, req.user.id, query), searchFormations(prisma, query)]);
   res.json({
     mesDonnees,
     objectifs,
+    formations,
     // Said out loud: the comparateur bancaire and the job offers exist, but
     // are not merged into this search yet (constants/finSearch.js).
     explorer: EXPLORER_BLOCKED,

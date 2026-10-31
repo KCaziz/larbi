@@ -28,6 +28,9 @@ import { businessFormulaById } from '../../constants/finBusiness.js';
 // PB-F027, P8-01 point 1) : un troisième catalogue, celui du dernier classeur
 // du client, gardé à part pour la même raison.
 import { budgetFormulaById } from '../../constants/finBudgetFormulas.js';
+// Les formules de la gestion commune (COL-F, ALG-C, P9-11) : un quatrième
+// catalogue, celui du classeur collectif.
+import { collectiveAlgorithmById, collectiveFormulaById } from '../../constants/finCollectiveFormulas.js';
 
 // `unite` as the client wants it: a money result carries the currency actually
 // used, a rate says it is a decimal to be shown as a percentage.
@@ -57,8 +60,8 @@ function resolveUnit(unit, currency) {
  * can say WHY instead of showing a zero.
  */
 export function computed(id, result, { inputs = {}, currency, hypotheses = null, warnings = [], sources = null, now = new Date() } = {}) {
-  const formula = formulaById(id) ?? budgetFormulaById(id) ?? businessFormulaById(id);
-  const algorithm = formula ? null : algorithmById(id);
+  const formula = formulaById(id) ?? budgetFormulaById(id) ?? businessFormulaById(id) ?? collectiveFormulaById(id);
+  const algorithm = formula ? null : (algorithmById(id) ?? collectiveAlgorithmById(id));
   if (!formula && !algorithm) throw new Error(`Unknown formula or algorithm: ${id}`);
 
   const messages = [...warnings];

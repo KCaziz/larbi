@@ -22,7 +22,7 @@ export const NOTIFICATION_PRIORITIES = ACTION_PRIORITIES;
 // 2026-10-28): budgets, revenus, échéances, dettes, objectifs, formation,
 // sécurité. A family is a group of types; turning a family off turns off its
 // types. Account alerts belong to « budgets » (budgets et comptes).
-export const NOTIFICATION_FAMILIES = ['budgets', 'revenus', 'echeances', 'dettes', 'objectifs', 'formation', 'securite'];
+export const NOTIFICATION_FAMILIES = ['budgets', 'revenus', 'echeances', 'dettes', 'objectifs', 'formation', 'securite', 'collectif'];
 
 export const NOTIFICATION_TYPES = [
   // AL-P04 / AL-P05 (P6-05): an envelope crosses 80 % or 100 %.
@@ -52,6 +52,15 @@ export const NOTIFICATION_TYPES = [
   { key: 'emergency_fund', family: 'objectifs', alert: 'AL-P09', category: 'action', priority: 'securite', requiresOptIn: false, defaultEnabled: true },
   // AL-P12: a course started and left for a week.
   { key: 'learning_to_continue', family: 'formation', alert: 'AL-P12', category: 'information', priority: 'apprentissage', requiresOptIn: false, defaultEnabled: true },
+  // Gestion commune (P9-09, tab 14 of the collective workbook).
+  { key: 'space_member', family: 'collectif', alert: null, category: 'information', priority: 'apprentissage', requiresOptIn: false, defaultEnabled: true },
+  { key: 'space_expense', family: 'collectif', alert: null, category: 'information', priority: 'apprentissage', requiresOptIn: false, defaultEnabled: true },
+  { key: 'space_budget', family: 'collectif', alert: null, category: 'action', priority: 'budget', requiresOptIn: false, defaultEnabled: true },
+  { key: 'space_settlement', family: 'collectif', alert: null, category: 'action', priority: 'budget', requiresOptIn: false, defaultEnabled: true },
+  { key: 'space_bill', family: 'collectif', alert: null, category: 'action', priority: 'echeance', requiresOptIn: false, defaultEnabled: true },
+  { key: 'space_task', family: 'collectif', alert: null, category: 'action', priority: 'echeance', requiresOptIn: false, defaultEnabled: true },
+  { key: 'space_contribution', family: 'collectif', alert: null, category: 'action', priority: 'echeance', requiresOptIn: false, defaultEnabled: true },
+  { key: 'space_permission', family: 'collectif', alert: null, category: 'information', priority: 'apprentissage', requiresOptIn: false, defaultEnabled: true },
   // P6-13: another member of a shared space changed what they share.
   { key: 'sharing_changed', family: 'securite', alert: null, category: 'information', priority: 'apprentissage', requiresOptIn: false, defaultEnabled: true },
 ];

@@ -149,3 +149,84 @@
   font-weight: 600;
   text-transform: capitalize;
 }
+
+/* G-10: the monthly cascade. The sign and the amount are always written. */
+.synthesis-cascade {
+  display: grid;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.synthesis-cascade h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+.synthesis-cascade ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.synthesis-cascade li {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.9rem;
+}
+.synthesis-cascade-bar {
+  display: block;
+  block-size: 10px;
+  background: var(--bg-alt);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.synthesis-cascade-bar span {
+  display: block;
+  block-size: 100%;
+}
+.synthesis-cascade-bar .in {
+  background: var(--green);
+}
+.synthesis-cascade-bar .out {
+  background: var(--clay);
+}
+.synthesis-reduction {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.synthesis-reduction input {
+  inline-size: 5rem;
+  min-block-size: 40px;
+  padding-inline: var(--space-xs);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+/* P8-24: keeping a report as it was. */
+.synthesis-kept {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 0.85rem;
+}
+.synthesis-kept button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-block-size: 32px;
+  padding-inline: var(--space-sm);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--text);
+  cursor: pointer;
+}

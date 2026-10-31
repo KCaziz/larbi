@@ -284,3 +284,61 @@
 .home-suggestion a:focus-visible {
   border-color: var(--accent-border);
 }
+
+/* P8-24: the declared resources, salary first. */
+.home-resources-list {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0 0 var(--space-xs);
+  padding: 0;
+  list-style: none;
+}
+.home-resources-list li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+.home-resources-tag {
+  margin-inline-start: var(--space-xs);
+  padding: 1px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+/* G-03: the net flow follows the scroll as a slim bar once the ring is behind. */
+/* The anchor has no height, so the bar appearing never moves the page under the
+   reader's thumb. */
+.home-miniflow-anchor {
+  position: sticky;
+  inset-block-start: var(--app-topbar, 56px);
+  block-size: 0;
+  z-index: 20;
+}
+.home-miniflow {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 6px var(--space-md);
+  background: var(--surface);
+  border-block-end: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.home-miniflow-svg {
+  direction: ltr;
+  inline-size: 120px;
+  block-size: 28px;
+  overflow: visible;
+}
+.home-miniflow {
+  white-space: nowrap;
+}
+@media (max-width: 767px) {
+  .home-miniflow-svg {
+    inline-size: 72px;
+  }
+}

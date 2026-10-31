@@ -1,14 +1,14 @@
 # Matrice des livrables et recette
 
-> Généré le 2026-10-29 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
+> Généré le 2026-10-31 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
 
 Livrable de l'**annexe 2** du contrat, dont le tableau est fourni vide (livrable / prévu / livré / test / réserve).
 
 La colonne « Test / résultat » renvoie à la suite automatisée : `npm test` dans `server/`. La colonne « Réserve » reprend ce que le plan déclare bloqué, sans l'adoucir — l'article 7 distingue les anomalies bloquantes, majeures et mineures, et une donnée que le client doit fournir n'est aucune des trois : c'est une réserve.
 
-**105 livrables sur 138** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
+**120 livrables sur 139** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
 
-Suite de tests : 151 fichiers (consistency : 3, e2e : 32, functional : 47, security : 38, unit : 31).
+Suite de tests : 171 fichiers (consistency : 3, e2e : 36, functional : 61, security : 39, unit : 32).
 
 | Livrable | Prévu | Livré | Test / résultat | Réserve / correction |
 | --- | --- | --- | --- | --- |
@@ -45,6 +45,7 @@ Suite de tests : 151 fichiers (consistency : 3, e2e : 32, functional : 47, secur
 | `P3-08` — Paiement : décisions à préciser (recherches à mener par le client) | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P3-09` — Paiement : socle indépendant du fournisseur | Oui | Oui | Suite automatisée verte |  |
 | `P3-10` — Paiement : branchement du fournisseur choisi | Oui | Non | — | Non commencé |
+| `P9-14` — Dépenses partagées : sous-catégorie et justificatif | Oui | Non | — | Non commencé |
 | `P3-11` — CMS pédagogique, lot A : structure d'une formation | Oui | Oui | Suite automatisée verte |  |
 | `P3-12` — CMS pédagogique, lot B : blocs de contenu et éditeur avancé | Oui | Oui | Suite automatisée verte |  |
 | `P3-13` — CMS pédagogique, lot C : quiz | Oui | Oui | Suite automatisée verte |  |
@@ -123,13 +124,13 @@ Suite de tests : 151 fichiers (consistency : 3, e2e : 32, functional : 47, secur
 | `P8-14` — Patrimoine réel et portefeuille fictif | Oui | Oui | Suite automatisée verte |  |
 | `P8-15` — Outils : un seul catalogue | Oui | Oui | Suite automatisée verte |  |
 | `P8-16` — Santé financière : une page à part entière | Oui | Oui | Suite automatisée verte |  |
-| `P8-17` — Formation, progression et certificats : la seule couche qui varie selon le profil | Oui | En cours | — |  |
+| `P8-17` — Formation, progression et certificats : la seule couche qui varie selon le profil | Oui | Oui | Suite automatisée verte |  |
 | `P8-18` — Alertes et états du moteur personnel | Oui | Oui | Suite automatisée verte |  |
-| `P8-19` — Recherche et assistant adaptés au moteur unique | Oui | Non | — | Non commencé |
-| `P8-20` — Paramètres : données et confiance | Oui | Non | — | Non commencé |
+| `P8-19` — Recherche et assistant adaptés au moteur unique | Oui | Oui | Suite automatisée verte |  |
+| `P8-20` — Paramètres : données et confiance | Oui | Oui | Suite automatisée verte |  |
 | `P8-21` — Contrôles du client et règle « trouvable » | Oui | Oui | Suite automatisée verte |  |
-| `P8-23` — Premiers pas : le parcours de premier démarrage (P0 à P7) | Oui | Non | — | Non commencé |
-| `P8-24` — Reliquats des écrans livrés le 2026-10-27 | Oui | Non | — | Non commencé |
+| `P8-23` — Premiers pas : le parcours de premier démarrage (P0 à P7) | Oui | Oui | Suite automatisée verte |  |
+| `P8-24` — Reliquats des écrans livrés le 2026-10-27 | Oui | En cours | — |  |
 | `P8-25` — Une adresse propre pour chaque écran regroupé | Oui | Oui | Suite automatisée verte |  |
 | `P8-26` — Réponses du client du 2026-10-28 : corriger ce qui est déjà livré | Oui | Oui | Suite automatisée verte |  |
 | `P8-27` — Retours du client du 2026-10-28 : couleurs des catégories et des flux, et les 3 suggestions | Oui | Oui | Suite automatisée verte |  |
@@ -138,18 +139,18 @@ Suite de tests : 151 fichiers (consistency : 3, e2e : 32, functional : 47, secur
 | `P8-30` — Fiche de paie : import d’un document | Oui | Non | — | Non commencé |
 | `P8-22` — Moteur budgétaire unique : validation de fin de phase | Oui | Non | — | Non commencé |
 | `P9-01` — Gestion commune : décisions de cadrage | Oui | Oui | Suite automatisée verte |  |
-| `P9-02` — Gestion commune : une solution à part, une adresse par espace, un tableau de bord d'espace | Oui | Non | — | Non commencé |
-| `P9-03` — Espace « groupe / amis » et espace temporaire | Oui | Non | — | Non commencé |
-| `P9-04` — Dépenses partagées : champs et règles manquants | Oui | Non | — | Non commencé |
-| `P9-05` — Budgets communs par catégorie | Oui | Non | — | Non commencé |
-| `P9-06` — Gestion des tâches | Oui | Non | — | Non commencé |
-| `P9-07` — Calendrier collectif unifié | Oui | Non | — | Non commencé |
-| `P9-08` — Lien sans doublon vers le budget personnel | Oui | Non | — | Non commencé |
-| `P9-09` — Alertes, activité récente et contribution requise | Oui | Non | — | Non commencé |
-| `P9-10` — Rapports et export d'un espace | Oui | Non | — | Non commencé |
-| `P9-11` — Formules collectives : un moteur collectif, sans doublon | Oui | Non | — | Non commencé |
-| `P9-12` — Contrôles du client et règle « trouvable » | Oui | Non | — | Non commencé |
-| `P9-13` — Gestion commune : validation de fin de phase | Oui | Non | — | Non commencé |
+| `P9-02` — Gestion commune : une solution à part, une adresse par espace, un tableau de bord d'espace | Oui | Oui | Suite automatisée verte |  |
+| `P9-03` — Espace « groupe / amis » et espace temporaire | Oui | Oui | Suite automatisée verte |  |
+| `P9-04` — Dépenses partagées : champs et règles manquants | Oui | Oui | Suite automatisée verte |  |
+| `P9-05` — Budgets communs par catégorie | Oui | Oui | Suite automatisée verte |  |
+| `P9-06` — Gestion des tâches | Oui | Oui | Suite automatisée verte |  |
+| `P9-07` — Calendrier collectif unifié | Oui | Oui | Suite automatisée verte |  |
+| `P9-08` — Lien sans doublon vers le budget personnel | Oui | Oui | Suite automatisée verte |  |
+| `P9-09` — Alertes, activité récente et contribution requise | Oui | Oui | Suite automatisée verte |  |
+| `P9-10` — Rapports et export d'un espace | Oui | Oui | Suite automatisée verte |  |
+| `P9-11` — Formules collectives : un moteur collectif, sans doublon | Oui | Oui | Suite automatisée verte |  |
+| `P9-12` — Contrôles du client et règle « trouvable » | Oui | Oui | Suite automatisée verte |  |
+| `P9-13` — Gestion commune : validation de fin de phase | Oui | En cours | — |  |
 
 ## Réserves, en clair
 

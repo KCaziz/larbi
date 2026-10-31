@@ -1,16 +1,16 @@
 # Matrice des écrans de la gestion budgétaire
 
-> Généré le 2026-10-29 par `node server/scripts/generate-deliverables.js` depuis `server/src/constants/finAppScreens.js`. Ne pas modifier à la main.
+> Généré le 2026-10-31 par `node server/scripts/generate-deliverables.js` depuis `server/src/constants/finAppScreens.js`. Ne pas modifier à la main.
 
 Les 44 écrans du cahier consolidé (onglet `05_Ecrans_Detailles`) et la façon dont chacun est servi. La règle « trouvable » (TASKS.md, section 6) veut que chaque écran ait **sa propre adresse**, atteinte depuis le menu en deux clics au plus : un écran regroupé dans une autre page n'est donc pas terminé, et la tâche qui le doit est nommée.
 
-**39 écrans sur 44** ont leur propre page ; 3 sont regroupés dans une autre ; 2 vivent dans la barre supérieure ; 0 ne sont pas encore servis.
+**41 écrans sur 44** ont leur propre page ; 1 sont regroupés dans une autre ; 2 vivent dans la barre supérieure ; 0 ne sont pas encore servis.
 
 | Code | Écran | Menu du client | Servi | Adresse | Premier clic | Tâche |
 |---|---|---|---|---|---|---|
 | AUTH-01 | Connexion / création de compte | Entrée | Sa propre page | `/connexion` | — | — |
-| ONB-01 | Profil éducatif | Premier démarrage | Regroupé dans une autre page | `/app/parametres/premiers-pas` | `/app/parametres/premiers-pas` | `P8-23` |
-| ONB-02 | Premier revenu | Premier démarrage | Regroupé dans une autre page | `/app/parametres/premiers-pas` | `/app/parametres/premiers-pas` | `P8-23` |
+| ONB-01 | Profil éducatif | Premier démarrage | Sa propre page | `/app/parametres/premiers-pas/profil` | `/app/parametres/premiers-pas` | — |
+| ONB-02 | Premier revenu | Premier démarrage | Sa propre page | `/app/parametres/premiers-pas/premier-revenu` | `/app/parametres/premiers-pas` | — |
 | ACC-01 | Accueil | Accueil | Sa propre page | `/app` | `/app` | — |
 | ACC-02 | Ajouter rapidement | Accueil | Regroupé dans une autre page | `/app/mouvements` | `/app` | `P8-24` |
 | COM-01 | Mes comptes | Mes comptes | Sa propre page | `/app/comptes` | `/app/comptes` | — |

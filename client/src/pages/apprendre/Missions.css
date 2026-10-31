@@ -1,0 +1,83 @@
+/* Pedagogical missions (P8-17). */
+.missions-list {
+  display: grid;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+  padding: 0;
+  list-style: none;
+}
+.missions-list li {
+  display: grid;
+  gap: 4px;
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.missions-list a {
+  display: grid;
+  gap: 2px;
+  color: var(--text-h);
+  text-decoration: none;
+}
+.missions-list a span {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.missions-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 0.85rem;
+}
+.missions-badge,
+.mission-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.mission-form,
+.mission-result {
+  display: grid;
+  gap: var(--space-md);
+}
+.mission-step {
+  display: grid;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.mission-step legend {
+  padding-inline: var(--space-xs);
+  font-weight: 700;
+}
+.mission-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-block-size: 44px;
+}
+.mission-totals {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mission-totals li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+.mission-trace {
+  display: grid;
+  gap: var(--space-sm);
+  padding-inline-start: 1.2em;
+}
+.mission-effects {
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}

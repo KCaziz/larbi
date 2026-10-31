@@ -4,7 +4,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { ChevronLeft, Lightbulb, Pencil, PiggyBank, Plus, Scale, Trash2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
-import { formatAmount, formatDate } from '../../lib/format.js';
+import { formatAmount, formatDate, formatRatio } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
@@ -16,6 +16,7 @@ import CategoryChip from '../../components/fincludia/CategoryChip.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import BudgetMeter from '../../components/fincludia/BudgetMeter.jsx';
 import BudgetDistribution from '../../components/fincludia/BudgetDistribution.jsx';
+import GroupedBars from '../../components/fincludia/charts/GroupedBars.jsx';
 import { toMinorUnits } from '../../lib/money.js';
 import '../../components/fincludia/Fincludia.css';
 import './Budget.css';
@@ -176,6 +177,15 @@ export default function BudgetDetailPage() {
           </div>
 
           {vue.enveloppes.length > 0 && <BudgetDistribution envelopes={vue.enveloppes} />}
+          {/* G-04: planned and real side by side, per envelope. */}
+          {vue.enveloppes.length > 0 && (
+            <GroupedBars
+              rows={vue.enveloppes.map((line) => ({ key: line.id, label: envelopeCategory(line, flatCategories)?.label ?? line.label ?? t('budget.noCategory'), a: line.prevu, b: line.reel }))}
+              names={{ a: t('budget.planned'), b: t('budget.real') }}
+              currency={currency}
+              caption={t('budget.plannedVsRealChart')}
+            />
+          )}
 
           {showProposal && <Proposal budgetId={id} currency={currency} usedCategoryIds={usedCategoryIds} categories={flatCategories} run={run} />}
 
@@ -251,6 +261,15 @@ export function MethodPanel({ budgetId, budget, references, run }) {
                 <FigureCard key={pocket.cle} label={t(`budget.methods.pockets.${pocket.cle}`, { target: Math.round(pocket.cible * 100) })} answer={pocket.part ?? pocket.ecart} />
               ))}
             </div>
+          )}
+          {/* G-09: the share really spent against the method's target. Side by side, never a verdict. */}
+          {analysis.data.poches && (
+            <GroupedBars
+              rows={analysis.data.poches.map((pocket) => ({ key: pocket.cle, label: t(`budget.methods.pocketNames.${pocket.cle}`), a: pocket.part?.resultat ?? pocket.partBrute ?? null, b: pocket.cible }))}
+              names={{ a: t('charts.actual'), b: t('charts.target') }}
+              format={(value) => formatRatio(i18n.language, value, { digits: 0 })}
+              caption={t('budget.methods.chartCaption')}
+            />
           )}
           {analysis.data.resteAAllouer && <FigureCard label={t('budget.remainingToAllocate')} answer={analysis.data.resteAAllouer} />}
           {analysis.data.budgetsRespectes && <FigureCard label={t('budget.methods.respected')} answer={analysis.data.budgetsRespectes} />}

@@ -119,6 +119,23 @@ function NotificationText({ t, language, notification: n }) {
       return t('notifications.messages.goalMilestone', { label: n.params.label, percent: Math.round(Number(n.params.niveau ?? 0) * 100) });
     case 'sharing_changed':
       return t('notifications.messages.sharingChanged', { kinds: (n.params.kinds ?? []).map((kind) => t(`spaces.dataKinds.${kind}`)).join(', ') });
+    // Gestion commune (P9-09).
+    case 'space_member':
+      return t(`notifications.messages.spaceMember.${n.params.event}`);
+    case 'space_expense':
+      return t('notifications.messages.spaceExpense', { label: n.params.label });
+    case 'space_budget':
+      return t(`notifications.messages.spaceBudget.${n.params.niveau}`);
+    case 'space_settlement':
+      return t('notifications.messages.spaceSettlement');
+    case 'space_bill':
+      return t('notifications.messages.spaceBill', { label: n.params.label, count: n.params.days, date: formatDate(language, n.params.date) });
+    case 'space_task':
+      return t(`notifications.messages.spaceTask.${n.params.niveau}`, { label: n.params.label, date: formatDate(language, n.params.date) });
+    case 'space_contribution':
+      return t('notifications.messages.spaceContribution', { date: formatDate(language, n.params.date) });
+    case 'space_permission':
+      return t(`notifications.messages.spacePermission.${n.params.role}`);
     case 'reminder_upcoming':
       return t(`notifications.messages.reminder.${n.params.kind}`, { label: n.params.label ?? '', date: formatDate(language, n.params.date) });
     // P8-18: the client's alerts AL-P01 to AL-P12.

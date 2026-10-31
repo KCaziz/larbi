@@ -42,3 +42,13 @@ describe('P8-14 — the patrimony reads the accounts', () => {
     assert.equal(view.totalDettes, null);
   });
 });
+
+describe('P8-24 — the net worth history reads the accounts', () => {
+  test('an account opened this month contributes from this month, not before', async () => {
+    await t.request('POST', '/fin/comptes', { user, json: { label: 'Courant', type: 'AC-02', currency: 'DZD', openingBalance: 5000000, openingDate: ago(2) } });
+    const points = (await t.request('GET', '/fin/patrimoine/historique', { user })).body.points;
+    assert.equal(points.length, 12);
+    assert.equal(points.at(-1).net, 5000000);
+    assert.equal(points[0].net, 0, 'the account did not exist a year ago');
+  });
+});

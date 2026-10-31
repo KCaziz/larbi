@@ -141,3 +141,30 @@
   color: var(--text);
   font: inherit;
 }
+
+/* P8-20: the connected devices. */
+.trust-devices {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.trust-devices li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.trust-tag {
+  padding-inline: 6px;
+  background: var(--accent-bg);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}

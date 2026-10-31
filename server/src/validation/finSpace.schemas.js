@@ -27,6 +27,8 @@ export const updateSpaceSchema = z
   .object({
     label: label.optional(),
     splitRule: z.enum(SPLIT_RULES).optional(),
+    // « Petit solde » (P9-04): below it a debt is not proposed as a repayment.
+    smallBalance: z.number().int().min(0).max(100000000).optional(),
     note,
     reason: reasonSchema.optional(),
   })

@@ -172,6 +172,9 @@ import {
   updateIntent,
   updateStep,
 } from '../controllers/admin/finAssistant.controller.js';
+import { createMission, deleteMission, listMissionsAdmin, setMissionStatus, updateMission } from '../services/finMission.service.js';
+import { createMissionSchema, updateMissionSchema } from '../validation/finMissions.schemas.js';
+import { prisma as missionPrisma } from '../config/prisma.js';
 import { createFlowSchema, createStepSchema, updateIntentSchema, updateStepSchema } from '../validation/finAssistant.schemas.js';
 import { bankSchema, conditionsQuerySchema, createConditionSchema, updateConditionSchema } from '../validation/comparator.schemas.js';
 
@@ -333,6 +336,14 @@ router.put('/glossary/guides/order', validateBody(reorderGuidesSchema), asyncRou
 router.post('/glossary/guides/:id/publish', asyncRoute(publishGuide));
 router.post('/glossary/guides/:id/unpublish', asyncRoute(unpublishGuide));
 router.delete('/glossary/guides/:id', asyncRoute(deleteGuide));
+
+// Pedagogical missions (P8-17): entered by an administrator from the client's contents.
+router.get('/fin-missions', asyncRoute(async (req, res) => res.json({ missions: await listMissionsAdmin(missionPrisma) })));
+router.post('/fin-missions', validateBody(createMissionSchema), asyncRoute(async (req, res) => res.status(201).json({ mission: await createMission(missionPrisma, req.body) })));
+router.patch('/fin-missions/:id', validateBody(updateMissionSchema), asyncRoute(async (req, res) => res.json({ mission: await updateMission(missionPrisma, req.params.id, req.body) })));
+router.post('/fin-missions/:id/publish', asyncRoute(async (req, res) => res.json({ mission: await setMissionStatus(missionPrisma, req.params.id, 'published') })));
+router.post('/fin-missions/:id/unpublish', asyncRoute(async (req, res) => res.json({ mission: await setMissionStatus(missionPrisma, req.params.id, 'draft') })));
+router.delete('/fin-missions/:id', asyncRoute(async (req, res) => res.json(await deleteMission(missionPrisma, req.params.id))));
 
 // FINCLUDIA deterministic assistant (P3-19).
 router.get('/fin-assistant/intents', asyncRoute(listIntents));

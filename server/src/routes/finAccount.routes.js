@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { getAccountHistory, getAccounts, patchAccount, postAccount, postTransfer, putAccountArchived, removeTransfer } from '../controllers/finAccount.controller.js';
 import { getHome } from '../controllers/finHome.controller.js';
-import { exportReport, getReport } from '../controllers/finReport.controller.js';
-import { reportExportQuerySchema, reportQuerySchema } from '../validation/finAccount.schemas.js';
+import { exportReport, getComparison, getReport } from '../controllers/finReport.controller.js';
+import { reportCompareQuerySchema, reportExportQuerySchema, reportQuerySchema } from '../validation/finAccount.schemas.js';
 import { requireAuth } from '../middleware/auth.js';
 import { synthesisQuerySchema } from '../validation/finMoney.schemas.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
@@ -27,6 +27,7 @@ router.param('transferId', uuidParam);
 router.get('/accueil', validateQuery(synthesisQuerySchema), asyncRoute(getHome));
 // The Synthèse and its monthly report (P8-10).
 router.get('/rapport', validateQuery(reportQuerySchema), asyncRoute(getReport));
+router.get('/rapport/comparaison', validateQuery(reportCompareQuerySchema), asyncRoute(getComparison));
 router.get('/rapport/export', validateQuery(reportExportQuerySchema), asyncRoute(exportReport));
 router.get('/comptes', validateQuery(accountsQuerySchema), asyncRoute(getAccounts));
 router.post('/comptes', validateBody(createAccountSchema), asyncRoute(postAccount));

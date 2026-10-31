@@ -16,8 +16,8 @@
 //   owner   the open task that owes what is missing, when it is not a page
 export const APP_SCREENS = [
   { code: 'AUTH-01', label: 'Connexion / création de compte', menu: 'Entrée', served: 'page', to: '/connexion', via: null },
-  { code: 'ONB-01', label: 'Profil éducatif', menu: 'Premier démarrage', served: 'grouped', to: '/app/parametres/premiers-pas', via: '/app/parametres/premiers-pas', owner: 'P8-23' },
-  { code: 'ONB-02', label: 'Premier revenu', menu: 'Premier démarrage', served: 'grouped', to: '/app/parametres/premiers-pas', via: '/app/parametres/premiers-pas', owner: 'P8-23' },
+  { code: 'ONB-01', label: 'Profil éducatif', menu: 'Premier démarrage', served: 'page', to: '/app/parametres/premiers-pas/profil', via: '/app/parametres/premiers-pas' },
+  { code: 'ONB-02', label: 'Premier revenu', menu: 'Premier démarrage', served: 'page', to: '/app/parametres/premiers-pas/premier-revenu', via: '/app/parametres/premiers-pas' },
   { code: 'ACC-01', label: 'Accueil', menu: 'Accueil', served: 'page', to: '/app', via: '/app' },
   { code: 'ACC-02', label: 'Ajouter rapidement', menu: 'Accueil', served: 'grouped', to: '/app/mouvements', via: '/app', owner: 'P8-24' },
   { code: 'COM-01', label: 'Mes comptes', menu: 'Mes comptes', served: 'page', to: '/app/comptes', via: '/app/comptes' },

@@ -560,8 +560,11 @@ async function carryFromPrevious(prisma, userId, budget) {
 // The budget whose period contains `at` — what "my budget" means on a home
 // screen. `null` when none does, which is a normal state, not an error.
 export function currentBudget(prisma, userId, at = new Date()) {
+  // A period ends on a DATE (stored at midnight): on its last day, at any hour,
+  // the budget is still the current one.
+  const today = new Date(Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), at.getUTCDate()));
   return prisma.finBudget.findFirst({
-    where: { userId, deletedAt: null, archivedAt: null, periodStart: { lte: at }, periodEnd: { gte: at } },
+    where: { userId, deletedAt: null, archivedAt: null, periodStart: { lte: at }, periodEnd: { gte: today } },
     select: BUDGET_SELECT,
     orderBy: { periodStart: 'desc' },
   });

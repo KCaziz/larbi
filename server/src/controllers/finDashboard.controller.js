@@ -31,6 +31,7 @@ import { buildReserveView } from '../services/finReserve.service.js';
 import { markedSavingsInPeriod } from '../services/finSavings.service.js';
 import { buildSynthesis, currentMonth, debtRatioIncome, loadSynthesisData } from '../services/finSynthesis.service.js';
 import { autonomy, buildDashboard, dataQuality } from '../services/finDashboard.service.js';
+import { recordHealthSnapshot } from '../services/finSnapshot.service.js';
 import { describeFormula } from '../services/finance/describe.js';
 import { monthlyAmount } from '../services/finance/formulas.js';
 
@@ -207,6 +208,10 @@ export async function getToday(req, res) {
     aFaire.alertes.length +
     (aFaire.questions.premiersPas > 0 ? 1 : 0);
   dashboard.aFaire = aFaire;
+
+  // The month's health index is KEPT as it is read (P8-24), so it has a history.
+  // A minor is shown no index, and nothing of it is kept.
+  if (!dashboard.minor && dashboard.santeFinanciere?.answer) await recordHealthSnapshot(prisma, req.user.id, period.start.toISOString().slice(0, 7), dashboard.santeFinanciere).catch(() => null);
 
   res.json({
     aujourdhui: dashboard,

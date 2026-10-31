@@ -15,6 +15,7 @@ import {
   putMemberRole,
   putMySharing,
   removeMember,
+  postCloseSpace,
   removeSpace,
 } from '../controllers/finSpace.controller.js';
 import { requireAuth } from '../middleware/auth.js';
@@ -40,6 +41,8 @@ router.post('/espaces', validateBody(createSpaceSchema), asyncRoute(postSpace));
 router.get('/espaces/:id', asyncRoute(getSpace));
 router.patch('/espaces/:id', validateBody(updateSpaceSchema), asyncRoute(patchSpace));
 router.delete('/espaces/:id', validateBody(leaveSchema), asyncRoute(removeSpace));
+// P9-03: the owner closes a temporary space; from then on it can only be read.
+router.post('/espaces/:id/cloturer', validateBody(leaveSchema), asyncRoute(postCloseSpace));
 router.get('/espaces/:id/journal', asyncRoute(getSpaceTrail));
 
 // The shared view: the only endpoint that returns another person's money, and

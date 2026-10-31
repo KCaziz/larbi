@@ -710,7 +710,8 @@
       "chatbot": "Assistant",
       "payments": "Paiements",
       "glossary": "Apprendre",
-      "finAssistant": "Assistant FINCLUDIA"
+      "finAssistant": "Assistant FINCLUDIA",
+      "missions": "Missions"
     },
     "shell": {
       "title": "Administration",
@@ -1621,7 +1622,33 @@
         "flow_step": "Étape du parcours",
         "flow_ended": "Parcours terminé",
         "not_available": "Écran indisponible"
-      }
+      },
+      "referenceTitle": "Ce que le fichier du client autorise",
+      "referenceAnswer": "Réponse autorisée :",
+      "referenceSteps": "Questions à poser :",
+      "referenceGuardrail": "Garde-fou :"
+    },
+    "missions": {
+      "title": "Missions pédagogiques",
+      "subtitle": "Les scénarios du client, saisis ici ; la règle de calcul est la même pour toutes.",
+      "create": "Nouvelle mission",
+      "json": "La mission (JSON)",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "rule": "Règle (non modifiable) : l’argent final est la somme de départ plus l’effet de chaque choix ; l’épargne et la résilience sont les sommes de leurs effets ; le badge est le plus haut dont le seuil est atteint. Montants en centimes de la somme fictive.",
+      "none": "Aucune mission saisie.",
+      "counts": "{{steps}} étape(s) · profils : {{profiles}}",
+      "everybody": "tous",
+      "edit": "Modifier",
+      "publish": "Publier",
+      "unpublish": "Dépublier",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer la mission « {{title}} » ?",
+      "saved": "Mission enregistrée.",
+      "published": "Mission publiée.",
+      "unpublished": "Mission repassée en brouillon.",
+      "deleted": "Mission supprimée.",
+      "notJson": "Ce texte n’est pas du JSON valide."
     }
   },
   "learn": {
@@ -3113,13 +3140,17 @@
         "savings": "Épargne",
         "unclassified": "À classer",
         "byEssential": "Selon « essentielle »"
-      }
+      },
+      "chartCaption": "Part réellement dépensée face à la cible de la méthode"
     },
     "editTitle": "Modifier le budget",
     "notFound": "Ce budget n’existe pas, ou il n’est pas le vôtre.",
     "backToBudget": "Retour au budget",
     "created": "Budget créé : ajoutez-lui ses enveloppes.",
-    "edit": "Modifier"
+    "edit": "Modifier",
+    "plannedVsRealChart": "Prévu et réel, par enveloppe",
+    "planned": "Prévu",
+    "real": "Réel"
   },
   "goals": {
     "title": "Objectifs",
@@ -3251,7 +3282,24 @@
       "noAccount": "Créez d’abord un compte dans « Mes comptes »."
     },
     "backToList": "Retour à mes dettes",
-    "created": "Dette enregistrée."
+    "created": "Dette enregistrée.",
+    "byType": {
+      "owed": "Mes dettes, par type",
+      "lent": "Ce qu’on me doit, par type"
+    },
+    "types": {
+      "D-01": "J’ai prêté",
+      "D-02": "On m’a prêté (dette simple)",
+      "D-03": "Emprunt bancaire",
+      "D-04": "Carte de crédit / débit différé",
+      "D-05": "Découvert",
+      "other": "Autre ou non précisé"
+    },
+    "budgetCategory": "Catégorie au budget",
+    "planInBudget": "Prévoir la mensualité au budget",
+    "updateInBudget": "Mettre la mensualité à jour au budget",
+    "inBudget": "La mensualité est prévue au budget en cours ; la remettre à jour garde la même enveloppe.",
+    "plannedInBudget": "Mensualité prévue au budget."
   },
   "reserve": {
     "title": "Réserve de sécurité",
@@ -3267,7 +3315,9 @@
     "targetSaved": "Cible enregistrée.",
     "errors": {
       "refused": "Cette valeur n’est pas valide."
-    }
+    },
+    "monthsUnit": "mois",
+    "gaugeCaption": "Mois couverts par la réserve, face à la cible"
   },
   "calendar": {
     "title": "Calendrier financier",
@@ -3674,7 +3724,8 @@
     "kinds": {
       "flatshare": "Colocation",
       "couple": "Couple",
-      "household": "Foyer"
+      "household": "Foyer",
+      "group": "Groupe / amis"
     },
     "roles": {
       "owner": "propriétaire",
@@ -3732,7 +3783,8 @@
     "errors": {
       "label": "Donnez un nom à cet espace.",
       "role": "Votre rôle dans cet espace ne permet pas cette action.",
-      "refused": "Cette opération a été refusée."
+      "refused": "Cette opération a été refusée.",
+      "closed": "Cet espace est clôturé : il ne peut plus que se lire."
     },
     "shared": {
       "title": "Dépenses partagées",
@@ -3753,7 +3805,9 @@
         "equal": "Parts égales",
         "percent": "En pourcentage",
         "amounts": "En montants",
-        "income_proportional": "Proportionnel aux revenus (avec consentement)"
+        "income_proportional": "Proportionnel aux revenus (avec consentement)",
+        "weighted": "Par poids",
+        "usage": "Par usage"
       },
       "fields": {
         "label": "Libellé",
@@ -3763,7 +3817,15 @@
         "splitMode": "Répartition",
         "participants": "Participants",
         "from": "De",
-        "to": "Vers"
+        "to": "Vers",
+        "weight": "Poids",
+        "usageUnit": "Unité d’usage (kWh, nuits…)",
+        "planned": "Dépense prévue (pas encore payée)",
+        "category": "Catégorie",
+        "noCategory": "Sans catégorie",
+        "personalAccount": "Payé avec mon argent personnel (facultatif)",
+        "noPersonalAccount": "Non, ou je l’ai déjà saisi ailleurs",
+        "personalAccountHelp": "Une seule dépense personnelle est créée sur ce compte. Les autres membres ne voient ni le lien ni le compte."
       },
       "errors": {
         "refused": "Cette action a été refusée. Vérifiez les informations saisies.",
@@ -3774,7 +3836,18 @@
       "noRecurrence": "Aucune récurrence détectée pour le moment.",
       "occurrences_one": "{{count}} occurrence",
       "occurrences_other": "{{count}} occurrences",
-      "confirmRecurrence": "Confirmer pour cette période"
+      "confirmRecurrence": "Confirmer pour cette période",
+      "lifecycle": {
+        "planned": "Prévue",
+        "cancelled": "Annulée"
+      },
+      "cancel": "Annuler cette dépense",
+      "cancelConfirm": "Annuler cette dépense ? Les soldes sont recalculés et la trace est gardée.",
+      "cancelled": "Dépense annulée.",
+      "confirm": "Confirmer la dépense",
+      "confirmed": "Dépense confirmée.",
+      "hiddenSmall_one": "Un petit solde sous {{threshold}} n’est pas proposé en remboursement ; il reste dans les soldes.",
+      "hiddenSmall_other": "{{count}} petits soldes sous {{threshold}} ne sont pas proposés en remboursement ; ils restent dans les soldes."
     },
     "common": {
       "title": "Objectifs et enveloppes communs",
@@ -3842,6 +3915,195 @@
       "noCommonGoal": "Aucun objectif commun pour le moment.",
       "householdTitle": "Revue du foyer",
       "householdSummary": "{{children}} enfant(s) déclaré(s), {{provisions}} provision(s) annuelle(s) ({{monthly}} / mois au total), {{goals}} objectif(s) commun(s)."
+    },
+    "budgets": {
+      "title": "Budgets communs",
+      "intro": "Une enveloppe par catégorie et par mois, pour l’espace seulement : elle ne change aucun budget personnel.",
+      "month": "Mois",
+      "category": "Catégorie",
+      "amount": "Montant prévu",
+      "set": "Enregistrer l’enveloppe",
+      "saved": "Enveloppe enregistrée.",
+      "remove": "Retirer",
+      "removed": "Enveloppe retirée.",
+      "none": "Aucune enveloppe pour ce mois.",
+      "left": "Reste",
+      "used": "Consommé",
+      "outside": "Dépensé sans enveloppe ce mois : {{amount}}",
+      "adminOnly": "Seul un administrateur de l’espace fixe les enveloppes.",
+      "level": {
+        "warning": "Plus de 80 % consommés",
+        "reached": "Enveloppe atteinte",
+        "exceeded": "Enveloppe dépassée"
+      }
+    },
+    "tasks": {
+      "title": "Tâches de l’espace",
+      "intro": "Ménage, courses, démarches : qui fait quoi, et pour quand. Une tâche ne crée jamais de mouvement d’argent.",
+      "statsTitle": "Ce mois-ci",
+      "noStats": "Aucune tâche échue ce mois-ci : rien à constater.",
+      "finishedRate": "Tâches terminées : {{rate}} de celles prévues ce mois-ci.",
+      "load": "{{share}} du poids des tâches du mois ({{count}} tâches)",
+      "add": "Ajouter la tâche",
+      "created": "Tâche ajoutée.",
+      "finish": "Terminer la tâche",
+      "finished": "Tâche terminée.",
+      "delete": "Supprimer la tâche",
+      "deleteConfirm": "Supprimer cette tâche ?",
+      "deleted": "Tâche supprimée.",
+      "none": "Aucune tâche à faire.",
+      "closed_one": "{{count}} tâche close",
+      "closed_other": "{{count}} tâches closes",
+      "recurrenceNeedsDate": "Une tâche qui se répète a besoin d’une échéance.",
+      "fields": {
+        "title": "Titre",
+        "category": "Catégorie",
+        "assignee": "Responsable",
+        "dueDate": "Échéance",
+        "priority": "Priorité",
+        "weight": "Poids (1 à 3)",
+        "recurrence": "Répétition"
+      },
+      "categories": {
+        "household": "Ménage",
+        "shopping": "Courses",
+        "bills": "Factures",
+        "children": "Enfants",
+        "admin": "Administratif",
+        "upkeep": "Entretien",
+        "project": "Projet",
+        "pet": "Animal",
+        "other": "Autre"
+      },
+      "priorities": {
+        "low": "Basse",
+        "normal": "Normale",
+        "high": "Haute",
+        "urgent": "Urgente"
+      },
+      "statuses": {
+        "todo": "À faire",
+        "doing": "En cours",
+        "done": "Terminée",
+        "cancelled": "Annulée"
+      },
+      "recurrences": {
+        "none": "Aucune",
+        "daily": "Chaque jour",
+        "weekly": "Chaque semaine",
+        "monthly": "Chaque mois"
+      }
+    },
+    "calendar": {
+      "title": "Calendrier de l’espace",
+      "intro": "Factures, tâches, règlements et objectifs sur une seule ligne du temps. Rien ne se crée ici : une facture prévue le reste jusqu’à sa confirmation.",
+      "filter": "Afficher",
+      "none": "Rien ce mois-ci pour ces filtres.",
+      "settlement": "{{from}} → {{to}}",
+      "types": {
+        "bills": "Factures",
+        "tasks": "Tâches",
+        "settlements": "Règlements",
+        "goals": "Objectifs"
+      },
+      "status": {
+        "bills": {
+          "planned": "Prévue",
+          "confirmed": "Confirmée"
+        },
+        "tasks": {
+          "todo": "À faire",
+          "doing": "En cours",
+          "done": "Terminée"
+        },
+        "settlements": {
+          "declared": "Déclaré"
+        },
+        "goals": {
+          "target": "Date visée"
+        }
+      }
+    },
+    "pot": {
+      "title": "Ressources communes",
+      "intro": "Ce qui est entré dans la caisse commune et ce qui en est sorti. Seules les entrées confirmées comptent.",
+      "resources": "Ressources communes",
+      "spent": "Dépenses réalisées",
+      "balance": "Solde du groupe",
+      "planned": "Contributions prévues, non comptées : {{amount}}",
+      "plannedTag": "Prévue",
+      "kinds": {
+        "opening": "Solde initial",
+        "contribution": "Contribution",
+        "other": "Autre entrée"
+      },
+      "add": "Ajouter l’entrée",
+      "added": "Entrée enregistrée.",
+      "confirm": "Confirmer l’entrée",
+      "confirmed": "Entrée confirmée.",
+      "delete": "Supprimer l’entrée",
+      "deleteConfirm": "Supprimer cette entrée ?",
+      "deleted": "Entrée supprimée.",
+      "fields": {
+        "kind": "Type",
+        "member": "Membre",
+        "amount": "Montant",
+        "date": "Date",
+        "planned": "Contribution prévue (pas encore versée)"
+      },
+      "proposalTitle": "Contribution requise",
+      "proposalHelp": "Indiquez un besoin collectif : la proposition dit ce que chacun mettrait en plus des ressources communes.",
+      "need": "Besoin collectif",
+      "propose": "Calculer la proposition",
+      "proposalResult": "Il manquerait {{amount}} pour couvrir ce besoin.",
+      "proposalNote": "Ce n’est qu’une proposition : rien n’est enregistré et aucun compte personnel n’est touché.",
+      "proposalRefused": "La proposition n’a pas pu être calculée : un membre n’a pas partagé son revenu dans cet espace."
+    },
+    "activity": {
+      "title": "Activité récente",
+      "expense": "{{actor}} a ajouté la dépense « {{label}} »",
+      "settlement": "{{actor}} a déclaré un règlement de {{from}} à {{to}}",
+      "task": "{{actor}} a créé la tâche « {{label}} »",
+      "inflow": "{{actor}} a ajouté une entrée : {{kind}}",
+      "member": "{{actor}} a rejoint l’espace"
+    },
+    "report": {
+      "title": "Rapport de l’espace",
+      "intro": "La synthèse du mois pour le groupe, à partir de ce que l’espace détient en commun. Rien de personnel n’y figure.",
+      "spend": "Dépenses du mois",
+      "noSpend": "Aucune dépense réalisée ce mois-ci.",
+      "noCategory": "Sans catégorie",
+      "total": "Total",
+      "balances": "Soldes des membres (cumulés)",
+      "budgets": "Budgets communs",
+      "tasks": "Tâches",
+      "exportTitle": "Exporter",
+      "exportHelp": "Le fichier quitte l’application : il contient les chiffres ci-dessus, lisibles par tout membre de l’espace.",
+      "consent": "J’accepte d’exporter ces données hors de l’application."
+    },
+    "overview": {
+      "title": "Vue d’ensemble — {{kind}}",
+      "balance": "Solde du groupe",
+      "seePot": "Voir les ressources",
+      "spend": "Dépenses du mois",
+      "noTrend": "Pas de mois précédent à comparer.",
+      "trend": "Par rapport au mois précédent : {{change}}",
+      "whoPaid": "Qui a payé ?",
+      "nobody": "Personne n’a encore payé pour le groupe ce mois-ci.",
+      "whoOwes": "Qui doit quoi ?",
+      "allSettled": "Rien à rembourser.",
+      "seeExpenses": "Voir les dépenses",
+      "budgets": "Budgets communs (reste)",
+      "noBudget": "Aucun budget commun ce mois-ci.",
+      "seeBudgets": "Voir les budgets",
+      "bills": "Prochaines factures",
+      "noBill": "Aucune facture prévue dans les 30 jours.",
+      "seeCalendar": "Voir le calendrier",
+      "tasks": "Tâches à faire",
+      "tasksCounts": "{{late}} en retard, {{today}} pour aujourd’hui.",
+      "seeTasks": "Voir les tâches",
+      "goal": "Objectif commun",
+      "seeGoals": "Voir les objectifs"
     }
   },
   "funding": {
@@ -3948,7 +4210,15 @@
       "debt_ratio": "Part du revenu prise par les dettes",
       "goal_contribution_missed": "Contribution mensuelle oubliée",
       "emergency_fund": "Fonds d’urgence",
-      "learning_to_continue": "Formation à reprendre"
+      "learning_to_continue": "Formation à reprendre",
+      "space_member": "Membres d’un espace",
+      "space_expense": "Nouvelles dépenses communes",
+      "space_budget": "Budgets communs à 80 % et 100 %",
+      "space_settlement": "Règlements entre membres",
+      "space_bill": "Factures communes à venir",
+      "space_task": "Tâches à faire ou en retard",
+      "space_contribution": "Contributions attendues",
+      "space_permission": "Changements de droit"
     },
     "messages": {
       "budgetAlert": {
@@ -3986,7 +4256,32 @@
         "below": "Votre réserve est sous la cible choisie.",
         "reached": "Votre fonds d’urgence a atteint sa cible."
       },
-      "learningToContinue": "Vous avez commencé « {{label}} » : reprenez là où vous vous êtes arrêté."
+      "learningToContinue": "Vous avez commencé « {{label}} » : reprenez là où vous vous êtes arrêté.",
+      "spaceMember": {
+        "joined": "Un nouveau membre a rejoint l’espace.",
+        "left": "Un membre a quitté l’espace.",
+        "removed": "Un membre a été retiré de l’espace.",
+        "closed": "L’espace a été clôturé : il ne peut plus que se lire."
+      },
+      "spaceExpense": "Nouvelle dépense commune : {{label}}.",
+      "spaceBudget": {
+        "warning": "Un budget commun a dépassé 80 %.",
+        "reached": "Un budget commun est atteint.",
+        "exceeded": "Un budget commun est dépassé."
+      },
+      "spaceSettlement": "Un règlement vous concernant a été déclaré.",
+      "spaceBill_one": "Facture commune « {{label}} » : demain ou aujourd’hui ({{date}}).",
+      "spaceBill_other": "Facture commune « {{label}} » dans {{count}} jours ({{date}}).",
+      "spaceTask": {
+        "soon": "Tâche « {{label}} » à faire pour le {{date}}.",
+        "overdue": "Tâche « {{label}} » en retard (échéance {{date}})."
+      },
+      "spaceContribution": "Votre contribution prévue pour le {{date}} attend d’être confirmée.",
+      "spacePermission": {
+        "admin": "Vous êtes maintenant administrateur d’un espace.",
+        "member": "Vous êtes maintenant membre d’un espace.",
+        "viewer": "Vous êtes maintenant lecteur d’un espace."
+      }
     },
     "families": {
       "budgets": "Budgets et comptes",
@@ -3995,7 +4290,8 @@
       "dettes": "Dettes",
       "objectifs": "Objectifs et fonds d’urgence",
       "formation": "Formation",
-      "securite": "Sécurité et partage"
+      "securite": "Sécurité et partage",
+      "collectif": "Gestion commune"
     }
   },
   "trust": {
@@ -4043,7 +4339,6 @@
       }
     },
     "devicesTitle": "Appareils connectés",
-    "devicesUnavailable": "Cette fonctionnalité n’est pas encore disponible : la plateforme ne garde pas encore la trace des sessions ouvertes.",
     "exportTitle": "Exporter mes données",
     "exportHint": "Télécharge toutes vos données FINCLUDIA dans un fichier. Votre mot de passe actuel est demandé.",
     "export": "Exporter",
@@ -4059,6 +4354,15 @@
     "errors": {
       "wrongPassword": "Mot de passe incorrect.",
       "emailMismatch": "L’adresse tapée ne correspond pas à votre compte."
+    },
+    "devices": {
+      "intro": "Les appareils où votre compte est ouvert. Si vous n’en reconnaissez pas un, déconnectez-le : il sera écarté à sa prochaine action.",
+      "untracked": "Votre session actuelle date d’avant cette liste : elle fonctionne, mais n’y figure pas. Reconnectez-vous pour qu’elle apparaisse.",
+      "thisOne": "Cet appareil",
+      "lastSeen": "dernière activité le {{date}}",
+      "disconnect": "Déconnecter",
+      "disconnectOthers": "Déconnecter tous les autres appareils",
+      "ended": "Appareil déconnecté."
     }
   },
   "search": {
@@ -4074,7 +4378,8 @@
       "mesDonnees": "Mes données",
       "objectifs": "Objectifs",
       "apprendre": "Apprendre",
-      "explorer": "Explorer"
+      "explorer": "Explorer",
+      "formations": "Formations"
     },
     "explorerHint": "Le comparateur bancaire et les offres d’emploi se consultent pour le moment depuis « Outils »."
   },
@@ -4312,7 +4617,11 @@
     "balance": "Solde",
     "transferTitle": "Nouveau transfert",
     "transferNeedsTwo": "Un transfert demande au moins deux comptes ouverts.",
-    "detail": "Détail"
+    "detail": "Détail",
+    "chartTitle": "Évolution des soldes",
+    "chartFilter": "Compte",
+    "chartAll": "Tous les comptes",
+    "chartCurrencies": "Les comptes d’une autre devise ne sont pas tracés sur la même échelle."
   },
   "health": {
     "title": "Santé financière",
@@ -4330,7 +4639,9 @@
       "goals": "si vos objectifs avancent comme prévu",
       "budgets": "si vos dépenses restent dans vos budgets",
       "dataQuality": "si vos données sont complètes et à jour"
-    }
+    },
+    "historyTitle": "L’indice mois par mois",
+    "historyHint": "Chaque point est l’indice tel qu’il a été lu ce mois-là ; il n’est jamais recalculé après coup."
   },
   "movements": {
     "title": "Mouvements",
@@ -4436,7 +4747,13 @@
     "calendar": "Calendrier",
     "seeWhy": "Voir pourquoi",
     "learningIntro": "Les contenus adaptés à votre profil.",
-    "continueLearning": "Continuer ma formation"
+    "continueLearning": "Continuer ma formation",
+    "expectedIncome": "Revenus prévus",
+    "salary": "Salaire",
+    "manageIncome": "Gérer mes revenus prévus",
+    "quickAddClose": "Fermer l’ajout rapide",
+    "quickAddFull": "Ouvrir le formulaire complet",
+    "miniFlow": "Flux net des derniers mois"
   },
   "finProfile": {
     "incomeRegularity": "Régularité de mon revenu",
@@ -4468,7 +4785,8 @@
       "R09": "Dettes",
       "R10": "Patrimoine réel",
       "R11": "Qualité des données",
-      "R12": "Formation et actions"
+      "R12": "Formation et actions",
+      "R06": "Scénario d’épargne"
     },
     "reportTitle": "Rapport mensuel — {{month}}",
     "backToReports": "Retour aux rapports",
@@ -4478,7 +4796,45 @@
     "reportsIntro": "Chaque mois a son rapport, à lire ou à télécharger.",
     "backToSynthesis": "Retour à la synthèse",
     "downloadAs": "Télécharger {{month}} en {{format}}",
-    "pdfHint": "Pour un PDF : ouvrez le rapport d’un mois, puis « PDF » l’imprime tel qu’il s’affiche."
+    "pdfHint": "Pour un PDF : ouvrez le rapport d’un mois, puis « PDF » l’imprime tel qu’il s’affiche.",
+    "scenario": {
+      "intro": "Et si vous réduisiez vos dépenses flexibles ? Une simulation avec votre chiffre, rien de plus.",
+      "reduction": "Réduction imaginée (%)",
+      "flexible": "Dépenses flexibles du mois",
+      "cut": "Réduction simulée",
+      "saved": "Épargne possible du mois",
+      "rate": "Taux d’épargne du scénario",
+      "disclaimer": "Ni un conseil, ni une promesse : rien n’est enregistré."
+    },
+    "cascade": {
+      "title": "Le mois en une ligne",
+      "income": "Revenus reçus",
+      "essential": "Charges essentielles",
+      "debt": "Dettes et engagements",
+      "flexible": "Dépenses flexibles",
+      "saved": "Mis de côté",
+      "left": "Reste"
+    },
+    "netFlowChart": "Flux net de chaque mois",
+    "compare": {
+      "title": "Comparer deux mois",
+      "intro": "Deux mois de votre choix, côte à côte. Chaque variation est calculée par le serveur ; elle n’est jamais un jugement.",
+      "first": "Premier mois",
+      "second": "Second mois",
+      "different": "Choisissez deux mois différents.",
+      "change": "Variation",
+      "revenus": "Revenus",
+      "depenses": "Dépenses",
+      "fluxNet": "Flux net",
+      "categories": "Dépenses par catégorie",
+      "topFive": "Les cinq premières catégories de chaque mois ; un mois non renseigné veut dire hors du haut du classement."
+    },
+    "keptBanner": "Rapport conservé le {{date}} (version {{version}}) : il est tel qu’il était alors, pas recalculé.",
+    "keptSaved": "Rapport conservé tel qu’il est aujourd’hui.",
+    "keptFailed": "Le rapport n’a pas pu être conservé.",
+    "keptOn": "Conservé le {{date}}",
+    "keep": "Conserver",
+    "keepAgain": "Conserver à nouveau"
   },
   "education": {
     "yourParcours": "Votre parcours : {{name}}",
@@ -4496,7 +4852,9 @@
     "missionsPreparing": "Les missions de votre parcours sont en cours de rédaction.",
     "recommended": "Recommandées pour vous",
     "forYou": "Pour votre profil",
-    "done": "Terminée"
+    "done": "Terminée",
+    "missionsAvailable_one": "{{count}} mission à jouer",
+    "missionsAvailable_other": "{{count}} missions à jouer"
   },
   "payslip": {
     "title": "Décodeur de fiche de paie",
@@ -4671,6 +5029,157 @@
       "noCriterion": "Choisissez au moins un critère.",
       "labels": "Donnez un nom à chaque option.",
       "input": "Ces données ne peuvent pas être comparées : vérifiez les valeurs saisies."
+    }
+  },
+  "firstSteps": {
+    "title": "Premiers pas",
+    "intro": "Huit étapes, dans l’ordre que vous voulez, à votre rythme.",
+    "freedom": "Seule la première étape est nécessaire. Chaque autre se passe, se reprend plus tard, et ce que vous ne renseignez pas reste « non calculé », jamais à 0.",
+    "done": "Fait",
+    "skipped": "Mise de côté",
+    "next": "À faire maintenant",
+    "todo": "Plus tard",
+    "skip": "Passer pour l’instant",
+    "resume": "Reprendre",
+    "start": "Commencer",
+    "addMore": "En ajouter",
+    "choose": "Choisir…",
+    "save": "Enregistrer",
+    "errors": {
+      "refused": "Cette étape n’a pas pu être enregistrée."
+    },
+    "income": {
+      "label": "Nom du revenu",
+      "amount": "Montant attendu",
+      "nextDate": "Prochaine date de réception (le jour habituel)",
+      "account": "Compte à créditer",
+      "noAccount": "Aucun compte pour l’instant."
+    },
+    "salary": {
+      "needIncome": "Ajoutez d’abord votre premier revenu (étape P1).",
+      "day": "Prochaine date de réception",
+      "confirmHint": "Recommandé : « me demander de confirmer », le jour venu."
+    },
+    "plan": {
+      "title": "Mon plan du premier revenu",
+      "intro": "Trois façons de l’organiser. Rien n’est créé pour vous : vous acceptez ou vous modifiez, écran par écran.",
+      "budget": "Créer un budget",
+      "reserve": "Régler mon fonds d’urgence",
+      "goal": "Ajouter un objectif"
+    },
+    "steps": {
+      "P0": {
+        "title": "Choisir mon profil",
+        "hint": "Il règle ce qu’on vous recommande d’apprendre. L’application complète s’ouvre quel que soit votre choix."
+      },
+      "P1": {
+        "title": "Mon premier revenu",
+        "hint": "Salaire, bourse, aide, job… Il sert de base à « reste à allouer ». Lycéens et étudiants : les revenus de leur catégorie sont proposés en premier (★)."
+      },
+      "P2": {
+        "title": "Confirmer la date de mon revenu",
+        "hint": "Le jour, la règle si c’est un week-end, le compte crédité. Le revenu n’est crédité qu’après votre confirmation."
+      },
+      "P3": {
+        "title": "Créer ou compléter mes comptes",
+        "hint": "Espèces, compte courant, CCP, épargne, carte… Sans compte, « Espèces » est proposé."
+      },
+      "P4": {
+        "title": "Mes premières dépenses",
+        "hint": "Possibles sans budget : elles seront rattachées plus tard à un budget compatible."
+      },
+      "P5": {
+        "title": "Définir mes budgets",
+        "hint": "Les dépenses déjà saisies de la même période et catégorie les consomment aussitôt."
+      },
+      "P6": {
+        "title": "Objectifs et fonds d’urgence",
+        "hint": "Un objectif avec un montant et une date ; le fonds d’urgence en est un."
+      },
+      "P7": {
+        "title": "Dettes et créances",
+        "hint": "Seulement si vous en avez : ce que vous devez, et ce qu’on vous doit."
+      }
+    },
+    "ownPage": "Ouvrir sur sa propre page",
+    "stepSaved": "Étape enregistrée.",
+    "backToSteps": "Retour aux premiers pas"
+  },
+  "incomes": {
+    "title": "Revenus prévus",
+    "intro": "Les revenus que vous avez déclarés : la base de votre « reste à allouer ».",
+    "expectedNote": "Un revenu prévu est ce que vous attendez : il ne change aucun solde. Seul un revenu confirmé le jour venu, dans le calendrier, entre dans un compte.",
+    "add": "Ajouter un revenu",
+    "none": "Aucun revenu déclaré pour l’instant.",
+    "added": "Revenu ajouté.",
+    "saved": "Revenu enregistré.",
+    "startDate": "Début",
+    "endDate": "Fin (facultatif)",
+    "manage": "Voir et corriger mes revenus prévus",
+    "errors": {
+      "refused": "Ce revenu n’a pas pu être enregistré."
+    }
+  },
+  "shared": {
+    "backToSpaces": "Mes espaces",
+    "spaceMenu": "Menu de l’espace",
+    "sections": {
+      "dashboard": "Vue d’ensemble",
+      "expenses": "Dépenses communes",
+      "goals": "Objectifs communs",
+      "household": "Foyer",
+      "members": "Membres et partage",
+      "budgets": "Budgets",
+      "tasks": "Tâches",
+      "calendar": "Calendrier",
+      "pot": "Ressources",
+      "report": "Rapport"
+    },
+    "closedBanner": "Espace clôturé le {{date}} : l’historique, les soldes et les rapports restent lisibles, plus rien ne s’écrit.",
+    "close": "Clôturer cet espace",
+    "closeConfirm": "Clôturer cet espace ? Plus rien ne pourra y être ajouté ni modifié. Cette action est définitive.",
+    "closed": "Espace clôturé."
+  },
+  "charts": {
+    "legend": "Légende",
+    "showTable": "Voir les chiffres",
+    "noTarget": "aucune cible choisie",
+    "actual": "Réel",
+    "target": "Cible",
+    "state": {
+      "good": "cible atteinte",
+      "warn": "plus de la moitié de la cible",
+      "low": "moins de la moitié de la cible"
+    }
+  },
+  "missions": {
+    "title": "Missions",
+    "intro": "De courtes missions : des choix sur une somme fictive, et ce que chacun a changé.",
+    "fictive": "Tout est fictif : une mission ne touche jamais vos comptes ni vos mouvements, et son résultat est à part de votre indice de connaissances.",
+    "none": "Aucune mission n’est encore publiée pour votre profil.",
+    "steps_one": "{{count}} étape",
+    "steps_other": "{{count}} étapes",
+    "played_one": "jouée {{count}} fois",
+    "played_other": "jouée {{count}} fois",
+    "backToProgress": "Retour à la progression",
+    "backToList": "Retour aux missions",
+    "notFound": "Cette mission n’existe pas ou n’est pas proposée à votre profil.",
+    "startingAmount": "Vous partez avec {{amount}} (somme fictive).",
+    "seeResult": "Voir le résultat",
+    "result": "Résultat",
+    "cash": "Argent restant",
+    "savings": "Épargne",
+    "resilience": "Résilience",
+    "points_one": "{{count}} point",
+    "points_other": "{{count}} points",
+    "badgeEarned": "Badge obtenu : {{label}}",
+    "noBadge": "Aucun badge cette fois : rejouez pour voir ce qui change.",
+    "rule": "Règle : l’argent restant est la somme de départ plus l’effet de chaque choix ; l’épargne et la résilience sont les sommes de leurs effets ; le badge est le plus haut dont le seuil de résilience est atteint.",
+    "whyTitle": "Pourquoi ?",
+    "effects": "Argent {{cash}} · épargne {{savings}} · résilience {{resilience}}",
+    "replay": "Rejouer",
+    "errors": {
+      "incomplete": "Répondez à chaque étape pour voir le résultat."
     }
   }
 }

@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from './api.js';
 
+// A write elsewhere on the page (the quick-add sheet) says so with this event,
+// and every screen that is showing figures reads them again.
+const DATA_CHANGED_EVENT = 'fin:data-changed';
+
 // Loads GET `path` and exposes { status, data, error, reload, setData }.
 // status: 'loading' | 'ready' | 'error'. A change of `path` counts as loading
 // again WITHOUT calling setState inside the effect: the stored result simply
@@ -24,6 +28,10 @@ export function useApi(path) {
   const samePath = result.path === path;
   const current = samePath && result.attempt === attempt;
   const reload = useCallback(() => setAttempt((n) => n + 1), []);
+  useEffect(() => {
+    window.addEventListener(DATA_CHANGED_EVENT, reload);
+    return () => window.removeEventListener(DATA_CHANGED_EVENT, reload);
+  }, [reload]);
   // Replace the loaded data after a local action (e.g. enrolling returns the fresh detail).
   const setData = useCallback((data) => setResult((r) => ({ ...r, data })), []);
 

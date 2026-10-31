@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
 import { prisma } from '../config/prisma.js';
-import { buildMonthlyReport, reportRows } from '../services/finReport.service.js';
+import { buildMonthlyReport, compareMonths, reportRows } from '../services/finReport.service.js';
 import { wealthFromAccounts } from './finWealth.controller.js';
 
 // The monthly report (P8-10): the Synthèse page and its download (CSV, XLSX;
@@ -9,7 +9,11 @@ import { wealthFromAccounts } from './finWealth.controller.js';
 const currentMonthKey = (now = new Date()) => now.toISOString().slice(0, 7);
 
 export async function getReport(req, res) {
-  res.json({ rapport: await buildMonthlyReport(prisma, req.user, { month: req.query.mois ?? currentMonthKey(), wealthFromAccounts }) });
+  res.json({ rapport: await buildMonthlyReport(prisma, req.user, { month: req.query.mois ?? currentMonthKey(), wealthFromAccounts, reduction: (req.query.reduction ?? 10) / 100 }) });
+}
+
+export async function getComparison(req, res) {
+  res.json({ comparaison: await compareMonths(prisma, req.user, { month: req.query.mois, other: req.query.avec, wealthFromAccounts }) });
 }
 
 const HEADER = ['Section', 'Indicateur', 'Valeur', 'Unité', 'Formule', 'Version'];

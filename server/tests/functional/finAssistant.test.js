@@ -23,11 +23,35 @@ describe('intents administration', () => {
   test('the 8 intents of the client\'s file are seeded on first list, all draft', async () => {
     const res = await adm('GET', '/intents');
     assert.equal(res.status, 200);
-    assert.equal(res.body.intents.length, 8);
+    // 7 of the first list + the client's 25 intentions (P8-24).
+    assert.equal(res.body.intents.length, 32);
     assert.ok(res.body.intents.every((i) => i.status === 'draft'));
-    assert.deepEqual(res.body.intents.map((i) => i.code).sort(), ['AIDE_BUDGET', 'AIDE_DETTE', 'APPRENDRE_TERME', 'CHERCHER_SOLUTION', 'CRÉER_OBJECTIF', 'DÉPENSE_PARTAGÉE', 'EXPLIQUER_INDICATEUR', 'NAVIGUER'].sort());
+    const first = res.body.intents.filter((i) => !i.code.startsWith('CB')).map((i) => i.code).sort();
+    assert.deepEqual(first, ['AIDE_BUDGET', 'AIDE_DETTE', 'APPRENDRE_TERME', 'CHERCHER_SOLUTION', 'CRÉER_OBJECTIF', 'EXPLIQUER_INDICATEUR', 'NAVIGUER'].sort());
     const again = await adm('GET', '/intents');
-    assert.equal(again.body.intents.length, 8, 'seeding is idempotent');
+    assert.equal(again.body.intents.length, 32, 'seeding is idempotent');
+  });
+
+  test('the client’s 25 intentions are seeded with their trigger words, their link on the new addresses and their guard-rail as a reference', async () => {
+    const intents = (await adm('GET', '/intents')).body.intents;
+    const cb = intents.filter((i) => i.code.startsWith('CB'));
+    assert.equal(cb.length, 25);
+    const by = Object.fromEntries(cb.map((i) => [i.code, i]));
+    assert.deepEqual(by.CB01.keywords, ['budget négatif', 'je dépense trop', 'plus d’argent']);
+    assert.equal(by.CB05.deepLinkPath, '/app/objectifs/fonds-urgence');
+    assert.equal(by.CB08.deepLinkPath, '/app/dettes/strategies');
+    assert.equal(by.CB05.deepLinkAvailable, true);
+    // No screen of its own: nothing is faked.
+    for (const code of ['CB16', 'CB22', 'CB99']) assert.equal(by[code].deepLinkPath, null, code);
+    // Every link that is named is a page that exists (the whitelist), none the old addresses.
+    for (const row of cb.filter((i) => i.deepLinkPath)) {
+      assert.equal(row.deepLinkAvailable, true, `${row.code} → ${row.deepLinkPath}`);
+      assert.ok(!/^\/(catalogue|espaces|mon-argent)/.test(row.deepLinkPath), row.code);
+    }
+    // The administrator sees what the client allows; the public text is theirs to write.
+    assert.match(by.CB22.reference.guardrail, /Ne jamais demander code PIN\/OTP\/mot de passe/);
+    assert.equal(by.CB01.responseTemplate, '<p></p>');
+    assert.ok(cb.every((i) => i.status === 'draft'));
   });
 
   test('publishing without a response is refused; a whitelisted deep link is accepted, an unknown one is refused', async () => {
@@ -49,6 +73,18 @@ describe('resolving a query (public)', () => {
     await adm('POST', `/intents/${navigate.id}/publish`);
     return navigate;
   }
+
+  test('a published intention of the client’s catalogue resolves by its trigger words, to its new address, and is audited under its code', async () => {
+    const intents = (await adm('GET', '/intents')).body.intents;
+    const reserve = intents.find((i) => i.code === 'CB05');
+    await adm('PATCH', `/intents/${reserve.id}`, { responseTemplate: '<p>Votre réserve se mesure en mois de dépenses essentielles.</p>' });
+    assert.equal((await adm('POST', `/intents/${reserve.id}/publish`)).status, 200);
+    const res = await pub('POST', '/resolve', { query: 'ma réserve de sécurité' });
+    assert.equal(res.body.type, 'intent');
+    assert.equal(res.body.intent.code, 'CB05');
+    assert.equal(res.body.intent.deepLinkPath, '/app/objectifs/fonds-urgence');
+    assert.equal(await t.prisma.finAuditLog.count({ where: { action: 'resolved', intentCode: 'CB05' } }), 1);
+  });
 
   test('a matching query resolves to the intent, with its deep link', async () => {
     await publishNaviguer();

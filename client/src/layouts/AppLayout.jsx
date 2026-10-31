@@ -9,6 +9,7 @@ import { APP_NAV, NAV_SECTIONS, SETTINGS_LINKS, visibleEntries } from '../config
 import GlobalSearch from '../components/layout/GlobalSearch.jsx';
 import NotificationBell from '../components/layout/NotificationBell.jsx';
 import ChatbotWidget from '../components/assistant/ChatbotWidget.jsx';
+import QuickAdd, { QuickAddLink } from '../components/fincludia/QuickAdd.jsx';
 import LanguageSwitcher from '../components/ui/LanguageSwitcher.jsx';
 import ThemeToggle from '../components/ui/ThemeToggle.jsx';
 import brandMark from '../assets/brand/fincludia-mark.png';
@@ -80,6 +81,7 @@ export default function AppLayout() {
 
         <main id="app-main" className="app-main">
           <Outlet />
+          <QuickAdd />
         </main>
       </div>
 
@@ -159,23 +161,23 @@ function AppTopBar({ settings }) {
       </Link>
 
       {/* « Gestion budgétaire / Gestion commune » (P9-01 point 1): out of the
-          financial menu. Gestion commune gets its own address with P9-02. */}
+          financial menu. Gestion commune has its own address, `/partage` (P9-02). */}
       <nav className="app-switcher" aria-label={t('appNav.switcher')}>
         <NavLink to="/app" className="app-switcher-link app-switcher-current" aria-current="page">
           {t('appNav.budgetApp')}
         </NavLink>
-        <NavLink to="/app/espaces" className="app-switcher-link">
+        <NavLink to="/partage" className="app-switcher-link">
           <ArrowLeftRight size={14} aria-hidden="true" />
-          {t('appNav.sharedApp')}
+          <span className="app-switcher-text">{t('appNav.sharedApp')}</span>
         </NavLink>
       </nav>
 
       <div className="app-topbar-actions">
         <GlobalSearch />
-        <Link to="/app/mouvements/nouveau" className="app-icon-button" title={t('appNav.quickAdd')}>
+        <QuickAddLink className="app-icon-button" title={t('appNav.quickAdd')}>
           <Plus size={18} aria-hidden="true" />
           <span className="sr-only">{t('appNav.quickAdd')}</span>
-        </Link>
+        </QuickAddLink>
         <NotificationBell />
         <button type="button" className="app-icon-button" title={t('nav.assistant')} onClick={() => document.dispatchEvent(new CustomEvent(ASSISTANT_OPEN_EVENT))}>
           <LifeBuoy size={18} aria-hidden="true" />

@@ -199,11 +199,11 @@ export async function loadSynthesisData(prisma, userId, period) {
     }),
     prisma.finTransaction.findMany({
       where: { userId, deletedAt: null, occurredAt: { gte: period.start, lte: period.end } },
-      select: { id: true, kind: true, value: true, currency: true, categoryId: true, planned: true, status: true, category: { select: { family: true } } },
+      select: { id: true, kind: true, value: true, currency: true, categoryId: true, planned: true, status: true, category: { select: { family: true, group: true, essential: true } } },
     }),
     prisma.finTransaction.findMany({
       where: { userId, deletedAt: null, occurredAt: { gte: before.start, lte: before.end } },
-      select: { kind: true, value: true, currency: true, planned: true, status: true, category: { select: { family: true } } },
+      select: { kind: true, value: true, currency: true, planned: true, status: true, category: { select: { family: true, group: true, essential: true } } },
     }),
   ]);
   return { incomes, movements, previous };
@@ -250,6 +250,8 @@ export async function monthlyMoneyHistory(prisma, userId, { months = 6, currency
         month: period.start.toISOString().slice(0, 7),
         revenus: inCurrency ? synthesis.revenus.resultat : null,
         depenses: inCurrency ? synthesis.depenses.resultat : null,
+        // G-03: the net flow of the month, as the engine computed it.
+        fluxNet: inCurrency ? synthesis.fluxNet?.resultat ?? null : null,
       };
     }),
   );

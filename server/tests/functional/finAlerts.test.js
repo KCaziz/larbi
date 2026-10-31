@@ -87,7 +87,7 @@ describe('P8-18 — the client’s alerts', () => {
 
   test('a family turned off raises nothing of it (answer D7)', async () => {
     const references = (await as('GET', '/fin/notifications/references')).body;
-    assert.deepEqual(references.families, ['budgets', 'revenus', 'echeances', 'dettes', 'objectifs', 'formation', 'securite']);
+    assert.deepEqual(references.families, ['budgets', 'revenus', 'echeances', 'dettes', 'objectifs', 'formation', 'securite', 'collectif']);
     const debtTypes = references.types.filter((type) => type.family === 'dettes').map((type) => type.key);
     await as('PUT', '/fin/notifications/parametres', Object.fromEntries(debtTypes.map((key) => [key, { enabled: false }])));
     await as('POST', '/fin/debts', { label: 'Téléphone', outstandingPrincipal: 2000000, monthlyInstalment: 200000, currency: 'DZD', dueDate: iso(dayStart(2)) });

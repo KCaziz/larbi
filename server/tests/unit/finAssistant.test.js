@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { fallbackCategories, isKnownDeepLink, normalise, resolveIntent } from '../../src/services/finAssistant.service.js';
 import { FIN_INTENTS, FIN_INTENT_CODES } from '../../src/constants/finAssistant.js';
 
-describe('the 8 intents', () => {
+describe('the 7 personal intents (P8-19)', () => {
   test('exactly the client\'s own closed list (13_Chatbot), nothing added or removed', () => {
-    assert.deepEqual(FIN_INTENT_CODES, ['NAVIGUER', 'EXPLIQUER_INDICATEUR', 'CRÉER_OBJECTIF', 'AIDE_BUDGET', 'AIDE_DETTE', 'APPRENDRE_TERME', 'CHERCHER_SOLUTION', 'DÉPENSE_PARTAGÉE']);
+    assert.deepEqual(FIN_INTENT_CODES, ['NAVIGUER', 'EXPLIQUER_INDICATEUR', 'CRÉER_OBJECTIF', 'AIDE_BUDGET', 'AIDE_DETTE', 'APPRENDRE_TERME', 'CHERCHER_SOLUTION']);
     assert.ok(FIN_INTENTS.every((i) => i.label && i.exampleQuery));
   });
 });

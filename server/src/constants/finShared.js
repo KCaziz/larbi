@@ -14,7 +14,19 @@
 //   percent             weights in hundredths of a percent, given per participant
 //   amounts             the amounts typed one by one
 //   income_proportional F042: proportional to the participants' declared income
-export const SPLIT_MODES = ['equal', 'percent', 'amounts', 'income_proportional'];
+//   weighted            COL-F03 (R-04): a positive weight per participant
+//   usage               COL-F03 (R-05): the units each one used, in a free unit
+//                       named on the expense; « explicable, pas de calcul caché »
+export const SPLIT_MODES = ['equal', 'percent', 'amounts', 'income_proportional', 'weighted', 'usage'];
+
+// The life of a shared expense (P9-04): realised counts in the balances, planned
+// has not happened yet, cancelled keeps its row and its trace but counts for
+// nothing (QC-08).
+export const EXPENSE_LIFECYCLES = ['done', 'planned', 'cancelled'];
+
+// « Petit solde » (A4): below it, a debt is not proposed as a repayment. 200 DA
+// in centimes. The default of a new space; each space may change it.
+export const SMALL_BALANCE_DEFAULT = 20000;
 
 // The rounding rule, documented because the client asks for it to be
 // (« arrondis selon une règle documentée ») and published by the API so nobody

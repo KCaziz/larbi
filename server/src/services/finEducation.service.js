@@ -3,6 +3,7 @@
 // writes (Enrollment, CourseProgress, Certification) — no table of its own.
 import { EDUCATION_PROFILES, EDUCATION_SOURCE, educationProfileByCode } from '../constants/finEducation.js';
 import { EDUCATION_PROFILE_CODES, finPublicByCode, isCollectivePublic } from '../constants/finPublics.js';
+import { listMissionsFor } from './finMission.service.js';
 
 // How many formations the « recommandées » list shows.
 const RECOMMENDED_MAX = 12;
@@ -63,6 +64,8 @@ export async function educationView(prisma, user) {
     recommended.push({ slug: row.slug, title: row.title, subtitle: row.subtitle, level: row.level, pourVous: forProfile(row), ...(await standing(prisma, user.id, row.id)) });
   }
 
+  const missionsCount = (await listMissionsFor(prisma, user)).length;
+
   return {
     profil: withLabel(profile),
     aChoisir: mustChoose,
@@ -70,8 +73,9 @@ export async function educationView(prisma, user) {
     parcours,
     recommandees: recommended,
     // Missions (P2-10, taken up again): their scenarios are the client's to
-    // write (answer E). Until then the screen says so.
-    missions: { statut: 'en_preparation', source: 'client' },
+    // write (answer E) and an administrator enters them. Until one is published
+    // for this profile, the screen says they are being prepared.
+    missions: missionsCount > 0 ? { statut: 'publiees', total: missionsCount, source: 'client' } : { statut: 'en_preparation', source: 'client' },
     source: EDUCATION_SOURCE,
   };
 }

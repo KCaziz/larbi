@@ -17,6 +17,7 @@ import { isAdultAgeRange } from '../constants/finPublics.js';
 import { accountsWithBalances } from './finAccount.service.js';
 import { currentBudget, loadBudgetData } from './finBudget.service.js';
 import { buildBudgetView } from './finBudgetView.service.js';
+import { scanSpaceAlerts } from './finSpaceAlerts.service.js';
 import { loadCalendarData } from './finCalendar.service.js';
 import { collectEvents } from './finCalendarView.service.js';
 import { buildDebtSynthesis, listDebts } from './finDebt.service.js';
@@ -177,6 +178,9 @@ export async function generateAlerts(prisma, user, { now = new Date(), force = f
       await notify('emergency_fund', { params: { niveau: level, mois: reserve.moisReserve.resultat, cible: reserve.cibleMois }, link: '/app/objectifs/fonds-urgence', referenceId: 'emergency-fund', dedupeBy: 'level' });
     }
   }
+
+  // ---- Gestion commune: bills, tasks and contributions that are due (P9-09) ----
+  await scanSpaceAlerts(prisma, userId, now);
 
   // ---- AL-P12: a course started and left for a week -------------------------
   const idleSince = new Date(now.getTime() - LEARNING_IDLE_DAYS * DAY);

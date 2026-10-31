@@ -15,6 +15,7 @@
 // there is one place to check rather than one per screen.
 
 import { createHash, randomBytes } from 'node:crypto';
+import { notifySpace } from './finSpaceAlerts.service.js';
 import {
   DEFAULT_SHARING,
   DEFAULT_SPLIT_RULE,
@@ -43,6 +44,8 @@ const SPACE_SELECT = {
   label: true,
   currency: true,
   splitRule: true,
+  smallBalance: true,
+  closedAt: true,
   note: true,
   status: true,
   version: true,
@@ -120,13 +123,43 @@ export async function ownMembership(prisma, userId, spaceId) {
   return membership;
 }
 
-// Same, but the caller must hold at least `role`.
-export async function requireRole(prisma, userId, spaceId, role) {
+/**
+ * A closed space takes no more writes (P9-03, rule B3): every writer goes
+ * through `requireRole` or this check, so one place decides. Locked with 423,
+ * not hidden — the person is told WHY, and reading stays open.
+ */
+export function assertOpen(membership) {
+  if (membership.space.closedAt) throw new HttpError(423, 'This space is closed: it can only be read', { reason: 'spaceClosed' });
+  return membership;
+}
+
+// Same, but the caller must hold at least `role`. A closed space refuses every
+// write, unless the caller says the action is allowed on a closed space
+// (deleting it, for the owner).
+export async function requireRole(prisma, userId, spaceId, role, { allowClosed = false } = {}) {
   const membership = await ownMembership(prisma, userId, spaceId);
   if (!roleAtLeast(membership.role, role)) {
     throw new HttpError(403, 'This action needs a higher role in the space', { reason: 'roleRequired', needed: role });
   }
+  if (!allowClosed) assertOpen(membership);
   return membership;
+}
+
+/**
+ * Closes a temporary space. The owner only, once: Active → Closed, with no way
+ * back (a mistaken closing is a new space). Pending invitations are revoked.
+ */
+export async function closeSpace(prisma, userId, spaceId, { reason } = {}) {
+  const me = await requireRole(prisma, userId, spaceId, 'owner', { allowClosed: true });
+  if (me.space.closedAt) throw new HttpError(409, 'This space is already closed', { reason: 'alreadyClosed' });
+  const closedAt = new Date();
+  await prisma.$transaction(async (tx) => {
+    await tx.finSpace.update({ where: { id: spaceId }, data: { closedAt, version: { increment: 1 } } });
+    await tx.finSpaceInvite.updateMany({ where: { spaceId, status: 'pending' }, data: { status: 'revoked' } });
+    await recordChange(tx, { userId, entity: SPACE_ENTITY, entityId: spaceId, action: 'correct', field: 'closedAt', before: null, after: closedAt, reason: reason ?? null });
+  });
+  await notifySpace(prisma, spaceId, userId, { type: 'space_member', params: { event: 'closed' }, link: `/partage/${spaceId}`, referenceId: `${spaceId}:closed` });
+  return { id: spaceId, closedAt };
 }
 
 export function listSpaces(prisma, userId) {
@@ -214,7 +247,7 @@ export async function updateSpace(prisma, userId, spaceId, body) {
 // Deleting a space is logical, like every other row of Phase 6: figures
 // computed inside it must keep knowing what they were made of.
 export async function deleteSpace(prisma, userId, spaceId, { reason } = {}) {
-  await requireRole(prisma, userId, spaceId, 'owner');
+  await requireRole(prisma, userId, spaceId, 'owner', { allowClosed: true });
   await prisma.$transaction(async (tx) => {
     await tx.finSpace.update({ where: { id: spaceId }, data: { deletedAt: new Date() } });
     await tx.finSpaceInvite.updateMany({ where: { spaceId, status: 'pending' }, data: { status: 'revoked' } });
@@ -322,11 +355,20 @@ export async function setMemberRole(prisma, userId, spaceId, memberId, role) {
     throw new HttpError(403, 'Only the owner can change another admin', { reason: 'roleRequired', needed: 'owner' });
   }
 
-  return prisma.$transaction(async (tx) => {
+  const changed = await prisma.$transaction(async (tx) => {
     const row = await tx.finSpaceMember.update({ where: { id: memberId }, data: { role }, select: MEMBER_SELECT });
     await recordChange(tx, { userId, entity: MEMBERSHIP_ENTITY, entityId: memberId, action: 'correct', field: 'role', before: target.role, after: role });
     return row;
   });
+  // P9-09: the member whose right changed is told, and only them.
+  await notifySpace(prisma, spaceId, userId, {
+    type: 'space_permission',
+    params: { role },
+    link: `/partage/${spaceId}/membres`,
+    referenceId: `${memberId}:${role}:${Date.now()}`,
+    onlyUserIds: [target.userId],
+  });
+  return changed;
 }
 
 /**
@@ -353,7 +395,7 @@ export async function leaveSpace(prisma, userId, spaceId, { memberId = null, rea
     throw new HttpError(422, 'The owner hands the space over or deletes it', { reason: 'ownerCannotLeave' });
   }
 
-  return prisma.$transaction(async (tx) => {
+  const left = await prisma.$transaction(async (tx) => {
     const row = await tx.finSpaceMember.update({ where: { id: target.id }, data: { leftAt: new Date() }, select: MEMBER_SELECT });
     await recordChange(tx, {
       userId,
@@ -367,6 +409,14 @@ export async function leaveSpace(prisma, userId, spaceId, { memberId = null, rea
     });
     return row;
   });
+  // P9-09: the others learn that somebody left, or was removed.
+  await notifySpace(prisma, spaceId, userId, {
+    type: 'space_member',
+    params: { event: removingSomebodyElse ? 'removed' : 'left' },
+    link: `/partage/${spaceId}/membres`,
+    referenceId: `${target.id}:left:${Date.now()}`,
+  });
+  return left;
 }
 
 // ---- invitations -----------------------------------------------------------
@@ -445,10 +495,12 @@ export async function acceptInvite(prisma, userId, token) {
   // Said plainly, and the invitation is left alone rather than consumed.
   if (existing && !existing.leftAt) throw new HttpError(422, 'Already a member of this space', { reason: 'alreadyMember' });
 
+  const closed = await prisma.finSpace.findUnique({ where: { id: invite.spaceId }, select: { closedAt: true } });
+  if (closed?.closedAt) throw new HttpError(423, 'This space is closed: it can only be read', { reason: 'spaceClosed' });
   const members = await prisma.finSpaceMember.count({ where: { spaceId: invite.spaceId, leftAt: null } });
   if (members >= SPACE_MEMBERS_MAX) throw new HttpError(422, 'This space is full', { reason: 'spaceFull' });
 
-  return prisma.$transaction(async (tx) => {
+  const joined = await prisma.$transaction(async (tx) => {
     const membership = existing
       ? // Somebody re-joining starts from private again: their old matrix is not
         // silently restored, because consent given once is not consent for ever.
@@ -475,6 +527,14 @@ export async function acceptInvite(prisma, userId, token) {
     });
     return membership;
   });
+  // P9-09: the others learn that somebody joined.
+  await notifySpace(prisma, invite.spaceId, userId, {
+    type: 'space_member',
+    params: { event: 'joined' },
+    link: `/partage/${invite.spaceId}/membres`,
+    referenceId: `${joined.id}:joined:${Date.now()}`,
+  });
+  return joined;
 }
 
 /**

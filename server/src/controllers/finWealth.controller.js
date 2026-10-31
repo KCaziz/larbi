@@ -85,7 +85,38 @@ export async function getAssetValuations(req, res) {
 // series line up with the figure it leads to.
 export async function getWealthHistory(req, res) {
   const currency = req.query.currency ?? req.user.finCurrency;
-  res.json({ currency, points: await netWorthHistory(prisma, req.user.id, currency) });
+  res.json({ currency, points: await accountsNetWorthHistory(prisma, req.user.id, currency) });
+}
+
+/**
+ * The net worth at the end of each of the last twelve months, read like the
+ * patrimony itself (P8-24): the accounts counted in the net worth as they stood
+ * at that date (PB-F001 then), the declared assets of the other classes valued
+ * by then, and the debts as the correction journal had them. A person with no
+ * account keeps the former series, which reads the declared assets only.
+ */
+export async function accountsNetWorthHistory(prisma, userId, currency, { months = 12, now = new Date() } = {}) {
+  if ((await prisma.finAccount.count({ where: { userId, deletedAt: null } })) === 0) return netWorthHistory(prisma, userId, currency);
+  const [declared, debts] = await Promise.all([listAssets(prisma, userId), listDebts(prisma, userId)]);
+  const points = [];
+  for (let back = months - 1; back >= 0; back -= 1) {
+    const end = new Date(Math.min(now.getTime(), Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - back + 1, 1) - 1));
+    const { accounts } = await accountsWithBalances(prisma, userId, { includeArchived: true, now: end });
+    // An account that did not exist yet contributes nothing, rather than its
+    // opening balance read backwards.
+    const existing = accounts.filter((account) => new Date(account.openingDate) <= end);
+    const { assets, liabilities } = wealthFromAccounts({
+      declared: declared.filter((asset) => asset.valuedAt <= end),
+      // A debt carried by an account is counted through it; the others as they
+      // stand today: their own history is not kept as dated balances.
+      debts: debts.filter((debt) => !debt.accountId),
+      accounts: existing,
+      now: end,
+    });
+    const sum = (rows, field) => rows.filter((row) => row.currency === currency).reduce((total, row) => total + row[field], 0);
+    points.push({ date: end.toISOString().slice(0, 10), net: sum(assets, 'value') - sum(liabilities, 'outstandingPrincipal') });
+  }
+  return points;
 }
 
 export async function getWealth(req, res) {

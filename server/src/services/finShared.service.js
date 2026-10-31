@@ -11,11 +11,15 @@
 // level of the space's permission matrix — so this file asks the matrix rather
 // than inventing a second notion of consent.
 
+import { COLLECTIVE_CATEGORY_KEYS } from '../constants/finCollectiveCategories.js';
 import { EXPENSE_MIN_ROLE, INCOME_SPLIT_REQUIRES_SHARING, SETTLEMENTS_PAGE_SIZE, SHARED_EXPENSES_PAGE_SIZE } from '../constants/finShared.js';
 import { roleAtLeast, sharesAtLeast } from '../constants/finSpace.js';
 import { HttpError } from '../utils/httpError.js';
+import { usableAccount } from './finAccount.service.js';
+import { alertBudgetLevel, notifySpace } from './finSpaceAlerts.service.js';
+import { spaceBudgetsView } from './finSpaceBudget.service.js';
 import { recordChange } from './finChange.service.js';
-import { normaliseSharing, ownMembership, requireRole } from './finSpace.service.js';
+import { assertOpen, normaliseSharing, ownMembership, requireRole } from './finSpace.service.js';
 import { monthlyAmount } from './finance/formulas.js';
 import { detectRecurrences } from './finance/algorithms.js';
 import { computeShares } from './finSharedView.service.js';
@@ -36,6 +40,11 @@ const EXPENSE_SELECT = {
   note: true,
   recordedById: true,
   status: true,
+  lifecycle: true,
+  cancelledAt: true,
+  usageUnit: true,
+  collectiveCategory: true,
+  personalTransactionId: true,
   version: true,
   shares: { select: { id: true, memberId: true, share: true, weight: true } },
 };
@@ -136,7 +145,8 @@ export async function createSharedExpense(prisma, userId, spaceId, body) {
   if (body.currency && body.currency !== space.currency) {
     throw new HttpError(422, 'A shared expense is in the currency of its space', { reason: 'currencyMismatch', expected: space.currency });
   }
-  if (body.occurredAt.getTime() > Date.now()) {
+  // A planned expense is the one that may be dated ahead (P9-04).
+  if (!body.planned && body.occurredAt.getTime() > Date.now()) {
     throw new HttpError(422, 'A shared expense cannot be dated in the future', { reason: 'futureDate' });
   }
 
@@ -173,9 +183,46 @@ export async function createSharedExpense(prisma, userId, spaceId, body) {
     throw new HttpError(422, 'The shares do not add up to the amount', { reason: 'sharesMismatch', total: sum, amount: body.value });
   }
 
+  if (body.collectiveCategory && !COLLECTIVE_CATEGORY_KEYS.includes(body.collectiveCategory)) {
+    throw new HttpError(422, 'Unknown collective category', { reason: 'unknownCategory' });
+  }
   const categoryId = await usableCategory(prisma, userId, body.categoryId ?? null);
 
-  return prisma.$transaction(async (tx) => {
+  // P9-08: money from the payer's own pocket. Checked before anything is written.
+  const link = body.personalLink ?? null;
+  if (link) {
+    if (body.payerId !== me.id) throw new HttpError(422, 'Only the payer can link their own personal money', { reason: 'notYourPayment' });
+    if (body.planned) throw new HttpError(422, 'A planned expense has not been paid yet', { reason: 'plannedNotLinkable' });
+    if (link.accountId) await usableAccount(prisma, userId, link.accountId, space.currency);
+    else await linkableTransaction(prisma, userId, link.transactionId, space.currency);
+  }
+
+  const recorded = await prisma.$transaction(async (tx) => {
+    let personalTransactionId = link?.transactionId ?? null;
+    if (link?.accountId) {
+      // A new personal expense, on the chosen account: what left the payer's money.
+      const made = await tx.finTransaction.create({
+        data: {
+          userId,
+          kind: 'expense',
+          accountId: link.accountId,
+          value: body.value,
+          currency: space.currency,
+          occurredAt: body.occurredAt,
+          categoryId,
+          note: body.label,
+          shared: true,
+          planned: false,
+          scope: 'personal',
+          consentUses: [],
+          source: 'manual',
+          status: 'real',
+        },
+        select: { id: true },
+      });
+      await recordChange(tx, { userId, entity: 'transaction', entityId: made.id, action: 'create', after: { kind: 'expense', value: body.value, currency: space.currency, fromSharedExpense: true } });
+      personalTransactionId = made.id;
+    }
     const expense = await tx.finSharedExpense.create({
       data: {
         spaceId,
@@ -185,6 +232,10 @@ export async function createSharedExpense(prisma, userId, spaceId, body) {
         currency: space.currency,
         occurredAt: body.occurredAt,
         splitMode: body.splitMode,
+        lifecycle: body.planned ? 'planned' : 'done',
+        usageUnit: body.splitMode === 'usage' ? body.usageUnit : null,
+        collectiveCategory: body.collectiveCategory ?? null,
+        personalTransactionId,
         categoryId,
         note: body.note ?? null,
         recordedById: me.id,
@@ -205,6 +256,14 @@ export async function createSharedExpense(prisma, userId, spaceId, body) {
     });
     return expense;
   });
+
+  // P9-09: the others are told, and an envelope that has just crossed 80 % or
+  // 100 % is said to everybody. A planned expense is not news yet.
+  if (!body.planned) {
+    await notifySpace(prisma, spaceId, userId, { type: 'space_expense', params: { label: recorded.label }, link: `/partage/${spaceId}/depenses`, referenceId: recorded.id });
+    await alertBudgetLevel(prisma, spaceId, { collectiveCategory: recorded.collectiveCategory, occurredAt: recorded.occurredAt }, spaceBudgetsView, userId);
+  }
+  return recorded;
 }
 
 // A category this account may point at: the client's reference or its own.
@@ -227,7 +286,7 @@ async function usableCategory(prisma, userId, categoryId) {
  * money too, and removing it silently changes what everybody owes.
  */
 export async function deleteSharedExpense(prisma, userId, spaceId, id, { reason } = {}) {
-  const me = await ownMembership(prisma, userId, spaceId);
+  const me = assertOpen(await ownMembership(prisma, userId, spaceId));
   const expense = await prisma.finSharedExpense.findFirst({ where: { id, spaceId, deletedAt: null }, select: EXPENSE_SELECT });
   if (!expense) throw new HttpError(404, 'Shared expense not found');
 
@@ -249,6 +308,103 @@ export async function deleteSharedExpense(prisma, userId, spaceId, id, { reason 
     });
   });
   return { id };
+}
+
+// A personal expense that can be designated as the source of a collective one:
+// the caller's own, an expense, in the space's currency, not already the source
+// of another (COL-F13: the uniqueness is also enforced by the database).
+async function linkableTransaction(prisma, userId, transactionId, currency) {
+  const row = await prisma.finTransaction.findFirst({
+    where: { id: transactionId, userId, deletedAt: null },
+    select: { id: true, kind: true, currency: true, planned: true, sharedExpense: { select: { id: true } } },
+  });
+  if (!row) throw new HttpError(404, 'Transaction not found');
+  if (row.kind !== 'expense' || row.planned) throw new HttpError(422, 'Only a realised personal expense can be linked', { reason: 'notAnExpense' });
+  if (row.currency !== currency) throw new HttpError(422, 'The transaction is not in the currency of the space', { reason: 'currencyMismatch', expected: currency });
+  if (row.sharedExpense) throw new HttpError(409, 'This personal expense is already linked to a collective one', { reason: 'alreadyLinked' });
+}
+
+/**
+ * Designates an already-entered personal expense as the source of a collective
+ * one (P9-08). Only the payer, only if nothing is linked yet: the amount is
+ * never counted twice.
+ */
+export async function linkPersonalTransaction(prisma, userId, spaceId, id, { transactionId }) {
+  const me = assertOpen(await ownMembership(prisma, userId, spaceId));
+  const expense = await prisma.finSharedExpense.findFirst({ where: { id, spaceId, deletedAt: null }, select: EXPENSE_SELECT });
+  if (!expense) throw new HttpError(404, 'Shared expense not found');
+  if (expense.payerId !== me.id) throw new HttpError(403, 'Only the payer can link their personal money', { reason: 'notYourPayment' });
+  if (expense.personalTransactionId) throw new HttpError(409, 'This expense is already linked to a personal transaction', { reason: 'alreadyLinked' });
+  await linkableTransaction(prisma, userId, transactionId, expense.currency);
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.finSharedExpense.update({ where: { id }, data: { personalTransactionId: transactionId, version: { increment: 1 } }, select: EXPENSE_SELECT });
+    await recordChange(tx, { userId, entity: SHARED_EXPENSE_ENTITY, entityId: id, action: 'correct', field: 'personalTransactionId', before: null, after: transactionId });
+    return updated;
+  });
+}
+
+/** Cuts the link; both rows stay, each on its own side. */
+export async function unlinkPersonalTransaction(prisma, userId, spaceId, id) {
+  const me = assertOpen(await ownMembership(prisma, userId, spaceId));
+  const expense = await prisma.finSharedExpense.findFirst({ where: { id, spaceId, deletedAt: null }, select: EXPENSE_SELECT });
+  if (!expense) throw new HttpError(404, 'Shared expense not found');
+  if (expense.payerId !== me.id) throw new HttpError(403, 'Only the payer can change this link', { reason: 'notYourPayment' });
+  if (!expense.personalTransactionId) throw new HttpError(409, 'This expense is not linked', { reason: 'notLinked' });
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.finSharedExpense.update({ where: { id }, data: { personalTransactionId: null, version: { increment: 1 } }, select: EXPENSE_SELECT });
+    await recordChange(tx, { userId, entity: SHARED_EXPENSE_ENTITY, entityId: id, action: 'correct', field: 'personalTransactionId', before: expense.personalTransactionId, after: null });
+    return updated;
+  });
+}
+
+/**
+ * Cancels a shared expense (QC-08): it stops counting, the balances are
+ * recomputed from what is left, and the row stays with its trace.
+ *
+ * Same people as deleting: whoever recorded it, its payer, or an admin. A
+ * cancelled expense cannot be cancelled again, and it cannot come back — a
+ * mistaken cancellation is fixed by recording the expense anew.
+ */
+export async function cancelSharedExpense(prisma, userId, spaceId, id, { reason } = {}) {
+  const me = assertOpen(await ownMembership(prisma, userId, spaceId));
+  const expense = await prisma.finSharedExpense.findFirst({ where: { id, spaceId, deletedAt: null }, select: EXPENSE_SELECT });
+  if (!expense) throw new HttpError(404, 'Shared expense not found');
+  if (expense.lifecycle === 'cancelled') throw new HttpError(409, 'This expense is already cancelled', { reason: 'alreadyCancelled' });
+  if (!(expense.recordedById === me.id || expense.payerId === me.id) && !roleAtLeast(me.role, 'admin')) {
+    throw new HttpError(403, 'Only the payer, whoever recorded it, or an admin may cancel this expense', { reason: 'notYours' });
+  }
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.finSharedExpense.update({
+      where: { id },
+      data: { lifecycle: 'cancelled', cancelledAt: new Date(), version: { increment: 1 } },
+      select: EXPENSE_SELECT,
+    });
+    await recordChange(tx, {
+      userId,
+      entity: SHARED_EXPENSE_ENTITY,
+      entityId: id,
+      action: 'correct',
+      field: 'lifecycle',
+      before: expense.lifecycle,
+      after: 'cancelled',
+      reason: reason ?? null,
+    });
+    return updated;
+  });
+}
+
+/** A planned expense that has happened: it starts counting in the balances. */
+export async function confirmPlannedExpense(prisma, userId, spaceId, id) {
+  const me = await requireRole(prisma, userId, spaceId, EXPENSE_MIN_ROLE);
+  const expense = await prisma.finSharedExpense.findFirst({ where: { id, spaceId, deletedAt: null }, select: EXPENSE_SELECT });
+  if (!expense) throw new HttpError(404, 'Shared expense not found');
+  if (expense.lifecycle !== 'planned') throw new HttpError(409, 'Only a planned expense can be confirmed', { reason: 'notPlanned' });
+  if (expense.occurredAt.getTime() > Date.now()) throw new HttpError(422, 'A planned expense is confirmed once its date has come', { reason: 'notYet' });
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.finSharedExpense.update({ where: { id }, data: { lifecycle: 'done', version: { increment: 1 } }, select: EXPENSE_SELECT });
+    await recordChange(tx, { userId, entity: SHARED_EXPENSE_ENTITY, entityId: id, action: 'correct', field: 'lifecycle', before: 'planned', after: 'done', reason: null });
+    return updated;
+  });
 }
 
 // ---- settlements -----------------------------------------------------------
@@ -303,7 +459,7 @@ export async function createSettlement(prisma, userId, spaceId, body) {
     throw new HttpError(403, 'Only a party to the settlement, or an admin, may record it', { reason: 'notYours' });
   }
 
-  return prisma.$transaction(async (tx) => {
+  const recorded = await prisma.$transaction(async (tx) => {
     const settlement = await tx.finSettlement.create({
       data: {
         spaceId,
@@ -330,10 +486,21 @@ export async function createSettlement(prisma, userId, spaceId, body) {
     });
     return settlement;
   });
+
+  // P9-09: the other side of the settlement is told, nobody else.
+  const parties = await prisma.finSpaceMember.findMany({ where: { id: { in: [body.fromId, body.toId] } }, select: { userId: true } });
+  await notifySpace(prisma, spaceId, userId, {
+    type: 'space_settlement',
+    params: { label: null },
+    link: `/partage/${spaceId}/depenses`,
+    referenceId: recorded.id,
+    onlyUserIds: parties.map((party) => party.userId).filter((id) => id !== userId),
+  });
+  return recorded;
 }
 
 export async function deleteSettlement(prisma, userId, spaceId, id, { reason } = {}) {
-  const me = await ownMembership(prisma, userId, spaceId);
+  const me = assertOpen(await ownMembership(prisma, userId, spaceId));
   const settlement = await prisma.finSettlement.findFirst({ where: { id, spaceId, deletedAt: null }, select: SETTLEMENT_SELECT });
   if (!settlement) throw new HttpError(404, 'Settlement not found');
 
@@ -360,7 +527,9 @@ export async function loadSharedData(prisma, spaceId) {
     // up to zero.
     liveMembers(prisma, spaceId, { includeLeft: true }),
     prisma.finSharedExpense.findMany({
-      where: { spaceId, deletedAt: null },
+      // Only a realised expense counts: a planned one has not happened, a
+      // cancelled one is kept for its trace and counts for nothing (QC-08).
+      where: { spaceId, deletedAt: null, lifecycle: 'done' },
       select: { id: true, payerId: true, value: true, currency: true, shares: { select: { memberId: true, share: true } } },
     }),
     prisma.finSettlement.findMany({
@@ -401,7 +570,7 @@ export async function detectSharedRecurrences(prisma, userId, spaceId) {
  */
 export async function confirmSharedRecurrence(prisma, userId, spaceId, body) {
   const existing = await prisma.finSharedExpense.findMany({
-    where: { spaceId, deletedAt: null, label: body.label },
+    where: { spaceId, deletedAt: null, lifecycle: { not: 'cancelled' }, label: body.label },
     select: { occurredAt: true },
   });
   if (existing.some((row) => monthKey(row.occurredAt) === monthKey(body.occurredAt))) {

@@ -8,12 +8,17 @@ import {
   ROUNDING_RULE,
   ROUNDING_RULE_TEXT,
   SETTLEMENTS_ARE_DECLARATIVE,
+  SMALL_BALANCE_DEFAULT,
   SPLIT_MODES,
 } from '../constants/finShared.js';
 import { listChanges } from '../services/finChange.service.js';
 import {
   SETTLEMENT_ENTITY,
   SHARED_EXPENSE_ENTITY,
+  cancelSharedExpense,
+  confirmPlannedExpense,
+  linkPersonalTransaction,
+  unlinkPersonalTransaction,
   confirmSharedRecurrence,
   createSettlement,
   createSharedExpense,
@@ -49,20 +54,35 @@ export function getSharedReferences(req, res) {
     settlementsAreDeclarative: SETTLEMENTS_ARE_DECLARATIVE,
     // And the one thing the income split needs from P6-13's matrix.
     incomeSplitRequiresSharing: INCOME_SPLIT_REQUIRES_SHARING,
-    formulas: ['F041', 'F042', 'F043', 'ALG-02'].map(describeFormula),
+    smallBalanceDefault: SMALL_BALANCE_DEFAULT,
+    formulas: ['F041', 'F042', 'F043', 'COL-F03', 'ALG-02'].map(describeFormula),
   });
 }
 
 // ---- shared expenses -------------------------------------------------------
+
+// The personal side of a collective expense is its payer's business (P9-08):
+// the account it left is nobody else's to see, so the link is shown to the
+// payer alone and removed from what everybody else reads.
+async function hideForeignLinks(spaceId, userId, expenses) {
+  const members = await prisma.finSpaceMember.findMany({ where: { spaceId }, select: { id: true, userId: true } });
+  const owner = new Map(members.map((member) => [member.id, member.userId]));
+  return expenses.map((expense) => {
+    if (owner.get(expense.payerId) === userId) return { ...expense, linkedToPersonal: expense.personalTransactionId !== null };
+    const { personalTransactionId, ...visible } = expense;
+    return visible;
+  });
+}
 
 export async function getSharedExpenses(req, res) {
   const result = await listSharedExpenses(prisma, req.user.id, req.params.id, req.query);
   // The names the screen needs, joined here so the interface never has to guess
   // who a member id is.
   const names = await memberNames(req.params.id);
+  const visible = await hideForeignLinks(req.params.id, req.user.id, result.expenses);
   res.json({
     ...result,
-    expenses: result.expenses.map((expense) => ({
+    expenses: visible.map((expense) => ({
       ...expense,
       payer: names.get(expense.payerId) ?? null,
       recordedBy: names.get(expense.recordedById) ?? null,
@@ -80,11 +100,30 @@ async function memberNames(spaceId) {
 }
 
 export async function postSharedExpense(req, res) {
-  res.status(201).json({ expense: await createSharedExpense(prisma, req.user.id, req.params.id, req.body) });
+  const expense = await createSharedExpense(prisma, req.user.id, req.params.id, req.body);
+  res.status(201).json({ expense: (await hideForeignLinks(req.params.id, req.user.id, [expense]))[0] });
+}
+
+export async function linkExpense(req, res) {
+  const expense = await linkPersonalTransaction(prisma, req.user.id, req.params.id, req.params.expenseId, req.body);
+  res.json({ expense: (await hideForeignLinks(req.params.id, req.user.id, [expense]))[0] });
+}
+
+export async function unlinkExpense(req, res) {
+  const expense = await unlinkPersonalTransaction(prisma, req.user.id, req.params.id, req.params.expenseId);
+  res.json({ expense: (await hideForeignLinks(req.params.id, req.user.id, [expense]))[0] });
 }
 
 export async function removeSharedExpense(req, res) {
   res.json(await deleteSharedExpense(prisma, req.user.id, req.params.id, req.params.expenseId, { reason: req.body?.reason }));
+}
+
+export async function cancelExpense(req, res) {
+  res.json({ expense: await cancelSharedExpense(prisma, req.user.id, req.params.id, req.params.expenseId, { reason: req.body?.reason }) });
+}
+
+export async function confirmExpense(req, res) {
+  res.json({ expense: await confirmPlannedExpense(prisma, req.user.id, req.params.id, req.params.expenseId) });
 }
 
 export async function getSharedExpenseHistory(req, res) {
@@ -149,7 +188,7 @@ export async function getBalances(req, res) {
   const me = await ownMembership(prisma, req.user.id, req.params.id);
   const { members, expenses, settlements } = await loadSharedData(prisma, req.params.id);
   const balances = buildBalances({ members, expenses, settlements, currency: me.space.currency });
-  const plan = settlementPlan(balances, { currency: me.space.currency });
+  const plan = settlementPlan(balances, { currency: me.space.currency, smallBalance: me.space.smallBalance });
 
   const names = new Map(members.map((member) => [member.id, member.displayName ?? member.user?.name ?? null]));
   res.json({
@@ -165,6 +204,7 @@ export async function getBalances(req, res) {
         plan.transferts === null
           ? null
           : plan.transferts.map((transfer) => ({ ...transfer, fromName: names.get(transfer.from) ?? null, toName: names.get(transfer.to) ?? null })),
+      masques: (plan.masques ?? []).map((transfer) => ({ ...transfer, fromName: names.get(transfer.from) ?? null, toName: names.get(transfer.to) ?? null })),
     },
     // Said in the answer, so no screen can present this as a payment button.
     reglementsDeclaratifs: SETTLEMENTS_ARE_DECLARATIVE,

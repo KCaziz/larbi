@@ -51,6 +51,8 @@ export const JOURNALLED_FIELDS = {
   envelope: ['categoryId', 'kind', 'value', 'currency', 'cap', 'recurring', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
   // Calendar and recurring expenses (P6-07). The DATE is journalled as much as
   // the amount: moving a due date changes which period a figure belongs to.
+  // Tasks of a space (P9-06): who it is on, when, and how it stands.
+  spaceTask: ['title', 'description', 'category', 'assigneeId', 'participants', 'dueDate', 'priority', 'recurrence', 'checklist', 'weight', 'status', 'reminderDays', 'linkedExpenseId', 'deletedAt'],
   recurrence: ['label', 'categoryId', 'kind', 'value', 'currency', 'frequency', 'nextDate', 'endDate', 'reminderDays', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
   provision: ['label', 'categoryId', 'value', 'currency', 'provisioned', 'targetDate', 'reminderDays', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
   // Goals (P6-08) and debts (P6-10). Both services already call

@@ -36,7 +36,8 @@ export async function getHome(req, res) {
   const incomeBreakdown = synthesis.mixedCurrencies ? [] : breakdown(incomeRows);
 
   // Category labels, icons and colours, joined once for both breakdowns.
-  const ids = [...new Set([...synthesis.repartition, ...incomeBreakdown].map((row) => row.categoryId).filter(Boolean))];
+  const declared = synthesisData.incomes.filter((row) => !row.archivedAt && row.currency === synthesis.currency);
+  const ids = [...new Set([...synthesis.repartition, ...incomeBreakdown, ...declared].map((row) => row.categoryId).filter(Boolean))];
   const categories = new Map(
     (await prisma.finCategory.findMany({ where: { id: { in: ids } }, select: { id: true, label: true, icon: true, color: true, group: true } })).map((row) => [row.id, row]),
   );
@@ -44,6 +45,15 @@ export async function getHome(req, res) {
     const category = categories.get(row.categoryId) ?? null;
     return { ...row, label: category?.label ?? null, icon: category?.icon ?? null, color: category?.color ?? null, group: category?.group ?? null };
   };
+
+  // The declared resources, the salary FIRST (P8-24, P8-11): « Salaire & emploi »
+  // before any other group, then the largest. The figure of each is what the
+  // person declared; the total of the month is `revenusPrevus` (PB-F002).
+  const salaryFirst = (row) => (categories.get(row.categoryId)?.group === 'Salaire & emploi' ? 0 : 1);
+  const revenusDeclares = [...declared]
+    .sort((a, b) => salaryFirst(a) - salaryFirst(b) || b.value - a.value)
+    .slice(0, 3)
+    .map((row) => ({ id: row.id, label: row.label ?? categories.get(row.categoryId)?.label ?? null, value: row.value, frequency: row.frequency, currency: row.currency, salary: salaryFirst(row) === 0 }));
 
   // The budget of the moment, as cards (« Nos budgets »).
   let budgetCard = null;
@@ -84,6 +94,7 @@ export async function getHome(req, res) {
       depenses: synthesis.depenses,
       fluxNet: synthesis.fluxNet,
       revenusPrevus: synthesis.revenusPrevus,
+      revenusDeclares,
       prevuReel: synthesis.prevuReel,
       tendance: synthesis.tendance,
       depensesParCategorie: synthesis.repartition.map(describe),

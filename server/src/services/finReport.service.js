@@ -14,6 +14,8 @@ import { methodAnalysis } from './finBudgetMethods.service.js';
 import { buildDebtSynthesis, listDebts } from './finDebt.service.js';
 import { buildGoalView, goalsWithCapital, listGoals } from './finGoal.service.js';
 import { clearingView } from './finMovement.service.js';
+import { markedSavingsInPeriod } from './finSavings.service.js';
+import { isReal } from './finance/dataModel.js';
 import { buildReserveView } from './finReserve.service.js';
 import { buildSynthesis, debtRatioIncome, loadSynthesisData } from './finSynthesis.service.js';
 import { buildWealthView, listAssets } from './finWealth.service.js';
@@ -45,7 +47,90 @@ const trend = (current, previous, { currency, now }) =>
     now,
   });
 
-export async function buildMonthlyReport(prisma, user, { month, now = new Date(), wealthFromAccounts }) {
+/**
+ * Two months of the person's choosing, side by side (P8-24, the Synthèse's
+ * « comparer deux mois »). Everything comes from the monthly report itself —
+ * `buildMonthlyReport` for each month — and the change from one to the other is
+ * PB-F023 (`(B − A) / |A|`, not computable on a zero base). Nothing is
+ * recomputed by the screen, and nothing is judged: a figure and its change.
+ */
+export async function compareMonths(prisma, user, { month, other, now = new Date(), wealthFromAccounts }) {
+  const [a, b] = await Promise.all([
+    buildMonthlyReport(prisma, user, { month, now, wealthFromAccounts }),
+    buildMonthlyReport(prisma, user, { month: other, now, wealthFromAccounts }),
+  ]);
+  const currency = a.currency;
+  const change = (field) => trend(b.sections.R01[field].resultat, a.sections.R01[field].resultat, { currency, now });
+  // The categories of both months, each with its two amounts (null: not among the top five that month).
+  const keys = new Map();
+  for (const [side, report] of [['a', a], ['b', b]]) {
+    for (const row of report.sections.R03.topCategories) {
+      const key = row.categoryId ?? 'none';
+      keys.set(key, { ...(keys.get(key) ?? { categoryId: row.categoryId ?? null, label: row.label, a: null, b: null }), [side]: row.total });
+    }
+  }
+  return {
+    currency,
+    mois: { a: month, b: other },
+    revenus: { a: a.sections.R01.revenus, b: b.sections.R01.revenus, variation: change('revenus') },
+    depenses: { a: a.sections.R01.depenses, b: b.sections.R01.depenses, variation: change('depenses') },
+    fluxNet: { a: a.sections.R01.fluxNet, b: b.sections.R01.fluxNet, variation: change('fluxNet') },
+    categories: [...keys.values()].sort((x, y) => (y.b ?? y.a ?? 0) - (x.b ?? x.a ?? 0)),
+  };
+}
+
+// AN-F002 and the monthly cascade (G-10) read the real expenses by what they
+// are: essential or flexible, by the flag the reference gives each category
+// and the person may change (AN-F001, « classification visible »).
+const isDebtGroup = (row) => row.category?.group === 'Dettes & engagements';
+
+/**
+ * R-06 and the cascade, from the period's real movements.
+ *
+ * `reduction` is the share of the flexible spending the person imagines
+ * cutting (AN-F010, 0 to 100 %): THEIR figure, simulation only — nothing is
+ * saved, nothing is advised. The scenario savings are the current capacity
+ * plus that reduction (AN-F009), and the scenario rate is over realised
+ * income (AN-F011).
+ */
+export function savingsScenarioAndCascade(movements, { currency, reduction = 0.1, saved = 0, now }) {
+  const real = movements.filter((row) => row.currency === currency && !row.planned && isReal(row) && row.category?.family !== 'goal');
+  const sum = (rows) => rows.reduce((total, row) => total + row.value, 0);
+  const expenses = real.filter((row) => row.kind === 'expense');
+  const income = sum(real.filter((row) => row.kind === 'income'));
+  const essential = expenses.filter((row) => row.category?.essential === true && !isDebtGroup(row));
+  const debt = expenses.filter((row) => isDebtGroup(row));
+  const flexible = expenses.filter((row) => !(row.category?.essential === true) && !isDebtGroup(row));
+  const flexibleTotal = sum(flexible);
+  const capacity = income - sum(expenses);
+  const cut = Math.round(flexibleTotal * reduction);
+  const inputs = { revenus_realises: income, depenses_flexibles: flexibleTotal, reduction_saisie: reduction };
+  const answer = (id, result) => computed(id, result, { inputs, currency, now });
+  const hasData = income > 0 || expenses.length > 0;
+  return {
+    scenario: {
+      depensesFlexibles: answer('AN-F002', hasData ? flexibleTotal : null),
+      reduction,
+      reductionSimulee: answer('AN-F010', hasData ? cut : null),
+      epargneScenario: answer('AN-F009', hasData ? capacity + cut : null),
+      tauxEpargneScenario: answer('AN-F011', income > 0 ? (capacity + cut) / income : null),
+    },
+    // Revenus → charges → dette → flexibles → épargne → reste: the month in
+    // one line, each step a plain total (nothing here is a formula).
+    cascade: hasData
+      ? [
+          { cle: 'income', montant: income },
+          { cle: 'essential', montant: -sum(essential) },
+          { cle: 'debt', montant: -sum(debt) },
+          { cle: 'flexible', montant: -flexibleTotal },
+          { cle: 'saved', montant: -saved },
+          { cle: 'left', montant: income - sum(expenses) - saved },
+        ]
+      : [],
+  };
+}
+
+export async function buildMonthlyReport(prisma, user, { month, now = new Date(), wealthFromAccounts, reduction = 0.1 }) {
   const userId = user.id;
   const currency = user.finCurrency;
   const period = monthBounds(month);
@@ -119,6 +204,10 @@ export async function buildMonthlyReport(prisma, user, { month, now = new Date()
     r05 = await methodAnalysis(prisma, userId, { method: 'M-01', budget, view, movements: budgetData.movements });
   }
 
+  // R-06 and the cascade (G-10).
+  const periodSavings = await markedSavingsInPeriod(prisma, userId, currency, { from: period.start, to: until });
+  const r06 = savingsScenarioAndCascade(data.movements, { currency, reduction, saved: periodSavings.net ?? 0, now });
+
   // R-07 / R-08 — goals and the emergency fund.
   const goals = await goalsWithCapital(prisma, userId, goalRows.filter((goal) => goal.status !== 'fictional'));
   const r07 = goals.map((goal) => ({ id: goal.id, label: goal.label, progressStatus: goal.progressStatus, vue: buildGoalView(goal, { now }) }));
@@ -141,8 +230,9 @@ export async function buildMonthlyReport(prisma, user, { month, now = new Date()
     genereLe: now.toISOString(),
     mois: month,
     periode: { debut: period.start, fin: period.end, luJusquAu: until },
+    cascade: r06.cascade,
     currency,
-    sections: { R01: r01, R02: r02, R03: r03, R04: r04, R05: r05, R07: r07, R08: r08, R09: r09, R10: r10, R11: r11 },
+    sections: { R01: r01, R02: r02, R03: r03, R04: r04, R05: r05, R06: r06.scenario, R07: r07, R08: r08, R09: r09, R10: r10, R11: r11 },
   };
 }
 
@@ -172,6 +262,10 @@ export function reportRows(report) {
     add('R-04', 'Dépenses dans les enveloppes', s.R04.reel);
     add('R-04', 'Reste', s.R04.reste);
   }
+  add('R-06', 'Dépenses flexibles', s.R06.depensesFlexibles);
+  add('R-06', 'Réduction simulée', s.R06.reductionSimulee);
+  add('R-06', 'Épargne du scénario', s.R06.epargneScenario);
+  add('R-06', 'Taux d’épargne du scénario', s.R06.tauxEpargneScenario);
   for (const goal of s.R07) add('R-07', goal.label, goal.vue.progres);
   add('R-08', 'Mois de fonds d’urgence', s.R08.moisReserve);
   add('R-08', 'Manque', s.R08.manque);

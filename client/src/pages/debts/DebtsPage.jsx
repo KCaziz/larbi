@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { Archive, ArchiveRestore, ChevronDown, ChevronUp, Landmark, Plus, Trash2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
+import RingChart from '../../components/fincludia/RingChart.jsx';
 import { useAuth } from '../../auth/useAuth.js';
 import { formatDate } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
@@ -98,6 +99,32 @@ export default function DebtsPage() {
           </p>
         ))}
 
+        {/* G-11: what is owed by type, and — apart — what is owed to me. */}
+        {[
+          ['owed', owed],
+          ['lent', lent],
+        ].map(([side, rows]) => {
+          const active = rows.filter((debt) => !debt.archivedAt && debt.outstandingPrincipal > 0);
+          const types = [...new Set(active.map((debt) => debt.debtType ?? 'other'))];
+          if (types.length === 0) return null;
+          const tones = ['var(--accent)', 'var(--green)', 'var(--clay)', 'var(--warn)', 'var(--border-strong)'];
+          return (
+            <section key={side} aria-labelledby={`debts-chart-${side}`}>
+              <h2 id={`debts-chart-${side}`}>{t(`debts.byType.${side}`)}</h2>
+              <RingChart
+                rows={types.map((type, index) => ({
+                  key: type,
+                  label: t(`debts.types.${type}`),
+                  total: active.filter((debt) => (debt.debtType ?? 'other') === type).reduce((sum, debt) => sum + debt.outstandingPrincipal, 0),
+                  color: tones[index % tones.length],
+                }))}
+                currency={currency}
+                label={t(`debts.byType.${side}`)}
+              />
+            </section>
+          );
+        })}
+
         <div className="debts-toolbar">
           <label className="debts-check" htmlFor="debts-archived">
             <input id="debts-archived" type="checkbox" checked={showArchived} onChange={(event) => setShowArchived(event.target.checked)} />
@@ -122,7 +149,7 @@ export default function DebtsPage() {
         ) : (
           <ul className="debts-list">
             {owed.map((debt) => (
-              <DebtRow key={debt.id} debt={debt} accounts={accounts.data?.accounts ?? []} run={run} />
+              <DebtRow key={debt.id} debt={debt} accounts={accounts.data?.accounts ?? []} budgetCategories={references.data?.budgetCategories ?? []} run={run} />
             ))}
           </ul>
         )}
@@ -133,7 +160,7 @@ export default function DebtsPage() {
             <h2 id="debts-receivables">{t('debts.receivables', { amount: formatAmount(i18n.language, synthese.creances?.encours ?? 0, currency) })}</h2>
             <ul className="debts-list">
               {lent.map((debt) => (
-                <DebtRow key={debt.id} debt={debt} accounts={accounts.data?.accounts ?? []} run={run} />
+                <DebtRow key={debt.id} debt={debt} accounts={accounts.data?.accounts ?? []} budgetCategories={references.data?.budgetCategories ?? []} run={run} />
               ))}
             </ul>
           </section>
@@ -166,12 +193,18 @@ export function formatAmount(language, amount, currency) {
   }
 }
 
-function DebtRow({ debt, accounts, run }) {
+function DebtRow({ debt, accounts, budgetCategories, run }) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
   const usable = accounts.filter((account) => !account.archivedAt && !account.liability && account.currency === debt.currency && account.id !== debt.accountId && account.type !== 'AC-09');
   const [paymentAccount, setPaymentAccount] = useState(usable[0]?.id ?? '');
+  const [budgetCategory, setBudgetCategory] = useState(budgetCategories[0]?.id ?? '');
+  // P8-24: the monthly instalment planned in the current budget.
+  const planInBudget = (event) => {
+    event.preventDefault();
+    run(() => api.post(`/fin/debts/${debt.id}/budget`, { categoryId: budgetCategory || budgetCategories[0]?.id }), 'debts.plannedInBudget');
+  };
 
   const pay = (event) => {
     event.preventDefault();
@@ -199,6 +232,26 @@ function DebtRow({ debt, accounts, run }) {
         <div className="debts-row-body">
           <p className="debts-detail-line">{t('debts.instalmentLine', { amount: formatAmount(i18n.language, debt.monthlyInstalment, debt.currency) })}</p>
           {debt.purpose && <p className="debts-detail-line">{debt.purpose}</p>}
+
+          {debt.direction !== 'lent' && debt.monthlyInstalment > 0 && budgetCategories.length > 0 && (
+            <form className="debts-budget-form" onSubmit={planInBudget}>
+              <div className="fin-field">
+                <label htmlFor={`debt-budget-${debt.id}`}>{t('debts.budgetCategory')}</label>
+                <select id={`debt-budget-${debt.id}`} value={budgetCategory} onChange={(event) => setBudgetCategory(event.target.value)}>
+                  {budgetCategories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.icon ? `${category.icon} ` : ''}
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <Button type="submit" variant="secondary">
+                {t(debt.budgetEnvelopeId ? 'debts.updateInBudget' : 'debts.planInBudget')}
+              </Button>
+              {debt.budgetEnvelopeId && <p className="fin-hint">{t('debts.inBudget')}</p>}
+            </form>
+          )}
 
           <form className="debts-payment-form" onSubmit={pay}>
             <AmountField

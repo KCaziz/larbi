@@ -1,5 +1,6 @@
 import { prisma } from '../../config/prisma.js';
-import { FIN_INTENTS } from '../../constants/finAssistant.js';
+import { FIN_INTENTS, FIN_INTENT_LINKS } from '../../constants/finAssistant.js';
+import { FIN_INTENT_CATALOGUE, finIntent } from '../../constants/finIntents.js';
 import { sanitizeRichText, richTextToPlain } from '../../services/sanitize.service.js';
 import { isKnownDeepLink } from '../../services/finAssistant.service.js';
 import { HttpError } from '../../utils/httpError.js';
@@ -8,6 +9,13 @@ import { HttpError } from '../../utils/httpError.js';
 // intents are seeded once from the client's own closed list (never created or
 // renamed freely — code is fixed), keywords/response/deep-link are editable;
 // flows (state machine) and the audit log are managed here too.
+
+// What the client's own file allows for an intention (answer, questions, guard-rail),
+// shown to the administrator who writes the public text — never sent to the public.
+const referenceOf = (code) => {
+  const row = finIntent(code);
+  return row ? { answer: row.answer, steps: row.steps, guardrail: row.guardrail, source: row.source, fallback: row.fallback } : null;
+};
 
 const intentRow = (i) => ({
   id: i.id,
@@ -20,6 +28,7 @@ const intentRow = (i) => ({
   deepLinkAvailable: isKnownDeepLink(i.deepLinkPath),
   status: i.status,
   updatedAt: i.updatedAt,
+  reference: referenceOf(i.code),
 });
 
 // The 8 rows exist once the admin first opens this screen (idempotent): the
@@ -31,6 +40,23 @@ export async function listIntents(req, res) {
   if (missing.length) {
     await prisma.finIntent.createMany({
       data: missing.map((i, index) => ({ code: i.code, label: i.label, exampleQuery: i.exampleQuery, responseTemplate: '<p></p>', position: index })),
+    });
+  }
+  // The client's 25 intentions (CB01 to CB99), seeded as drafts the same way (P8-24):
+  // their trigger words and their link on the new addresses are the client's and ours;
+  // the PUBLIC text is still written by an administrator before anything is published.
+  const missingCatalogue = FIN_INTENT_CATALOGUE.filter((i) => !byCode.has(i.code));
+  if (missingCatalogue.length) {
+    await prisma.finIntent.createMany({
+      data: missingCatalogue.map((i, index) => ({
+        code: i.code,
+        label: i.label,
+        exampleQuery: i.triggers[0] ?? i.label,
+        keywords: i.triggers,
+        responseTemplate: '<p></p>',
+        deepLinkPath: FIN_INTENT_LINKS[i.code] ?? null,
+        position: 100 + index,
+      })),
     });
   }
   const rows = await prisma.finIntent.findMany({ orderBy: { position: 'asc' } });
