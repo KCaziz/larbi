@@ -17,30 +17,31 @@ datasource db {
 }
 
 model User {
-  finMissionAttempts FinMissionAttempt[]
-  finSnapshots       FinSnapshot[]
-  id                 String              @id @default(uuid())
-  email              String              @unique @db.VarChar(254)
-  passwordHash       String
-  name               String
+  finPushSubscriptions FinPushSubscription[]
+  finMissionAttempts   FinMissionAttempt[]
+  finSnapshots         FinSnapshot[]
+  id                   String                @id @default(uuid())
+  email                String                @unique @db.VarChar(254)
+  passwordHash         String
+  name                 String
   // Free-form string, not a DB enum: the cahier des charges explicitly
   // allows adding new account categories later ("autres catégories
   // pouvant être ajoutées"), and a Postgres enum would need a migration
   // for each new one. Allowed values are validated at the application
   // layer (see P1-06).
-  accountType        String
+  accountType          String
   // "standard" | "premium" (see TASKS.md section 1, "Accès aux
   // fonctionnalités"). Same free-form-string reasoning as accountType.
-  accessLevel        String              @default("standard")
+  accessLevel          String                @default("standard")
   // "user" | "admin". Orthogonal to accessLevel: role = what you may
   // manage (RBAC), accessLevel = which content tier you may consume.
   // Never settable from a public endpoint (see auth.schemas.js).
-  role               String              @default("user")
+  role                 String                @default("user")
   // "active" | "suspended" (P3-16). Checked on every request (requireAuth), so
   // suspending an account takes effect immediately, on the same session.
-  status             String              @default("active")
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
+  status               String                @default("active")
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 
   // ---- FINCLUDIA publics (P3-18) --------------------------------------------
   // The FINCLUDIA profile a user has chosen (one of the 8 publics of the
@@ -1380,6 +1381,10 @@ model FinSharedExpense {
   // The ONE personal transaction this expense is paid from (P9-08, COL-F13,
   // B5): unique, so 1 collective expense <-> 0 or 1 personal transaction. Only
   // its payer can see it.
+  // An optional, free label inside the category, THIS space's own (P9-14): the workbook gives no list.
+  subCategory           String?          @db.VarChar(40)
+  // The receipt of this expense, if any.
+  receipt               Media?           @relation("SharedExpenseReceipt")
   personalTransactionId String?          @unique
   personalTransaction   FinTransaction?  @relation("SharedExpenseSource", fields: [personalTransactionId], references: [id], onDelete: SetNull)
   // Who recorded it, which is not always the payer: a flatmate may enter the
@@ -1971,6 +1976,11 @@ model Media {
   // transaction instead, erasing an account left every receipt behind.
   finTransactionId String?         @unique
   finTransaction   FinTransaction? @relation("TransactionReceipt", fields: [finTransactionId], references: [id], onDelete: Cascade)
+
+  // The receipt of a SHARED expense (P9-14): private storage, readable by the members of the space only,
+  // and gone with the expense it documents. Never a public URL.
+  sharedExpenseId String?           @unique
+  sharedExpense   FinSharedExpense? @relation("SharedExpenseReceipt", fields: [sharedExpenseId], references: [id], onDelete: Cascade)
 
   // Target of the composite foreign key from lesson_blocks: a block can only show a file
   // that belongs to ITS OWN lesson.
@@ -2826,4 +2836,25 @@ model FinMissionAttempt {
 
   @@index([userId, missionId])
   @@map("fin_mission_attempts")
+}
+
+// A browser that agreed to receive the person's notifications (P8-24, Web Push).
+// One row per browser; the endpoint is the push service's own address for it and
+// is secret enough that it is never sent to anybody else. Removed the moment the
+// push service says the browser is gone (404 / 410) or the person turns it off.
+model FinPushSubscription {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint   String    @unique @db.VarChar(700)
+  p256dh     String    @db.VarChar(200)
+  auth       String    @db.VarChar(100)
+  // The browser's own name, from its User-Agent — what the person recognises in
+  // their list; no address, no fingerprint (same rule as the sessions).
+  label      String    @db.VarChar(80)
+  createdAt  DateTime  @default(now())
+  lastSentAt DateTime?
+
+  @@index([userId])
+  @@map("fin_push_subscriptions")
 }

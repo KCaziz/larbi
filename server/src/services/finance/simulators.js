@@ -27,7 +27,9 @@ import { yearly } from './money.js';
 // `hypotheses` is filled only for simulators that project into the future: the
 // client requires the assumptions of a simulation to be visible, and sending the
 // field on a plain monthly total would suggest a projection that never happened.
-const run = (resultats, hypotheses = null) => ({ resultats, hypotheses });
+// `serie` is for a simulator that also shows a value PER STEP (the compound
+// interest table, year by year): each of its values is itself a contract answer.
+const run = (resultats, hypotheses = null, serie = null) => ({ resultats, hypotheses, serie });
 
 const entry = (amount, currency) => ({ amount, currency });
 
@@ -158,6 +160,40 @@ export const SIMULATOR_FUNCTIONS = {
         versementRequis: computed('F032', f.paymentWithReturn({ target, initial: capital, rate: monthlyRate, periods: months }), { inputs: { target, capital, monthlyRate, months }, ...ctx }),
       },
       { rendement_mensuel: monthlyRate, horizon_mois: months },
+    );
+  },
+
+  // CAL-IC — Intérêts composés (client's request of 2026-11-01).
+  // The rate is annual and NOMINAL, capitalised `periodsPerYear` times a year
+  // (F020 turns it into the periodic rate); a payment is made at the end of each
+  // period (F030's own convention). The `serie` gives the total at the end of
+  // every year — F031 evaluated year by year — with what was paid in, so the
+  // interface can show how much of it is interest (the difference of two values
+  // it holds, left to the interface like every other difference here).
+  'interet-compose': (input, ctx) => {
+    const { capital, periodicContribution, annualRate, years, compoundingsPerYear: periodsPerYear } = input;
+    const rate = f.periodicRate(annualRate, periodsPerYear);
+    const at = (periods) => ({ initial: capital, payment: periodicContribution, rate, periods });
+    const periods = years * periodsPerYear;
+    const args = at(periods);
+    const serie = [];
+    for (let year = 1; year <= years; year += 1) {
+      const stepArgs = at(year * periodsPerYear);
+      serie.push({
+        annee: year,
+        verse: capital + periodicContribution * year * periodsPerYear,
+        valeur: computed('F031', f.futureValueTotal(stepArgs), { inputs: stepArgs, ...ctx }),
+      });
+    }
+    return run(
+      {
+        tauxPeriodique: computed('F020', rate, { inputs: { annualRate, periodsPerYear }, ...ctx }),
+        valeurFutureCapital: computed('F029', f.futureValueLumpSum(args), { inputs: args, ...ctx }),
+        valeurFutureVersements: computed('F030', f.futureValuePayments(args), { inputs: args, ...ctx }),
+        valeurFutureTotale: computed('F031', f.futureValueTotal(args), { inputs: args, ...ctx }),
+      },
+      { taux_annuel: annualRate, horizon_annees: years, capitalisation_par_an: periodsPerYear },
+      serie,
     );
   },
 

@@ -198,3 +198,39 @@
   gap: 2px;
   font-variant-numeric: tabular-nums;
 }
+
+/* « Importer une fiche » (P8-30). */
+.payslip-import {
+  display: grid;
+  gap: var(--space-sm);
+  margin-block-end: var(--space-lg);
+  padding: var(--space-md);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+}
+.payslip-import-pick {
+  justify-self: start;
+  cursor: pointer;
+}
+.payslip-import-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+}
+.payslip-import-table th,
+.payslip-import-table td {
+  padding: 4px 6px;
+  border-block-end: 1px solid var(--border);
+  text-align: start;
+}
+.payslip-import-table input[type='text'],
+.payslip-import-table select {
+  inline-size: 100%;
+  min-block-size: 40px;
+}
+.payslip-import-extra,
+.payslip-import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: end;
+}

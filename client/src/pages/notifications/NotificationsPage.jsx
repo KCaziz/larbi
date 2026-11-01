@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Bell, BellOff, Check } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
+import BrowserPush from './BrowserPush.jsx';
 import { formatDate } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
@@ -14,7 +15,7 @@ import Notice from '../../components/ui/Notice.jsx';
 import './Notifications.css';
 
 // The client's families of notifications (answer D7), in his order.
-const FAMILIES = ['budgets', 'revenus', 'echeances', 'dettes', 'objectifs', 'formation', 'securite'];
+const FAMILIES = ['budgets', 'revenus', 'echeances', 'dettes', 'objectifs', 'formation', 'securite', 'collectif'];
 
 // Notifications and alerts (P6-18), screen C24. In-app only for now (« canal
 // in-app d'abord ; e-mail / push selon P6-01 »).
@@ -189,6 +190,7 @@ function NotificationSettings({ t, onDone }) {
 
   return (
     <div className="notifications-settings">
+      <BrowserPush />
       {message && (
         <p className="form-error" role="status">
           {message.text}

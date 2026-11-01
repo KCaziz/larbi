@@ -14,6 +14,9 @@ let ownerMemberId;
 
 const iso = (date) => date.toISOString();
 const ago = (days) => new Date(Date.now() - days * 24 * 3600 * 1000);
+// Two moments of the CURRENT month that are never in the future, whatever day it is (the 1st included).
+const monthStart = () => Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1);
+const early = (seconds) => new Date(monthStart() + seconds * 1000);
 
 async function join(joiner, role = 'member') {
   const invite = await t.request('POST', `/fin/espaces/${space.id}/invitations`, { user: owner, json: { role } });
@@ -56,18 +59,17 @@ describe('confirming a recurring bill', () => {
   test('is refused a second time for the same bill and the same month (dedup)', async () => {
     const first = await t.request('POST', `/fin/espaces/${space.id}/depenses-recurrentes/confirmer`, {
       user: owner,
-      json: { label: 'Loyer', value: 50000, occurredAt: iso(ago(1)), splitMode: 'equal', payerId: ownerMemberId, participants: [{ memberId: ownerMemberId }] },
+      json: { label: 'Loyer', value: 50000, occurredAt: iso(early(1)), splitMode: 'equal', payerId: ownerMemberId, participants: [{ memberId: ownerMemberId }] },
     });
     assert.equal(first.status, 201);
 
     const second = await t.request('POST', `/fin/espaces/${space.id}/depenses-recurrentes/confirmer`, {
       user: owner,
-      json: { label: 'Loyer', value: 50000, occurredAt: iso(ago(0.5)), splitMode: 'equal', payerId: ownerMemberId, participants: [{ memberId: ownerMemberId }] },
+      json: { label: 'Loyer', value: 50000, occurredAt: iso(early(2)), splitMode: 'equal', payerId: ownerMemberId, participants: [{ memberId: ownerMemberId }] },
     });
     assert.equal(second.status, 422, 'same label, same calendar month: refused as a duplicate');
 
-    const nextMonthDate = new Date();
-    nextMonthDate.setUTCMonth(nextMonthDate.getUTCMonth() - 2);
+    const nextMonthDate = new Date(monthStart() - 40 * 24 * 3600 * 1000);
     const third = await t.request('POST', `/fin/espaces/${space.id}/depenses-recurrentes/confirmer`, {
       user: owner,
       json: { label: 'Loyer', value: 50000, occurredAt: iso(nextMonthDate), splitMode: 'equal', payerId: ownerMemberId, participants: [{ memberId: ownerMemberId }] },

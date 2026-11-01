@@ -145,6 +145,26 @@ export const SIMULATORS = [
       rate('monthlyRate', { required: true }),
     ],
   },
+  // « Simulateur des intérêts composés » (asked by the client on 2026-11-01, on top
+  // of the 30 of tab 23): what a sum, with or without regular payments, becomes
+  // when its interest earns interest. It reuses the client's own formulas —
+  // F020 (periodic rate), F029 (capital), F030 (payments), F031 (total) — and
+  // adds none. The capitalisation frequency is an input the person sees and
+  // changes (12 = monthly), like the periods of a credit (F020 asks for it).
+  {
+    key: 'interet-compose',
+    example: { capital: da(100_000), periodicContribution: da(5_000), annualRate: 0.06, years: 10, compoundingsPerYear: 12 },
+    calculator: 'CAL-IC',
+    formulas: ['F020', 'F029', 'F030', 'F031'],
+    publics: ['tous'],
+    fields: [
+      money('capital'),
+      money('periodicContribution'),
+      rate('annualRate', { required: true }),
+      count('years', { required: true, min: 1, max: 60 }),
+      count('compoundingsPerYear', { min: 1, max: 365, default: MONTHLY_PERIODS }),
+    ],
+  },
   {
     key: 'inflation',
     example: { nominalValue: da(1_000_000), inflation: 0.05, years: 10, nominalReturn: 0.03 },

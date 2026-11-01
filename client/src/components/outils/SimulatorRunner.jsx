@@ -4,6 +4,7 @@ import { Info } from 'lucide-react';
 import { api, ApiError } from '../../lib/api.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { formatAmount, formatNumber, formatRatio } from '../../lib/format.js';
+import LineChart from '../fincludia/charts/LineChart.jsx';
 import Button from '../ui/Button.jsx';
 import Notice from '../ui/Notice.jsx';
 import '../../pages/outils/Simulators.css';
@@ -382,6 +383,53 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
             })}
           </ul>
         </div>
+      )}
+
+      {/* A step-by-step series (compound interest, year by year). Each value is a
+          contract answer of the server; what was paid in is the sum of the person's
+          own inputs, and the interest is the difference of the two — shown, with
+          the paid-in column, so the reader can see how much is interest and how
+          much is their own money. A table, because that is its keyboard and
+          screen-reader form too. */}
+      {answer?.serie && answer.serie.length > 0 && (
+        <section className="simulator-serie mt-lg" aria-labelledby="simulator-serie-title">
+          <h2 id="simulator-serie-title">{t('simulators.serie.title')}</h2>
+          {/* The curve: what was paid in, and what it became. The gap between the two
+              is the interest; the table below gives both, year by year. */}
+          <LineChart
+            xLabel={t('simulators.serie.year')}
+            format={(value) => amount(value)}
+            caption={t('simulators.serie.title')}
+            series={[
+              { key: 'value', label: t('simulators.serie.value'), tone: 0, points: answer.serie.map((row) => ({ month: String(row.annee).padStart(3, '0'), label: t('simulators.serie.yearN', { year: row.annee }), value: row.valeur.resultat })) },
+              { key: 'paid', label: t('simulators.serie.paid'), tone: 2, points: answer.serie.map((row) => ({ month: String(row.annee).padStart(3, '0'), label: t('simulators.serie.yearN', { year: row.annee }), value: row.verse })) },
+            ]}
+          />
+          <table className="simulator-serie-table">
+            <caption className="sr-only">{t('simulators.serie.title')}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t('simulators.serie.year')}</th>
+                <th scope="col">{t('simulators.serie.paid')}</th>
+                <th scope="col">{t('simulators.serie.interest')}</th>
+                <th scope="col">{t('simulators.serie.value')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {answer.serie.map((row) => (
+                <tr key={row.annee}>
+                  <th scope="row">{row.annee}</th>
+                  <td>{amount(row.verse)}</td>
+                  <td>{row.valeur.resultat === null ? t('simulators.notComputed') : amount(row.valeur.resultat - row.verse)}</td>
+                  <td>
+                    <strong>{row.valeur.resultat === null ? t('simulators.notComputed') : amount(row.valeur.resultat)}</strong>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="fin-hint">{t('simulators.serie.note')}</p>
+        </section>
       )}
 
       {/* Keeping a scenario needs an account; running a simulation does not

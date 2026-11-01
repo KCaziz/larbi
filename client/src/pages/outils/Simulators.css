@@ -313,3 +313,20 @@
 .compare-criteria .comparison-toggle {
   min-block-size: 32px;
 }
+
+/* The year-by-year table of the compound-interest simulator. */
+.simulator-serie-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.simulator-serie-table th,
+.simulator-serie-table td {
+  padding: 6px 10px;
+  border-block-end: 1px solid var(--border);
+  text-align: end;
+}
+.simulator-serie-table th:first-child,
+.simulator-serie-table thead th {
+  text-align: start;
+}

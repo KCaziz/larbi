@@ -1,4 +1,6 @@
 import { prisma } from '../config/prisma.js';
+import { sendStoredMedia } from '../services/mediaResponse.js';
+import { discardTemp, ingestUpload, removeStored } from '../services/storage.service.js';
 import {
   BALANCE_SIGN,
   BALANCE_SIGN_TEXT,
@@ -15,8 +17,12 @@ import { listChanges } from '../services/finChange.service.js';
 import {
   SETTLEMENT_ENTITY,
   SHARED_EXPENSE_ENTITY,
+  attachSharedReceipt,
   cancelSharedExpense,
   confirmPlannedExpense,
+  removeSharedReceipt,
+  sharedReceiptFile,
+  sharedSubCategories,
   linkPersonalTransaction,
   unlinkPersonalTransaction,
   confirmSharedRecurrence,
@@ -116,6 +122,35 @@ export async function unlinkExpense(req, res) {
 
 export async function removeSharedExpense(req, res) {
   res.json(await deleteSharedExpense(prisma, req.user.id, req.params.id, req.params.expenseId, { reason: req.body?.reason }));
+}
+
+export async function postSharedReceipt(req, res) {
+  let stored;
+  try {
+    stored = await ingestUpload(req.file, ['image', 'document']);
+  } catch (err) {
+    await discardTemp(req.file);
+    throw err;
+  }
+  try {
+    res.status(201).json({ receipt: await attachSharedReceipt(prisma, req.user.id, req.params.id, req.params.expenseId, stored) });
+  } catch (err) {
+    // A refused request leaves no file behind.
+    await removeStored([stored.storageKey]);
+    throw err;
+  }
+}
+
+export async function getSharedReceipt(req, res) {
+  sendStoredMedia(res, await sharedReceiptFile(prisma, req.user.id, req.params.id, req.params.expenseId));
+}
+
+export async function deleteSharedReceipt(req, res) {
+  res.json(await removeSharedReceipt(prisma, req.user.id, req.params.id, req.params.expenseId));
+}
+
+export async function getSubCategories(req, res) {
+  res.json({ subCategories: await sharedSubCategories(prisma, req.user.id, req.params.id) });
 }
 
 export async function cancelExpense(req, res) {

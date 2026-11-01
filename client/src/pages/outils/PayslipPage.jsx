@@ -14,6 +14,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import Section from '../../components/ui/Section.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
+import PayslipImport from './PayslipImport.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './CreditSimulator.css';
@@ -145,6 +146,18 @@ export default function PayslipPage() {
       <Section>
         <Notice variant="info">{reference.data.limite}</Notice>
 
+        {/* P8-30: a PDF or a photo, read in the browser, confirmed line by line; the form below is filled with what the person kept. */}
+        <PayslipImport
+          kinds={kinds}
+          kindLabel={kindLabel}
+          onUse={({ lines: imported, declaredNet: importedNet, period: importedPeriod }) => {
+            setLines(imported.map((line) => newLine(line.kind)).map((line, index) => ({ ...line, label: imported[index].label, value: imported[index].value })));
+            setDeclaredNet(importedNet);
+            if (importedPeriod) setPeriod(importedPeriod);
+            setResult(null);
+            setError(null);
+          }}
+        />
         <form className="credit-form payslip-form" onSubmit={submit}>
           <div className="credit-form-row">
             <label>

@@ -960,7 +960,7 @@ Tâches :
 Statut de blocage : ne peut commencer qu'après les décisions de `P3-08`.
 
 ### P9-14 — Dépenses partagées : sous-catégorie et justificatif
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟢 low`
 - Dépendances : `P9-04`
 - Durée cible : 2 jours (estimation)
@@ -968,6 +968,8 @@ Statut de blocage : ne peut commencer qu'après les décisions de `P3-08`.
 
 - **Sous-catégorie** (facultative, « référentiel / personnalisée ») : le classeur ne donne aucune liste de sous-catégories pour les 19 catégories collectives ; à décider avec le client avant d'en écrire (une sous-catégorie personnalisée par espace est la version qui n'invente rien).
 - **Justificatif** (image ou PDF) : stockage privé de `P5-03`, lisible des seuls membres de l'espace, jamais lié à une pièce personnelle ; suppression avec la dépense.
+
+**Réalisé (2026-11-01).** Migration `20261031230000_fin_shared_receipts`. **Justificatif** : image ou PDF d'une dépense partagée (`POST/GET/DELETE /fin/espaces/:id/depenses/:expenseId/justificatif`), dans le stockage privé de `P5-03` : le type est lu dans le CONTENU du fichier, jamais d'après son nom ; lisible des seuls membres de l'espace (un étranger obtient 404), jamais par une adresse à partager (la liste montre un fait, pas le nom de stockage) ; seuls le payeur, celui qui a saisi la dépense ou un administrateur le posent, le remplacent ou le retirent ; un remplacement garde un seul justificatif et efface l'ancien fichier ; supprimer la dépense supprime la ligne ET le fichier ; un espace clôturé n'en accepte plus et une demande refusée ne laisse aucun fichier. **Sous-catégorie** : un libellé libre et facultatif, propre à l'espace (le classeur ne donne aucune liste, donc rien n'est inventé), proposé à la saisie à partir de ce que l'espace a déjà utilisé (`GET …/sous-categories`, limité à l'espace). Écran : le champ avec ses suggestions, et sur chaque dépense « Ajouter / remplacer / retirer le justificatif » et le lien pour le lire. Vérifié par `tests/security/finSharedReceipt.test.js` (6 tests) ; les dépenses partagées existantes restent vertes (25). Limite connue : l'effacement d'un COMPTE ne supprime pas encore les fichiers des justificatifs des dépenses partagées qu'il a posés (la ligne disparaît avec l'espace, le fichier non) ; à traiter avec l'effacement des données (`P6-01` point 9) avant la mise en production.
 
 ### Impact sur le délai (ajouts du 2026-09-19)
 
@@ -1663,12 +1665,14 @@ Tâches :
 - Documentation courte d'exploitation.
 - Documentation des comptes / rôles / accès administrateur.
 
+**Hébergement décidé (2026-11-01).** Serveur partagé **cPanel** : l'application Node s'y lance par « Setup Node.js App » (Phusion Passenger) avec `server/app.cjs` déjà écrit ; le site construit est servi par le même processus (`CLIENT_DIR`). La base est **MariaDB/MySQL** (celle du projet) et non PostgreSQL comme l'écrit la liste ci-dessus, qui date d'avant ce choix. Conséquences à traiter ici : pas de processus persistant garanti (les limiteurs de débit en mémoire repartent à chaque redémarrage de Passenger), HTTPS par le certificat de cPanel (AutoSSL), sauvegardes par l'outil de cPanel plus la copie du dossier de stockage privé, planification des tâches (cron cPanel) pour les rappels, et clés des notifications du navigateur à placer dans l'environnement de l'application.
+
 ---
 
 ### P5-07 — Livrables contractuels, réversibilité et matrice de recette
-- Statut : `🚧 in-progress`
+- Statut : `✅ done`
 - Priorité : `🔴 high`
-- Dépendances : `P5-06`
+- Dépendances : `P5-01`, `P5-02`
 - Durée cible : 2 jours (estimation)
 - Origine : « FINCLUDIA contrat.docx », reçu le 2026-10-16 (contrat de prestation daté du 14/09/2026)
 
@@ -2580,6 +2584,22 @@ FINCLUDIA **n'était pas dans le plan de 8 semaines** et représente un produit 
 
 Soit **environ 86 jours ouvrés, de l'ordre de 4 mois** pour une personne, en plus de ce qui reste du MVP (paiement, simulateur de crédit, facture, Phase 5). Pistes pour livrer plus tôt : commencer par 2 ou 3 publics, livrer les lots 0 à 2 du backlog client (argent, budget, objectifs, réserve, dettes) avant le reste, garder espaces partagés et portefeuille fictif pour une seconde livraison. **Le client doit arbitrer (`P6-01`).**
 
+**Dépendances retracées (2026-11-01).** Cette tâche était indiquée comme dépendante de `P5-06` (préparation de la production), mais ce qu'elle a produit — l'inventaire des composants, la matrice de recette, les tests de cohérence — se génère depuis `package.json`, ce fichier et la suite de tests : rien n'y attend la mise en production. Elle dépend en réalité des audits de sécurité `P5-01` et `P5-02` (article 9). Ce qui dépend vraiment de la production (comptes au nom du client, dossier d'exécution, mini-formation) est passé dans `P5-08`.
+**Restent** : l'article 10 (comptes au nom du client), le dossier d'exécution et la mini-formation, repris dans `P5-08`.
+
+---
+### P5-08 — Livrables contractuels qui dépendent de la mise en production
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P5-06`
+- Durée cible : 1 jour (estimation)
+- Origine : reste de `P5-07`, retracé le 2026-11-01
+
+- **Article 10** : domaine, hébergement cPanel, dépôt Git, base, messagerie, SSL, analytics et API ouverts au nom du client ou sous son contrôle direct, vérifiés compte par compte.
+- **Dossier d'exécution** (article 3) : comment déployer, mettre à jour et restaurer sur le cPanel retenu.
+- **Mini-formation de prise en main** (article 3).
+- **Article 17 — réversibilité** : la remise du code, de la documentation, des bases et des sauvegardes dans les sept jours après la fin du contrat, préparée et essayée une fois.
+
 ---
 
 # PHASE 7 — PÉRIMÈTRE CONTRACTUEL NON COUVERT
@@ -3351,6 +3371,10 @@ Ce que ces tâches livrées n'ont pas fini, rassemblé ici :
 
 **Avancement au 2026-10-31 (suite, assistant et recherche).** Migration `20261031210000_fin_intents_catalogue_codes`. **Fait — les 25 intentions du client rendues utilisables sur les nouvelles adresses.** Jusqu'ici le catalogue `CB01`-`CB24` + `CB99` n'était branché nulle part (le test de contenu le gardait, rien ne le lisait). Il est maintenant semé, comme les sept premières, en BROUILLONS à la première ouverture de l'écran d'administration : mots déclencheurs du client en mots-clés, et un lien vers l'adresse actuelle de l'application (`FIN_INTENT_LINKS` : budgets, fonds d'urgence, stratégies de dette, simulateur de crédit, fiche de paie, comparateur, Synthèse et rapports, Santé…), chaque lien étant une page qui existe (liste blanche étendue). Les intentions sans écran propre — droits d'un mineur (CB16), conseils de sécurité (CB22), repli (CB99) — ne mènent nulle part plutôt qu'à une mauvaise page. L'administrateur voit à côté de l'éditeur ce que le fichier du client autorise (réponse, questions, garde-fou) ; le TEXTE PUBLIC reste à écrire par lui avant toute publication (la « réponse autorisée » du client décrit une action, ce n'est pas un texte à afficher tel quel). Résolution et audit sous le code `CBnn`. Vérifié par `tests/functional/finAssistant.test.js` (14 tests, dont une intention du catalogue publiée puis résolue vers son adresse). **Fait — la recherche des contenus de formation** : `formations` dans `/fin/recherche` (titre, description ou titre d'un cours des formations PUBLIÉES, jamais un brouillon), un groupe « Formations » dans la recherche globale, lien vers `/app/formation/:slug` (`tests/security/finSearch.test.js`, 8 tests). Il reste de cette tâche : le Web Push (choix d'hébergement) et le retrait des trois catégories (question I, à trancher avec le client).
 
+**Avancement au 2026-11-01 (suite, deuxième lot de graphiques, à la demande du client de multiplier les graphiques).** Le kit gagne `BarList` (une mesure par ligne, échelle commune, valeur écrite au bout de la barre, ligne de base au milieu quand les valeurs sont signées : crédits d'un côté, dettes de l'autre, jamais par la couleur seule) et `LineChart` accepte une étape qui n'est pas un mois (une année). Nouveaux graphiques : **Gestion commune** — vue d'ensemble d'un espace (anneau des dépenses du mois aux couleurs des 19 catégories du client, soldes des membres sur une ligne de base, budgets prévu / réel), rapport d'un espace (anneau et soldes), budgets communs (prévu / réel), charge de tâches de chaque personne (COL-F12) ; **application personnelle** — les sept dimensions de l'indice de santé côte à côte sur 100 (une dimension non mesurée n'est pas un zéro), patrimoine (ce que je possède face à ce que je dois, et anneau de la répartition par classe), **simulateur d'intérêts composés** — courbe « valeur » face à « versé » année par année, au-dessus du tableau. Vérifié dans un vrai navigateur par `tests/e2e/fin-charts2-journey.test.js` (6 tests) ; l'anneau charge maintenant sa propre feuille de style, il n'est plus réservé à l'Accueil.
+
+**Avancement au 2026-11-01 (suite, Web Push).** Hébergement retenu : serveur partagé cPanel (voir `P5-06`). Migration `20261101100000_fin_push_subscriptions` ; dépendance `web-push` ; script `npm run push:keys` pour produire UNE FOIS la paire de clés VAPID, à placer dans l'environnement de l'application (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, documentés dans `.env.example`) ; sans clés la fonction est éteinte et le dit, rien n'est simulé. **Fait — la notification du navigateur** : chaque navigateur s'abonne lui-même, avec un consentement explicite à chaque abonnement (`POST /fin/notifications/push/abonnement`), se liste et se retire (par son adresse ou depuis la liste). À chaque notification créée (donc seulement si la personne n'a pas coupé ce type), ses navigateurs sont prévenus par un message qui ne contient AUCUN montant, nom ni libellé — il dit qu'il y a quelque chose à lire et où ; les mots sont choisis dans le service worker (`client/public/sw.js`) d'après la langue du navigateur. Un navigateur que le service de notification ne connaît plus (404, 410) est oublié ; un autre échec le garde et n'annule jamais la notification. Le service worker ne met rien en cache et n'est enregistré que si la personne active la fonction. Écran : bloc « Notifications du navigateur » dans les réglages des notifications. Vérifié par `tests/security/finPush.test.js` (10 tests). **Défaut corrigé au passage** : la famille « Gestion commune » (`collectif`) ajoutée avec `P9-09` manquait à la liste des familles de l'écran des réglages : on ne pouvait pas la couper. Il ne reste de cette tâche que le retrait des trois catégories, en attente d'une réponse du client (question I).
+
 ### P8-25 — Une adresse propre pour chaque écran regroupé
 - Statut : `✅ done`
 - Priorité : `🟡 medium`
@@ -3473,13 +3497,50 @@ Ce qui a été constaté :
 **Bloquée : le client prépare lui-même ces éléments.** Ce qui est attendu de lui : la nouvelle vitrine (textes, structure des pages), la présentation des compartiments, et les parcours de formation par profil (avec les contenus de missions et de formation qu’il a dit fournir, réponse E). À réception : refonte de la vitrine (pages publiques, `client/src/pages/` hors `/app`), des pages de présentation des compartiments, et des parcours dans la couche éducative (`P8-17`).
 
 ### P8-30 — Fiche de paie : import d’un document
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟢 low`
 - Dépendances : `P8-15`
 - Durée cible : 2 jours (estimation)
 - Origine : réponse du client D5 (2026-10-28) ; reste de `P8-15`, sortie le 2026-10-29
 
 Le décodeur (`P8-15`) se remplit à la main. Le client demande aussi l’**import** : une fiche en PDF ou en photo, dont les lignes sont extraites puis **confirmées par la personne avant tout calcul**. À décider avant de commencer : la bibliothèque d’extraction (texte d’un PDF ; reconnaissance de caractères pour une photo), qu’elle tourne sur le serveur ou dans le navigateur, et ce que devient le fichier (rien n’est conservé sans consentement, comme l’historique). Une fiche dont l’extraction échoue revient à la saisie manuelle, jamais à un calcul deviné.
+
+**Réalisé (2026-11-01).** Choix pour un hébergement mutualisé cPanel (aucun outil installable sur le serveur) : la lecture se fait **dans le navigateur** — `pdfjs-dist` pour le texte d’un PDF, `tesseract.js` pour une photo, moteur, worker et données de langue **servis par le site** sous `/ocr` (aucun service tiers). Le fichier n’est envoyé nulle part et n’est pas conservé. `payslipParse.js` ne fait que PROPOSER des lignes (types du décodeur, montants exacts en centimes, « à confirmer » si incertain, net à payer lu et non calculé) ; la personne garde, corrige ou retire chaque ligne avant que le formulaire ne soit rempli, puis le décodeur calcule. Un PDF image, un fichier illisible ou sans ligne reconnue renvoie à la saisie manuelle, sans rien deviner. La politique de sécurité (helmet) autorise désormais `'wasm-unsafe-eval'` (WebAssembly seulement, pas l’eval de chaînes) et les workers du même site. Vérifié par `payslipParse.test.js` (8), `fin-payslip-import-journey` (4 : PDF, photo OCR, zéro envoi, fichier illisible) et `tests/security/csp.test.js` + `hardening.test.js`.
+
+### P8-31 — Simulateur des intérêts composés
+- Statut : `✅ done`
+- Priorité : `🟢 low`
+- Dépendances : `P8-15`
+- Durée cible : 0,5 jour (estimation)
+- Origine : message du client du 2026-11-01 (« on avait oublié d'intégrer le simulateur des intérêts composés »)
+
+Le simulateur n'est dans aucune des listes du client (CAL-01 à CAL-30, CAL-V7, CAL-P) : « intérêt composé » n'apparaît qu'une fois, comme SUJET d'apprentissage du profil Épargnant (onglet `02_Profils_Education` : « objectifs, inflation, intérêt composé, risque, portefeuille fictif »). Les formules existaient déjà (F029 à F031, dans CAL-07, CAL-08 et CAL-29) ; ce qui manquait est l'écran qui répond à « je place X à Y % pendant Z ans : combien ai-je, et combien viennent des intérêts ? ».
+
+**Réalisé (2026-11-01).** Simulateur `interet-compose` (code `CAL-IC`, ajouté au catalogue des Outils, famille Épargne, public comme aux autres simulateurs) : capital, versement à chaque période, taux annuel nominal, durée en années (1 à 60) et capitalisations par an (12 par défaut, visible et modifiable, comme les échéances d'un crédit). Il réutilise les formules du client et n'en ajoute aucune : F020 (taux périodique), F029 (capital), F030 (versements, en fin de période), F031 (total), chaque chiffre disant laquelle l'a produit. Un TABLEAU année par année (valeur F031 de chaque année, ce qui a été versé et la part d'intérêts, différence de deux valeurs que l'écran possède) ; hypothèses visibles ; mention « une illustration, pas une promesse ». Vérifié par `tests/functional/simulatorCompound.test.js` (6 tests, dont 1 000 000 à 12 % capitalisé chaque mois sur un an = 1 126 825 et la capitalisation annuelle = 1 000 000 × 1,06¹⁰) et par le parcours navigateur `simulators-journey` (compté dans l'échantillon public).
+**À confirmer avec le client** (question J) : s'il attend aussi la comparaison avec l'intérêt SIMPLE, elle n'est pas faite — l'intérêt simple n'est dans aucune formule de son classeur et en inventer une serait écrire sa règle à sa place ; dites-lui qu'un tableau « versé / intérêts / valeur » donne déjà la part des intérêts, et demandez-lui la formule s'il tient à la comparaison.
+
+### P8-32 — Graphiques complémentaires
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-10`
+- Durée cible : 2 jours (estimation)
+- Origine : demande du client du 2026-11-01 (« faire un maximum de graphiques ») ; suite des lots de graphiques de `P8-24`
+
+Le kit de graphiques existe (`LineChart`, `GroupedBars`, `Gauge`, `BarList`, `RingChart`) ; il reste à l'appliquer partout où une courbe ou des barres disent plus qu'un chiffre :
+- **Dettes** : courbe d'amortissement de chaque stratégie (capital restant mois par mois, avalanche contre boule de neige).
+- **Objectifs** : projection d'un objectif (capital affecté dans le temps jusqu'à la cible), et comparaison des objectifs entre eux.
+- **Calendrier** : charge des échéances par semaine du mois.
+- **Budgets** : dépense cumulée jour par jour contre le rythme prévu ; reste à vivre par jour.
+- **Épargne** : taux d'épargne mois par mois (AN-F007) ; évolution du fonds d'urgence en mois couverts.
+- **Mouvements** : revenus contre dépenses par jour, semaine ou mois (G-05 : le choix du pas).
+- **Débit du flux net** par jour et par semaine (G-03 : aujourd'hui mensuel).
+- **Revenus** : répartition des revenus prévus par source.
+- **Gestion commune** : évolution du solde du groupe ; dépenses par membre dans le temps ; avancement des objectifs communs.
+- **Comparer deux mois** : barres côte à côte par catégorie.
+- **Simulateurs** : courbe de chaque simulateur à projection (retraite, inflation, objectif avec rendement).
+Chaque graphique suit les règles du kit (une échelle, légende écrite, valeurs écrites, tableau des chiffres, trou plutôt que zéro) et a son test navigateur.
+
+---
 
 ### P8-22 — Moteur budgétaire unique : validation de fin de phase
 - Statut : `❌ todo`

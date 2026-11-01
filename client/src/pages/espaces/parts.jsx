@@ -344,6 +344,8 @@ export function SharedExpenses({ t, language, spaceId, space, members }) {
                 <span className="spaces-tag">{t('spaces.shared.paidBy', { name: expense.payer })}</span>
                 {expense.lifecycle !== 'done' && <span className="spaces-tag">{t(`spaces.shared.lifecycle.${expense.lifecycle}`)}</span>}
                 {expense.splitMode === 'usage' && <span className="spaces-tag">{expense.usageUnit}</span>}
+                {expense.subCategory && <span className="spaces-tag">{expense.subCategory}</span>}
+                <ExpenseReceipt t={t} spaceId={spaceId} expense={expense} run={run} />
                 {expense.lifecycle === 'planned' && new Date(expense.occurredAt) <= new Date() && (
                   <button type="button" className="spaces-icon" onClick={() => run(() => api.post(`/fin/espaces/${spaceId}/depenses/${expense.id}/confirmer`, {}), 'spaces.shared.confirmed')} aria-label={t('spaces.shared.confirm')}>
                     <Check size={15} aria-hidden="true" />
@@ -507,6 +509,42 @@ export function FinancialAgreement({ t, spaceId, note, canEdit, run, reload }) {
   );
 }
 
+// The receipt of a shared expense (P9-14): private, readable by the members of the
+// space only. A link to read it (never an address to share), a button to replace
+// or remove it, and a field to attach one.
+function ExpenseReceipt({ t, spaceId, expense, run }) {
+  const base = `/fin/espaces/${spaceId}/depenses/${expense.id}/justificatif`;
+  const inputId = `receipt-${expense.id}`;
+  return (
+    <span className="spaces-receipt">
+      {expense.receipt && (
+        <a className="spaces-tag" href={`/api${base}`} target="_blank" rel="noreferrer">
+          {t('spaces.shared.receipt')}
+        </a>
+      )}
+      <label htmlFor={inputId} className="spaces-plain">
+        {expense.receipt ? t('spaces.shared.receiptReplace') : t('spaces.shared.receiptAdd')}
+        <input
+          id={inputId}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,application/pdf"
+          className="sr-only"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = '';
+            if (file) run(() => api.upload(base, file), 'spaces.shared.receiptSaved');
+          }}
+        />
+      </label>
+      {expense.receipt && (
+        <button type="button" className="spaces-plain" onClick={() => run(() => api.delete(base), 'spaces.shared.receiptRemoved')}>
+          {t('spaces.shared.receiptRemove')}
+        </button>
+      )}
+    </span>
+  );
+}
+
 export function ExpenseForm({ t, spaceId, currency, members, references, run, onDone, confirmRecurrence = false, initialLabel = '', initialValue = '' }) {
   const today = new Date().toISOString().slice(0, 10);
   const [label, setLabel] = useState(initialLabel);
@@ -521,6 +559,9 @@ export function ExpenseForm({ t, spaceId, currency, members, references, run, on
   const [planned, setPlanned] = useState(false);
   const [usageUnit, setUsageUnit] = useState('');
   const [collectiveCategory, setCollectiveCategory] = useState('');
+  // P9-14: a free label inside the category, suggested from what the space already used.
+  const [subCategory, setSubCategory] = useState('');
+  const subCategories = useApi(`/fin/espaces/${spaceId}/sous-categories`);
   // P9-08: the personal account the payer paid from, if any. One personal
   // expense is created there; it is never asked twice.
   const [personalAccountId, setPersonalAccountId] = useState('');
@@ -568,6 +609,7 @@ export function ExpenseForm({ t, spaceId, currency, members, references, run, on
               participants,
               ...(planned ? { planned: true } : {}),
               ...(collectiveCategory ? { collectiveCategory } : {}),
+              ...(subCategory.trim() ? { subCategory: subCategory.trim() } : {}),
               ...(personalAccountId && !planned && isMyPayment ? { personalLink: { accountId: personalAccountId } } : {}),
               ...(splitMode === 'usage' ? { usageUnit: usageUnit.trim() } : {}),
             }),
@@ -620,6 +662,15 @@ export function ExpenseForm({ t, spaceId, currency, members, references, run, on
               </option>
             ))}
           </select>
+        </label>
+        <label htmlFor="shared-expense-subcategory">
+          {t('spaces.shared.fields.subCategory')}
+          <input id="shared-expense-subcategory" type="text" list="shared-expense-subcategories" value={subCategory} onChange={(event) => setSubCategory(event.target.value)} maxLength={40} />
+          <datalist id="shared-expense-subcategories">
+            {(subCategories.data?.subCategories ?? []).map((name) => (
+              <option key={name} value={name} />
+            ))}
+          </datalist>
         </label>
         {splitMode === 'usage' && (
           <label htmlFor="shared-expense-unit">

@@ -15,10 +15,13 @@ import './Charts.css';
 const WIDTH = 600;
 const HEIGHT = 160;
 
-export default function LineChart({ series, currency, caption, format }) {
+export default function LineChart({ series, currency, caption, format, xLabel }) {
   const { t, i18n } = useTranslation();
   const usable = series.filter((item) => item.points.filter((point) => point.value !== null).length >= 1);
   const months = [...new Set(series.flatMap((item) => item.points.map((point) => point.month)))].sort();
+  // A point may say how its step is written (« Année 3 »); otherwise it is a month.
+  const labels = new Map(series.flatMap((item) => item.points.filter((point) => point.label).map((point) => [point.month, point.label])));
+  const stepLabel = (month) => labels.get(month) ?? formatDate(i18n.language, `${month}-01`);
   if (usable.length === 0 || months.length < 2) return null;
 
   const values = usable.flatMap((item) => item.points.map((point) => point.value)).filter((value) => value !== null);
@@ -80,7 +83,7 @@ export default function LineChart({ series, currency, caption, format }) {
           <caption className="sr-only">{caption}</caption>
           <thead>
             <tr>
-              <th scope="col">{t('wealth.historyDate')}</th>
+              <th scope="col">{xLabel ?? t('wealth.historyDate')}</th>
               {usable.map((item) => (
                 <th key={item.key} scope="col">
                   {item.label}
@@ -91,7 +94,7 @@ export default function LineChart({ series, currency, caption, format }) {
           <tbody>
             {months.map((month) => (
               <tr key={month}>
-                <td>{formatDate(i18n.language, `${month}-01`)}</td>
+                <td>{stepLabel(month)}</td>
                 {usable.map((item) => (
                   <td key={item.key}>{money(item.points.find((point) => point.month === month)?.value ?? null)}</td>
                 ))}

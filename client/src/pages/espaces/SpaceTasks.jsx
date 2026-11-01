@@ -4,6 +4,7 @@ import { api } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { formatDate, formatRatio } from '../../lib/format.js';
 import Button from '../../components/ui/Button.jsx';
+import BarList from '../../components/fincludia/charts/BarList.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 
@@ -102,6 +103,14 @@ export default function SpaceTasks({ t, language, spaceId, members, run, feedbac
           <p className="spaces-help">
             {finished?.resultat === null || finished === undefined ? t('spaces.tasks.noStats') : t('spaces.tasks.finishedRate', { rate: formatRatio(language, finished.resultat) })}
           </p>
+          {stats.data.synthese.charge.some((row) => row.charge.resultat !== null) && (
+            <BarList
+              max={1}
+              rows={stats.data.synthese.charge.map((row) => ({ key: row.memberId, label: row.name, value: row.charge.resultat }))}
+              format={(value) => formatRatio(language, value)}
+              caption={t('spaces.tasks.statsTitle')}
+            />
+          )}
           {stats.data.synthese.charge.some((row) => row.charge.resultat !== null) && (
             <ul className="spaces-members">
               {stats.data.synthese.charge.map((row) => (

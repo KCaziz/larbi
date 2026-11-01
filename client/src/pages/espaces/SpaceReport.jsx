@@ -6,6 +6,8 @@ import { formatAmount, formatRatio } from '../../lib/format.js';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
+import RingChart from '../../components/fincludia/RingChart.jsx';
+import BarList from '../../components/fincludia/charts/BarList.jsx';
 
 // The report of a space for one month, and its export (P9-10). Everything here
 // is what the space holds in common; nothing personal. The export leaves the
@@ -49,6 +51,13 @@ export default function SpaceReport({ t, language, spaceId }) {
 
       <section aria-labelledby="report-spend">
         <h3 id="report-spend">{t('spaces.report.spend')}</h3>
+        {r.depenses.count > 0 && (
+          <RingChart
+            rows={r.depenses.parCategorie.map((row) => ({ key: row.category ?? 'none', label: row.label ?? t('spaces.report.noCategory'), total: row.value }))}
+            currency={r.currency}
+            label={t('spaces.report.spend')}
+          />
+        )}
         {r.depenses.count === 0 ? (
           <p className="spaces-empty">{t('spaces.report.noSpend')}</p>
         ) : (
@@ -74,6 +83,14 @@ export default function SpaceReport({ t, language, spaceId }) {
 
       <section aria-labelledby="report-balances">
         <h3 id="report-balances">{t('spaces.report.balances')}</h3>
+        <BarList
+          signed
+          rows={r.soldes.map((row) => ({ key: row.memberId, label: row.name, value: row.solde.resultat }))}
+          format={money}
+          caption={t('spaces.report.balances')}
+          positiveLabel={t('spaces.overview.owedToThem')}
+          negativeLabel={t('spaces.overview.theyOwe')}
+        />
         <ul className="spaces-members">
           {r.soldes.map((row) => (
             <li key={row.memberId} className="spaces-member">

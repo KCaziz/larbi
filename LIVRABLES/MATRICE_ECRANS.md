@@ -1,6 +1,6 @@
 # Matrice des écrans de la gestion budgétaire
 
-> Généré le 2026-10-31 par `node server/scripts/generate-deliverables.js` depuis `server/src/constants/finAppScreens.js`. Ne pas modifier à la main.
+> Généré le 2026-11-01 par `node server/scripts/generate-deliverables.js` depuis `server/src/constants/finAppScreens.js`. Ne pas modifier à la main.
 
 Les 44 écrans du cahier consolidé (onglet `05_Ecrans_Detailles`) et la façon dont chacun est servi. La règle « trouvable » (TASKS.md, section 6) veut que chaque écran ait **sa propre adresse**, atteinte depuis le menu en deux clics au plus : un écran regroupé dans une autre page n'est donc pas terminé, et la tâche qui le doit est nommée.
 

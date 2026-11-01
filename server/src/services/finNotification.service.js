@@ -2,6 +2,7 @@
 // signal feeds into — a budget threshold (P6-05), an overdue goal (P6-08), a
 // sharing change (P6-13), an upcoming calendar event (P6-07). This file only
 // ever writes and reads ONE account's own rows.
+import { pushToUser } from './finPush.service.js';
 import { occurrencesWithOutcome } from './finOccurrence.service.js';
 import { NOTIFICATIONS_PER_DAY_MAX, NOTIFICATION_PRIORITIES, NOTIFICATION_TYPE_KEYS, REMINDER_WINDOW_DAYS, notificationTypeByKey } from '../constants/finNotification.js';
 import { loadCalendarData } from './finCalendar.service.js';
@@ -77,9 +78,12 @@ export async function createNotification(prisma, userId, { type, params = {}, li
     if (dedupeBy === 'level' && existing.params?.niveau === params.niveau) return null;
   }
 
-  return prisma.finNotification.create({
+  const created = await prisma.finNotification.create({
     data: { userId, type, category: kind.category, priority: kind.priority, params, link, referenceId },
   });
+  // Web Push, for the browsers this person chose (P8-24).
+  await pushToUser(prisma, userId, { link: link ?? '/app/notifications', tag: type });
+  return created;
 }
 
 export async function listNotifications(prisma, userId, { category, read } = {}) {

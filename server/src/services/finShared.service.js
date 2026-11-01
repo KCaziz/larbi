@@ -16,6 +16,7 @@ import { EXPENSE_MIN_ROLE, INCOME_SPLIT_REQUIRES_SHARING, SETTLEMENTS_PAGE_SIZE,
 import { roleAtLeast, sharesAtLeast } from '../constants/finSpace.js';
 import { HttpError } from '../utils/httpError.js';
 import { usableAccount } from './finAccount.service.js';
+import { removeStored } from './storage.service.js';
 import { alertBudgetLevel, notifySpace } from './finSpaceAlerts.service.js';
 import { spaceBudgetsView } from './finSpaceBudget.service.js';
 import { recordChange } from './finChange.service.js';
@@ -44,6 +45,8 @@ const EXPENSE_SELECT = {
   cancelledAt: true,
   usageUnit: true,
   collectiveCategory: true,
+  subCategory: true,
+  receipt: { select: { id: true, originalName: true, kind: true } },
   personalTransactionId: true,
   version: true,
   shares: { select: { id: true, memberId: true, share: true, weight: true } },
@@ -235,6 +238,7 @@ export async function createSharedExpense(prisma, userId, spaceId, body) {
         lifecycle: body.planned ? 'planned' : 'done',
         usageUnit: body.splitMode === 'usage' ? body.usageUnit : null,
         collectiveCategory: body.collectiveCategory ?? null,
+        subCategory: body.subCategory ?? null,
         personalTransactionId,
         categoryId,
         note: body.note ?? null,
@@ -295,7 +299,10 @@ export async function deleteSharedExpense(prisma, userId, spaceId, id, { reason 
     throw new HttpError(403, 'Only the payer, whoever recorded it, or an admin may remove this expense', { reason: 'notYours' });
   }
 
+  // The receipt goes with the expense it documents (row and file).
+  const receipt = await prisma.media.findUnique({ where: { sharedExpenseId: id }, select: { id: true, storageKey: true } });
   await prisma.$transaction(async (tx) => {
+    if (receipt) await tx.media.delete({ where: { id: receipt.id } });
     await tx.finSharedExpense.update({ where: { id }, data: { deletedAt: new Date() } });
     await recordChange(tx, {
       userId,
@@ -307,6 +314,7 @@ export async function deleteSharedExpense(prisma, userId, spaceId, id, { reason 
       reason: reason ?? null,
     });
   });
+  if (receipt) await removeStored([receipt.storageKey]);
   return { id };
 }
 
@@ -355,6 +363,62 @@ export async function unlinkPersonalTransaction(prisma, userId, spaceId, id) {
     await recordChange(tx, { userId, entity: SHARED_EXPENSE_ENTITY, entityId: id, action: 'correct', field: 'personalTransactionId', before: expense.personalTransactionId, after: null });
     return updated;
   });
+}
+
+// ---- the receipt of a shared expense (P9-14) ------------------------------
+//
+// Private storage, like every file here: readable by the members of THIS space
+// only, never by a URL, and gone with the expense. Whoever may delete an expense
+// (its payer, whoever recorded it, an admin) may attach or remove its receipt.
+
+async function expenseForReceipt(prisma, userId, spaceId, id, { write }) {
+  const me = write ? assertOpen(await ownMembership(prisma, userId, spaceId)) : await ownMembership(prisma, userId, spaceId);
+  const expense = await prisma.finSharedExpense.findFirst({ where: { id, spaceId, deletedAt: null }, select: { id: true, payerId: true, recordedById: true } });
+  if (!expense) throw new HttpError(404, 'Shared expense not found');
+  if (write && !(expense.recordedById === me.id || expense.payerId === me.id) && !roleAtLeast(me.role, 'admin')) {
+    throw new HttpError(403, 'Only the payer, whoever recorded it, or an admin may change the receipt', { reason: 'notYours' });
+  }
+  return expense;
+}
+
+export async function attachSharedReceipt(prisma, userId, spaceId, id, stored) {
+  const expense = await expenseForReceipt(prisma, userId, spaceId, id, { write: true });
+  // The replaced receipt's row goes first (the key is unique), its file after.
+  const previous = await prisma.media.findUnique({ where: { sharedExpenseId: expense.id }, select: { id: true, storageKey: true } });
+  const media = await prisma.$transaction(async (tx) => {
+    if (previous) await tx.media.delete({ where: { id: previous.id } });
+    const created = await tx.media.create({ data: { ...stored, uploadedById: userId, sharedExpenseId: expense.id } });
+    await recordChange(tx, { userId, entity: SHARED_EXPENSE_ENTITY, entityId: expense.id, action: 'correct', field: 'receipt', before: previous ? 'present' : null, after: 'present' });
+    return created;
+  });
+  if (previous) await removeStored([previous.storageKey]);
+  return { id: media.id, originalName: media.originalName, kind: media.kind, sizeBytes: media.sizeBytes };
+}
+
+export async function sharedReceiptFile(prisma, userId, spaceId, id) {
+  const expense = await expenseForReceipt(prisma, userId, spaceId, id, { write: false });
+  const media = await prisma.media.findUnique({ where: { sharedExpenseId: expense.id }, select: { storageKey: true, mimeType: true, originalName: true, kind: true } });
+  if (!media) throw new HttpError(404, 'No receipt');
+  return media;
+}
+
+export async function removeSharedReceipt(prisma, userId, spaceId, id) {
+  const expense = await expenseForReceipt(prisma, userId, spaceId, id, { write: true });
+  const media = await prisma.media.findUnique({ where: { sharedExpenseId: expense.id }, select: { id: true, storageKey: true } });
+  if (!media) throw new HttpError(404, 'No receipt');
+  await prisma.$transaction(async (tx) => {
+    await tx.media.delete({ where: { id: media.id } });
+    await recordChange(tx, { userId, entity: SHARED_EXPENSE_ENTITY, entityId: expense.id, action: 'correct', field: 'receipt', before: 'present', after: null });
+  });
+  await removeStored([media.storageKey]);
+  return { id };
+}
+
+/** The sub-categories this space already used, to suggest rather than to impose. */
+export async function sharedSubCategories(prisma, userId, spaceId) {
+  await ownMembership(prisma, userId, spaceId);
+  const rows = await prisma.finSharedExpense.findMany({ where: { spaceId, deletedAt: null, subCategory: { not: null } }, distinct: ['subCategory'], select: { subCategory: true }, orderBy: { subCategory: 'asc' }, take: 100 });
+  return rows.map((row) => row.subCategory);
 }
 
 /**

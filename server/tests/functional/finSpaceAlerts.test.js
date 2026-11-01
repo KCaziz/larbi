@@ -17,6 +17,8 @@ const iso = (date) => date.toISOString();
 const ago = (days) => new Date(Date.now() - days * DAY);
 const inDays = (days) => new Date(Date.now() + days * DAY);
 const month = () => new Date().toISOString().slice(0, 7);
+// A moment of the CURRENT month that is never in the future, even on the 1st: a budget reads its own month.
+const early = () => new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1, 0, 0, 1));
 
 async function memberId(user) {
   const res = await t.request('GET', `/fin/espaces/${space.id}/membres`, { user });
@@ -27,7 +29,7 @@ const pot = (user = owner) => t.request('GET', `/fin/espaces/${space.id}/ressour
 const spend = (json) =>
   t.request('POST', `/fin/espaces/${space.id}/depenses`, {
     user: owner,
-    json: { label: 'Facture', value: 100000, occurredAt: iso(ago(1)), splitMode: 'equal', payerId: ownerId, participants: [{ memberId: ownerId }, { memberId: flatmateId }], ...json },
+    json: { label: 'Facture', value: 100000, occurredAt: iso(early()), splitMode: 'equal', payerId: ownerId, participants: [{ memberId: ownerId }, { memberId: flatmateId }], ...json },
   });
 const notifications = async (user, type) => (await t.request('GET', '/fin/notifications', { user })).body.notifications.filter((n) => n.type === type);
 

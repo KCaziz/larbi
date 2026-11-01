@@ -2073,7 +2073,9 @@
       "horizon_mois": "Horizon (months)",
       "inflation": "Inflation",
       "rendement_mensuel": "Monthly return",
-      "rendement_nominal": "Nominal return"
+      "rendement_nominal": "Nominal return",
+      "taux_annuel": "Annual rate",
+      "capitalisation_par_an": "Compoundings per year"
     },
     "list": {
       "budget-mensuel": {
@@ -2147,6 +2149,10 @@
       "simulation-logement": {
         "title": "Housing simulation",
         "body": "Instalment, total cost, living allowance and the reserve left after the down payment, for a housing project."
+      },
+      "interet-compose": {
+        "title": "Compound interest",
+        "body": "What a sum becomes, with or without regular payments, when its interest earns interest too."
       }
     },
     "fields": {
@@ -2216,7 +2222,9 @@
       "earlyRepaymentFees": "Early repayment fees",
       "debts": "My debts",
       "minimumPayment": "Minimum instalment",
-      "price": "Price of the home"
+      "price": "Price of the home",
+      "periodicContribution": "Payment each period",
+      "compoundingsPerYear": "Compoundings per year"
     },
     "results": {
       "revenus": "Income",
@@ -2301,7 +2309,16 @@
     "scenarioTitle": "Name of the scenario",
     "saveScenario": "Keep this scenario",
     "scenarioSaved": "Scenario \"{{title}}\" kept, with its hypotheses and its formula versions.",
-    "saveNeedsAccount": "The calculations are free to use. Keeping a scenario and comparing it later needs an account."
+    "saveNeedsAccount": "The calculations are free to use. Keeping a scenario and comparing it later needs an account.",
+    "serie": {
+      "title": "Year by year",
+      "year": "Year",
+      "paid": "Paid in",
+      "interest": "Interest",
+      "value": "Value",
+      "note": "An illustration, not a promise: the rate is the one you typed, constant, and each payment is made at the end of its period. No real return is guaranteed.",
+      "yearN": "Year {{year}}"
+    }
   },
   "comparison": {
     "criterion": "Criterion",
@@ -3599,7 +3616,8 @@
     "noValuation": "No revaluation since it was entered.",
     "revalueTitle": "New valuation",
     "revalued": "Value updated, with its date.",
-    "deleteShort": "Delete"
+    "deleteShort": "Delete",
+    "assetsVsDebts": "What I own and what I owe"
   },
   "paper": {
     "title": "Practice portfolio",
@@ -3824,7 +3842,8 @@
         "noCategory": "No category",
         "personalAccount": "Paid with my personal money (optional)",
         "noPersonalAccount": "No, or I already entered it elsewhere",
-        "personalAccountHelp": "A single personal expense is created on this account. The other members see neither the link nor the account."
+        "personalAccountHelp": "A single personal expense is created on this account. The other members see neither the link nor the account.",
+        "subCategory": "Sub-category (free, optional)"
       },
       "errors": {
         "refused": "This action was refused. Check the information entered.",
@@ -3846,7 +3865,13 @@
       "confirm": "Confirm the expense",
       "confirmed": "Expense confirmed.",
       "hiddenSmall_one": "A small balance under {{threshold}} is not proposed as a repayment; it stays in the balances.",
-      "hiddenSmall_other": "{{count}} small balances under {{threshold}} are not proposed as repayments; they stay in the balances."
+      "hiddenSmall_other": "{{count}} small balances under {{threshold}} are not proposed as repayments; they stay in the balances.",
+      "receipt": "Receipt",
+      "receiptAdd": "Add a receipt",
+      "receiptReplace": "Replace the receipt",
+      "receiptRemove": "Remove the receipt",
+      "receiptSaved": "Receipt saved.",
+      "receiptRemoved": "Receipt removed."
     },
     "common": {
       "title": "Common goals and envelopes",
@@ -4102,7 +4127,9 @@
       "tasksCounts": "{{late}} late, {{today}} for today.",
       "seeTasks": "See the tasks",
       "goal": "Common goal",
-      "seeGoals": "See the goals"
+      "seeGoals": "See the goals",
+      "owedToThem": "The group owes them",
+      "theyOwe": "They owe the group"
     }
   },
   "funding": {
@@ -4291,6 +4318,21 @@
       "formation": "Learning",
       "securite": "Security and sharing",
       "collectif": "Shared management"
+    },
+    "push": {
+      "title": "Browser notifications",
+      "intro": "On top of the application, this browser can tell you a notification is waiting. The message holds no amount and no name: it only says there is something to read.",
+      "unsupported": "This browser cannot receive notifications.",
+      "offOnServer": "Browser notifications are not switched on on this server.",
+      "consent": "I agree to receive notifications in this browser. I can turn them off at any time.",
+      "turnOn": "Turn on in this browser",
+      "turnOff": "Turn off in this browser",
+      "enabled": "Notifications are on in this browser.",
+      "disabled": "Notifications are off in this browser.",
+      "denied": "The browser refused: allow notifications for this site in its settings.",
+      "failed": "It did not work. Try again.",
+      "mine": "Your browsers",
+      "remove": "Remove {{name}}"
     }
   },
   "trust": {
@@ -4640,7 +4682,8 @@
       "dataQuality": "whether your data is complete and up to date"
     },
     "historyTitle": "The index, month by month",
-    "historyHint": "Each point is the index as it was read that month; it is never recomputed afterwards."
+    "historyHint": "Each point is the index as it was read that month; it is never recomputed afterwards.",
+    "dimensionsChart": "The seven dimensions of the index"
   },
   "movements": {
     "title": "Movements",
@@ -4912,6 +4955,26 @@
       "advance": "Advance",
       "other_deduction": "Other deduction",
       "unknown": "Line to confirm"
+    },
+    "import": {
+      "title": "Import a payslip (PDF or photo)",
+      "privacy": "The file is read in your browser: it is sent nowhere and not kept. You check every line before anything is calculated.",
+      "choose": "Choose a PDF or a photo",
+      "reading": "Reading the document…",
+      "nothing": "No line could be read in this file. Enter your payslip by hand, below.",
+      "scannedPdf": "This PDF is an image: it has no text to read. Send a photo of the payslip instead, or enter it by hand.",
+      "failed": "Reading failed. Enter your payslip by hand, below.",
+      "confirm": "Here is what was read. Check, correct or untick each line: nothing is calculated until you confirm.",
+      "keep": "Keep",
+      "kind": "Line type",
+      "label": "Label",
+      "amount": "Amount (DZD)",
+      "ambiguous": "Several amounts on this line: check this one.",
+      "net": "Net to pay read (DZD)",
+      "period": "Period",
+      "use_one": "Use this line",
+      "use_other": "Use these {{count}} lines",
+      "cancel": "Cancel"
     }
   },
   "toolsCatalogue": {

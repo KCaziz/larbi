@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { HeartPulse } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import LineChart from '../../components/fincludia/charts/LineChart.jsx';
+import BarList from '../../components/fincludia/charts/BarList.jsx';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
@@ -62,6 +63,13 @@ export default function HealthPage() {
                 <p className="fin-hint">{t('health.historyHint')}</p>
               </section>
             )}
+            {/* The seven dimensions side by side, out of 100; a dimension nobody measured yet is not a zero. */}
+            <BarList
+              max={100}
+              rows={health.dimensions.map((dimension) => ({ key: dimension.key, label: dimension.label, value: dimension.score }))}
+              format={(value) => `${value} / 100`}
+              caption={t('health.dimensionsChart')}
+            />
             <ul className="fin-health-dimensions">
               {health.dimensions.map((dimension) => (
                 <li key={dimension.key}>

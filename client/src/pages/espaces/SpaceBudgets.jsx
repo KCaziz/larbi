@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
+import GroupedBars from '../../components/fincludia/charts/GroupedBars.jsx';
 
 // The common budgets of one space (P9-05): an envelope per category and month,
 // the remainder (COL-F06, which may be negative) and the consumption (COL-F07).
@@ -49,6 +50,14 @@ export default function SpaceBudgets({ t, language, spaceId, space, canEdit, run
         <input id="space-budget-month" type="month" value={month} onChange={(event) => event.target.value && setMonth(event.target.value)} />
       </label>
 
+      {data.budgets.length > 0 && (
+        <GroupedBars
+          rows={data.budgets.map((line) => ({ key: line.id, label: label(line.category), a: line.value, b: line.spent }))}
+          names={{ a: t('budget.planned'), b: t('budget.real') }}
+          currency={space.currency}
+          caption={t('spaces.budgets.title')}
+        />
+      )}
       {data.budgets.length === 0 ? (
         <p className="spaces-empty">{t('spaces.budgets.none')}</p>
       ) : (

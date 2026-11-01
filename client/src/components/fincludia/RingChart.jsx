@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatAmount } from '../../lib/format.js';
+import '../../pages/accueil/Home.css';
 
 // The ring of the Accueil (P8-06, ACC-04): a part of a whole — accounts,
 // spending or income — per category. Each slice keeps the colour the client

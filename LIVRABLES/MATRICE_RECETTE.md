@@ -1,14 +1,14 @@
 # Matrice des livrables et recette
 
-> Généré le 2026-10-31 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
+> Généré le 2026-11-01 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
 
 Livrable de l'**annexe 2** du contrat, dont le tableau est fourni vide (livrable / prévu / livré / test / réserve).
 
 La colonne « Test / résultat » renvoie à la suite automatisée : `npm test` dans `server/`. La colonne « Réserve » reprend ce que le plan déclare bloqué, sans l'adoucir — l'article 7 distingue les anomalies bloquantes, majeures et mineures, et une donnée que le client doit fournir n'est aucune des trois : c'est une réserve.
 
-**120 livrables sur 139** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
+**124 livrables sur 142** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
 
-Suite de tests : 171 fichiers (consistency : 3, e2e : 36, functional : 61, security : 39, unit : 32).
+Suite de tests : 178 fichiers (consistency : 3, e2e : 38, functional : 62, security : 42, unit : 33).
 
 | Livrable | Prévu | Livré | Test / résultat | Réserve / correction |
 | --- | --- | --- | --- | --- |
@@ -45,7 +45,7 @@ Suite de tests : 171 fichiers (consistency : 3, e2e : 36, functional : 61, secur
 | `P3-08` — Paiement : décisions à préciser (recherches à mener par le client) | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P3-09` — Paiement : socle indépendant du fournisseur | Oui | Oui | Suite automatisée verte |  |
 | `P3-10` — Paiement : branchement du fournisseur choisi | Oui | Non | — | Non commencé |
-| `P9-14` — Dépenses partagées : sous-catégorie et justificatif | Oui | Non | — | Non commencé |
+| `P9-14` — Dépenses partagées : sous-catégorie et justificatif | Oui | Oui | Suite automatisée verte |  |
 | `P3-11` — CMS pédagogique, lot A : structure d'une formation | Oui | Oui | Suite automatisée verte |  |
 | `P3-12` — CMS pédagogique, lot B : blocs de contenu et éditeur avancé | Oui | Oui | Suite automatisée verte |  |
 | `P3-13` — CMS pédagogique, lot C : quiz | Oui | Oui | Suite automatisée verte |  |
@@ -78,7 +78,7 @@ Suite de tests : 171 fichiers (consistency : 3, e2e : 36, functional : 61, secur
 | `P5-04` — Disponibilité et sauvegardes | Oui | En cours | — |  |
 | `P5-05` — Tests fonctionnels et sécurité | Oui | Non | — | Non commencé |
 | `P5-06` — Préparation production et livraison | Oui | Non | — | Non commencé |
-| `P5-07` — Livrables contractuels, réversibilité et matrice de recette | Oui | En cours | — |  |
+| `P5-07` — Livrables contractuels, réversibilité et matrice de recette | Oui | Oui | Suite automatisée verte |  |
 | `P6-01` — FINCLUDIA : décisions de cadrage à obtenir du client | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P6-22` — FINCLUDIA : intégration du référentiel maître (seuils, paie, mineurs, assistant, objectifs) | Oui | Oui | Suite automatisée verte |  |
 | `P6-02` — FINCLUDIA : modèle de données financier commun | Oui | Oui | Suite automatisée verte |  |
@@ -103,6 +103,7 @@ Suite de tests : 171 fichiers (consistency : 3, e2e : 36, functional : 61, secur
 | `P6-23` — FINCLUDIA : visualisations graphiques des tableaux de bord | Oui | Oui | Suite automatisée verte |  |
 | `P6-24` — FINCLUDIA : comptes financiers multiples et coordination des opérations | Oui | Oui | Suite automatisée verte |  |
 | `P6-21` — FINCLUDIA : validation de fin de phase | Oui | Oui | Suite automatisée verte |  |
+| `P5-08` — Livrables contractuels qui dépendent de la mise en production | Oui | Non | — | Non commencé |
 | `P7-01` — ERP entreprises, diaspora et commerce international | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P7-02` — Espace entreprise : socle de trésorerie (tiers, ventes, achats, règlements) | Oui | Oui | Suite automatisée verte |  |
 | `P7-03` — Espace entreprise : déclinaison par segment (PME/PMI, start-up, micro-entreprise, auto-entrepreneur, micro-importateur, profession libérale) | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
@@ -136,7 +137,9 @@ Suite de tests : 171 fichiers (consistency : 3, e2e : 36, functional : 61, secur
 | `P8-27` — Retours du client du 2026-10-28 : couleurs des catégories et des flux, et les 3 suggestions | Oui | Oui | Suite automatisée verte |  |
 | `P8-28` — Comparateurs et produits bancaires : affichage, rubriques vides, fiches du référentiel | Oui | Oui | Suite automatisée verte |  |
 | `P8-29` — Vitrine, compartiments et parcours de formation : refonte | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
-| `P8-30` — Fiche de paie : import d’un document | Oui | Non | — | Non commencé |
+| `P8-30` — Fiche de paie : import d’un document | Oui | Oui | Suite automatisée verte |  |
+| `P8-31` — Simulateur des intérêts composés | Oui | Oui | Suite automatisée verte |  |
+| `P8-32` — Graphiques complémentaires | Oui | Non | — | Non commencé |
 | `P8-22` — Moteur budgétaire unique : validation de fin de phase | Oui | Non | — | Non commencé |
 | `P9-01` — Gestion commune : décisions de cadrage | Oui | Oui | Suite automatisée verte |  |
 | `P9-02` — Gestion commune : une solution à part, une adresse par espace, un tableau de bord d'espace | Oui | Oui | Suite automatisée verte |  |

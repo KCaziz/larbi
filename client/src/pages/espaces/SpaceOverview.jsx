@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate, formatRatio } from '../../lib/format.js';
+import RingChart from '../../components/fincludia/RingChart.jsx';
+import BarList from '../../components/fincludia/charts/BarList.jsx';
+import GroupedBars from '../../components/fincludia/charts/GroupedBars.jsx';
 
 // The dashboard of a space (P9-02, tab 03, CD-01 to CD-08): the group's balance,
 // the month's spending, who paid, who owes what, the budgets, the next bills,
@@ -37,14 +40,15 @@ export default function SpaceOverview({ t, language, spaceId, space }) {
           ) : (
             <p className="spaces-help">{t('spaces.overview.trend', { change: `${d.depenses.tendance > 0 ? '+' : ''}${formatRatio(language, d.depenses.tendance)}` })}</p>
           )}
-          <ul className="space-overview-list">
-            {d.depenses.parCategorie.slice(0, 4).map((row) => (
-              <li key={row.category ?? 'none'}>
-                <span>{categoryLabel(row.category)}</span>
-                <span>{money(row.value)}</span>
-              </li>
-            ))}
-          </ul>
+          {/* The ring: the month's spending by collective category, each slice the colour the client gave it. */}
+          <RingChart
+            rows={d.depenses.parCategorie.map((row) => {
+              const found = refs.data?.categories.find((item) => item.key === row.category);
+              return { key: row.category ?? 'none', label: found ? found.label : t('spaces.report.noCategory'), icon: found?.icon, color: found?.color, total: row.value };
+            })}
+            currency={d.currency}
+            label={t('spaces.overview.spend')}
+          />
         </article>
 
         <article className="space-compartment">
@@ -65,6 +69,15 @@ export default function SpaceOverview({ t, language, spaceId, space }) {
 
         <article className="space-compartment">
           <h3>{t('spaces.overview.whoOwes')}</h3>
+          {/* Everybody's balance on one baseline: owed to them on one side, owed by them on the other. */}
+          <BarList
+            signed
+            rows={d.quiDoitQuoi.soldes.map((row) => ({ key: row.memberId, label: row.name, value: row.solde.resultat }))}
+            format={money}
+            caption={t('spaces.overview.whoOwes')}
+            positiveLabel={t('spaces.overview.owedToThem')}
+            negativeLabel={t('spaces.overview.theyOwe')}
+          />
           {d.quiDoitQuoi.transferts.length === 0 ? (
             <p className="spaces-help">{t('spaces.overview.allSettled')}</p>
           ) : (
@@ -82,14 +95,12 @@ export default function SpaceOverview({ t, language, spaceId, space }) {
           {d.budgets.length === 0 ? (
             <p className="spaces-help">{t('spaces.overview.noBudget')}</p>
           ) : (
-            <ul className="space-overview-list">
-              {d.budgets.slice(0, 4).map((budget) => (
-                <li key={budget.id}>
-                  <span>{categoryLabel(budget.category)}</span>
-                  <span>{budget.reste.resultat === null ? t('fincludia.notComputed') : money(budget.reste.resultat)}</span>
-                </li>
-              ))}
-            </ul>
+            <GroupedBars
+              rows={d.budgets.slice(0, 6).map((budget) => ({ key: budget.id, label: categoryLabel(budget.category), a: budget.value, b: budget.spent }))}
+              names={{ a: t('budget.planned'), b: t('budget.real') }}
+              currency={d.currency}
+              caption={t('spaces.overview.budgets')}
+            />
           )}
           <Link to={at('budgets')}>{t('spaces.overview.seeBudgets')}</Link>
         </article>

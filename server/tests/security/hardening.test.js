@@ -49,7 +49,8 @@ describe('response headers', () => {
     assert.match(csp, /script-src 'self'/);
     assert.match(csp, /object-src 'none'/);
     assert.match(csp, /frame-ancestors 'self'/);
-    assert.doesNotMatch(csp, /script-src[^;]*unsafe-(inline|eval)/);
+    // 'wasm-unsafe-eval' (WebAssembly only, for the in-browser OCR) is allowed; string eval and inline scripts are not.
+    assert.doesNotMatch(csp, /script-src[^;]*(?<!wasm-)unsafe-(inline|eval)/);
   });
 });
 

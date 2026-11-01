@@ -2074,7 +2074,9 @@
       "horizon_mois": "Horizon (mois)",
       "inflation": "Inflation",
       "rendement_mensuel": "Rendement mensuel",
-      "rendement_nominal": "Rendement nominal"
+      "rendement_nominal": "Rendement nominal",
+      "taux_annuel": "Taux annuel",
+      "capitalisation_par_an": "Capitalisations par an"
     },
     "list": {
       "budget-mensuel": {
@@ -2148,6 +2150,10 @@
       "simulation-logement": {
         "title": "Simulation logement",
         "body": "Mensualité, coût total, reste à vivre et réserve restante après l'apport, pour un projet de logement."
+      },
+      "interet-compose": {
+        "title": "Intérêts composés",
+        "body": "Ce que devient une somme, avec ou sans versements réguliers, quand ses intérêts rapportent eux aussi des intérêts."
       }
     },
     "fields": {
@@ -2217,7 +2223,9 @@
       "earlyRepaymentFees": "Frais de remboursement anticipé",
       "debts": "Mes dettes",
       "minimumPayment": "Mensualité minimale",
-      "price": "Prix du logement"
+      "price": "Prix du logement",
+      "periodicContribution": "Versement à chaque période",
+      "compoundingsPerYear": "Capitalisations par an"
     },
     "results": {
       "revenus": "Revenus",
@@ -2302,7 +2310,16 @@
     "scenarioTitle": "Nom du scénario",
     "saveScenario": "Enregistrer ce scénario",
     "scenarioSaved": "Scénario « {{title}} » enregistré, avec ses hypothèses et ses versions de formule.",
-    "saveNeedsAccount": "Les calculs sont libres d’accès. Pour conserver un scénario et le comparer plus tard, il faut un compte."
+    "saveNeedsAccount": "Les calculs sont libres d’accès. Pour conserver un scénario et le comparer plus tard, il faut un compte.",
+    "serie": {
+      "title": "Année par année",
+      "year": "Année",
+      "paid": "Versé",
+      "interest": "Intérêts",
+      "value": "Valeur",
+      "note": "Une illustration, pas une promesse : le taux est celui que vous avez saisi, constant, et chaque versement est fait à la fin de sa période. Aucun rendement réel n’est garanti.",
+      "yearN": "Année {{year}}"
+    }
   },
   "comparison": {
     "criterion": "Critère",
@@ -3600,7 +3617,8 @@
     "noValuation": "Aucune réévaluation depuis sa saisie.",
     "revalueTitle": "Nouvelle valorisation",
     "revalued": "Valeur mise à jour, avec sa date.",
-    "deleteShort": "Supprimer"
+    "deleteShort": "Supprimer",
+    "assetsVsDebts": "Ce que je possède et ce que je dois"
   },
   "paper": {
     "title": "Portefeuille d’entraînement",
@@ -3825,7 +3843,8 @@
         "noCategory": "Sans catégorie",
         "personalAccount": "Payé avec mon argent personnel (facultatif)",
         "noPersonalAccount": "Non, ou je l’ai déjà saisi ailleurs",
-        "personalAccountHelp": "Une seule dépense personnelle est créée sur ce compte. Les autres membres ne voient ni le lien ni le compte."
+        "personalAccountHelp": "Une seule dépense personnelle est créée sur ce compte. Les autres membres ne voient ni le lien ni le compte.",
+        "subCategory": "Sous-catégorie (libre, facultative)"
       },
       "errors": {
         "refused": "Cette action a été refusée. Vérifiez les informations saisies.",
@@ -3847,7 +3866,13 @@
       "confirm": "Confirmer la dépense",
       "confirmed": "Dépense confirmée.",
       "hiddenSmall_one": "Un petit solde sous {{threshold}} n’est pas proposé en remboursement ; il reste dans les soldes.",
-      "hiddenSmall_other": "{{count}} petits soldes sous {{threshold}} ne sont pas proposés en remboursement ; ils restent dans les soldes."
+      "hiddenSmall_other": "{{count}} petits soldes sous {{threshold}} ne sont pas proposés en remboursement ; ils restent dans les soldes.",
+      "receipt": "Justificatif",
+      "receiptAdd": "Ajouter un justificatif",
+      "receiptReplace": "Remplacer le justificatif",
+      "receiptRemove": "Retirer le justificatif",
+      "receiptSaved": "Justificatif enregistré.",
+      "receiptRemoved": "Justificatif retiré."
     },
     "common": {
       "title": "Objectifs et enveloppes communs",
@@ -4103,7 +4128,9 @@
       "tasksCounts": "{{late}} en retard, {{today}} pour aujourd’hui.",
       "seeTasks": "Voir les tâches",
       "goal": "Objectif commun",
-      "seeGoals": "Voir les objectifs"
+      "seeGoals": "Voir les objectifs",
+      "owedToThem": "Le groupe lui doit",
+      "theyOwe": "Il doit au groupe"
     }
   },
   "funding": {
@@ -4292,6 +4319,21 @@
       "formation": "Formation",
       "securite": "Sécurité et partage",
       "collectif": "Gestion commune"
+    },
+    "push": {
+      "title": "Notifications du navigateur",
+      "intro": "En plus de l’application, ce navigateur peut vous prévenir qu’une notification vous attend. Le message ne contient aucun montant ni aucun nom : il dit seulement qu’il y a quelque chose à lire.",
+      "unsupported": "Ce navigateur ne sait pas recevoir de notifications.",
+      "offOnServer": "Les notifications du navigateur ne sont pas activées sur ce serveur.",
+      "consent": "J’accepte de recevoir des notifications dans ce navigateur. Je peux les couper à tout moment.",
+      "turnOn": "Activer dans ce navigateur",
+      "turnOff": "Désactiver dans ce navigateur",
+      "enabled": "Notifications activées dans ce navigateur.",
+      "disabled": "Notifications désactivées dans ce navigateur.",
+      "denied": "Le navigateur a refusé : autorisez les notifications pour ce site dans ses réglages.",
+      "failed": "L’opération n’a pas abouti. Réessayez.",
+      "mine": "Vos navigateurs",
+      "remove": "Retirer {{name}}"
     }
   },
   "trust": {
@@ -4641,7 +4683,8 @@
       "dataQuality": "si vos données sont complètes et à jour"
     },
     "historyTitle": "L’indice mois par mois",
-    "historyHint": "Chaque point est l’indice tel qu’il a été lu ce mois-là ; il n’est jamais recalculé après coup."
+    "historyHint": "Chaque point est l’indice tel qu’il a été lu ce mois-là ; il n’est jamais recalculé après coup.",
+    "dimensionsChart": "Les sept dimensions de l’indice"
   },
   "movements": {
     "title": "Mouvements",
@@ -4913,6 +4956,26 @@
       "advance": "Avance ou acompte",
       "other_deduction": "Autre retenue",
       "unknown": "Ligne à confirmer"
+    },
+    "import": {
+      "title": "Importer une fiche (PDF ou photo)",
+      "privacy": "Le fichier est lu dans votre navigateur : il n’est envoyé nulle part et n’est pas conservé. Vous vérifiez chaque ligne avant tout calcul.",
+      "choose": "Choisir un PDF ou une photo",
+      "reading": "Lecture du document…",
+      "nothing": "Aucune ligne n’a pu être lue dans ce fichier. Saisissez votre fiche à la main, ci-dessous.",
+      "scannedPdf": "Ce PDF est une image : il n’a pas de texte à lire. Envoyez plutôt une photo de la fiche, ou saisissez-la à la main.",
+      "failed": "La lecture a échoué. Saisissez votre fiche à la main, ci-dessous.",
+      "confirm": "Voici ce qui a été lu. Vérifiez, corrigez ou décochez chaque ligne : rien n’est calculé tant que vous n’avez pas confirmé.",
+      "keep": "Garder",
+      "kind": "Type de ligne",
+      "label": "Libellé",
+      "amount": "Montant (DA)",
+      "ambiguous": "Plusieurs montants sur cette ligne : vérifiez celui-ci.",
+      "net": "Net à payer lu (DA)",
+      "period": "Période",
+      "use_one": "Utiliser cette ligne",
+      "use_other": "Utiliser ces {{count}} lignes",
+      "cancel": "Annuler"
     }
   },
   "toolsCatalogue": {

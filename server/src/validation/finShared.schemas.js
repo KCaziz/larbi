@@ -39,6 +39,9 @@ export const createSharedExpenseSchema = z
     planned: z.boolean().optional(),
     // The free unit of a split by usage, one per expense.
     usageUnit: z.string().trim().min(1).max(30).optional(),
+    // A free label inside the category, this space's own (P9-14): « Électricité » under « Factures »,
+    // whatever the group calls it. Suggested from what the space already used.
+    subCategory: z.string().trim().min(1).max(40).nullable().optional(),
     // One of the 19 collective categories (P9-05): what the common budget reads.
     collectiveCategory: z.string().regex(/^COLC-\d{2}$/).nullable().optional(),
     // Paid with personal money (P9-08): EITHER a personal expense is created on

@@ -1,10 +1,10 @@
 # Inventaire des composants tiers et de leurs licences
 
-> Généré le 2026-10-31 par `node server/scripts/generate-deliverables.js`. Ne pas modifier à la main.
+> Généré le 2026-11-01 par `node server/scripts/generate-deliverables.js`. Ne pas modifier à la main.
 
 Livrable de l'**article 14** du contrat : « Le Prestataire communique au Client la liste des bibliothèques, frameworks, plugins, API et composants tiers intégrés […]. Les composants tiers restent soumis à leurs licences respectives. »
 
-**40 composants**, 8 licences distinctes.
+**43 composants**, 9 licences distinctes.
 
 Les versions indiquées sont celles **réellement installées**, pas les intervalles demandés : c'est le code installé qui est livré.
 
@@ -15,6 +15,7 @@ Tous les composants déclarent une licence.
 L'article 14 demande que les obligations significatives soient portées à la connaissance du Client. Ces composants portent une licence à obligations de redistribution. Ils sont utilisés **tels quels, sans modification**, ce qui est le cas d'usage que ces licences prévoient — mais la décision d'accepter l'obligation appartient au Client, pas au Prestataire.
 
 - `mariadb` 3.5.4 (serveur, développement) — **LGPL-2.1-or-later**
+- `web-push` 3.6.7 (serveur, production) — **MPL-2.0**
 - `dompurify` 3.4.15 (client, production) — **(MPL-2.0 OR Apache-2.0)** — licence double : la branche permissive peut être retenue, et aucune obligation de redistribution ne joue alors.
 
 ## Répartition par licence
@@ -22,12 +23,13 @@ L'article 14 demande que les obligations significatives soient portées à la co
 | Licence | Composants |
 | --- | --- |
 | (MPL-2.0 OR Apache-2.0) | 1 |
-| Apache-2.0 | 3 |
+| Apache-2.0 | 5 |
 | BSD-2-Clause | 1 |
 | BSD-3-Clause | 1 |
 | ISC | 1 |
 | LGPL-2.1-or-later | 1 |
 | MIT | 29 |
+| MPL-2.0 | 1 |
 | OFL-1.1 | 3 |
 
 ## Détail
@@ -51,6 +53,7 @@ L'article 14 demande que les obligations significatives soient portées à la co
 | serveur | production | `multer` | 2.4.0 | `^2.4.0` | MIT |
 | serveur | développement | `prisma` | 7.10.0 | `^7.10.0` | Apache-2.0 |
 | serveur | production | `sanitize-html` | 2.17.7 | `^2.17.7` | MIT |
+| serveur | production | `web-push` | 3.6.7 | `^3.6.7` | MPL-2.0 |
 | serveur | production | `zod` | 4.6.5 | `^4.6.5` | MIT |
 | client | production | `@dnd-kit/core` | 6.3.1 | `^6.3.1` | MIT |
 | client | production | `@dnd-kit/sortable` | 10.0.0 | `^10.0.0` | MIT |
@@ -69,9 +72,11 @@ L'article 14 demande que les obligations significatives soient portées à la co
 | client | production | `i18next-browser-languagedetector` | 8.2.1 | `^8.2.1` | MIT |
 | client | production | `lucide-react` | 1.47.0 | `^1.47.0` | ISC |
 | client | développement | `oxlint` | 1.83.0 | `^1.81.0` | MIT |
+| client | production | `pdfjs-dist` | 5.6.205 | `^5.6.205` | Apache-2.0 |
 | client | production | `react` | 19.3.0 | `^19.2.8` | MIT |
 | client | production | `react-dom` | 19.3.0 | `^19.2.8` | MIT |
 | client | production | `react-i18next` | 17.0.14 | `^17.0.14` | MIT |
 | client | production | `react-router-dom` | 7.18.4 | `^7.18.4` | MIT |
+| client | production | `tesseract.js` | 7.0.0 | `^7.0.0` | Apache-2.0 |
 | client | développement | `vite` | 8.3.0 | `^8.3.0` | MIT |
 

@@ -164,3 +164,29 @@
 .chart-gauge-text {
   margin: 6px 0 0;
 }
+
+/* BarList: one measure per row. With signed values the baseline is in the
+   middle: credits grow to the end side, debts to the start side. */
+.chart-bar-track-signed {
+  position: relative;
+}
+.chart-bar-track-signed::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  inline-size: 1px;
+  background: var(--border-strong);
+}
+.chart-bar-track-signed .chart-bar {
+  position: absolute;
+  inset-block: 0;
+}
+.chart-bar-pos {
+  inset-inline-start: 50%;
+  background: var(--green);
+}
+.chart-bar-neg {
+  inset-inline-end: 50%;
+  background: var(--clay);
+}

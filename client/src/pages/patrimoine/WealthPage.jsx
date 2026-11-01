@@ -17,6 +17,8 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import NetWorthChart from '../../components/fincludia/NetWorthChart.jsx';
+import RingChart from '../../components/fincludia/RingChart.jsx';
+import BarList from '../../components/fincludia/charts/BarList.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Wealth.css';
 
@@ -95,6 +97,15 @@ export default function WealthPage() {
               )}
             </dd>
           </dl>
+          {/* G-12: what is owned against what is owed, on one scale. A figure nobody could compute is not drawn as a zero. */}
+          <BarList
+            rows={[
+              { key: 'assets', label: t('wealth.totalAssets'), value: view.totalActifs },
+              { key: 'debts', label: t('wealth.totalDebts'), value: view.totalDettes },
+            ]}
+            format={(value) => formatAmount(i18n.language, value, view.currency)}
+            caption={t('wealth.assetsVsDebts')}
+          />
           {/* The debts come from P6-10: the figure is not computed twice. */}
           <p className="wealth-help">{t('wealth.debtsFromDebtsPage')}</p>
 
@@ -125,6 +136,11 @@ export default function WealthPage() {
         {view.parType.length > 0 && (
           <section aria-labelledby="wealth-allocation">
             <h2 id="wealth-allocation">{t('wealth.allocationTitle')}</h2>
+            <RingChart
+              rows={view.parType.map((row, index) => ({ key: row.kind, label: t(`wealth.kinds.${row.kind}`, row.kind), total: row.total, color: ['var(--accent)', 'var(--green)', 'var(--clay)', 'var(--warn)', 'var(--border-strong)'][index % 5] }))}
+              currency={view.currency}
+              label={t('wealth.allocationTitle')}
+            />
             <ul className="wealth-breakdown">
               {view.parType.map((row) => (
                 <li key={row.kind}>
