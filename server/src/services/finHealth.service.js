@@ -1,5 +1,7 @@
 import {
   DATA_QUALITY_MIX,
+  GOAL_PRIORITY_WEIGHTS,
+  GOAL_SCORE_MIX,
   HEALTH_BANDS,
   HEALTH_DIMENSIONS,
   HEALTH_SCALES,
@@ -17,6 +19,7 @@ import {
   READINESS_WITHOUT_BANK_RULES,
   RESERVE_BANDS,
   bandOf,
+  goalPriorityLevel,
   reserveTargetFor,
   scoreIn,
 } from '../constants/finHealth.js';
@@ -71,13 +74,66 @@ export function weightedBudgetsScore(lines) {
 }
 
 /**
- * La qualité des données : 60 % complétude + 40 % fraîcheur, chacune 0-100.
- * Si l'une des deux manque, l'autre ne suffit pas à la représenter : la
- * dimension entière devient absente plutôt que mesurée à moitié.
+ * La qualité des données (client, 2026-11-02) : 40 % complétude + 30 % fraîcheur
+ * + 30 % pointage, chacune 0-100. Une composante non applicable (null) est
+ * retirée et les autres sont renormalisées ; aucune composante : non calculée,
+ * jamais 0.
  */
-export function dataQualityScore({ completeness = null, freshness = null } = {}) {
-  if (completeness === null || freshness === null) return null;
-  return completeness * DATA_QUALITY_MIX.completeness + freshness * DATA_QUALITY_MIX.freshness;
+export function dataQualityScore({ completeness = null, freshness = null, clearing = null } = {}) {
+  const parts = [
+    [completeness, DATA_QUALITY_MIX.completeness],
+    [freshness, DATA_QUALITY_MIX.freshness],
+    [clearing, DATA_QUALITY_MIX.clearing],
+  ].filter(([value]) => Number.isFinite(value));
+  if (parts.length === 0) return null;
+  const total = parts.reduce((sum, [, weight]) => sum + weight, 0);
+  return Math.round(parts.reduce((sum, [value, weight]) => sum + value * weight, 0) / total);
+}
+
+/**
+ * Fraîcheur d'une donnée : 100 dans le seuil, 50 entre une et deux fois le
+ * seuil, 0 au-delà (client, 2026-11-02). `ageDays` null = donnée absente : non
+ * mesurée, pas 0.
+ */
+export function freshnessOf(ageDays, thresholdDays) {
+  if (!Number.isFinite(ageDays) || !Number.isFinite(thresholdDays)) return null;
+  if (ageDays <= thresholdDays) return 100;
+  return ageDays <= 2 * thresholdDays ? 50 : 0;
+}
+
+/**
+ * Trajectoire d'un objectif = min(100 ; capital réellement affecté / capital
+ * prévu à date × 100). Rien de prévu encore (objectif tout juste créé) : 100.
+ */
+export function goalTrajectory(allocated, plannedToDate) {
+  if (!Number.isFinite(allocated) || !Number.isFinite(plannedToDate)) return null;
+  if (plannedToDate <= 0) return 100;
+  return Math.min(100, (Math.max(0, allocated) / plannedToDate) * 100);
+}
+
+/**
+ * Score d'un objectif = 70 % trajectoire + 30 % régularité. Sans rythme de
+ * contribution (régularité null), la trajectoire compte seule.
+ */
+export function goalScore({ trajectory, regularity = null }) {
+  if (!Number.isFinite(trajectory)) return null;
+  if (!Number.isFinite(regularity)) return Math.round(trajectory);
+  return Math.round(trajectory * GOAL_SCORE_MIX.trajectory + regularity * GOAL_SCORE_MIX.regularity);
+}
+
+/**
+ * La dimension « Objectifs » : la moyenne des scores des objectifs actifs,
+ * pondérée par la priorité (haute 3, normale 2, basse 1). `lines` =
+ * [{ trajectory, regularity, priority }]. Aucun objectif noté : non calculée,
+ * jamais 0, et son poids est redistribué.
+ */
+export function goalsScore(lines) {
+  const scored = (lines ?? [])
+    .map((line) => ({ score: goalScore(line), weight: GOAL_PRIORITY_WEIGHTS[goalPriorityLevel(line.priority)] }))
+    .filter((row) => row.score !== null);
+  if (scored.length === 0) return null;
+  const total = scored.reduce((sum, row) => sum + row.weight, 0);
+  return Math.round(scored.reduce((sum, row) => sum + row.score * row.weight, 0) / total);
 }
 
 /**
@@ -88,10 +144,10 @@ export function dataQualityScore({ completeness = null, freshness = null } = {})
  *   reserveMonths    mois de réserve
  *   debtRatio        taux d'effort total (décimal)
  *   savingsRate      taux d'épargne nette (décimal)
- *   goalsGap         écart au plan (décimal, 0 = dans la trajectoire)
+ *   goalLines        [{ trajectory, regularity, priority }] par objectif actif
  *   incomeMonths     mois d'historique de revenu régulier
  *   budgetLines      [{ allocated, spent }] par budget de la période
- *   dataQuality      { completeness, freshness } sur 0-100
+ *   dataQuality      { completeness, freshness, clearing } sur 0-100
  */
 export function financialHealth(measures = {}, { now = new Date() } = {}) {
   const scores = {
@@ -99,7 +155,7 @@ export function financialHealth(measures = {}, { now = new Date() } = {}) {
     reserve: dimensionScore('reserve', measures.reserveMonths ?? null),
     debt: dimensionScore('debt', measures.debtRatio ?? null),
     savings: dimensionScore('savings', measures.savingsRate ?? null),
-    goals: dimensionScore('goals', measures.goalsGap ?? null),
+    goals: goalsScore(measures.goalLines ?? null),
     budgets: weightedBudgetsScore(measures.budgetLines ?? null),
     dataQuality: dataQualityScore(measures.dataQuality ?? {}),
   };

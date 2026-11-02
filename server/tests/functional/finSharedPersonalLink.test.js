@@ -5,6 +5,8 @@ import { boot } from '../helpers/server.js';
 // P9-08: a collective expense paid with personal money is linked to ONE personal
 // transaction (COL-F13, QC-04, B5): created on the chosen account OR designated
 // among those already entered, never both; the account stays its owner's.
+// Since P9-15 that transaction is the payer's SHARE only (the rest is an
+// advance, see finSharedAdvance.test.js); the account is still lowered of all.
 
 let t;
 let owner;
@@ -58,6 +60,7 @@ describe('a collective expense paid from a personal account', () => {
     const transaction = await t.prisma.finTransaction.findUnique({ where: { id: stored.personalTransactionId } });
     assert.equal(transaction.shared, true);
     assert.equal(transaction.accountId, current.id);
+    assert.equal(transaction.value, 450000, 'only his half weighs on his budget');
   });
 
   test('an already-entered expense can be designated instead — and nothing is created twice', async () => {
@@ -66,7 +69,8 @@ describe('a collective expense paid from a personal account', () => {
     const res = await spend({ personalLink: { transactionId: entered.body.transaction.id } });
     assert.equal(res.status, 201, JSON.stringify(res.body).slice(0, 300));
     assert.equal(await personalExpenses(), 1, 'the designated one is the only one');
-    assert.equal(await balance(), 5000000 - 900000);
+    assert.equal(await balance(), 5000000 - 900000, 'the account still left of the whole amount');
+    assert.equal((await t.prisma.finTransaction.findUnique({ where: { id: entered.body.transaction.id } })).value, 450000, 'cut down to his share');
   });
 
   test('both an account and a transaction is refused: it would count the money twice', async () => {
@@ -91,14 +95,15 @@ describe('a collective expense paid from a personal account', () => {
     assert.equal(await personalExpenses(), 0);
   });
 
-  test('a later link, and cutting it, leave both rows in place', async () => {
+  test('a later link applies the same rule; an expense that moved the money is undone by cancelling it, not by cutting the link', async () => {
     const expense = (await spend({})).body.expense;
     const entered = (await t.request('POST', '/fin/transactions', { user: owner, json: { kind: 'expense', value: 900000, currency: 'DZD', occurredAt: iso(yesterday()), accountId: current.id } })).body.transaction;
     const linked = await t.request('PUT', `/fin/espaces/${space.id}/depenses/${expense.id}/lien-personnel`, { user: owner, json: { transactionId: entered.id } });
     assert.equal(linked.status, 200, JSON.stringify(linked.body).slice(0, 200));
     assert.equal((await t.request('PUT', `/fin/espaces/${space.id}/depenses/${expense.id}/lien-personnel`, { user: owner, json: { transactionId: entered.id } })).status, 409);
-    assert.equal((await t.request('DELETE', `/fin/espaces/${space.id}/depenses/${expense.id}/lien-personnel`, { user: owner })).status, 200);
-    assert.ok(await t.prisma.finTransaction.findUnique({ where: { id: entered.id } }));
+    assert.equal((await t.request('DELETE', `/fin/espaces/${space.id}/depenses/${expense.id}/lien-personnel`, { user: owner })).status, 409);
+    await t.request('POST', `/fin/espaces/${space.id}/depenses/${expense.id}/annuler`, { user: owner, json: {} });
+    assert.equal((await t.prisma.finTransaction.findUnique({ where: { id: entered.id } })).value, 900000, 'his own entry is given back as he made it');
     assert.ok(await t.prisma.finSharedExpense.findUnique({ where: { id: expense.id } }));
   });
 });
@@ -115,10 +120,10 @@ describe('who sees the personal side (QC-05)', () => {
     assert.equal(asOwner.body.expenses[0].linkedToPersonal, true);
   });
 
-  test('cancelling the collective expense does not touch the personal transaction', async () => {
+  test('cancelling the collective expense takes back what it made on the payer side', async () => {
     const res = await spend({ personalLink: { accountId: current.id } });
     await t.request('POST', `/fin/espaces/${space.id}/depenses/${res.body.expense.id}/annuler`, { user: owner, json: {} });
-    assert.equal(await personalExpenses(), 1);
-    assert.equal(await balance(), 5000000 - 900000, 'the money did leave the account');
+    assert.equal(await personalExpenses(), 0);
+    assert.equal(await balance(), 5000000, 'the money is back on the account');
   });
 });

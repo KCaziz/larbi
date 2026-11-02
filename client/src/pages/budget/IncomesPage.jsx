@@ -14,6 +14,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import BackLink from '../../components/fincludia/BackLink.jsx';
+import BarList from '../../components/fincludia/charts/BarList.jsx';
 import '../../components/fincludia/Fincludia.css';
 
 // « Revenus prévus » (P8-24): the incomes the person declared, the base of the
@@ -73,6 +74,16 @@ export default function IncomesPage() {
 
         {editing === 'new' && <IncomeForm currency={currency} onSubmit={(body) => run(() => api.post('/fin/revenus', body), 'incomes.added')} />}
 
+        {/* The expected income per month by source, one scale for all (F001). */}
+        {incomes.filter((income) => !income.archivedAt && income.currency === currency && income.monthlyValue !== null).length >= 2 && (
+          <BarList
+            caption={t('incomes.sourcesChart')}
+            rows={incomes
+              .filter((income) => !income.archivedAt && income.currency === currency && income.monthlyValue !== null)
+              .map((income) => ({ key: income.id, label: income.label, value: income.monthlyValue }))}
+            format={(value) => formatAmount(i18n.language, value, currency)}
+          />
+        )}
         {incomes.length === 0 ? (
           <p className="fin-hint">{t('incomes.none')}</p>
         ) : (

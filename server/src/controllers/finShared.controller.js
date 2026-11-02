@@ -74,8 +74,9 @@ async function hideForeignLinks(spaceId, userId, expenses) {
   const members = await prisma.finSpaceMember.findMany({ where: { spaceId }, select: { id: true, userId: true } });
   const owner = new Map(members.map((member) => [member.id, member.userId]));
   return expenses.map((expense) => {
-    if (owner.get(expense.payerId) === userId) return { ...expense, linkedToPersonal: expense.personalTransactionId !== null };
-    const { personalTransactionId, ...visible } = expense;
+    // P9-15: how the payer's own money was used is theirs alone as well.
+    const { personalTransactionId, advanceTransferId, advanceOriginalValue, personalCreated, ...visible } = expense;
+    if (owner.get(expense.payerId) === userId) return { ...visible, linkedToPersonal: personalTransactionId !== null || advanceTransferId !== null, advanced: advanceTransferId !== null };
     return visible;
   });
 }

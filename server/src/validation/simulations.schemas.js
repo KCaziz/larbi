@@ -23,6 +23,7 @@ const RATE_MAX = 10;
 const currency = z.string().regex(/^[A-Z]{3}$/);
 
 function fieldSchema(field) {
+  if (field.type === 'choice') return z.enum(field.options);
   if (field.type === 'money') {
     let schema = z.number().int().max(MAX_AMOUNT);
     if (field.min !== undefined) schema = schema.min(field.min);

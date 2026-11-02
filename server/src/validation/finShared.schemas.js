@@ -73,6 +73,8 @@ export const createSettlementSchema = z
     currency: currencySchema.optional(),
     settledAt: isoDate,
     note,
+    // The account that received the money (only the receiver can say): the advance comes down and the account goes up.
+    accountId: z.string().uuid().optional(),
   })
   .strict()
   // Nobody settles with themselves: it would move no money and change nothing,

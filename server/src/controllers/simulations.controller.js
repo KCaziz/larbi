@@ -14,7 +14,7 @@ const noStore = (res) => res.set('Cache-Control', 'no-store');
 
 // A repeated field carries the description of its own rows, so the form can draw
 // them without a second source of truth.
-const describeField = ({ key, type, required = false, min, max, maxLength, item, minItems, maxItems, default: value }) => ({
+const describeField = ({ key, type, required = false, min, max, maxLength, item, minItems, maxItems, options, showWhen, default: value }) => ({
   key,
   type,
   required,
@@ -22,6 +22,8 @@ const describeField = ({ key, type, required = false, min, max, maxLength, item,
   max,
   maxLength,
   default: value,
+  ...(options ? { options } : {}),
+  ...(showWhen ? { showWhen } : {}),
   ...(item ? { item: item.map(describeField), minItems, maxItems } : {}),
 });
 

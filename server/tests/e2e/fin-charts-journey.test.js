@@ -77,12 +77,29 @@ describe('the charts, end to end', { skip: findChrome() ? false : 'no Chrome/Chr
     await b.shot('chart-net-flow');
   });
 
+  test('G-05 — the Synthèse history can be read by week and by day, the table following', async () => {
+    await chartsOn('/app/synthese', "document.querySelectorAll('.synthesis-steps button').length === 3");
+    assert.ok(await b.clickContaining('Par jour'));
+    await b.waitFor("document.querySelectorAll('.wealth-chart table tbody tr').length === 31 || document.querySelectorAll('.chart table tbody tr').length === 31", 'thirty-one days', 15_000);
+    assert.ok(await b.clickContaining('Par semaine'));
+    await b.waitFor("document.querySelectorAll('.chart table tbody tr').length === 12", 'twelve weeks', 15_000);
+    await b.shot('chart-by-week');
+  });
+
   test('G-04 — a budget shows planned and real side by side, each value written', async () => {
     await chartsOn(`/app/budgets/${budgetId}`, "document.querySelectorAll('.chart-bar-row').length >= 1");
     const values = await b.ev("[...document.querySelectorAll('.chart-bar-value')].map((e) => e.textContent.trim())");
     assert.ok(values.length >= 2 && values.every((v) => v.length > 0), JSON.stringify(values));
     await b.ev("(document.querySelector('.chart, .home-ring') ?? document.body).scrollIntoView()");
     await b.shot('chart-planned-real');
+  });
+
+  test('G-04 — the same budget draws what was spent so far against the even pace, over its table', async () => {
+    await chartsOn(`/app/budgets/${budgetId}`, "document.querySelectorAll('.chart .chart-line').length >= 1");
+    assert.ok(await b.ev("[...document.querySelectorAll('.chart-legend-item')].some((e) => /rythme/i.test(e.textContent))"), 'a legend naming the pace');
+    assert.ok(await b.ev("!!document.querySelector('.chart details table')"), 'the figures as a table');
+    await b.ev("(document.querySelector('.chart .chart-line') ?? document.body).scrollIntoView()");
+    await b.shot('chart-budget-pace');
   });
 
   test('G-06 — the accounts page draws the balance history of the account', async () => {

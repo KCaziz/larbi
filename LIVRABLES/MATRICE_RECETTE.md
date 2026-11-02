@@ -6,9 +6,9 @@ Livrable de l'**annexe 2** du contrat, dont le tableau est fourni vide (livrable
 
 La colonne « Test / résultat » renvoie à la suite automatisée : `npm test` dans `server/`. La colonne « Réserve » reprend ce que le plan déclare bloqué, sans l'adoucir — l'article 7 distingue les anomalies bloquantes, majeures et mineures, et une donnée que le client doit fournir n'est aucune des trois : c'est une réserve.
 
-**126 livrables sur 147** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
+**132 livrables sur 147** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
 
-Suite de tests : 178 fichiers (consistency : 3, e2e : 38, functional : 62, security : 42, unit : 33).
+Suite de tests : 186 fichiers (consistency : 3, e2e : 38, functional : 66, security : 42, unit : 37).
 
 | Livrable | Prévu | Livré | Test / résultat | Réserve / correction |
 | --- | --- | --- | --- | --- |
@@ -138,10 +138,10 @@ Suite de tests : 178 fichiers (consistency : 3, e2e : 38, functional : 62, secur
 | `P8-28` — Comparateurs et produits bancaires : affichage, rubriques vides, fiches du référentiel | Oui | Oui | Suite automatisée verte |  |
 | `P8-29` — Vitrine, compartiments et parcours de formation : refonte | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P8-30` — Fiche de paie : import d’un document | Oui | Oui | Suite automatisée verte |  |
-| `P8-31` — Simulateur des intérêts composés | Oui | Oui | Suite automatisée verte |  |
-| `P8-32` — Graphiques complémentaires | Oui | En cours | — |  |
-| `P8-33` — Santé financière : dimensions « Objectifs » et « Qualité des données » | Oui | Non | — | Non commencé |
-| `P8-34` — Missions V1 et règles de certification | Oui | Non | — | Non commencé |
+| `P8-31` — Simulateur des intérêts simples et composés | Oui | Oui | Suite automatisée verte |  |
+| `P8-32` — Graphiques complémentaires | Oui | Oui | Suite automatisée verte |  |
+| `P8-33` — Santé financière : dimensions « Objectifs » et « Qualité des données » | Oui | Oui | Suite automatisée verte |  |
+| `P8-34` — Missions V1 et règles de certification | Oui | Oui | Suite automatisée verte |  |
 | `P8-22` — Moteur budgétaire unique : validation de fin de phase | Oui | Non | — | Non commencé |
 | `P9-01` — Gestion commune : décisions de cadrage | Oui | Oui | Suite automatisée verte |  |
 | `P9-02` — Gestion commune : une solution à part, une adresse par espace, un tableau de bord d'espace | Oui | Oui | Suite automatisée verte |  |
@@ -156,9 +156,9 @@ Suite de tests : 178 fichiers (consistency : 3, e2e : 38, functional : 62, secur
 | `P9-11` — Formules collectives : un moteur collectif, sans doublon | Oui | Oui | Suite automatisée verte |  |
 | `P9-12` — Contrôles du client et règle « trouvable » | Oui | Oui | Suite automatisée verte |  |
 | `P9-13` — Gestion commune : validation de fin de phase | Oui | Non | — | Non commencé |
-| `P9-15` — Dépense commune payée avec mon argent : seule ma part pèse sur mon budget | Oui | Non | — | Non commencé |
-| `P9-16` — Catégories communes reliées aux 125 catégories | Oui | Non | — | Non commencé |
-| `P9-17` — Alerte de retard sur un objectif commun | Oui | Non | — | Non commencé |
+| `P9-15` — Dépense commune payée avec mon argent : seule ma part pèse sur mon budget | Oui | Oui | Suite automatisée verte |  |
+| `P9-16` — Catégories communes reliées aux 125 catégories | Oui | Oui | Suite automatisée verte |  |
+| `P9-17` — Alerte de retard sur un objectif commun | Oui | Oui | Suite automatisée verte |  |
 
 ## Réserves, en clair
 

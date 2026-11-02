@@ -59,7 +59,7 @@ export default function IncomeExpenseChart({ points, currency }) {
           <tbody>
             {points.map((point) => (
               <tr key={point.month}>
-                <td>{formatDate(i18n.language, `${point.month}-01`)}</td>
+                <td>{formatDate(i18n.language, point.month.length === 7 ? `${point.month}-01` : point.month)}</td>
                 <td>{point.revenus === null ? t('fincludia.notComputed') : formatAmount(i18n.language, point.revenus, currency)}</td>
                 <td>{point.depenses === null ? t('fincludia.notComputed') : formatAmount(i18n.language, point.depenses, currency)}</td>
               </tr>

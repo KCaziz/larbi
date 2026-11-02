@@ -68,6 +68,18 @@ describe('more charts, end to end', { skip: findChrome() ? false : 'no Chrome/Ch
     await scrollShot('.space-overview', 'charts2-space');
   });
 
+  test('the dashboard of a space also draws the pot and what each member paid, month by month', async () => {
+    const history = (await api('GET', `/fin/espaces/${space.id}/historique-mensuel`)).body.historique;
+    assert.equal(history.points.length, 6);
+    const last = history.points.at(-1);
+    assert.equal(last.soldeGroupe, -490000, 'no entry, 400 000 + 90 000 spent');
+    assert.deepEqual(Object.values(last.paye).sort((a, b) => a - b), [90000, 400000], 'each member paid their own');
+    await b.goto(`${site.url}/partage/${space.id}`);
+    await b.waitFor("document.querySelectorAll('.space-overview .chart-line').length >= 2", 'the two curves', 15_000);
+    assert.ok(await b.ev("document.querySelectorAll('.space-overview .chart-legend-item').length >= 3"), 'a legend naming the balance and the members');
+    await scrollShot('.space-compartment-wide', 'charts2-space-history');
+  });
+
   test('the report of a space: the ring and the balances', async () => {
     await b.goto(`${site.url}/partage/${space.id}/rapport`);
     await b.waitFor("document.querySelectorAll('.home-ring').length >= 1 && document.querySelectorAll('.chart-bar-track-signed').length >= 1", 'ring and balances', 15_000);
@@ -105,5 +117,72 @@ describe('more charts, end to end', { skip: findChrome() ? false : 'no Chrome/Ch
     await b.waitFor("document.querySelectorAll('.simulator-serie .chart-line').length >= 2", 'the two curves', 15_000);
     assert.ok(await b.ev("document.querySelectorAll('.simulator-serie .chart-legend-item').length === 2"), 'a legend naming both');
     await scrollShot('.simulator-serie', 'charts2-compound');
+  });
+
+  test('the debt strategies: what is still owed month by month, one curve for each order', async () => {
+    await api('POST', '/fin/debts', { label: 'Crédit voiture', outstandingPrincipal: 6000000, monthlyInstalment: 300000, currency: 'DZD', rate: 0.09 });
+    await api('POST', '/fin/debts', { label: 'Crédit conso', outstandingPrincipal: 2000000, monthlyInstalment: 150000, currency: 'DZD', rate: 0.14 });
+    await b.goto(`${site.url}/app/dettes/strategies`);
+    await b.waitFor("document.querySelectorAll('.chart .chart-line').length >= 2", 'the two curves', 15_000);
+    assert.ok(await b.ev("document.querySelectorAll('.chart .chart-legend-item').length === 2"), 'a legend naming both orders');
+    assert.ok(await b.ev("!!document.querySelector('.chart details table')"), 'the figures as a table');
+    await scrollShot('.chart', 'charts2-debt-strategies');
+  });
+
+  test('the goals against each other, personal and common: progress on one scale, the value written', async () => {
+    // Written straight to the table: the API refuses capital that no marked saving backs.
+    const goal = (label, target, allocated) => t.prisma.finGoal.create({ data: { userId: owner.id, label, target, currency: 'DZD', allocated, source: 'manual', status: 'real' } });
+    await goal('Voyage', 1000000, 250000);
+    await goal('Ordinateur', 400000, 300000);
+    await b.goto(`${site.url}/app/objectifs`);
+    await b.waitFor("document.querySelectorAll('.chart .chart-bar-row').length >= 2", 'the goal bars', 15_000);
+    const values = await b.ev("[...document.querySelectorAll('.chart-bar-value')].map((e) => e.textContent.trim())");
+    assert.ok(values.some((v) => v.includes('25')) && values.some((v) => v.includes('75')), JSON.stringify(values));
+    await scrollShot('.chart', 'charts2-goals');
+
+    await api('POST', `/fin/espaces/${space.id}/objectifs-communs`, { label: 'Cuisine', target: 1000000, currency: 'DZD' });
+    await api('POST', `/fin/espaces/${space.id}/objectifs-communs`, { label: 'Vacances', target: 500000, currency: 'DZD' });
+    await b.goto(`${site.url}/partage/${space.id}/objectifs`);
+    await b.waitFor("document.querySelectorAll('.chart .chart-bar-row').length >= 2", 'the common goal bars', 15_000);
+    await scrollShot('.chart', 'charts2-common-goals');
+  });
+
+  test('the calendar: the load of the month week by week, what falls due', async () => {
+    const day = (n) => new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), n, 12)).toISOString();
+    const planned = (n, kind, value) => api('POST', '/fin/transactions', { kind, value, currency: 'DZD', occurredAt: day(n), planned: true });
+    const first = await planned(3, 'expense', 150000);
+    assert.equal(first.status, 201, JSON.stringify(first.body).slice(0, 300));
+    for (const [n, kind, value] of [[20, 'expense', 90000]]) {
+      const res = await planned(n, kind, value);
+      assert.equal(res.status, 201, JSON.stringify(res.body).slice(0, 300));
+    }
+    const cal = (await api('GET', '/fin/calendrier')).body.calendrier;
+    assert.ok((cal.semaines ?? []).length >= 4, 'the weeks of the month');
+    assert.equal(cal.semaines.reduce((sum, week) => sum + week.sorties, 0), 240000);
+    await b.goto(`${site.url}/app/calendrier`);
+    await b.waitFor("document.querySelectorAll('.chart .chart-bar-row').length >= 4", 'the weeks', 15_000);
+    await scrollShot('.chart', 'charts2-calendar-weeks');
+  });
+
+  test('two months compared: the categories side by side, each value written', async () => {
+    const lastMonth = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() - 1, 10, 12)).toISOString();
+    assert.equal((await api('POST', '/fin/transactions', { kind: 'expense', value: 700000, currency: 'DZD', occurredAt: lastMonth })).status, 201);
+    await b.goto(`${site.url}/app/synthese/rapports`);
+    await b.waitFor("document.querySelectorAll('.synthesis-compare .chart-bar-row').length >= 1", 'the compared bars', 15_000);
+    assert.ok(await b.ev("document.querySelectorAll('.synthesis-compare .chart-legend-item').length === 2"), 'a legend naming both months');
+    await scrollShot('.synthesis-compare .chart', 'charts2-compare-months');
+  });
+
+  test('the expected incomes: each source against the same scale, at its monthly equivalent', async () => {
+    const listed = await api('GET', '/fin/revenus');
+    assert.equal(listed.status, 200);
+    await api('POST', '/fin/revenus', { label: 'Salaire', value: 8000000, currency: 'DZD', frequency: 'mensuel', startDate: new Date(Date.now() - 60 * 86400000).toISOString() });
+    await api('POST', '/fin/revenus', { label: 'Prime annuelle', value: 1200000, currency: 'DZD', frequency: 'annuel', startDate: new Date(Date.now() - 60 * 86400000).toISOString() });
+    const monthly = (await api('GET', '/fin/revenus')).body.incomes.find((row) => row.label === 'Prime annuelle').monthlyValue;
+    assert.equal(monthly, 100000, 'a year of 12 000 DA is 1 000 DA a month');
+    await b.goto(`${site.url}/app/budgets/revenus`);
+    await b.waitFor("document.querySelectorAll('.chart .chart-bar-track, .chart li').length >= 2", 'the bars', 15_000);
+    assert.ok((await b.ev('document.body.textContent')).includes('Prime annuelle'));
+    await scrollShot('.chart', 'charts2-incomes');
   });
 });

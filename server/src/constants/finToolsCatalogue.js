@@ -58,10 +58,10 @@ export const TOOLS_CATALOGUE = [
   { code: 'CAL-28', label: 'Indice de santé financière', family: 'analysis', formulas: 'F053', to: '/sante' },
   { code: 'CAL-29', label: 'Projection retraite indicative', family: 'savings', formulas: 'F031,F033', ...sim('projection-retraite') },
   // Asked by the client on 2026-11-01: « le simulateur des intérêts composés ».
-  { code: 'CAL-IC', label: 'Intérêts composés', family: 'savings', formulas: 'F020,F029-F031', ...sim('interet-compose') },
+  { code: 'CAL-IC', label: 'Intérêts simples et composés', family: 'savings', formulas: 'INT-F01 à INT-F05', ...sim('interet-compose') },
   { code: 'CAL-30', label: 'Simulation logement / immobilier', family: 'debt', formulas: 'F021-F023,F056', ...sim('simulation-logement') },
   { code: 'CAL-V7-01', label: 'Analyse 50/30/20', family: 'analysis', formulas: 'AN-F005-AN-F008', to: '/budgets' },
-  { code: 'CAL-V7-02', label: 'Scénarios d’épargne mensuelle', family: 'savings', formulas: 'AN-F009-AN-F012', pending: 'P8-24' },
+  { code: 'CAL-V7-02', label: 'Scénarios d’épargne mensuelle', family: 'savings', formulas: 'AN-F009-AN-F012', to: '/synthese' },
   { code: 'CAL-V7-03', label: 'Pointage mensuel', family: 'budget', formulas: 'AN-F004', to: '/mouvements' },
   { code: 'CAL-V7-04', label: 'Projection solde fin de mois', family: 'budget', formulas: 'AN-F013', to: '/calendrier' },
   { code: 'CAL-V7-05', label: 'Rapport mensuel', family: 'analysis', formulas: 'Agrégation des formules', to: '/synthese' },

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../config/prisma.js';
 import { COLLECTIVE_CATEGORIES } from '../constants/finCollectiveCategories.js';
+import { referenceOfCollective } from '../constants/finCollectiveCategoryMap.js';
 import { requireAuth } from '../middleware/auth.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
 import { deleteSpaceBudget, setSpaceBudget, spaceBudgetsView } from '../services/finSpaceBudget.service.js';
@@ -22,7 +23,7 @@ router.param('id', uuidParam);
 router.param('budgetId', uuidParam);
 
 router.get('/espaces/references-budgets', (req, res) => {
-  res.json({ categories: COLLECTIVE_CATEGORIES, formulas: ['COL-F06', 'COL-F07', 'ALG-C02'].map(describeFormula) });
+  res.json({ categories: COLLECTIVE_CATEGORIES.map((category) => ({ ...category, referenceKey: referenceOfCollective(category.key) })), formulas: ['COL-F06', 'COL-F07', 'ALG-C02'].map(describeFormula) });
 });
 router.get(
   '/espaces/:id/budgets',

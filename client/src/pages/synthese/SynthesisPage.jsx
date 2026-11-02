@@ -40,7 +40,9 @@ export default function SynthesisPage() {
   // `?instantane=1`: the report AS IT WAS kept (P8-24), not recomputed.
   const asKept = new URLSearchParams(location.search).get('instantane') === '1';
   const report = useApi(asKept ? `/fin/rapport/instantane/${month}` : `/fin/rapport?mois=${month}&reduction=${Math.min(100, Math.max(0, Number(reduction) || 0))}`);
-  const history = useApi('/fin/argent/synthese/historique');
+  // G-05: the step of the history charts — month (the default), week or day.
+  const [step, setStep] = useState('mois');
+  const history = useApi(`/fin/argent/synthese/historique${step === 'mois' ? '' : `?pas=${step}`}`);
   const [kept, setKept] = useState(null);
   if (report.data && report.data !== kept) setKept(report.data);
   const data = report.data ?? kept;
@@ -104,13 +106,28 @@ export default function SynthesisPage() {
               expenses: s.R01.tendance.depenses.resultat === null ? t('fincludia.notComputed') : formatRatio(i18n.language, s.R01.tendance.depenses.resultat),
             })}
           </p>
+          <div role="group" aria-label={t('synthesis.stepLabel')} className="synthesis-steps">
+            {['mois', 'semaine', 'jour'].map((value) => (
+              <button key={value} type="button" aria-pressed={step === value} className={step === value ? 'is-active' : ''} onClick={() => setStep(value)}>
+                {t(`synthesis.steps.${value}`)}
+              </button>
+            ))}
+          </div>
           {history.data?.points && <IncomeExpenseChart points={history.data.points} currency={history.data.currency} />}
           {/* G-03: the net flow of each month, as the engine computed it. */}
           {history.data?.points && (
             <LineChart
-              series={[{ key: 'net', label: t('appHome.netFlow'), tone: 0, points: history.data.points.map((point) => ({ month: point.month, value: point.fluxNet ?? null })) }]}
+              series={[{ key: 'net', label: t('appHome.netFlow'), tone: 0, points: history.data.points.map((point) => ({ month: point.month, ...(point.month.length > 7 ? { label: formatDate(i18n.language, point.month) } : {}), value: point.fluxNet ?? null })) }]}
               currency={history.data.currency}
               caption={t('synthesis.netFlowChart')}
+            />
+          )}
+          {/* The savings rate of each month (F008, the one the home shows); a month without income has none, and is a gap. */}
+          {history.data?.points && history.data.points.some((point) => typeof point.tauxEpargne === 'number') && (
+            <LineChart
+              series={[{ key: 'rate', label: t('synthesis.savingsRateChart'), tone: 1, points: history.data.points.map((point) => ({ month: point.month, ...(point.month.length > 7 ? { label: formatDate(i18n.language, point.month) } : {}), value: typeof point.tauxEpargne === 'number' ? point.tauxEpargne : null })) }]}
+              format={(value) => formatRatio(i18n.language, value)}
+              caption={t('synthesis.savingsRateChart')}
             />
           )}
         </section>

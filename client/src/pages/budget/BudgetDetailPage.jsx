@@ -17,6 +17,7 @@ import AmountField from '../../components/fincludia/AmountField.jsx';
 import BudgetMeter from '../../components/fincludia/BudgetMeter.jsx';
 import BudgetDistribution from '../../components/fincludia/BudgetDistribution.jsx';
 import GroupedBars from '../../components/fincludia/charts/GroupedBars.jsx';
+import LineChart from '../../components/fincludia/charts/LineChart.jsx';
 import { toMinorUnits } from '../../lib/money.js';
 import '../../components/fincludia/Fincludia.css';
 import './Budget.css';
@@ -184,6 +185,19 @@ export default function BudgetDetailPage() {
               names={{ a: t('budget.planned'), b: t('budget.real') }}
               currency={currency}
               caption={t('budget.plannedVsRealChart')}
+            />
+          )}
+
+          {/* G-04: the spending so far against the pace that would use the budget evenly. */}
+          {vue.courbe?.length > 1 && (
+            <LineChart
+              currency={currency}
+              caption={t('budget.paceChart')}
+              xLabel={t('budget.paceDay')}
+              series={[
+                { key: 'real', label: t('budget.paceReal'), tone: 0, points: vue.courbe.map((point) => ({ month: point.jour, label: formatDate(i18n.language, point.jour), value: point.reel })) },
+                { key: 'pace', label: t('budget.pacePlanned'), tone: 2, points: vue.courbe.map((point) => ({ month: point.jour, label: formatDate(i18n.language, point.jour), value: point.rythme })) },
+              ]}
             />
           )}
 

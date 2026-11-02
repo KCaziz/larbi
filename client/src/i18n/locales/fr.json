@@ -2076,7 +2076,17 @@
       "rendement_mensuel": "Rendement mensuel",
       "rendement_nominal": "Rendement nominal",
       "taux_annuel": "Taux annuel",
-      "capitalisation_par_an": "Capitalisations par an"
+      "capitalisation_par_an": "Capitalisations par an",
+      "type_interet": "Type d’intérêt",
+      "taux_saisi": "Taux saisi",
+      "periodicite_taux": "Périodicité du taux",
+      "type_taux_annuel": "Type de taux annuel",
+      "capitalisation": "Capitalisation",
+      "duree_mois": "Durée (mois)",
+      "periode_calcul_mois": "Période de calcul (mois)",
+      "nombre_periodes": "Nombre de périodes",
+      "frequence_versement": "Fréquence du versement",
+      "moment_versement": "Moment du versement"
     },
     "list": {
       "budget-mensuel": {
@@ -2152,8 +2162,8 @@
         "body": "Mensualité, coût total, reste à vivre et réserve restante après l'apport, pour un projet de logement."
       },
       "interet-compose": {
-        "title": "Intérêts composés",
-        "body": "Ce que devient une somme, avec ou sans versements réguliers, quand ses intérêts rapportent eux aussi des intérêts."
+        "title": "Intérêts simples et composés",
+        "body": "Ce que devient une somme, avec ou sans versements réguliers, à intérêt simple ou composé. Le taux saisi pour un mois ou un trimestre n’est jamais divisé. Impôts et frais de gestion du compte ne sont pas comptés."
       }
     },
     "fields": {
@@ -2224,8 +2234,17 @@
       "debts": "Mes dettes",
       "minimumPayment": "Mensualité minimale",
       "price": "Prix du logement",
-      "periodicContribution": "Versement à chaque période",
-      "compoundingsPerYear": "Capitalisations par an"
+      "periodicContribution": "Versement périodique",
+      "compoundingsPerYear": "Capitalisations par an",
+      "rate": "Taux",
+      "ratePeriod": "Le taux est",
+      "annualRateKind": "Taux annuel",
+      "interestKind": "Type d’intérêt",
+      "duration": "Durée",
+      "durationUnit": "Unité de la durée",
+      "compounding": "Capitalisation",
+      "contributionFrequency": "Fréquence du versement",
+      "contributionTiming": "Moment du versement"
     },
     "results": {
       "revenus": "Revenus",
@@ -2280,7 +2299,9 @@
       "interetsEconomises": "Intérêts économisés, estimation",
       "avalanche": "Dette la plus coûteuse d'abord",
       "bouleDeNeige": "Plus petit solde d'abord",
-      "reserveApresApport": "Réserve après l'apport"
+      "reserveApresApport": "Réserve après l'apport",
+      "tauxPeriode": "Taux de la période",
+      "tauxAnnuelEffectif": "Taux annuel effectif équivalent"
     },
     "rowNumber": "Ligne {{number}}",
     "addRow": "Ajouter une ligne",
@@ -2317,8 +2338,24 @@
       "paid": "Versé",
       "interest": "Intérêts",
       "value": "Valeur",
-      "note": "Une illustration, pas une promesse : le taux est celui que vous avez saisi, constant, et chaque versement est fait à la fin de sa période. Aucun rendement réel n’est garanti.",
-      "yearN": "Année {{year}}"
+      "note": "Une illustration, pas une promesse : le taux est celui que vous avez saisi, constant. Impôts et frais de gestion du compte ne sont pas comptés.",
+      "yearN": "Année {{year}}",
+      "step": "Période",
+      "monthN": "Mois {{month}}"
+    },
+    "choices": {
+      "monthly": "Mensuel",
+      "quarterly": "Trimestriel",
+      "annual": "Annuel",
+      "nominal": "Nominal",
+      "effective": "Effectif (TAE)",
+      "compound": "Composé",
+      "simple": "Simple",
+      "end": "Fin de période",
+      "start": "Début de période",
+      "years": "Années",
+      "quarters": "Trimestres",
+      "months": "Mois"
     }
   },
   "comparison": {
@@ -3167,7 +3204,11 @@
     "edit": "Modifier",
     "plannedVsRealChart": "Prévu et réel, par enveloppe",
     "planned": "Prévu",
-    "real": "Réel"
+    "real": "Réel",
+    "paceChart": "Dépense cumulée contre le rythme prévu",
+    "paceDay": "Jour",
+    "paceReal": "Dépense cumulée",
+    "pacePlanned": "Rythme prévu (réparti sur la période)"
   },
   "goals": {
     "title": "Objectifs",
@@ -3235,11 +3276,15 @@
       "run": "Simuler",
       "monthsToReach": "Mois pour atteindre la cible",
       "atHorizon": "À l’horizon : {{capital}} pour une cible de {{target}} (inflation comprise).",
-      "disclaimer": "Une simulation avec vos hypothèses : ni une promesse, ni un conseil. Rien n’est enregistré."
+      "disclaimer": "Une simulation avec vos hypothèses : ni une promesse, ni un conseil. Rien n’est enregistré.",
+      "chart": "Capital et objectif, mois par mois",
+      "chartCapital": "Capital projeté",
+      "chartTarget": "Objectif (avec inflation)"
     },
     "backToList": "Retour aux objectifs",
     "notFound": "Cet objectif n’existe pas, ou il n’est pas le vôtre.",
-    "created": "Objectif créé."
+    "created": "Objectif créé.",
+    "compareChart": "Avancement de chaque objectif (100 % = la cible)"
   },
   "debts": {
     "title": "Dettes",
@@ -3316,7 +3361,10 @@
     "planInBudget": "Prévoir la mensualité au budget",
     "updateInBudget": "Mettre la mensualité à jour au budget",
     "inBudget": "La mensualité est prévue au budget en cours ; la remettre à jour garde la même enveloppe.",
-    "plannedInBudget": "Mensualité prévue au budget."
+    "plannedInBudget": "Mensualité prévue au budget.",
+    "curveTitle": "Capital restant dû, mois par mois",
+    "curveMonthHead": "Mois",
+    "curveMonth": "Mois {{month}}"
   },
   "reserve": {
     "title": "Réserve de sécurité",
@@ -3470,7 +3518,11 @@
       "day": "Le jour même",
       "after": "Le lendemain"
     },
-    "backToCalendar": "Retour au calendrier"
+    "backToCalendar": "Retour au calendrier",
+    "weekChart": "Charge des échéances, semaine par semaine",
+    "weekOf": "Semaine du {{date}}",
+    "weekIn": "Entrées prévues",
+    "weekOut": "Sorties prévues"
   },
   "today": {
     "title": "Aujourd'hui",
@@ -3843,7 +3895,12 @@
         "noCategory": "Sans catégorie",
         "personalAccount": "Payé avec mon argent personnel (facultatif)",
         "noPersonalAccount": "Non, ou je l’ai déjà saisi ailleurs",
-        "personalAccountHelp": "Une seule dépense personnelle est créée sur ce compte. Les autres membres ne voient ni le lien ni le compte.",
+        "personalAccountHelp": "Le compte est débité du montant total ; seule votre part pèse sur votre budget, le reste est une avance à récupérer. Les autres membres ne voient ni le lien ni le compte.",
+        "referenceCategory": "Catégorie précise (facultatif)",
+        "referenceFromCommon": "Celle de la catégorie commune",
+        "receivedAccount": "Compte qui a reçu l’argent (facultatif)",
+        "noReceivedAccount": "Aucun : règlement seulement déclaratif",
+        "receivedAccountHelp": "Choisissez le compte pour que votre avance diminue et que le compte augmente (ce n’est pas un revenu).",
         "subCategory": "Sous-catégorie (libre, facultative)"
       },
       "errors": {
@@ -3896,7 +3953,19 @@
         "role": "Votre rôle dans cet espace ne permet pas cette action."
       },
       "fairShareTitle": "Part équitable selon les revenus (si partagés)",
-      "fairShareMissing": "Non calculé : {{names}} n’a/ont pas partagé ses/leurs revenus dans cet espace."
+      "fairShareMissing": "Non calculé : {{names}} n’a/ont pas partagé ses/leurs revenus dans cet espace.",
+      "calendarLine": "Contribution attendue tous les {{months}} mois, à partir du {{date}}.",
+      "calendarNone": "Pas de calendrier : seuls les paliers 25, 50, 75 et 100 % sont annoncés.",
+      "calendarEdit": "Calendrier des contributions",
+      "calendarRemove": "Retirer le calendrier",
+      "calendarEvery": "Rythme",
+      "calendarFirst": "Première échéance",
+      "calendarShare": "Part attendue de {{name}}",
+      "calendarSaved": "Calendrier enregistré.",
+      "calendarRemoved": "Calendrier retiré.",
+      "calendarMonthly": "Chaque mois",
+      "calendarMonths": "Tous les {{count}} mois",
+      "progressChart": "Avancement des objectifs communs (100 % = la cible)"
     },
     "household": {
       "childrenTitle": "Enfants",
@@ -4130,7 +4199,11 @@
       "goal": "Objectif commun",
       "seeGoals": "Voir les objectifs",
       "owedToThem": "Le groupe lui doit",
-      "theyOwe": "Il doit au groupe"
+      "theyOwe": "Il doit au groupe",
+      "history": "Mois après mois",
+      "potChart": "Solde du groupe à la fin de chaque mois",
+      "paidChart": "Ce que chaque membre a payé chaque mois",
+      "others": "Autres"
     }
   },
   "funding": {
@@ -4245,6 +4318,7 @@
       "space_bill": "Factures communes à venir",
       "space_task": "Tâches à faire ou en retard",
       "space_contribution": "Contributions attendues",
+      "space_goal_gap": "Retard sur un objectif commun",
       "space_permission": "Changements de droit"
     },
     "messages": {
@@ -4304,6 +4378,13 @@
         "overdue": "Tâche « {{label}} » en retard (échéance {{date}})."
       },
       "spaceContribution": "Votre contribution prévue pour le {{date}} attend d’être confirmée.",
+      "spaceGoalGap": {
+        "late": "Objectif « {{label}} » : il vous manque {{gap}} sur les {{expected}} prévus à ce jour.",
+        "reinforced": "Objectif « {{label}} » : retard important, il vous manque {{gap}} sur les {{expected}} prévus à ce jour.",
+        "reminder": "Rappel — objectif « {{label}} » : {{gap}} restent à verser.",
+        "admin": "Une contribution prévue reste à compléter sur l’objectif « {{label}} ».",
+        "milestone": "L’objectif commun « {{label}} » a atteint {{percent}} %."
+      },
       "spacePermission": {
         "admin": "Vous êtes maintenant administrateur d’un espace.",
         "member": "Vous êtes maintenant membre d’un espace.",
@@ -4877,7 +4958,14 @@
     "keptFailed": "Le rapport n’a pas pu être conservé.",
     "keptOn": "Conservé le {{date}}",
     "keep": "Conserver",
-    "keepAgain": "Conserver à nouveau"
+    "keepAgain": "Conserver à nouveau",
+    "savingsRateChart": "Taux d’épargne de chaque mois",
+    "stepLabel": "Pas des graphiques",
+    "steps": {
+      "mois": "Par mois",
+      "semaine": "Par semaine",
+      "jour": "Par jour"
+    }
   },
   "education": {
     "yourParcours": "Votre parcours : {{name}}",
@@ -5181,7 +5269,8 @@
     "manage": "Voir et corriger mes revenus prévus",
     "errors": {
       "refused": "Ce revenu n’a pas pu être enregistré."
-    }
+    },
+    "sourcesChart": "Revenus prévus par mois, selon la source"
   },
   "shared": {
     "backToSpaces": "Mes espaces",
@@ -5243,6 +5332,17 @@
     "replay": "Rejouer",
     "errors": {
       "incomplete": "Répondez à chaque étape pour voir le résultat."
+    },
+    "cert": {
+      "title": "Mon certificat : {{name}}",
+      "missions": "Toutes les missions validées ({{done}} sur {{total}}) : 70 % au minimum, 80 % pour la sécurité numérique",
+      "average": "Moyenne d’au moins 75 % (actuellement {{average}} %)",
+      "finalCase": "Cas final réussi",
+      "security": "Modules de sécurité terminés",
+      "met": "Atteint",
+      "notMet": "À faire",
+      "eligible": "Toutes les conditions sont remplies. Ce certificat reste pédagogique : ce n’est ni un diplôme professionnel, ni un agrément financier, ni un score bancaire.",
+      "rules": "Ce certificat est pédagogique : ni diplôme professionnel, ni agrément financier, ni score bancaire. Rejouer une mission garde votre meilleur résultat."
     }
   }
 }

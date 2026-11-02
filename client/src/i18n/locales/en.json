@@ -2075,7 +2075,17 @@
       "rendement_mensuel": "Monthly return",
       "rendement_nominal": "Nominal return",
       "taux_annuel": "Annual rate",
-      "capitalisation_par_an": "Compoundings per year"
+      "capitalisation_par_an": "Compoundings per year",
+      "type_interet": "Kind of interest",
+      "taux_saisi": "Rate typed",
+      "periodicite_taux": "Period of the rate",
+      "type_taux_annuel": "Kind of yearly rate",
+      "capitalisation": "Compounding",
+      "duree_mois": "Duration (months)",
+      "periode_calcul_mois": "Calculation period (months)",
+      "nombre_periodes": "Number of periods",
+      "frequence_versement": "Payment frequency",
+      "moment_versement": "When the payment is made"
     },
     "list": {
       "budget-mensuel": {
@@ -2151,8 +2161,8 @@
         "body": "Instalment, total cost, living allowance and the reserve left after the down payment, for a housing project."
       },
       "interet-compose": {
-        "title": "Compound interest",
-        "body": "What a sum becomes, with or without regular payments, when its interest earns interest too."
+        "title": "Simple and compound interest",
+        "body": "What a sum becomes, with or without regular payments, at simple or compound interest. A rate typed for a month or a quarter is never divided. Taxes and account fees are not counted."
       }
     },
     "fields": {
@@ -2223,8 +2233,17 @@
       "debts": "My debts",
       "minimumPayment": "Minimum instalment",
       "price": "Price of the home",
-      "periodicContribution": "Payment each period",
-      "compoundingsPerYear": "Compoundings per year"
+      "periodicContribution": "Regular payment",
+      "compoundingsPerYear": "Compoundings per year",
+      "rate": "Rate",
+      "ratePeriod": "The rate is",
+      "annualRateKind": "Yearly rate",
+      "interestKind": "Kind of interest",
+      "duration": "Duration",
+      "durationUnit": "Unit of the duration",
+      "compounding": "Compounding",
+      "contributionFrequency": "Payment frequency",
+      "contributionTiming": "When the payment is made"
     },
     "results": {
       "revenus": "Income",
@@ -2279,7 +2298,9 @@
       "interetsEconomises": "Interest saved, estimate",
       "avalanche": "Costliest debt first",
       "bouleDeNeige": "Smallest balance first",
-      "reserveApresApport": "Reserve left after the down payment"
+      "reserveApresApport": "Reserve left after the down payment",
+      "tauxPeriode": "Rate of the period",
+      "tauxAnnuelEffectif": "Equivalent effective annual rate"
     },
     "rowNumber": "Row {{number}}",
     "addRow": "Add a row",
@@ -2316,8 +2337,24 @@
       "paid": "Paid in",
       "interest": "Interest",
       "value": "Value",
-      "note": "An illustration, not a promise: the rate is the one you typed, constant, and each payment is made at the end of its period. No real return is guaranteed.",
-      "yearN": "Year {{year}}"
+      "note": "An illustration, not a promise: the rate is the one you typed, constant. Taxes and account fees are not counted.",
+      "yearN": "Year {{year}}",
+      "step": "Period",
+      "monthN": "Month {{month}}"
+    },
+    "choices": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "annual": "Yearly",
+      "nominal": "Nominal",
+      "effective": "Effective (EAR)",
+      "compound": "Compound",
+      "simple": "Simple",
+      "end": "End of period",
+      "start": "Start of period",
+      "years": "Years",
+      "quarters": "Quarters",
+      "months": "Months"
     }
   },
   "comparison": {
@@ -3166,7 +3203,11 @@
     "edit": "Edit",
     "plannedVsRealChart": "Planned and real, per envelope",
     "planned": "Planned",
-    "real": "Real"
+    "real": "Real",
+    "paceChart": "Cumulative spending against the planned pace",
+    "paceDay": "Day",
+    "paceReal": "Cumulative spending",
+    "pacePlanned": "Planned pace (spread over the period)"
   },
   "goals": {
     "title": "Goals",
@@ -3234,11 +3275,15 @@
       "run": "Simulate",
       "monthsToReach": "Months to reach the target",
       "atHorizon": "At the horizon: {{capital}} for a target of {{target}} (inflation included).",
-      "disclaimer": "A simulation with your assumptions: neither a promise nor advice. Nothing is saved."
+      "disclaimer": "A simulation with your assumptions: neither a promise nor advice. Nothing is saved.",
+      "chart": "Capital and target, month by month",
+      "chartCapital": "Projected capital",
+      "chartTarget": "Target (with inflation)"
     },
     "backToList": "Back to goals",
     "notFound": "This goal does not exist, or it is not yours.",
-    "created": "Goal created."
+    "created": "Goal created.",
+    "compareChart": "Progress of each goal (100 % = the target)"
   },
   "debts": {
     "title": "Debts",
@@ -3315,7 +3360,10 @@
     "planInBudget": "Plan the instalment in the budget",
     "updateInBudget": "Update the instalment in the budget",
     "inBudget": "The instalment is planned in the current budget; updating it keeps the same envelope.",
-    "plannedInBudget": "Instalment planned in the budget."
+    "plannedInBudget": "Instalment planned in the budget.",
+    "curveTitle": "Remaining debt, month by month",
+    "curveMonthHead": "Month",
+    "curveMonth": "Month {{month}}"
   },
   "reserve": {
     "title": "Safety reserve",
@@ -3469,7 +3517,11 @@
       "day": "On the day",
       "after": "The day after"
     },
-    "backToCalendar": "Back to the calendar"
+    "backToCalendar": "Back to the calendar",
+    "weekChart": "Load of the due items, week by week",
+    "weekOf": "Week of {{date}}",
+    "weekIn": "Expected inflows",
+    "weekOut": "Expected outflows"
   },
   "today": {
     "title": "Today",
@@ -3842,7 +3894,12 @@
         "noCategory": "No category",
         "personalAccount": "Paid with my personal money (optional)",
         "noPersonalAccount": "No, or I already entered it elsewhere",
-        "personalAccountHelp": "A single personal expense is created on this account. The other members see neither the link nor the account.",
+        "personalAccountHelp": "The account is debited of the whole amount; only your share weighs on your budget, the rest is an advance to recover. The other members see neither the link nor the account.",
+        "referenceCategory": "Precise category (optional)",
+        "referenceFromCommon": "The common category’s own",
+        "receivedAccount": "Account that received the money (optional)",
+        "noReceivedAccount": "None: declarative settlement only",
+        "receivedAccountHelp": "Pick the account so that your advance goes down and the account goes up (it is not an income).",
         "subCategory": "Sub-category (free, optional)"
       },
       "errors": {
@@ -3895,7 +3952,19 @@
         "role": "Your role in this space does not allow this action."
       },
       "fairShareTitle": "Fair share by income (if shared)",
-      "fairShareMissing": "Not computed: {{names}} has/have not shared their income in this space."
+      "fairShareMissing": "Not computed: {{names}} has/have not shared their income in this space.",
+      "calendarLine": "Contribution expected every {{months}} months, from {{date}}.",
+      "calendarNone": "No calendar: only the 25, 50, 75 and 100 % milestones are announced.",
+      "calendarEdit": "Contribution calendar",
+      "calendarRemove": "Remove the calendar",
+      "calendarEvery": "Rhythm",
+      "calendarFirst": "First due date",
+      "calendarShare": "{{name}}’s expected share",
+      "calendarSaved": "Calendar saved.",
+      "calendarRemoved": "Calendar removed.",
+      "calendarMonthly": "Every month",
+      "calendarMonths": "Every {{count}} months",
+      "progressChart": "Progress of the common goals (100 % = the target)"
     },
     "household": {
       "childrenTitle": "Children",
@@ -4129,7 +4198,11 @@
       "goal": "Common goal",
       "seeGoals": "See the goals",
       "owedToThem": "The group owes them",
-      "theyOwe": "They owe the group"
+      "theyOwe": "They owe the group",
+      "history": "Month after month",
+      "potChart": "Group balance at the end of each month",
+      "paidChart": "What each member paid each month",
+      "others": "Others"
     }
   },
   "funding": {
@@ -4244,6 +4317,7 @@
       "space_bill": "Upcoming common bills",
       "space_task": "Tasks to do or overdue",
       "space_contribution": "Expected contributions",
+      "space_goal_gap": "Delay on a common goal",
       "space_permission": "Permission changes"
     },
     "messages": {
@@ -4303,6 +4377,13 @@
         "overdue": "Task “{{label}}” is overdue (due {{date}})."
       },
       "spaceContribution": "Your planned contribution for {{date}} is waiting to be confirmed.",
+      "spaceGoalGap": {
+        "late": "Goal “{{label}}”: you are {{gap}} short of the {{expected}} planned so far.",
+        "reinforced": "Goal “{{label}}”: significant delay, you are {{gap}} short of the {{expected}} planned so far.",
+        "reminder": "Reminder — goal “{{label}}”: {{gap}} still to pay in.",
+        "admin": "A planned contribution is still to be completed on the goal “{{label}}”.",
+        "milestone": "The common goal “{{label}}” has reached {{percent}} %."
+      },
       "spacePermission": {
         "admin": "You are now an administrator of a space.",
         "member": "You are now a member of a space.",
@@ -4876,7 +4957,14 @@
     "keptFailed": "The report could not be kept.",
     "keptOn": "Kept on {{date}}",
     "keep": "Keep",
-    "keepAgain": "Keep again"
+    "keepAgain": "Keep again",
+    "savingsRateChart": "Savings rate of each month",
+    "stepLabel": "Chart step",
+    "steps": {
+      "mois": "By month",
+      "semaine": "By week",
+      "jour": "By day"
+    }
   },
   "education": {
     "yourParcours": "Your path: {{name}}",
@@ -5180,7 +5268,8 @@
     "manage": "See and correct my expected income",
     "errors": {
       "refused": "This income could not be saved."
-    }
+    },
+    "sourcesChart": "Expected income per month, by source"
   },
   "shared": {
     "backToSpaces": "My spaces",
@@ -5242,6 +5331,17 @@
     "replay": "Replay",
     "errors": {
       "incomplete": "Answer every step to see the result."
+    },
+    "cert": {
+      "title": "My certificate: {{name}}",
+      "missions": "Every mission validated ({{done}} of {{total}}): 70 % at least, 80 % for digital security",
+      "average": "An average of at least 75 % (currently {{average}} %)",
+      "finalCase": "Final case passed",
+      "security": "Security modules completed",
+      "met": "Met",
+      "notMet": "To do",
+      "eligible": "Every condition is met. This certificate stays educational: it is not a professional diploma, a financial approval or a bank score.",
+      "rules": "This certificate is educational: not a professional diploma, a financial approval or a bank score. Replaying a mission keeps your best result."
     }
   }
 }

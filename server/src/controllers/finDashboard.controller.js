@@ -31,6 +31,7 @@ import { buildReserveView } from '../services/finReserve.service.js';
 import { markedSavingsInPeriod } from '../services/finSavings.service.js';
 import { buildSynthesis, currentMonth, debtRatioIncome, loadSynthesisData } from '../services/finSynthesis.service.js';
 import { autonomy, buildDashboard, dataQuality } from '../services/finDashboard.service.js';
+import { dataQualityMeasures, goalLinesOf } from '../services/finHealthMeasures.service.js';
 import { recordHealthSnapshot } from '../services/finSnapshot.service.js';
 import { describeFormula } from '../services/finance/describe.js';
 import { monthlyAmount } from '../services/finance/formulas.js';
@@ -155,6 +156,7 @@ export async function getToday(req, res) {
     onboarding,
     uncategorised: synthesis.nonCategorisees,
     quality,
+    healthMeasures: { goalLines: await goalLinesOf(prisma, req.user.id, { now }), dataQuality: await dataQualityMeasures(prisma, req.user.id, { onboarding, now }) },
     currency,
     now,
   });

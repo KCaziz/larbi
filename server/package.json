@@ -27,6 +27,7 @@
     "deliverables": "node scripts/generate-deliverables.js",
     "reprise": "node scripts/reprise.js",
     "demo": "node scripts/demo-accounts.js",
+    "missions:seed": "node scripts/seed-missions.js",
     "push:keys": "node -e \"const w=require('web-push');const k=w.generateVAPIDKeys();console.log('VAPID_PUBLIC_KEY='+k.publicKey);console.log('VAPID_PRIVATE_KEY='+k.privateKey);console.log('VAPID_SUBJECT=mailto:contact@example.com')\""
   },
   "dependencies": {

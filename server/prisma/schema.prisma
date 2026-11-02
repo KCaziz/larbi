@@ -1203,6 +1203,7 @@ model FinSpaceMember {
   settlementsTo       FinSettlement[]            @relation("SettlementTo")
   recordedSettlements FinSettlement[]            @relation("SettlementRecorder")
   goalContributions   FinSpaceGoalContribution[]
+  goalShares          FinSpaceGoalShare[]
   createdAt           DateTime                   @default(now())
   updatedAt           DateTime                   @updatedAt
 
@@ -1385,6 +1386,13 @@ model FinSharedExpense {
   subCategory           String?          @db.VarChar(40)
   // The receipt of this expense, if any.
   receipt               Media?           @relation("SharedExpenseReceipt")
+  // P9-15: what the payer's own money did. The transfer of the part that is not
+  // theirs towards their receivable account (the pair's id), the amount of their
+  // existing transaction before it was cut to their share, and whether the
+  // personal expense was made BY this record (then it goes back with it).
+  advanceTransferId     String?          @db.VarChar(36)
+  advanceOriginalValue  Int?
+  personalCreated       Boolean          @default(false)
   personalTransactionId String?          @unique
   personalTransaction   FinTransaction?  @relation("SharedExpenseSource", fields: [personalTransactionId], references: [id], onDelete: SetNull)
   // Who recorded it, which is not always the payer: a flatmate may enter the
@@ -1451,6 +1459,8 @@ model FinSettlement {
   // a settlement nobody can dispute.
   recordedById String
   recordedBy   FinSpaceMember @relation("SettlementRecorder", fields: [recordedById], references: [id], onDelete: Cascade)
+  // P9-15: the transfer from the receivable account to the account that received the money, when the receiver said where it arrived.
+  transferId   String?        @db.VarChar(36)
   source       String         @db.VarChar(20)
   status       String         @db.VarChar(20)
   deletedAt    DateTime?
@@ -1472,20 +1482,26 @@ model FinSettlement {
 // ever governs PERSONAL data someone chooses to reveal.
 
 model FinSpaceGoal {
-  id            String                     @id @default(uuid())
-  spaceId       String
-  space         FinSpace                   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  label         String                     @db.VarChar(80)
-  target        Int
-  currency      String                     @db.VarChar(3)
-  targetDate    DateTime?
-  note          String?                    @db.VarChar(300)
-  version       Int                        @default(1)
-  archivedAt    DateTime?
-  deletedAt     DateTime?
-  createdAt     DateTime                   @default(now())
-  updatedAt     DateTime                   @updatedAt
-  contributions FinSpaceGoalContribution[]
+  id                      String                     @id @default(uuid())
+  spaceId                 String
+  space                   FinSpace                   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  label                   String                     @db.VarChar(80)
+  target                  Int
+  currency                String                     @db.VarChar(3)
+  targetDate              DateTime?
+  note                    String?                    @db.VarChar(300)
+  version                 Int                        @default(1)
+  archivedAt              DateTime?
+  deletedAt               DateTime?
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
+  // P9-17: the calendar of contributions. Every `contributionEveryMonths` months
+  // from `firstDueAt`, each member owes the share set for them below. Without it
+  // there is no due date, hence no delay to measure (only milestones).
+  contributionEveryMonths Int?
+  firstDueAt              DateTime?
+  contributions           FinSpaceGoalContribution[]
+  shares                  FinSpaceGoalShare[]
 
   @@index([spaceId, deletedAt])
   @@map("fin_space_goals")
@@ -1510,6 +1526,20 @@ model FinSpaceGoalContribution {
   @@index([spaceGoalId])
   @@index([memberId])
   @@map("fin_space_goal_contributions")
+}
+
+// What one member is expected to put in at each due date of a common goal (P9-17).
+model FinSpaceGoalShare {
+  id          String         @id @default(uuid())
+  spaceGoalId String
+  spaceGoal   FinSpaceGoal   @relation(fields: [spaceGoalId], references: [id], onDelete: Cascade)
+  memberId    String
+  member      FinSpaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  amount      Int
+
+  @@unique([spaceGoalId, memberId])
+  @@index([memberId])
+  @@map("fin_space_goal_shares")
 }
 
 // A household's child (P6-15, famille): MINIMAL data on purpose — a first

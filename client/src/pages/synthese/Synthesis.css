@@ -230,3 +230,21 @@
   color: var(--text);
   cursor: pointer;
 }
+
+.synthesis-steps {
+  display: flex;
+  gap: var(--space-xs);
+  margin-block: var(--space-sm);
+}
+.synthesis-steps button {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  padding: var(--space-xs) var(--space-sm);
+  cursor: pointer;
+}
+.synthesis-steps button.is-active {
+  border-color: var(--border-strong);
+  font-weight: 600;
+}

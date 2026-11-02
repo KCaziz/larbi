@@ -132,6 +132,9 @@ export function buildDashboard({
   onboarding = null,
   uncategorised = 0,
   quality = null,
+  // The two dimensions of the health index that need the database (P8-33):
+  // { goalLines, dataQuality }, from finHealthMeasures.service.js.
+  healthMeasures = {},
   currency,
   now = new Date(),
 }) {
@@ -226,9 +229,8 @@ export function buildDashboard({
 
   // ---- santé financière (F053) -------------------------------------------
   // Les mesures viennent des modules qui les possèdent ; aucune n'est
-  // recalculée ici. Celles qu'aucun module ne fournit encore — l'écart au plan
-  // des objectifs, l'historique de régularité du revenu, la complétude des
-  // données — restent ABSENTES, donc hors du calcul, et le score l'annonce.
+  // recalculée ici. Celles qu'aucun module ne fournit (pas d'objectif noté, pas
+  // de donnée à mesurer) restent ABSENTES, donc hors du calcul, et le score l'annonce.
   // Les mettre à zéro ferait baisser la note de quelqu'un pour une donnée que
   // personne ne lui a demandée.
   const income = synthesis?.revenus?.resultat ?? null;
@@ -239,10 +241,10 @@ export function buildDashboard({
       reserveMonths: reserve?.moisReserve?.resultat ?? null,
       debtRatio: debts?.tauxEffort?.resultat ?? null,
       savingsRate: available.get('savingsRate')?.resultat ?? null,
-      goalsGap: null,
+      goalLines: healthMeasures.goalLines ?? null,
       // P8-16, answer C5: each budget of the period, scored then weighted.
       budgetLines: budgetLinesOf(budgetView),
-      dataQuality: {},
+      dataQuality: healthMeasures.dataQuality ?? {},
     },
     { now },
   );

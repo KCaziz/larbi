@@ -4,6 +4,7 @@ import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatRatio } from '../../lib/format.js';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
+import GroupedBars from '../../components/fincludia/charts/GroupedBars.jsx';
 
 // « Comparer deux mois » (P8-24): two months of the person's choosing, side by
 // side. Each figure and its change (PB-F023) come from the server; the screen
@@ -72,6 +73,12 @@ export default function CompareMonths() {
           {c.categories.length > 0 && (
             <>
               <h3>{t('synthesis.compare.categories')}</h3>
+              <GroupedBars
+                rows={c.categories.map((row) => ({ key: row.categoryId ?? 'none', label: row.label ?? t('myMoney.noCategory'), a: row.a ?? null, b: row.b ?? null }))}
+                names={{ a, b }}
+                currency={c.currency}
+                caption={t('synthesis.compare.categories')}
+              />
               <table className="chart-table synthesis-compare-table">
                 <thead>
                   <tr>

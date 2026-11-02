@@ -27,6 +27,7 @@ const toServer = (field, raw) => {
     const label = String(raw).trim();
     return label === '' ? null : label;
   }
+  if (field.type === 'choice') return String(raw);
   const value = Number(raw);
   if (!Number.isFinite(value)) return null;
   if (field.type === 'money') return Math.round(value * 100);
@@ -84,6 +85,7 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
   const setRows = (field, rows) => setValues((previous) => ({ ...previous, [field.key]: rows }));
   // A field with a declared default shows it: it is a stated convention the
   // person can change, not a hidden assumption.
+  const isShown = (field) => !field.showWhen || Object.entries(field.showWhen).every(([key, wanted]) => shownValue(simulator.fields.find((other) => other.key === key)) === wanted);
   const shownValue = (field) => values[field.key] ?? (field.default === undefined ? '' : String(field.default));
 
   async function submit(event) {
@@ -106,6 +108,9 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
           .filter((row) => Object.keys(row).length > 0);
         continue;
       }
+      // A field that only applies to one answer of another (the kind of a yearly
+      // rate) is neither shown nor sent when that answer is not the one chosen.
+      if (!isShown(field)) continue;
       const raw = values[field.key];
       // An optional field left empty is not sent: the server treats it as
       // "nothing under this heading" and says so in the snapshot.
@@ -145,6 +150,19 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
     if (kind === 'flag') return value ? t('simulators.plan.completed') : t('simulators.plan.notCompleted');
     if (kind === 'strategy') return t(`simulators.strategies.${value}`);
     return String(value);
+  };
+
+  // A step of the series: a year (other simulators) or a month of the horizon
+  // (interest, whose horizon may be a few months).
+  const stepHead = answer?.serie?.some((row) => row.mois !== undefined) ? t('simulators.serie.step') : t('simulators.serie.year');
+  const stepKey = (row) => String(row.mois ?? row.annee * 12).padStart(4, '0');
+  const stepLabel = (row) => (row.mois !== undefined && row.annee === undefined ? t('simulators.serie.monthN', { month: row.mois }) : t('simulators.serie.yearN', { year: row.annee }));
+  // The assumptions of the interest simulator: a choice is shown in words, the
+  // rate as a percentage, the others as they come.
+  const hypothesisValue = (name, value) => {
+    if (typeof value === 'string') return t(`simulators.choices.${value}`, { defaultValue: value });
+    if (name === 'taux_saisi') return formatRatio(i18n.language, value);
+    return value;
   };
 
   const display = (result) => {
@@ -263,6 +281,17 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
                   </Button>
                 )}
               </fieldset>
+            ) : !isShown(field) ? null : field.type === 'choice' ? (
+              <div className="form-field" key={field.key}>
+                <label htmlFor={`field-${field.key}`}>{t(`simulators.fields.${field.key}`)}</label>
+                <select id={`field-${field.key}`} value={shownValue(field)} onChange={(e) => setValues((previous) => ({ ...previous, [field.key]: e.target.value }))}>
+                  {field.options.map((option) => (
+                    <option key={option} value={option}>
+                      {t(`simulators.choices.${option}`)}
+                    </option>
+                  ))}
+                </select>
+              </div>
             ) : (
               <div className="form-field" key={field.key}>
                 <label htmlFor={`field-${field.key}`}>
@@ -309,7 +338,7 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
             <p className="simulator-hypotheses">
               {t('simulators.hypotheses')}{' '}
               {Object.entries(answer.hypotheses)
-                .map(([name, value]) => `${t(`simulators.hypothesisNames.${name}`)} : ${value}`)
+                .map(([name, value]) => `${t(`simulators.hypothesisNames.${name}`)} : ${hypothesisValue(name, value)}`)
                 .join(' · ')}
             </p>
           )}
@@ -397,19 +426,19 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
           {/* The curve: what was paid in, and what it became. The gap between the two
               is the interest; the table below gives both, year by year. */}
           <LineChart
-            xLabel={t('simulators.serie.year')}
+            xLabel={stepHead}
             format={(value) => amount(value)}
             caption={t('simulators.serie.title')}
             series={[
-              { key: 'value', label: t('simulators.serie.value'), tone: 0, points: answer.serie.map((row) => ({ month: String(row.annee).padStart(3, '0'), label: t('simulators.serie.yearN', { year: row.annee }), value: row.valeur.resultat })) },
-              { key: 'paid', label: t('simulators.serie.paid'), tone: 2, points: answer.serie.map((row) => ({ month: String(row.annee).padStart(3, '0'), label: t('simulators.serie.yearN', { year: row.annee }), value: row.verse })) },
+              { key: 'value', label: t('simulators.serie.value'), tone: 0, points: answer.serie.map((row) => ({ month: stepKey(row), label: stepLabel(row), value: row.valeur.resultat })) },
+              { key: 'paid', label: t('simulators.serie.paid'), tone: 2, points: answer.serie.map((row) => ({ month: stepKey(row), label: stepLabel(row), value: row.verse })) },
             ]}
           />
           <table className="simulator-serie-table">
             <caption className="sr-only">{t('simulators.serie.title')}</caption>
             <thead>
               <tr>
-                <th scope="col">{t('simulators.serie.year')}</th>
+                <th scope="col">{stepHead}</th>
                 <th scope="col">{t('simulators.serie.paid')}</th>
                 <th scope="col">{t('simulators.serie.interest')}</th>
                 <th scope="col">{t('simulators.serie.value')}</th>
@@ -417,8 +446,8 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
             </thead>
             <tbody>
               {answer.serie.map((row) => (
-                <tr key={row.annee}>
-                  <th scope="row">{row.annee}</th>
+                <tr key={stepKey(row)}>
+                  <th scope="row">{stepLabel(row)}</th>
                   <td>{amount(row.verse)}</td>
                   <td>{row.valeur.resultat === null ? t('simulators.notComputed') : amount(row.valeur.resultat - row.verse)}</td>
                   <td>

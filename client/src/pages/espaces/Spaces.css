@@ -363,3 +363,7 @@
   justify-content: space-between;
   gap: var(--space-xs);
 }
+
+.space-compartment-wide {
+  grid-column: 1 / -1;
+}

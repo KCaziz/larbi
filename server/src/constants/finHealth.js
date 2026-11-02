@@ -33,19 +33,21 @@ const band = (min, max, score, label = null) => ({ min, max, score, label });
 
 // B-8 since P8-16: « budgets » replaces « stabilité des revenus » (decision
 // P8-01 point 4). A new version, so a score read later says which grid it used.
-export const HEALTH_VERSION = 'B-8';
+export const HEALTH_VERSION = 'B-9';
+// B-9 (P8-33, client's answer H of 2026-11-02): the « objectifs » and « qualité
+// des données » dimensions are finally measured, by his rules. Weights unchanged.
 
 export const HEALTH_DIMENSIONS = [
   { key: 'balance', weight: 25, label: 'Solde et équilibre mensuel', basis: 'flux_net / revenu_net' },
   { key: 'reserve', weight: 20, label: 'Réserve / résilience', basis: 'mois de réserve' },
   { key: 'debt', weight: 20, label: 'Pression de dette', basis: 'taux d’effort total' },
   { key: 'savings', weight: 15, label: 'Épargne', basis: 'taux d’épargne nette' },
-  { key: 'goals', weight: 10, label: 'Trajectoire des objectifs', basis: 'écart au plan' },
+  { key: 'goals', weight: 10, label: 'Objectifs', basis: '70 % trajectoire + 30 % régularité, pondérés par priorité' },
   // P8-16 (decision P8-01 point 4): the consolidated specification's seven
   // dimensions — « stabilité des revenus » leaves, « budgets » takes its 5 %,
   // measured as real spending over the active budgets (tab 11_Tableau_Bord).
   { key: 'budgets', weight: 5, label: 'Respect des budgets', basis: 'dépenses réelles / budgets actifs' },
-  { key: 'dataQuality', weight: 5, label: 'Qualité des données', basis: 'complétude + fraîcheur' },
+  { key: 'dataQuality', weight: 5, label: 'Qualité des données', basis: '40 % complétude + 30 % fraîcheur + 30 % pointage' },
 ];
 
 // Les grilles de la « Normalisation détaillée (B) » de `10_Sante_Baremes`.
@@ -85,14 +87,6 @@ export const HEALTH_SCALES = {
     band(0, 0.05, 30),
     band(null, 0, 0),
   ],
-  // écart au plan des objectifs : 0 = dans ou au-dessus de la trajectoire,
-  // 0.10 = 10 % de retard. Une valeur négative (en avance) vaut 100.
-  goals: [
-    band(null, 0.0001, 100),
-    band(0.0001, 0.1001, 80),
-    band(0.1001, 0.2501, 50),
-    band(0.2501, null, 20),
-  ],
   // mois d'historique de revenu régulier
   incomeStability: [
     band(12, null, 100),
@@ -103,8 +97,35 @@ export const HEALTH_SCALES = {
   ],
 };
 
-// « Qualité des données : 60 % complétude + 40 % fraîcheur, chacune 0-100 ».
-export const DATA_QUALITY_MIX = { completeness: 0.6, freshness: 0.4 };
+// « Qualité des données » (client, 2026-11-02) : 40 % complétude + 30 % fraîcheur
+// + 30 % pointage, chacune 0-100. Une composante non applicable renormalise les
+// autres ; il remplace le mélange 60/40 de la version B-8.
+export const DATA_QUALITY_MIX = { completeness: 0.4, freshness: 0.3, clearing: 0.3 };
+
+// « Objectifs » (client, 2026-11-02) : score d'un objectif = 70 % trajectoire +
+// 30 % régularité (si un rythme de contribution existe), pondéré par la priorité.
+export const GOAL_SCORE_MIX = { trajectory: 0.7, regularity: 0.3 };
+export const GOAL_PRIORITY_WEIGHTS = { high: 3, normal: 2, low: 1 };
+// La priorité stockée est un nombre de 0 à 100 sans écran de saisie : elle est
+// ramenée aux trois niveaux du client (choix de réalisation, à lui signaler).
+// 0 (jamais renseignée) vaut « normale » ; 1-33 basse ; 34-66 normale ; 67+ haute.
+export function goalPriorityLevel(priority) {
+  if (!Number.isFinite(priority) || priority === 0) return 'normal';
+  if (priority >= 67) return 'high';
+  return priority >= 34 ? 'normal' : 'low';
+}
+
+// « Fraîcheur » (client, 2026-11-02), seuil en jours par donnée : 100 dans le
+// seuil, 50 entre une et deux fois le seuil, 0 au-delà.
+export const FRESHNESS_THRESHOLD_DAYS = {
+  accountBalance: 30,
+  recurringIncome: 31,
+  debt: 31,
+  valuation: 90,
+  situation: 180,
+  profile: 180,
+};
+export const CLEARING_WINDOW_DAYS = 30;
 
 // Les bandes du score global (B).
 export const HEALTH_BANDS = [

@@ -266,7 +266,7 @@ describe('P6-06 — what is declared rather than invented', () => {
     await setPublic('SAL', '25-34');
     const res = await today();
     const health = res.body.aujourdhui.santeFinanciere;
-    assert.equal(health.version, 'B-8');
+    assert.equal(health.version, 'B-9');
     assert.equal(health.answer.formule_id, 'F053');
     assert.ok(Array.isArray(health.dimensions) && health.dimensions.length === 7);
     assert.ok(!res.body.aujourdhui.kpis.some((kpi) => kpi.formule === 'F053'));

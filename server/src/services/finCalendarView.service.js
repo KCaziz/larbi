@@ -254,6 +254,18 @@ export function buildCalendar({
 
   const tensionDays = days.filter((day) => day.tension === true);
 
+  // The load of the period week by week (what falls due, and what comes in), weeks
+  // starting on Sunday like the history by week; the first and last may be partial.
+  const weeks = new Map();
+  for (const day of days) {
+    const date = new Date(`${day.jour}T00:00:00Z`);
+    const start = dayKey(new Date(date.getTime() - date.getUTCDay() * 86_400_000));
+    const week = weeks.get(start) ?? { debut: start, sorties: 0, entrees: 0 };
+    week.sorties += day.sorties;
+    week.entrees += day.entrees;
+    weeks.set(start, week);
+  }
+
   // What was really spent in the period already, so the screen can put the plan
   // next to the facts. Realised only: the planned rows are the plan.
   const realisedRows = realised.filter((row) => row.currency === currency && isReal(row) && !row.planned);
@@ -263,6 +275,7 @@ export function buildCalendar({
     currency,
     periode: { debut: from, fin: to, jours: days.length },
     jours: days,
+    semaines: [...weeks.values()],
     totalPrevuSorties: answer('F003', totalOut),
     totalPrevuEntrees: answer('F002', totalIn),
     // Realised, for comparison. Separate figures, never added to the planned

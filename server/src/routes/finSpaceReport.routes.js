@@ -5,6 +5,7 @@ import { prisma } from '../config/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
 import { spaceDashboard } from '../services/finSpaceDashboard.service.js';
+import { spaceHistory } from '../services/finSpaceHistory.service.js';
 import { buildSpaceReport, spaceReportRows } from '../services/finSpaceReport.service.js';
 import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
 
@@ -36,6 +37,14 @@ router.get(
   validateQuery(reportQuery),
   asyncRoute(async (req, res) => {
     res.json({ rapport: await buildSpaceReport(prisma, req.user.id, req.params.id, { month: req.query.mois ?? currentMonth() }) });
+  }),
+);
+
+// P8-32: the pot at the end of each month and what each member paid in it.
+router.get(
+  '/espaces/:id/historique-mensuel',
+  asyncRoute(async (req, res) => {
+    res.json({ historique: await spaceHistory(prisma, req.user.id, req.params.id) });
   }),
 );
 

@@ -2,7 +2,7 @@
 // one account — the colocation's shared envelope, the couple's shared goal.
 // Contributions are facts several people add to, unlike a personal goal's
 // single editable "allocated" figure (P6-08).
-import { SPACE_GOALS_MAX, SPACE_WRITE_MIN_ROLE } from '../constants/finSpaceGoal.js';
+import { GOAL_EVERY_MONTHS, SPACE_GOALS_MAX, SPACE_WRITE_MIN_ROLE } from '../constants/finSpaceGoal.js';
 import { roleAtLeast } from '../constants/finSpace.js';
 import { HttpError } from '../utils/httpError.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
@@ -14,13 +14,14 @@ import { computed } from './finance/contract.js';
 export const SPACE_GOAL_ENTITY = 'spaceGoal';
 export const SPACE_GOAL_CONTRIBUTION_ENTITY = 'spaceGoalContribution';
 
-const GOAL_SELECT = { id: true, spaceId: true, label: true, target: true, currency: true, targetDate: true, note: true, version: true, archivedAt: true };
+const GOAL_SELECT = { id: true, spaceId: true, label: true, target: true, currency: true, targetDate: true, note: true, version: true, archivedAt: true, contributionEveryMonths: true, firstDueAt: true };
+const WITH_PEOPLE = { shares: { select: { memberId: true, amount: true } }, contributions: { where: { deletedAt: null }, select: { memberId: true, amount: true } } };
 
 export async function listSpaceGoals(prisma, userId, spaceId, { includeArchived = false } = {}) {
   await ownMembership(prisma, userId, spaceId);
   return prisma.finSpaceGoal.findMany({
     where: { spaceId, deletedAt: null, ...(includeArchived ? {} : { archivedAt: null }) },
-    select: { ...GOAL_SELECT, contributions: { where: { deletedAt: null }, select: { memberId: true, amount: true } } },
+    select: { ...GOAL_SELECT, ...WITH_PEOPLE },
     orderBy: { createdAt: 'asc' },
   });
 }
@@ -37,7 +38,7 @@ export async function ownSpaceGoalWithContributions(prisma, userId, spaceId, id)
   await ownSpaceGoal(prisma, userId, spaceId, id);
   return prisma.finSpaceGoal.findFirst({
     where: { id, spaceId, deletedAt: null },
-    select: { ...GOAL_SELECT, contributions: { where: { deletedAt: null }, select: { memberId: true, amount: true } } },
+    select: { ...GOAL_SELECT, ...WITH_PEOPLE },
   });
 }
 
@@ -65,6 +66,39 @@ export async function updateSpaceGoal(prisma, userId, spaceId, id, body) {
   return prisma.$transaction(async (tx) => {
     const after = await tx.finSpaceGoal.update({ where: { id }, data: { ...fields, version: { increment: 1 } }, select: GOAL_SELECT });
     await recordCorrection(tx, { userId, entity: SPACE_GOAL_ENTITY, entityId: id, before, after, reason: reason ?? null });
+    return after;
+  });
+}
+
+/**
+ * The calendar of contributions of a goal (P9-17): every `everyMonths` months
+ * from `firstDueAt`, each listed member is expected to put in their `amount`.
+ * Replaces the previous calendar; `null` removes it (then only milestones).
+ * Shares are set by hand: a space can have unequal ones, and the delay is
+ * always read against the member's own.
+ */
+export async function setGoalCalendar(prisma, userId, spaceId, id, calendar) {
+  await requireRole(prisma, userId, spaceId, SPACE_WRITE_MIN_ROLE);
+  const before = await ownSpaceGoal(prisma, userId, spaceId, id);
+  if (calendar) {
+    if (!GOAL_EVERY_MONTHS.includes(calendar.everyMonths)) throw new HttpError(422, 'Unsupported rhythm', { reason: 'badRhythm' });
+    const live = new Set((await liveMembers(prisma, spaceId)).map((member) => member.id));
+    const seen = new Set();
+    for (const share of calendar.shares) {
+      if (!live.has(share.memberId)) throw new HttpError(422, 'A member of the calendar is not in this space', { reason: 'unknownMember' });
+      if (seen.has(share.memberId)) throw new HttpError(422, 'A member is listed twice', { reason: 'duplicateMember' });
+      seen.add(share.memberId);
+    }
+  }
+  return prisma.$transaction(async (tx) => {
+    await tx.finSpaceGoalShare.deleteMany({ where: { spaceGoalId: id } });
+    if (calendar) await tx.finSpaceGoalShare.createMany({ data: calendar.shares.map((share) => ({ spaceGoalId: id, memberId: share.memberId, amount: share.amount })) });
+    const after = await tx.finSpaceGoal.update({
+      where: { id },
+      data: { contributionEveryMonths: calendar?.everyMonths ?? null, firstDueAt: calendar?.firstDueAt ?? null, version: { increment: 1 } },
+      select: GOAL_SELECT,
+    });
+    await recordChange(tx, { userId, entity: SPACE_GOAL_ENTITY, entityId: id, action: 'correct', field: 'calendar', before: before.contributionEveryMonths, after: after.contributionEveryMonths, reason: null });
     return after;
   });
 }

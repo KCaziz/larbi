@@ -4,7 +4,8 @@ import { Ban, Check, Copy, Eye, Lock, Plus, Receipt, Trash2, UserMinus, Users } 
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
-import { formatAmount, formatDate } from '../../lib/format.js';
+import { formatAmount, formatDate, formatRatio } from '../../lib/format.js';
+import BarList from '../../components/fincludia/charts/BarList.jsx';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
@@ -13,7 +14,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
-import { toMinorUnits } from '../../lib/money.js';
+import { fromMinorUnits, toMinorUnits } from '../../lib/money.js';
 import '../../components/fincludia/Fincludia.css';
 import './Spaces.css';
 
@@ -559,6 +560,9 @@ export function ExpenseForm({ t, spaceId, currency, members, references, run, on
   const [planned, setPlanned] = useState(false);
   const [usageUnit, setUsageUnit] = useState('');
   const [collectiveCategory, setCollectiveCategory] = useState('');
+  // P9-16: any of the 125 categories; left empty, the common category's own one is used.
+  const [categoryId, setCategoryId] = useState('');
+  const referenceCategories = useApi('/fin/categories');
   // P9-14: a free label inside the category, suggested from what the space already used.
   const [subCategory, setSubCategory] = useState('');
   const subCategories = useApi(`/fin/espaces/${spaceId}/sous-categories`);
@@ -609,6 +613,7 @@ export function ExpenseForm({ t, spaceId, currency, members, references, run, on
               participants,
               ...(planned ? { planned: true } : {}),
               ...(collectiveCategory ? { collectiveCategory } : {}),
+              ...(categoryId ? { categoryId } : {}),
               ...(subCategory.trim() ? { subCategory: subCategory.trim() } : {}),
               ...(personalAccountId && !planned && isMyPayment ? { personalLink: { accountId: personalAccountId } } : {}),
               ...(splitMode === 'usage' ? { usageUnit: usageUnit.trim() } : {}),
@@ -661,6 +666,25 @@ export function ExpenseForm({ t, spaceId, currency, members, references, run, on
                 {`${category.icon} ${category.label}`}
               </option>
             ))}
+          </select>
+        </label>
+        <label htmlFor="shared-expense-reference">
+          {t('spaces.shared.fields.referenceCategory')}
+          <select id="shared-expense-reference" value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
+            <option value="">{t('spaces.shared.fields.referenceFromCommon')}</option>
+            {(referenceCategories.data?.groups ?? [])
+              .filter((group) => ['fixed', 'variable', 'seasonal', 'debt', 'shared'].includes(group.code))
+              .map((group) => (
+                <optgroup key={group.code} label={group.label}>
+                  {group.categories
+                    .filter((category) => !category.archivedAt)
+                    .map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.label}
+                      </option>
+                    ))}
+                </optgroup>
+              ))}
           </select>
         </label>
         <label htmlFor="shared-expense-subcategory">
@@ -743,6 +767,11 @@ export function SettlementForm({ t, spaceId, currency, members, run, onDone }) {
   const [value, setValue] = useState('');
   const [date, setDate] = useState(today);
   const [error, setError] = useState(null);
+  // P9-15: the one who was paid says where the money arrived; the advance goes down by as much.
+  const [accountId, setAccountId] = useState('');
+  const myAccounts = useApi('/fin/comptes');
+  const iAmPaid = members.find((member) => member.id === toId)?.isMe === true;
+  const receivingAccounts = (myAccounts.data?.accounts ?? []).filter((account) => account.currency === currency && !account.archivedAt && account.type !== 'AC-09');
 
   const submit = async (event) => {
     event.preventDefault();
@@ -754,7 +783,7 @@ export function SettlementForm({ t, spaceId, currency, members, run, onDone }) {
     const amount = toMinorUnits(value, currency);
     if (amount === null) return;
     const outcome = await run(
-      () => api.post(`/fin/espaces/${spaceId}/reglements`, { fromId, toId, value: amount, settledAt: new Date(date).toISOString() }),
+      () => api.post(`/fin/espaces/${spaceId}/reglements`, { fromId, toId, value: amount, settledAt: new Date(date).toISOString(), ...(iAmPaid && accountId ? { accountId } : {}) }),
       'spaces.shared.settlementAdded',
     );
     if (outcome.ok) onDone();
@@ -791,6 +820,20 @@ export function SettlementForm({ t, spaceId, currency, members, run, onDone }) {
           <input id="settlement-date" type="date" value={date} max={today} onChange={(event) => setDate(event.target.value)} required />
         </label>
       </div>
+      {iAmPaid && receivingAccounts.length > 0 && (
+        <label htmlFor="settlement-account">
+          {t('spaces.shared.fields.receivedAccount')}
+          <select id="settlement-account" value={accountId} onChange={(event) => setAccountId(event.target.value)}>
+            <option value="">{t('spaces.shared.fields.noReceivedAccount')}</option>
+            {receivingAccounts.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.label}
+              </option>
+            ))}
+          </select>
+          <span className="spaces-help">{t('spaces.shared.fields.receivedAccountHelp')}</span>
+        </label>
+      )}
       <p className="spaces-help">{t('spaces.shared.declarative')}</p>
       <div className="spaces-actions">
         <Button type="submit">{t('spaces.save')}</Button>
@@ -833,6 +876,15 @@ export function CommonGoals({ t, language, spaceId, currency }) {
         </p>
       )}
 
+      {/* How far each common goal has come, on one scale (100 % = its target). */}
+      {goals.data && goals.data.goals.length >= 2 && (
+        <BarList
+          caption={t('spaces.common.progressChart')}
+          max={1}
+          rows={goals.data.goals.map((goal) => ({ key: goal.id, label: goal.label, value: goal.vue.progres.resultat === null ? null : Math.min(1, goal.vue.progres.resultat) }))}
+          format={(value) => formatRatio(language, value, { digits: 0 })}
+        />
+      )}
       {goals.data && goals.data.goals.length > 0 && (
         <ul className="spaces-list">
           {goals.data.goals.map((goal) => (
@@ -887,6 +939,7 @@ export function CommonGoals({ t, language, spaceId, currency }) {
                   )
                 )}
                 <ContributeForm t={t} spaceId={spaceId} goalId={goal.id} currency={goal.currency} run={run} />
+                <GoalCalendar t={t} language={language} spaceId={spaceId} goal={goal} run={run} />
               </div>
             </li>
           ))}
@@ -900,6 +953,80 @@ export function CommonGoals({ t, language, spaceId, currency }) {
       </div>
       {creating && <CommonGoalForm t={t} spaceId={spaceId} currency={currency} run={run} onDone={() => setCreating(false)} />}
     </>
+  );
+}
+
+// P9-17: the calendar of contributions and what each member is expected to put
+// in at each due date. Without it, only milestones are announced.
+function GoalCalendar({ t, language, spaceId, goal, run }) {
+  const [editing, setEditing] = useState(false);
+  const members = useApi(editing ? `/fin/espaces/${spaceId}/membres` : null);
+  const [everyMonths, setEveryMonths] = useState(String(goal.contributionEveryMonths ?? 1));
+  const [firstDue, setFirstDue] = useState(goal.firstDueAt ? goal.firstDueAt.slice(0, 10) : '');
+  const [amounts, setAmounts] = useState(() => Object.fromEntries(goal.shares.map((share) => [share.memberId, fromMinorUnits(share.amount, goal.currency)])));
+  const url = `/fin/espaces/${spaceId}/objectifs-communs/${goal.id}/calendrier`;
+
+  const save = async (event) => {
+    event.preventDefault();
+    const shares = Object.entries(amounts)
+      .map(([memberId, text]) => ({ memberId, amount: text === '' ? null : toMinorUnits(text, goal.currency) }))
+      .filter((share) => share.amount);
+    if (shares.length === 0 || !firstDue) return;
+    const outcome = await run(() => api.put(url, { calendar: { everyMonths: Number(everyMonths), firstDueAt: new Date(firstDue).toISOString(), shares } }), 'spaces.common.calendarSaved');
+    if (outcome.ok) setEditing(false);
+  };
+
+  return (
+    <div className="spaces-calendar">
+      {goal.contributionEveryMonths ? (
+        <p className="spaces-help">{t('spaces.common.calendarLine', { months: goal.contributionEveryMonths, date: formatDate(language, goal.firstDueAt) })}</p>
+      ) : (
+        <p className="spaces-help">{t('spaces.common.calendarNone')}</p>
+      )}
+      <div className="spaces-actions">
+        <Button type="button" variant="secondary" onClick={() => setEditing((v) => !v)}>
+          {t('spaces.common.calendarEdit')}
+        </Button>
+        {goal.contributionEveryMonths && (
+          <Button type="button" variant="secondary" onClick={() => run(() => api.put(url, { calendar: null }), 'spaces.common.calendarRemoved')}>
+            {t('spaces.common.calendarRemove')}
+          </Button>
+        )}
+      </div>
+      {editing && (
+        <form className="spaces-form" onSubmit={save}>
+          <div className="spaces-form-grid">
+            <label htmlFor={`cal-every-${goal.id}`}>
+              {t('spaces.common.calendarEvery')}
+              <select id={`cal-every-${goal.id}`} value={everyMonths} onChange={(event) => setEveryMonths(event.target.value)}>
+                {[1, 2, 3, 6, 12].map((months) => (
+                  <option key={months} value={months}>
+                    {months === 1 ? t('spaces.common.calendarMonthly') : t('spaces.common.calendarMonths', { count: months })}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label htmlFor={`cal-first-${goal.id}`}>
+              {t('spaces.common.calendarFirst')}
+              <input id={`cal-first-${goal.id}`} type="date" value={firstDue} onChange={(event) => setFirstDue(event.target.value)} required />
+            </label>
+            {(members.data?.membres ?? []).map((member) => (
+              <AmountField
+                key={member.id}
+                id={`cal-${goal.id}-${member.id}`}
+                label={t('spaces.common.calendarShare', { name: member.name })}
+                value={amounts[member.id] ?? ''}
+                currency={goal.currency}
+                onChange={(value) => setAmounts((current) => ({ ...current, [member.id]: value }))}
+              />
+            ))}
+          </div>
+          <div className="spaces-actions">
+            <Button type="submit">{t('spaces.save')}</Button>
+          </div>
+        </form>
+      )}
+    </div>
   );
 }
 

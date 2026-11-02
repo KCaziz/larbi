@@ -9,7 +9,7 @@ import {
   HEALTH_SCALES,
 } from '../../src/constants/finHealth.js';
 import { FIN_PUBLIC_CODES } from '../../src/constants/finPublics.js';
-import { dataQualityScore, financialHealth, fundingReadiness, reserveTarget } from '../../src/services/finHealth.service.js';
+import { dataQualityScore, financialHealth, freshnessOf, fundingReadiness, goalScore, goalTrajectory, goalsScore, reserveTarget } from '../../src/services/finHealth.service.js';
 
 // Barèmes du référentiel maître (P6-22, chantiers 2 et 3).
 //
@@ -68,9 +68,9 @@ describe('P6-22 — une dimension absente n’est jamais un zéro', () => {
     reserveMonths: 4,
     debtRatio: 0.25,
     savingsRate: 0.12,
-    goalsGap: 0,
+    goalLines: [{ trajectory: 100, regularity: null, priority: 0 }],
     budgetLines: [{ allocated: 1000000, spent: 900000 }],
-    dataQuality: { completeness: 80, freshness: 60 },
+    dataQuality: { completeness: 80, freshness: 60, clearing: 70 },
   };
 
   test('un dossier complet donne un score et sa bande', () => {
@@ -107,12 +107,41 @@ describe('P6-22 — une dimension absente n’est jamais un zéro', () => {
     assert.ok(withoutIt > withWeakDebt, `${withoutIt} devrait dépasser ${withWeakDebt}`);
   });
 
-  test('la qualité des données exige ses deux moitiés', () => {
-    // 60 % complétude + 40 % fraîcheur : avec une seule des deux, la dimension
-    // n'est pas mesurée à moitié, elle est absente.
-    assert.equal(dataQualityScore({ completeness: 100 }), null);
-    assert.equal(dataQualityScore({ freshness: 100 }), null);
-    assert.equal(dataQualityScore({ completeness: 100, freshness: 50 }), 80);
+  test('la qualité des données : 40 % complétude + 30 % fraîcheur + 30 % pointage, une composante absente renormalise', () => {
+    assert.equal(dataQualityScore({ completeness: 80, freshness: 60, clearing: 70 }), 71);
+    // Sans pointage (aucune opération éligible), les deux autres se partagent le total.
+    assert.equal(dataQualityScore({ completeness: 100, freshness: 50 }), Math.round((100 * 0.4 + 50 * 0.3) / 0.7));
+    assert.equal(dataQualityScore({ clearing: 40 }), 40);
+    // Aucune composante : non calculée, jamais 0.
+    assert.equal(dataQualityScore({}), null);
+  });
+
+  test('la fraîcheur : 100 dans le seuil, 50 entre un et deux seuils, 0 au-delà', () => {
+    assert.equal(freshnessOf(30, 30), 100);
+    assert.equal(freshnessOf(31, 30), 50);
+    assert.equal(freshnessOf(60, 30), 50);
+    assert.equal(freshnessOf(61, 30), 0);
+    assert.equal(freshnessOf(null, 30), null, 'une donnée absente n’est pas mesurée');
+  });
+
+  test('un objectif : trajectoire = min(100 ; affecté / prévu), score = 70 % trajectoire + 30 % régularité', () => {
+    assert.equal(goalTrajectory(50000, 100000), 50);
+    assert.equal(goalTrajectory(150000, 100000), 100, 'jamais au-dessus de 100');
+    assert.equal(goalTrajectory(0, 0), 100, 'rien de prévu encore');
+    assert.equal(goalScore({ trajectory: 50, regularity: 100 }), 65);
+    assert.equal(goalScore({ trajectory: 50, regularity: null }), 50, 'sans rythme, la trajectoire seule');
+  });
+
+  test('les objectifs : moyenne pondérée par la priorité (haute 3, normale 2, basse 1), non calculée sans objectif', () => {
+    const high = { trajectory: 100, regularity: null, priority: 90 };
+    const low = { trajectory: 0, regularity: null, priority: 10 };
+    assert.equal(goalsScore([high, low]), 75, '(100 × 3 + 0 × 1) / 4');
+    assert.equal(goalsScore([{ trajectory: 60, regularity: null, priority: 0 }]), 60, 'priorité jamais renseignée = normale');
+    assert.equal(goalsScore([]), null);
+    assert.equal(goalsScore(null), null);
+    const absent = financialHealth({ ...complete, goalLines: [] });
+    assert.equal(absent.dimensions.find((row) => row.key === 'goals').score, null);
+    assert.match(absent.answer.avertissements.join(' '), /Objectifs/, 'le score partiel le dit');
   });
 
   test('chaque réponse porte le contrat du moteur', () => {

@@ -21,6 +21,7 @@ import {
   updateTransaction,
 } from '../services/finMoney.service.js';
 import { describeFormula } from '../services/finance/describe.js';
+import { monthlyAmount } from '../services/finance/formulas.js';
 import { buildSynthesis, currentMonth, loadSynthesisData, monthlyMoneyHistory, stepMoneyHistory } from '../services/finSynthesis.service.js';
 import { sendStoredMedia } from '../services/mediaResponse.js';
 import { discardTemp, ingestUpload, removeStored } from '../services/storage.service.js';
@@ -50,7 +51,8 @@ export function getMoneyReferences(req, res) {
 
 export async function getIncomes(req, res) {
   const incomes = await listIncomes(prisma, req.user.id, { includeArchived: req.query.includeArchived === 'true' });
-  res.json({ incomes });
+  // The monthly equivalent (F001) is the engine's; the screen draws the share of each source from it.
+  res.json({ incomes: incomes.map((income) => ({ ...income, monthlyValue: monthlyAmount(income.value, income.frequency) })) });
 }
 
 export async function postIncome(req, res) {

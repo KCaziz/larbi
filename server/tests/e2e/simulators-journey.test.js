@@ -124,13 +124,14 @@ describe('simulators, end to end', { skip: findChrome() ? false : 'no Chrome/Chr
     assert.ok(await b.waitText(s.list['interet-compose'].title));
     await fill('capital', 1000000);
     await fill('periodicContribution', 50000);
-    await fill('annualRate', 6); // typed as a percentage, sent as 0.06
-    await fill('years', 5);
+    await fill('rate', 6); // typed as a percentage, sent as 0.06; a yearly rate by default
+    await fill('duration', 5); // in years by default
     assert.ok(await b.clickContaining(s.compute));
     assert.ok(await b.waitText(s.resultsTitle));
     assert.ok(await b.waitText(s.serie.title));
     const text = await b.text();
-    assert.ok(text.includes(fr.simulators.hypothesisNames.capitalisation_par_an));
+    assert.ok(text.includes(fr.simulators.hypothesisNames.type_interet));
+    assert.ok(await b.ev("!!document.getElementById('field-ratePeriod') && !!document.getElementById('field-annualRateKind')"), 'the choices are drawn, and the kind of yearly rate shows for a yearly rate');
     assert.ok(await valueOf(s.results.valeurFutureTotale));
     assert.equal(await b.ev("document.querySelectorAll('.simulator-serie-table tbody tr').length"), 5, 'one row per year');
     assert.ok(await b.waitText(s.serie.note), 'an illustration, not a promise');

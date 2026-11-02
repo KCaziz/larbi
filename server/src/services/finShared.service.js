@@ -12,10 +12,12 @@
 // than inventing a second notion of consent.
 
 import { COLLECTIVE_CATEGORY_KEYS } from '../constants/finCollectiveCategories.js';
+import { collectiveOfReference, referenceOfCollective } from '../constants/finCollectiveCategoryMap.js';
 import { EXPENSE_MIN_ROLE, INCOME_SPLIT_REQUIRES_SHARING, SETTLEMENTS_PAGE_SIZE, SHARED_EXPENSES_PAGE_SIZE } from '../constants/finShared.js';
 import { roleAtLeast, sharesAtLeast } from '../constants/finSpace.js';
 import { HttpError } from '../utils/httpError.js';
 import { usableAccount } from './finAccount.service.js';
+import { assertAdvanceable, payerShareOf, receiveAdvance, recordPersonalPayment, revertPersonalPayment, revertReceivedAdvance } from './finSharedAdvance.service.js';
 import { removeStored } from './storage.service.js';
 import { alertBudgetLevel, notifySpace } from './finSpaceAlerts.service.js';
 import { spaceBudgetsView } from './finSpaceBudget.service.js';
@@ -48,6 +50,9 @@ const EXPENSE_SELECT = {
   subCategory: true,
   receipt: { select: { id: true, originalName: true, kind: true } },
   personalTransactionId: true,
+  advanceTransferId: true,
+  advanceOriginalValue: true,
+  personalCreated: true,
   version: true,
   shares: { select: { id: true, memberId: true, share: true, weight: true } },
 };
@@ -63,6 +68,7 @@ const SETTLEMENT_SELECT = {
   note: true,
   recordedById: true,
   status: true,
+  transferId: true,
 };
 
 // The live members of a space, with what each one shares — the shape both the
@@ -189,43 +195,46 @@ export async function createSharedExpense(prisma, userId, spaceId, body) {
   if (body.collectiveCategory && !COLLECTIVE_CATEGORY_KEYS.includes(body.collectiveCategory)) {
     throw new HttpError(422, 'Unknown collective category', { reason: 'unknownCategory' });
   }
-  const categoryId = await usableCategory(prisma, userId, body.categoryId ?? null);
+  // P9-16: the 19 collective categories are a preselection of the 125: picking one
+  // fills the other, and a reference category picked alone finds its group.
+  let categoryId = await usableCategory(prisma, userId, body.categoryId ?? null);
+  let collectiveCategory = body.collectiveCategory ?? null;
+  if (!categoryId && collectiveCategory) {
+    const key = referenceOfCollective(collectiveCategory);
+    const row = key ? await prisma.finCategory.findFirst({ where: { key, userId: null, deletedAt: null, archivedAt: null }, select: { id: true } }) : null;
+    categoryId = row?.id ?? null;
+  } else if (categoryId && !collectiveCategory) {
+    const row = await prisma.finCategory.findUnique({ where: { id: categoryId }, select: { key: true } });
+    collectiveCategory = collectiveOfReference(row?.key) ?? null;
+  }
 
   // P9-08: money from the payer's own pocket. Checked before anything is written.
   const link = body.personalLink ?? null;
+  let linked = null;
   if (link) {
     if (body.payerId !== me.id) throw new HttpError(422, 'Only the payer can link their own personal money', { reason: 'notYourPayment' });
     if (body.planned) throw new HttpError(422, 'A planned expense has not been paid yet', { reason: 'plannedNotLinkable' });
     if (link.accountId) await usableAccount(prisma, userId, link.accountId, space.currency);
-    else await linkableTransaction(prisma, userId, link.transactionId, space.currency);
+    else {
+      linked = await linkableTransaction(prisma, userId, link.transactionId, space.currency);
+      assertAdvanceable(linked, { value: body.value, payerShare: payerShareOf(shares, me.id) });
+    }
   }
 
   const recorded = await prisma.$transaction(async (tx) => {
-    let personalTransactionId = link?.transactionId ?? null;
-    if (link?.accountId) {
-      // A new personal expense, on the chosen account: what left the payer's money.
-      const made = await tx.finTransaction.create({
-        data: {
+    // P9-15: the account is debited of the whole amount, the budget bears only
+    // the payer's share, the rest is an advance to recover.
+    const personal = link
+      ? await recordPersonalPayment(tx, {
           userId,
-          kind: 'expense',
-          accountId: link.accountId,
-          value: body.value,
-          currency: space.currency,
-          occurredAt: body.occurredAt,
+          space,
+          expense: { value: body.value, label: body.label, occurredAt: body.occurredAt },
+          payerShare: payerShareOf(shares, me.id),
           categoryId,
-          note: body.label,
-          shared: true,
-          planned: false,
-          scope: 'personal',
-          consentUses: [],
-          source: 'manual',
-          status: 'real',
-        },
-        select: { id: true },
-      });
-      await recordChange(tx, { userId, entity: 'transaction', entityId: made.id, action: 'create', after: { kind: 'expense', value: body.value, currency: space.currency, fromSharedExpense: true } });
-      personalTransactionId = made.id;
-    }
+          accountId: link.accountId ?? null,
+          transaction: link.transactionId ? linked : null,
+        })
+      : null;
     const expense = await tx.finSharedExpense.create({
       data: {
         spaceId,
@@ -237,9 +246,9 @@ export async function createSharedExpense(prisma, userId, spaceId, body) {
         splitMode: body.splitMode,
         lifecycle: body.planned ? 'planned' : 'done',
         usageUnit: body.splitMode === 'usage' ? body.usageUnit : null,
-        collectiveCategory: body.collectiveCategory ?? null,
+        collectiveCategory,
         subCategory: body.subCategory ?? null,
-        personalTransactionId,
+        ...(personal ?? {}),
         categoryId,
         note: body.note ?? null,
         recordedById: me.id,
@@ -301,7 +310,9 @@ export async function deleteSharedExpense(prisma, userId, spaceId, id, { reason 
 
   // The receipt goes with the expense it documents (row and file).
   const receipt = await prisma.media.findUnique({ where: { sharedExpenseId: id }, select: { id: true, storageKey: true } });
+  const payer = await prisma.finSpaceMember.findUnique({ where: { id: expense.payerId }, select: { userId: true } });
   await prisma.$transaction(async (tx) => {
+    await revertPersonalPayment(tx, { expense, payerUserId: payer.userId, reason: 'dépense commune supprimée' });
     if (receipt) await tx.media.delete({ where: { id: receipt.id } });
     await tx.finSharedExpense.update({ where: { id }, data: { deletedAt: new Date() } });
     await recordChange(tx, {
@@ -324,12 +335,13 @@ export async function deleteSharedExpense(prisma, userId, spaceId, id, { reason 
 async function linkableTransaction(prisma, userId, transactionId, currency) {
   const row = await prisma.finTransaction.findFirst({
     where: { id: transactionId, userId, deletedAt: null },
-    select: { id: true, kind: true, currency: true, planned: true, sharedExpense: { select: { id: true } } },
+    select: { id: true, kind: true, currency: true, planned: true, accountId: true, value: true, sharedExpense: { select: { id: true } } },
   });
   if (!row) throw new HttpError(404, 'Transaction not found');
   if (row.kind !== 'expense' || row.planned) throw new HttpError(422, 'Only a realised personal expense can be linked', { reason: 'notAnExpense' });
   if (row.currency !== currency) throw new HttpError(422, 'The transaction is not in the currency of the space', { reason: 'currencyMismatch', expected: currency });
   if (row.sharedExpense) throw new HttpError(409, 'This personal expense is already linked to a collective one', { reason: 'alreadyLinked' });
+  return row;
 }
 
 /**
@@ -343,9 +355,13 @@ export async function linkPersonalTransaction(prisma, userId, spaceId, id, { tra
   if (!expense) throw new HttpError(404, 'Shared expense not found');
   if (expense.payerId !== me.id) throw new HttpError(403, 'Only the payer can link their personal money', { reason: 'notYourPayment' });
   if (expense.personalTransactionId) throw new HttpError(409, 'This expense is already linked to a personal transaction', { reason: 'alreadyLinked' });
-  await linkableTransaction(prisma, userId, transactionId, expense.currency);
+  const transaction = await linkableTransaction(prisma, userId, transactionId, expense.currency);
+  const payerShare = payerShareOf(expense.shares, me.id);
+  assertAdvanceable(transaction, { value: expense.value, payerShare });
+  const space = await prisma.finSpace.findUnique({ where: { id: spaceId }, select: { id: true, label: true, currency: true } });
   return prisma.$transaction(async (tx) => {
-    const updated = await tx.finSharedExpense.update({ where: { id }, data: { personalTransactionId: transactionId, version: { increment: 1 } }, select: EXPENSE_SELECT });
+    const personal = await recordPersonalPayment(tx, { userId, space, expense, payerShare, categoryId: null, transaction });
+    const updated = await tx.finSharedExpense.update({ where: { id }, data: { ...personal, version: { increment: 1 } }, select: EXPENSE_SELECT });
     await recordChange(tx, { userId, entity: SHARED_EXPENSE_ENTITY, entityId: id, action: 'correct', field: 'personalTransactionId', before: null, after: transactionId });
     return updated;
   });
@@ -358,6 +374,10 @@ export async function unlinkPersonalTransaction(prisma, userId, spaceId, id) {
   if (!expense) throw new HttpError(404, 'Shared expense not found');
   if (expense.payerId !== me.id) throw new HttpError(403, 'Only the payer can change this link', { reason: 'notYourPayment' });
   if (!expense.personalTransactionId) throw new HttpError(409, 'This expense is not linked', { reason: 'notLinked' });
+  // Its advance is undone by cancelling the expense, which gives everything back at once.
+  if (expense.advanceTransferId || expense.advanceOriginalValue !== null || expense.personalCreated) {
+    throw new HttpError(409, 'This expense moved your money: cancel it to take that back', { reason: 'advanced' });
+  }
   return prisma.$transaction(async (tx) => {
     const updated = await tx.finSharedExpense.update({ where: { id }, data: { personalTransactionId: null, version: { increment: 1 } }, select: EXPENSE_SELECT });
     await recordChange(tx, { userId, entity: SHARED_EXPENSE_ENTITY, entityId: id, action: 'correct', field: 'personalTransactionId', before: expense.personalTransactionId, after: null });
@@ -437,7 +457,10 @@ export async function cancelSharedExpense(prisma, userId, spaceId, id, { reason 
   if (!(expense.recordedById === me.id || expense.payerId === me.id) && !roleAtLeast(me.role, 'admin')) {
     throw new HttpError(403, 'Only the payer, whoever recorded it, or an admin may cancel this expense', { reason: 'notYours' });
   }
+  const payer = await prisma.finSpaceMember.findUnique({ where: { id: expense.payerId }, select: { userId: true } });
   return prisma.$transaction(async (tx) => {
+    // P9-15: what the payer's own money did goes back with the expense.
+    await revertPersonalPayment(tx, { expense, payerUserId: payer.userId, reason: 'dépense commune annulée' });
     const updated = await tx.finSharedExpense.update({
       where: { id },
       data: { lifecycle: 'cancelled', cancelledAt: new Date(), version: { increment: 1 } },
@@ -473,6 +496,11 @@ export async function confirmPlannedExpense(prisma, userId, spaceId, id) {
 
 // ---- settlements -----------------------------------------------------------
 
+// The transfer a settlement made is the receiver's own ledger: others only learn that money was brought to an account.
+function visibleSettlement({ transferId, ...rest }) {
+  return { ...rest, accountLinked: transferId !== null };
+}
+
 export async function listSettlements(prisma, userId, spaceId, { page = 1, pageSize = SETTLEMENTS_PAGE_SIZE } = {}) {
   await ownMembership(prisma, userId, spaceId);
   const size = Math.min(pageSize, SETTLEMENTS_PAGE_SIZE);
@@ -486,7 +514,7 @@ export async function listSettlements(prisma, userId, spaceId, { page = 1, pageS
     }),
     prisma.finSettlement.count({ where: { spaceId, deletedAt: null } }),
   ]);
-  return { settlements: rows, page, pageSize: size, total, pages: Math.max(1, Math.ceil(total / size)) };
+  return { settlements: rows.map(visibleSettlement), page, pageSize: size, total, pages: Math.max(1, Math.ceil(total / size)) };
 }
 
 /**
@@ -523,6 +551,13 @@ export async function createSettlement(prisma, userId, spaceId, body) {
     throw new HttpError(403, 'Only a party to the settlement, or an admin, may record it', { reason: 'notYours' });
   }
 
+  // P9-15: only the one who was paid knows where the money arrived.
+  if (body.accountId) {
+    if (body.toId !== me.id) throw new HttpError(422, 'Only the one who was paid can say which account received it', { reason: 'notYourAccount' });
+    await usableAccount(prisma, userId, body.accountId, space.currency);
+  }
+
+  let advanceApplied = 0;
   const recorded = await prisma.$transaction(async (tx) => {
     const settlement = await tx.finSettlement.create({
       data: {
@@ -548,6 +583,14 @@ export async function createSettlement(prisma, userId, spaceId, body) {
       action: 'create',
       after: { spaceId, from: settlement.fromId, to: settlement.toId, value: settlement.value, currency: settlement.currency },
     });
+    if (body.accountId) {
+      const received = await receiveAdvance(tx, { userId, spaceId, accountId: body.accountId, value: body.value, currency: space.currency, settledAt: body.settledAt, note: body.note ?? 'Remboursement reçu' });
+      if (received) {
+        advanceApplied = received.applied;
+        await tx.finSettlement.update({ where: { id: settlement.id }, data: { transferId: received.transferId } });
+        settlement.transferId = received.transferId;
+      }
+    }
     return settlement;
   });
 
@@ -560,7 +603,7 @@ export async function createSettlement(prisma, userId, spaceId, body) {
     referenceId: recorded.id,
     onlyUserIds: parties.map((party) => party.userId).filter((id) => id !== userId),
   });
-  return recorded;
+  return { ...visibleSettlement(recorded), advanceApplied };
 }
 
 export async function deleteSettlement(prisma, userId, spaceId, id, { reason } = {}) {
@@ -573,7 +616,9 @@ export async function deleteSettlement(prisma, userId, spaceId, id, { reason } =
     throw new HttpError(403, 'Only a party to the settlement, or an admin, may remove it', { reason: 'notYours' });
   }
 
+  const receiver = settlement.transferId ? await prisma.finSpaceMember.findUnique({ where: { id: settlement.toId }, select: { userId: true } }) : null;
   await prisma.$transaction(async (tx) => {
+    if (receiver) await revertReceivedAdvance(tx, { userId: receiver.userId, transferId: settlement.transferId, reason: 'règlement supprimé' });
     await tx.finSettlement.update({ where: { id }, data: { deletedAt: new Date() } });
     await recordChange(tx, { userId, entity: SETTLEMENT_ENTITY, entityId: id, action: 'delete', field: 'deletedAt', after: true, reason: reason ?? null });
   });

@@ -6,6 +6,7 @@ import { api } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import BrowserPush from './BrowserPush.jsx';
 import { formatDate } from '../../lib/format.js';
+import { formatMoney } from '../../lib/money.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
@@ -135,6 +136,13 @@ function NotificationText({ t, language, notification: n }) {
       return t(`notifications.messages.spaceTask.${n.params.niveau}`, { label: n.params.label, date: formatDate(language, n.params.date) });
     case 'space_contribution':
       return t('notifications.messages.spaceContribution', { date: formatDate(language, n.params.date) });
+    case 'space_goal_gap':
+      return t(`notifications.messages.spaceGoalGap.${n.params.event}`, {
+        label: n.params.label,
+        percent: n.params.percent,
+        gap: n.params.gap === undefined ? '' : formatMoney(language, n.params.gap, n.params.currency),
+        expected: n.params.expected === undefined ? '' : formatMoney(language, n.params.expected, n.params.currency),
+      });
     case 'space_permission':
       return t(`notifications.messages.spacePermission.${n.params.role}`);
     case 'reminder_upcoming':

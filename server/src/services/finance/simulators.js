@@ -23,6 +23,8 @@ import { debtPayoffPlan } from './algorithms.js';
 import { computed } from './contract.js';
 import * as f from './formulas.js';
 import { yearly } from './money.js';
+import { effectiveAnnualRate, interestValue, periodRate } from './interest.js';
+import { CONTRIBUTION_MONTHS, DURATION_MONTHS, interestPeriodMonths } from '../../constants/simulators.js';
 
 // `hypotheses` is filled only for simulators that project into the future: the
 // client requires the assumptions of a simulation to be visible, and sending the
@@ -184,36 +186,54 @@ export const SIMULATOR_FUNCTIONS = {
     );
   },
 
-  // CAL-IC — Intérêts composés (client's request of 2026-11-01).
-  // The rate is annual and NOMINAL, capitalised `periodsPerYear` times a year
-  // (F020 turns it into the periodic rate); a payment is made at the end of each
-  // period (F030's own convention). The `serie` gives the total at the end of
-  // every year — F031 evaluated year by year — with what was paid in, so the
-  // interface can show how much of it is interest (the difference of two values
-  // it holds, left to the interface like every other difference here).
+  // CAL-IC — Intérêts simples et composés (client's request of 2026-11-01, rules
+  // of 2026-11-02). The rate of a period is never divided (INT-F01); the value is
+  // built period by period (services/finance/interest.js) and rounded once. The
+  // `serie` gives the total after each step (every month up to two years, then
+  // every twelve), with what was paid in, so the interface can show how much of it
+  // is interest — the difference of two values it holds, left to the interface
+  // like every other difference here.
   'interet-compose': (input, ctx) => {
-    const { capital, periodicContribution, annualRate, years, compoundingsPerYear: periodsPerYear } = input;
-    const rate = f.periodicRate(annualRate, periodsPerYear);
-    const at = (periods) => ({ initial: capital, payment: periodicContribution, rate, periods });
-    const periods = years * periodsPerYear;
-    const args = at(periods);
-    const serie = [];
-    for (let year = 1; year <= years; year += 1) {
-      const stepArgs = at(year * periodsPerYear);
-      serie.push({
-        annee: year,
-        verse: capital + periodicContribution * year * periodsPerYear,
-        valeur: computed('F031', f.futureValueTotal(stepArgs), { inputs: stepArgs, ...ctx }),
+    const { capital, periodicContribution, rate, ratePeriod, annualRateKind, interestKind, duration, durationUnit, compounding, contributionFrequency, contributionTiming } = input;
+    const periodMonths = interestPeriodMonths(input);
+    const totalMonths = duration * DURATION_MONTHS[durationUnit];
+    const periods = totalMonths / periodMonths;
+    const every = contributionFrequency ? CONTRIBUTION_MONTHS[contributionFrequency] / periodMonths : 1;
+    const r = periodRate({ rate, ratePeriod, rateKind: annualRateKind, periodMonths });
+    const at = (n) => ({ initial: capital, payment: periodicContribution, rate: r, periods: n, every, kind: interestKind, timing: contributionTiming });
+    const value = interestValue(at(periods));
+    const rateInputs = { rate, ratePeriod, annualRateKind, periodMonths };
+    const serie = monthSteps(totalMonths)
+      .filter((month) => month % periodMonths === 0)
+      .map((month) => {
+        const step = interestValue(at(month / periodMonths));
+        const row = {
+          mois: month,
+          verse: step === null ? null : capital + step.paid,
+          valeur: computed('INT-F04', step === null ? null : step.lump + step.payments, { inputs: at(month / periodMonths), ...ctx }),
+        };
+        if (month % 12 === 0) row.annee = month / 12;
+        return row;
       });
-    }
     return run(
       {
-        tauxPeriodique: computed('F020', rate, { inputs: { annualRate, periodsPerYear }, ...ctx }),
-        valeurFutureCapital: computed('F029', f.futureValueLumpSum(args), { inputs: args, ...ctx }),
-        valeurFutureVersements: computed('F030', f.futureValuePayments(args), { inputs: args, ...ctx }),
-        valeurFutureTotale: computed('F031', f.futureValueTotal(args), { inputs: args, ...ctx }),
+        tauxPeriode: computed('INT-F01', r, { inputs: rateInputs, ...ctx }),
+        valeurFutureCapital: computed('INT-F02', value === null ? null : value.lump, { inputs: at(periods), ...ctx }),
+        valeurFutureVersements: computed('INT-F03', value === null ? null : value.payments, { inputs: at(periods), ...ctx }),
+        valeurFutureTotale: computed('INT-F04', value === null ? null : value.lump + value.payments, { inputs: at(periods), ...ctx }),
+        // The yearly rate that a compounded period rate is worth; in simple interest the rate does not compound.
+        ...(interestKind === 'compound' ? { tauxAnnuelEffectif: computed('INT-F05', effectiveAnnualRate(r, periodMonths), { inputs: { rate: r, periodMonths }, ...ctx }) } : {}),
       },
-      { taux_annuel: annualRate, horizon_annees: years, capitalisation_par_an: periodsPerYear },
+      {
+        type_interet: interestKind,
+        taux_saisi: rate,
+        periodicite_taux: ratePeriod,
+        ...(ratePeriod === 'annual' ? { type_taux_annuel: annualRateKind, capitalisation: compounding } : {}),
+        duree_mois: totalMonths,
+        periode_calcul_mois: periodMonths,
+        nombre_periodes: periods,
+        ...(periodicContribution > 0 ? { frequence_versement: contributionFrequency, moment_versement: contributionTiming } : {}),
+      },
       serie,
     );
   },

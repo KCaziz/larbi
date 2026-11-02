@@ -60,6 +60,7 @@ export const NOTIFICATION_TYPES = [
   { key: 'space_bill', family: 'collectif', alert: null, category: 'action', priority: 'echeance', requiresOptIn: false, defaultEnabled: true },
   { key: 'space_task', family: 'collectif', alert: null, category: 'action', priority: 'echeance', requiresOptIn: false, defaultEnabled: true },
   { key: 'space_contribution', family: 'collectif', alert: null, category: 'action', priority: 'echeance', requiresOptIn: false, defaultEnabled: true },
+  { key: 'space_goal_gap', family: 'collectif', alert: null, category: 'action', priority: 'echeance', requiresOptIn: false, defaultEnabled: true },
   { key: 'space_permission', family: 'collectif', alert: null, category: 'information', priority: 'apprentissage', requiresOptIn: false, defaultEnabled: true },
   // P6-13: another member of a shared space changed what they share.
   { key: 'sharing_changed', family: 'securite', alert: null, category: 'information', priority: 'apprentissage', requiresOptIn: false, defaultEnabled: true },

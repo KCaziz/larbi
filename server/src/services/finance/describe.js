@@ -1,6 +1,7 @@
 import { algorithmById, formulaById } from '../../constants/finance.js';
 import { budgetFormulaById } from '../../constants/finBudgetFormulas.js';
 import { collectiveAlgorithmById, collectiveFormulaById } from '../../constants/finCollectiveFormulas.js';
+import { interestFormulaById } from '../../constants/finInterestFormulas.js';
 
 // The client's own columns for a formula, so an interface can explain a result
 // in the client's wording instead of paraphrasing it. An algorithm (ALG-xx) has
@@ -13,7 +14,7 @@ import { collectiveAlgorithmById, collectiveFormulaById } from '../../constants/
 export function describeFormula(id) {
   // The client's final rules PB-F and AN-F (P8-01 point 1) are described the
   // same way.
-  const formula = formulaById(id) ?? budgetFormulaById(id) ?? collectiveFormulaById(id);
+  const formula = formulaById(id) ?? budgetFormulaById(id) ?? collectiveFormulaById(id) ?? interestFormulaById(id);
   if (formula) {
     return { id, label: formula.label, rule: formula.rule, condition: formula.condition, unit: formula.unit, version: formula.version, ...(formula.equivalent ? { equivalent: formula.equivalent } : {}) };
   }

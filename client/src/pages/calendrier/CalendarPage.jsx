@@ -13,6 +13,7 @@ import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
+import GroupedBars from '../../components/fincludia/charts/GroupedBars.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import { flowClass } from '../../lib/flows.js';
 import '../../components/fincludia/Fincludia.css';
@@ -152,6 +153,16 @@ export default function CalendarPage() {
               </button>
             ))}
           </div>
+
+          {/* The load of the period week by week: what falls due against what comes in. */}
+          {cal.semaines?.length > 1 && (
+            <GroupedBars
+              rows={cal.semaines.map((week) => ({ key: week.debut, label: t('calendar.weekOf', { date: formatDate(i18n.language, week.debut) }), a: week.entrees, b: week.sorties }))}
+              names={{ a: t('calendar.weekIn'), b: t('calendar.weekOut') }}
+              currency={cal.currency}
+              caption={t('calendar.weekChart')}
+            />
+          )}
 
           <DayList days={cal.jours} tab={tab} currency={cal.currency} language={i18n.language} t={t} run={run} />
         </section>

@@ -4,6 +4,27 @@ import { formatAmount, formatDate, formatRatio } from '../../lib/format.js';
 import RingChart from '../../components/fincludia/RingChart.jsx';
 import BarList from '../../components/fincludia/charts/BarList.jsx';
 import GroupedBars from '../../components/fincludia/charts/GroupedBars.jsx';
+import LineChart from '../../components/fincludia/charts/LineChart.jsx';
+
+// The months behind the dashboard: what the pot held at the end of each, and what
+// each member paid in each. The chart kit allows four series, so the three
+// members who paid most are drawn and the others are drawn together.
+function HistoryCharts({ t, history }) {
+  const { points, members, currency } = history;
+  const total = (memberId) => points.reduce((sum, point) => sum + (point.paye[memberId] ?? 0), 0);
+  const ranked = [...members].sort((a, b) => total(b.memberId) - total(a.memberId));
+  const shown = ranked.length > 4 ? ranked.slice(0, 3) : ranked;
+  const rest = ranked.slice(shown.length);
+  const series = shown.map((member, index) => ({ key: member.memberId, label: member.name ?? t('spaces.report.noCategory'), tone: index, points: points.map((point) => ({ month: point.month, value: point.paye[member.memberId] ?? 0 })) }));
+  if (rest.length > 0) series.push({ key: 'others', label: t('spaces.overview.others'), tone: 3, points: points.map((point) => ({ month: point.month, value: rest.reduce((sum, member) => sum + (point.paye[member.memberId] ?? 0), 0) })) });
+  return (
+    <article className="space-compartment space-compartment-wide">
+      <h3>{t('spaces.overview.history')}</h3>
+      <LineChart currency={currency} caption={t('spaces.overview.potChart')} series={[{ key: 'pot', label: t('spaces.overview.balance'), tone: 0, points: points.map((point) => ({ month: point.month, value: point.soldeGroupe })) }]} />
+      <LineChart currency={currency} caption={t('spaces.overview.paidChart')} series={series} />
+    </article>
+  );
+}
 
 // The dashboard of a space (P9-02, tab 03, CD-01 to CD-08): the group's balance,
 // the month's spending, who paid, who owes what, the budgets, the next bills,
@@ -12,6 +33,7 @@ import GroupedBars from '../../components/fincludia/charts/GroupedBars.jsx';
 export default function SpaceOverview({ t, language, spaceId, space }) {
   const dash = useApi(`/fin/espaces/${spaceId}/tableau-de-bord`);
   const refs = useApi('/fin/espaces/references-budgets');
+  const history = useApi(`/fin/espaces/${spaceId}/historique-mensuel`);
   if (!dash.data) return null;
   const d = dash.data.tableau;
   const money = (amount) => formatAmount(language, amount, d.currency);
@@ -31,6 +53,8 @@ export default function SpaceOverview({ t, language, spaceId, space }) {
           <p className="space-overview-figure">{money(d.soldeGroupe.resultat)}</p>
           <Link to={at('ressources')}>{t('spaces.overview.seePot')}</Link>
         </article>
+
+        {history.data && <HistoryCharts t={t} history={history.data.historique} />}
 
         <article className="space-compartment">
           <h3>{t('spaces.overview.spend')}</h3>

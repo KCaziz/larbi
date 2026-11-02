@@ -5,7 +5,7 @@ import { Archive, ArchiveRestore, ChevronRight, Flag, Plus, Trash2 } from 'lucid
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
-import { formatAmount, formatDate } from '../../lib/format.js';
+import { formatAmount, formatDate, formatRatio } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
@@ -13,6 +13,8 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
+import LineChart from '../../components/fincludia/charts/LineChart.jsx';
+import BarList from '../../components/fincludia/charts/BarList.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import { toMinorUnits } from '../../lib/money.js';
 import '../../components/fincludia/Fincludia.css';
@@ -26,7 +28,7 @@ import './Goals.css';
 // own addresses, `/app/objectifs/nouveau` and `/app/objectifs/:id`; this page
 // lists the goals and leads to them.
 export default function GoalsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const location = useLocation();
   const [showArchived, setShowArchived] = useState(false);
@@ -91,6 +93,15 @@ export default function GoalsPage() {
           </Button>
         </div>
 
+        {/* The goals against each other: progress on one scale, 100 % being the target (F025). */}
+        {list.filter((goal) => !goal.archivedAt).length >= 2 && (
+          <BarList
+            caption={t('goals.compareChart')}
+            max={1}
+            rows={list.filter((goal) => !goal.archivedAt).map((goal) => ({ key: goal.id, label: goal.label, value: goal.vue.progres.resultat === null ? null : Math.min(1, goal.vue.progres.resultat) }))}
+            format={(value) => formatRatio(i18n.language, value, { digits: 0 })}
+          />
+        )}
         {list.length === 0 ? (
           <Notice variant="info">{t('goals.none')}</Notice>
         ) : (
@@ -334,6 +345,18 @@ function ScenarioForm({ goal }) {
                 target: formatAmount(i18n.language, result.cibleFinHorizon, goal.currency),
               })}
             </p>
+          )}
+          {/* The projection: the capital month by month against the target, which inflation raises. */}
+          {result.trajectoire?.length > 1 && (
+            <LineChart
+              currency={goal.currency}
+              caption={t('goals.scenario.chart')}
+              xLabel={t('debts.curveMonthHead')}
+              series={[
+                { key: 'capital', label: t('goals.scenario.chartCapital'), tone: 0, points: result.trajectoire.map((point) => ({ month: `m${String(point.mois).padStart(4, '0')}`, label: t('debts.curveMonth', { month: point.mois }), value: point.capital })) },
+                { key: 'target', label: t('goals.scenario.chartTarget'), tone: 2, points: result.trajectoire.map((point) => ({ month: `m${String(point.mois).padStart(4, '0')}`, label: t('debts.curveMonth', { month: point.mois }), value: point.cible })) },
+              ]}
+            />
           )}
           <p className="fin-hint">{t('goals.scenario.disclaimer')}</p>
         </div>

@@ -41,7 +41,8 @@ describe('the single tools catalogue', { skip: findChrome() ? false : 'no Chrome
     assert.ok(await b.waitFor(`${items()} === ${TOOLS_CATALOGUE.length}`, 'the whole catalogue'));
     const outside = await b.ev("[...document.querySelectorAll('#app-main a')].map((a) => a.getAttribute('href')).filter((href) => href && !href.startsWith('/app'))");
     assert.deepEqual(outside, []);
-    assert.ok(await b.waitText(fr.toolsCatalogue.pending), 'a calculator not built yet says so');
+    // Every calculator is built since P8-24 (CAL-V7-02 opens the savings scenario of the Synthèse): none says « à venir ».
+    assert.ok(!(await b.text()).includes(fr.toolsCatalogue.pending), 'no calculator is left unbuilt');
     await b.shot('p8-15-catalogue');
   });
 

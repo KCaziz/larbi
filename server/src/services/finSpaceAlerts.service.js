@@ -11,6 +11,7 @@
 // An alert says that something happened or is due; it never contains an amount
 // a member did not already have the right to see in the space.
 import { createNotification } from './finNotification.service.js';
+import { scanGoalGaps } from './finSpaceGoalGap.service.js';
 
 const DAY = 24 * 3600 * 1000;
 const BILL_DAYS = [7, 3, 0];
@@ -63,8 +64,10 @@ export async function alertBudgetLevel(prisma, spaceId, { collectiveCategory, oc
 
 /** The scanned alerts of one person, across the spaces they belong to. */
 export async function scanSpaceAlerts(prisma, userId, now = new Date()) {
-  const memberships = await prisma.finSpaceMember.findMany({ where: { userId, leftAt: null, space: { deletedAt: null } }, select: { id: true, spaceId: true } });
+  const memberships = await prisma.finSpaceMember.findMany({ where: { userId, leftAt: null, space: { deletedAt: null } }, select: { id: true, spaceId: true, role: true } });
   const today = dayStart(now);
+  // P9-17: delay on a common goal, and its milestones.
+  await scanGoalGaps(prisma, userId, memberships, now);
   for (const { id: memberId, spaceId } of memberships) {
     const link = (path) => `/partage/${spaceId}/${path}`;
     // Bills: a planned shared expense, J-7 / J-3 / J.

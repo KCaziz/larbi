@@ -105,6 +105,31 @@ export function assignToEnvelopes(movements, envelopes) {
   return { spent, outside: outsideCount === 0 ? null : outside };
 }
 
+/**
+ * The spending of a period day by day against the pace that would use the
+ * budget evenly (G-04, « dépense cumulée contre le rythme prévu »): for each day
+ * the real spending in the envelopes up to its end, and the planned total times
+ * the share of the period gone. The real curve stops today (null after, never
+ * zero); a period over 62 days is thinned to every seventh day. Empty without
+ * envelopes: no plan, no pace.
+ */
+export function spendingCurve({ period, envelopes, movements, currency, now }) {
+  const planned = envelopes.reduce((sum, envelope) => sum + envelope.value, 0);
+  if (envelopes.length === 0 || planned <= 0) return [];
+  const total = daysInPeriod(period.start, period.end);
+  const elapsed = daysElapsed(period.start, period.end, now);
+  const first = Date.UTC(period.start.getUTCFullYear(), period.start.getUTCMonth(), period.start.getUTCDate());
+  const own = movements.filter((row) => row.currency === currency);
+  const points = [];
+  for (let day = 1; day <= total; day += 1) {
+    if (total > 62 && day % 7 !== 0 && day !== total && day !== elapsed) continue;
+    const dayEnd = first + day * DAY;
+    const spent = day > elapsed ? null : [...assignToEnvelopes(own.filter((row) => row.occurredAt?.getTime() < dayEnd), envelopes).spent.values()].reduce((sum, value) => sum + value, 0);
+    points.push({ jour: new Date(first + (day - 1) * DAY).toISOString().slice(0, 10), reel: spent, rythme: Math.round((planned * day) / total) });
+  }
+  return points;
+}
+
 export function consumedByCategory(movements) {
   const byCategory = new Map();
   for (const row of movements) {
@@ -294,6 +319,7 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
     currency,
     periode: { debut: period.start, fin: period.end, jours: totalDays, joursEcoules: elapsed, joursRestants: remaining, mois: months },
     enveloppes: lines,
+    courbe: spendingCurve({ period, envelopes, movements, currency, now }),
     totalPrevu: answer('PB-F007', totalPrevu),
     totalReel: answer('PB-F005', totalReel),
     // PB-F006 — income really received minus expenses really paid over the
