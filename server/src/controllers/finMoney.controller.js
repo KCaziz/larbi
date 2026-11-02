@@ -21,7 +21,7 @@ import {
   updateTransaction,
 } from '../services/finMoney.service.js';
 import { describeFormula } from '../services/finance/describe.js';
-import { buildSynthesis, currentMonth, loadSynthesisData, monthlyMoneyHistory } from '../services/finSynthesis.service.js';
+import { buildSynthesis, currentMonth, loadSynthesisData, monthlyMoneyHistory, stepMoneyHistory } from '../services/finSynthesis.service.js';
 import { sendStoredMedia } from '../services/mediaResponse.js';
 import { discardTemp, ingestUpload, removeStored } from '../services/storage.service.js';
 import { HttpError } from '../utils/httpError.js';
@@ -258,8 +258,13 @@ export async function getSynthesis(req, res) {
 
 // Revenus vs dépenses, one point per month (P6-23). Capped at 12: a longer
 // window would be a different screen (a yearly report), not the curve the
-// client asked for on "Mon argent".
+// client asked for on "Mon argent". `pas` (G-05): by day or by week instead.
 export async function getMoneySynthesisHistory(req, res) {
-  const points = await monthlyMoneyHistory(prisma, req.user.id, { months: req.query.months ?? 6, currency: req.user.finCurrency });
-  res.json({ currency: req.user.finCurrency, points });
+  const step = req.query.pas ?? 'mois';
+  const currency = req.user.finCurrency;
+  const points =
+    step === 'mois'
+      ? await monthlyMoneyHistory(prisma, req.user.id, { months: req.query.months ?? 6, currency })
+      : await stepMoneyHistory(prisma, req.user.id, { step, currency });
+  res.json({ currency, pas: step, points });
 }

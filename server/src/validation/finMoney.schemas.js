@@ -184,4 +184,5 @@ export const synthesisQuerySchema = z
 // Revenus vs dépenses sur plusieurs mois (P6-23). Bornes mêmes que le contrôleur
 // (2 à 12) : ici pour que la requête soit refusée avant d'atteindre le service,
 // pas seulement écrêtée en silence.
-export const moneyHistoryQuerySchema = z.object({ months: z.coerce.number().int().min(2).max(12).optional() }).strict();
+// `pas` (G-05): by month (the default, `months` of them), by day or by week.
+export const moneyHistoryQuerySchema = z.object({ months: z.coerce.number().int().min(2).max(12).optional(), pas: z.enum(['jour', 'semaine', 'mois']).optional() }).strict();

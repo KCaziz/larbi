@@ -47,23 +47,30 @@ describe('P8-11 — a salary is credited once, after confirmation (QA-P05)', () 
     assert.equal(res.status, 201, JSON.stringify(res.body).slice(0, 200));
     return { recurrence: res.body.recurrence, due };
   };
-  const income = async () => (await t.request('GET', '/fin/argent/synthese', { user })).body.synthese.revenus.resultat;
+  // The month of the salary's date, not the current one: three days back, then
+  // moved off the weekend, is still last month early in a month.
+  const monthOf = (date) => {
+    const from = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+    const to = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 23, 59, 59));
+    return `from=${from.toISOString()}&to=${to.toISOString()}`;
+  };
+  const income = async (due) => (await t.request('GET', `/fin/argent/synthese?${monthOf(due)}`, { user })).body.synthese.revenus.resultat;
 
   test('nothing is real before confirmation; one credit after; a second confirmation is refused', async () => {
     const { recurrence, due } = await salary();
-    assert.equal(await income(), null, 'expected, not received');
+    assert.equal(await income(due), null, 'expected, not received');
     const confirm = () => t.request('POST', '/fin/calendrier/occurrences', { user, json: { recurrenceId: recurrence.id, dueDate: due.toISOString(), action: 'confirm' } });
     assert.equal((await confirm()).status, 201);
-    assert.equal(await income(), 6000000);
+    assert.equal(await income(due), 6000000);
     assert.equal((await confirm()).status, 409);
-    assert.equal(await income(), 6000000, 'never twice');
+    assert.equal(await income(due), 6000000, 'never twice');
   });
 
   test('« Pas reçu » records nothing, and the occurrence leaves the calendar', async () => {
     const { recurrence, due } = await salary();
     const res = await t.request('POST', '/fin/calendrier/occurrences', { user, json: { recurrenceId: recurrence.id, dueDate: due.toISOString(), action: 'missed' } });
     assert.equal(res.status, 201);
-    assert.equal(await income(), null);
+    assert.equal(await income(due), null);
     const cal = (await t.request('GET', '/fin/calendrier', { user })).body.calendrier;
     const events = cal.jours.flatMap((day) => day.evenements).filter((event) => event.sourceId === recurrence.id && event.dueDate === due.toISOString().slice(0, 10));
     assert.deepEqual(events, []);

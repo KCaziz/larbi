@@ -105,7 +105,8 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
     const saved = await api('PUT', '/fin/onboarding', { answers: { netSalary: { amount: 6000000, frequency: 'mensuel' } } }, user);
     assert.equal(saved.status, 200, 'le diagnostic enregistre une réponse');
 
-    await open('/compte/premiers-pas', fr.finOnboarding.resultTitle, 'le diagnostic progressif');
+    // The estimation questions (P6-03) live beside the first steps since P8-23.
+    await open('/app/parametres/premiers-pas/estimations', fr.finOnboarding.resultTitle, 'le diagnostic progressif');
     // The first result exists, and it is a figure rather than a zero.
     assert.ok(await b.waitText(fr.finOnboarding.resultTitle), 'un premier résultat est affiché');
 

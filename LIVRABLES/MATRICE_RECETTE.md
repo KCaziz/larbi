@@ -1,12 +1,12 @@
 # Matrice des livrables et recette
 
-> Généré le 2026-11-01 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
+> Généré le 2026-11-02 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
 
 Livrable de l'**annexe 2** du contrat, dont le tableau est fourni vide (livrable / prévu / livré / test / réserve).
 
 La colonne « Test / résultat » renvoie à la suite automatisée : `npm test` dans `server/`. La colonne « Réserve » reprend ce que le plan déclare bloqué, sans l'adoucir — l'article 7 distingue les anomalies bloquantes, majeures et mineures, et une donnée que le client doit fournir n'est aucune des trois : c'est une réserve.
 
-**124 livrables sur 142** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
+**126 livrables sur 147** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
 
 Suite de tests : 178 fichiers (consistency : 3, e2e : 38, functional : 62, security : 42, unit : 33).
 
@@ -34,7 +34,7 @@ Suite de tests : 178 fichiers (consistency : 3, e2e : 38, functional : 62, secur
 | `P2-07` — Validation de fin de phase | Oui | Oui | Suite automatisée verte |  |
 | `P2-08` — FINCLUDIA : « Apprendre » — glossaire, mini-guides et recherche pédagogique | Oui | Oui | Suite automatisée verte |  |
 | `P2-09` — FINCLUDIA : indice de connaissances financières et passeports (Avenir, étudiant) | Oui | Oui | Suite automatisée verte |  |
-| `P2-10` — FINCLUDIA : défis et missions pédagogiques (lycéen) | Oui | Non | — | Non commencé |
+| `P2-10` — FINCLUDIA : défis et missions pédagogiques (lycéen) | Oui | Oui | Suite automatisée verte |  |
 | `P3-01` — Modèle de données blog | Oui | Oui | Suite automatisée verte |  |
 | `P3-02` — CMS simplifié | Oui | Oui | Suite automatisée verte |  |
 | `P3-03` — Frontend blog | Oui | Oui | Suite automatisée verte |  |
@@ -131,7 +131,7 @@ Suite de tests : 178 fichiers (consistency : 3, e2e : 38, functional : 62, secur
 | `P8-20` — Paramètres : données et confiance | Oui | Oui | Suite automatisée verte |  |
 | `P8-21` — Contrôles du client et règle « trouvable » | Oui | Oui | Suite automatisée verte |  |
 | `P8-23` — Premiers pas : le parcours de premier démarrage (P0 à P7) | Oui | Oui | Suite automatisée verte |  |
-| `P8-24` — Reliquats des écrans livrés le 2026-10-27 | Oui | En cours | — |  |
+| `P8-24` — Reliquats des écrans livrés le 2026-10-27 | Oui | Oui | Suite automatisée verte |  |
 | `P8-25` — Une adresse propre pour chaque écran regroupé | Oui | Oui | Suite automatisée verte |  |
 | `P8-26` — Réponses du client du 2026-10-28 : corriger ce qui est déjà livré | Oui | Oui | Suite automatisée verte |  |
 | `P8-27` — Retours du client du 2026-10-28 : couleurs des catégories et des flux, et les 3 suggestions | Oui | Oui | Suite automatisée verte |  |
@@ -139,7 +139,9 @@ Suite de tests : 178 fichiers (consistency : 3, e2e : 38, functional : 62, secur
 | `P8-29` — Vitrine, compartiments et parcours de formation : refonte | Oui | Bloqué | — | Bloqué : décision ou donnée attendue du client |
 | `P8-30` — Fiche de paie : import d’un document | Oui | Oui | Suite automatisée verte |  |
 | `P8-31` — Simulateur des intérêts composés | Oui | Oui | Suite automatisée verte |  |
-| `P8-32` — Graphiques complémentaires | Oui | Non | — | Non commencé |
+| `P8-32` — Graphiques complémentaires | Oui | En cours | — |  |
+| `P8-33` — Santé financière : dimensions « Objectifs » et « Qualité des données » | Oui | Non | — | Non commencé |
+| `P8-34` — Missions V1 et règles de certification | Oui | Non | — | Non commencé |
 | `P8-22` — Moteur budgétaire unique : validation de fin de phase | Oui | Non | — | Non commencé |
 | `P9-01` — Gestion commune : décisions de cadrage | Oui | Oui | Suite automatisée verte |  |
 | `P9-02` — Gestion commune : une solution à part, une adresse par espace, un tableau de bord d'espace | Oui | Oui | Suite automatisée verte |  |
@@ -153,7 +155,10 @@ Suite de tests : 178 fichiers (consistency : 3, e2e : 38, functional : 62, secur
 | `P9-10` — Rapports et export d'un espace | Oui | Oui | Suite automatisée verte |  |
 | `P9-11` — Formules collectives : un moteur collectif, sans doublon | Oui | Oui | Suite automatisée verte |  |
 | `P9-12` — Contrôles du client et règle « trouvable » | Oui | Oui | Suite automatisée verte |  |
-| `P9-13` — Gestion commune : validation de fin de phase | Oui | En cours | — |  |
+| `P9-13` — Gestion commune : validation de fin de phase | Oui | Non | — | Non commencé |
+| `P9-15` — Dépense commune payée avec mon argent : seule ma part pèse sur mon budget | Oui | Non | — | Non commencé |
+| `P9-16` — Catégories communes reliées aux 125 catégories | Oui | Non | — | Non commencé |
+| `P9-17` — Alerte de retard sur un objectif commun | Oui | Non | — | Non commencé |
 
 ## Réserves, en clair
 

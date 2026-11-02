@@ -31,6 +31,21 @@ import { yearly } from './money.js';
 // interest table, year by year): each of its values is itself a contract answer.
 const run = (resultats, hypotheses = null, serie = null) => ({ resultats, hypotheses, serie });
 
+// The steps of a series: every year of a horizon given in years; for one given
+// in months, every month up to two years, then every twelve months — always
+// ending on the horizon itself. A horizon that is not a whole positive number
+// has no series (its results already say they are not computed).
+const MAX_YEARS = 100;
+const yearSteps = (years) => (Number.isInteger(years) && years > 0 && years <= MAX_YEARS ? Array.from({ length: years }, (_, i) => i + 1) : []);
+function monthSteps(months) {
+  if (!Number.isInteger(months) || months <= 0 || months > MAX_YEARS * 12) return [];
+  const step = months <= 24 ? 1 : 12;
+  const steps = [];
+  for (let month = step; month < months; month += step) steps.push(month);
+  steps.push(months);
+  return steps;
+}
+
 const entry = (amount, currency) => ({ amount, currency });
 
 // The financing maths shared by CAL-10 and CAL-30 (P4-11). `financedPrincipal`
@@ -160,6 +175,12 @@ export const SIMULATOR_FUNCTIONS = {
         versementRequis: computed('F032', f.paymentWithReturn({ target, initial: capital, rate: monthlyRate, periods: months }), { inputs: { target, capital, monthlyRate, months }, ...ctx }),
       },
       { rendement_mensuel: monthlyRate, horizon_mois: months },
+      // F031 at each step up to the horizon, beside what was paid in and the
+      // target: the curve shows when — and whether — the capital meets it.
+      monthSteps(months).map((month) => {
+        const stepArgs = { ...args, periods: month };
+        return { mois: month, verse: capital + contribution * month, valeur: computed('F031', f.futureValueTotal(stepArgs), { inputs: stepArgs, ...ctx }), cible: target };
+      }),
     );
   },
 
@@ -206,6 +227,12 @@ export const SIMULATOR_FUNCTIONS = {
         rendementReel: computed('F034', f.realReturn(nominalReturn, inflationRate), { inputs: { nominalReturn, inflation: inflationRate }, ...ctx }),
       },
       { inflation: inflationRate, horizon_annees: years, rendement_nominal: nominalReturn },
+      // F033 year by year: the same sum, in the money of each year.
+      yearSteps(years).map((year) => ({
+        annee: year,
+        nominal: nominalValue,
+        reel: computed('F033', f.realValue({ nominalValue, inflation: inflationRate, years: year }), { inputs: { nominalValue, inflation: inflationRate, years: year }, ...ctx }),
+      })),
     );
   },
 
@@ -257,6 +284,17 @@ export const SIMULATOR_FUNCTIONS = {
         capitalReel: computed('F033', nominal === null ? null : f.realValue({ nominalValue: nominal, inflation: inflationRate, years }), { inputs: { nominal, inflation: inflationRate, years }, ...ctx }),
       },
       { rendement_mensuel: monthlyRate, inflation: inflationRate, horizon_annees: years },
+      // F031 at the end of each year, and the same capital in today's money (F033).
+      yearSteps(years).map((year) => {
+        const stepArgs = { ...args, periods: year * 12 };
+        const value = f.futureValueTotal(stepArgs);
+        return {
+          annee: year,
+          verse: capital + monthlyContribution * year * 12,
+          valeur: computed('F031', value, { inputs: stepArgs, ...ctx }),
+          reel: computed('F033', value === null ? null : f.realValue({ nominalValue: value, inflation: inflationRate, years: year }), { inputs: { nominal: value, inflation: inflationRate, years: year }, ...ctx }),
+        };
+      }),
     );
   },
 

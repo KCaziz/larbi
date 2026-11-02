@@ -750,7 +750,7 @@ Tâches :
 - **Pas de test unitaire/fonctionnel dédié supplémentaire ni de parcours navigateur**, au-delà de ce qui est listé ci-dessus.
 
 ### P2-10 — FINCLUDIA : défis et missions pédagogiques (lycéen)
-- Statut : `❌ todo`
+- Statut : `✅ done`
 - Priorité : `🟡 medium` — abandonnée le 2026-10-11, **reprise le 2026-10-27** (voir la note ci-dessous)
 - Dépendances : `P2-09`, `P6-12`
 - Durée cible : 2 jours (estimation)
@@ -764,6 +764,9 @@ Tâches :
 - Aucune conséquence sur des données réelles ; adapté aux mineurs.
 
 Décision (2026-10-11) : cette tâche n'est plus demandée au client et n'est plus poursuivie pour l'instant ; elle pourra être reprise plus tard si une source de contenu (scénarios, règles de points, textes) est définie.
+
+**Réalisé le 2026-10-31 dans `P8-17`, tâche close le 2026-11-02.** Les trois points sont livrés : des missions courtes jouées sur une somme fictive, dont chaque choix a ses effets (argent, épargne, points de résilience) et son explication, et qu'on peut rejouer (chaque partie est une nouvelle tentative) ; un score à la règle écrite et lisible par la personne, séparé de l'indice de connaissances, avec des badges (le plus haut seuil atteint) ; aucune donnée réelle touchée, et chaque mission vise un profil. Écrans : `/app/apprendre/missions` et sa partie, la saisie dans l'administration, les badges sur le passeport. Vérifié par `tests/functional/finMissions.test.js` (10 tests). Détails : voir la note « Réalisé » de `P8-17`.
+- **Reste** (confié à `P8-34`) : les missions V1 fixées par le client le 2026-11-02 et leurs contenus ; rien n'est publié sans sa validation.
 
 ---
 
@@ -3015,7 +3018,7 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **anneau** selon l'onglet actif (comptes, dépenses, revenus, flux), couleur fixe par catégorie (celle du client), au plus cinq parts plus « Autres », légende avec montant et part, clic sur une part (ou sa ligne de légende) qui filtre les mouvements affichés dessous et le lien « Voir tous les mouvements » (ACC-04, ACC-07, ACC-08) ; petit carré « Outils » à gauche (ACC-06) ;
 - « Aujourd'hui » (la prochaine action) ; « Nos budgets » avec un « + » qui ouvre la gestion des budgets ; au plus trois objectifs prioritaires et le fonds d'urgence ; prochaines échéances et lien vers le calendrier ; santé financière avec « Voir pourquoi » ; bloc formation ; prévu / réel / tendance (ACC-09).
 - Vérifié dans un navigateur, ordinateur et téléphone (sans défilement horizontal).
-- **Restent** : l'ancien écran par public reste servi sous `/app/aujourdhui` en attendant d'être réduit à la seule liste « Aujourd'hui » (`P8-21`) ; l'ajout rapide en feuille glissante sur téléphone (aujourd'hui, il ouvre la page Mouvements) et l'anneau qui se change en mini-courbe au défilement → `P8-24`.
+- Restaient (repris et faits par `P8-24`, 2026-10-31 et 2026-11-01) : l'ancien écran par public reste servi sous `/app/aujourdhui` en attendant d'être réduit à la seule liste « Aujourd'hui » (`P8-21`) ; l'ajout rapide en feuille glissante sur téléphone (aujourd'hui, il ouvre la page Mouvements) et l'anneau qui se change en mini-courbe au défilement → `P8-24`.
 
 ### P8-07 — Mouvements : revenus, dépenses, transferts et pointage
 - Statut : `✅ done`
@@ -3092,7 +3095,7 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Versionné** (ARC-10) : le rapport porte sa version et sa date de production, et chaque chiffre son identifiant et sa version de formule.
 - **Téléchargement** en haut à droite : CSV et XLSX (`/api/fin/rapport/export`, montants en centimes, cellules protégées contre les formules), PDF par l'impression du navigateur (feuille d'impression sans la coque de l'application) — aucune dépendance nouvelle.
 - L'ancienne page « Mon argent » est remplacée (la saisie et l'historique sont dans « Mouvements », `P8-07`).
-- **Restent** : la section R-06 (scénarios d'épargne), la cascade mensuelle et les autres graphiques du catalogue (onglet 13 : seuls G-01, G-02, G-05, G-07 existent) ; une comparaison de deux mois au choix (aujourd'hui : le mois précédent) ; des instantanés de rapport conservés (aujourd'hui : régénéré à la demande, versionné) → `P8-24`.
+- Restaient (repris et faits par `P8-24`, 2026-10-31 et 2026-11-01) : la section R-06 (scénarios d'épargne), la cascade mensuelle et les autres graphiques du catalogue (onglet 13 : seuls G-01, G-02, G-05, G-07 existent) ; une comparaison de deux mois au choix (aujourd'hui : le mois précédent) ; des instantanés de rapport conservés (aujourd'hui : régénéré à la demande, versionné) → `P8-24`.
 
 ### P8-11 — Calendrier financier : trois onglets et revenus à confirmer
 - Statut : `✅ done`
@@ -3113,7 +3116,7 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Le jour venu : Confirmer, Modifier, Pas reçu, Reporter** (`POST /api/fin/calendrier/occurrences`). Rien de réel avant confirmation ; une occurrence n'est créditée qu'**une seule fois** (table `fin_occurrences`, unique par récurrence et date — QA-P05). Le mode « réalisé » crée seul les occurrences échues (sur 62 jours au plus).
 - **Cash projeté = solde des comptes (PB-F002) + entrées prévues − sorties prévues**, plus aucun solde saisi à la main (fin de C7, `P8-04`).
 - PB-F021 (prochaine date, règle du jour) appliqué à chaque occurrence. Migration `20261027160000_fin_calendar_occurrences`.
-- **Restent** : la question « Quel jour recevez-vous votre salaire ? » posée au premier démarrage (`P8-23`), et le salaire comme premier revenu de l'Accueil (`P8-24`).
+- Restaient (repris et faits par `P8-24`, 2026-10-31 et 2026-11-01) : la question « Quel jour recevez-vous votre salaire ? » posée au premier démarrage (`P8-23`), et le salaire comme premier revenu de l'Accueil (`P8-24`).
 
 ### P8-12 — Objectifs & sécurité : un seul compartiment, et des objectifs qui simulent
 - Statut : `✅ done`
@@ -3154,7 +3157,7 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Créances et dettes toujours séparées** : sens « owed » / « lent » et type D-01 à D-05 sur chaque ligne (migration `20261027180000_fin_debts_receivables`) ; l'encours, le taux d'effort (désormais **PB-F020**) et les stratégies ne portent que sur les dettes ; les créances ont leur propre total et leur propre section.
 - **Carte de crédit (D-04)** et **découvert (D-05)** : déjà portés par les comptes (`P8-03`, `P8-05`) — une carte est un compte passif (PB-F027), un découvert un attribut du compte courant (« découvert autorisé »).
 - Stratégies (dette la plus coûteuse d'abord, petite dette d'abord, paiement supplémentaire) inchangées depuis `P6-10` (ALG-01) ; taux inconnu → la dette est exclue de la simulation, et l'écran le dit.
-- **Reste** (confié à `P8-24`) : le rattachement d'une échéance de dette au budget (étape P7 du premier démarrage).
+- Restaient (repris et faits par `P8-24`, 2026-10-31 et 2026-11-01) : le rattachement d'une échéance de dette au budget (étape P7 du premier démarrage).
 
 ### P8-14 — Patrimoine réel et portefeuille fictif
 - Statut : `✅ done`
@@ -3173,7 +3176,7 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - une **créance** (« J'ai prêté ») est un actif, jamais une dette ;
 - patrimoine net = **PB-F024** (au lieu de F035).
 - Le portefeuille fictif garde son entrée dédiée (onglet 03 : « sous Patrimoine ou entrée dédiée »), son badge « Simulation » permanent et sa séparation (`P6-12`) : il ne touche ni le solde, ni le patrimoine, ni la santé financière.
-- **Reste** : l'historique du patrimoine net (`/patrimoine/historique`) lit encore les seuls actifs déclarés → `P8-24`.
+- Restaient (repris et faits par `P8-24`, 2026-10-31 et 2026-11-01) : l'historique du patrimoine net (`/patrimoine/historique`) lit encore les seuls actifs déclarés → `P8-24`.
 
 ### P8-15 — Outils : un seul catalogue
 - Statut : `✅ done`
@@ -3212,7 +3215,7 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - Les **sept dimensions du consolidé** (version de barème `B-8`) : équilibre 25, réserve 20, dette 20, épargne 15, objectifs 10, **budgets 5** (remplace « stabilité des revenus »), qualité 5 — poids par défaut versionnés, présentés au client à la recette.
 - Sous-score **« Respect des budgets »** = dépenses réelles des enveloppes / montants alloués (report compris), ramené sur 100 : **100 tant qu'on reste dans les budgets, puis baisse proportionnelle jusqu'à 0 à 200 %** (question C5, valeur par défaut) ; sans budget, non mesuré.
 - Page `/app/sante` : l'indice, « indice partiel » quand des dimensions manquent (elles sortent du calcul, jamais 0), chaque sous-score avec sa phrase courte « Pourquoi ? » **sans poids ni formule** (`P8-01` point 7), « Compléter » vers l'écran qui mesurerait une dimension absente, et la mention « ce n'est pas un score de crédit ». L'Accueil y renvoie par « Voir pourquoi ».
-- **Restent** : l'historique de l'indice (aucun instantané n'est encore conservé), et les dimensions « objectifs » et « qualité des données » qui ne sont pas encore mesurées par leurs modules → `P8-24`.
+- Restaient (repris et faits par `P8-24`, 2026-10-31 et 2026-11-01) : l'historique de l'indice (aucun instantané n'est encore conservé), et les dimensions « objectifs » et « qualité des données » qui ne sont pas encore mesurées par leurs modules → `P8-24`.
 
 ### P8-17 — Formation, progression et certificats : la seule couche qui varie selon le profil
 - Statut : `✅ done`
@@ -3255,7 +3258,7 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 - **Les douze alertes du client** : AL-P01 revenu attendu à confirmer ; AL-P02 / AL-P03 compte sous le seuil, à découvert, au-delà du découvert autorisé ; AL-P04 / AL-P05 budget à 80 % et dépassé, sans avoir à ouvrir le budget ; AL-P06 rappels (sur consentement, inchangé) ; AL-P07 paiement prévu passé et non confirmé ; AL-P08 objectif en retard, jalon (25, 50, 75, 100 %), contribution mensuelle oubliée (à partir du 25 du mois) ; AL-P09 fonds d’urgence sous un mois, sous la cible, cible atteinte ; AL-P10 échéance de dette à J-3 et dépassée, part du revenu prise par les mensualités à 30, 40 et 50 % ; AL-P11 et AL-P12 dans « Aujourd’hui », et AL-P12 aussi en notification après une semaine sans reprendre une formation. Seuils et messages du référentiel du client (`constants/finAlerts.js`, onglet `13_Alertes`). Rien sur les dettes ni le fonds d’urgence pour un mineur déclaré.
 - **Familles (réponse D7)** : budgets et comptes, revenus, échéances, dettes, objectifs et fonds d’urgence, formation, sécurité et partage ; chaque type porte sa famille et le code d’alerte du client ; le centre de notifications règle une famille d’un coup, puis chaque alerte.
 - Tests : `tests/functional/finAlerts.test.js` (une alerte par scénario, une famille coupée, un mineur), tests des notifications mis à jour.
-- **Reste** : la notification du navigateur (Web Push, décision `P8-01` point 9) n’est pas branchée ; les alertes sont dans l’application → `P8-24`.
+- Restaient (repris et faits par `P8-24`, 2026-10-31 et 2026-11-01) : la notification du navigateur (Web Push, décision `P8-01` point 9) n’est pas branchée ; les alertes sont dans l’application → `P8-24`.
 
 ### P8-19 — Recherche et assistant adaptés au moteur unique
 - Statut : `✅ done`
@@ -3269,7 +3272,7 @@ Ce qui peut être corrigé **sans attendre les comptes**, parce que des chiffres
 **Réalisé le 2026-10-31.**
 - **Recherche** : le registre d'écrans (`client/src/config/searchScreens.js`) liste maintenant les adresses `/app/…` de **tous les compartiments** du menu du client, des écrans de saisie, des outils, de la santé, des rapports, des paramètres et des premiers pas ; les **comptes** sont cherchés par nom (`/api/fin/recherche`, `mesDonnees.accounts`) ; chaque résultat ouvre **sa page** — mouvement (`/app/mouvements/:id`), compte (`/app/comptes/:id`), budget, objectif (`/app/objectifs/:id`) ; les termes et guides s'ouvrent dans l'application.
 - **Assistant** : l'intention collective « Dépense partagée » **quitte l'assistant personnel** (décision `P8-01` point 10) — retirée du catalogue (7 intentions) et supprimée de la base (migration `20261031110000`) ; elle revient avec Gestion commune (Phase 9). Les liens profonds de l'assistant acceptent les écrans de l'application.
-- **Reste** (confié à `P8-24`) : la recherche ne couvre pas encore les contenus de formation ni les catalogues d'outils côté serveur (les outils sont atteints par le registre d'écrans) ; les intentions CB* de l'assistant n'ont pas été réécrites pour les nouvelles adresses.
+- Restaient (repris et faits par `P8-24`, 2026-10-31 et 2026-11-01) : la recherche ne couvre pas encore les contenus de formation ni les catalogues d'outils côté serveur (les outils sont atteints par le registre d'écrans) ; les intentions CB* de l'assistant n'ont pas été réécrites pour les nouvelles adresses.
 
 ### P8-20 — Paramètres : données et confiance
 - Statut : `✅ done`
@@ -3335,10 +3338,10 @@ Remplace l'actuel accueil par questions propres à chaque public (`P6-03`) par l
 - **Plan du premier revenu** (JA01, JA03, JA04) : une fois le revenu saisi, trois chemins — budget, fonds d'urgence (cible par défaut selon le profil), objectif — que la personne accepte ou modifie ; rien n'est créé à sa place. La régularité du revenu (stable / irrégulier / saisonnier) est déjà dans le profil financier.
 - Les questions d'estimation de `P6-03` restent disponibles à part (`/app/parametres/premiers-pas/estimations`).
 - **Dépendance revue le 2026-10-31** : `P8-17` a été retirée de ses dépendances. Seule la structure des six profils éducatifs (déjà construite) sert à l'étape P0 ; les contenus que le client doit fournir ne concernent que la formation, pas ce parcours.
-- **Reste** (confié à `P8-24`) : retirer de l'accueil les catégories `goal`, « Autre charge fixe » et « Transport récurrent » (`RETIRED_CATEGORIES`) une fois la détection de l'épargne et la réserve n'en dépendant plus ; donner au profil éducatif (ONB-01) et au premier revenu (ONB-02) chacun leur adresse.
+- Décision du client du 2026-11-02 (question I) : les catégories `goal`, « Autre charge fixe » et « Transport récurrent » restent telles quelles ; rien à retirer. Les adresses propres d'ONB-01 et ONB-02 sont faites (`P8-24`, 2026-10-31).
 
 ### P8-24 — Reliquats des écrans livrés le 2026-10-27
-- Statut : `🚧 in-progress`
+- Statut : `✅ done`
 - Priorité : `🟡 medium`
 - Dépendances : `P8-06`, `P8-10`, `P8-11`, `P8-14`, `P8-16`
 - Durée cible : 3 jours (estimation)
@@ -3355,7 +3358,7 @@ Ce que ces tâches livrées n'ont pas fini, rassemblé ici :
 - **Fait — Revenus prévus** : écran `/app/budgets/revenus` (lister, ajouter, corriger, archiver ; accessible depuis les Budgets et depuis « Premiers pas ») ; le « Compléter » de la préparation au financement y mène. Un revenu prévu ne change aucun solde.
 - **Fait — Patrimoine** : l'historique du patrimoine net (douze fins de mois) lit les comptes tels qu'ils étaient à chaque date, plus les actifs déclarés des autres classes ; un compte ouvert récemment ne compte pas avant son ouverture. Les dettes sans compte sont lues telles qu'elles sont aujourd'hui (leur historique n'est pas conservé en soldes datés).
 - **Fait — Synthèse** : section **R-06** (scénario d'épargne : dépenses flexibles AN-F002, réduction saisie par la personne AN-F010, épargne du scénario AN-F009, taux AN-F011 — simulation, rien n'est enregistré, `?reduction=`) et la **cascade mensuelle** (G-10 : revenus → charges essentielles → dettes → flexibles → épargne → reste) ; R-06 figure aussi dans le CSV / XLSX.
-- **Reste** : l'ajout rapide en feuille glissante et l'anneau qui devient mini-courbe (Accueil) ; les graphiques G-03, G-04, G-06, G-08, G-09, G-11, G-12 ; la comparaison de deux mois au choix et des instantanés de rapport conservés ; l'historique de l'indice de santé (instantanés) et les dimensions « objectifs » et « qualité des données » ; la notification du navigateur (Web Push : elle demande des clés et un service worker, donc un choix d'hébergement à faire) ; le salaire affiché comme premier revenu de l'Accueil ; le rattachement d'une échéance de dette au budget ; la recherche des contenus de formation et la réécriture des intentions CB* de l'assistant pour les nouvelles adresses ; les catégories à retirer (`goal`, « Autre charge fixe », « Transport récurrent ») et une adresse propre pour ONB-01 et ONB-02.
+- Restait au 2026-10-31 (fait depuis, voir plus bas) : l'ajout rapide en feuille glissante et l'anneau qui devient mini-courbe (Accueil) ; les graphiques G-03, G-04, G-06, G-08, G-09, G-11, G-12 ; la comparaison de deux mois au choix et des instantanés de rapport conservés ; l'historique de l'indice de santé (instantanés) et les dimensions « objectifs » et « qualité des données » ; la notification du navigateur (Web Push : elle demande des clés et un service worker, donc un choix d'hébergement à faire) ; le salaire affiché comme premier revenu de l'Accueil ; le rattachement d'une échéance de dette au budget ; la recherche des contenus de formation et la réécriture des intentions CB* de l'assistant pour les nouvelles adresses ; les catégories à retirer (`goal`, « Autre charge fixe », « Transport récurrent ») et une adresse propre pour ONB-01 et ONB-02.
 
 **Avancement au 2026-10-31 (suite, graphiques de l'onglet 13).** Un kit de graphiques commun (`components/fincludia/charts/` : `LineChart`, `GroupedBars`, `Gauge`, `Charts.css`) qui suit les règles du projet : une seule échelle, une légende toujours écrite, chaque valeur écrite à côté de sa forme, un tableau des chiffres en alternative, un trou (jamais un zéro) quand un mois n'a pas de chiffre, quatre teintes fixes jamais cyclées. **Faits** : G-03 (flux net de chaque mois, dans la Synthèse ; `fluxNet` ajouté aux points de `/fin/argent/synthese/historique`, calculé par le moteur) ; G-04 (prévu et réel côte à côte par enveloppe, dans un budget) ; G-06 (évolution des soldes sur douze mois, avec le filtre « tous les comptes / un compte », sur Mes comptes et sur la fiche d'un compte) ; G-08 (jauge du fonds d'urgence : mois couverts face à la cible, dite en couleur ET en mots, « aucune cible choisie » plutôt qu'un faux 0 %) ; G-09 (part réellement dépensée face à la cible de la méthode, côte à côte, jamais un verdict) ; G-11 (dettes par type avec les mots du client D-01 à D-05, et, à part, ce qui m'est dû). G-12 existait (courbe du patrimoine net et répartition par classe). Vérifié dans un vrai navigateur par `tests/e2e/fin-charts-journey.test.js` (5 tests) et `finMoney.test.js` (43). **Reste de cette tâche, à jour** : l'ajout rapide en feuille glissante et l'anneau qui devient mini-courbe (Accueil) ; la comparaison de deux mois au choix et des instantanés de rapport conservés ; l'historique de l'indice de santé et les dimensions « objectifs » et « qualité des données » ; la notification du navigateur (Web Push, qui demande un choix d'hébergement) ; le salaire affiché comme premier revenu de l'Accueil ; le rattachement d'une échéance de dette au budget ; la recherche des contenus de formation et la réécriture des intentions CB* de l'assistant ; les catégories à retirer et une adresse propre pour ONB-01 et ONB-02. Le graphique de flux net est mensuel : le classeur parle de jour, semaine ou mois, et la courbe de l'Accueil qui devient mini-graphe au défilement reste dans le reste ci-dessus.
 
@@ -3374,6 +3377,9 @@ Ce que ces tâches livrées n'ont pas fini, rassemblé ici :
 **Avancement au 2026-11-01 (suite, deuxième lot de graphiques, à la demande du client de multiplier les graphiques).** Le kit gagne `BarList` (une mesure par ligne, échelle commune, valeur écrite au bout de la barre, ligne de base au milieu quand les valeurs sont signées : crédits d'un côté, dettes de l'autre, jamais par la couleur seule) et `LineChart` accepte une étape qui n'est pas un mois (une année). Nouveaux graphiques : **Gestion commune** — vue d'ensemble d'un espace (anneau des dépenses du mois aux couleurs des 19 catégories du client, soldes des membres sur une ligne de base, budgets prévu / réel), rapport d'un espace (anneau et soldes), budgets communs (prévu / réel), charge de tâches de chaque personne (COL-F12) ; **application personnelle** — les sept dimensions de l'indice de santé côte à côte sur 100 (une dimension non mesurée n'est pas un zéro), patrimoine (ce que je possède face à ce que je dois, et anneau de la répartition par classe), **simulateur d'intérêts composés** — courbe « valeur » face à « versé » année par année, au-dessus du tableau. Vérifié dans un vrai navigateur par `tests/e2e/fin-charts2-journey.test.js` (6 tests) ; l'anneau charge maintenant sa propre feuille de style, il n'est plus réservé à l'Accueil.
 
 **Avancement au 2026-11-01 (suite, Web Push).** Hébergement retenu : serveur partagé cPanel (voir `P5-06`). Migration `20261101100000_fin_push_subscriptions` ; dépendance `web-push` ; script `npm run push:keys` pour produire UNE FOIS la paire de clés VAPID, à placer dans l'environnement de l'application (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, documentés dans `.env.example`) ; sans clés la fonction est éteinte et le dit, rien n'est simulé. **Fait — la notification du navigateur** : chaque navigateur s'abonne lui-même, avec un consentement explicite à chaque abonnement (`POST /fin/notifications/push/abonnement`), se liste et se retire (par son adresse ou depuis la liste). À chaque notification créée (donc seulement si la personne n'a pas coupé ce type), ses navigateurs sont prévenus par un message qui ne contient AUCUN montant, nom ni libellé — il dit qu'il y a quelque chose à lire et où ; les mots sont choisis dans le service worker (`client/public/sw.js`) d'après la langue du navigateur. Un navigateur que le service de notification ne connaît plus (404, 410) est oublié ; un autre échec le garde et n'annule jamais la notification. Le service worker ne met rien en cache et n'est enregistré que si la personne active la fonction. Écran : bloc « Notifications du navigateur » dans les réglages des notifications. Vérifié par `tests/security/finPush.test.js` (10 tests). **Défaut corrigé au passage** : la famille « Gestion commune » (`collectif`) ajoutée avec `P9-09` manquait à la liste des familles de l'écran des réglages : on ne pouvait pas la couper. Il ne reste de cette tâche que le retrait des trois catégories, en attente d'une réponse du client (question I).
+
+**Réalisé le 2026-11-02 — tâche close.** Tous les reliquats sont faits (voir les avancements ci-dessus), sauf un, qui ne dépend pas de nous. Les tâches closes qui confiaient un reste à `P8-24` le disent maintenant fait. ACC-02 « Ajouter rapidement » n'est plus un écran regroupé : la feuille glissante s'ouvre depuis l'Accueil et son lien mène à `/app/mouvements/nouveau`.
+- **Reste** (confié à `P8-33`) : les dimensions « objectifs » et « qualité des données » de l'indice de santé, dont le client a donné les règles le 2026-11-02. Les trois catégories restent telles quelles (question I, même date).
 
 ### P8-25 — Une adresse propre pour chaque écran regroupé
 - Statut : `✅ done`
@@ -3520,7 +3526,7 @@ Le simulateur n'est dans aucune des listes du client (CAL-01 à CAL-30, CAL-V7, 
 **À confirmer avec le client** (question J) : s'il attend aussi la comparaison avec l'intérêt SIMPLE, elle n'est pas faite — l'intérêt simple n'est dans aucune formule de son classeur et en inventer une serait écrire sa règle à sa place ; dites-lui qu'un tableau « versé / intérêts / valeur » donne déjà la part des intérêts, et demandez-lui la formule s'il tient à la comparaison.
 
 ### P8-32 — Graphiques complémentaires
-- Statut : `❌ todo`
+- Statut : `🚧 in-progress`
 - Priorité : `🟡 medium`
 - Dépendances : `P8-10`
 - Durée cible : 2 jours (estimation)
@@ -3540,12 +3546,54 @@ Le kit de graphiques existe (`LineChart`, `GroupedBars`, `Gauge`, `BarList`, `Ri
 - **Simulateurs** : courbe de chaque simulateur à projection (retraite, inflation, objectif avec rendement).
 Chaque graphique suit les règles du kit (une échelle, légende écrite, valeurs écrites, tableau des chiffres, trou plutôt que zéro) et a son test navigateur.
 
+**Avancement au 2026-11-02 (tâche en cours, reprise après `P8-33`).** Côté serveur, faits et vérifiés à la main, tests encore à écrire : séries `serie` de l'objectif avec rendement (F031), de l'inflation (F033) et de la retraite (F031 et F033), le dernier point étant égal au résultat final ; `soldes` dans ALG-01 (capital restant chaque mois) ; `trajectoire` dans le scénario d'objectif ALG-03 ; `tauxEpargne` (F008) dans l'historique ; `?pas=jour|semaine` sur `/fin/argent/synthese/historique` (31 jours ou 12 semaines commençant le dimanche). Aucun écran n'est encore branché. Réserve à lever : le classeur nomme AN-F007 pour le taux d'épargne mensuel, mais AN-F007 est la part épargne/dette accélérée de la méthode 50/30/20 ; la courbe utilise F008, le taux que montre l'Accueil. Restent aussi : charge des échéances par semaine, dépense cumulée d'un budget, fonds d'urgence en mois couverts, répartition des revenus par source, gestion commune, barres de « Comparer deux mois ».
+
+### P8-33 — Santé financière : dimensions « Objectifs » et « Qualité des données »
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P8-16`
+- Durée cible : 3 jours (estimation)
+- Origine : réponse du client du 2026-11-02 (question H), qui lève le blocage noté dans `P8-24`
+
+Poids définitifs, inchangés : équilibre du mois 25 %, réserve 20 %, dette 20 %, épargne 15 %, objectifs 10 %, budgets 5 %, qualité des données 5 %. Indice = Σ(score × poids disponible) / Σ poids disponibles. La règle Budgets existante est confirmée (125 % consommé = 75/100, 150 % = 50/100, 200 % ou plus = 0).
+
+**Objectifs (10 %).** Le fonds d'urgence est exclu (déjà mesuré par Réserve). Pour chaque objectif actif :
+- Trajectoire = min(100 ; capital réellement affecté / capital prévu à date × 100).
+- Régularité, lorsqu'un rythme de contribution existe = contributions faites à temps / contributions attendues × 100.
+- Score d'un objectif = 70 % trajectoire + 30 % régularité.
+- Agrégation pondérée par priorité : haute 3, normale 2, basse 1.
+- Objectifs en pause ou arrêtés non notés ; objectifs atteints visibles dans l'historique, sans gonfler le score courant.
+- Aucun objectif actif : « Non calculée », jamais 0, et le poids est redistribué.
+
+**Qualité des données (5 %).** Remplace le mélange 60/40 : 40 % complétude + 30 % fraîcheur + 30 % pointage ; une composante non applicable renormalise les autres.
+- Complétude = champs nécessaires renseignés / champs nécessaires applicables × 100.
+- Pointage = transactions pointées ou rapprochées / transactions éligibles des 30 derniers jours × 100.
+- Fraîcheur, donnée par donnée : soldes de comptes manuels 30 jours ; revenus récurrents et dettes 31 jours ; valorisations patrimoniales 90 jours ; situation professionnelle et profil 180 jours. 100 dans le seuil, 50 entre une et deux fois le seuil, 0 au-delà.
+
+**Choix à faire à la réalisation, à signaler au client** : le capital prévu à date d'un objectif sans date cible ; la liste des « champs nécessaires » ; le champ priorité, aujourd'hui un nombre de 0 à 100 sans écran, à ramener aux trois niveaux. Une nouvelle version du barème (`HEALTH_VERSION`) dit quelle grille a produit un score conservé.
+
+### P8-34 — Missions V1 et règles de certification
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-17`, `P2-09`
+- Durée cible : 3 jours pour la structure (estimation), hors rédaction des contenus
+- Origine : réponse du client du 2026-11-02 (question E précisée)
+
+Les missions obligatoires V1, liées aux fonctions de FINCLUDIA :
+- **Lycéen, 8 missions** : Besoin ou envie ? ; Construire mon premier budget ; Transformer une envie en objectif ; Comprendre compte, CCP, carte et paiement ; Sécurité financière numérique ; Comprendre le crédit sans emprunter ; Simuler mon premier salaire ; Découvrir épargne, risque et portefeuille fictif. Défi pratique : créer une ressource, réaliser un budget, créer un objectif, identifier une tentative de fraude, tester un crédit pédagogique, construire un premier portefeuille fictif. Certification : Passeport Avenir — Bases financières.
+- **Salarié, 8 missions** : Lire et analyser mon mois ; Comprendre ma fiche de paie ; Maîtriser abonnements et dépenses récurrentes ; Construire ma sécurité financière et tester un choc ; Comprendre mes dettes et choisir une stratégie ; Planifier mes objectifs de long terme ; Construire mon patrimoine net ; Simuler logement, retraite, inflation et décisions de long terme. Défi pratique : clôturer un mois, pointer ses opérations, analyser son rapport, créer son fonds d'urgence, déclarer ses dettes, tester deux stratégies, construire son patrimoine, simuler un projet long terme. Certification : Pilotage financier personnel — Niveau fondamental.
+- **Épargnant, 10 missions** : Suis-je prêt à épargner/investir ? ; Définir objectif et horizon ; Intérêt simple et intérêt composé ; Inflation et rendement réel ; Risque, volatilité, perte et liquidité ; Comprendre les grandes classes d'actifs ; Diversification et concentration ; Construire un portefeuille fictif ; Comparer deux placements ; Tenir un journal de décisions et faire une revue. Défi pratique : diagnostic, objectif, simulation d'intérêts, inflation, profil pédagogique de risque, portefeuille fictif, comparaison, revue du journal. Certification : Épargne & Investissement — Bases pédagogiques.
+
+Règles : mission validée à 70 % minimum au quiz ; module Sécurité numérique à 80 %. Le certificat demande toutes les missions obligatoires, une moyenne globale d'au moins 75 %, le cas final réussi et les modules de sécurité obligatoires terminés. Il reste pédagogique : ni diplôme professionnel, ni agrément financier, ni score bancaire.
+
+**Écarts à lever** : le client renvoie à « la bibliothèque pédagogique déjà construite », mais aucun de ses fichiers ne contient le texte des missions, leurs quiz ni le cas final : seuls les titres sont connus, et aucun contenu ne sera inventé. Les missions actuelles (`P8-17`) sont des choix à effets, sans note de quiz : les seuils de 70 et 80 % demandent de relier chaque mission à un quiz. Profils étudiant et jeune actif : aucune liste reçue.
+
 ---
 
 ### P8-22 — Moteur budgétaire unique : validation de fin de phase
 - Statut : `❌ todo`
 - Priorité : `🔴 high`
-- Dépendances : `P8-01`, `P8-02`, `P8-03`, `P8-04`, `P8-05`, `P8-06`, `P8-07`, `P8-08`, `P8-09`, `P8-10`, `P8-11`, `P8-12`, `P8-13`, `P8-14`, `P8-15`, `P8-16`, `P8-17`, `P8-18`, `P8-19`, `P8-20`, `P8-21`, `P8-23`, `P8-24`, `P8-25`, `P8-26`, `P8-27`, `P8-28`, `P8-30`
+- Dépendances : `P8-01`, `P8-02`, `P8-03`, `P8-04`, `P8-05`, `P8-06`, `P8-07`, `P8-08`, `P8-09`, `P8-10`, `P8-11`, `P8-12`, `P8-13`, `P8-14`, `P8-15`, `P8-16`, `P8-17`, `P8-18`, `P8-19`, `P8-20`, `P8-21`, `P8-23`, `P8-24`, `P8-25`, `P8-26`, `P8-27`, `P8-28`, `P8-30`, `P8-33`, `P8-34`
 - Durée cible : 1 jour (estimation)
 
 Critères : les 44 écrans du consolidé sont livrés, chacun à sa propre adresse et atteignable depuis la navigation ; les seize contrôles QA du client passent ; aucun calcul du diagnostic n°2 n'est encore faux ; démonstration au client sur deux comptes, un lycéen et un salarié, pour montrer qu'ils ont la même application et une formation différente.
@@ -3557,6 +3605,8 @@ Critères : les 44 écrans du consolidé sont livrés, chacun à sa propre adres
 - `fin-j01-j10-journey`, `blog-journey`, `fincludia-journey`, `fin-categories-journey` : des vérifications qui lisaient la page avant l’arrivée des données (elles attendent désormais le texte), l’ancien titre d’« Aujourd’hui », l’adresse `/app/apprendre/…` d’une personne connectée, et le libellé d’une catégorie désormais précédé de son icône (`P8-27` ; le nom a maintenant son propre élément, `.fincat-name`).
 - **Un vrai défaut trouvé ainsi** : imprimer depuis l’application imprimait aussi la barre du haut, le menu et la barre du bas (une facture A4 sur deux pages). Règles d’impression communes ajoutées à `client/src/layouts/AppLayout.css`.
 - Une unité aussi : la cible de réserve du profil « autre / libre » (`AUT`, `P8-17`) manquait à la grille A ; elle y est, sans cible, avec la raison, comme EPG.
+
+**Démonstration préparée le 2026-11-02.** `npm run demo` (dans `server/`) crée sur la base de développement les comptes de la démonstration, en passant par l'API de l'application comme une personne qui saisit (validation, règles et journal compris) : `salarie@demo.fincludia.local` (salariée, quatre mois de salaire, loyer, factures et courses, un budget du mois, deux objectifs, deux dettes dont une à taux connu, une voiture) et `lyceen@demo.fincludia.local` (mineur, argent de poche, petites dépenses, un objectif). Mot de passe commun : `Demo-Fincludia-2026`. Relancer le script remplace les comptes précédents ; `npm run demo -- --clean` les supprime. Refusé sur la production et sur une base de test. Vérifié : chaque étape acceptée par l'application, connexion réelle des deux comptes. Reste à faire : la démonstration elle-même, avec le client.
 
 ---
 
@@ -3745,14 +3795,53 @@ Les huit scénarios du client deviennent un parcours navigateur qui part de l'en
 **Réalisé (2026-10-31).** `tests/functional/finSharedQc.test.js` reprend QC-01, QC-02, QC-03 et QC-05 avec les chiffres du client (9 000 pour trois : 3 000 chacun, A +6 000 ; A paie 6 000 pour B et C : sa part est 0 ; soldes croisés : moins de virements, aucun net modifié ; B ne voit rien des transactions personnelles de A). QC-04, QC-06, QC-07 et QC-08 sont prouvés là où vit leur fonction (`finSharedPersonalLink`, `finSpaceBudget`, `finSpaceTask`, `finSharedRules`). `tests/e2e/fin-shared-journey.test.js`, dans un vrai navigateur : rien de Gestion commune dans le menu personnel ; le sélecteur de la barre supérieure est la seule porte ; il mène à `/partage` ; chacun des 9 compartiments d'un espace est atteint depuis son propre menu, à sa propre adresse ; le titre et le retour sont là ; sur téléphone, aucun défilement horizontal. **Défaut trouvé par ce parcours et corrigé** : sur téléphone le sélecteur était masqué dans les DEUX applications, donc Gestion commune n'avait aucune porte depuis un téléphone. Il reste maintenant, réduit à l'icône de l'autre application (nom conservé pour un lecteur d'écran, zone de 44 px).
 
 ### P9-13 — Gestion commune : validation de fin de phase
-- Statut : `🚧 in-progress`
+- Statut : `❌ todo`
 - Priorité : `🔴 high`
-- Dépendances : `P9-01`, `P9-02`, `P9-03`, `P9-04`, `P9-05`, `P9-06`, `P9-07`, `P9-08`, `P9-09`, `P9-10`, `P9-11`, `P9-12`
+- Dépendances : `P9-01`, `P9-02`, `P9-03`, `P9-04`, `P9-05`, `P9-06`, `P9-07`, `P9-08`, `P9-09`, `P9-10`, `P9-11`, `P9-12`, `P9-15`, `P9-16`, `P9-17`
 - Durée cible : 1 jour (estimation)
 
 Critères : une solution à part, sans aucun lien depuis l'application personnelle ; chaque écran du fichier collectif a sa propre adresse ; QC-01 à QC-08 passent ; démonstration au client sur une colocation, un couple et un groupe d'amis.
 
 **Avancement (2026-10-31).** Les critères vérifiables par test le sont : une solution à part sans lien depuis le menu de l'application personnelle, le seul accès étant le sélecteur (parcours navigateur de `P9-12`) ; chaque compartiment du fichier collectif a sa propre adresse sous `/partage` ; QC-01 à QC-08 passent. **Reste** : la démonstration au client sur une colocation, un couple et un groupe d'amis, et son accord sur les écarts notés (questions F et G de `P9-05` et `P9-08`, correspondance des 19 catégories collectives, canal « push »). La suite complète n'a pas été relancée depuis la fin de `P9-02` : à lancer une fois, seule, avant la démonstration.
+
+
+**Démonstration préparée le 2026-11-02.** `npm run demo` crée aussi les trois espaces de la démonstration, avec leurs membres invités et ayant accepté : une colocation à trois (« Colocation rue Didouche » : loyer, courses et internet sur trois mois, un budget commun, trois tâches de poids différents), un couple (« Yasmine et Sami » : courses, sorties, un objectif commun « Mariage » avec les contributions des deux) et un groupe d'amis (« Voyage à Béjaïa », créé par Nour : location, essence, restaurant, chacun payé par une personne différente). `salarie@demo.fincludia.local` est membre des trois ; les autres comptes sont `coloc.karim`, `coloc.lina`, `couple.sami`, `amis.nour` et `amis.walid` (même domaine, même mot de passe, voir `P8-22`).
+
+### P9-15 — Dépense commune payée avec mon argent : seule ma part pèse sur mon budget
+- Statut : `❌ todo`
+- Priorité : `🔴 high`
+- Dépendances : `P9-08`
+- Durée cible : 4 jours (estimation)
+- Origine : réponse du client du 2026-11-02 (question G), qui **remplace** le choix de `P9-08` (montant entier)
+
+Le compte est débité du montant total, le budget personnel ne supporte que la part définitive. Exemple du client : A paie 9 000 DA de courses pour A, B et C à parts égales. Mouvement du compte de A = -9 000 DA ; dépense personnelle de A = 3 000 DA ; avance collective à récupérer = 6 000 DA ; budget Alimentation de A = -3 000 DA. Quand B rembourse 3 000 DA, le compte de A augmente, mais ce n'est **pas un revenu** : la créance passe de 6 000 à 3 000 DA. La règle anti-doublon reste : une dépense collective crée une transaction personnelle OU se rattache à une existante, jamais les deux.
+
+Piste retenue, à confirmer à la réalisation : réutiliser le mécanisme de « J'ai prêté » (`P8-13`) : une dépense de la part, plus un transfert du reste vers un compte de créance AC-09 ; un règlement reçu est un transfert retour. Aucun calcul de dépenses n'a alors à changer. **À préciser** : les règlements (`FinSettlement`) sont aujourd'hui déclaratifs, sans compte : il faut leur relier le compte qui reçoit et celui qui paie. Côté débiteur, la part de B devient sa dépense quand B rembourse, à confirmer avec le client. À traiter aussi : une part corrigée après coup, une dépense annulée, et les dépenses déjà reliées avant ce changement.
+
+### P9-16 — Catégories communes reliées aux 125 catégories
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P9-05`, `P9-14`
+- Durée cible : 2 jours (estimation)
+- Origine : réponse du client du 2026-11-02 (question F)
+
+Les dépenses communes utilisent les 125 catégories, sous-catégories comprises ; les 19 catégories de l'onglet 12 deviennent une **présélection ergonomique**, chacune en **correspondance directe** avec une catégorie du référentiel. Le client ne donne pas la table de correspondance : la proposer et la lui faire valider. Les budgets communs, rapports et alertes lisent aujourd'hui `collectiveCategory` (COLC-nn) : continuer à les regrouper par ces 19 entrées. La sous-catégorie libre de `P9-14` est à revoir.
+
+### P9-17 — Alerte de retard sur un objectif commun
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P9-09`
+- Durée cible : 3 jours (estimation)
+- Origine : réponse du client du 2026-11-02
+
+L'écart se mesure par rapport à la contribution attendue du membre, jamais à la moyenne des autres (un espace peut avoir des parts différentes). Écart = max(0 ; attendu à date - versé). Écart % = écart / attendu à date × 100.
+- **Première alerte** : échéance + 3 jours, si écart ≥ max(500 DA ; 10 % de l'attendu à date). Exemple : attendu 20 000 DA, seuil 2 000 DA.
+- **Niveau renforcé** : écart ≥ max(1 000 DA ; 25 % de l'attendu), ou une contribution périodique complète impayée 7 jours après son échéance.
+- Aucune alerte d'écart avant la date prévue. Sans calendrier de contributions, pas d'alerte de retard : seulement les jalons 25, 50, 75 et 100 %.
+- Le membre concerné reçoit le détail ; le propriétaire ou l'administrateur peut recevoir « Une contribution prévue reste à compléter » ; le montant nominatif n'est montré aux autres que si les permissions de l'espace l'autorisent.
+- Pas de relance quotidienne : une deuxième relance à J+7, puis l'événement reste visible dans Aujourd'hui / Échéances. Famille : Calendrier & échéances / contributions collectives.
+
+**À construire d'abord** : un objectif commun n'a aujourd'hui ni calendrier de contributions, ni part attendue par membre (`FinSpaceGoal`).
 
 ### Impact sur le délai (Phases 8 et 9, réécrit le 2026-10-27)
 
@@ -3871,13 +3960,13 @@ Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau
 ## Où en est chaque phase
 
 - **Phase 1 (socle, design)** — `✅ done`, validée (`P1-08`). Navigation, charte graphique officielle, sidebar classique repliable, barre supérieure (recherche, notifications, assistant) : tout est en place et câblé au serveur (`P1-12`, `P1-13`).
-- **Phase 2 (e-learning)** — `✅ done`, validée (`P2-07`). Seul `P2-10` (défis et missions) reste `❌ todo` : abandonnée le 2026-10-11, elle est **reprise depuis le 2026-10-27**, parce que le nouveau cahier prévoit des missions dans la couche éducative (réalisation dans `P8-17`).
+- **Phase 2 (e-learning)** — `✅ done`, validée (`P2-07`). `P2-10` (défis et missions), reprise le 2026-10-27, est faite dans `P8-17` et close le 2026-11-02 ; le contenu des missions est attendu du client (`P8-29`).
 - **Phase 3 (blog/CMS/newsletter)** — `✅ done` pour tout ce qui ne dépend pas d'un choix externe. Le paiement réel attend un fournisseur (`P3-08` `⛔ blocked`, bloque `P3-10` `❌ todo`) ; la newsletter et « mot de passe oublié » attendent un fournisseur d'e-mail (non choisi).
 - **Phase 4 (outils, calculateurs, comparateurs)** — `✅ done` en totalité, `P4-02` (simulateur de crédit) et `P4-04` (fiscalité) compris. `P4-04` reste `❌ todo` mais **volontairement hors MVP** (le client doit encore fournir les règles fiscales).
 - **Phase 5 (sécurité, disponibilité, livraison)** — la sécurité est faite (`P5-01`, `P5-02`, `P5-03` `✅ done`, audités sur preuve le 2026-10-18 : 38 fichiers de tests de sécurité, 364 cas). `P5-04` (sauvegardes) `🚧 in-progress` : les scripts existent et ont été testés réellement (`npm run backup`, `npm run backup:verify`), mais où les conserver dépend encore de l'hébergement définitif. `P5-05`/`P5-06` restent `❌ todo`, en attente de `P5-04`. `P5-07` (livrables contractuels) `🚧 in-progress`.
 - **Phase 6 (FINCLUDIA, gestion financière personnelle)** — **`✅ done` sur 23 des 24 tâches** (`P6-24` fermée le 2026-10-28). Les deux modules financiers de P6-02 à P6-20, P6-22 et P6-23 sont faits et testés (onboarding, « Mon argent », budgets, objectifs, réserve, dettes, patrimoine, portefeuille fictif, espaces partagés, notifications, centre de confiance, recherche globale, personnalisation des 8 parcours, graphiques de tableaux de bord). `P6-21` (validation de fin de phase) est close depuis le 2026-10-18 : les 10 parcours J01-J10 **et** les 8 scénarios par public passent en navigateur. Reste `⛔ blocked` : `P6-01` (cadrage, voir plus bas). `P6-24` (comptes financiers coordonnés) est **débloquée** depuis le 2026-10-27 : le client a choisi des comptes qui portent chaque opération ; réalisation par `P8-03` et `P8-05`. **Plusieurs tâches `✅ done` portent désormais un avertissement daté** (`P6-04`, `P6-05`, `P6-06`, `P6-08`, `P6-09`) : leurs erreurs ou écarts sont nommés sous la tâche, et corrigés en Phase 8.
 - **Phase 7 (périmètre contractuel ERP)** — alerte de périmètre, pas un planning. `P7-02` (socle de trésorerie) est fait. `P7-01`, `P7-03`, `P7-04`, `P7-05` sont `⛔ blocked`, chacun en attente d'un cahier des charges ou d'un référentiel que le client n'a pas encore fourni pour cette partie.
-- **Phase 8 (Gestion budgétaire, moteur budgétaire unique)** — **en cours depuis le 2026-10-27 : 22 tâches sur 30 terminées (2026-10-29).** `P8-01` à `P8-16`, `P8-18`, `P8-21`, `P8-25`, `P8-26`, `P8-27` et `P8-28` sont faites : application sous `/app` avec la navigation finale, comptes et transferts, calculs faux corrigés, Mes comptes, Accueil, Mouvements, 125 catégories, budgets, Synthèse et rapport, Calendrier, Objectifs & sécurité, Dettes, Patrimoine, Santé financière, le catalogue unique des Outils (avec la fiche de paie, la comparaison C19 et les favoris), les alertes, les couleurs et les trois suggestions, les comparateurs et fiches bancaires, les seize contrôles du client. Restent `P8-17` (Formation, en cours : en attente de la validation complète), `P8-19`, `P8-20`, `P8-23` (Premiers pas), `P8-24` (reliquats des écrans livrés), `P8-30` (import d’une fiche de paie), `P8-29` (refonte de la vitrine, bloquée en attente des éléments du client) et la validation `P8-22`. `P6-24` (comptes multiples) est fermée avec `P8-03` et `P8-05`.
+- **Phase 8 (Gestion budgétaire, moteur budgétaire unique)** — **en cours depuis le 2026-10-27 : 29 tâches sur 32 terminées (2026-11-02).** `P8-01` à `P8-21`, `P8-23` à `P8-28`, `P8-30` et `P8-31` sont faites : application sous `/app` avec la navigation finale, comptes et transferts, calculs faux corrigés, Mes comptes, Accueil (avec l'ajout rapide en feuille glissante et la mini-courbe), Mouvements, catégories, budgets, Synthèse et rapport (avec R-06, la cascade, la comparaison de deux mois et les instantanés), Calendrier, Objectifs & sécurité, Dettes, Patrimoine, Santé financière (avec son historique), le catalogue unique des Outils, la fiche de paie et son import, les alertes et la notification du navigateur, la Formation, les Premiers pas, les deux lots de graphiques, les seize contrôles du client. Restent `P8-32` (graphiques complémentaires), `P8-29` (refonte de la vitrine, bloquée en attente des éléments du client) et la validation `P8-22`, qui reprend aussi les deux questions encore ouvertes (H et I). `P6-24` (comptes multiples) est fermée avec `P8-03` et `P8-05`.
 - **Phase 9 (Gestion commune, gestion collective)** — ouverte le 2026-10-27 ; rien de commencé. Les décisions de cadrage sont prises (`P9-01` `✅ done`, 2026-10-27). Elle reprend `P6-13` à `P6-15` dans une solution séparée et y ajoute les tâches collectives, les budgets communs et le calendrier unifié.
 
 ## Ce qui bloque encore réellement, et qui doit trancher

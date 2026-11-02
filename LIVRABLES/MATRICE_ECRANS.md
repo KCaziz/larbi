@@ -1,10 +1,10 @@
 # Matrice des écrans de la gestion budgétaire
 
-> Généré le 2026-11-01 par `node server/scripts/generate-deliverables.js` depuis `server/src/constants/finAppScreens.js`. Ne pas modifier à la main.
+> Généré le 2026-11-02 par `node server/scripts/generate-deliverables.js` depuis `server/src/constants/finAppScreens.js`. Ne pas modifier à la main.
 
 Les 44 écrans du cahier consolidé (onglet `05_Ecrans_Detailles`) et la façon dont chacun est servi. La règle « trouvable » (TASKS.md, section 6) veut que chaque écran ait **sa propre adresse**, atteinte depuis le menu en deux clics au plus : un écran regroupé dans une autre page n'est donc pas terminé, et la tâche qui le doit est nommée.
 
-**41 écrans sur 44** ont leur propre page ; 1 sont regroupés dans une autre ; 2 vivent dans la barre supérieure ; 0 ne sont pas encore servis.
+**42 écrans sur 44** ont leur propre page ; 0 sont regroupés dans une autre ; 2 vivent dans la barre supérieure ; 0 ne sont pas encore servis.
 
 | Code | Écran | Menu du client | Servi | Adresse | Premier clic | Tâche |
 |---|---|---|---|---|---|---|
@@ -12,7 +12,7 @@ Les 44 écrans du cahier consolidé (onglet `05_Ecrans_Detailles`) et la façon 
 | ONB-01 | Profil éducatif | Premier démarrage | Sa propre page | `/app/parametres/premiers-pas/profil` | `/app/parametres/premiers-pas` | — |
 | ONB-02 | Premier revenu | Premier démarrage | Sa propre page | `/app/parametres/premiers-pas/premier-revenu` | `/app/parametres/premiers-pas` | — |
 | ACC-01 | Accueil | Accueil | Sa propre page | `/app` | `/app` | — |
-| ACC-02 | Ajouter rapidement | Accueil | Regroupé dans une autre page | `/app/mouvements` | `/app` | `P8-24` |
+| ACC-02 | Ajouter rapidement | Accueil | Sa propre page | `/app/mouvements/nouveau` | `/app` | — |
 | COM-01 | Mes comptes | Mes comptes | Sa propre page | `/app/comptes` | `/app/comptes` | — |
 | COM-02 | Créer / modifier un compte | Mes comptes | Sa propre page | `/app/comptes/nouveau` | `/app/comptes` | — |
 | COM-03 | Détail compte | Mes comptes | Sa propre page | `/app/comptes/:id` | `/app/comptes` | — |

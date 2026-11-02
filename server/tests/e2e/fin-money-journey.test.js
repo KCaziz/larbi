@@ -46,7 +46,7 @@ describe('FINCLUDIA money, end to end', { skip: findChrome() ? false : 'no Chrom
   const waitFigure = (label, pattern) => b.waitFor(`${pattern}.test(${figureExpr(label)})`, `figure ${label}`);
 
   const openOnboarding = async () => {
-    await b.goto(`${site.url}/app/parametres/premiers-pas`);
+    await b.goto(`${site.url}/app/parametres/premiers-pas/estimations`);
     assert.ok(await b.waitText(on.resultTitle), 'the first steps are rendered');
   };
   // The list, and the entry at its own address (TRX-02, P8-25).
@@ -270,7 +270,7 @@ describe('FINCLUDIA money, end to end', { skip: findChrome() ? false : 'no Chrom
     await b.goto(`${site.url}/app/mouvements/nouveau`);
     assert.ok(await b.waitText(ar.myMoney.save));
     assert.equal(await b.ev("document.documentElement.getAttribute('dir')"), 'rtl');
-    await b.goto(`${site.url}/app/parametres/premiers-pas`);
+    await b.goto(`${site.url}/app/parametres/premiers-pas/estimations`);
     assert.ok(await b.waitText(ar.finOnboarding.resultTitle));
     await b.ev("localStorage.setItem('lang', 'fr')");
   });

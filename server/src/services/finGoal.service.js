@@ -301,13 +301,21 @@ export function goalScenario(goal, params, { now = new Date() } = {}) {
   let capital = goal.allocated;
   let contribution = params.monthlyContribution ?? goal.monthlyContribution ?? 0;
   let reachedAt = null;
+  const path = [{ mois: 0, capital: Math.round(goal.allocated), cible: goal.target }];
   for (let month = 1; month <= limit; month += 1) {
     capital = capital * (1 + monthlyRate) + contribution;
     if (month % 12 === 0) contribution = contribution * (1 + raise);
     // The target in the money of that month: inflation raises it over time.
     const target = goal.target * Math.pow(1 + inflation, month / 12);
     if (reachedAt === null && capital >= target) reachedAt = month;
+    path.push({ mois: month, capital: Math.round(capital), cible: Math.round(target) });
   }
+  // The curve of the projection: up to the horizon when there is one, else up
+  // to the month the target is met (or ten years, when it never is) — every
+  // month over two years at most, else every twelve, always ending on the last.
+  const end = horizon ?? reachedAt ?? Math.min(limit, 120);
+  const step = end <= 24 ? 1 : 12;
+  const trajectoire = path.filter((point) => point.mois <= end && (point.mois % step === 0 || point.mois === end));
   const finalTarget = Math.round(goal.target * Math.pow(1 + inflation, limit / 12));
   const hypotheses = {
     contribution_mensuelle: params.monthlyContribution ?? goal.monthlyContribution ?? 0,
@@ -322,6 +330,7 @@ export function goalScenario(goal, params, { now = new Date() } = {}) {
     dateAtteinte: reachedAt === null ? null : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + reachedAt, now.getUTCDate())),
     capitalFinHorizon: horizon === null ? null : Math.round(capital),
     cibleFinHorizon: horizon === null ? null : finalTarget,
+    trajectoire,
     hypotheses,
   };
 }

@@ -19,7 +19,9 @@ export const APP_SCREENS = [
   { code: 'ONB-01', label: 'Profil éducatif', menu: 'Premier démarrage', served: 'page', to: '/app/parametres/premiers-pas/profil', via: '/app/parametres/premiers-pas' },
   { code: 'ONB-02', label: 'Premier revenu', menu: 'Premier démarrage', served: 'page', to: '/app/parametres/premiers-pas/premier-revenu', via: '/app/parametres/premiers-pas' },
   { code: 'ACC-01', label: 'Accueil', menu: 'Accueil', served: 'page', to: '/app', via: '/app' },
-  { code: 'ACC-02', label: 'Ajouter rapidement', menu: 'Accueil', served: 'grouped', to: '/app/mouvements', via: '/app', owner: 'P8-24' },
+  // On a phone the Accueil's link opens the sliding sheet over the page (P8-24);
+  // on a computer, or without script, it leads to the entry page itself.
+  { code: 'ACC-02', label: 'Ajouter rapidement', menu: 'Accueil', served: 'page', to: '/app/mouvements/nouveau', via: '/app' },
   { code: 'COM-01', label: 'Mes comptes', menu: 'Mes comptes', served: 'page', to: '/app/comptes', via: '/app/comptes' },
   { code: 'COM-02', label: 'Créer / modifier un compte', menu: 'Mes comptes', served: 'page', to: '/app/comptes/nouveau', via: '/app/comptes' },
   { code: 'COM-03', label: 'Détail compte', menu: 'Mes comptes', served: 'page', to: '/app/comptes/:id', via: '/app/comptes' },

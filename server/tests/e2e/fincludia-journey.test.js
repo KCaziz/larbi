@@ -130,6 +130,9 @@ describe('FINCLUDIA foundations, end to end', { skip: findChrome() ? false : 'no
     await setSession(null);
     await b.goto(`${site.url}/apprendre`);
     assert.ok(await b.waitText(ap.title));
+    // The results arrive after the page: wait for them, or the headings read
+    // below would only be those of the site's own menu (« Formations »).
+    assert.ok(await b.waitText('Mensualite de credit'), 'the results are shown');
 
     // The four groups the client asks for, each with its own heading.
     const text = await b.text();
@@ -173,7 +176,9 @@ describe('FINCLUDIA foundations, end to end', { skip: findChrome() ? false : 'no
     await setSession(admin);
     await b.goto(`${site.url}/admin/assistant-fincludia`);
     assert.ok(await b.waitText(fr.admin.finAssistant.title));
-    assert.ok(await b.waitText(fr.admin.finAssistant.intentsNote));
+    // The first opening also seeds the client's catalogue (CB01-CB24, CB99) as
+    // drafts (P8-24): a few dozen writes, once, before the list shows.
+    assert.ok(await b.waitText(fr.admin.finAssistant.intentsNote, 30_000));
     // Edit "APPRENDRE_TERME": deep link to /apprendre, a response, and keywords.
     assert.ok(
       await b.ev(`(() => {

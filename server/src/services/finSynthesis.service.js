@@ -8,8 +8,9 @@
 // never 0.
 
 import { computed } from './finance/contract.js';
-import { monthlyAmount, netFlow, totalExpenses, totalIncome } from './finance/formulas.js';
+import { monthlyAmount, netFlow, savingsRate, totalExpenses, totalIncome } from './finance/formulas.js';
 import { isFictional, isReal } from './finance/dataModel.js';
+import { markedSavingsInPeriod } from './finSavings.service.js';
 
 // First and last instant of a month, and of the month before it (the trend).
 const monthRange = (reference) => {
@@ -240,18 +241,46 @@ export async function monthlyMoneyHistory(prisma, userId, { months = 6, currency
     const monthsAgo = months - 1 - index;
     return currentMonth(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - monthsAgo, 1)));
   });
+  return historyOf(prisma, userId, periods, currency, (period) => period.start.toISOString().slice(0, 7));
+}
 
+/**
+ * The same figures by day or by week (G-05 « jour, semaine ou mois », G-03 the
+ * net flow): the last `count` days, or the last `count` weeks — a week starting
+ * on Sunday, the first working day in Algeria (the weekend is Friday-Saturday).
+ * Each point is named by its first day (`YYYY-MM-DD`).
+ */
+export const HISTORY_STEPS = { jour: 31, semaine: 12 };
+export async function stepMoneyHistory(prisma, userId, { step, count = HISTORY_STEPS[step], currency } = {}) {
+  const now = new Date();
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const DAY = 86_400_000;
+  const length = step === 'semaine' ? 7 : 1;
+  // The first day of the current step: today, or the Sunday of this week.
+  const current = step === 'semaine' ? today - new Date(today).getUTCDay() * DAY : today;
+  const periods = Array.from({ length: count }, (_, index) => {
+    const start = current - (count - 1 - index) * length * DAY;
+    return { start: new Date(start), end: new Date(start + length * DAY - 1) };
+  });
+  return historyOf(prisma, userId, periods, currency, (period) => period.start.toISOString().slice(0, 10));
+}
+
+function historyOf(prisma, userId, periods, currency, name) {
   return Promise.all(
     periods.map(async (period) => {
       const { incomes, movements } = await loadSynthesisData(prisma, userId, period);
       const synthesis = buildSynthesis({ incomes, movements, previous: [], fallbackCurrency: currency, period });
       const inCurrency = !synthesis.mixedCurrencies && synthesis.currency === currency;
+      // F008 — the net savings of the month over its income, as on the
+      // Accueil: nothing set aside on record is « not computed », never 0 %.
+      const saved = inCurrency ? await markedSavingsInPeriod(prisma, userId, currency, { from: period.start, to: period.end }) : null;
       return {
-        month: period.start.toISOString().slice(0, 7),
+        month: name(period),
         revenus: inCurrency ? synthesis.revenus.resultat : null,
         depenses: inCurrency ? synthesis.depenses.resultat : null,
         // G-03: the net flow of the month, as the engine computed it.
         fluxNet: inCurrency ? synthesis.fluxNet?.resultat ?? null : null,
+        tauxEpargne: saved === null ? null : savingsRate(saved.net, synthesis.revenus.resultat),
       };
     }),
   );
