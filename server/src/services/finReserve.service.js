@@ -18,6 +18,20 @@ const ESSENTIAL_WINDOW_MONTHS = 3;
 // workbook; `emergency` in constants/finGoal.js).
 export const EMERGENCY_GOAL_TEMPLATE = 'emergency';
 
+// A goal IS the emergency fund when made from that model — or, made by hand
+// (« Autre objectif »), when its name says so (recette R6-01): a person who
+// named a goal « Fonds d'urgence » was told no emergency fund existed. The
+// database collation ignores case and accents.
+const EMERGENCY_NAMES = ['urgence', 'emergency', 'طوارئ'];
+export const EMERGENCY_GOAL_WHERE = {
+  OR: [{ templateKey: EMERGENCY_GOAL_TEMPLATE }, { templateKey: null, OR: EMERGENCY_NAMES.map((name) => ({ label: { contains: name } })) }],
+};
+// Its complement, written out: `NOT` over a nullable column would also drop
+// every goal without a model (SQL's NULL is neither equal nor different).
+export const NOT_EMERGENCY_GOAL_WHERE = {
+  OR: [{ templateKey: { not: EMERGENCY_GOAL_TEMPLATE } }, { templateKey: null, NOT: EMERGENCY_NAMES.map((name) => ({ label: { contains: name } })) }],
+};
+
 const startOfDay = (date) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 const monthsBefore = (date, months) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() - months, date.getUTCDate()));
 
@@ -93,7 +107,7 @@ export async function essentialMonthlyExpenses(prisma, userId, currency, now = n
 // is neither a balance nor the fund the client measures.
 async function emergencyFundCapital(prisma, userId, currency) {
   const rows = await prisma.finGoal.findMany({
-    where: { userId, deletedAt: null, archivedAt: null, currency, templateKey: EMERGENCY_GOAL_TEMPLATE, status: { not: 'fictional' } },
+    where: { userId, deletedAt: null, archivedAt: null, currency, status: { not: 'fictional' }, ...EMERGENCY_GOAL_WHERE },
     select: { allocated: true, accountId: true },
   });
   if (rows.length === 0) return null;
@@ -143,6 +157,8 @@ export async function buildReserveView(prisma, userId, { currency, targetMonths,
     // emergency fund's capital (null when there is no such goal).
     epargneLiquide: capital,
     depensesEssentielles: essential.amount,
+    // 'history' (the real spending), 'declared' (the person's estimate) or null.
+    sourceDepensesEssentielles: essential.source,
     moisReserve: answer('PB-F018', capital === null ? null : safetyFundMonths(capital, essential.amount)),
     cibleMontant: answer('PB-F017', target),
     manque: answer('PB-F019', gap),

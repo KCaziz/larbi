@@ -8,9 +8,8 @@
 .passport-actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
   gap: 14px;
+  margin-block-start: var(--space-sm);
 }
 
 .passport-sheet {

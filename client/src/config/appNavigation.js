@@ -40,6 +40,9 @@ export const APP_BASE = '/app';
 // retained the same day (TASKS.md, P8-01): « Mouvements » and « Budgets » in
 // the menu, « Santé financière » beside « Synthèse », and five sections.
 export const NAV_SECTIONS = [
+  // « Mes premiers pas » at the head of the menu (recette R4-04): the first
+  // thing a new account has to do, never hidden behind the profile button.
+  { key: 'start', labelKey: 'appNav.sections.start' },
   { key: 'daily', labelKey: 'appNav.sections.daily' },
   { key: 'analyse', labelKey: 'appNav.sections.analyse' },
   { key: 'build', labelKey: 'appNav.sections.build' },
@@ -49,6 +52,7 @@ export const NAV_SECTIONS = [
 ];
 
 export const APP_NAV = [
+  { key: 'firstSteps', to: '/app/parametres/premiers-pas', labelKey: 'appNav.settingsOnboarding', icon: Rocket, section: 'start' },
   { key: 'home', to: '/app', end: true, labelKey: 'appNav.home', icon: Home, mobile: true, section: 'daily' },
   // The list of what is left to do; the Accueil shows the figures.
   { key: 'today', to: '/app/aujourdhui', labelKey: 'appNav.today', icon: ListChecks, mobile: true, section: 'daily' },
@@ -121,6 +125,27 @@ export const LEGACY_REDIRECTS = [
   { from: 'compte/categories', to: '/app/parametres/categories' },
   { from: 'compte/premiers-pas', to: '/app/parametres/premiers-pas' },
 ];
+
+// The pages a screen can go back to (recette R3-04), besides the menu.
+const BACK_PARENTS = [
+  ...APP_NAV.filter((entry) => entry.to !== APP_BASE),
+  { to: '/app/parametres', labelKey: 'appNav.mySpace' },
+  { to: '/app/parametres/premiers-pas', labelKey: 'appNav.settingsOnboarding' },
+  { to: '/app/apprendre', labelKey: 'appNav.learnHub' },
+  { to: '/partage', labelKey: 'appNav.sharedApp' },
+];
+
+// Where a page goes back to when it does not say so itself: the closest page
+// above it in the address, else the Accueil. The Accueil and the list of
+// spaces, the two doors of the applications, have none.
+export function backFor(pathname) {
+  const path = pathname.replace(/\/+$/, '');
+  if (path === APP_BASE || path === '/partage') return null;
+  if (!path.startsWith(`${APP_BASE}/`) && !path.startsWith('/partage/')) return null;
+  const parent = BACK_PARENTS.filter((entry) => path.startsWith(`${entry.to}/`)).sort((a, b) => b.to.length - a.to.length)[0];
+  if (parent) return { to: parent.to, labelKey: parent.labelKey };
+  return { to: APP_BASE, labelKey: 'appNav.home' };
+}
 
 // The entries a person may see: all of them, minus the adults-only ones for a
 // DECLARED minor.

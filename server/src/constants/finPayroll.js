@@ -18,7 +18,7 @@
 // incertitude de notre côté.
 
 export const PAYROLL_SOURCE_NOTE =
-  'Valeurs déclarées dans le référentiel du client, avec leur texte et leur date. À revalider auprès de la source avant toute diffusion opposable.';
+  'Valeurs de référence, avec leur texte et leur date. À revalider auprès de la source avant toute diffusion opposable.';
 
 // ---------------------------------------------------------------------------
 // SNMG — salaire national minimum garanti
@@ -77,7 +77,7 @@ export const IRG_SOURCE = {
   consultedAt: '2026-10-12',
   institution: 'DGI',
   url: 'https://mfdgi.gov.dz/fr/particuliers/irg-traitements-et-salaires',
-  reserve: 'Barème déclaré dans le document du client : date d’effet et abattements applicables à vérifier.',
+  reserve: 'Barème de référence : date d’effet et abattements applicables à vérifier.',
 };
 
 // Les trois régimes mensuels que la DGI distingue, transcrits sans être

@@ -13,5 +13,5 @@ export const SOURCE_PUBLICATION = {
   decidedOn: '2026-10-28',
   decidedBy: 'client',
   notice:
-    'Information issue de la source transmise par le client, non vérifiée par FINCLUDIA auprès de l’établissement. À confirmer avant toute décision.',
+    'Information de référence, non vérifiée par FINCLUDIA auprès de l’établissement. À confirmer avant toute décision.',
 };

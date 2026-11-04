@@ -7,7 +7,6 @@ import { useApi } from '../../lib/useApi.js';
 import { formatAmount } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
@@ -45,9 +44,8 @@ export default function MissionPlayPage() {
 
   return (
     <>
-      <PageHeader icon={Target} title={m.title} subtitle={m.summary} maxWidth={760} />
+      <PageHeader back={{ to: '/app/apprendre/missions', label: t('missions.backToList') }} icon={Target} title={m.title} subtitle={m.summary} maxWidth={760} />
       <div className="fin-page-narrow">
-        <BackLink to="/app/apprendre/missions">{t('missions.backToList')}</BackLink>
         <p className="fin-hint">{t('missions.startingAmount', { amount: money(m.startingAmount) })}</p>
 
         {!result ? (

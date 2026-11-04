@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { CircleHelp, Sparkles } from 'lucide-react';
+import { Calculator, CircleHelp, Sparkles } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { fromMinorUnits, toMinorUnits } from '../../lib/money.js';
@@ -11,6 +11,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
+import PageHeader from '../../components/layout/PageHeader.jsx';
 import '../Pages.css';
 import './FinOnboarding.css';
 
@@ -48,9 +49,9 @@ export default function FinOnboardingPage() {
   }
 
   return (
-    <div>
-      <h2 className="account-heading">{t('finOnboarding.title')}</h2>
-      <p>{t('finOnboarding.intro')}</p>
+    <>
+      <PageHeader icon={Calculator} title={t('finOnboarding.title')} subtitle={t('finOnboarding.intro')} />
+      <div className="settings-page">
 
       {/* Never a dead end: every question can be skipped, and the whole thing
           can be left and resumed. Saying so up front is the client's own
@@ -150,6 +151,7 @@ export default function FinOnboardingPage() {
         </p>
       </section>
     </div>
+    </>
   );
 }
 

@@ -8,7 +8,6 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import { ListChecks } from 'lucide-react';
 import { Entry, useMovementLookups } from './MovementsPage.jsx';
 import '../argent/MyMoney.css';
@@ -54,9 +53,8 @@ export default function MovementEntryPage() {
 
   return (
     <>
-      <PageHeader icon={ListChecks} title={t(editing ? 'movements.editTitle' : 'myMoney.addTitle')} subtitle={t('movements.intro')} maxWidth={1040} />
+      <PageHeader back={{ to: back, label: t(editing ? 'movements.backToMovement' : 'movements.backToList') }} icon={ListChecks} title={t(editing ? 'movements.editTitle' : 'myMoney.addTitle')} subtitle={t('movements.intro')} maxWidth={1040} />
       <div className="money-page">
-        <BackLink to={back}>{t(editing ? 'movements.backToMovement' : 'movements.backToList')}</BackLink>
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
             {message.text}

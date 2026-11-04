@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MAX_STORED_AMOUNT } from './finData.schemas.js';
 import { PAYSLIP_LINE_KEYS } from '../constants/finPayroll.js';
 
 // Entrées du décodeur de fiche de paie (P4-14). Mêmes conventions que le reste
@@ -7,7 +8,7 @@ import { PAYSLIP_LINE_KEYS } from '../constants/finPayroll.js';
 // Les montants sont saisis POSITIFS, y compris les retenues : une personne lit
 // « IRG 4 500 » sur sa fiche, pas « −4 500 ». Le sens vient du type de ligne,
 // pas du signe, ce qui évite qu'une retenue saisie en négatif s'ajoute au net.
-const amount = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
+const amount = z.number().int().min(0).max(MAX_STORED_AMOUNT);
 
 export const decodePayslipSchema = z
   .object({

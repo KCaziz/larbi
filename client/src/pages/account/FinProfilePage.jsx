@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
@@ -7,6 +8,7 @@ import Button from '../../components/ui/Button.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
+import PageHeader from '../../components/layout/PageHeader.jsx';
 import '../Pages.css';
 import './FinProfile.css';
 
@@ -34,9 +36,9 @@ export default function FinProfilePage() {
   if (profile.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={profile.reload} />;
 
   return (
-    <div className="fin-profile-page">
-      <h2 className="account-heading">{t('account.fin.title')}</h2>
-      <p>{t('account.fin.intro')}</p>
+    <>
+      <PageHeader icon={Settings} title={t('account.fin.title')} subtitle={t('account.fin.intro')} />
+      <div className="settings-page fin-profile-page">
       {/* Keyed on the loaded profile: a fresh local copy is seeded once per
           load/reload, with no effect needed to sync it afterwards. */}
       {saved && (
@@ -58,6 +60,7 @@ export default function FinProfilePage() {
       )}
       <Notice variant="info">{t('account.fin.footNote')}</Notice>
     </div>
+    </>
   );
 }
 

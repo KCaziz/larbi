@@ -24,6 +24,7 @@ import {
   requireRole,
   revokeInvite,
   setMemberRole,
+  transferOwnership,
   spaceTrail,
   updateMySharing,
   updateSpace,
@@ -110,6 +111,12 @@ export async function putMySharing(req, res) {
 
 export async function putMemberRole(req, res) {
   res.json({ membre: await setMemberRole(prisma, req.user.id, req.params.id, req.params.memberId, req.body.role) });
+}
+
+// Handing the space over (recette R2-02): the owner names the member who
+// becomes owner; they become admin.
+export async function postTransferOwnership(req, res) {
+  res.json({ membre: await transferOwnership(prisma, req.user.id, req.params.id, req.params.memberId) });
 }
 
 export async function postLeave(req, res) {

@@ -5,6 +5,7 @@ import { useAuth } from '../../auth/useAuth.js';
 import { ApiError, errorKey } from '../../lib/api.js';
 import { accountTypeLabel, useAccountTypes } from '../../lib/accountTypes.js';
 import Button from '../../components/ui/Button.jsx';
+import PageHeader from '../../components/layout/PageHeader.jsx';
 import '../Pages.css';
 
 const fields = [
@@ -169,9 +170,9 @@ export default function ProfilePage() {
   };
 
   return (
-    <div>
-      <h2 className="account-heading">{t('account.profile.title')}</h2>
-      <p>{t('account.profile.intro')}</p>
+    <>
+      <PageHeader icon={UserRound} title={t('account.profile.title')} subtitle={t('account.profile.intro')} />
+      <div className="settings-page">
       <div className="skeleton-grid">
         {fields.map((field) => {
           const Icon = field.icon;
@@ -191,5 +192,6 @@ export default function ProfilePage() {
       <EditProfile />
       <ChangePassword />
     </div>
+    </>
   );
 }

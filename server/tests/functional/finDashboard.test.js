@@ -210,7 +210,8 @@ describe('P6-06 — alerts and what is coming up', () => {
     const action = view.actions.find((item) => item.key === 'categoriseMovements');
     assert.ok(action);
     assert.equal(action.contexte.count, 2);
-    assert.equal(action.to, '/mon-argent');
+    // Straight to the movements to categorise, filtered (recette R1-09).
+    assert.equal(action.to, '/app/mouvements?sansCategorie=1');
   });
 
   test('the actions stay in the client s priority order', async () => {

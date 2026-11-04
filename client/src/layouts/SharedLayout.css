@@ -1,45 +1,16 @@
-/* Gestion commune's own window (P9-02). The top bar reuses the personal
-   application's switcher and brand styles (AppLayout.css). */
+/* Gestion commune's own window (P9-02). The top bar is the personal
+   application's one (AppTopBar, AppLayout.css). */
 .shared-shell {
   min-block-size: 100vh;
   background: var(--bg);
   color: var(--text);
 }
-.shared-topbar {
-  position: sticky;
-  inset-block-start: 0;
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  block-size: 56px;
-  padding-inline: var(--space-md);
-  background: var(--surface);
-  border-block-end: 1px solid var(--border);
-}
-.shared-topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  margin-inline-start: auto;
-}
-.shared-user {
-  font-size: 0.9rem;
-}
 .shared-main {
   min-inline-size: 0;
 }
-@media (max-width: 767px) {
-  .shared-topbar {
-    padding-inline: var(--space-sm);
-  }
-  .shared-topbar .app-brand span,
-  .shared-user {
-    display: none;
-  }
-}
 @media print {
-  .shared-topbar,
+  .app-topbar,
+  .chatbot,
   .space-nav {
     display: none !important;
   }

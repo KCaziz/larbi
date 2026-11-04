@@ -284,6 +284,91 @@ main {
   color: var(--on-accent);
 }
 
+/* Form controls (recette R3-01). One look for every field of the site, so
+   that no form shows a browser-default field next to a styled one. `:where`
+   keeps these rules at zero specificity: a component that styles its own
+   fields (a search box without border, an amount with its currency) still
+   wins, and everything else gets this. */
+:where(
+    input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color'], [type='submit'], [type='button'], [type='reset'], [type='image'], [type='hidden']),
+    select,
+    textarea
+  ) {
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  min-block-size: 44px;
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+/* In a form laid out as a grid (`…-grid`), a field fills its cell: left to
+   its own width, a text field or a list was wider than its column and ran
+   under the next one (recette R1-02, R1-05). */
+:where([class$='-grid'], [class*='-grid ']) > * {
+  min-inline-size: 0;
+}
+:where([class$='-grid'], [class*='-grid ']) > :where(label, .fin-field) > :where(input:not([type='checkbox'], [type='radio'], [type='color']), select, textarea, .fin-amount) {
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+/* A field inside a composite control (a search box with its icon) belongs to
+   the composite, which draws the border, the size and the focus ring. */
+:is(.global-search-box, .chatbot-search, .apprendre-search-input, .money-search, .tools-search) input {
+  min-block-size: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+:where(textarea) {
+  min-block-size: 88px;
+  resize: vertical;
+}
+
+:where(
+    input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color'], [type='submit'], [type='button'], [type='reset'], [type='image'], [type='hidden']),
+    select,
+    textarea
+  ):focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+:where(input, select, textarea):disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+:where(input, select, textarea)[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+:where(input[type='checkbox'], input[type='radio']) {
+  inline-size: 18px;
+  block-size: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+:where(input[type='range']) {
+  accent-color: var(--accent);
+}
+
+:where(button) {
+  font: inherit;
+}
+
 /* Spacing utilities: reach for these on any button row, badge or small block
    that is not already inside a flex/grid container with its own `gap` —
    never leave an adjacent pair of controls with nothing between them. */

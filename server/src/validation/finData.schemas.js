@@ -21,7 +21,12 @@ export const consentUsesSchema = z
 
 // An amount in the smallest unit of the currency: a whole number, never a float
 // (a float has already lost centimes before it reaches us).
-export const amountSchema = z.number().int().safe();
+// Bounded by what the database keeps: the money columns are 32-bit integers,
+// and MariaDB outside strict mode CLAMPS a larger value instead of refusing it
+// — 999 999 999 999 DA became 21 474 836,47 DA without a word (recette R1-06).
+// Refused here, the person is told; stored, it would be a different figure.
+export const MAX_STORED_AMOUNT = 2_147_483_647;
+export const amountSchema = z.number().int().min(-MAX_STORED_AMOUNT).max(MAX_STORED_AMOUNT);
 export const currencySchema = z
   .string()
   .trim()

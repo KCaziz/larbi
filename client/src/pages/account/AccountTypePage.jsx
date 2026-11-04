@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { BadgeCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth.js';
 import { errorKey } from '../../lib/api.js';
 import { accountTypeLabel, useAccountTypes } from '../../lib/accountTypes.js';
 import Button from '../../components/ui/Button.jsx';
+import PageHeader from '../../components/layout/PageHeader.jsx';
 import '../Pages.css';
 
 export default function AccountTypePage() {
@@ -29,9 +31,9 @@ export default function AccountTypePage() {
   };
 
   return (
-    <div>
-      <h2 className="account-heading">{t('account.type.title')}</h2>
-      <p>{t('account.type.intro')}</p>
+    <>
+      <PageHeader icon={BadgeCheck} title={t('account.type.title')} subtitle={t('account.type.intro')} />
+      <div className="settings-page">
       <div className="form-card form-card-sm">
         <form className="form-stack" onSubmit={handleSubmit}>
           <div className="form-field">
@@ -74,5 +76,6 @@ export default function AccountTypePage() {
         </form>
       </div>
     </div>
+    </>
   );
 }

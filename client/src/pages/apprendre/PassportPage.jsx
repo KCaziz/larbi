@@ -39,14 +39,16 @@ export default function PassportPage() {
   };
 
   return (
-    <div className="passport-wrap">
+    <>
+    <PageHeader icon={BookOpen} title={title} subtitle={t('passport.intro')} maxWidth={980}>
       <div className="passport-actions">
-        <PageHeader icon={BookOpen} title={title} subtitle={t('passport.intro')} maxWidth={980} />
         <Button onClick={() => window.print()}>
           <Printer size={16} strokeWidth={1.9} aria-hidden="true" />
           {t('passport.print')}
         </Button>
       </div>
+    </PageHeader>
+    <div className="passport-wrap">
       {/* The parcours of the profile and the missions (P8-17). */}
       <EducationPanel mode="progress" />
 
@@ -135,5 +137,6 @@ export default function PassportPage() {
         )}
       </article>
     </div>
+    </>
   );
 }

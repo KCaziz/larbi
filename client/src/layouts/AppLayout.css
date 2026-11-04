@@ -171,8 +171,64 @@
   background: var(--surface);
   border-inline-end: 1px solid var(--border);
 }
+/* Fold / unfold (recette R4-01), at the head of the menu on every width. */
 .app-sidebar-toggle {
-  display: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  inline-size: 100%;
+  min-block-size: 40px;
+  margin-block-end: var(--space-xs);
+  padding-inline: var(--space-sm);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.app-sidebar-toggle:hover,
+.app-sidebar-toggle:focus-visible {
+  background: var(--bg-alt);
+}
+
+/* Folded on a computer: the icons only, their names as tooltips. */
+@media (min-width: 1200px) {
+  .app-sidebar-toggled {
+    inline-size: var(--app-rail);
+    padding-inline: var(--space-xs);
+  }
+  .app-sidebar-toggled .app-nav-text,
+  .app-sidebar-toggled .app-nav-heading,
+  .app-sidebar-toggled .app-nav-badge {
+    display: none;
+  }
+  .app-sidebar-toggled :is(.app-nav-link, .app-sidebar-toggle) {
+    justify-content: center;
+    padding-inline: 0;
+  }
+}
+
+/* Language and theme in the bar (recette R4-02). */
+.app-topbar-prefs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* One line, whatever the width: names do not wrap, the search gives way
+   first, the person's name goes before the buttons do. */
+.app-topbar :is(.app-switcher-link, .app-profile-name, .app-brand) {
+  white-space: nowrap;
+}
+.app-topbar .global-search {
+  flex: 0 1 220px;
+  min-inline-size: 120px;
+}
+@media (max-width: 1439px) {
+  .app-topbar .app-profile-name {
+    display: none;
+  }
 }
 
 .app-nav-list {
@@ -236,6 +292,59 @@
   min-inline-size: 0;
 }
 
+/* ---- the page template (recette R3-02, R3-03) ------------------------ */
+/* Every page of both applications has the same width, the same gutters and
+   the same distance between its banner and its content: the banner's text
+   and the content start on the same line and end on the same line. Pages
+   declared their own widths (720, 920, 1040, 1100 px…) and paddings; inside
+   the application these rules win over them, on purpose. A narrow form keeps
+   its own maximum width, but starts on that line too. */
+.app-main,
+.shared-main {
+  --app-page-width: 1120px;
+  --app-gutter: clamp(16px, 3vw, 32px);
+}
+
+:is(.app-main, .shared-main) .page-header {
+  padding: var(--space-md) var(--app-gutter) var(--space-lg);
+}
+:is(.app-main, .shared-main) .page-header-inner {
+  max-width: var(--app-page-width);
+}
+:is(.app-main, .shared-main) .page-header-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+:is(.app-main, .shared-main) .page-header-icon {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+}
+:is(.app-main, .shared-main) .page-header h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  overflow-wrap: anywhere;
+}
+:is(.app-main, .shared-main) .page-header p {
+  max-width: 760px;
+  margin-block-start: var(--space-xs);
+  font-size: 1rem;
+}
+:is(.app-main, .shared-main) .page-header .fin-back {
+  min-block-size: 36px;
+  margin-block-end: var(--space-xs);
+}
+
+:is(.app-main, .shared-main) .page-header + * {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: calc(var(--app-page-width) + 2 * var(--app-gutter));
+  margin-inline: auto;
+  padding: var(--space-lg) var(--app-gutter) var(--space-xl);
+}
+
 /* ---- tablet: collapsible sidebar ----------------------------------- */
 @media (max-width: 1199px) {
   .app-sidebar {
@@ -246,35 +355,34 @@
   .app-sidebar .app-nav-heading {
     display: none;
   }
-  .app-sidebar .app-nav-link {
+  .app-sidebar :is(.app-nav-link, .app-sidebar-toggle) {
     justify-content: center;
+    padding-inline: 0;
   }
-  .app-sidebar-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    inline-size: 100%;
-    min-block-size: 44px;
-    margin-block-end: var(--space-xs);
-    border: 0;
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--text-h);
-    cursor: pointer;
-  }
-  .app-sidebar-expanded {
+  /* Unfolded on a tablet. */
+  .app-sidebar-toggled {
     inline-size: var(--app-sidebar);
+    padding-inline: var(--space-sm);
   }
-  .app-sidebar-expanded .app-nav-text {
+  .app-sidebar-toggled .app-nav-text {
     display: inline;
   }
-  .app-sidebar-expanded .app-nav-heading {
+  .app-sidebar-toggled .app-nav-heading {
     display: block;
   }
-  .app-sidebar-expanded .app-nav-link {
+  .app-sidebar-toggled :is(.app-nav-link, .app-sidebar-toggle) {
     justify-content: flex-start;
+    padding-inline: var(--space-sm);
   }
   .app-profile-name {
+    display: none;
+  }
+}
+
+/* Below 1 000 px the bar keeps its essentials; language and theme stay in
+   the profile menu. */
+@media (max-width: 999px) {
+  .app-topbar-prefs {
     display: none;
   }
 }

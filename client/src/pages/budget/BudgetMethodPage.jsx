@@ -8,7 +8,6 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import { MethodPanel } from './BudgetDetailPage.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Budget.css';
@@ -42,9 +41,8 @@ export default function BudgetMethodPage() {
 
   return (
     <>
-      <PageHeader icon={Scale} title={t('budget.methods.title')} subtitle={view.data.budget.label} maxWidth={1040} />
+      <PageHeader back={{ to: `/app/budgets/${id}`, label: t('budget.backToBudget') }} icon={Scale} title={t('budget.methods.title')} subtitle={view.data.budget.label} maxWidth={1040} />
       <div className="budget-page">
-        <BackLink to={`/app/budgets/${id}`}>{t('budget.backToBudget')}</BackLink>
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
             {message.text}

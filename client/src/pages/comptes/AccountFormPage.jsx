@@ -9,7 +9,6 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import { AccountEditForm, AccountForm } from './accountParts.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Accounts.css';
@@ -49,9 +48,8 @@ export default function AccountFormPage() {
 
   return (
     <>
-      <PageHeader icon={editing ? Pencil : Plus} title={editing ? t('accounts.editTitle') : t('accounts.addTitle')} subtitle={editing ? account.label : t('accounts.intro')} maxWidth={720} />
+      <PageHeader back={{ to: editing ? `/app/comptes/${id}` : '/app/comptes', label: t(editing ? 'accounts.backToAccount' : 'accounts.backToList') }} icon={editing ? Pencil : Plus} title={editing ? t('accounts.editTitle') : t('accounts.addTitle')} subtitle={editing ? account.label : t('accounts.intro')} maxWidth={720} />
       <div className="accounts-page accounts-screen">
-        <BackLink to={editing ? `/app/comptes/${id}` : '/app/comptes'}>{t(editing ? 'accounts.backToAccount' : 'accounts.backToList')}</BackLink>
         {error && (
           <p className="form-error" role="alert">
             {error}

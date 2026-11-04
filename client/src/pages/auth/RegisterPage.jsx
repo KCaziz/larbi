@@ -3,7 +3,7 @@ import { UserPlus } from 'lucide-react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth.js';
-import { errorKey } from '../../lib/api.js';
+import { ApiError, errorKey } from '../../lib/api.js';
 import { accountTypeLabel, useAccountTypes } from '../../lib/accountTypes.js';
 import AuthAside from '../../components/layout/AuthAside.jsx';
 import Button from '../../components/ui/Button.jsx';
@@ -13,7 +13,7 @@ const initialForm = { name: '', email: '', password: '', accountType: '' };
 
 export default function RegisterPage() {
   const { t } = useTranslation();
-  const { status, register } = useAuth();
+  const { status, register, login } = useAuth();
   const navigate = useNavigate();
   const accountTypes = useAccountTypes();
   const [form, setForm] = useState(initialForm);
@@ -55,6 +55,18 @@ export default function RegisterPage() {
       });
       navigate('/app', { replace: true });
     } catch (err) {
+      // The account may exist although the answer was lost (connection cut,
+      // server restarting) or a first click already created it: the same
+      // e-mail and password then simply sign in, instead of a dead end.
+      if (err instanceof ApiError && (err.status === 0 || err.status === 409 || err.status >= 500)) {
+        try {
+          await login({ email: form.email, password: form.password });
+          navigate('/app', { replace: true });
+          return;
+        } catch {
+          // Not the same password, or still unreachable: the original error stands.
+        }
+      }
       setError(t(errorKey(err, { 409: 'auth.register.emailTaken' })));
       setSubmitting(false);
     }

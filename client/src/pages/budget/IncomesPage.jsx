@@ -13,7 +13,6 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import BarList from '../../components/fincludia/charts/BarList.jsx';
 import '../../components/fincludia/Fincludia.css';
 
@@ -52,9 +51,8 @@ export default function IncomesPage() {
 
   return (
     <>
-      <PageHeader icon={Wallet} title={t('incomes.title')} subtitle={t('incomes.intro')} maxWidth={760} />
+      <PageHeader back={{ to: '/app/budgets', label: t('budget.backToList') }} icon={Wallet} title={t('incomes.title')} subtitle={t('incomes.intro')} maxWidth={760} />
       <div className="fin-page-narrow">
-        <BackLink to="/app/budgets">{t('budget.backToList')}</BackLink>
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
             {message.text}

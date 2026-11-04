@@ -369,19 +369,19 @@
 
 .calendar-form label {
   display: grid;
-  gap: 5px;
-  font-size: 0.86rem;
+  gap: 4px;
+  color: var(--text-h);
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
-.calendar-form input,
-.calendar-form select {
-  max-inline-size: 100%;
-  padding: 7px 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
+/* A field fills its column: left to its own width, a text field was wider
+   than the column and ran under its neighbour (recette R1-02). The look is
+   the common one (index.css). */
+.calendar-form label > :is(input:not([type='checkbox'], [type='radio']), select),
+.calendar-form .fin-amount {
+  inline-size: 100%;
+  min-inline-size: 0;
 }
 
 .calendar-provisions {

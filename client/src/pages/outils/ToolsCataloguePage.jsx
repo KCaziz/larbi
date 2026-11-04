@@ -154,7 +154,6 @@ function ToolCard({ tool, label, favorite, onToggle }) {
       </div>
       <p className="tools-item-meta">
         <span>{tool.code}</span>
-        {tool.formulas && <span>{t('toolsCatalogue.formulas', { formulas: tool.formulas })}</span>}
       </p>
       {tool.pending ? (
         <p className="tools-item-pending">{t('toolsCatalogue.pending')}</p>

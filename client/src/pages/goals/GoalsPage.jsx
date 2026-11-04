@@ -464,9 +464,10 @@ export function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel })
         <AmountField id="new-goal-target" label={t('goals.target')} value={form.target} currency={defaultCurrency} onChange={(target) => setForm({ ...form, target })} required />
         <div className="fin-field">
           <label htmlFor="new-goal-date">{t('goals.targetDate')}</label>
-          {/* C09 (in red): the amount and the horizon are asked at creation —
-              no computation runs without them. */}
-          <input id="new-goal-date" type="date" value={form.targetDate} required onChange={(event) => setForm({ ...form, targetDate: event.target.value })} />
+          {/* Optional, as its label says (recette R1-07): without a date the
+              goal is kept and followed; what needs a horizon says « non
+              calculé » until one is given. */}
+          <input id="new-goal-date" type="date" value={form.targetDate} min={new Date().toISOString().slice(0, 10)} onChange={(event) => setForm({ ...form, targetDate: event.target.value })} />
         </div>
         <div className="fin-field">
           <label htmlFor="new-goal-rate">{t('goals.rate')}</label>

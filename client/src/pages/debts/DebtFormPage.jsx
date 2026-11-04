@@ -8,7 +8,6 @@ import { useAuth } from '../../auth/useAuth.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import { CreateDebtForm, LoanForm } from './DebtsPage.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Debts.css';
@@ -53,9 +52,8 @@ export default function DebtFormPage({ screen }) {
 
   return (
     <>
-      <PageHeader icon={Landmark} title={t(title)} subtitle={t('debts.intro')} maxWidth={720} />
+      <PageHeader back={{ to: '/app/dettes', label: t('debts.backToList') }} icon={Landmark} title={t(title)} subtitle={t(direction ? `debts.loans.${direction}Hint` : 'debts.intro')} maxWidth={720} />
       <div className="debts-page">
-        <BackLink to="/app/dettes">{t('debts.backToList')}</BackLink>
         {error && (
           <p className="form-error" role="alert">
             {error}

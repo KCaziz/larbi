@@ -8,7 +8,6 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import { GoalDetail } from './GoalsPage.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Goals.css';
@@ -52,9 +51,8 @@ export default function GoalDetailPage() {
 
   return (
     <>
-      <PageHeader icon={Flag} title={goal.label} subtitle={t('goals.intro')} maxWidth={1040} />
+      <PageHeader back={{ to: '/app/objectifs', label: t('goals.backToList') }} icon={Flag} title={goal.label} subtitle={t('goals.intro')} maxWidth={1040} />
       <div className="goals-page">
-        <BackLink to="/app/objectifs">{t('goals.backToList')}</BackLink>
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
             {message.text}

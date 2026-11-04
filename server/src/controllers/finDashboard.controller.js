@@ -27,6 +27,7 @@ import { occurrencesWithOutcome } from '../services/finOccurrence.service.js';
 import { buildDebtSynthesis, listDebts } from '../services/finDebt.service.js';
 import { buildGoalView, listGoals } from '../services/finGoal.service.js';
 import { completeness } from '../services/finOnboarding.service.js';
+import { firstStepsState } from '../services/finFirstSteps.service.js';
 import { buildReserveView } from '../services/finReserve.service.js';
 import { markedSavingsInPeriod } from '../services/finSavings.service.js';
 import { buildSynthesis, currentMonth, debtRatioIncome, loadSynthesisData } from '../services/finSynthesis.service.js';
@@ -129,6 +130,13 @@ export async function getToday(req, res) {
   const onboardingRow = await prisma.finOnboarding.findUnique({ where: { userId: req.user.id }, select: { answers: true, completedAt: true } });
   const questions = questionsForPublic(req.user.finPublic, { minor: isAdultAgeRange(req.user.finAgeRange) === false });
   const onboarding = onboardingRow ? completeness(questions, onboardingRow.answers ?? {}) : { applicable: questions.length, answered: 0, skipped: 0, remaining: questions.length, ratio: 0 };
+  // What « Premiers pas » still offers (recette R1-08): the steps neither done
+  // nor set aside. The former questionnaire above still measures how complete
+  // the profile is, but it is no longer what the person is asked to finish —
+  // reminding them of it said « 7 questions left » to someone who had done
+  // every step.
+  const firstSteps = await firstStepsState(prisma, req.user.id);
+  const firstStepsLeft = firstSteps.steps.filter((step) => !step.done && !step.skipped).length;
 
   // ---- the quality banner (F055) ------------------------------------------
   // The most recent thing the person actually recorded, across the tables that
@@ -153,7 +161,7 @@ export async function getToday(req, res) {
     autonomyAnswer,
     periodSavings,
     upcoming,
-    onboarding,
+    onboarding: { remaining: firstStepsLeft },
     uncategorised: synthesis.nonCategorisees,
     quality,
     healthMeasures: { goalLines: await goalLinesOf(prisma, req.user.id, { now }), dataQuality: await dataQualityMeasures(prisma, req.user.id, { onboarding, now }) },
@@ -197,7 +205,7 @@ export async function getToday(req, res) {
     paiementsAConfirmer: toConfirm.filter((event) => !event.inflow),
     aPointer: clearing.counts.unchecked + clearing.counts.to_verify,
     echeances: dashboard.echeances,
-    questions: { premiersPas: onboarding.remaining, sante: healthToComplete },
+    questions: { premiersPas: firstStepsLeft, sante: healthToComplete },
     alertes: dashboard.alertes,
     formations: courses.map((row) => ({ id: row.id, title: row.formation.title, slug: row.formation.slug })),
   };

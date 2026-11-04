@@ -4,7 +4,6 @@ import { CheckCheck } from 'lucide-react';
 import { errorKey } from '../../lib/api.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import { ClearingPanel, useMovementLookups } from './MovementsPage.jsx';
 import '../argent/MyMoney.css';
 import './Movements.css';
@@ -32,9 +31,8 @@ export default function ClearingPage() {
 
   return (
     <>
-      <PageHeader icon={CheckCheck} title={t('movements.tabs.clearing')} subtitle={t('movements.clearingIntro')} maxWidth={1040} />
+      <PageHeader back={{ to: '/app/mouvements', label: t('movements.backToList') }} icon={CheckCheck} title={t('movements.tabs.clearing')} subtitle={t('movements.clearingIntro')} maxWidth={1040} />
       <div className="money-page">
-        <BackLink to="/app/mouvements">{t('movements.backToList')}</BackLink>
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
             {message.text}

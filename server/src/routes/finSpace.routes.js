@@ -13,6 +13,7 @@ import {
   postLeave,
   postSpace,
   putMemberRole,
+  postTransferOwnership,
   putMySharing,
   removeMember,
   postCloseSpace,
@@ -55,6 +56,7 @@ router.get('/espaces/:id/membres', asyncRoute(getMembers));
 router.put('/espaces/:id/mon-partage', validateBody(sharingSchema), asyncRoute(putMySharing));
 router.post('/espaces/:id/quitter', validateBody(leaveSchema), asyncRoute(postLeave));
 router.put('/espaces/:id/membres/:memberId/role', validateBody(roleSchema), asyncRoute(putMemberRole));
+router.post('/espaces/:id/membres/:memberId/proprietaire', validateBody(leaveSchema), asyncRoute(postTransferOwnership));
 router.delete('/espaces/:id/membres/:memberId', validateBody(leaveSchema), asyncRoute(removeMember));
 
 router.post('/espaces/:id/invitations', validateBody(inviteSchema), asyncRoute(postInvite));

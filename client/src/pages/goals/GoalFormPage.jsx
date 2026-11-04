@@ -6,7 +6,6 @@ import { useAuth } from '../../auth/useAuth.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import { CreateGoalForm } from './GoalsPage.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Goals.css';
@@ -25,9 +24,8 @@ export default function GoalFormPage() {
 
   return (
     <>
-      <PageHeader icon={Plus} title={t('goals.createTitle')} subtitle={t('goals.intro')} maxWidth={1040} />
+      <PageHeader back={{ to: '/app/objectifs', label: t('goals.backToList') }} icon={Plus} title={t('goals.createTitle')} subtitle={t('goals.intro')} maxWidth={1040} />
       <div className="goals-page">
-        <BackLink to="/app/objectifs">{t('goals.backToList')}</BackLink>
         <CreateGoalForm
           templates={templates}
           defaultCurrency={user?.finCurrency ?? 'DZD'}

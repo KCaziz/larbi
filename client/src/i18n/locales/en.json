@@ -346,7 +346,7 @@
     "notice": "Simulations compute on the figures you enter: the bank alone makes the decision.",
     "simulators": {
       "title": "Simulators",
-      "body": "Budget, savings, goals, inflation: explained calculations, every figure showing its formula."
+      "body": "Budget, savings, goals, inflation: calculations explained step by step, with their assumptions."
     },
     "jobOffers": {
       "title": "Compare job offers",
@@ -362,7 +362,7 @@
     },
     "postal": {
       "title": "Algérie Poste / CCP reference",
-      "body": "The CCP, EDAHABIA, BaridiMob and postal services documented by the client — and, just as prominently, what remains to be verified before any tariff is published."
+      "body": "CCP, EDAHABIA, BaridiMob and postal services explained simply: what they are for and how to use them."
     }
   },
   "blogList": {
@@ -586,7 +586,7 @@
       "horizonLabel": "Your time horizon",
       "consentIntro": "Before continuing, two things to accept:",
       "consentPrivacy": "Your financial data belongs to your account and is never read by another user without your explicit agreement. Deleting your account erases your data completely and permanently.",
-      "consentNoAdvice": "FINCLUDIA shows calculations and leads to explore, never regulated financial advice or a promise of approval: every figure states its formula and assumptions, to check with a professional before any decision.",
+      "consentNoAdvice": "FINCLUDIA shows calculations and leads to explore, never regulated financial advice or a promise of approval: every figure is explained, to check with a professional before any decision.",
       "consentAccept": "I have read and accept these two points.",
       "save": "Save",
       "saved": "Profile saved.",
@@ -1582,7 +1582,7 @@
       "intents": "Intentions",
       "flows": "Flows",
       "audit": "Log",
-      "intentsNote": "The 8 intentions come from the client's specification (tab \"13_Chatbot\"): their name and example cannot be changed here. You can fill in their keywords, their answer and the screen they open.",
+      "intentsNote": "The assistant's 8 intentions are fixed: their name and example cannot be changed here. You can fill in their keywords, their answer and the screen they open.",
       "example": "Example question: \"{{example}}\"",
       "keywords": "Keywords (comma-separated)",
       "keywordsHint": "Words visitors might type. Example: expense, add, spend.",
@@ -1623,14 +1623,14 @@
         "flow_ended": "Flow ended",
         "not_available": "Screen unavailable"
       },
-      "referenceTitle": "What the client’s file allows",
+      "referenceTitle": "What the assistant can do",
       "referenceAnswer": "Allowed answer:",
       "referenceSteps": "Questions to ask:",
       "referenceGuardrail": "Guard-rail:"
     },
     "missions": {
       "title": "Pedagogical missions",
-      "subtitle": "The client’s scenarios, entered here; the scoring rule is the same for all.",
+      "subtitle": "The missions' scenarios, entered here; the scoring rule is the same for all.",
       "create": "New mission",
       "json": "The mission (JSON)",
       "save": "Save",
@@ -1903,7 +1903,7 @@
     "bankCount_other": "{{count}} banks",
     "conditionCount_one": "{{count}} offer",
     "conditionCount_other": "{{count}} offers",
-    "notDocumented": "Not documented in the source — to be completed",
+    "notDocumented": "Information to come",
     "extraThemes": {
       "ccp": "CCP / Algérie Poste",
       "insurance": "Insurance and guarantees",
@@ -1997,7 +1997,7 @@
     "sortLabel": "Display order",
     "resultCount_one": "{{count}} result",
     "resultCount_other": "{{count}} results",
-    "notDocumentedBody": "The bank source the client provided does not document this section: no data is invented. It will be completed once a bank source is provided.",
+    "notDocumentedBody": "This section is not filled in yet for this bank: nothing is shown rather than an approximate figure. It will be completed soon.",
     "costNote": "The estimated annual cost adds the fees up over one year: 800 DA charged every quarter comes to 3,200 DA a year. When the fee depends on the amount of the operation, or is not a fixed amount, it is shown as published and marked \"Variable\".",
     "segmentNote": "This page gathers the offers banks reserve for this profile, section by section. Offers open to every customer remain available in each section of the comparator.",
     "noSegmentRows": "No offer is reserved for this profile yet.",
@@ -2329,7 +2329,7 @@
     "composite": "Several values",
     "scenarioTitle": "Name of the scenario",
     "saveScenario": "Keep this scenario",
-    "scenarioSaved": "Scenario \"{{title}}\" kept, with its hypotheses and its formula versions.",
+    "scenarioSaved": "Scenario \"{{title}}\" saved, with its assumptions.",
     "saveNeedsAccount": "The calculations are free to use. Keeping a scenario and comparing it later needs an account.",
     "serie": {
       "title": "Year by year",
@@ -2395,7 +2395,7 @@
     "scoreNote": "The score is optional. It appears only if you give weights, and its method is shown with it.",
     "weightOf": "Weight of \"{{criterion}}\"",
     "nonMonetisableTitle": "Benefits that cannot be priced, shown apart",
-    "formulaNote": "Net economic value computed with formula {{formula}} of the specification.",
+    "formulaNote": "Economic net: what you really keep once the costs of the job are deducted.",
     "fields": {
       "label": "Name of the offer",
       "net": "Monthly net salary",
@@ -2427,7 +2427,7 @@
     "compare": "Compare",
     "resultsTitle": "Comparison",
     "perOperation": "{{amount}} DZD",
-    "noOnlinePayment": "\"Online payment\" is not part of this comparison: no bank in the client's workbook publishes a dedicated column for it."
+    "noOnlinePayment": "\"Online payment\" is not part of this comparison yet: the information is not available for every bank."
   },
   "explorer": {
     "title": "Explorer",
@@ -2461,7 +2461,7 @@
     "comparisonTitle": "Scenarios compared",
     "figure": "Figure",
     "noScoreNote": "No overall mark: there is no defensible way to weigh a living allowance against a number of months. The figures are shown side by side, for you to read.",
-    "versionChanged": "Computed with {{formula}} version {{saved}}; the formula is now at version {{current}}.",
+    "versionChanged": "This result was computed with an earlier version of the method: run it again to get it up to date.",
     "stale": "The saved parameters no longer match what this simulator accepts: the figures are not recomputed.",
     "errors": {
       "nothingInCommon": "These scenarios share no figure to compare.",
@@ -2586,7 +2586,7 @@
       "save": "Save",
       "cancel": "Cancel",
       "actions": "Actions",
-      "noOffer": "No offer yet. Prices are to be entered from the information provided by the client.",
+      "noOffer": "No offer yet. Create the first one below.",
       "buyer": "Buyer",
       "allStatuses": "All",
       "ordersHint": "View only: an order's status only changes with the payment provider's confirmation.",
@@ -2684,7 +2684,7 @@
   },
   "finCategories": {
     "title": "My categories",
-    "intro": "Categories are how your income, spending, goals, assets and debts are sorted. The reference list below is the one from the FINCLUDIA specification; you can rename it, hide what does not concern you, and add your own.",
+    "intro": "Categories are how your income, spending, goals, assets and debts are sorted. You can rename the ones below, hide what does not concern you, and add your own.",
     "referenceNote": "The standard reference is never changed: when you rename a standard category, FINCLUDIA records your own name for it and keeps the original name shown beside it. Nothing is erased either: a category you remove leaves the list and stays readable by whatever already used it.",
     "showArchived": "Also show hidden categories",
     "count_one": "{{count}} category",
@@ -2932,7 +2932,7 @@
     "fictionalStarted": "Fictional budget enabled.",
     "fictionalActive": "Your budget is in fictional mode: every figure carries the SIMULATION label and stays separate from any real amount.",
     "resultTitle": "Your first result",
-    "resultIntro": "Computed from what you declared. Every figure names the formula it used and may read \"not computed\", which is different from zero.",
+    "resultIntro": "Computed from what you declared. A figure may show \"not computed\": that is different from zero.",
     "result": {
       "revenus": "Resources per month",
       "depenses": "Essential expenses per month",
@@ -2999,7 +2999,7 @@
   },
   "myMoney": {
     "title": "My money",
-    "intro": "Your resources, your spending, and what is left. Every figure names the formula that produced it.",
+    "intro": "Your resources, your spending and what you have left. The \"Why?\" button explains every figure.",
     "synthesisTitle": "Synthesis",
     "income": "Income received",
     "expenses": "Expenses",
@@ -3366,22 +3366,53 @@
     "curveMonth": "Month {{month}}"
   },
   "reserve": {
-    "title": "Safety reserve",
-    "intro": "How many months of essential expenses your savings cover, and what is left to reach your own target.",
+    "title": "Emergency fund",
+    "intro": "Money set aside to face the unexpected — a breakdown, a health expense, a loss of income — without getting into debt.",
     "months": "Months of reserve",
     "targetAmount": "Target amount",
     "gap": "Gap",
     "liquidSavings": "Emergency fund capital",
     "essentialExpenses": "Essential monthly expenses",
-    "chooseTarget": "Your target, in months",
-    "chooseTargetHint": "Yours to choose: no value is suggested by default.",
+    "chooseTarget": "Number of months",
+    "chooseTargetHint": "3 to 6 months is often advised; more if your income is irregular.",
     "save": "Save",
     "targetSaved": "Target saved.",
     "errors": {
       "refused": "This value is not valid."
     },
     "monthsUnit": "months",
-    "gaugeCaption": "Months covered by the reserve, against the target"
+    "gaugeCaption": "Months covered by the reserve, against the target",
+    "what": "It is measured in months: how many months of essential expenses (housing, food, energy, transport, health…) your emergency fund could cover. Three steps are enough to compute it; it also counts in your financial health.",
+    "missingIntro": "To compute your emergency fund, one or more steps below are left.",
+    "stepDone": "done",
+    "stepTodo": "to do",
+    "fundName": "Emergency fund",
+    "fundCreated": "Your emergency fund is created. You can put money into it from your goals.",
+    "essentialSaved": "Your essential expenses are saved.",
+    "steps": {
+      "essential": {
+        "title": "1. Your essential expenses per month",
+        "done": "{{amount}} per month, from your spending over the last months.",
+        "doneDeclared": "{{amount}} per month, from your estimate.",
+        "how": "They are computed on their own from your spending recorded in the essential categories (rent, food, energy, transport, health, phone…) over the last three months. Meanwhile, give an estimate: it is enough to start.",
+        "declare": "My estimate per month",
+        "change": "Correct my estimate per month",
+        "fromHistory": "Computed from your spending recorded in the essential categories (rent, food, energy, transport, health, phone…) over the last three months. They update with every new expense."
+      },
+      "target": {
+        "title": "2. How many months do you want to be able to hold?",
+        "done": "Your target: {{months}} months.",
+        "default": "Target suggested for your profile: {{months}} months. You can change it."
+      },
+      "fund": {
+        "title": "3. Your emergency fund",
+        "done": "It holds {{amount}} today.",
+        "manage": "Put money into it",
+        "todo": "Create the \"Emergency fund\" goal: its target will be {{amount}}. You will then put money into it, at your own pace.",
+        "after": "First do the two steps above: they set the amount to reach.",
+        "create": "Create my emergency fund"
+      }
+    }
   },
   "calendar": {
     "title": "Financial calendar",
@@ -3601,7 +3632,7 @@
     "seeGoals": "See my goals",
     "upcomingTitle": "Coming up",
     "seeCalendar": "See the calendar",
-    "healthPending": "The financial-health index ({{formula}}) is not shown: its weights have to be validated ({{task}}). A score computed on invented weights would be a judgement nobody could check. The sub-scores above are readable one by one.",
+    "healthPending": "The financial-health index is not shown here yet: this part is under development. The sub-scores above are readable one by one.",
     "pickPublic": "Choosing your path tailors this dashboard to your situation.",
     "pickPublicLink": "Choose my path"
   },
@@ -3675,7 +3706,7 @@
     "title": "Practice portfolio",
     "intro": "To practise without risking a dinar.",
     "noExecution": "Nothing is executed anywhere: no order is sent, and none of these figures enters your real patrimony.",
-    "pricesAreYours": "The prices used here are the ones you state yourself. The platform publishes no quote and no list of instruments: that data has to come from the client, and nothing is invented in the meantime.",
+    "pricesAreYours": "The prices used here are the ones you state yourself. The platform publishes no quote and no list of instruments: nothing is invented.",
     "noCatalogue": "There is no list to pick from: name the instrument and state the simulated price you want to use.",
     "figuresTitle": "Your simulation",
     "since": "since {{date}}",
@@ -3718,7 +3749,7 @@
     "cannotTell": "not measurable yet",
     "riskTitle": "Educational risk profile",
     "riskScore": "Score",
-    "riskNoLabel": "No label accompanies this score: the thresholds that would turn a number into a word (\"cautious\", \"dynamic\"...) have to be validated by the client. A word resting on invented thresholds would read as a judgement.",
+    "riskNoLabel": "No label accompanies this score yet (under development): a word such as \"cautious\" or \"dynamic\" would read as a judgement.",
     "computeRisk": "Compute my score",
     "choose": "Choose...",
     "risk": {
@@ -3842,18 +3873,19 @@
     "deleted": "Space deleted.",
     "fields": {
       "kind": "Kind of space",
-      "label": "Name",
-      "displayName": "Name shown to the others",
+      "label": "Name of the space",
+      "displayName": "Your name in this space",
       "token": "Invitation code"
     },
-    "displayNameHelp": "Optional. Joining a flatshare does not oblige you to give your full name.",
+    "displayNameHelp": "Optional. It is the name the other members will see next to your expenses — by default, your account's ({{name}}). It is not the name of the space.",
     "save": "Create",
     "cancel": "Cancel",
     "errors": {
       "label": "Give this space a name.",
       "role": "Your role in this space does not allow this action.",
       "refused": "This operation was refused.",
-      "closed": "This space is closed: it can only be read."
+      "closed": "This space is closed: it can only be read.",
+      "displayNameIsLabel": "Your name in the space cannot be the space's name: leave this field empty to use your account's name."
     },
     "shared": {
       "title": "Shared expenses",
@@ -4158,7 +4190,8 @@
       "settlement": "{{actor}} declared a settlement from {{from}} to {{to}}",
       "task": "{{actor}} created the task “{{label}}”",
       "inflow": "{{actor}} added an entry: {{kind}}",
-      "member": "{{actor}} joined the space"
+      "member": "{{actor}} joined the space",
+      "created": "{{actor}} created the space \"{{label}}\""
     },
     "report": {
       "title": "Report of the space",
@@ -4203,7 +4236,11 @@
       "potChart": "Group balance at the end of each month",
       "paidChart": "What each member paid each month",
       "others": "Others"
-    }
+    },
+    "transfer": "Make owner",
+    "transferConfirm": "Hand the space over to {{name}}? You will become an administrator, and only {{name}} will be able to delete the space.",
+    "transferred": "The space has been handed over.",
+    "ownerNote": "You own this space: only you can delete it. To leave it, first make another member the owner."
   },
   "funding": {
     "title": "Funding readiness",
@@ -4212,18 +4249,18 @@
     "dimensionsTitle": "The five dimensions",
     "completeness": "File completeness",
     "stability": "Stability",
-    "stabilityBlocked": "No formula has been supplied for this dimension yet.",
+    "stabilityBlocked": "This dimension is under development.",
     "debtEffort": "Debt effort rate",
     "downPayment": "Potential down payment",
     "reserve": "Safety reserve",
-    "globalBlockedNote": "The global index combining these dimensions awaits the client’s weights: publishing a figure on invented weights would be a judgement on you nobody could check.",
+    "globalBlockedNote": "The overall index combining these dimensions is under development.",
     "checklistTitle": "Still to complete",
     "pieces": {
       "public": "Choose your FINCLUDIA public",
       "income": "Declare at least one income",
       "reserveTarget": "Choose a reserve target (in months)",
       "wealth": "Declare at least one real asset",
-      "stability": "Dimension awaiting the client",
+      "stability": "Dimension under development",
       "debtEffort": "Declare at least one debt to compute the effort rate"
     },
     "export": "Export",
@@ -4259,7 +4296,7 @@
       "unavailable": "Not available yet",
       "unavailableHint": "This module has not been published yet."
     },
-    "globalBlockedNote": "A global index combining these markers awaits the client's weights: publishing a figure on invented weights would be a judgement on you nobody could verify.",
+    "globalBlockedNote": "An overall index combining these markers is under development.",
     "completedTitle": "Completed formations",
     "noCompleted": "No completed formation yet.",
     "seeCertificate": "See my certificate",
@@ -4512,28 +4549,33 @@
     "minorKeeps": "You keep the rest of FINCLUDIA: real budget, envelopes, goals, safety, learning and the paper portfolio."
   },
   "postal": {
-    "title": "Algérie Poste / CCP reference",
-    "intro": "The CCP, EDAHABIA, BaridiMob, TPE and postal services documented by the client, with what remains to be verified before any tariff is published.",
-    "noTariffTitle": "No tariff is published here.",
-    "counts": {
-      "records": "Records",
-      "publishable": "Publishable",
-      "computable": "Computable",
-      "controls": "Open controls"
-    },
-    "catalogueTitle": "Documented services",
-    "catalogueIntro": "What the supplied text describes: the service, its audience, its channel and its conditions.",
+    "title": "Algérie Poste services",
+    "intro": "CCP, EDAHABIA, BaridiMob, TPE and postal services: what they are for, what you need to access them and how to use them.",
     "familyLabel": "Family",
     "allFamilies": "All families",
-    "tariffWithheld": "Tariff not published — awaiting the dated official schedule.",
-    "noTariff": "No tariff given by the source",
-    "undocumentedTitle": "What is not documented",
-    "blockedTitle": "Blocked calculations",
-    "blockedIntro": "Three scales are transcribed without being applied: two readings would give two different prices.",
-    "controlsTitle": "The 16 controls to obtain",
-    "controlsIntro": "The questions to put to Algérie Poste, as the client listed them. While they stay open, tariffs stay unpublished.",
-    "proofExpected": "Evidence expected:",
-    "productImpact": "Product impact:"
+    "tariffWithheld": "Rate to come",
+    "indicativeNote": "The rates and conditions below are indicative: check them at the post office or with Algérie Poste before any decision.",
+    "searchLabel": "Search a service",
+    "searchPlaceholder": "E.g. EDAHABIA card, transfer, withdrawal…",
+    "noResult": "No service matches your search.",
+    "tariffLabel": "Rate:",
+    "families": {
+      "comptes_et_services_ccp": "CCP account",
+      "cartes_monetique_locale": "Cards and payment",
+      "transfert_recu_international": "Money received from abroad",
+      "banque_distance": "Remote services",
+      "donnees_referentielles": "Useful information",
+      "tpe_commercant": "Merchants (TPE)",
+      "services_postaux": "Postal services"
+    },
+    "kinds": {
+      "tarif": "Rate",
+      "procedure": "Procedure",
+      "plafond": "Limit",
+      "information": "Information",
+      "delai": "Time limit",
+      "definition": "Definition"
+    }
   },
   "business": {
     "title": "My business",
@@ -4612,8 +4654,8 @@
     "capUnknown": "Not computable",
     "capSource": "Cap source:",
     "offersTitle": "The offers in the reference",
-    "offersIntro": "The 25 offers listed in the client’s referential, as its source describes them.",
-    "offersSource": "Information from the source the client provided, not checked by FINCLUDIA. To be confirmed before any decision.",
+    "offersIntro": "The credit offers listed, as the banks describe them.",
+    "offersSource": "Information published by the banks, not verified by FINCLUDIA. Confirm with the bank before any decision.",
     "criteria": {
       "taux": "Rate / margin",
       "duree": "Term",
@@ -4646,7 +4688,8 @@
       "analyse": "Analyse",
       "build": "Build",
       "tools": "Tools",
-      "learn": "Learn"
+      "learn": "Learn",
+      "start": "Get started"
     },
     "synthesis": "Summary",
     "calendar": "Financial calendar",
@@ -4673,7 +4716,9 @@
     "settingsNotifications": "Notifications",
     "settingsTrust": "Privacy and data",
     "settingsPayments": "Payments",
-    "settingsPremium": "Premium access"
+    "settingsPremium": "Premium access",
+    "backTo": "Back: {{page}}",
+    "learnHub": "Learn"
   },
   "accounts": {
     "title": "My accounts",
@@ -4834,7 +4879,9 @@
       "restore": "restored",
       "delete": "deleted"
     },
-    "clearingIntro": "What is left to check, one click per movement."
+    "clearingIntro": "What is left to check, one click per movement.",
+    "chooseCategory": "Choose a category…",
+    "categorised": "Category saved."
   },
   "appHome": {
     "title": "Home",

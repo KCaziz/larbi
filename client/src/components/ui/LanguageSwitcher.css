@@ -13,6 +13,7 @@
 
 .language-switcher select {
   height: 40px;
+  min-block-size: 0;
   padding: 0 12px;
   padding-inline-start: 34px;
   border: 1px solid var(--border);

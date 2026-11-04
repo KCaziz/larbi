@@ -38,9 +38,6 @@ export default function SimulatorsPage() {
             <article className="feature-card tone-blue" key={simulator.key}>
               <h3>{t(`simulators.list.${simulator.key}.title`)}</h3>
               <p>{t(`simulators.list.${simulator.key}.body`)}</p>
-              <p className="simulator-formulas">
-                {t('simulators.formulaCount', { count: simulator.formulas.length })}
-              </p>
               <Button to={`${toolsBase}/outils/simulateurs/${simulator.key}`} variant="ghost" arrow>
                 {t('simulators.open')}
               </Button>

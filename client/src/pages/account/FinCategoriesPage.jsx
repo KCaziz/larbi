@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, History, Pencil, Plus, RotateCcw, Trash2, X } from 'lucide-react';
+import { Check, History, Pencil, Plus, RotateCcw, Tag, Trash2, X } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { formatDate } from '../../lib/format.js';
@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
+import PageHeader from '../../components/layout/PageHeader.jsx';
 import '../Pages.css';
 import './FinCategories.css';
 
@@ -49,9 +50,9 @@ export default function FinCategoriesPage() {
   if (groups.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={groups.reload} />;
 
   return (
-    <div>
-      <h2 className="account-heading">{t('finCategories.title')}</h2>
-      <p>{t('finCategories.intro')}</p>
+    <>
+      <PageHeader icon={Tag} title={t('finCategories.title')} subtitle={t('finCategories.intro')} />
+      <div className="settings-page">
       <Notice variant="info">{t('finCategories.referenceNote')}</Notice>
 
       {message && (
@@ -75,6 +76,7 @@ export default function FinCategoriesPage() {
         />
       ))}
     </div>
+    </>
   );
 }
 

@@ -4,7 +4,6 @@ import { Users } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import { formatDate } from '../../lib/format.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import '../../components/fincludia/Fincludia.css';
@@ -37,9 +36,8 @@ export default function SpaceFrame({ spaceId, children }) {
 
   return (
     <>
-      <PageHeader icon={Users} title={data.space.label} subtitle={t(`spaces.kinds.${data.space.kind}`)} maxWidth={1040} />
+      <PageHeader back={{ to: '/partage', label: t('shared.backToSpaces') }} icon={Users} title={data.space.label} subtitle={t(`spaces.kinds.${data.space.kind}`)} maxWidth={1040} />
       <div className="spaces-page">
-        <BackLink to="/partage">{t('shared.backToSpaces')}</BackLink>
         {/* A closed space is read-only (P9-03): said first, so no form fails by surprise. */}
         {data.space.closedAt && (
           <p className="spaces-rule" role="status">

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Receipt } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import { formatDate } from '../../lib/format.js';
 import { formatMoney } from '../../lib/money.js';
@@ -6,6 +7,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import PaymentStatus from '../../components/payments/PaymentStatus.jsx';
+import PageHeader from '../../components/layout/PageHeader.jsx';
 import '../../components/payments/Payments.css';
 import '../Pages.css';
 
@@ -15,8 +17,9 @@ export default function MyPaymentsPage() {
   const orders = useApi('/payments/orders');
 
   return (
-    <div>
-      <h2 className="account-heading">{t('payments.mine.title')}</h2>
+    <>
+      <PageHeader icon={Receipt} title={t('payments.mine.title')} />
+      <div className="settings-page">
       {orders.status === 'loading' && <LoadingState />}
       {orders.status === 'error' && <ErrorState message={t('state.loadError')} onRetry={orders.reload} />}
       {orders.status === 'ready' &&
@@ -47,5 +50,6 @@ export default function MyPaymentsPage() {
           </table>
         ))}
     </div>
+    </>
   );
 }

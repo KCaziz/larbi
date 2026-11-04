@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Copy, Eye, Plus, Trash2, UserMinus } from 'lucide-react';
+import { Copy, Crown, Eye, Plus, Trash2, UserMinus } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { formatDate } from '../../lib/format.js';
@@ -149,6 +149,19 @@ function MembersSection({ t, language, spaceId, data, canAdmin, run, feedback })
                   .join(', ') || t('spaces.sharesNothing')}
               </span>
             )}
+            {/* Handing the space over (recette R2-02): only the owner, to a
+                member still in the space. */}
+            {data.monRole === 'owner' && !member.isMe && (
+              <button
+                type="button"
+                className="spaces-plain spaces-transfer"
+                onClick={() => {
+                  if (window.confirm(t('spaces.transferConfirm', { name: member.name }))) run(() => api.post(`/fin/espaces/${spaceId}/membres/${member.id}/proprietaire`, {}), 'spaces.transferred');
+                }}
+              >
+                <Crown size={14} aria-hidden="true" /> {t('spaces.transfer')}
+              </button>
+            )}
             {canAdmin && !member.isMe && member.role !== 'owner' && (
               <button
                 type="button"
@@ -206,6 +219,7 @@ function MembersSection({ t, language, spaceId, data, canAdmin, run, feedback })
         </>
       )}
 
+      {data.monRole === 'owner' && <p className="spaces-help">{t('spaces.ownerNote')}</p>}
       <div className="spaces-actions">
         {data.monRole === 'owner' && !data.space.closedAt && data.space.kind === 'group' && (
           <Button

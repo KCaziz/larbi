@@ -37,13 +37,21 @@ export async function spaceActivity(prisma, userId, spaceId, { limit = ACTIVITY_
   ]);
   const names = new Map(members.map((member) => [member.id, member.displayName ?? member.user?.name ?? null]));
   const currency = me.space.currency;
+  const creatorId = [...members].sort((a, b) => a.joinedAt.getTime() - b.joinedAt.getTime())[0]?.id ?? null;
 
   const items = [
     ...expenses.map((row) => ({ type: 'expense', id: row.id, at: row.createdAt, actor: names.get(row.recordedById) ?? null, label: row.label, amount: row.value, currency: row.currency, status: row.lifecycle })),
     ...settlements.map((row) => ({ type: 'settlement', id: row.id, at: row.createdAt, actor: names.get(row.recordedById) ?? null, from: names.get(row.fromId) ?? null, to: names.get(row.toId) ?? null, amount: row.value, currency: row.currency })),
     ...tasks.map((row) => ({ type: 'task', id: row.id, at: row.createdAt, actor: names.get(row.createdById) ?? null, label: row.title, status: row.status })),
     ...inflows.map((row) => ({ type: 'inflow', id: row.id, at: row.createdAt, actor: names.get(row.recordedById) ?? null, kind: row.kind, amount: row.value, currency, status: row.status })),
-    ...members.map((member) => ({ type: 'member', id: member.id, at: member.joinedAt, actor: names.get(member.id) ?? null })),
+    // The first member is the one who created the space: their arrival is
+    // the creation, said as such, with the space's name beside the person's
+    // (recette R2-01) — never the space as if it had joined itself.
+    ...members.map((member) =>
+      member.id === creatorId
+        ? { type: 'created', id: member.id, at: member.joinedAt, actor: names.get(member.id) ?? null, label: me.space.label ?? null }
+        : { type: 'member', id: member.id, at: member.joinedAt, actor: names.get(member.id) ?? null },
+    ),
   ]
     .sort((a, b) => b.at.getTime() - a.at.getTime())
     .slice(0, take);

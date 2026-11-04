@@ -185,8 +185,8 @@ export const DASHBOARD_ACTIONS = [
   { key: 'confirmPlanned', priority: 'echeance', to: '/calendrier', needs: 'calendar' },
   { key: 'envelopeExceeded', priority: 'budget', to: '/budget', needs: 'budget' },
   { key: 'buildReserve', priority: 'securite', to: '/reserve', needs: 'reserve' },
-  { key: 'categoriseMovements', priority: 'budget', to: '/mon-argent', needs: 'money' },
-  { key: 'finishOnboarding', priority: 'apprentissage', to: '/compte/premiers-pas', needs: 'onboarding' },
+  { key: 'categoriseMovements', priority: 'budget', to: '/app/mouvements?sansCategorie=1', needs: 'money' },
+  { key: 'finishOnboarding', priority: 'apprentissage', to: '/app/parametres/premiers-pas', needs: 'onboarding' },
   { key: 'createBudget', priority: 'budget', to: '/budget', needs: 'budget' },
   { key: 'addMovement', priority: 'apprentissage', to: '/mon-argent', needs: 'money' },
 ];

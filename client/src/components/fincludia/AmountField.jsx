@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { MAX_MINOR_UNITS, fractionDigits } from '../../lib/money.js';
 import './Fincludia.css';
 
 // An amount field (P1-12's "champ montant", used by P6-03 and P6-04). The
@@ -25,6 +26,8 @@ export default function AmountField({ id, label, value, currency, onChange, requ
           inputMode="decimal"
           step="0.01"
           min="0"
+          // The browser says it before sending, in the person's language.
+          max={MAX_MINOR_UNITS / 10 ** fractionDigits(currency)}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           required={required}

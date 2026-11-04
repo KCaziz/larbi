@@ -1,18 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeftRight, LifeBuoy, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, UserRound, X } from 'lucide-react';
-import { useAuth } from '../auth/useAuth.js';
+import { Menu, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
 import { useApi } from '../lib/useApi.js';
-import { ASSISTANT_OPEN_EVENT } from '../lib/finControls.js';
 import { APP_NAV, NAV_SECTIONS, SETTINGS_LINKS, visibleEntries } from '../config/appNavigation.js';
-import GlobalSearch from '../components/layout/GlobalSearch.jsx';
-import NotificationBell from '../components/layout/NotificationBell.jsx';
 import ChatbotWidget from '../components/assistant/ChatbotWidget.jsx';
-import QuickAdd, { QuickAddLink } from '../components/fincludia/QuickAdd.jsx';
-import LanguageSwitcher from '../components/ui/LanguageSwitcher.jsx';
-import ThemeToggle from '../components/ui/ThemeToggle.jsx';
-import brandMark from '../assets/brand/fincludia-mark.png';
+import QuickAdd from '../components/fincludia/QuickAdd.jsx';
+import AppTopBar from '../components/layout/AppTopBar.jsx';
 import './AppLayout.css';
 
 // The application's own window (P8-02): apart from the showcase site, with
@@ -36,7 +30,21 @@ export default function AppLayout() {
   const entries = visibleEntries(APP_NAV, { declaredMinor });
   const settings = visibleEntries(SETTINGS_LINKS, { declaredMinor });
 
-  const [expanded, setExpanded] = useState(false);
+  // The sidebar can be folded to its icons and unfolded (recette R4-01), on
+  // every width: folded is the exception on a computer, the rule on a tablet.
+  // The choice is kept for the next visit.
+  const [toggled, setToggled] = useState(() => readSidebarChoice());
+  const wide = typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1200px)').matches;
+  const folded = wide ? toggled : !toggled;
+  const toggleSidebar = () =>
+    setToggled((value) => {
+      try {
+        localStorage.setItem(SIDEBAR_KEY, value ? '0' : '1');
+      } catch {
+        /* private window: the choice holds for this visit only */
+      }
+      return !value;
+    });
   const [moreOpen, setMoreOpen] = useState(false);
   const [lastPath, setLastPath] = useState(pathname);
   // A new page closes the phone sheet (adjusting state during render rather
@@ -57,19 +65,13 @@ export default function AppLayout() {
       <a href="#app-main" className="skip-link">
         {t('appNav.skipToContent')}
       </a>
-      <AppTopBar settings={settings} />
+      <AppTopBar app="budget" />
 
       <div className="app-body">
-        <nav className={`app-sidebar${expanded ? ' app-sidebar-expanded' : ''}`} aria-label={t('appNav.label')}>
-          <button
-            type="button"
-            className="app-sidebar-toggle"
-            aria-pressed={expanded}
-            title={expanded ? t('nav.collapseMenu') : t('nav.expandMenu')}
-            onClick={() => setExpanded((value) => !value)}
-          >
-            {expanded ? <PanelLeftClose size={18} aria-hidden="true" /> : <PanelLeftOpen size={18} aria-hidden="true" />}
-            <span className="sr-only">{expanded ? t('nav.collapseMenu') : t('nav.expandMenu')}</span>
+        <nav className={`app-sidebar${toggled ? ' app-sidebar-toggled' : ''}`} aria-label={t('appNav.label')}>
+          <button type="button" className="app-sidebar-toggle" aria-expanded={!folded} title={folded ? t('nav.expandMenu') : t('nav.collapseMenu')} onClick={toggleSidebar}>
+            {folded ? <PanelLeftOpen className="icon-dir" size={18} aria-hidden="true" /> : <PanelLeftClose className="icon-dir" size={18} aria-hidden="true" />}
+            <span className="app-nav-text">{folded ? t('nav.expandMenu') : t('nav.collapseMenu')}</span>
           </button>
           {sections.map((section) => (
             <div key={section.key} className="app-nav-section">
@@ -113,6 +115,15 @@ export default function AppLayout() {
   );
 }
 
+const SIDEBAR_KEY = 'fincludia.sidebar';
+function readSidebarChoice() {
+  try {
+    return localStorage.getItem(SIDEBAR_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 function NavList({ entries, badges = {}, className = '' }) {
   const { t } = useTranslation();
   return (
@@ -131,97 +142,5 @@ function NavList({ entries, badges = {}, className = '' }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-// The top bar (tab 03B): « Mon espace » at the head, search, notifications,
-// help, the quick add, and the switch between the two applications.
-function AppTopBar({ settings }) {
-  const { t } = useTranslation();
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [profileOpen, setProfileOpen] = useState(false);
-  const { pathname } = useLocation();
-  useEffect(() => setProfileOpen(false), [pathname]);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/');
-    } catch {
-      /* the session stays; the button can be pressed again */
-    }
-  };
-
-  return (
-    <header className="app-topbar">
-      <Link to="/app" className="app-brand">
-        <img src={brandMark} alt="" aria-hidden="true" width="28" height="28" />
-        <span>{t('common.brand')}</span>
-      </Link>
-
-      {/* « Gestion budgétaire / Gestion commune » (P9-01 point 1): out of the
-          financial menu. Gestion commune has its own address, `/partage` (P9-02). */}
-      <nav className="app-switcher" aria-label={t('appNav.switcher')}>
-        <NavLink to="/app" className="app-switcher-link app-switcher-current" aria-current="page">
-          {t('appNav.budgetApp')}
-        </NavLink>
-        <NavLink to="/partage" className="app-switcher-link">
-          <ArrowLeftRight size={14} aria-hidden="true" />
-          <span className="app-switcher-text">{t('appNav.sharedApp')}</span>
-        </NavLink>
-      </nav>
-
-      <div className="app-topbar-actions">
-        <GlobalSearch />
-        <QuickAddLink className="app-icon-button" title={t('appNav.quickAdd')}>
-          <Plus size={18} aria-hidden="true" />
-          <span className="sr-only">{t('appNav.quickAdd')}</span>
-        </QuickAddLink>
-        <NotificationBell />
-        <button type="button" className="app-icon-button" title={t('nav.assistant')} onClick={() => document.dispatchEvent(new CustomEvent(ASSISTANT_OPEN_EVENT))}>
-          <LifeBuoy size={18} aria-hidden="true" />
-          <span className="sr-only">{t('nav.assistant')}</span>
-        </button>
-
-        <div
-          className="app-profile"
-          onBlur={(event) => {
-            if (!event.currentTarget.contains(event.relatedTarget)) setProfileOpen(false);
-          }}
-        >
-          <button type="button" className="app-icon-button" aria-expanded={profileOpen} aria-controls="app-profile-menu" onClick={() => setProfileOpen((value) => !value)}>
-            <UserRound size={18} aria-hidden="true" />
-            <span className="app-profile-name">{user?.name ?? t('appNav.mySpace')}</span>
-          </button>
-          {profileOpen && (
-            <div id="app-profile-menu" className="app-profile-menu">
-              <p className="app-profile-title">{t('appNav.mySpace')}</p>
-              <ul>
-                {settings.map((link) => (
-                  <li key={link.to}>
-                    <Link to={link.to} className="app-profile-link">
-                      <link.icon size={16} aria-hidden="true" />
-                      {t(link.labelKey)}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <div className="app-profile-controls">
-                <LanguageSwitcher />
-                <ThemeToggle />
-              </div>
-              <Link to="/" className="app-profile-link">
-                {t('appNav.backToSite')}
-              </Link>
-              <button type="button" className="app-profile-link" onClick={handleLogout}>
-                <LogOut size={16} aria-hidden="true" />
-                {t('nav.logout')}
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </header>
   );
 }

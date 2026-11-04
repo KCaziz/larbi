@@ -9,7 +9,6 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import IncomeExpenseChart from '../../components/fincludia/IncomeExpenseChart.jsx';
 import LineChart from '../../components/fincludia/charts/LineChart.jsx';
 import '../../components/fincludia/Fincludia.css';
@@ -56,9 +55,8 @@ export default function SynthesisPage() {
 
   return (
     <>
-      <PageHeader icon={isReport ? FileText : PieChart} title={isReport ? t('synthesis.reportTitle', { month }) : t('synthesis.title')} subtitle={t('synthesis.intro')} maxWidth={1100} />
+      <PageHeader icon={isReport ? FileText : PieChart} title={isReport ? t('synthesis.reportTitle', { month }) : t('synthesis.title')} subtitle={t('synthesis.intro')} maxWidth={1100} back={isReport ? { to: '/app/synthese/rapports', label: t('synthesis.backToReports') } : undefined} />
       <div className="synthesis-page">
-        {isReport && <BackLink to="/app/synthese/rapports">{t('synthesis.backToReports')}</BackLink>}
         {asKept && data?.instantane && (
           <p className="fin-hint" role="status">
             {t('synthesis.keptBanner', { date: formatDate(i18n.language, data.instantane.capturedAt), version: data.instantane.version })}
@@ -283,7 +281,11 @@ export default function SynthesisPage() {
               {t('movements.clearingRate')} : {s.R11.tauxPointage.resultat === null ? t('fincludia.notComputed') : formatRatio(i18n.language, s.R11.tauxPointage.resultat)}
             </p>
             {s.R11.nonPointees > 0 && <p className="synthesis-alert">{t('synthesis.toClear', { count: s.R11.nonPointees })}</p>}
-            {s.R11.nonCategorisees > 0 && <p>{t('myMoney.uncategorisedCount', { count: s.R11.nonCategorisees })}</p>}
+            {s.R11.nonCategorisees > 0 && (
+              <p>
+                <Link to="/app/mouvements?sansCategorie=1">{t('myMoney.uncategorisedCount', { count: s.R11.nonCategorisees })}</Link>
+              </p>
+            )}
           </Block>
 
           <Block id="r12" title={t('synthesis.sections.R12')} to="/app/formation">

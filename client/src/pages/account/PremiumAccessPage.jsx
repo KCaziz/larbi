@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
+import { Star } from 'lucide-react';
 import { useAuth } from '../../auth/useAuth.js';
 import LockedContent from '../../components/ui/LockedContent.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import OffersList from '../../components/payments/OffersList.jsx';
+import PageHeader from '../../components/layout/PageHeader.jsx';
 import '../Pages.css';
 
 export default function PremiumAccessPage() {
@@ -10,9 +12,9 @@ export default function PremiumAccessPage() {
   const { user } = useAuth();
 
   return (
-    <div>
-      <h2 className="account-heading">{t('account.premium.title')}</h2>
-      <p>{t('account.premium.intro')}</p>
+    <>
+      <PageHeader icon={Star} title={t('account.premium.title')} subtitle={t('account.premium.intro')} />
+      <div className="settings-page">
       {user.accessLevel === 'premium' ? (
         <Notice variant="info">
           <strong>{t('account.premium.activeTitle')}</strong> {t('account.premium.activeBody')}
@@ -28,5 +30,6 @@ export default function PremiumAccessPage() {
       )}
       <Notice variant="info">{t('account.premium.footNote')}</Notice>
     </div>
+    </>
   );
 }

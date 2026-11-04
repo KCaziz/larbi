@@ -27,6 +27,11 @@ export function formatMoney(language, amount, currency) {
 // `allowZero` because 0 means different things in different places: a PRICE of
 // zero is a mistake (P3-09), while a DECLARED amount of zero is a real answer
 // ("I have no savings") and must not be read as "not answered".
+// The largest amount the database keeps, in minor units (a 32-bit integer
+// column): 21 474 836,47 for a currency with cents. Above it the server
+// refuses rather than storing a different figure (recette R1-06).
+export const MAX_MINOR_UNITS = 2_147_483_647;
+
 export function toMinorUnits(text, currency, { allowZero = false } = {}) {
   const digits = fractionDigits(currency);
   const clean = String(text ?? '').replace(/[\s  ]/g, '').replace(',', '.');
@@ -35,7 +40,7 @@ export function toMinorUnits(text, currency, { allowZero = false } = {}) {
   if (!match) return null;
   const minor = Number(match[1] + (match[2] ?? '').padEnd(digits, '0'));
   const positive = allowZero ? minor >= 0 : minor > 0;
-  return positive && Number.isSafeInteger(minor) ? minor : null;
+  return positive && minor <= MAX_MINOR_UNITS ? minor : null;
 }
 
 // 250050 -> "2500.50": the value an edit field starts with.

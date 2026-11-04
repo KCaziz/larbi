@@ -7,7 +7,6 @@ import { useApi } from '../../lib/useApi.js';
 import { formatDate } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import { thisMonth } from './SynthesisPage.jsx';
 import CompareMonths from './CompareMonths.jsx';
 import '../../components/fincludia/charts/Charts.css';
@@ -44,9 +43,8 @@ export default function ReportsPage() {
 
   return (
     <>
-      <PageHeader icon={FileText} title={t('synthesis.reportsTitle')} subtitle={t('synthesis.reportsIntro')} maxWidth={1040} />
+      <PageHeader back={{ to: '/app/synthese', label: t('synthesis.backToSynthesis') }} icon={FileText} title={t('synthesis.reportsTitle')} subtitle={t('synthesis.reportsIntro')} maxWidth={1040} />
       <div className="synthesis-page">
-        <BackLink to="/app/synthese">{t('synthesis.backToSynthesis')}</BackLink>
         {message && (
           <p className="form-status" role="status">
             {message}

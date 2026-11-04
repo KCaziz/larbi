@@ -1,5 +1,6 @@
 import { CLEARING_WINDOW_DAYS, FRESHNESS_THRESHOLD_DAYS } from '../constants/finHealth.js';
 import { freshnessOf, goalTrajectory } from './finHealth.service.js';
+import { NOT_EMERGENCY_GOAL_WHERE } from './finReserve.service.js';
 
 // What the two dimensions of the health index that were not measured before
 // (« Objectifs » and « Qualité des données », client's answer H of 2026-11-02)
@@ -42,7 +43,7 @@ export function plannedToDate(goal, now) {
  */
 export async function goalLinesOf(prisma, userId, { now = new Date() } = {}) {
   const goals = await prisma.finGoal.findMany({
-    where: { userId, deletedAt: null, archivedAt: null, progressStatus: 'active', OR: [{ templateKey: null }, { templateKey: { not: 'emergency' } }] },
+    where: { userId, deletedAt: null, archivedAt: null, progressStatus: 'active', ...NOT_EMERGENCY_GOAL_WHERE },
     select: { id: true, target: true, allocated: true, targetDate: true, monthlyContribution: true, accountId: true, priority: true, createdAt: true },
   });
   const lines = [];

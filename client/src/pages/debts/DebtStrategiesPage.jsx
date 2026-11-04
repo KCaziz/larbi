@@ -8,7 +8,6 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import AdultOnly from '../../components/fincludia/AdultOnly.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import { adultRefusalReason, isAdultRefusal } from '../../lib/adultRefusal.js';
 import LineChart from '../../components/fincludia/charts/LineChart.jsx';
 import { PayoffPlan } from './DebtsPage.jsx';
@@ -44,9 +43,8 @@ export default function DebtStrategiesPage() {
 
   return (
     <>
-      <PageHeader icon={Landmark} title={t('debts.compareStrategies')} subtitle={t('debts.compareIntro')} maxWidth={1040} />
+      <PageHeader back={{ to: '/app/dettes', label: t('debts.backToList') }} icon={Landmark} title={t('debts.compareStrategies')} subtitle={t('debts.compareIntro')} maxWidth={1040} />
       <div className="debts-page">
-        <BackLink to="/app/dettes">{t('debts.backToList')}</BackLink>
         {comparison.data.avalanche ? (
           <>
           <LineChart

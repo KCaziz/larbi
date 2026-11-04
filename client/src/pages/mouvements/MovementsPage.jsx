@@ -543,7 +543,28 @@ export function Row({ transaction, lookups, run, detail = true }) {
         {SIGN[transaction.kind]} {formatAmount(i18n.language, transaction.value, transaction.currency)}
       </span>
       <span className="money-row-category">
-        {transfer ? <span className="flow-label">{t(`movements.kinds.${transaction.kind}`)}</span> : <CategoryChip category={category} fallback={t('myMoney.noCategory')} />}
+        {transfer ? (
+          <span className="flow-label">{t(`movements.kinds.${transaction.kind}`)}</span>
+        ) : category ? (
+          <CategoryChip category={category} />
+        ) : (
+          // Categorised on the spot (recette R1-09): the « à catégoriser »
+          // alert leads here, and the row offers the choice itself.
+          <>
+            <label className="sr-only" htmlFor={`category-${transaction.id}`}>
+              {t('myMoney.category')}
+            </label>
+            <select
+              id={`category-${transaction.id}`}
+              className="movements-category-pick"
+              value=""
+              onChange={(event) => event.target.value && run(() => api.patch(`/fin/transactions/${transaction.id}`, { categoryId: event.target.value }), 'movements.categorised')}
+            >
+              <option value="">{t('movements.chooseCategory')}</option>
+              <CategoryOptions groups={lookups.categoryGroups} />
+            </select>
+          </>
+        )}
         {!transfer && <span className="flow-label">{t(`flows.${flow}`)}</span>}
       </span>
       <span className="money-row-tags">

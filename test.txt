@@ -1,4 +1,68 @@
 - la faq ne marche que en fr 
 - le createur d'un espace commun doit pouvoir supprimer un espace et pouvoir passer les droits a une autre personne de l'espace (une seul personne peut supprimer)
 - les tips dans l'espace client ne se lance pas quand on clique dessus c'est la faq qui se lance 
-- 
+- quand on crée un compte on a d'abord une erreur (je n'ai pas pu la save) 11:18:01 [vite] http proxy error: /api/auth/register
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+POST /api/auth/register 409 437.415 ms - 283
+puis quand on reclique on un message disant que le compte existe deja
+- il faut ajouter un toggle a la sidebar 
+- il faut uniformiser les margin entre contenu type exp entre la sidebar et le contenu de la page ou entre le header d'une page et son contenu 
+- je veut que qu'on on clique sur un boutton la page scroll directement au résultat exp si je clique sur ajouter une enveloppe alors on va aller au formulaire qui viens de s'afficher et ceux sur touts les features du site
+- je veut que les icones de categories ne soit pas des emojis mais je vrai icones (lucide ou autres de preferences celles qui tu utilise sur le site)
+- dans app il faut que la top bar aient le changement de langue et de luminosité
+- il y'a des pages qui ne sont pas centrer exp nouveau compte
+- malheuresement pas toutes les pages ont un retours en arriere exp mouvement comptes
+- dans la topbar quand on est connecter a un compte et on va a l'acceuil je veut que le boutton "acceder a mon espace" soit juste l'icone
+- la page /outils/postal est nul ! dans le filtre famille on a les clé brute, supprime toutes les mentions du client et des sections ou tu parle de ca exp sections Ce qui n’est pas documenté ou Les calculs bloqués Les 16 contrôles à obtenir je veut que tu refactor 
+- il faut que la page mes premier pas soit en haut de la sidebar 
+- la page objectifs se casse qaund les sommes a atteindre sont trop grosse 
+- je ne comprends pas la page /objectifs/fonds-urgence mettre les info quand on a pas d'objectifs fond d'urgences plus visible 
+- dans /objectifs/nouveau on me dit Date cible (optionnel) mais si je la laisse vide alors il me dit qu'il faut renseigné le champ
+- dans details d'un objectifs je ne comprend rien au fait d'affecter un montant ou de contribuer 
+- la page aujord'hui indique des choses a faire mais c'est faux elle indique des choses pas encore faites mais je les aient faites exp Il reste 7 question(s) pour un premier résultat complet alors que j'ai compléter mes premier pas pareille pour les mouvement indique toujours que je dois pointé un mouvement alors que tout est en régle 
+- la page /fonds-urgence est vraiment incompréhensible en plus elle est nécessaire pour le calcul de la santé financiére il faut vraiment ajouter des indication ou bien la modifier car meme aprés avoir declarer un objectifs fonds d'urgences ca ne marche pas il indique Les dépenses essentielles ne sont pas encore connue mais on doit indiquer comment declarer ses dernieres 
+- la page /calendrier/regulier complétement cassé 
+- le contenu dans /mouvement se casses avec trop d'etiquettes ou de gros libellés bref beaucoup d'info 
+- page /progression completment casser 
+- dans /outils il faut enlever les mentions des calculs ou des formules 
+- cette alerte 6 transactions à catégoriser s'affiche mais je ne sais pas comment la corriger 
+- /parametres/categories est nul (les marges, la navigation, l'ergonomie)
+- /parametres/confiance plusieurs clé bruts présentes exp trust.tables.account
+- quand on choisis une catégories dans n'importe qu'elle page (depense, budget etc) j'aimerais ajouter une options de recherches et aussi améliorer la navigation entre catégories et sous categories
+- page /parametres/premium complétement cassé 
+- dans /parametres/premium la section devenir premium on l'api directement dans le code POST /api/tools/scenarios/comparaison 409
+- page /partage/b467fabd-2be5-4deb-9ad7-d3cf76e09e3b/depenses les formulaires sont cassé !
+- dans partage > ressources la partie Contribution requise est pas claire 
+- la top bar est completement niqués dans la partie gestion commune pourquoi elle differentes de gestion budgetaire il faut qu'elles soit pareilles 
+- il y'a un gros gros problémes dans les espaces communs tu vois quand je cree un espace et bien le site me considere comme etant cette espace au lieu de dire aziz a cree l'espace x il me dit x a crée l'espace x exp nous deux a rejoint l’espace (alors que mon compte s'apppelle aziz) puis quand je rejoint avec un autre compte aziz sellal a rejoint l’espace c'est vraiment important que la distinctions soit faites 
+
+
+
+- ici je vais compiler les elements qui n'ont pas de css 
+* note dans le form d'ajout d'enveloppe dans un budget
+* votre profil principal dans premier pas, en fait touts les input de premier pas n'ont pas de css non en fait touts les input des forms n'ont pas de css
+* compte dans evolution des soldes dans comptes
+* bouttons recu dans mes premiers pas (pour confirmer un mouvement)
+* la selection non pointée pointée dans mouvements
+* depuis le compte et date dans la page objectifs 
+* page /dettes/pret
+* statut dans le details d'un objectifs 
+* mois dans partage section budgets en fait l'input mois dans toutes la parties gestions communes n'a pas de css
+
+
+NDT: de maniére generale je constate un manque d'uniformisation entre les pages et ceux sur le centrage les marges les bouttons retours, la taille (largeur) des pages 
+NDT2: je remarque vraiment une dispariter entre les inputs la plupart n'ont pas de css il faut absolument remedier a cela certain champs on en et c'est bien mais dans un meme form on trouve des champs avec et d'autres sans exp page details d'un objectifs
+
+
+- ici je vais compiler les graphes qui ne fonctionne pas 
+* évolution des soldes (il affiches juste une boules pour chaque compte et ceux sur un sueul axe X)
+* simulation des objectifs il marche mais il est vraiment moche et pas trés compréhensible 
+* synthése pareille j'ai des boules sur un meme axe X
+* dans vue d'ensemble le graphe fait n'importe quoi il est en forme triangulaire 
+
+NDT : de maniére generale je veut plus de couleur plus de lisiblité et d'indication dans les graphiques 
+
+
+Note: il faut supprimer toute mention du client sur la platforme si une chose n'est pas encore decider dit juste a suivre ou en developpement 
+NOTE2: il faut supprimer toutes mentions de formules ou de calcules qui sont dans nos boucles exp Score F054 : somme des critères normalisés

@@ -68,12 +68,19 @@
 
 .debts-create-grid input {
   width: 100%;
-  padding: 7px 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
+}
+
+/* « J'ai prêté » / « On m'a prêté » on their own page (recette R6-05): one
+   field under the other, spaced, and no wider than a form needs. */
+.debts-loan-form {
+  display: grid;
+  gap: var(--space-md);
+  max-inline-size: 640px;
+  margin-block-start: 0;
+  padding: var(--space-lg);
+}
+.debts-loan-form > .btn {
+  justify-self: start;
 }
 
 .debts-create-actions {

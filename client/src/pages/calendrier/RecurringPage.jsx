@@ -8,7 +8,6 @@ import { useAuth } from '../../auth/useAuth.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import { RecurrenceForm } from './CalendarPage.jsx';
 import '../../components/fincludia/Fincludia.css';
 import '../mouvements/Movements.css';
@@ -42,9 +41,8 @@ export default function RecurringPage() {
 
   return (
     <>
-      <PageHeader icon={Repeat} title={t('calendar.addRecurrence')} subtitle={t('calendar.intro')} maxWidth={1040} />
+      <PageHeader back={{ to: '/app/calendrier', label: t('calendar.backToCalendar') }} icon={Repeat} title={t('calendar.addRecurrence')} subtitle={t('calendar.intro')} maxWidth={1040} />
       <div className="calendar-page">
-        <BackLink to="/app/calendrier">{t('calendar.backToCalendar')}</BackLink>
         {error && (
           <p className="form-error" role="alert">
             {error}

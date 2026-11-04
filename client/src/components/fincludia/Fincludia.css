@@ -175,6 +175,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* The ring goes around the whole field, currency included. */
+.fin-amount:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+.fin-amount input:focus {
+  box-shadow: none;
+}
+
 .fin-amount-currency {
   display: flex;
   align-items: center;

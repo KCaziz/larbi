@@ -9,7 +9,6 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import { BalanceHistory } from './accountParts.jsx';
 import '../../components/fincludia/Fincludia.css';
@@ -46,9 +45,8 @@ export default function AccountDetailPage() {
 
   return (
     <>
-      <PageHeader icon={Wallet} title={account.label} subtitle={typeLabel} maxWidth={1040} />
+      <PageHeader back={{ to: '/app/comptes', label: t('accounts.backToList') }} icon={Wallet} title={account.label} subtitle={typeLabel} maxWidth={1040} />
       <div className="accounts-page accounts-screen" style={{ '--account-color': account.color }}>
-        <BackLink to="/app/comptes">{t('accounts.backToList')}</BackLink>
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
             {t(message.text)}

@@ -1,47 +1,61 @@
-/* Safety reserve (P6-09). Tokens only, logical properties (RTL). */
+/* Safety reserve (P6-09), as three steps (recette R6-01). Tokens only,
+   logical properties (RTL). */
 .reserve-page {
-  max-width: 760px;
-  margin-inline: auto;
-  padding-inline: 16px;
-  padding-block-end: 40px;
-}
-
-.reserve-composition {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 14px;
-  margin-block: 16px;
-  font-size: 0.9rem;
+  gap: var(--space-md);
 }
 
-.reserve-composition dt {
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-.reserve-composition dd {
+.reserve-missing {
   margin: 0;
-  font-variant-numeric: tabular-nums;
+  color: var(--text-h);
+  font-weight: 500;
 }
 
-.reserve-target-form {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 14px;
-  margin-block-start: 18px;
-  padding: 16px;
+.reserve-steps {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reserve-step {
+  padding: var(--space-md);
   border: 1px solid var(--border);
+  border-inline-start: 4px solid var(--warn);
   border-radius: var(--radius);
   background: var(--surface);
 }
+.reserve-step-done {
+  border-inline-start-color: var(--green);
+}
 
-.reserve-target-form input {
-  width: 120px;
-  padding: 7px 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
+.reserve-step h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 var(--space-xs);
+  font-size: 1.1rem;
+}
+.reserve-step h2 svg {
+  flex: 0 0 auto;
+  color: var(--warn);
+}
+.reserve-step-done h2 svg {
+  color: var(--green);
+}
+
+.reserve-step p {
+  margin-block: 0 var(--space-xs);
+}
+
+.reserve-inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-sm);
+  margin-block: var(--space-xs);
+}
+.reserve-inline-form > .fin-field {
+  flex: 0 1 280px;
 }

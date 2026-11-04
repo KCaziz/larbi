@@ -256,9 +256,9 @@ export const RESERVE_TARGETS = {
   COU: { months: 4, alert: true, range: [1, 12], variant: { months: 6, when: 'Foyer à un seul revenu ou revenus irréguliers' } },
   FAM: { months: 4, alert: true, range: [1, 12], variant: { months: 6, when: 'Foyer à un seul revenu, revenus irréguliers ou personnes à charge' } },
   COL: { months: 3, alert: true, range: [1, 12], shared: { months: 1, label: 'charges partagées' }, note: 'Deux réserves séparées : personnelle et charges communes.' },
-  EPG: { months: null, alert: true, note: 'Aucune cible par profil dans le référentiel du client ; la lecture commune en mois s’applique.' },
+  EPG: { months: null, alert: true, note: 'Pas de cible propre à ce profil : la lecture commune en mois s’applique.' },
   // « Autre / libre » (P8-17, onglet 16_Education) : absent de la grille A.
-  AUT: { months: null, alert: true, note: 'Aucune cible par profil dans le référentiel du client ; la lecture commune en mois s’applique.' },
+  AUT: { months: null, alert: true, note: 'Pas de cible propre à ce profil : la lecture commune en mois s’applique.' },
 };
 
 // ---------------------------------------------------------------------------
@@ -278,7 +278,7 @@ export const REFERENTIAL_DIVERGENCES = [
     key: 'health_scale',
     subject: 'Indice de santé financière',
     chosen: 'Barème B, 7 dimensions (qualité des données comptée à part).',
-    alternative: 'Un barème à 6 dimensions est mentionné dans le document du client, sans être détaillé.',
+    alternative: 'Un barème à 6 dimensions existe, sans être détaillé.',
     why: 'Seul le barème à 7 dimensions est chiffré ; le second ne peut pas être implémenté faute de pondérations.',
   },
   {
@@ -293,7 +293,7 @@ export const REFERENTIAL_DIVERGENCES = [
     subject: 'Cibles de réserve de sécurité',
     chosen: 'Grille A, par public.',
     alternative: 'Une grille « profil ancien / général » coexiste avec des valeurs différentes (3 mois pour un salarié, 4 à 6 pour une famille).',
-    why: 'La grille A est la plus récente et la plus détaillée ; aucune des deux n’est présentée comme légale par le client.',
+    why: 'La grille A est la plus récente et la plus détaillée ; aucune des deux n’est une norme légale.',
   },
 ];
 

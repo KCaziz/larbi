@@ -117,7 +117,7 @@ export default function TodayPage() {
             </h2>
             <p>
               {t('today.toClear', { count: list.aPointer })}{' '}
-              <Link to="/app/mouvements" className="today-link">
+              <Link to="/app/mouvements/pointage" className="today-link">
                 {t('today.goClear')}
               </Link>
             </p>

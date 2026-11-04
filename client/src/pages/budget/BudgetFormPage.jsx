@@ -10,7 +10,6 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Budget.css';
 
@@ -36,9 +35,8 @@ export default function BudgetFormPage() {
 
   return (
     <>
-      <PageHeader icon={editing ? Pencil : Plus} title={t(editing ? 'budget.editTitle' : 'budget.createTitle')} subtitle={budget?.label ?? t('budget.intro')} maxWidth={720} />
+      <PageHeader back={{ to: editing ? `/app/budgets/${id}` : '/app/budgets', label: t(editing ? 'budget.backToBudget' : 'budget.backToList') }} icon={editing ? Pencil : Plus} title={t(editing ? 'budget.editTitle' : 'budget.createTitle')} subtitle={budget?.label ?? t('budget.intro')} maxWidth={720} />
       <div className="budget-page">
-        <BackLink to={editing ? `/app/budgets/${id}` : '/app/budgets'}>{t(editing ? 'budget.backToBudget' : 'budget.backToList')}</BackLink>
         <BudgetForm
           key={budget?.id ?? 'new'}
           budget={budget}

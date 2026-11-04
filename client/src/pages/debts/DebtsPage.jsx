@@ -334,9 +334,7 @@ export function LoanForm({ direction, accounts, run }) {
     );
   };
   return (
-    <form className="debts-create-form" onSubmit={submit}>
-      <h2>{t(`debts.loans.${direction}`)}</h2>
-      <p className="fin-hint">{t(`debts.loans.${direction}Hint`)}</p>
+    <form className="debts-create-form debts-loan-form" onSubmit={submit}>
       <div className="fin-field">
         <label htmlFor="loan-who">{t(`debts.loans.${direction}Who`)}</label>
         <input id="loan-who" value={state.counterparty} maxLength={60} required onChange={(event) => setState({ ...state, counterparty: event.target.value })} />

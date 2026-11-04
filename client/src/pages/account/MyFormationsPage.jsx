@@ -7,6 +7,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import EmptyState from '../../components/cms/EmptyState.jsx';
 import FormationCard from '../../components/learn/FormationCard.jsx';
 import { useCatalogueBase } from '../../lib/useToolsBase.js';
+import PageHeader from '../../components/layout/PageHeader.jsx';
 import '../learn/Learn.css';
 import '../Pages.css';
 
@@ -16,9 +17,9 @@ export default function MyFormationsPage() {
   const { status, data, reload } = useApi('/learn/enrollments');
 
   return (
-    <div>
-      <h2 className="account-heading">{t('learn.mine.title')}</h2>
-      <p>{t('learn.mine.intro')}</p>
+    <>
+      <PageHeader icon={GraduationCap} title={t('learn.mine.title')} subtitle={t('learn.mine.intro')} />
+      <div className="settings-page">
 
       {status === 'loading' && <LoadingState />}
       {status === 'error' && <ErrorState message={t('learn.mine.loadError')} onRetry={reload} />}
@@ -37,5 +38,6 @@ export default function MyFormationsPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

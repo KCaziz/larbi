@@ -4,7 +4,6 @@ import { Award, CheckCircle2, Circle, Target } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import '../../components/fincludia/Fincludia.css';
@@ -53,9 +52,8 @@ export default function MissionsPage() {
 
   return (
     <>
-      <PageHeader icon={Target} title={t('missions.title')} subtitle={t('missions.intro')} maxWidth={760} />
+      <PageHeader back={{ to: '/app/progression', label: t('missions.backToProgress') }} icon={Target} title={t('missions.title')} subtitle={t('missions.intro')} maxWidth={760} />
       <div className="fin-page-narrow">
-        <BackLink to="/app/progression">{t('missions.backToProgress')}</BackLink>
         <p className="fin-hint">{t('missions.fictive')}</p>
         {certification.data?.certification && <CertificationCard t={t} status={certification.data.certification} />}
         {list.data.missions.length === 0 ? (

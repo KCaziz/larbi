@@ -6,7 +6,6 @@ import { errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import '../../components/fincludia/Fincludia.css';
@@ -43,9 +42,8 @@ export default function FirstStepPage({ screen }) {
 
   return (
     <>
-      <PageHeader icon={Rocket} title={t(`firstSteps.steps.${key}.title`)} subtitle={t(`firstSteps.steps.${key}.hint`)} maxWidth={760} />
+      <PageHeader back={{ to: '/app/parametres/premiers-pas', label: t('firstSteps.backToSteps') }} icon={Rocket} title={t(`firstSteps.steps.${key}.title`)} subtitle={t(`firstSteps.steps.${key}.hint`)} maxWidth={760} />
       <div className="fin-page-narrow">
-        <BackLink to="/app/parametres/premiers-pas">{t('firstSteps.backToSteps')}</BackLink>
         {message && (
           <p className="form-error" role="alert">
             {message}

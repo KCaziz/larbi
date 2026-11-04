@@ -51,6 +51,7 @@ export function useSpaceRun(reload) {
 // private, and the only sharing control on this page writes the viewer's own
 // row — there is no way to set somebody else's, by design.
 export function SpaceForm({ t, currency, references, run, onDone }) {
+  const { user } = useAuth();
   const [kind, setKind] = useState('flatshare');
   const [label, setLabel] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -61,6 +62,12 @@ export function SpaceForm({ t, currency, references, run, onDone }) {
     setError(null);
     if (label.trim().length === 0) {
       setError(t('spaces.errors.label'));
+      return;
+    }
+    // The name the others see is a PERSON's (recette R2-01): the space's own
+    // name there made every event read « Nous deux a rejoint l'espace ».
+    if (displayName.trim() && displayName.trim().toLowerCase() === label.trim().toLowerCase()) {
+      setError(t('spaces.errors.displayNameIsLabel'));
       return;
     }
     const outcome = await run(
@@ -89,11 +96,11 @@ export function SpaceForm({ t, currency, references, run, onDone }) {
         </label>
         <label htmlFor="space-display">
           {t('spaces.fields.displayName')}
-          <input id="space-display" type="text" value={displayName} onChange={(event) => setDisplayName(event.target.value)} maxLength={60} />
+          <input id="space-display" type="text" value={displayName} placeholder={user?.name ?? ''} onChange={(event) => setDisplayName(event.target.value)} maxLength={60} />
         </label>
       </div>
       {/* Why the display name exists at all. */}
-      <p className="spaces-help">{t('spaces.displayNameHelp')}</p>
+      <p className="spaces-help">{t('spaces.displayNameHelp', { name: user?.name ?? '' })}</p>
       {error && <p className="form-error">{error}</p>}
       <div className="spaces-actions">
         <Button type="submit">{t('spaces.save')}</Button>

@@ -9,7 +9,6 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import { TransferForm } from './accountParts.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Accounts.css';
@@ -40,9 +39,8 @@ export default function TransferPage() {
 
   return (
     <>
-      <PageHeader icon={ArrowLeftRight} title={t('accounts.transferTitle')} subtitle={t('accounts.transferHint')} maxWidth={720} />
+      <PageHeader back={{ to: '/app/comptes', label: t('accounts.backToList') }} icon={ArrowLeftRight} title={t('accounts.transferTitle')} subtitle={t('accounts.transferHint')} maxWidth={720} />
       <div className="accounts-page accounts-screen">
-        <BackLink to="/app/comptes">{t('accounts.backToList')}</BackLink>
         {error && (
           <p className="form-error" role="alert">
             {error}

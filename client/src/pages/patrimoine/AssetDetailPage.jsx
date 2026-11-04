@@ -13,7 +13,6 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import AdultOnly from '../../components/fincludia/AdultOnly.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
-import BackLink from '../../components/fincludia/BackLink.jsx';
 import { adultRefusalReason, isAdultRefusal } from '../../lib/adultRefusal.js';
 import '../../components/fincludia/Fincludia.css';
 import './Wealth.css';
@@ -60,9 +59,8 @@ export default function AssetDetailPage() {
 
   return (
     <>
-      <PageHeader icon={Landmark} title={asset.label} subtitle={t(`wealth.kinds.${asset.kind}`, asset.kind)} maxWidth={1040} />
+      <PageHeader back={{ to: '/app/patrimoine', label: t('wealth.backToList') }} icon={Landmark} title={asset.label} subtitle={t(`wealth.kinds.${asset.kind}`, asset.kind)} maxWidth={1040} />
       <div className="wealth-page">
-        <BackLink to="/app/patrimoine">{t('wealth.backToList')}</BackLink>
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
             {message.text}

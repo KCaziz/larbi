@@ -94,6 +94,63 @@
   align-items: center;
   gap: 6px;
 }
+
+/* One grid for every movement row (recette R3-08): the date, the amount and
+   the actions keep their column whatever the row says; a long note is cut
+   with an ellipsis (the whole of it is on the movement's page), the chips
+   wrap inside their own column instead of pushing the row apart. */
+.movements-row {
+  display: grid;
+  grid-template-columns: 96px 150px minmax(0, 220px) minmax(0, 1fr) auto;
+  align-items: center;
+}
+.movements-row > * {
+  min-inline-size: 0;
+}
+.movements-row .money-row-amount {
+  min-inline-size: 0;
+}
+.movements-row .money-row-tags {
+  margin-inline-end: 0;
+}
+.movements-row .money-note {
+  display: block;
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.movements-row .money-tag {
+  max-inline-size: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.movements-row .movements-row-actions {
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+.movements-category-pick {
+  inline-size: 100%;
+  min-block-size: 36px;
+  font-size: 0.85rem;
+}
+@media (max-width: 899px) {
+  .movements-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .movements-row .money-row-amount {
+    text-align: end;
+  }
+  .movements-row .money-row-category,
+  .movements-row .money-row-tags,
+  .movements-row .movements-row-actions {
+    grid-column: 1 / -1;
+  }
+  .movements-row .movements-row-actions {
+    justify-content: flex-start;
+  }
+}
 .movements-row.flow .flow-amount {
   color: var(--flow);
 }

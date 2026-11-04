@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MAX_STORED_AMOUNT } from './finData.schemas.js';
 import {
   BUSINESS_CONTACT_KINDS,
   BUSINESS_DOCUMENT_KINDS,
@@ -14,8 +15,8 @@ import {
 // c'est délibéré : nous n'avons pas la règle officielle de composition, et un
 // format inventé refuserait des entreprises réelles.
 
-const amount = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
-const positiveAmount = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
+const amount = z.number().int().min(0).max(MAX_STORED_AMOUNT);
+const positiveAmount = z.number().int().positive().max(MAX_STORED_AMOUNT);
 const currency = z.string().regex(/^[A-Z]{3}$/);
 const shortText = (max) => z.string().trim().min(1).max(max);
 const optionalText = (max) => z.string().trim().max(max).optional().nullable();

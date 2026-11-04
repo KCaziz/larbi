@@ -372,6 +372,36 @@ export async function setMemberRole(prisma, userId, spaceId, memberId, role) {
 }
 
 /**
+ * Handing the space over (recette R2-02). Only the owner does it, and only to
+ * a member still in the space: the two roles swap in one transaction, so the
+ * space never has zero or two owners. The former owner stays, as admin, and
+ * can then leave like anybody else; the one who can delete the space is now
+ * the new owner, and only them.
+ */
+export async function transferOwnership(prisma, userId, spaceId, memberId) {
+  const me = await requireRole(prisma, userId, spaceId, 'owner');
+  const target = await prisma.finSpaceMember.findFirst({ where: { id: memberId, spaceId, leftAt: null }, select: MEMBER_SELECT });
+  if (!target) throw new HttpError(404, 'Member not found');
+  if (target.id === me.id) throw new HttpError(422, 'You already own this space', { reason: 'alreadyOwner' });
+
+  const changed = await prisma.$transaction(async (tx) => {
+    await tx.finSpaceMember.update({ where: { id: me.id }, data: { role: 'admin' } });
+    const row = await tx.finSpaceMember.update({ where: { id: target.id }, data: { role: 'owner' }, select: MEMBER_SELECT });
+    await recordChange(tx, { userId, entity: MEMBERSHIP_ENTITY, entityId: me.id, action: 'correct', field: 'role', before: 'owner', after: 'admin' });
+    await recordChange(tx, { userId, entity: MEMBERSHIP_ENTITY, entityId: target.id, action: 'correct', field: 'role', before: target.role, after: 'owner' });
+    return row;
+  });
+  await notifySpace(prisma, spaceId, userId, {
+    type: 'space_permission',
+    params: { role: 'owner' },
+    link: `/partage/${spaceId}/membres`,
+    referenceId: `${target.id}:owner:${Date.now()}`,
+    onlyUserIds: [target.userId],
+  });
+  return changed;
+}
+
+/**
  * Leaving, or being removed.
  *
  * The membership is marked `leftAt` rather than deleted: the space's figures
