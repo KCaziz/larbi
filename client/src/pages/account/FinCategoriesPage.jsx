@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, History, Pencil, Plus, RotateCcw, Tag, Trash2, X } from 'lucide-react';
+import { Check, History, Pencil, Plus, RotateCcw, Search, Tag, Trash2, X } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { formatDate } from '../../lib/format.js';
@@ -9,6 +9,7 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import PageHeader from '../../components/layout/PageHeader.jsx';
+import CategoryIcon from '../../components/fincludia/CategoryIcon.jsx';
 import '../Pages.css';
 import './FinCategories.css';
 
@@ -27,6 +28,8 @@ export default function FinCategoriesPage() {
   const groups = useApi(`/fin/categories?${includeArchived ? 'includeArchived=true' : ''}`);
   const [message, setMessage] = useState(null);
   const [openHistory, setOpenHistory] = useState(null);
+  // The 125 categories are long to scan: a search over every one, and families folded until looked at.
+  const [query, setQuery] = useState('');
 
   // Runs one write, then reloads. The message lives on the PAGE, not inside a
   // row: reloading replaces the rows, and a confirmation held by one would be
@@ -61,6 +64,24 @@ export default function FinCategoriesPage() {
         </p>
       )}
 
+      <div className="fincat-search">
+        <Search size={16} aria-hidden="true" />
+        <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('finCategories.search')} aria-label={t('finCategories.search')} />
+      </div>
+
+      {/* A way to the family wanted, without scrolling through the 125. */}
+      {!query && (
+        <nav className="fincat-jump" aria-label={t('finCategories.jump')}>
+          {groups.data.groups
+            .filter((group) => group.categories.length > 0)
+            .map((group) => (
+              <a key={group.code} href={`#fincat-${group.code}`}>
+                {group.label}
+              </a>
+            ))}
+        </nav>
+      )}
+
       <label className="fincat-archived">
         <input type="checkbox" checked={includeArchived} onChange={(event) => setIncludeArchived(event.target.checked)} />
         {t('finCategories.showArchived')}
@@ -70,6 +91,7 @@ export default function FinCategoriesPage() {
         <FamilySection
           key={group.code}
           group={group}
+          query={query}
           openHistory={openHistory}
           onToggleHistory={(id) => setOpenHistory((current) => (current === id ? null : id))}
           run={run}
@@ -80,10 +102,14 @@ export default function FinCategoriesPage() {
   );
 }
 
-function FamilySection({ group, openHistory, onToggleHistory, run }) {
+function FamilySection({ group, query, openHistory, onToggleHistory, run }) {
   const { t } = useTranslation();
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState('');
+  const needle = normalise(query);
+  const shown = needle ? group.categories.filter((category) => [category.label, category.group, category.originalLabel].some((text) => normalise(text).includes(needle))) : group.categories;
+  // A search that matches nothing in this family leaves it out.
+  if (needle && shown.length === 0) return null;
 
   const add = async (event) => {
     event.preventDefault();
@@ -95,15 +121,16 @@ function FamilySection({ group, openHistory, onToggleHistory, run }) {
   };
 
   return (
-    <section className="fincat-family">
-      <h3>
-        {/* The family name is the client's own wording, like the category
-            labels: reference data, not interface text, so it is not translated. */}
-        {group.label} <span className="fincat-count">{t('finCategories.count', { count: group.categories.length })}</span>
-      </h3>
+    <details className="fincat-family" id={`fincat-${group.code}`} open>
+      <summary>
+        <h3>
+          {/* The family name is reference data, like the category labels, so it is not translated. */}
+          {group.label} <span className="fincat-count">{t('finCategories.count', { count: shown.length })}</span>
+        </h3>
+      </summary>
 
       <ul className="fincat-list">
-        {group.categories.map((category) => (
+        {shown.map((category) => (
           <CategoryRow
             key={category.id}
             category={category}
@@ -137,9 +164,11 @@ function FamilySection({ group, openHistory, onToggleHistory, run }) {
           <Plus size={15} aria-hidden="true" /> {t('finCategories.add')}
         </button>
       )}
-    </section>
+    </details>
   );
 }
+
+const normalise = (text) => String(text ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 function CategoryRow({ category, historyOpen, onToggleHistory, run }) {
   const { t } = useTranslation();
@@ -194,7 +223,7 @@ function CategoryRow({ category, historyOpen, onToggleHistory, run }) {
       ) : (
         <>
           <span className="fincat-label">
-            {category.icon && <span aria-hidden="true">{category.icon} </span>}
+            {category.icon && <CategoryIcon emoji={category.icon} size={16} />}
             <span className="fincat-name">{category.label}</span>
           </span>
           <span className="fincat-tags">

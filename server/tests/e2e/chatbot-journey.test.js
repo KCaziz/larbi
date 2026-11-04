@@ -104,11 +104,11 @@ describe('guided assistant, end to end', { skip: findChrome() ? false : 'no Chro
     assert.ok(await b.waitFor("!document.querySelector('.chatbot-panel')"));
   });
 
-  test('Arabic: only Arabic questions, right-to-left, the panel stays on screen', async () => {
+  test('Arabic: the French questions answer until Arabic ones exist, then only Arabic ones; right-to-left, the panel stays on screen', async () => {
     await b.ev("localStorage.setItem('lang', 'ar')");
     await b.goto(`${site.url}/`);
     await sleep(800);
-    assert.equal(await toggleShown(), false, 'no Arabic question published yet');
+    assert.equal(await toggleShown(), true, 'nothing in Arabic yet: the French questions answer (R5-05), never an empty panel');
 
     await t.prisma.chatbotEntry.create({ data: { question: 'كيف أتابع تقدمي؟', answer: '<p>افتح فضائي ثم تكويناتي.</p>', language: 'ar', status: 'published' } });
     await b.goto(`${site.url}/`);

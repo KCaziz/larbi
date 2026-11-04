@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { tipsKeyFor } from '../../lib/pageTips.js';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ChevronRight, MessageCircleQuestion, Search, X } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Lightbulb, MessageCircleQuestion, Search, X } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { ASSISTANT_OPEN_EVENT } from '../../lib/finControls.js';
 import { useApi } from '../../lib/useApi.js';
@@ -24,6 +25,7 @@ export default function ChatbotWidget() {
 function Assistant() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const lang = contentLanguage(i18n.language) ?? 'fr';
   const entries = useApi(`/chatbot/entries?lang=${lang}`);
   // The deterministic resolver (P3-19) is content of its own: the panel must
@@ -41,6 +43,9 @@ function Assistant() {
   const titleId = useId();
 
   const list = entries.status === 'ready' ? entries.data.entries : [];
+  const tipsKey = tipsKeyFor(pathname);
+  const tipsRaw = tipsKey ? t(`tips.${tipsKey}`, { returnObjects: true }) : [];
+  const tips = Array.isArray(tipsRaw) ? tipsRaw : [];
   const hasResolver = intents.status === 'ready' && intents.data.intents.length > 0;
   const selected = list.find((e) => e.id === selectedId) ?? null;
 
@@ -210,6 +215,22 @@ function Assistant() {
                   </button>
                 </form>
                 )}
+                {entries.status === 'ready' && entries.data.fallback && <p className="chatbot-intro">{t('chatbot.fallbackNote')}</p>}
+                {/* Tips for the page open behind the panel (R4-05): they open in place, they never leave it. */}
+                {tips.length > 0 && (
+                  <section className="chatbot-tips" aria-label={t('chatbot.tipsTitle')}>
+                    <h3>{t('chatbot.tipsTitle')}</h3>
+                    {tips.map((tip) => (
+                      <details key={tip.title}>
+                        <summary>
+                          <Lightbulb size={15} aria-hidden="true" /> {tip.title}
+                        </summary>
+                        <p>{tip.body}</p>
+                      </details>
+                    ))}
+                  </section>
+                )}
+                {tips.length > 0 && list.length > 0 && <h3 className="chatbot-faq-title">{t('chatbot.title')}</h3>}
                 <ul className="chatbot-list">
                   {list.map((entry) => (
                     <li key={entry.id}>

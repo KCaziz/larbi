@@ -18,7 +18,7 @@ export default function MyPaymentsPage() {
 
   return (
     <>
-      <PageHeader icon={Receipt} title={t('payments.mine.title')} />
+      <PageHeader icon={Receipt} title={t('payments.mine.title')} subtitle={t('payments.mine.intro')} />
       <div className="settings-page">
       {orders.status === 'loading' && <LoadingState />}
       {orders.status === 'error' && <ErrorState message={t('state.loadError')} onRetry={orders.reload} />}

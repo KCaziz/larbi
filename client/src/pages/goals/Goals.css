@@ -245,3 +245,35 @@
   display: grid;
   gap: var(--space-xs);
 }
+
+.goals-icon-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+.goals-icon-picker button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.goals-icon-picker button.is-selected {
+  border-color: var(--border-strong);
+  background: var(--surface-alt, rgba(127, 127, 127, 0.12));
+}
+
+.goals-action {
+  margin-block-start: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.goals-action h3 {
+  margin-block: 0 var(--space-xs);
+}

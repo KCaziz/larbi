@@ -178,7 +178,8 @@ export default function SpacePot({ t, language, spaceId, space, members, canAdmi
       {proposalError && <p className="form-error">{proposalError}</p>}
       {proposal && (
         <section aria-live="polite">
-          <p>{t('spaces.pot.proposalResult', { amount: money(proposal.contributionRequise.resultat ?? 0) })}</p>
+          <p>{(proposal.contributionRequise.resultat ?? 0) > 0 ? t('spaces.pot.proposalResult', { amount: money(proposal.contributionRequise.resultat) }) : t('spaces.pot.proposalCovered')}</p>
+          {(proposal.contributionRequise.resultat ?? 0) > 0 && <p className="spaces-help">{t('spaces.pot.proposalShares')}</p>}
           <ul className="spaces-members">
             {proposal.parts.map((part) => (
               <li key={part.memberId} className="spaces-member">

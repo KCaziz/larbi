@@ -1,69 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { formatAmount, formatDate } from '../../lib/format.js';
-import './Fincludia.css';
+import LineChart from './charts/LineChart.jsx';
 
 // The net-worth curve (P6-23), built from `/fin/patrimoine/historique` — the
-// server's own reconstruction of the change journal, never a second source
-// of the figure. The SVG line is decorative (`aria-hidden`): the exact
-// points it draws are also listed as a plain table underneath, collapsed by
-// default, so nothing here exists only as a shape nobody can read out.
+// server's own reconstruction of the change journal, never a second source of
+// the figure. Drawn by the chart kit: axes, legend, a sentence, and the exact
+// points in a table underneath. Fewer than two dates is a message, not a dot.
 export default function NetWorthChart({ points, currency }) {
-  const { t, i18n } = useTranslation();
-
-  // One point is a dot, not a history — nothing to draw a line between.
-  if (points.length < 2) return null;
-
-  const values = points.map((point) => point.net);
-  const min = Math.min(...values, 0);
-  const max = Math.max(...values, 0);
-  const span = max - min || 1;
-
-  const width = 600;
-  const height = 160;
-  const coords = points
-    .map((point, index) => {
-      const x = (index / (points.length - 1)) * width;
-      const y = height - ((point.net - min) / span) * height;
-      return `${x},${y}`;
-    })
-    .join(' ');
-
-  return (
-    <div className="wealth-chart">
-      <svg className="wealth-chart-svg" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden="true">
-        {/* The zero line, when the series crosses it (a debt bigger than what is owned). */}
-        {min < 0 && max > 0 && (
-          <line
-            className="wealth-chart-zero"
-            x1="0"
-            x2={width}
-            y1={height - ((0 - min) / span) * height}
-            y2={height - ((0 - min) / span) * height}
-          />
-        )}
-        <polyline className="wealth-chart-line" points={coords} fill="none" />
-      </svg>
-
-      <details className="wealth-chart-details">
-        <summary>{t('wealth.historyToggle')}</summary>
-        <table className="wealth-chart-table">
-          <caption className="sr-only">{t('wealth.historyTitle')}</caption>
-          <thead>
-            <tr>
-              <th scope="col">{t('wealth.historyDate')}</th>
-              <th scope="col">{t('wealth.historyNet')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {points.map((point) => (
-              <tr key={point.date}>
-                <td>{formatDate(i18n.language, point.date)}</td>
-                <td>{formatAmount(i18n.language, point.net, currency)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </details>
-    </div>
-  );
+  const { t } = useTranslation();
+  return <LineChart currency={currency} caption={t('wealth.historyTitle')} series={[{ key: 'net', label: t('wealth.netWorth', { defaultValue: t('wealth.historyTitle') }), tone: 0, points: points.map((point) => ({ month: point.date.slice(0, 10), value: point.net })) }]} />;
 }

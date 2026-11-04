@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Landmark } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
-import { api, ApiError } from '../../lib/api.js';
+import { api, errorKey } from '../../lib/api.js';
 import { formatNumber } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
@@ -52,7 +52,7 @@ export default function UsageFitPage() {
     try {
       setAnswer(await api.post('/tools/comparator/adequation', body));
     } catch (err) {
-      setSubmitError(err instanceof ApiError ? err.message : t('state.loadError'));
+      setSubmitError(t(errorKey(err)));
       setAnswer(null);
     } finally {
       setBusy(false);

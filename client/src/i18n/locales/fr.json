@@ -684,7 +684,9 @@
     "forbidden": "Vous n'avez pas accès à cette page.",
     "notFound": "Élément introuvable.",
     "fileTooLarge": "Ce fichier est trop volumineux.",
-    "fileUnsupported": "Ce type de fichier n'est pas accepté."
+    "fileUnsupported": "Ce type de fichier n'est pas accepté.",
+    "conflict": "Cette action n’est pas possible dans l’état actuel.",
+    "refused": "Cette valeur ou cette demande n’est pas acceptée. Vérifiez les champs."
   },
   "state": {
     "loading": "Chargement…",
@@ -2063,8 +2065,6 @@
     "hypotheses": "Hypothèses retenues :",
     "notComputed": "Non calculé",
     "why": "Pourquoi ce chiffre ?",
-    "formulaCount_one": "{{count}} formule",
-    "formulaCount_other": "{{count}} formules",
     "months_one": "{{count}} mois",
     "months_other": "{{count}} mois",
     "days_one": "{{count}} jour",
@@ -2362,7 +2362,7 @@
     "criterion": "Critère",
     "score": "Score pondéré",
     "bestOnCriterion": "Meilleure valeur sur ce critère",
-    "scoreMethod": "Score {{formula}} : somme des critères normalisés (min-max sur les options comparées) multipliés par vos poids, divisée par la somme des poids utilisés. Poids : {{weights}}.",
+    "scoreMethod": "Le score de chaque option combine vos critères : chacun est ramené à une échelle de 0 à 100 parmi les options comparées, puis multiplié par l’importance que vous lui donnez. Importances utilisées : {{weights}}.",
     "missingValue": "Donnée manquante pour « {{criterion}} » : {{options}}. Elle n’est pas remplacée par zéro et ne compte pas dans le score.",
     "direction": {
       "lower": "moins est mieux",
@@ -2419,7 +2419,7 @@
   "bankUsage": {
     "title": "Adéquation de mon compte à mon usage",
     "intro": "Comparez 2 ou 3 comptes déjà publics du comparateur sur ce que vous utilisez réellement : carte, retraits, virements, frais de tenue.",
-    "disclaimer": "Comparaison indicative à partir des données publiques déjà affichées dans le comparateur. Aucun « meilleur » absolu : le score n'apparaît que si vous donnez vos propres poids. Le paiement en ligne n'a pas de colonne dans les classeurs du client et n'est donc pas comparé ici.",
+    "disclaimer": "Comparaison indicative à partir des données publiques déjà affichées dans le comparateur. Aucun « meilleur » absolu : le score n’apparaît que si vous donnez vos propres poids. Le paiement en ligne n’est pas encore comparé ici.",
     "pickAccounts": "Choisissez {{min}} à {{max}} comptes à comparer",
     "selectedCount": "{{count}} / {{max}} choisis",
     "noneAvailable": "Aucun compte n'est encore documenté dans le comparateur.",
@@ -2513,7 +2513,9 @@
     "searchPlaceholder": "Posez votre question…",
     "searchGo": "Chercher",
     "openScreen": "Ouvrir cet écran",
-    "notUnderstood": "Je n'ai pas compris. Choisissez une option…"
+    "notUnderstood": "Je n'ai pas compris. Choisissez une option…",
+    "fallbackNote": "Ces questions ne sont pas encore traduites : elles s’affichent en français.",
+    "tipsTitle": "Astuces pour cette page"
   },
   "payments": {
     "offersTitle": "Devenir premium",
@@ -2538,7 +2540,8 @@
     },
     "mine": {
       "title": "Mes paiements",
-      "empty": "Vous n'avez effectué aucun paiement."
+      "empty": "Vous n'avez effectué aucun paiement.",
+      "intro": "Les paiements que vous avez faits sur la plateforme : date, offre et montant."
     },
     "return": {
       "title": "Résultat du paiement",
@@ -2747,7 +2750,9 @@
       "labelTaken": "Vous avez déjà une catégorie de ce nom dans cette famille.",
       "tooMany": "Vous avez atteint le nombre maximal de catégories dans cette famille."
     },
-    "essential": "Essentielle"
+    "essential": "Essentielle",
+    "search": "Rechercher une catégorie (nom, groupe)",
+    "jump": "Aller à une famille"
   },
   "fincludia": {
     "notComputed": "non calculé",
@@ -3231,7 +3236,7 @@
     "progress": "Progression",
     "remaining": "Reste à atteindre",
     "requiredContribution": "Versement nécessaire pour la date cible",
-    "allocated": "Capital déjà affecté",
+    "allocated": "Capital déjà mis de côté",
     "monthlyContribution": "Contribution mensuelle",
     "estimatedDate": "Objectif atteint vers {{date}}, à ce rythme.",
     "archive": "Archiver",
@@ -3279,12 +3284,21 @@
       "disclaimer": "Une simulation avec vos hypothèses : ni une promesse, ni un conseil. Rien n’est enregistré.",
       "chart": "Capital et objectif, mois par mois",
       "chartCapital": "Capital projeté",
-      "chartTarget": "Objectif (avec inflation)"
+      "chartTarget": "Objectif (avec inflation)",
+      "onTime": "À ce rythme, vous atteignez l’objectif à la date prévue.",
+      "ahead": "À ce rythme, vous atteignez l’objectif {{months}} mois avant la date prévue : en avance.",
+      "behind": "À ce rythme, vous atteignez l’objectif {{months}} mois après la date prévue : en retard.",
+      "neverReached": "Avec ces hypothèses, l’objectif n’est pas atteint dans la durée simulée."
     },
     "backToList": "Retour aux objectifs",
     "notFound": "Cet objectif n’existe pas, ou il n’est pas le vôtre.",
     "created": "Objectif créé.",
-    "compareChart": "Avancement de chaque objectif (100 % = la cible)"
+    "compareChart": "Avancement de chaque objectif (100 % = la cible)",
+    "contributeTitle": "Mettre de l’argent de côté pour cet objectif",
+    "contributeHelp": "Déplace de l’argent : le montant quitte l’un de vos comptes et arrive sur le compte de l’objectif. C’est un virement réel, ni une dépense ni un revenu.",
+    "editTitle": "Corriger les chiffres de l’objectif",
+    "editHelp": "Ne déplace aucun argent : sert à ajuster à la main le capital déjà mis de côté et la contribution mensuelle prévue.",
+    "editHelpAccount": "Ne déplace aucun argent : le capital de cet objectif est le solde de son compte, il ne se saisit pas ici. Vous ajustez seulement la contribution mensuelle prévue."
   },
   "debts": {
     "title": "Dettes",
@@ -4177,13 +4191,15 @@
         "date": "Date",
         "planned": "Contribution prévue (pas encore versée)"
       },
-      "proposalTitle": "Contribution requise",
-      "proposalHelp": "Indiquez un besoin collectif : la proposition dit ce que chacun mettrait en plus des ressources communes.",
-      "need": "Besoin collectif",
-      "propose": "Calculer la proposition",
-      "proposalResult": "Il manquerait {{amount}} pour couvrir ce besoin.",
-      "proposalNote": "Ce n’est qu’une proposition : rien n’est enregistré et aucun compte personnel n’est touché.",
-      "proposalRefused": "La proposition n’a pas pu être calculée : un membre n’a pas partagé son revenu dans cet espace."
+      "proposalTitle": "Combien chacun doit-il verser ? (simulation)",
+      "proposalHelp": "Une dépense à venir n’est pas couverte par le pot commun ? Saisissez son montant (par exemple le loyer du mois). On regarde ce que le pot contient, puis on calcule ce qu’il manque et la part de chacun.",
+      "need": "Montant de la dépense à couvrir",
+      "propose": "Voir la part de chacun",
+      "proposalResult": "Le pot commun ne suffit pas : il manque {{amount}}.",
+      "proposalNote": "Ce n’est qu’une proposition à discuter ensemble : rien n’est enregistré et aucun compte personnel n’est touché.",
+      "proposalRefused": "La proposition n’a pas pu être calculée : un membre n’a pas encore accepté de partager son revenu dans cet espace.",
+      "proposalCovered": "Le pot commun couvre déjà cette dépense : personne n’a à verser de plus.",
+      "proposalShares": "Ce que chacun verserait pour combler ce manque :"
     },
     "activity": {
       "title": "Activité récente",
@@ -4241,7 +4257,11 @@
     "transfer": "Rendre propriétaire",
     "transferConfirm": "Transmettre la propriété de l’espace à {{name}} ? Vous deviendrez administrateur, et seul(e) {{name}} pourra supprimer l’espace.",
     "transferred": "La propriété de l’espace a été transmise.",
-    "ownerNote": "Vous êtes propriétaire de cet espace : vous seul(e) pouvez le supprimer. Pour le quitter, rendez d’abord un autre membre propriétaire."
+    "ownerNote": "Vous êtes propriétaire de cet espace : vous seul(e) pouvez le supprimer. Pour le quitter, rendez d’abord un autre membre propriétaire.",
+    "myNameLabel": "Votre nom dans cet espace",
+    "myNameHelp": "C’est le nom que les autres membres voient à côté de vos actions. Il peut être différent de celui de votre compte, mais pas du nom de l’espace.",
+    "myNameSave": "Changer mon nom",
+    "nameSaved": "Votre nom dans l’espace a été changé."
   },
   "funding": {
     "title": "Préparation au financement",
@@ -4471,7 +4491,15 @@
       "debt": "Dettes",
       "recurrence": "Récurrences",
       "provision": "Provisions",
-      "asset": "Actifs réels"
+      "asset": "Actifs réels",
+      "account": "Comptes",
+      "tag": "Étiquettes",
+      "occurrence": "Suites données aux échéances",
+      "payslip": "Fiches de paie conservées",
+      "business": "Entreprises",
+      "businessContact": "Contacts d’entreprise",
+      "businessDocument": "Documents d’entreprise",
+      "businessPayment": "Paiements d’entreprise"
     },
     "completenessTitle": "Complétude de votre dossier",
     "completenessDisclaimer": "Ceci mesure seulement ce que vous avez déjà renseigné — jamais un score de solvabilité ni une évaluation de votre situation.",
@@ -4719,7 +4747,8 @@
     "settingsPayments": "Paiements",
     "settingsPremium": "Accès premium",
     "backTo": "Retour : {{page}}",
-    "learnHub": "Apprendre"
+    "learnHub": "Apprendre",
+    "mySpaceIntro": "Votre profil, vos préférences, la confidence de vos données et votre abonnement, au même endroit."
   },
   "accounts": {
     "title": "Mes comptes",
@@ -5131,7 +5160,6 @@
     },
     "count_one": "{{count}} outil",
     "count_other": "{{count}} outils",
-    "formulas": "Formules : {{formulas}}",
     "pending": "À venir : ce calculateur n’est pas encore construit.",
     "open": "Ouvrir",
     "onMyData": "Sur mes données",
@@ -5349,7 +5377,12 @@
       "good": "cible atteinte",
       "warn": "plus de la moitié de la cible",
       "low": "moins de la moitié de la cible"
-    }
+    },
+    "needTwoSteps": "Pas encore assez de données pour tracer une courbe : il en faut au moins deux dates.",
+    "readingOne": "{{label}} : {{value}} ({{when}}).",
+    "readingFlat": "{{label}} reste à {{to}} entre {{when}} et {{until}}.",
+    "readingUp": "{{label}} passe de {{from}} ({{when}}) à {{to}} ({{until}}) : en hausse.",
+    "readingDown": "{{label}} passe de {{from}} ({{when}}) à {{to}} ({{until}}) : en baisse."
   },
   "missions": {
     "title": "Missions",
@@ -5391,5 +5424,114 @@
       "eligible": "Toutes les conditions sont remplies. Ce certificat reste pédagogique : ce n’est ni un diplôme professionnel, ni un agrément financier, ni un score bancaire.",
       "rules": "Ce certificat est pédagogique : ni diplôme professionnel, ni agrément financier, ni score bancaire. Rejouer une mission garde votre meilleur résultat."
     }
+  },
+  "categoryPicker": {
+    "choose": "Choisir une catégorie",
+    "search": "Rechercher une catégorie",
+    "clearSearch": "Effacer la recherche",
+    "noResult": "Aucune catégorie ne correspond.",
+    "back": "Retour"
+  },
+  "tips": {
+    "accueil": [
+      {
+        "title": "Commencez par « Aujourd’hui »",
+        "body": "Cette page liste ce qu’il reste à faire. Chaque ligne mène à l’endroit exact où le régler, et elle disparaît dès que c’est fait."
+      },
+      {
+        "title": "Changez la période d’un clic",
+        "body": "Jour, semaine, mois, année : les chiffres de la page suivent la période choisie."
+      }
+    ],
+    "comptes": [
+      {
+        "title": "Un virement n’est pas une dépense",
+        "body": "Un virement entre vos comptes ne change ni vos revenus ni vos dépenses : il déplace seulement l’argent."
+      },
+      {
+        "title": "Le solde de départ compte",
+        "body": "Donnez le solde que le compte avait à une date : tous les calculs partent de là."
+      }
+    ],
+    "mouvements": [
+      {
+        "title": "Pointer, c’est vérifier",
+        "body": "Comparez chaque mouvement avec votre relevé, puis marquez-le « pointé » : l’Accueil cesse de vous le rappeler."
+      },
+      {
+        "title": "Cherchez avant de filtrer",
+        "body": "La recherche trouve un libellé, une catégorie ou un montant ; les filtres affinent ensuite."
+      }
+    ],
+    "budgets": [
+      {
+        "title": "Un budget est un plan",
+        "body": "Fixez ce que vous comptez dépenser par catégorie ; la page compare ensuite ce plan à ce que vous dépensez vraiment."
+      },
+      {
+        "title": "Le rythme vous dit où vous en êtes",
+        "body": "La courbe de la dépense cumulée se lit contre le rythme régulier : au-dessus, vous dépensez plus vite que prévu."
+      }
+    ],
+    "objectifs": [
+      {
+        "title": "Deux gestes différents",
+        "body": "« Mettre de côté » déplace de l’argent vers l’objectif ; « Corriger » ne fait qu’ajuster les chiffres."
+      },
+      {
+        "title": "Sans date, sans pression",
+        "body": "La date cible est facultative : sans elle, l’objectif avance à votre rythme."
+      }
+    ],
+    "dettes": [
+      {
+        "title": "Séparez ce que vous devez de ce qu’on vous doit",
+        "body": "Les dettes et les créances ont chacune leur section et leur total."
+      },
+      {
+        "title": "Comparez deux façons de rembourser",
+        "body": "La page « Stratégies » montre combien de temps et d’intérêts chaque ordre de remboursement demande."
+      }
+    ],
+    "calendrier": [
+      {
+        "title": "Les paiements réguliers se déclarent une fois",
+        "body": "Loyer, abonnements, salaire : déclarez-les, ils reviennent seuls à chaque échéance."
+      },
+      {
+        "title": "Confirmez ce qui s’est passé",
+        "body": "Quand une échéance arrive, dites si elle a eu lieu : c’est ce qui l’ajoute à vos mouvements."
+      }
+    ],
+    "synthese": [
+      {
+        "title": "Lisez d’abord la phrase sous le graphique",
+        "body": "Elle dit en mots si la courbe monte ou descend, avant le détail des chiffres."
+      },
+      {
+        "title": "Passez au jour ou à la semaine",
+        "body": "Le choix « Par mois / Par semaine / Par jour » change le pas de toutes les courbes."
+      }
+    ],
+    "sante": [
+      {
+        "title": "Un indice se construit",
+        "body": "Plus vous renseignez (revenus, dettes, fonds d’urgence), plus l’indice devient complet ; un point « non calculé » dit ce qui manque."
+      },
+      {
+        "title": "Une étape à la fois",
+        "body": "Choisissez la dimension la plus basse : c’est celle qui fera monter l’indice le plus."
+      }
+    ],
+    "partage": [
+      {
+        "title": "Qui a payé, qui doit quoi",
+        "body": "La page des dépenses calcule les parts et propose le plus petit nombre de remboursements."
+      },
+      {
+        "title": "Vous gardez la main sur vos données",
+        "body": "Vous choisissez, type de donnée par type de donnée, ce que les autres membres voient de vous."
+      }
+    ]
   }
 }

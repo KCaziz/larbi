@@ -17,7 +17,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHeader icon={Settings} title={t('appNav.mySpace')} maxWidth={760} />
+      <PageHeader icon={Settings} title={t('appNav.mySpace')} subtitle={t('appNav.mySpaceIntro')} maxWidth={760} />
       <div className="fin-page-narrow">
         <ul className="fin-health-dimensions">
           {links.map((link) => (

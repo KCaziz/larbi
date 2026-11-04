@@ -71,12 +71,49 @@ describe('the activity names people, not the space (R2-01)', () => {
   });
 });
 
-describe('an amount the database cannot keep is refused (R1-06)', () => {
-  test('a goal above 21 474 836,47 DA is a 400, never a clamped figure', async () => {
-    const res = await t.request('POST', '/fin/goals', { user: owner, json: { label: 'Trop', target: 99_999_999_999_900, currency: 'DZD' } });
+describe('large amounts are kept exactly, and an amount beyond the limit is refused (R1-06, R1-10)', () => {
+  test('a goal of 999 999 999 999 DA is stored as it was typed; one beyond 10^13 DA is a 400, never a clamped figure', async () => {
+    const big = 99_999_999_999_900; // 999 999 999 999 DA, which a 32-bit column used to clamp to 21 474 836,47
+    const ok = await t.request('POST', '/fin/goals', { user: owner, json: { label: 'Maison', target: big, currency: 'DZD', targetDate: null } });
+    assert.equal(ok.status, 201, JSON.stringify(ok.body).slice(0, 200));
+    assert.equal(ok.body.goal.target, big);
+    const read = await t.request('GET', '/fin/goals', { user: owner });
+    assert.equal(read.body.goals.find((goal) => goal.label === 'Maison').target, big, 'read back unchanged');
+    const res = await t.request('POST', '/fin/goals', { user: owner, json: { label: 'Trop', target: 1_000_000_000_000_001, currency: 'DZD' } });
     assert.equal(res.status, 400);
-    const ok = await t.request('POST', '/fin/goals', { user: owner, json: { label: 'Maison', target: 2_147_483_647, currency: 'DZD', targetDate: null } });
-    assert.equal(ok.status, 201);
-    assert.equal(ok.body.goal.target, 2_147_483_647);
+  });
+
+  test('sums of large amounts stay exact', async () => {
+    const big = 99_999_999_999_901;
+    for (const note of ['a', 'b']) {
+      const made = await t.request('POST', '/fin/transactions', { user: owner, json: { kind: 'expense', value: big, currency: 'DZD', occurredAt: new Date(Date.now() - 3600_000).toISOString(), note } });
+      assert.equal(made.status, 201, JSON.stringify(made.body).slice(0, 200));
+    }
+    const sum = await t.prisma.finTransaction.aggregate({ where: { userId: owner.id, kind: 'expense' }, _sum: { value: true } });
+    assert.equal(sum._sum.value, big * 2);
+  });
+});
+
+describe('one\'s own name in a space (R2-07)', () => {
+  const rename = (user, displayName) => t.request('PUT', `/fin/espaces/${space.id}/mon-nom`, { user, json: { displayName } });
+  const nameOf = async (user) => (await members(user)).find((m) => m.isMe).name;
+
+  test('a member changes their own name, the others see it, and null gives back the account name', async () => {
+    assert.equal((await rename(other, 'Sami')).status, 200);
+    assert.equal(await nameOf(other), 'Sami');
+    assert.equal((await members(owner)).find((m) => m.id === otherId).name, 'Sami');
+    assert.equal((await rename(other, null)).status, 200);
+    assert.notEqual(await nameOf(other), 'Sami');
+  });
+
+  test('the name of the space is refused: it is what made a creator look like the space', async () => {
+    const res = await rename(owner, 'nous DEUX');
+    assert.equal(res.status, 422);
+    assert.equal(res.body.error.details.reason, 'nameIsSpace');
+  });
+
+  test('somebody outside the space cannot reach it', async () => {
+    const stranger = await t.user();
+    assert.equal((await rename(stranger, 'X')).status, 404);
   });
 });

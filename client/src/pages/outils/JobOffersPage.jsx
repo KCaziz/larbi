@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Briefcase } from 'lucide-react';
-import { api, ApiError } from '../../lib/api.js';
+import { api, errorKey } from '../../lib/api.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import { formatAmount, formatNumber, formatRatio } from '../../lib/format.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
@@ -70,7 +70,7 @@ export default function JobOffersPage() {
     try {
       setAnswer(await api.post('/tools/comparaisons/offres-emploi', body));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('state.loadError'));
+      setError(t(errorKey(err)));
       setAnswer(null);
     } finally {
       setBusy(false);

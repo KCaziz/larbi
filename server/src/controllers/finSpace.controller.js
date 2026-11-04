@@ -12,6 +12,7 @@ import {
 import {
   acceptInvite,
   createSpace,
+  renameMyself,
   closeSpace,
   deleteSpace,
   inviteToSpace,
@@ -115,6 +116,10 @@ export async function putMemberRole(req, res) {
 
 // Handing the space over (recette R2-02): the owner names the member who
 // becomes owner; they become admin.
+export async function putMyName(req, res) {
+  res.json({ membre: await renameMyself(prisma, req.user.id, req.params.id, req.body.displayName) });
+}
+
 export async function postTransferOwnership(req, res) {
   res.json({ membre: await transferOwnership(prisma, req.user.id, req.params.id, req.params.memberId) });
 }

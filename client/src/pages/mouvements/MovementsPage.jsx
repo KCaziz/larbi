@@ -15,7 +15,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
-import CategoryOptions from '../../components/fincludia/CategoryOptions.jsx';
+import CategoryPicker from '../../components/fincludia/CategoryPicker.jsx';
 import CategoryChip from '../../components/fincludia/CategoryChip.jsx';
 import { flowClass, flowOf } from '../../lib/flows.js';
 import '../argent/MyMoney.css';
@@ -311,10 +311,7 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
 
           <div className="fin-field">
             <label htmlFor="entry-categoryId">{t('myMoney.category')}</label>
-            <select {...field('categoryId')}>
-              <option value="">{t('myMoney.noCategory')}</option>
-              <CategoryOptions groups={lookups.categoryGroups} />
-            </select>
+            <CategoryPicker id="entry-categoryId" value={form.categoryId} groups={lookups.categoryGroups} emptyLabel={t('myMoney.noCategory')} onChange={(categoryId) => setForm({ ...form, categoryId })} />
             {/* P8-27: the chosen category with its colour, icon and group. */}
             {form.categoryId && <CategoryChip category={lookups.categories.find((row) => row.id === form.categoryId)} />}
           </div>
@@ -332,7 +329,7 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
                 .filter((row) => !row.archivedAt)
                 .map((row) => (
                   <option key={row.id} value={row.id}>
-                    {row.icon} {row.label} ({row.currency})
+                    {row.label} ({row.currency})
                   </option>
                 ))}
             </select>
@@ -344,7 +341,7 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
               <option value="">{t('myMoney.notStated')}</option>
               {lookups.paymentMethods.map((method) => (
                 <option key={method.id} value={method.id}>
-                  {method.icon} {method.label}
+                  {method.label}
                 </option>
               ))}
             </select>
@@ -442,10 +439,7 @@ function Filters({ filters, setFilters, lookups, references, query, onApply, onC
       <label className="sr-only" htmlFor="filter-category">
         {t('myMoney.category')}
       </label>
-      <select id="filter-category" value={filters.categoryId} onChange={(event) => setFilters({ ...filters, categoryId: event.target.value, uncategorised: false })}>
-        <option value="">{t('myMoney.allCategories')}</option>
-        <CategoryOptions groups={lookups.categoryGroups} />
-      </select>
+      <CategoryPicker id="filter-category" className="movements-filter-category" value={filters.categoryId} groups={lookups.categoryGroups} emptyLabel={t('myMoney.allCategories')} label={t('myMoney.category')} onChange={(categoryId) => setFilters({ ...filters, categoryId, uncategorised: false })} />
       <label className="sr-only" htmlFor="filter-tag">
         {t('movements.tag')}
       </label>
@@ -554,15 +548,14 @@ export function Row({ transaction, lookups, run, detail = true }) {
             <label className="sr-only" htmlFor={`category-${transaction.id}`}>
               {t('myMoney.category')}
             </label>
-            <select
+            <CategoryPicker
               id={`category-${transaction.id}`}
               className="movements-category-pick"
               value=""
-              onChange={(event) => event.target.value && run(() => api.patch(`/fin/transactions/${transaction.id}`, { categoryId: event.target.value }), 'movements.categorised')}
-            >
-              <option value="">{t('movements.chooseCategory')}</option>
-              <CategoryOptions groups={lookups.categoryGroups} />
-            </select>
+              groups={lookups.categoryGroups}
+              emptyLabel={t('movements.chooseCategory')}
+              onChange={(categoryId) => categoryId && run(() => api.patch(`/fin/transactions/${transaction.id}`, { categoryId }), 'movements.categorised')}
+            />
           </>
         )}
         {!transfer && <span className="flow-label">{t(`flows.${flow}`)}</span>}
@@ -726,10 +719,7 @@ function TagManager({ lookups, reload }) {
         </div>
         <div className="fin-field">
           <label htmlFor="tag-auto">{t('movements.tagAuto')}</label>
-          <select id="tag-auto" value={state.autoCategoryId} onChange={(event) => setState({ ...state, autoCategoryId: event.target.value })}>
-            <option value="">{t('movements.tagAutoNone')}</option>
-            <CategoryOptions groups={lookups.categoryGroups} />
-          </select>
+          <CategoryPicker id="tag-auto" value={state.autoCategoryId} groups={lookups.categoryGroups} emptyLabel={t('movements.tagAutoNone')} onChange={(autoCategoryId) => setState({ ...state, autoCategoryId })} />
         </div>
         {error && <p className="form-error">{error}</p>}
         <Button type="submit">{t('movements.addTag')}</Button>

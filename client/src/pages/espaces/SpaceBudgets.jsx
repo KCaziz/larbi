@@ -25,7 +25,7 @@ export default function SpaceBudgets({ t, language, spaceId, space, canEdit, run
   const data = view.data.budgets;
   const label = (key) => {
     const found = data.categories.find((item) => item.key === key);
-    return found ? `${found.icon} ${found.label}` : key;
+    return found ? found.label : key;
   };
   const money = (amount) => formatAmount(language, amount, space.currency);
 

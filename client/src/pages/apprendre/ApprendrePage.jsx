@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BookOpen, FileText, GraduationCap, Lock, Search, SearchX, Star, Calculator } from 'lucide-react';
-import { api, ApiError } from '../../lib/api.js';
+import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
@@ -90,7 +90,7 @@ export default function ApprendrePage() {
       else await api.post('/apprendre/favoris', { kind: card.kind, refId: card.id });
       favorites.reload();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('state.loadError'));
+      setError(t(errorKey(err)));
     }
   }
 

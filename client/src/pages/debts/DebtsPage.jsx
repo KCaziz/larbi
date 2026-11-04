@@ -240,7 +240,6 @@ function DebtRow({ debt, accounts, budgetCategories, run }) {
                 <select id={`debt-budget-${debt.id}`} value={budgetCategory} onChange={(event) => setBudgetCategory(event.target.value)}>
                   {budgetCategories.map((category) => (
                     <option key={category.id} value={category.id}>
-                      {category.icon ? `${category.icon} ` : ''}
                       {category.label}
                     </option>
                   ))}

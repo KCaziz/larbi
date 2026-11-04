@@ -161,7 +161,8 @@ export default function Header() {
                 <Button
                   to="/app"
                   variant="secondary"
-                  className={user?.role === 'admin' ? 'btn-collapse' : ''}
+                  className="btn-icon-only"
+                  aria-label={t('appNav.openApp')}
                   title={t('appNav.openApp')}
                   onClick={closeMenu}
                 >

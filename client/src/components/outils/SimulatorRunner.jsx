@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Info } from 'lucide-react';
-import { api, ApiError } from '../../lib/api.js';
+import { api, errorKey } from '../../lib/api.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { formatAmount, formatNumber, formatRatio } from '../../lib/format.js';
 import LineChart from '../fincludia/charts/LineChart.jsx';
@@ -125,7 +125,7 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
       setSent(body);
       setSaved(null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('state.loadError'));
+      setError(t(errorKey(err)));
       setAnswer(null);
     } finally {
       setBusy(false);
@@ -209,7 +209,7 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
       setTitle('');
       onSaved?.(scenario);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('state.loadError'));
+      setError(t(errorKey(err)));
     }
   }
 

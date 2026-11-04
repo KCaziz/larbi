@@ -264,3 +264,14 @@
     white-space: nowrap;
   }
 }
+
+/* « Accéder à mon espace » once signed in: the icon alone, the name stays for
+   screen readers and in the tooltip (SUIVI_RECETTE R4-03). */
+.auth-actions .btn-icon-only .btn-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}

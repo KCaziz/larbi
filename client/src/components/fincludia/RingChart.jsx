@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatAmount } from '../../lib/format.js';
+import CategoryIcon from './CategoryIcon.jsx';
 import '../../pages/accueil/Home.css';
 
 // The ring of the Accueil (P8-06, ACC-04): a part of a whole — accounts,
@@ -84,8 +85,7 @@ export default function RingChart({ rows, currency, selected, onSelect, label })
             >
               <span className="home-ring-swatch" style={{ background: arc.color ?? OTHER_COLOR }} aria-hidden="true" />
               <span className="home-ring-legend-label">
-                {arc.icon ? `${arc.icon} ` : ''}
-                {arc.label}
+                {arc.icon && <CategoryIcon emoji={arc.icon} size={13} />} {arc.label}
               </span>
               <span className="home-ring-legend-value">
                 {formatAmount(i18n.language, arc.total, currency)} · {share(arc.total)}

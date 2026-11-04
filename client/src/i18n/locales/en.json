@@ -684,7 +684,9 @@
     "forbidden": "You do not have access to this page.",
     "notFound": "Item not found.",
     "fileTooLarge": "This file is too large.",
-    "fileUnsupported": "This file type is not accepted."
+    "fileUnsupported": "This file type is not accepted.",
+    "conflict": "This action is not possible in the current state.",
+    "refused": "This value or request is not accepted. Check the fields."
   },
   "state": {
     "loading": "Loading…",
@@ -2062,8 +2064,6 @@
     "hypotheses": "Assumptions used:",
     "notComputed": "Not computed",
     "why": "Why this figure?",
-    "formulaCount_one": "{{count}} formula",
-    "formulaCount_other": "{{count}} formulas",
     "months_one": "{{count}} month",
     "months_other": "{{count}} months",
     "days_one": "{{count}} day",
@@ -2361,7 +2361,7 @@
     "criterion": "Criterion",
     "score": "Weighted score",
     "bestOnCriterion": "Best value on this criterion",
-    "scoreMethod": "Score {{formula}}: the sum of the normalised criteria (min-max across the compared options) multiplied by your weights, divided by the sum of the weights used. Weights: {{weights}}.",
+    "scoreMethod": "Each option’s score combines your criteria: each one is brought to a 0–100 scale among the compared options, then multiplied by the importance you give it. Importance used: {{weights}}.",
     "missingValue": "Missing value for \"{{criterion}}\": {{options}}. It is not replaced by zero and does not count towards the score.",
     "direction": {
       "lower": "lower is better",
@@ -2418,7 +2418,7 @@
   "bankUsage": {
     "title": "My account's fit to my usage",
     "intro": "Compare 2 or 3 accounts already public in the comparator on what you actually use: card, withdrawals, transfers, account fees.",
-    "disclaimer": "An indicative comparison from the public data already shown in the comparator. No absolute \"best\": the score only appears if you give your own weights. Online payment has no column in the client's workbooks and is therefore not compared here.",
+    "disclaimer": "An indicative comparison from the public data already shown in the comparator. No absolute “best”: a score only appears if you give your own weights. Online payment is not compared here yet.",
     "pickAccounts": "Choose {{min}} to {{max}} accounts to compare",
     "selectedCount": "{{count}} / {{max}} chosen",
     "noneAvailable": "No account is documented in the comparator yet.",
@@ -2512,7 +2512,9 @@
     "searchPlaceholder": "Type your question…",
     "searchGo": "Search",
     "openScreen": "Open this screen",
-    "notUnderstood": "I did not understand. Choose an option…"
+    "notUnderstood": "I did not understand. Choose an option…",
+    "fallbackNote": "These questions are not translated yet: they are shown in French.",
+    "tipsTitle": "Tips for this page"
   },
   "payments": {
     "offersTitle": "Go premium",
@@ -2537,7 +2539,8 @@
     },
     "mine": {
       "title": "My payments",
-      "empty": "You have not made any payment."
+      "empty": "You have not made any payment.",
+      "intro": "The payments you made on the platform: date, offer and amount."
     },
     "return": {
       "title": "Payment result",
@@ -2746,7 +2749,9 @@
       "labelTaken": "You already have a category with that name in this family.",
       "tooMany": "You have reached the maximum number of categories in this family."
     },
-    "essential": "Essential"
+    "essential": "Essential",
+    "search": "Search a category (name, group)",
+    "jump": "Go to a family"
   },
   "fincludia": {
     "notComputed": "not computed",
@@ -3278,12 +3283,21 @@
       "disclaimer": "A simulation with your assumptions: neither a promise nor advice. Nothing is saved.",
       "chart": "Capital and target, month by month",
       "chartCapital": "Projected capital",
-      "chartTarget": "Target (with inflation)"
+      "chartTarget": "Target (with inflation)",
+      "onTime": "At this pace, you reach the goal on the planned date.",
+      "ahead": "At this pace, you reach the goal {{months}} months before the planned date: ahead.",
+      "behind": "At this pace, you reach the goal {{months}} months after the planned date: behind.",
+      "neverReached": "With these assumptions, the goal is not reached within the simulated period."
     },
     "backToList": "Back to goals",
     "notFound": "This goal does not exist, or it is not yours.",
     "created": "Goal created.",
-    "compareChart": "Progress of each goal (100 % = the target)"
+    "compareChart": "Progress of each goal (100 % = the target)",
+    "contributeTitle": "Set money aside for this goal",
+    "contributeHelp": "This moves money: the amount leaves one of your accounts and arrives on the goal’s account. It is a real transfer, neither an expense nor an income.",
+    "editTitle": "Correct the goal’s figures",
+    "editHelp": "This moves no money: use it to adjust by hand the capital already set aside and the planned monthly contribution.",
+    "editHelpAccount": "This moves no money: this goal’s capital is the balance of its account, it is not typed here. You only adjust the planned monthly contribution."
   },
   "debts": {
     "title": "Debts",
@@ -4176,13 +4190,15 @@
         "date": "Date",
         "planned": "Planned contribution (not paid in yet)"
       },
-      "proposalTitle": "Required contribution",
-      "proposalHelp": "Give a collective need: the proposal says what each member would put in on top of the common resources.",
-      "need": "Collective need",
-      "propose": "Work out the proposal",
-      "proposalResult": "{{amount}} would be missing to cover this need.",
-      "proposalNote": "This is only a proposal: nothing is saved and no personal account is touched.",
-      "proposalRefused": "The proposal could not be worked out: a member has not shared their income in this space."
+      "proposalTitle": "How much should each person pay in? (simulation)",
+      "proposalHelp": "An upcoming expense the common pot does not cover? Enter its amount (for instance this month’s rent). We look at what the pot holds, then work out what is missing and each person’s share.",
+      "need": "Amount of the expense to cover",
+      "propose": "See everyone’s share",
+      "proposalResult": "The common pot is not enough: {{amount}} is missing.",
+      "proposalNote": "This is only a proposal to discuss together: nothing is saved and no personal account is touched.",
+      "proposalRefused": "The proposal could not be worked out: a member has not yet agreed to share their income in this space.",
+      "proposalCovered": "The common pot already covers this expense: nobody has to pay in more.",
+      "proposalShares": "What each person would pay in to fill the gap:"
     },
     "activity": {
       "title": "Recent activity",
@@ -4240,7 +4256,11 @@
     "transfer": "Make owner",
     "transferConfirm": "Hand the space over to {{name}}? You will become an administrator, and only {{name}} will be able to delete the space.",
     "transferred": "The space has been handed over.",
-    "ownerNote": "You own this space: only you can delete it. To leave it, first make another member the owner."
+    "ownerNote": "You own this space: only you can delete it. To leave it, first make another member the owner.",
+    "myNameLabel": "Your name in this space",
+    "myNameHelp": "This is the name the other members see next to your actions. It can differ from your account name, but not be the space’s name.",
+    "myNameSave": "Change my name",
+    "nameSaved": "Your name in the space has been changed."
   },
   "funding": {
     "title": "Funding readiness",
@@ -4470,7 +4490,15 @@
       "debt": "Debts",
       "recurrence": "Recurrences",
       "provision": "Provisions",
-      "asset": "Real assets"
+      "asset": "Real assets",
+      "account": "Accounts",
+      "tag": "Tags",
+      "occurrence": "Follow-ups to due dates",
+      "payslip": "Saved payslips",
+      "business": "Businesses",
+      "businessContact": "Business contacts",
+      "businessDocument": "Business documents",
+      "businessPayment": "Business payments"
     },
     "completenessTitle": "Your file's completeness",
     "completenessDisclaimer": "This only measures what you have already filled in — never a creditworthiness score or an assessment of your situation.",
@@ -4718,7 +4746,8 @@
     "settingsPayments": "Payments",
     "settingsPremium": "Premium access",
     "backTo": "Back: {{page}}",
-    "learnHub": "Learn"
+    "learnHub": "Learn",
+    "mySpaceIntro": "Your profile, your preferences, your data privacy and your subscription, in one place."
   },
   "accounts": {
     "title": "My accounts",
@@ -5130,7 +5159,6 @@
     },
     "count_one": "{{count}} tool",
     "count_other": "{{count}} tools",
-    "formulas": "Formulas: {{formulas}}",
     "pending": "Coming: this calculator is not built yet.",
     "open": "Open",
     "onMyData": "On my data",
@@ -5348,7 +5376,12 @@
       "good": "target reached",
       "warn": "over half of the target",
       "low": "under half of the target"
-    }
+    },
+    "needTwoSteps": "Not enough data to draw a curve yet: at least two dates are needed.",
+    "readingOne": "{{label}}: {{value}} ({{when}}).",
+    "readingFlat": "{{label}} stays at {{to}} between {{when}} and {{until}}.",
+    "readingUp": "{{label}} goes from {{from}} ({{when}}) to {{to}} ({{until}}): up.",
+    "readingDown": "{{label}} goes from {{from}} ({{when}}) to {{to}} ({{until}}): down."
   },
   "missions": {
     "title": "Missions",
@@ -5390,5 +5423,114 @@
       "eligible": "Every condition is met. This certificate stays educational: it is not a professional diploma, a financial approval or a bank score.",
       "rules": "This certificate is educational: not a professional diploma, a financial approval or a bank score. Replaying a mission keeps your best result."
     }
+  },
+  "categoryPicker": {
+    "choose": "Choose a category",
+    "search": "Search a category",
+    "clearSearch": "Clear the search",
+    "noResult": "No category matches.",
+    "back": "Back"
+  },
+  "tips": {
+    "accueil": [
+      {
+        "title": "Start with “Today”",
+        "body": "This page lists what is left to do. Each line leads to the exact place to settle it, and disappears once done."
+      },
+      {
+        "title": "Change the period in one click",
+        "body": "Day, week, month, year: the figures follow the period you choose."
+      }
+    ],
+    "comptes": [
+      {
+        "title": "A transfer is not an expense",
+        "body": "A transfer between your accounts changes neither your income nor your spending: it only moves money."
+      },
+      {
+        "title": "The starting balance matters",
+        "body": "Give the balance the account had on a date: every calculation starts from there."
+      }
+    ],
+    "mouvements": [
+      {
+        "title": "Ticking is checking",
+        "body": "Compare each movement with your statement, then mark it “checked”: the home page stops reminding you."
+      },
+      {
+        "title": "Search before filtering",
+        "body": "Search finds a label, a category or an amount; the filters then narrow it down."
+      }
+    ],
+    "budgets": [
+      {
+        "title": "A budget is a plan",
+        "body": "Set what you plan to spend per category; the page then compares the plan with what you really spend."
+      },
+      {
+        "title": "The pace tells you where you stand",
+        "body": "Read the cumulative spending against the even pace: above it, you spend faster than planned."
+      }
+    ],
+    "objectifs": [
+      {
+        "title": "Two different actions",
+        "body": "“Set aside” moves money to the goal; “Correct” only adjusts the figures."
+      },
+      {
+        "title": "No date, no pressure",
+        "body": "The target date is optional: without it, the goal moves at your own pace."
+      }
+    ],
+    "dettes": [
+      {
+        "title": "Keep what you owe apart from what you are owed",
+        "body": "Debts and receivables each have their section and their total."
+      },
+      {
+        "title": "Compare two ways to repay",
+        "body": "The “Strategies” page shows how long and how much interest each order of repayment takes."
+      }
+    ],
+    "calendrier": [
+      {
+        "title": "Declare regular payments once",
+        "body": "Rent, subscriptions, salary: declare them and they come back by themselves at each due date."
+      },
+      {
+        "title": "Confirm what happened",
+        "body": "When a due date arrives, say whether it took place: that is what adds it to your movements."
+      }
+    ],
+    "synthese": [
+      {
+        "title": "Read the sentence under the chart first",
+        "body": "It says in words whether the curve rises or falls, before the detail of the figures."
+      },
+      {
+        "title": "Switch to day or week",
+        "body": "The “By month / By week / By day” choice changes the step of every curve."
+      }
+    ],
+    "sante": [
+      {
+        "title": "An index is built up",
+        "body": "The more you fill in (income, debts, emergency fund), the more complete the index; a “not calculated” point says what is missing."
+      },
+      {
+        "title": "One step at a time",
+        "body": "Pick the lowest dimension: it is the one that will raise the index most."
+      }
+    ],
+    "partage": [
+      {
+        "title": "Who paid, who owes what",
+        "body": "The expenses page works out the shares and proposes the fewest repayments."
+      },
+      {
+        "title": "You keep control of your data",
+        "body": "You choose, kind of data by kind of data, what the other members see of you."
+      }
+    ]
   }
 }

@@ -9,6 +9,8 @@ const label = z.string().trim().min(1).max(80);
 const note = z.string().trim().min(1).max(300).nullable().optional();
 const displayName = z.string().trim().min(1).max(60).nullable().optional();
 
+export const renameMyselfSchema = z.object({ displayName: z.string().trim().min(1).max(60).nullable() }).strict();
+
 export const createSpaceSchema = z
   .object({
     kind: z.enum(SPACE_KINDS),

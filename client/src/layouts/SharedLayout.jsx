@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import AppTopBar from '../components/layout/AppTopBar.jsx';
+import { useRevealOnAction } from '../lib/useRevealOnAction.js';
 import ChatbotWidget from '../components/assistant/ChatbotWidget.jsx';
 import './SharedLayout.css';
 
@@ -14,6 +15,7 @@ import './SharedLayout.css';
 // matrix of P6-13).
 export default function SharedLayout() {
   const { t } = useTranslation();
+  useRevealOnAction();
 
   return (
     <div className="shared-shell">

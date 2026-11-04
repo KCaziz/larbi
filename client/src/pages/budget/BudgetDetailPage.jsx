@@ -407,7 +407,7 @@ function EnvelopeForm({ budgetId, currency, groups, usedGroups, categories, used
             <optgroup label={t('budget.wholeGroups')}>
               {availableGroups.map((row) => (
                 <option key={row.group} value={`group:${row.group}`}>
-                  {row.icon} {row.group}
+                  {row.group}
                 </option>
               ))}
             </optgroup>

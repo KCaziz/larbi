@@ -3,12 +3,14 @@
 // smaller line. The colour is never the only signal: the label is always
 // written. `category` is a row of GET /fin/categories (its `color` is never
 // null since P8-27).
+import CategoryIcon from './CategoryIcon.jsx';
+
 export default function CategoryChip({ category, fallback = null, compact = false }) {
   if (!category) return fallback ? <span className="category-chip category-chip-none">{fallback}</span> : null;
   return (
     <span className="category-chip" style={{ '--category-color': category.color ?? 'var(--border-strong)' }}>
       <span className="category-chip-icon" aria-hidden="true">
-        {category.icon ?? '•'}
+        <CategoryIcon emoji={category.icon} size={14} />
       </span>
       <span className="category-chip-text">
         <span className="category-chip-label">{category.label}</span>

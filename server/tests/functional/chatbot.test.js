@@ -90,7 +90,10 @@ describe('public reading', () => {
     assert.deepEqual(fr.body.entries.map((e) => e.question), ['Publiée B', 'Publiée A'], 'French by default, drafts hidden');
     assert.deepEqual(Object.keys(fr.body.entries[0]).sort(), ['answer', 'id', 'question']);
     assert.deepEqual((await pub('en')).body.entries.map((e) => e.question), ['Published EN']);
-    assert.deepEqual((await pub('ar')).body.entries, [], 'nothing published: an empty list (the client hides the button)');
+    const ar = (await pub('ar')).body;
+    assert.deepEqual(ar.entries.map((e) => e.question), ['Publiée B', 'Publiée A'], 'nothing in Arabic yet: the French ones answer, never an empty panel');
+    assert.equal(ar.fallback, true);
+    assert.equal((await pub('en')).body.fallback, false);
     assert.equal((await pub('xx')).status, 400);
   });
 });

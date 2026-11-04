@@ -378,6 +378,24 @@ export async function setMemberRole(prisma, userId, spaceId, memberId, role) {
  * can then leave like anybody else; the one who can delete the space is now
  * the new owner, and only them.
  */
+/**
+ * Changes the name the others see for the caller in THIS space (R2-07). Only
+ * their own: there is no route to rename somebody else. `null` goes back to
+ * the account's name. The space's own name is refused: it is what made a
+ * creator look like the space itself (R2-01).
+ */
+export async function renameMyself(prisma, userId, spaceId, displayName) {
+  const me = assertOpen(await ownMembership(prisma, userId, spaceId));
+  if (displayName !== null && displayName.trim().toLowerCase() === me.space.label.trim().toLowerCase()) {
+    throw new HttpError(422, 'Your name cannot be the name of the space', { reason: 'nameIsSpace' });
+  }
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.finSpaceMember.update({ where: { id: me.id }, data: { displayName }, select: MEMBER_SELECT });
+    await recordChange(tx, { userId, entity: SPACE_ENTITY, entityId: spaceId, action: 'correct', field: 'displayName', before: me.displayName ?? null, after: displayName });
+    return updated;
+  });
+}
+
 export async function transferOwnership(prisma, userId, spaceId, memberId) {
   const me = await requireRole(prisma, userId, spaceId, 'owner');
   const target = await prisma.finSpaceMember.findFirst({ where: { id: memberId, spaceId, leftAt: null }, select: MEMBER_SELECT });

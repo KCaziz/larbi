@@ -663,3 +663,8 @@
   color: var(--text);
   font-style: italic;
 }
+
+.category-icon {
+  flex: none;
+  vertical-align: -0.2em;
+}

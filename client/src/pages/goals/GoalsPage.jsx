@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { Archive, ArchiveRestore, ChevronRight, Flag, Plus, Trash2 } from 'lucide-react';
+import { Archive, ArchiveRestore, ChevronRight, Flag, LifeBuoy, Plus, Trash2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
@@ -17,6 +17,7 @@ import LineChart from '../../components/fincludia/charts/LineChart.jsx';
 import BarList from '../../components/fincludia/charts/BarList.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import { toMinorUnits } from '../../lib/money.js';
+import CategoryIcon from '../../components/fincludia/CategoryIcon.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Goals.css';
 
@@ -27,6 +28,9 @@ import './Goals.css';
 // P8-25: creating a goal (OBJ-02) and one goal's detail (OBJ-03) have their
 // own addresses, `/app/objectifs/nouveau` and `/app/objectifs/:id`; this page
 // lists the goals and leads to them.
+// The icons offered for a goal of one's own; what is stored is the key of the icon.
+const GOAL_ICONS = ['🎯', '🏠', '🚗', '✈️', '🎓', '💍', '👶', '💻', '🎁', '🏥', '🌱', '🚀'];
+
 export default function GoalsPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
@@ -72,7 +76,9 @@ export default function GoalsPage() {
 
         {reserve.data && (
           <section className="goals-emergency" aria-labelledby="goals-emergency-title">
-            <h2 id="goals-emergency-title">🛟 {t('goals.emergencyTitle')}</h2>
+            <h2 id="goals-emergency-title">
+              <LifeBuoy size={18} aria-hidden="true" /> {t('goals.emergencyTitle')}
+            </h2>
             <div className="fin-figure-grid">
               <FigureCard label={t('reserve.months')} answer={reserve.data.moisReserve} />
               <FigureCard label={t('reserve.targetAmount')} answer={reserve.data.cibleMontant} />
@@ -128,7 +134,7 @@ function GoalRow({ goal, model }) {
           {/* The goal's own icon and colour (« Autre objectif », answer D1), else its model's. */}
           {(goal.icon ?? model?.icon) && (
             <span className="goals-row-icon" style={{ background: goal.color ?? model?.color ?? undefined }} aria-hidden="true">
-              {goal.icon ?? model?.icon}
+              <CategoryIcon emoji={goal.icon ?? model?.icon} size={16} />
             </span>
           )}
           <strong>{goal.label}</strong>
@@ -192,9 +198,20 @@ export function GoalDetail({ goal, formulas, statuses, accounts, contributions, 
         </p>
       ))}
 
-      <EditGoalForm goal={goal} run={run} />
+      {/* Two different things, said apart: moving money, and correcting the figures. */}
+      {goal.status !== 'fictional' && (
+        <section className="goals-action" aria-labelledby={`goal-pay-${goal.id}`}>
+          <h3 id={`goal-pay-${goal.id}`}>{t('goals.contributeTitle')}</h3>
+          <p className="fin-hint">{t('goals.contributeHelp')}</p>
+          <ContributionForm goal={goal} accounts={accounts} run={run} />
+        </section>
+      )}
 
-      {goal.status !== 'fictional' && <ContributionForm goal={goal} accounts={accounts} run={run} />}
+      <section className="goals-action" aria-labelledby={`goal-fix-${goal.id}`}>
+        <h3 id={`goal-fix-${goal.id}`}>{t('goals.editTitle')}</h3>
+        <p className="fin-hint">{goal.capitalSource === 'account' ? t('goals.editHelpAccount') : t('goals.editHelp')}</p>
+        <EditGoalForm goal={goal} run={run} />
+      </section>
       {contributions.length > 0 && (
         <section className="goals-contributions">
           <h3>{t('goals.contributions')}</h3>
@@ -338,6 +355,9 @@ function ScenarioForm({ goal }) {
         <div className="goals-scenario-result">
           <FigureCard label={t('goals.scenario.monthsToReach')} answer={result.moisPourAtteindre} />
           {result.dateAtteinte && <p>{t('goals.estimatedDate', { date: formatDate(i18n.language, result.dateAtteinte) })}</p>}
+          {/* In one sentence: ahead of the target date, behind it, or on it. */}
+          {result.dateAtteinte && goal.targetDate && <ScenarioVerdict t={t} reached={result.dateAtteinte} target={goal.targetDate} />}
+          {!result.dateAtteinte && <p>{t('goals.scenario.neverReached')}</p>}
           {result.capitalFinHorizon !== null && (
             <p>
               {t('goals.scenario.atHorizon', {
@@ -363,6 +383,14 @@ function ScenarioForm({ goal }) {
       )}
     </details>
   );
+}
+
+function ScenarioVerdict({ t, reached, target }) {
+  const a = new Date(reached);
+  const b = new Date(target);
+  const months = (b.getUTCFullYear() - a.getUTCFullYear()) * 12 + (b.getUTCMonth() - a.getUTCMonth());
+  if (months === 0) return <p className="goals-verdict">{t('goals.scenario.onTime')}</p>;
+  return <p className="goals-verdict">{t(months > 0 ? 'goals.scenario.ahead' : 'goals.scenario.behind', { months: Math.abs(months) })}</p>;
 }
 
 function EditGoalForm({ goal, run }) {
@@ -439,7 +467,6 @@ export function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel })
             <option value="">{t('goals.customTemplate')}</option>
             {templates.map((tpl) => (
               <option key={tpl.key} value={tpl.key}>
-                {tpl.icon ? `${tpl.icon} ` : ''}
                 {tpl.label}
               </option>
             ))}
@@ -448,8 +475,14 @@ export function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel })
         {!form.templateKey && (
           <>
             <div className="fin-field">
-              <label htmlFor="new-goal-icon">{t('goals.icon')}</label>
-              <input id="new-goal-icon" value={form.icon} maxLength={16} placeholder="🎯" onChange={(event) => setForm({ ...form, icon: event.target.value })} />
+              <span id="new-goal-icon-label">{t('goals.icon')}</span>
+              <div className="goals-icon-picker" role="radiogroup" aria-labelledby="new-goal-icon-label">
+                {GOAL_ICONS.map((emoji) => (
+                  <button key={emoji} type="button" role="radio" aria-checked={form.icon === emoji} aria-label={emoji} className={form.icon === emoji ? 'is-selected' : ''} onClick={() => setForm({ ...form, icon: form.icon === emoji ? '' : emoji })}>
+                    <CategoryIcon emoji={emoji} size={18} />
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="fin-field">
               <label htmlFor="new-goal-color">{t('goals.color')}</label>

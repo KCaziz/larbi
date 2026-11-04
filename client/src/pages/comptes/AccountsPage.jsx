@@ -12,6 +12,7 @@ import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
+import CategoryIcon from '../../components/fincludia/CategoryIcon.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Accounts.css';
 
@@ -154,7 +155,7 @@ function AccountCard({ account, types, run }) {
   return (
     <li className={account.archivedAt ? 'accounts-card accounts-card-archived' : 'accounts-card'} style={{ '--account-color': account.color }}>
       <span className="accounts-icon" aria-hidden="true">
-        {account.icon}
+        <CategoryIcon emoji={account.icon} size={20} />
       </span>
       <div className="accounts-text">
         <h3 className="accounts-name">

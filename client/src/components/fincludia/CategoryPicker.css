@@ -1,0 +1,106 @@
+.category-picker {
+  position: relative;
+  inline-size: 100%;
+}
+.category-picker-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  inline-size: 100%;
+  min-block-size: 44px;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface, transparent);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.category-picker-value {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.category-picker-placeholder {
+  opacity: 0.7;
+}
+.category-picker-panel {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: calc(100% + 4px);
+  z-index: 30;
+  max-block-size: min(420px, 70vh);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface, Canvas);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+.category-picker-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-block-end: 1px solid var(--border);
+}
+.category-picker-search input {
+  flex: 1;
+  min-inline-size: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.category-picker-clear {
+  display: inline-flex;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.category-picker-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-xs);
+  overflow-y: auto;
+}
+.category-picker-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  inline-size: 100%;
+  min-block-size: 40px;
+  padding: var(--space-xs) var(--space-sm);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.category-picker-row:hover,
+.category-picker-row:focus-visible {
+  background: var(--surface-alt, rgba(127, 127, 127, 0.14));
+}
+.category-picker-row[aria-current='true'] {
+  font-weight: 600;
+}
+.category-picker-name {
+  flex: 1;
+  min-inline-size: 0;
+}
+.category-picker-group,
+.category-picker-count {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+.category-picker-none {
+  padding: var(--space-sm);
+  opacity: 0.8;
+}

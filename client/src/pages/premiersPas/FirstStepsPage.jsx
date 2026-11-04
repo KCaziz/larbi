@@ -232,7 +232,6 @@ export function IncomeStep({ currency, run }) {
           {ordered.map((category) => (
             <option key={category.id} value={category.id}>
               {suggested(category) ? '★ ' : ''}
-              {category.icon ? `${category.icon} ` : ''}
               {category.label}
             </option>
           ))}

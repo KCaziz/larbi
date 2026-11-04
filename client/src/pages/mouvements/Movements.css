@@ -101,7 +101,7 @@
    wrap inside their own column instead of pushing the row apart. */
 .movements-row {
   display: grid;
-  grid-template-columns: 96px 150px minmax(0, 220px) minmax(0, 1fr) auto;
+  grid-template-columns: 96px minmax(150px, max-content) minmax(0, 220px) minmax(0, 1fr) auto;
   align-items: center;
 }
 .movements-row > * {
@@ -109,6 +109,7 @@
 }
 .movements-row .money-row-amount {
   min-inline-size: 0;
+  white-space: nowrap;
 }
 .movements-row .money-row-tags {
   margin-inline-end: 0;

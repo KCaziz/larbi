@@ -270,3 +270,28 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+.chatbot-tips {
+  margin-block-end: var(--space-sm);
+}
+.chatbot-tips h3,
+.chatbot-faq-title {
+  margin: 0 0 var(--space-xs);
+  font-size: 0.95rem;
+}
+.chatbot-tips details {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  margin-block-end: var(--space-xs);
+}
+.chatbot-tips summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  cursor: pointer;
+  font-weight: 600;
+}
+.chatbot-tips p {
+  margin: var(--space-xs) 0 0;
+}

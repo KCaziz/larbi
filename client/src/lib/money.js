@@ -27,15 +27,15 @@ export function formatMoney(language, amount, currency) {
 // `allowZero` because 0 means different things in different places: a PRICE of
 // zero is a mistake (P3-09), while a DECLARED amount of zero is a real answer
 // ("I have no savings") and must not be read as "not answered".
-// The largest amount the database keeps, in minor units (a 32-bit integer
-// column): 21 474 836,47 for a currency with cents. Above it the server
-// refuses rather than storing a different figure (recette R1-06).
-export const MAX_MINOR_UNITS = 2_147_483_647;
+// The largest amount the server keeps, in minor units: 10^15, that is
+// 10 000 000 000 000 DA. Above it the server refuses rather than storing a
+// different figure (recette R1-06, R1-10).
+export const MAX_MINOR_UNITS = 1_000_000_000_000_000;
 
 export function toMinorUnits(text, currency, { allowZero = false } = {}) {
   const digits = fractionDigits(currency);
   const clean = String(text ?? '').replace(/[\s  ]/g, '').replace(',', '.');
-  const pattern = digits > 0 ? new RegExp(`^(\\d{1,10})(?:\\.(\\d{1,${digits}}))?$`) : /^(\d{1,10})$/;
+  const pattern = digits > 0 ? new RegExp(`^(\\d{1,14})(?:\\.(\\d{1,${digits}}))?$`) : /^(\d{1,15})$/;
   const match = clean.match(pattern);
   if (!match) return null;
   const minor = Number(match[1] + (match[2] ?? '').padEnd(digits, '0'));

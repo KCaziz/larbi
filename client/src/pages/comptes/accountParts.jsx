@@ -68,7 +68,7 @@ export function AccountForm({ types, currency, initial, onSubmit }) {
         <select id="account-type" value={state.type} onChange={(event) => setState({ ...state, type: event.target.value })}>
           {types.map((type) => (
             <option key={type.id} value={type.id}>
-              {type.icon} {type.label}
+              {type.label}
             </option>
           ))}
         </select>

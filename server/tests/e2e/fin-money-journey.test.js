@@ -235,7 +235,15 @@ describe('FINCLUDIA money, end to end', { skip: findChrome() ? false : 'no Chrom
     const categoryId = (await t.prisma.finCategory.findFirst({ where: { key: 'variable.alimentation_boissons', userId: null }, select: { id: true } })).id;
     assert.ok(await b.clickWhere(`e => (e.getAttribute('title') ?? '') === ${JSON.stringify(fr.movements.edit)}`));
     assert.ok(await b.waitFor("document.querySelector('#entry-note')?.value === 'Courses de la semaine'", 'the movement in the form'));
-    assert.ok(await setValue('#entry-categoryId', categoryId, 'HTMLSelectElement'));
+    // The category picker (R3-07): open it, search, choose.
+    assert.ok(await b.clickWhere('e => e.id === "entry-categoryId"'));
+    assert.ok(await b.waitFor("!!document.querySelector('.category-picker-panel input')", 'the picker'));
+    const wanted = (await t.prisma.finCategory.findUnique({ where: { id: categoryId }, select: { label: true } })).label;
+    await fill('.category-picker-panel input', wanted.slice(0, 6));
+    const named = `e => e.classList.contains('category-picker-row') && e.querySelector('.category-picker-name')?.textContent === ${JSON.stringify(wanted)}`;
+    assert.ok(await b.waitFor(`[...document.querySelectorAll('.category-picker-row')].some(${named})`, 'the result of the search'));
+    assert.ok(await b.clickWhere(named));
+    assert.ok(await b.waitFor(`document.querySelector('#entry-categoryId')?.textContent.includes(${JSON.stringify(wanted)})`, 'the choice on the button'));
     assert.ok(await b.click(mm.save));
     assert.ok(await b.waitText(fr.movements.corrected), 'back on the movement, which says so');
     const moved = await t.prisma.finTransaction.findFirst({ where: { userId: user.id, note: 'Courses de la semaine' } });

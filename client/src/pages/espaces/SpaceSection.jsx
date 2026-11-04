@@ -99,6 +99,28 @@ function DashboardSection({ t, language, spaceId, data, canAdmin, run, reload, f
 
 // MY matrix (the only sharing control, writing my own row), the members, the
 // invitations — the token shown once — and leaving or deleting the space.
+// The name the others see for me in this space (R2-07): mine alone to change.
+function MyName({ t, spaceId, current, run }) {
+  const [name, setName] = useState(current);
+  const submit = (event) => {
+    event.preventDefault();
+    const clean = name.trim();
+    if (clean && clean !== current) run(() => api.put(`/fin/espaces/${spaceId}/mon-nom`, { displayName: clean }), 'spaces.nameSaved');
+  };
+  return (
+    <form className="spaces-form" onSubmit={submit}>
+      <div className="fin-field">
+        <label htmlFor="my-space-name">{t('spaces.myNameLabel')}</label>
+        <input id="my-space-name" value={name} maxLength={60} onChange={(event) => setName(event.target.value)} required />
+        <span className="fin-hint">{t('spaces.myNameHelp')}</span>
+      </div>
+      <Button type="submit" variant="secondary">
+        {t('spaces.myNameSave')}
+      </Button>
+    </form>
+  );
+}
+
 function MembersSection({ t, language, spaceId, data, canAdmin, run, feedback }) {
   const navigate = useNavigate();
   const references = useApi('/fin/espaces/references');
@@ -131,6 +153,7 @@ function MembersSection({ t, language, spaceId, data, canAdmin, run, feedback })
       </ul>
 
       <h2>{t('spaces.membersTitle')}</h2>
+      <MyName t={t} spaceId={spaceId} current={data.membres.find((member) => member.isMe)?.name ?? ''} run={run} />
       <ul className="spaces-members">
         {data.membres.map((member) => (
           <li key={member.id} className="spaces-member">

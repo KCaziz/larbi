@@ -628,7 +628,9 @@
     "forbidden": "Ulac anekcum-ik ɣer usebter-a.",
     "notFound": "Aferdis ulac-it.",
     "fileTooLarge": "Afaylu-a meqqer aṭas.",
-    "fileUnsupported": "Anaw-a n ufaylu ur yettwaqbal ara."
+    "fileUnsupported": "Anaw-a n ufaylu ur yettwaqbal ara.",
+    "conflict": "Tigawt-a ur tezmir ara tura.",
+    "refused": "Azal-a neɣ asuter-a ur ttwaqbalen ara. Ɛiwdet tuqqna n yiwen n wumuɣ."
   },
   "state": {
     "loading": "Asali…",

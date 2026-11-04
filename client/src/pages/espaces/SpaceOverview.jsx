@@ -39,7 +39,7 @@ export default function SpaceOverview({ t, language, spaceId, space }) {
   const money = (amount) => formatAmount(language, amount, d.currency);
   const categoryLabel = (key) => {
     const found = refs.data?.categories.find((item) => item.key === key);
-    return found ? `${found.icon} ${found.label}` : t('spaces.report.noCategory');
+    return found ? found.label : t('spaces.report.noCategory');
   };
   const at = (path) => `/partage/${spaceId}/${path}`;
   // The vocabulary follows the kind of space (the household says « foyer »).

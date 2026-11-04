@@ -456,7 +456,7 @@ model FinIncome {
   // that erasure fail for anyone who had used a category of their own.
   categoryId  String?
   category    FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  value       Int
+  value       Float
   currency    String       @db.VarChar(3)
   // One of FREQUENCIES (constants/finance.js): hebdomadaire, mensuel,
   // trimestriel, semestriel, annuel. F001 normalises it to the month.
@@ -498,16 +498,16 @@ model FinAccount {
   // decides the nature (asset, liability...).
   type              String           @db.VarChar(5)
   currency          String           @db.VarChar(3)
-  openingBalance    Int              @default(0)
+  openingBalance    Float            @default(0)
   openingDate       DateTime         @default(now())
   includeInTotal    Boolean
   includeInNetWorth Boolean
   // Null means the type's own colour and icon.
   color             String?          @db.VarChar(9)
   icon              String?          @db.VarChar(16)
-  minBalanceAlert   Int?
-  maxBalanceInfo    Int?
-  overdraftAllowed  Int?
+  minBalanceAlert   Float?
+  maxBalanceInfo    Float?
+  overdraftAllowed  Float?
   note              String?          @db.VarChar(300)
   // The metadata socle every financial row carries (P6-02).
   scope             String           @default("personal") @db.VarChar(20)
@@ -613,7 +613,7 @@ model FinTransaction {
   // The two writes of one transfer share this id (PB-PR-06), and are written
   // together in one database transaction.
   transferId    String?           @db.VarChar(36)
-  value         Int
+  value         Float
   currency      String            @db.VarChar(3)
   occurredAt    DateTime
   categoryId    String?
@@ -794,9 +794,9 @@ model FinEnvelope {
   categoryGroup String?      @db.VarChar(60)
   // One of ENVELOPE_KINDS: the client's own « fixe / variable ».
   kind          String       @db.VarChar(10)
-  value         Int
+  value         Float
   currency      String       @db.VarChar(3)
-  cap           Int?
+  cap           Float?
   // Whether this envelope is carried over when the budget is duplicated for the
   // next period. A one-off envelope (a trip, school fees) must not silently
   // reappear next month.
@@ -839,7 +839,7 @@ model FinGoal {
   // D1, 2026-10-28; C09 in red). Null = the model's icon and colour.
   icon                String?     @db.VarChar(16)
   color               String?     @db.VarChar(7)
-  target              Int
+  target              Float
   currency            String      @db.VarChar(3)
   // "Date future" the client asks for at creation. Nullable all the same: a
   // goal corrected later or a fictional one may lose its date without losing
@@ -848,8 +848,8 @@ model FinGoal {
   // "Capital déjà affecté". Bounded against this account's own marked savings
   // (F007) at the service layer — a CHECK cannot read another table — except
   // for a fictional goal, which plays with money that was never really saved.
-  allocated           Int         @default(0)
-  monthlyContribution Int?
+  allocated           Float       @default(0)
+  monthlyContribution Float?
   // « En cours / Atteint / En pause / Arrêté » (P8-12, tab 10B). Separate
   // from the socle's `status`, which says how the row is known.
   progressStatus      String      @default("active") @db.VarChar(10)
@@ -893,15 +893,15 @@ model FinDebt {
   // The real asset this debt financed, if any (a car, a flat) — informational
   // only; linking it to P6-11's patrimony is for when that task exists.
   assetFinanced        String?          @db.VarChar(120)
-  outstandingPrincipal Int
-  monthlyInstalment    Int
+  outstandingPrincipal Float
+  monthlyInstalment    Float
   currency             String           @db.VarChar(3)
   // A ratio (0.07 = 7 %) when the client knows it, null otherwise — never
   // guessed from the instalment, which would invent a rate nobody declared.
   rate                 Float?
   // The alternative when the rate is not known: a total cost already declared
   // by the lender (a store credit's fixed total, for instance).
-  knownTotalCost       Int?
+  knownTotalCost       Float?
   dueDate              DateTime?
   // P8-13 (tab 09_Dettes): « owed » — what I owe (D-02 to D-05) — or « lent »
   // — a receivable, what is owed to me (D-01). Always kept apart.
@@ -943,7 +943,7 @@ model FinDebtPayment {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   debtId    String
   debt      FinDebt   @relation(fields: [debtId], references: [id], onDelete: Cascade)
-  amount    Int
+  amount    Float
   currency  String    @db.VarChar(3)
   paidAt    DateTime
   note      String?   @db.VarChar(300)
@@ -977,7 +977,7 @@ model FinRecurrence {
   // "income" | "expense" (TRANSACTION_KINDS): a recurrence is money that comes
   // in or goes out, like the movement it will become.
   kind         String          @db.VarChar(10)
-  value        Int
+  value        Float
   currency     String          @db.VarChar(3)
   // One of FREQUENCIES (constants/finance.js). F049 normalises it to the month
   // so the monthly and yearly cost of a subscription can be shown.
@@ -1041,10 +1041,10 @@ model FinProvision {
   categoryId   String?
   category     FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   // The amount the dated expense is expected to be.
-  value        Int
+  value        Float
   currency     String       @db.VarChar(3)
   // What has already been set aside for it.
-  provisioned  Int          @default(0)
+  provisioned  Float        @default(0)
   // The date the expense falls due.
   targetDate   DateTime
   reminderDays Json         @default("[7, 1]")
@@ -1086,7 +1086,7 @@ model FinAsset {
   kind        String       @db.VarChar(20)
   categoryId  String?
   category    FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  value       Int
+  value       Float
   currency    String       @db.VarChar(3)
   // WHEN the value was established. Not `updatedAt`: re-reading a row does not
   // make its valuation fresher, and the client's « alerte valeur de plus de 90
@@ -1144,7 +1144,7 @@ model FinSpace {
   // Below this amount a debt is no longer PROPOSED as a repayment (P9-04, the
   // client's « petit solde », 200 DA by default, editable). It only hides a
   // proposal: the balance itself is never erased.
-  smallBalance Int                 @default(20000)
+  smallBalance Float               @default(20000)
   // Set when the owner closes a TEMPORARY space (P9-03, rule B3): from then on
   // nothing is written in it; the history, balances, reports and exports stay readable.
   closedAt     DateTime?
@@ -1261,11 +1261,11 @@ model FinPaperPortfolio {
   user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   // The fictional starting capital. The client's own default is 100 000 DA,
   // and it is « modifiable ».
-  capital     Int
+  capital     Float
   // Fictional cash not currently invested. Kept as a column rather than derived
   // from the trades: it is what the next buy is checked against, and deriving
   // it on every write would make that check a race.
-  cash        Int
+  cash        Float
   currency    String               @db.VarChar(3)
   // Simulated fee rate, as a decimal of the traded amount. Stored per portfolio
   // so it is visible and editable — never a hidden coefficient.
@@ -1297,7 +1297,7 @@ model FinPaperInstrument {
   // this becomes a key into it.
   label       String            @db.VarChar(80)
   // The person's own simulated price per unit, in centimes.
-  markPrice   Int
+  markPrice   Float
   markedAt    DateTime
   note        String?           @db.VarChar(300)
   createdAt   DateTime          @default(now())
@@ -1324,10 +1324,10 @@ model FinPaperTrade {
   // Whole units. A workshop does not need fractional shares, and an integer is
   // a quantity somebody can check.
   quantity     Int
-  unitPrice    Int
+  unitPrice    Float
   // The simulated fee actually applied, stored rather than recomputed: a later
   // change of the portfolio's rate must not rewrite the past.
-  fee          Int
+  fee          Float
   currency     String             @db.VarChar(3)
   decidedAt    DateTime
   note         String?            @db.VarChar(300)
@@ -1360,7 +1360,7 @@ model FinSharedExpense {
   payerId               String
   payer                 FinSpaceMember   @relation("ExpensePayer", fields: [payerId], references: [id], onDelete: Cascade)
   label                 String           @db.VarChar(80)
-  value                 Int
+  value                 Float
   currency              String           @db.VarChar(3)
   occurredAt            DateTime
   // One of SPLIT_MODES (constants/finShared.js). Stored so the screen can say
@@ -1391,7 +1391,7 @@ model FinSharedExpense {
   // existing transaction before it was cut to their share, and whether the
   // personal expense was made BY this record (then it goes back with it).
   advanceTransferId     String?          @db.VarChar(36)
-  advanceOriginalValue  Int?
+  advanceOriginalValue  Float?
   personalCreated       Boolean          @default(false)
   personalTransactionId String?          @unique
   personalTransaction   FinTransaction?  @relation("SharedExpenseSource", fields: [personalTransactionId], references: [id], onDelete: SetNull)
@@ -1426,11 +1426,11 @@ model FinSharedShare {
   memberId  String
   member    FinSpaceMember   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   // What this participant owes of the expense, in centimes.
-  share     Int
+  share     Float
   // The weight that produced it, when the split was proportional: a percentage
   // in hundredths of a percent, or the income used. Kept so the screen can
   // show WHY a share is what it is, and so the figure can be argued with.
-  weight    Int?
+  weight    Float?
   createdAt DateTime         @default(now())
 
   // One share per participant per expense: two would split the same money
@@ -1450,7 +1450,7 @@ model FinSettlement {
   from         FinSpaceMember @relation("SettlementFrom", fields: [fromId], references: [id], onDelete: Cascade)
   toId         String
   to           FinSpaceMember @relation("SettlementTo", fields: [toId], references: [id], onDelete: Cascade)
-  value        Int
+  value        Float
   currency     String         @db.VarChar(3)
   settledAt    DateTime
   note         String?        @db.VarChar(300)
@@ -1486,7 +1486,7 @@ model FinSpaceGoal {
   spaceId                 String
   space                   FinSpace                   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   label                   String                     @db.VarChar(80)
-  target                  Int
+  target                  Float
   currency                String                     @db.VarChar(3)
   targetDate              DateTime?
   note                    String?                    @db.VarChar(300)
@@ -1516,7 +1516,7 @@ model FinSpaceGoalContribution {
   spaceGoal     FinSpaceGoal   @relation(fields: [spaceGoalId], references: [id], onDelete: Cascade)
   memberId      String
   member        FinSpaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  amount        Int
+  amount        Float
   currency      String         @db.VarChar(3)
   contributedAt DateTime
   note          String?        @db.VarChar(300)
@@ -1535,7 +1535,7 @@ model FinSpaceGoalShare {
   spaceGoal   FinSpaceGoal   @relation(fields: [spaceGoalId], references: [id], onDelete: Cascade)
   memberId    String
   member      FinSpaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  amount      Int
+  amount      Float
 
   @@unique([spaceGoalId, memberId])
   @@index([memberId])
@@ -1570,8 +1570,8 @@ model FinSpaceProvision {
   spaceId            String
   space              FinSpace  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   label              String    @db.VarChar(80)
-  plannedAmount      Int
-  alreadyProvisioned Int       @default(0)
+  plannedAmount      Float
+  alreadyProvisioned Float     @default(0)
   currency           String    @db.VarChar(3)
   targetDate         DateTime
   note               String?   @db.VarChar(300)
@@ -2606,8 +2606,8 @@ model FinBusinessDocument {
   // Montants en centimes, comme partout dans le moteur. Hors taxe et taxe sont
   // DÉCLARÉS tous les deux : le taux de TVA appliqué appartient au document
   // réel, et aucun taux n'est supposé ici (voir P7-01).
-  amountExcl  Int
-  taxAmount   Int                  @default(0)
+  amountExcl  Float
+  taxAmount   Float                @default(0)
   currency    String               @db.VarChar(3)
   note        String?              @db.VarChar(300)
   scope       String               @default("business") @db.VarChar(20)
@@ -2639,7 +2639,7 @@ model FinBusinessPayment {
   business    FinBusiness         @relation(fields: [businessId], references: [id], onDelete: Cascade)
   documentId  String
   document    FinBusinessDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  value       Int
+  value       Float
   currency    String              @db.VarChar(3)
   receivedAt  DateTime
   method      String?             @db.VarChar(20)
@@ -2674,9 +2674,9 @@ model FinPayslip {
   // [{ kind, label, value }] as the decoder accepts them.
   lines       Json
   // In centimes: the gross, the net the lines give, the net printed on it.
-  gross       Int
-  value       Int
-  declaredNet Int?
+  gross       Float
+  value       Float
+  declaredNet Float?
   currency    String    @default("DZD") @db.VarChar(3)
   scope       String    @default("personal") @db.VarChar(20)
   source      String    @db.VarChar(20)
@@ -2723,7 +2723,7 @@ model FinSpaceBudget {
   category  String    @db.VarChar(8)
   // `YYYY-MM`.
   period    String    @db.VarChar(7)
-  value     Int
+  value     Float
   setById   String
   version   Int       @default(1)
   deletedAt DateTime?
@@ -2789,7 +2789,7 @@ model FinSpaceInflow {
   kind         String    @db.VarChar(12)
   // The member who contributed, for a contribution.
   memberId     String?
-  value        Int
+  value        Float
   occurredAt   DateTime
   status       String    @default("confirmed") @db.VarChar(10)
   note         String?   @db.VarChar(300)
@@ -2834,7 +2834,7 @@ model FinMission {
   summary        String              @db.VarChar(500)
   // Education profile codes it is offered to; an empty list means everybody.
   profiles       Json                @default("[]")
-  startingAmount Int
+  startingAmount Float
   currency       String              @db.VarChar(3)
   // [{ key, prompt, choices: [{ key, label, cash, savings, resilience, explanation }] }]
   steps          Json

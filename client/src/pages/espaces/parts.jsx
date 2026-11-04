@@ -6,6 +6,7 @@ import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { formatAmount, formatDate, formatRatio } from '../../lib/format.js';
 import BarList from '../../components/fincludia/charts/BarList.jsx';
+import CategoryPicker from '../../components/fincludia/CategoryPicker.jsx';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
@@ -670,30 +671,23 @@ export function ExpenseForm({ t, spaceId, currency, members, references, run, on
             <option value="">{t('spaces.shared.fields.noCategory')}</option>
             {(budgetReferences.data?.categories ?? []).map((category) => (
               <option key={category.key} value={category.key}>
-                {`${category.icon} ${category.label}`}
+                {category.label}
               </option>
             ))}
           </select>
         </label>
-        <label htmlFor="shared-expense-reference">
-          {t('spaces.shared.fields.referenceCategory')}
-          <select id="shared-expense-reference" value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
-            <option value="">{t('spaces.shared.fields.referenceFromCommon')}</option>
-            {(referenceCategories.data?.groups ?? [])
+        <div className="fin-field">
+          <label htmlFor="shared-expense-reference">{t('spaces.shared.fields.referenceCategory')}</label>
+          <CategoryPicker
+            id="shared-expense-reference"
+            value={categoryId}
+            emptyLabel={t('spaces.shared.fields.referenceFromCommon')}
+            groups={(referenceCategories.data?.groups ?? [])
               .filter((group) => ['fixed', 'variable', 'seasonal', 'debt', 'shared'].includes(group.code))
-              .map((group) => (
-                <optgroup key={group.code} label={group.label}>
-                  {group.categories
-                    .filter((category) => !category.archivedAt)
-                    .map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.label}
-                      </option>
-                    ))}
-                </optgroup>
-              ))}
-          </select>
-        </label>
+              .map((group) => ({ ...group, categories: group.categories.filter((category) => !category.archivedAt) }))}
+            onChange={setCategoryId}
+          />
+        </div>
         <label htmlFor="shared-expense-subcategory">
           {t('spaces.shared.fields.subCategory')}
           <input id="shared-expense-subcategory" type="text" list="shared-expense-subcategories" value={subCategory} onChange={(event) => setSubCategory(event.target.value)} maxLength={40} />

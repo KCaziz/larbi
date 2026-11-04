@@ -94,6 +94,8 @@ export function errorKey(err, overrides = {}) {
   if (status === 400) return 'errors.invalid';
   if (status === 403) return 'errors.forbidden';
   if (status === 404) return 'errors.notFound';
+  if (status === 409) return 'errors.conflict';
+  if (status === 422) return 'errors.refused';
   if (status === 413) return 'errors.fileTooLarge';
   if (status === 415) return 'errors.fileUnsupported';
   if (status === 429) return 'errors.tooMany';

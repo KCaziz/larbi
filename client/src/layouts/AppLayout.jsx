@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Menu, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
 import { useApi } from '../lib/useApi.js';
+import { useRevealOnAction } from '../lib/useRevealOnAction.js';
 import { APP_NAV, NAV_SECTIONS, SETTINGS_LINKS, visibleEntries } from '../config/appNavigation.js';
 import ChatbotWidget from '../components/assistant/ChatbotWidget.jsx';
 import QuickAdd from '../components/fincludia/QuickAdd.jsx';
@@ -20,6 +21,7 @@ import './AppLayout.css';
 // sheet below 768 px.
 export default function AppLayout() {
   const { t } = useTranslation();
+  useRevealOnAction();
   const { pathname } = useLocation();
   const journey = useApi('/fin/parcours');
   const declaredMinor = journey.data?.mineurDeclare === true;

@@ -222,7 +222,7 @@ describe('P6-22 — les cibles de réserve, grille A', () => {
     // lirait comme un oubli.
     for (const code of FIN_PUBLIC_CODES) assert.ok(RESERVE_TARGETS[code], code);
     assert.equal(RESERVE_TARGETS.EPG.months, null);
-    assert.match(RESERVE_TARGETS.EPG.note, /Aucune cible par profil/);
+    assert.match(RESERVE_TARGETS.EPG.note, /Pas de cible propre à ce profil/);
   });
 
   test('un lycéen n’est jamais alerté sur sa réserve', () => {
