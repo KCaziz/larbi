@@ -11,7 +11,7 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import FigureCard from '../../components/fincludia/FigureCard.jsx';
+import FigureCard, { HowToCompute } from '../../components/fincludia/FigureCard.jsx';
 import CategoryIcon from '../../components/fincludia/CategoryIcon.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Accounts.css';
@@ -171,6 +171,7 @@ function AccountCard({ account, types, run }) {
         {account.liability && <span className="accounts-owed">{t('accounts.owed')} </span>}
         {account.solde.resultat === null ? t('fincludia.notComputed') : formatAmount(i18n.language, account.solde.resultat, account.currency)}
       </p>
+      {account.solde.resultat === null && <HowToCompute hint={{ key: 'accountBalance', to: `/app/comptes/${account.id}/modifier` }} />}
 
       {/* AL-P02 / AL-P03: an icon AND a sentence, never the colour alone. */}
       {account.alertes.length > 0 && (

@@ -1632,12 +1632,11 @@
     },
     "missions": {
       "title": "Pedagogical missions",
-      "subtitle": "The missions' scenarios, entered here; the scoring rule is the same for all.",
+      "subtitle": "Short role-plays: a pretend amount, steps, and at each step choices with consequences.",
       "create": "New mission",
-      "json": "The mission (JSON)",
       "save": "Save",
       "cancel": "Cancel",
-      "rule": "Rule (not editable): the final money is the starting sum plus the effect of each choice; savings and resilience are the sums of their effects; the badge is the highest one whose threshold is reached. Amounts in cents of the fictive sum.",
+      "rule": "Scoring (the same for all): final money = starting amount + effects of each choice; savings and resilience = the sum of their effects; badge = the highest whose resilience threshold is reached.",
       "none": "No mission entered.",
       "counts": "{{steps}} step(s) · profiles: {{profiles}}",
       "everybody": "everybody",
@@ -1650,7 +1649,54 @@
       "published": "Mission published.",
       "unpublished": "Mission back to draft.",
       "deleted": "Mission deleted.",
-      "notJson": "This text is not valid JSON."
+      "howItWorks": "A mission starts from a pretend amount. At each step the person picks an answer; each choice changes the money available, the savings and a \"resilience\" score, then shows its explanation. At the end they get the highest badge whose threshold they reach. The mission stays a draft until you publish it.",
+      "invalid": "The mission was not saved: a field is empty or out of range. Check each step and each choice.",
+      "slugTaken": "A mission already has this title: choose another one.",
+      "sections": {
+        "general": "The mission",
+        "step": "Step {{number}}",
+        "choice": "Choice {{number}}",
+        "badges": "Badges"
+      },
+      "fields": {
+        "title": "Title",
+        "summary": "Introduction (one or two sentences)",
+        "profiles": "For which profiles?",
+        "profilesHint": "None ticked: the mission is offered to everybody.",
+        "startingAmount": "Pretend starting amount (DA)",
+        "startingAmountHint": "The money the person has at the start of the mission.",
+        "prompt": "The situation (what the person reads)",
+        "choiceLabel": "The answer offered",
+        "cash": "Effect on money (DA, negative = spending)",
+        "savings": "Effect on savings (DA)",
+        "resilience": "Effect on resilience (-100 to 100)",
+        "explanation": "Explanation shown after this choice",
+        "badgeLabel": "Badge name",
+        "minResilience": "Minimum resilience"
+      },
+      "badgesHint": "Optional. A badge is earned when the final resilience reaches its threshold.",
+      "addStep": "Add a step",
+      "removeStep": "Remove the step",
+      "addChoice": "Add a choice",
+      "removeChoice": "Remove",
+      "addBadge": "Add a badge",
+      "removeBadge": "Remove",
+      "errors": {
+        "titleSummary": "Give the mission a title and an introduction.",
+        "amount": "The starting amount must be a positive number.",
+        "prompt": "Each step must describe a situation.",
+        "choice": "Each choice needs an answer and an explanation.",
+        "effects": "Effects must be numbers; resilience goes from -100 to 100.",
+        "badge": "Each badge needs a name and a whole-number threshold."
+      },
+      "profiles": {
+        "LYC": "High-school student",
+        "ETU": "Student",
+        "JAC": "Young worker",
+        "SAL": "Employee",
+        "EPG": "Beginner saver",
+        "AUT": "Other"
+      }
     }
   },
   "learn": {
@@ -2910,6 +2956,24 @@
         "createBudget": "Your spending is compared to envelopes instead of being one total.",
         "addMovement": "From the first recorded expense, your totals and what is left are computed."
       }
+    },
+    "howTo": {
+      "lead": "To get it:",
+      "reserveFund": "create your emergency fund",
+      "essentialExpenses": "give your essential expenses",
+      "reserveTarget": "choose how many months to hold",
+      "income": "add your income",
+      "budget": "create a budget for the month",
+      "contribution": "say how much you put in each month",
+      "goalDate": "give your goal a date",
+      "debts": "declare your debts",
+      "savings": "set money aside on a goal",
+      "accounts": "add an account and its balance",
+      "accountBalance": "give this account's balance",
+      "movements": "record your spending and income",
+      "health": "see what is missing",
+      "assets": "add what you own",
+      "formation": "start a course"
     }
   },
   "finOnboarding": {
@@ -3377,7 +3441,26 @@
     "plannedInBudget": "Instalment planned in the budget.",
     "curveTitle": "Remaining debt, month by month",
     "curveMonthHead": "Month",
-    "curveMonth": "Month {{month}}"
+    "curveMonth": "Month {{month}}",
+    "progress": {
+      "title": {
+        "owed": "Where my debts stand",
+        "lent": "What I am still owed"
+      },
+      "total": {
+        "owed": "{{left}} left to repay out of {{start}} borrowed: {{percent}}% already repaid.",
+        "lent": "{{left}} left to get back out of {{start}} lent: {{percent}}% already returned."
+      },
+      "repaid": {
+        "owed": "Already repaid",
+        "lent": "Already returned"
+      },
+      "left": {
+        "owed": "Left to repay",
+        "lent": "Left to get back"
+      },
+      "row": "{{left}} left out of {{start}} ({{percent}}% done)"
+    }
   },
   "reserve": {
     "title": "Emergency fund",
@@ -3426,6 +3509,14 @@
         "after": "First do the two steps above: they set the amount to reach.",
         "create": "Create my emergency fund"
       }
+    },
+    "howTo": {
+      "lead": "How to set them:",
+      "record": "Record your housing, food, energy, transport, health, phone spending…: each one counts as soon as it is in an essential category.",
+      "recordLink": "Add an expense",
+      "mark": "Choose what counts as essential: in your categories, tick or untick \"Essential\".",
+      "markLink": "My categories",
+      "estimate": "Until a month of spending is recorded, give an estimate below: it is used meanwhile."
     }
   },
   "calendar": {
@@ -3820,6 +3911,14 @@
       "price": "Enter a price as a whole number.",
       "trade": "Enter a quantity and a price as whole numbers.",
       "refused": "This operation was refused. Check the fictional cash and the quantities."
+    },
+    "guide": {
+      "title": "How to practise",
+      "step1": "Add a holding: give it a name (for example \"Share A\" or \"Cautious fund\"), a type and a starting price you choose.",
+      "step2": "Buy some with your pretend capital of {{amount}}: the simulated fees are deducted, as for real.",
+      "step3": "Change its price to simulate a rise or a fall, and watch your gain or loss and your return.",
+      "step4": "Write down why you bought or sold in the decision journal, then read it again later.",
+      "why": "No list of placements and no price is given here: you create the holdings yourself, to learn without a real price being suggested to you."
     }
   },
   "spaces": {
@@ -4712,12 +4811,12 @@
     "movements": "Movements",
     "budgets": "Budgets",
     "sections": {
+      "start": "Get started",
       "daily": "Day to day",
       "analyse": "Analyse",
       "build": "Build",
       "tools": "Tools",
-      "learn": "Learn",
-      "start": "Get started"
+      "learn": "Learn"
     },
     "synthesis": "Summary",
     "calendar": "Financial calendar",
@@ -4910,7 +5009,14 @@
     },
     "clearingIntro": "What is left to check, one click per movement.",
     "chooseCategory": "Choose a category…",
-    "categorised": "Category saved."
+    "categorised": "Category saved.",
+    "clearingLegend": "What do \"checked\", \"reconciled\", \"to verify\" mean?",
+    "clearingHelp": {
+      "unchecked": "You have not checked this movement yet.",
+      "checked": "You have checked that this movement is right (amount, date, category).",
+      "reconciled": "You found it on your bank or CCP statement: the account itself confirms it.",
+      "to_verify": "Something is wrong (amount, duplicate, unknown operation): to look at again later."
+    }
   },
   "appHome": {
     "title": "Home",
@@ -5226,7 +5332,66 @@
     "favorite": "Add “{{name}}” to my favourites",
     "unfavorite": "Remove “{{name}}” from my favourites",
     "favoriteError": "The favourite could not be saved. Try again.",
-    "noFavorite": "No favourite yet: tap the star of a tool to keep it here."
+    "noFavorite": "No favourite yet: tap the star of a tool to keep it here.",
+    "descriptions": {
+      "CAL-01": "Share your month’s income between your spending and see what is left.",
+      "CAL-02": "Know how much you can spend per day until the end of the month.",
+      "CAL-03": "Set an envelope for a category and follow what is left in it.",
+      "CAL-04": "See how much you can set aside each month.",
+      "CAL-05": "Know how many months of essential expenses your savings cover.",
+      "CAL-06": "Work out how much to save each month to reach a goal by a date.",
+      "CAL-07": "The same, with savings that earn interest.",
+      "CAL-08": "See what an amount will be worth tomorrow as prices rise.",
+      "CAL-09": "Measure the share of your income that goes to your debts.",
+      "CAL-10": "Estimate a loan’s monthly payment from the amount, term and rate.",
+      "CAL-11": "See what you save by repaying a loan early.",
+      "CAL-12": "Compare two ways of paying off several debts.",
+      "CAL-13": "Add up what you own minus what you owe.",
+      "CAL-14": "Practise investing with pretend money, without risk.",
+      "CAL-15": "See which share of your spending you cover yourself as a student.",
+      "CAL-16": "Set money aside each month for a large yearly expense.",
+      "CAL-17": "Plan the budget of your first salary.",
+      "CAL-18": "Compare two job offers on what you really keep.",
+      "CAL-19": "Find your subscriptions and what they cost per month and per year.",
+      "CAL-24": "See where your file stands before asking for financing.",
+      "CAL-25": "Compare banks’ credit offers.",
+      "CAL-26": "Find out how you relate to risk, for learning purposes.",
+      "CAL-27": "Follow what you have learnt about finance.",
+      "CAL-28": "A marker of the state of your finances, explained point by point.",
+      "CAL-29": "Get an idea of what your savings will give at retirement.",
+      "CAL-IC": "Understand the difference between simple and compound interest.",
+      "CAL-30": "Estimate what housing costs, buying or renting.",
+      "CAL-V7-01": "Compare your spending with the 50% needs, 30% wants, 20% savings rule.",
+      "CAL-V7-02": "Compare several monthly saving paces.",
+      "CAL-V7-03": "Tick your operations one by one to check your accounts.",
+      "CAL-V7-04": "Forecast your balance at the end of the month.",
+      "CAL-V7-05": "Your month in review, to read or download.",
+      "CAL-P01": "The balance of each of your accounts.",
+      "CAL-P02": "The total of your accounts.",
+      "CAL-P03": "What came in minus what went out over a period.",
+      "CAL-P04": "What is left in each budget.",
+      "CAL-P05": "The share of your income not yet given to a budget.",
+      "CAL-P06": "How much you spend on average per day.",
+      "CAL-P07": "Where you will be at the end of the period at this pace.",
+      "CAL-P08": "What you can still spend today.",
+      "CAL-P09": "Where each of your goals stands.",
+      "CAL-P10": "Your emergency fund in months of expenses.",
+      "CAL-P11": "The share of your income spent on debts.",
+      "CAL-P12": "The order in which to repay your debts.",
+      "CAL-P13": "Your payments that come back every month.",
+      "CAL-P14": "What you had planned against what happened.",
+      "CAL-P15": "How your income and spending change month to month.",
+      "CAL-P16": "A loan’s monthly payment.",
+      "CAL-P17": "What your accounts represent in your wealth.",
+      "LY09": "Plan the budget of your studies.",
+      "OUT-COMPARATEUR": "Compare banks, fees and services, for your profile.",
+      "OUT-POSTAL": "Algérie Poste services explained: CCP, cards, BaridiMob.",
+      "OUT-COMPARER": "Compare two choices side by side on your own criteria.",
+      "OUT-ATELIER": "Try scenarios on your figures without changing anything.",
+      "OUT-PAIE": "Understand each line of your payslip.",
+      "OUT-FACTURE": "Create an invoice and download it as a PDF.",
+      "OUT-EXPLORATEUR": "Search your data: movements, categories, periods."
+    }
   },
   "compare": {
     "title": "Compare options",
@@ -5429,7 +5594,8 @@
     "search": "Search a category",
     "clearSearch": "Clear the search",
     "noResult": "No category matches.",
-    "back": "Back"
+    "back": "Back",
+    "inGroup": "in {{group}}"
   },
   "tips": {
     "accueil": [
@@ -5532,5 +5698,109 @@
         "body": "You choose, kind of data by kind of data, what the other members see of you."
       }
     ]
+  },
+  "market": {
+    "title": "Learning market",
+    "intro": "The main families of placements, to understand return, risk and liquidity before practising.",
+    "backToPortfolio": "Back: Practice portfolio",
+    "open": "See the learning market",
+    "fictionTitle": "Fictional examples, not real prices.",
+    "fictionBody": "Each holding is a type of placement with a generic name. Its return and its variation are teaching assumptions (version {{version}}, of {{date}}); its history is simulated from them. The « real » return takes out {{inflation}} inflation a year, as in the simulators. Nothing is advice or an offer.",
+    "filter": "Families of placements",
+    "all": "All",
+    "badge": "Fictional example",
+    "classes": {
+      "savings": "Savings",
+      "bonds": "Bonds and sukuk",
+      "funds": "Funds",
+      "shares": "Shares",
+      "commodities": "Commodities"
+    },
+    "liquidity": {
+      "immediate": "Available at any time",
+      "term": "Locked until maturity",
+      "days": "Sold within a few days, at the day’s price"
+    },
+    "horizonNone": "No minimum term",
+    "horizonMonths_one": "At least {{count}} month",
+    "horizonMonths_other": "At least {{count}} months",
+    "riskLabel": "Risk {{level}} out of 7",
+    "chartCaption": "Simulated price of {{name}}, month by month",
+    "facts": {
+      "price": "Price this month",
+      "priceValue": "{{price}} ({{month}})",
+      "expected": "Assumed average return",
+      "expectedValue": "{{rate}} a year, that is {{real}} once inflation is taken out",
+      "volatility": "Usual variation (volatility)",
+      "liquidity": "Getting the money back",
+      "horizon": "Advised term"
+    },
+    "seen": {
+      "title": "What the simulated history shows",
+      "lastYear": "Over the last 12 months: {{value}}",
+      "perYear": "Per year since the start: {{value}}",
+      "volatility": "Variation seen: {{value}}",
+      "worstMonth": "Worst month: {{value}}",
+      "largestFall": "Largest fall from a peak: {{value}}"
+    },
+    "projection": {
+      "title": "What if I placed…?",
+      "amount": "Amount placed",
+      "years": "For (years)",
+      "run": "See the range",
+      "range": "After {{years}} year(s): between {{low}} and {{high}}, most often around {{median}}.",
+      "today": "Around {{value}} in today’s money, once inflation is taken out.",
+      "loss": "Chance of ending below the amount placed: {{value}}.",
+      "notAPromise": "A range drawn from the assumptions: one chance in ten of doing worse than the low end, one in ten of doing better than the high end. Not a promise."
+    },
+    "buy": {
+      "units": "Number of units",
+      "submit": "Buy (fictional)"
+    },
+    "instrumentNote": "Added from the learning market (fictional example).",
+    "purchaseNote": "Bought from the learning market.",
+    "buyRefused": "Purchase refused: your pretend capital is not enough for this many units.",
+    "bought": "Fictional purchase recorded.",
+    "compare": "Compare",
+    "comparison": {
+      "title": "Comparison",
+      "intro": "Each holding starts at 100 at the beginning of the history: you see which rose, fell, or varied most."
+    },
+    "updatePrice": "Set to the learning market’s price: {{price}} ({{month}})",
+    "priceUpdated": "Price updated.",
+    "supports": {
+      "livret": {
+        "name": "Savings account (example)",
+        "description": "A savings account: the money stays available and does not fall, but earns little — often less than rising prices."
+      },
+      "depot-terme": {
+        "name": "12-month term deposit (example)",
+        "description": "A sum locked for a set term, at a rate known in advance. Leaving before maturity costs part of the interest."
+      },
+      "obligation-etat": {
+        "name": "5-year government bond (example)",
+        "description": "A loan to the State, repaid at maturity with interest. Its price moves a little with rates meanwhile."
+      },
+      "sukuk": {
+        "name": "Sukuk (example)",
+        "description": "A security compliant with Islamic finance, backed by a real asset: it pays a share of that asset’s income rather than interest."
+      },
+      "fonds-diversifie": {
+        "name": "Diversified fund (example)",
+        "description": "A basket mixing bonds and shares: less variation than a single share, more expected return than a bond."
+      },
+      "action-grande": {
+        "name": "Share of a large company (example)",
+        "description": "A part of an established company: more expected return over time, but years of decline are normal."
+      },
+      "action-petite": {
+        "name": "Share of a small company (example)",
+        "description": "A part of a young or small company: can rise or fall a lot. Only for a small share, over a long time."
+      },
+      "or": {
+        "name": "Gold (example)",
+        "description": "A safe haven sought in times of crisis: pays nothing, its price varies strongly from one year to the next."
+      }
+    }
   }
 }

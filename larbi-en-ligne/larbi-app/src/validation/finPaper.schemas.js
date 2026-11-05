@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { MAX_PAPER_FEE_RATE, PAPER_CAPITAL_MAX, PAPER_CAPITAL_MIN, PAPER_TRADE_KINDS, RISK_QUESTIONS } from '../constants/finPaper.js';
-import { amountSchema, currencySchema } from './finData.schemas.js';
+import { PROJECTION_MAX_YEARS } from '../constants/finPaperMarket.js';
+import { MAX_STORED_AMOUNT, amountSchema, currencySchema } from './finData.schemas.js';
 
 // Paper portfolio (P6-12). Everything here is fictional, and the server pins
 // the status: there is no field by which a caller could ask for anything else.
@@ -78,4 +79,13 @@ export const riskAnswersSchema = z
 
 export const portfolioQuerySchema = z
   .object({ currency: currencySchema.optional(), noticeShare: z.coerce.number().min(0.01).max(1).optional() })
+  .strict();
+
+// « If I place this amount for this many years » on a support of the
+// pedagogical market (EP06, recette R8-12). The amount in centimes.
+export const marketProjectionQuerySchema = z
+  .object({
+    montant: z.coerce.number().int().min(100).max(MAX_STORED_AMOUNT),
+    annees: z.coerce.number().int().min(1).max(PROJECTION_MAX_YEARS),
+  })
   .strict();

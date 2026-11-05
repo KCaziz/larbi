@@ -1,0 +1,1 @@
+function e(e,t=null){return t?.family===`goal`?`savings`:e.transferId||e.kind===`transfer_in`||e.kind===`transfer_out`?`transfer`:e.kind===`income`||e.inflow===!0?`income`:`expense`}var t=e=>`flow flow-${e}`;export{e as n,t};

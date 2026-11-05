@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   getCalendar,
+  postOccurrence,
   getCalendarReferences,
   getDetection,
   getProvisionHistory,
@@ -25,6 +26,7 @@ import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
 import { archiveSchema, deleteSchema } from '../validation/finMoney.schemas.js';
 import {
   calendarQuerySchema,
+  occurrenceSchema,
   confirmRecurrenceSchema,
   copyPlanSchema,
   createProvisionSchema,
@@ -45,6 +47,8 @@ router.param('id', uuidParam);
 
 router.get('/calendrier/references', getCalendarReferences);
 router.get('/calendrier', validateQuery(calendarQuerySchema), asyncRoute(getCalendar));
+// « Confirmer, Modifier, Pas reçu, Reporter » one occurrence (P8-11).
+router.post('/calendrier/occurrences', validateBody(occurrenceSchema), asyncRoute(postOccurrence));
 // « Plan du mois » (SA03): copy the planned movements of the month before.
 router.post('/calendrier/plan', validateBody(copyPlanSchema), asyncRoute(postCopyPlan));
 

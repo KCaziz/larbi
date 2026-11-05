@@ -1,4 +1,7 @@
 import { prisma } from '../config/prisma.js';
+import { REFERENCE_CATEGORIES } from '../constants/finCategoryReference.js';
+import { BUDGET_METHODS, METHOD_MAPPING, POCKET_RULES } from '../constants/finBudgetMethods.js';
+import { methodAnalysis } from '../services/finBudgetMethods.service.js';
 import {
   ALERT_LEVELS,
   BUDGET_RECURRENCES,
@@ -47,6 +50,12 @@ export function getBudgetReferences(req, res) {
     defaultAlertThresholds: DEFAULT_ALERT_THRESHOLDS,
     proposalSources: PROPOSAL_SOURCES,
     proposalMonths: { default: PROPOSAL_MONTHS, max: MAX_PROPOSAL_MONTHS },
+    // The client category groups an envelope may cover (P8-09), with their
+    // icon, and the optional methods with their default mapping (tab 12B).
+    categoryGroups: [...new Map(REFERENCE_CATEGORIES.filter((c) => c.family !== 'income' && c.group).map((c) => [c.group, { group: c.group, icon: c.icon }])).values()],
+    methods: BUDGET_METHODS,
+    methodMapping: METHOD_MAPPING,
+    pockets: POCKET_RULES,
     // The formulas this screen answers with, in the client's own wording, so
     // the "Pourquoi ?" panel explains them without a second source of truth.
     formulas: ['F002', 'F003', 'F004', 'F009', 'F010', 'F011', 'F012'].map(describeFormula),
@@ -90,10 +99,18 @@ export async function postBudgetDuplicate(req, res) {
 }
 
 // One budget, computed: the screen's whole content in a single answer.
+// One budget read through an optional method (P8-09, tab 12).
+export async function getBudgetMethod(req, res) {
+  const budget = await ownBudget(prisma, req.user.id, req.params.id);
+  const data = await loadBudgetData(prisma, req.user.id, budget);
+  const view = buildBudgetView({ budget, ...data });
+  res.json(await methodAnalysis(prisma, req.user.id, { method: req.query.methode, budget, view, movements: data.movements }));
+}
+
 export async function getBudget(req, res) {
   const budget = await ownBudget(prisma, req.user.id, req.params.id);
-  const { envelopes, movements, incomes } = await loadBudgetData(prisma, req.user.id, budget);
-  const view = buildBudgetView({ budget, envelopes, movements, incomes, now: req.query.at ?? new Date() });
+  const data = await loadBudgetData(prisma, req.user.id, budget);
+  const view = buildBudgetView({ budget, ...data, now: req.query.at ?? new Date() });
 
   // The envelopes carry category ids; the labels are joined here so the
   // interface never has to guess what a category is called.
@@ -103,7 +120,8 @@ export async function getBudget(req, res) {
   );
   view.enveloppes = view.enveloppes.map((line) => ({
     ...line,
-    label: line.categoryId ? (labels.get(line.categoryId)?.label ?? null) : null,
+    // An envelope on a client category group is named by the group (P8-09).
+    label: line.categoryGroup ?? (line.categoryId ? (labels.get(line.categoryId)?.label ?? null) : null),
     family: line.categoryId ? (labels.get(line.categoryId)?.family ?? null) : null,
   }));
 
@@ -114,7 +132,7 @@ export async function getBudget(req, res) {
     await createNotification(prisma, req.user.id, {
       type: 'budget_alert',
       params: { niveau: line.alerte.niveau, label: line.label, taux: line.tauxConsommation.resultat },
-      link: `/budget/${budget.id}`,
+      link: `/app/budgets/${budget.id}`,
       referenceId: line.id,
       dedupeBy: 'level',
     });

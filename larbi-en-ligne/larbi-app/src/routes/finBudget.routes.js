@@ -14,6 +14,7 @@ import {
   putBudgetArchived,
   removeBudget,
   removeEnvelope,
+  getBudgetMethod,
 } from '../controllers/finBudget.controller.js';
 import { requireAuth } from '../middleware/auth.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
@@ -21,6 +22,7 @@ import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
 import { archiveSchema, deleteSchema } from '../validation/finMoney.schemas.js';
 import {
   budgetViewQuerySchema,
+  methodQuerySchema,
   createBudgetSchema,
   createEnvelopeSchema,
   duplicateBudgetSchema,
@@ -45,6 +47,8 @@ router.get('/budgets/proposition', validateQuery(proposalQuerySchema), asyncRout
 router.get('/budgets', asyncRoute(getBudgets));
 router.post('/budgets', validateBody(createBudgetSchema), asyncRoute(postBudget));
 router.get('/budgets/:id', validateQuery(budgetViewQuerySchema), asyncRoute(getBudget));
+// The optional methods (P8-09): an analysis, never a rule.
+router.get('/budgets/:id/methode', validateQuery(methodQuerySchema), asyncRoute(getBudgetMethod));
 router.patch('/budgets/:id', validateBody(updateBudgetSchema), asyncRoute(patchBudget));
 router.put('/budgets/:id/archive', validateBody(archiveSchema), asyncRoute(putBudgetArchived));
 router.delete('/budgets/:id', validateBody(deleteSchema), asyncRoute(removeBudget));

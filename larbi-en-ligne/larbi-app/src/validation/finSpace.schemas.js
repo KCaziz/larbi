@@ -9,6 +9,8 @@ const label = z.string().trim().min(1).max(80);
 const note = z.string().trim().min(1).max(300).nullable().optional();
 const displayName = z.string().trim().min(1).max(60).nullable().optional();
 
+export const renameMyselfSchema = z.object({ displayName: z.string().trim().min(1).max(60).nullable() }).strict();
+
 export const createSpaceSchema = z
   .object({
     kind: z.enum(SPACE_KINDS),
@@ -27,6 +29,8 @@ export const updateSpaceSchema = z
   .object({
     label: label.optional(),
     splitRule: z.enum(SPLIT_RULES).optional(),
+    // « Petit solde » (P9-04): below it a debt is not proposed as a repayment.
+    smallBalance: z.number().int().min(0).max(100000000).optional(),
     note,
     reason: reasonSchema.optional(),
   })

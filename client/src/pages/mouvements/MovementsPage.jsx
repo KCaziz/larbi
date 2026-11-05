@@ -315,11 +315,9 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
             {/* P8-27: the chosen category with its colour, icon and group. */}
             {form.categoryId && <CategoryChip category={lookups.categories.find((row) => row.id === form.categoryId)} />}
           </div>
-
-          <div className="fin-field">
-            <label htmlFor="entry-subcategory">{t('myMoney.subcategory')}</label>
-            <input maxLength={60} {...field('subcategory')} />
-          </div>
+          {/* No free « sous-catégorie » field (recette R8-02): the picker above
+              already chooses a category, then its sub-category. A value saved
+              before is kept as it is on edit. */}
 
           <div className="fin-field">
             <label htmlFor="entry-accountId">{t('movements.account')}</label>
@@ -500,6 +498,7 @@ function History({ data, currency, lookups, run }) {
   return (
     <>
       {/* Totals OF THE FILTERED SET, transfers excluded (PB-F004, PB-F005). */}
+      <ClearingLegend />
       <p className="money-totals">{t('myMoney.filteredTotals', { count: data.total, income: money(totals.real.income), expenses: money(totals.real.expense) })}</p>
       {data.transactions.length === 0 ? (
         <Notice variant="info">{t('myMoney.noTransaction')}</Notice>
@@ -585,11 +584,12 @@ export function Row({ transaction, lookups, run, detail = true }) {
         <select
           id={`clearing-${transaction.id}`}
           className={`movements-clearing movements-clearing-${transaction.clearing}`}
+          title={t(`movements.clearingHelp.${transaction.clearing}`)}
           value={transaction.clearing}
           onChange={(event) => run(() => api.put(`/fin/transactions/${transaction.id}/pointage`, { clearing: event.target.value }), 'movements.cleared')}
         >
           {['unchecked', 'checked', 'reconciled', 'to_verify'].map((state) => (
-            <option key={state} value={state}>
+            <option key={state} value={state} title={t(`movements.clearingHelp.${state}`)}>
               {t(`movements.clearingStates.${state}`)}
             </option>
           ))}
@@ -617,6 +617,25 @@ export function Row({ transaction, lookups, run, detail = true }) {
 
 // ---- clearing (TRX-04) ---------------------------------------------------------
 
+// What each clearing state means (recette R8-03): in the tooltip of every
+// control that sets one, and here, readable on a phone where there is no hover.
+export function ClearingLegend() {
+  const { t } = useTranslation();
+  return (
+    <details className="movements-clearing-legend">
+      <summary>{t('movements.clearingLegend')}</summary>
+      <dl>
+        {['unchecked', 'checked', 'reconciled', 'to_verify'].map((state) => (
+          <div key={state}>
+            <dt>{t(`movements.clearingStates.${state}`)}</dt>
+            <dd>{t(`movements.clearingHelp.${state}`)}</dd>
+          </div>
+        ))}
+      </dl>
+    </details>
+  );
+}
+
 export function ClearingPanel({ lookups, run }) {
   const { t, i18n } = useTranslation();
   const view = useApi('/fin/pointage');
@@ -636,6 +655,7 @@ export function ClearingPanel({ lookups, run }) {
       <p className="fin-hint">
         {['unchecked', 'checked', 'reconciled', 'to_verify'].map((state) => `${t(`movements.clearingStates.${state}`)} : ${counts[state]}`).join(' · ')}
       </p>
+      <ClearingLegend />
       {pending.length === 0 ? (
         <Notice variant="info">{t('movements.allCleared')}</Notice>
       ) : (
@@ -650,14 +670,14 @@ export function ClearingPanel({ lookups, run }) {
                   <CategoryChip category={category} fallback={row.note ?? t('myMoney.noCategory')} compact />
                 </span>
                 <span className="movements-row-actions">
-                  <button type="button" className="money-plain" onClick={() => set(row.id, 'checked')}>
+                  <button type="button" className="money-plain" title={t('movements.clearingHelp.checked')} onClick={() => set(row.id, 'checked')}>
                     <CheckCheck size={15} aria-hidden="true" /> {t('movements.clearingStates.checked')}
                   </button>
-                  <button type="button" className="money-plain" onClick={() => set(row.id, 'reconciled')}>
+                  <button type="button" className="money-plain" title={t('movements.clearingHelp.reconciled')} onClick={() => set(row.id, 'reconciled')}>
                     {t('movements.clearingStates.reconciled')}
                   </button>
                   {row.clearing !== 'to_verify' && (
-                    <button type="button" className="money-plain" onClick={() => set(row.id, 'to_verify')}>
+                    <button type="button" className="money-plain" title={t('movements.clearingHelp.to_verify')} onClick={() => set(row.id, 'to_verify')}>
                       {t('movements.clearingStates.to_verify')}
                     </button>
                   )}

@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import { Archive, ArchiveRestore, ChevronDown, ChevronUp, Landmark, Plus, Trash2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
-import RingChart from '../../components/fincludia/RingChart.jsx';
 import { useAuth } from '../../auth/useAuth.js';
 import { formatDate } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
@@ -99,30 +98,16 @@ export default function DebtsPage() {
           </p>
         ))}
 
-        {/* G-11: what is owed by type, and — apart — what is owed to me. */}
+        {/* Where each debt stands (recette R8-06): what was owed at the start,
+            what has been repaid, what is left — a repayment shrinks the bar.
+            What I owe, and apart what is owed to me. */}
         {[
           ['owed', owed],
           ['lent', lent],
         ].map(([side, rows]) => {
-          const active = rows.filter((debt) => !debt.archivedAt && debt.outstandingPrincipal > 0);
-          const types = [...new Set(active.map((debt) => debt.debtType ?? 'other'))];
-          if (types.length === 0) return null;
-          const tones = ['var(--accent)', 'var(--green)', 'var(--clay)', 'var(--warn)', 'var(--border-strong)'];
-          return (
-            <section key={side} aria-labelledby={`debts-chart-${side}`}>
-              <h2 id={`debts-chart-${side}`}>{t(`debts.byType.${side}`)}</h2>
-              <RingChart
-                rows={types.map((type, index) => ({
-                  key: type,
-                  label: t(`debts.types.${type}`),
-                  total: active.filter((debt) => (debt.debtType ?? 'other') === type).reduce((sum, debt) => sum + debt.outstandingPrincipal, 0),
-                  color: tones[index % tones.length],
-                }))}
-                currency={currency}
-                label={t(`debts.byType.${side}`)}
-              />
-            </section>
-          );
+          const shown = rows.filter((debt) => !debt.archivedAt && debt.outstandingPrincipal + (debt.repaid ?? 0) > 0);
+          if (shown.length === 0) return null;
+          return <DebtProgress key={side} side={side} debts={shown} currency={currency} />;
         })}
 
         <div className="debts-toolbar">
@@ -167,6 +152,49 @@ export default function DebtsPage() {
         )}
       </div>
     </>
+  );
+}
+
+// One bar per debt on the same scale: the repaid part and the part still
+// due, with both written in words (never the colour alone), and the total.
+function DebtProgress({ side, debts, currency }) {
+  const { t, i18n } = useTranslation();
+  const money = (value) => formatAmount(i18n.language, value, currency);
+  const rows = debts.map((debt) => ({ id: debt.id, label: debt.label, left: debt.outstandingPrincipal, repaid: debt.repaid ?? 0, start: debt.outstandingPrincipal + (debt.repaid ?? 0) }));
+  const scale = Math.max(...rows.map((row) => row.start), 1);
+  const total = rows.reduce((sum, row) => ({ left: sum.left + row.left, start: sum.start + row.start }), { left: 0, start: 0 });
+  const percent = (part, whole) => (whole > 0 ? Math.round((part / whole) * 100) : 0);
+  return (
+    <section className="debts-progress" aria-labelledby={`debts-chart-${side}`}>
+      <h2 id={`debts-chart-${side}`}>{t(`debts.progress.title.${side}`)}</h2>
+      <p className="debts-progress-total">
+        {t(`debts.progress.total.${side}`, { left: money(total.left), start: money(total.start), percent: percent(total.start - total.left, total.start) })}
+      </p>
+      <ul className="chart-legend" aria-label={t('charts.legend')}>
+        <li className="chart-legend-item">
+          <span className="debts-swatch debts-swatch-repaid" aria-hidden="true" />
+          {t(`debts.progress.repaid.${side}`)}
+        </li>
+        <li className="chart-legend-item">
+          <span className="debts-swatch debts-swatch-left" aria-hidden="true" />
+          {t(`debts.progress.left.${side}`)}
+        </li>
+      </ul>
+      <ul className="debts-progress-list">
+        {rows.map((row) => (
+          <li key={row.id}>
+            <div className="debts-progress-head">
+              <strong>{row.label}</strong>
+              <span>{t('debts.progress.row', { left: money(row.left), start: money(row.start), percent: percent(row.repaid, row.start) })}</span>
+            </div>
+            <div className="debts-progress-track" style={{ inlineSize: `${Math.max(8, (row.start / scale) * 100)}%` }} aria-hidden="true">
+              <span className="debts-progress-repaid" style={{ inlineSize: `${percent(row.repaid, row.start)}%` }} />
+              <span className="debts-progress-left" style={{ inlineSize: `${100 - percent(row.repaid, row.start)}%` }} />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

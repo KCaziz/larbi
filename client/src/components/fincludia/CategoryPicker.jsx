@@ -108,10 +108,15 @@ export default function CategoryPicker({ id, value, onChange, groups, emptyLabel
               ) : (
                 found.map((category) => (
                   <li key={category.id}>
-                    <button type="button" className="category-picker-row" onClick={() => pick(category.id)}>
-                      <CategoryIcon emoji={category.icon} size={16} />
-                      <span className="category-picker-name">{category.label}</span>
-                      <span className="category-picker-group">{category.bucketName}</span>
+                    {/* Two lines (recette R8-01): the sub-category, then the
+                        category it belongs to — side by side, the second was
+                        squeezed under the first in a narrow list. */}
+                    <button type="button" className="category-picker-row category-picker-result" aria-current={category.id === value ? 'true' : undefined} onClick={() => pick(category.id)}>
+                      <CategoryIcon emoji={category.icon} size={18} />
+                      <span className="category-picker-text">
+                        <span className="category-picker-name">{category.label}</span>
+                        <span className="category-picker-group">{t('categoryPicker.inGroup', { group: category.bucketName })}</span>
+                      </span>
                     </button>
                   </li>
                 ))
@@ -128,7 +133,7 @@ export default function CategoryPicker({ id, value, onChange, groups, emptyLabel
                 {current.categories.map((category) => (
                   <li key={category.id}>
                     <button type="button" className="category-picker-row" aria-current={category.id === value ? 'true' : undefined} onClick={() => pick(category.id)}>
-                      <CategoryIcon emoji={category.icon} size={16} />
+                      <CategoryIcon emoji={category.icon} size={18} />
                       <span className="category-picker-name">{category.label}</span>
                     </button>
                   </li>
@@ -139,14 +144,14 @@ export default function CategoryPicker({ id, value, onChange, groups, emptyLabel
                 bucket.categories.length === 1 ? (
                   <li key={bucket.key}>
                     <button type="button" className="category-picker-row" aria-current={bucket.categories[0].id === value ? 'true' : undefined} onClick={() => pick(bucket.categories[0].id)}>
-                      <CategoryIcon emoji={bucket.categories[0].icon ?? bucket.icon} size={16} />
+                      <CategoryIcon emoji={bucket.categories[0].icon ?? bucket.icon} size={18} />
                       <span className="category-picker-name">{bucket.categories[0].label}</span>
                     </button>
                   </li>
                 ) : (
                   <li key={bucket.key}>
                     <button type="button" className="category-picker-row" onClick={() => setGroup(bucket.key)}>
-                      <CategoryIcon emoji={bucket.icon} size={16} />
+                      <CategoryIcon emoji={bucket.icon} size={18} />
                       <span className="category-picker-name">{bucket.name}</span>
                       <span className="category-picker-count">{bucket.categories.length}</span>
                       <ChevronRight className="icon-dir" size={16} aria-hidden="true" />

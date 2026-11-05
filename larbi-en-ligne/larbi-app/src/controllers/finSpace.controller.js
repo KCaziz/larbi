@@ -12,6 +12,8 @@ import {
 import {
   acceptInvite,
   createSpace,
+  renameMyself,
+  closeSpace,
   deleteSpace,
   inviteToSpace,
   leaveSpace,
@@ -23,6 +25,7 @@ import {
   requireRole,
   revokeInvite,
   setMemberRole,
+  transferOwnership,
   spaceTrail,
   updateMySharing,
   updateSpace,
@@ -88,6 +91,10 @@ export async function patchSpace(req, res) {
   res.json({ space: await updateSpace(prisma, req.user.id, req.params.id, req.body) });
 }
 
+export async function postCloseSpace(req, res) {
+  res.json(await closeSpace(prisma, req.user.id, req.params.id, { reason: req.body?.reason }));
+}
+
 export async function removeSpace(req, res) {
   res.json(await deleteSpace(prisma, req.user.id, req.params.id, { reason: req.body?.reason }));
 }
@@ -105,6 +112,16 @@ export async function putMySharing(req, res) {
 
 export async function putMemberRole(req, res) {
   res.json({ membre: await setMemberRole(prisma, req.user.id, req.params.id, req.params.memberId, req.body.role) });
+}
+
+// Handing the space over (recette R2-02): the owner names the member who
+// becomes owner; they become admin.
+export async function putMyName(req, res) {
+  res.json({ membre: await renameMyself(prisma, req.user.id, req.params.id, req.body.displayName) });
+}
+
+export async function postTransferOwnership(req, res) {
+  res.json({ membre: await transferOwnership(prisma, req.user.id, req.params.id, req.params.memberId) });
 }
 
 export async function postLeave(req, res) {

@@ -229,6 +229,11 @@
   .app-topbar .app-profile-name {
     display: none;
   }
+  /* An administrator's switcher has a third entry: the brand keeps its mark
+     and gives up its name, rather than touching the switcher (recette R8-10). */
+  .app-topbar:has(.app-switcher > :nth-child(3)) .app-brand span {
+    display: none;
+  }
 }
 
 .app-nav-list {

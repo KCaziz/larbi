@@ -158,6 +158,8 @@ try {
   const partner = await person('couple.sami', 'Sami Conjoint', { accountType: 'salarie', finPublic: 'SAL', finAgeRange: '25-34' });
   const friend1 = await person('amis.nour', 'Nour Amie', { accountType: 'salarie', finPublic: 'SAL', finAgeRange: '25-34' });
   const friend2 = await person('amis.walid', 'Walid Ami', { accountType: 'etudiant', finPublic: 'ETU', finAgeRange: '19-24' });
+  // An administrator, to test the back office with the same password.
+  const admin = await person('admin', 'Admin Démo', { accountType: 'salarie', finPublic: 'SAL', finAgeRange: '25-34', role: 'admin' });
 
   const space = async (owner, kind, label, others) => {
     const created = await call(owner, 'POST', '/fin/espaces', { kind, label, currency: 'DZD' }, `space ${label}`);
@@ -219,7 +221,7 @@ try {
   }
 
   console.log('\nDemonstration accounts (password for all of them: %s)', PASSWORD);
-  for (const user of [salarie, lyceen, flatmate1, flatmate2, partner, friend1, friend2]) console.log(`  ${user.email.padEnd(36)} ${user.name}`);
+  for (const user of [salarie, lyceen, flatmate1, flatmate2, partner, friend1, friend2, admin]) console.log(`  ${user.email.padEnd(36)} ${user.name}`);
   console.log('\nP8-22: compare salarie and lyceen. P9-13: salarie is in the flatshare, the couple and the friends.');
   if (failures.length) {
     console.log(`\n${failures.length} step(s) refused by the application:`);

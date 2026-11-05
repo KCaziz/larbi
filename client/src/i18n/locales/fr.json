@@ -1632,12 +1632,11 @@
     },
     "missions": {
       "title": "Missions pédagogiques",
-      "subtitle": "Les scénarios des missions, saisis ici ; la règle de calcul est la même pour toutes.",
+      "subtitle": "Des mises en situation courtes : une somme fictive, des étapes, et à chaque étape des choix qui ont des conséquences.",
       "create": "Nouvelle mission",
-      "json": "La mission (JSON)",
       "save": "Enregistrer",
       "cancel": "Annuler",
-      "rule": "Règle (non modifiable) : l’argent final est la somme de départ plus l’effet de chaque choix ; l’épargne et la résilience sont les sommes de leurs effets ; le badge est le plus haut dont le seuil est atteint. Montants en centimes de la somme fictive.",
+      "rule": "Calcul (le même pour toutes) : argent final = somme de départ + effets de chaque choix ; épargne et résilience = somme de leurs effets ; badge = le plus haut dont le seuil de résilience est atteint.",
       "none": "Aucune mission saisie.",
       "counts": "{{steps}} étape(s) · profils : {{profiles}}",
       "everybody": "tous",
@@ -1650,7 +1649,54 @@
       "published": "Mission publiée.",
       "unpublished": "Mission repassée en brouillon.",
       "deleted": "Mission supprimée.",
-      "notJson": "Ce texte n’est pas du JSON valide."
+      "howItWorks": "Une mission part d’une somme fictive. À chaque étape, la personne choisit une réponse ; chaque choix change l’argent disponible, l’épargne et un score de « résilience », puis affiche son explication. À la fin, elle obtient le badge le plus haut dont elle atteint le seuil. La mission reste en brouillon tant que vous ne la publiez pas.",
+      "invalid": "La mission n’a pas été enregistrée : un champ est vide ou hors limites. Vérifiez chaque étape et chaque choix.",
+      "slugTaken": "Une mission porte déjà ce titre : choisissez-en un autre.",
+      "sections": {
+        "general": "La mission",
+        "step": "Étape {{number}}",
+        "choice": "Choix {{number}}",
+        "badges": "Badges"
+      },
+      "fields": {
+        "title": "Titre",
+        "summary": "Présentation (une ou deux phrases)",
+        "profiles": "Pour quels profils ?",
+        "profilesHint": "Aucun coché : la mission est proposée à tout le monde.",
+        "startingAmount": "Somme fictive de départ (DA)",
+        "startingAmountHint": "L’argent dont la personne dispose au début de la mission.",
+        "prompt": "La situation (ce que la personne lit)",
+        "choiceLabel": "La réponse proposée",
+        "cash": "Effet sur l’argent (DA, négatif = dépense)",
+        "savings": "Effet sur l’épargne (DA)",
+        "resilience": "Effet sur la résilience (-100 à 100)",
+        "explanation": "Explication affichée après ce choix",
+        "badgeLabel": "Nom du badge",
+        "minResilience": "Résilience minimale"
+      },
+      "badgesHint": "Facultatif. Un badge est gagné quand la résilience finale atteint son seuil.",
+      "addStep": "Ajouter une étape",
+      "removeStep": "Retirer l’étape",
+      "addChoice": "Ajouter un choix",
+      "removeChoice": "Retirer",
+      "addBadge": "Ajouter un badge",
+      "removeBadge": "Retirer",
+      "errors": {
+        "titleSummary": "Donnez un titre et une présentation à la mission.",
+        "amount": "La somme de départ doit être un nombre positif.",
+        "prompt": "Chaque étape doit décrire une situation.",
+        "choice": "Chaque choix doit avoir une réponse et une explication.",
+        "effects": "Les effets doivent être des nombres ; la résilience va de -100 à 100.",
+        "badge": "Chaque badge doit avoir un nom et un seuil entier."
+      },
+      "profiles": {
+        "LYC": "Lycéen",
+        "ETU": "Étudiant",
+        "JAC": "Jeune actif",
+        "SAL": "Salarié",
+        "EPG": "Épargnant débutant",
+        "AUT": "Autre"
+      }
     }
   },
   "learn": {
@@ -2911,6 +2957,24 @@
         "createBudget": "Vos dépenses se comparent à des enveloppes au lieu d’être un simple total.",
         "addMovement": "Dès la première dépense enregistrée, vos totaux et votre reste à vivre se calculent."
       }
+    },
+    "howTo": {
+      "lead": "Pour l’obtenir :",
+      "reserveFund": "créez votre fonds d’urgence",
+      "essentialExpenses": "indiquez vos dépenses essentielles",
+      "reserveTarget": "choisissez combien de mois tenir",
+      "income": "ajoutez vos revenus",
+      "budget": "créez un budget pour le mois",
+      "contribution": "indiquez combien vous versez par mois",
+      "goalDate": "donnez une date à votre objectif",
+      "debts": "déclarez vos dettes",
+      "savings": "mettez de l’argent de côté sur un objectif",
+      "accounts": "ajoutez un compte et son solde",
+      "accountBalance": "indiquez le solde de ce compte",
+      "movements": "enregistrez vos dépenses et revenus",
+      "health": "voir ce qui manque",
+      "assets": "ajoutez ce que vous possédez",
+      "formation": "commencez une formation"
     }
   },
   "finOnboarding": {
@@ -3378,7 +3442,26 @@
     "plannedInBudget": "Mensualité prévue au budget.",
     "curveTitle": "Capital restant dû, mois par mois",
     "curveMonthHead": "Mois",
-    "curveMonth": "Mois {{month}}"
+    "curveMonth": "Mois {{month}}",
+    "progress": {
+      "title": {
+        "owed": "Où en sont mes dettes",
+        "lent": "Ce qu’on me doit encore"
+      },
+      "total": {
+        "owed": "Il reste {{left}} à rembourser sur {{start}} empruntés : {{percent}} % déjà remboursés.",
+        "lent": "Il reste {{left}} à récupérer sur {{start}} prêtés : {{percent}} % déjà rendus."
+      },
+      "repaid": {
+        "owed": "Déjà remboursé",
+        "lent": "Déjà rendu"
+      },
+      "left": {
+        "owed": "Reste à rembourser",
+        "lent": "Reste à récupérer"
+      },
+      "row": "reste {{left}} sur {{start}} ({{percent}} % fait)"
+    }
   },
   "reserve": {
     "title": "Fonds d’urgence",
@@ -3427,6 +3510,14 @@
         "after": "Faites d’abord les deux étapes ci-dessus : elles fixent le montant à atteindre.",
         "create": "Créer mon fonds d’urgence"
       }
+    },
+    "howTo": {
+      "lead": "Comment les régler :",
+      "record": "Enregistrez vos dépenses de logement, d’alimentation, d’énergie, de transport, de santé, de téléphone… : chacune compte dès qu’elle est rangée dans une catégorie essentielle.",
+      "recordLink": "Ajouter une dépense",
+      "mark": "Choisissez ce qui compte comme essentiel : dans vos catégories, cochez ou décochez « Essentielle ».",
+      "markLink": "Mes catégories",
+      "estimate": "En attendant un mois de dépenses enregistrées, donnez une estimation ci-dessous : elle est utilisée jusque-là."
     }
   },
   "calendar": {
@@ -3821,6 +3912,14 @@
       "price": "Indiquez un prix en nombre entier.",
       "trade": "Indiquez une quantité et un prix en nombres entiers.",
       "refused": "Cette opération a été refusée. Vérifiez les liquidités fictives et les quantités."
+    },
+    "guide": {
+      "title": "Comment s’entraîner",
+      "step1": "Ajoutez un support : donnez-lui un nom (par exemple « Action A » ou « Fonds prudent »), un type et un prix de départ que vous choisissez.",
+      "step2": "Achetez-en avec votre capital fictif de {{amount}} : les frais simulés sont déduits, comme en vrai.",
+      "step3": "Changez son prix pour simuler une hausse ou une baisse, et regardez votre gain ou votre perte et votre rendement.",
+      "step4": "Notez pourquoi vous avez acheté ou vendu dans le journal de décisions, puis relisez-le plus tard.",
+      "why": "Aucune liste de placements ni aucun cours n’est fourni ici : c’est vous qui créez les supports, pour apprendre sans qu’un prix réel ne vous soit suggéré."
     }
   },
   "spaces": {
@@ -4713,12 +4812,12 @@
     "movements": "Mouvements",
     "budgets": "Budgets",
     "sections": {
+      "start": "Pour commencer",
       "daily": "Au quotidien",
       "analyse": "Analyser",
       "build": "Construire",
       "tools": "Outils",
-      "learn": "Apprendre",
-      "start": "Pour commencer"
+      "learn": "Apprendre"
     },
     "synthesis": "Synthèse",
     "calendar": "Calendrier financier",
@@ -4911,7 +5010,14 @@
     },
     "clearingIntro": "Ce qui reste à vérifier, un clic par mouvement.",
     "chooseCategory": "Choisir une catégorie…",
-    "categorised": "Catégorie enregistrée."
+    "categorised": "Catégorie enregistrée.",
+    "clearingLegend": "Que veulent dire « pointée », « rapprochée », « à vérifier » ?",
+    "clearingHelp": {
+      "unchecked": "Vous n’avez pas encore vérifié ce mouvement.",
+      "checked": "Vous avez vérifié que ce mouvement est juste (montant, date, catégorie).",
+      "reconciled": "Vous l’avez retrouvé sur votre relevé de banque ou de CCP : il est confirmé par le compte lui-même.",
+      "to_verify": "Quelque chose cloche (montant, doublon, opération inconnue) : à revoir plus tard."
+    }
   },
   "appHome": {
     "title": "Accueil",
@@ -5227,7 +5333,66 @@
     "favorite": "Ajouter « {{name}} » à mes favoris",
     "unfavorite": "Retirer « {{name}} » de mes favoris",
     "favoriteError": "Le favori n’a pas pu être enregistré. Réessayez.",
-    "noFavorite": "Aucun favori pour l’instant : touchez l’étoile d’un outil pour le garder ici."
+    "noFavorite": "Aucun favori pour l’instant : touchez l’étoile d’un outil pour le garder ici.",
+    "descriptions": {
+      "CAL-01": "Répartir vos revenus du mois entre vos dépenses et voir ce qu’il reste.",
+      "CAL-02": "Savoir combien vous pouvez dépenser par jour jusqu’à la fin du mois.",
+      "CAL-03": "Fixer une enveloppe pour une catégorie et suivre ce qui y reste.",
+      "CAL-04": "Voir combien vous pouvez mettre de côté chaque mois.",
+      "CAL-05": "Savoir combien de mois de dépenses essentielles votre épargne couvre.",
+      "CAL-06": "Calculer combien épargner par mois pour atteindre un objectif à une date.",
+      "CAL-07": "Même calcul, avec une épargne placée qui rapporte des intérêts.",
+      "CAL-08": "Voir ce que vaudra une somme demain avec la hausse des prix.",
+      "CAL-09": "Mesurer la part de vos revenus qui part dans vos dettes.",
+      "CAL-10": "Estimer la mensualité d’un crédit selon le montant, la durée et le taux.",
+      "CAL-11": "Voir ce que vous gagnez à rembourser un crédit plus tôt.",
+      "CAL-12": "Comparer deux façons de rembourser plusieurs dettes.",
+      "CAL-13": "Faire le total de ce que vous possédez moins ce que vous devez.",
+      "CAL-14": "S’entraîner à investir avec de l’argent fictif, sans risque.",
+      "CAL-15": "Voir quelle part de vos dépenses vous couvrez seul en tant qu’étudiant.",
+      "CAL-16": "Mettre de côté chaque mois pour une grosse dépense annuelle.",
+      "CAL-17": "Préparer le budget de votre premier salaire.",
+      "CAL-18": "Comparer deux offres d’emploi sur ce qu’il vous reste vraiment.",
+      "CAL-19": "Retrouver vos abonnements et ce qu’ils coûtent par mois et par an.",
+      "CAL-24": "Voir où en est votre dossier avant de demander un financement.",
+      "CAL-25": "Comparer des offres de crédit des banques.",
+      "CAL-26": "Découvrir votre rapport au risque, à but pédagogique.",
+      "CAL-27": "Suivre ce que vous avez appris en finances.",
+      "CAL-28": "Un repère sur l’état de vos finances, expliqué point par point.",
+      "CAL-29": "Avoir une idée de ce que votre épargne donnera à la retraite.",
+      "CAL-IC": "Comprendre la différence entre intérêts simples et composés.",
+      "CAL-30": "Estimer ce que coûte un logement, achat ou location.",
+      "CAL-V7-01": "Comparer vos dépenses à la règle 50 % besoins, 30 % envies, 20 % épargne.",
+      "CAL-V7-02": "Comparer plusieurs rythmes d’épargne mensuelle.",
+      "CAL-V7-03": "Cocher vos opérations une à une pour vérifier vos comptes.",
+      "CAL-V7-04": "Prévoir votre solde à la fin du mois.",
+      "CAL-V7-05": "Le bilan de votre mois, à lire ou télécharger.",
+      "CAL-P01": "Le solde de chacun de vos comptes.",
+      "CAL-P02": "Le total de vos comptes.",
+      "CAL-P03": "Ce qui est entré moins ce qui est sorti sur une période.",
+      "CAL-P04": "Ce qu’il reste dans chaque budget.",
+      "CAL-P05": "La part de vos revenus pas encore attribuée à un budget.",
+      "CAL-P06": "Combien vous dépensez en moyenne par jour.",
+      "CAL-P07": "Où vous en serez à la fin de la période à ce rythme.",
+      "CAL-P08": "Ce que vous pouvez encore dépenser aujourd’hui.",
+      "CAL-P09": "Où en est chacun de vos objectifs.",
+      "CAL-P10": "Votre fonds d’urgence en mois de dépenses.",
+      "CAL-P11": "La part de vos revenus consacrée aux dettes.",
+      "CAL-P12": "L’ordre dans lequel rembourser vos dettes.",
+      "CAL-P13": "Vos paiements qui reviennent chaque mois.",
+      "CAL-P14": "Ce que vous aviez prévu face à ce qui s’est passé.",
+      "CAL-P15": "Comment vos revenus et dépenses évoluent de mois en mois.",
+      "CAL-P16": "La mensualité d’un crédit.",
+      "CAL-P17": "Ce que représentent vos comptes dans votre patrimoine.",
+      "LY09": "Préparer le budget de vos études.",
+      "OUT-COMPARATEUR": "Comparer les banques, frais et services, selon votre profil.",
+      "OUT-POSTAL": "Les services d’Algérie Poste expliqués : CCP, cartes, BaridiMob.",
+      "OUT-COMPARER": "Comparer deux choix côte à côte sur vos propres critères.",
+      "OUT-ATELIER": "Essayer des scénarios sur vos chiffres sans rien changer.",
+      "OUT-PAIE": "Comprendre chaque ligne de votre fiche de paie.",
+      "OUT-FACTURE": "Créer une facture et la télécharger en PDF.",
+      "OUT-EXPLORATEUR": "Chercher dans vos données : mouvements, catégories, périodes."
+    }
   },
   "compare": {
     "title": "Comparer des options",
@@ -5430,7 +5595,8 @@
     "search": "Rechercher une catégorie",
     "clearSearch": "Effacer la recherche",
     "noResult": "Aucune catégorie ne correspond.",
-    "back": "Retour"
+    "back": "Retour",
+    "inGroup": "dans {{group}}"
   },
   "tips": {
     "accueil": [
@@ -5533,5 +5699,109 @@
         "body": "Vous choisissez, type de donnée par type de donnée, ce que les autres membres voient de vous."
       }
     ]
+  },
+  "market": {
+    "title": "Marché pédagogique",
+    "intro": "Les grandes familles de placements, pour comprendre rendement, risque et liquidité avant de s’entraîner.",
+    "backToPortfolio": "Retour : Portefeuille d’entraînement",
+    "open": "Voir le marché pédagogique",
+    "fictionTitle": "Exemples fictifs, pas des cours réels.",
+    "fictionBody": "Chaque support est un type de placement au nom générique. Son rendement et sa variation sont des hypothèses pédagogiques (version {{version}}, du {{date}}) ; son historique est simulé à partir d’elles. Le rendement « réel » retire une inflation de {{inflation}} par an, comme dans les simulateurs. Rien n’est un conseil ni une offre.",
+    "filter": "Familles de placements",
+    "all": "Tous",
+    "badge": "Exemple fictif",
+    "classes": {
+      "savings": "Épargne",
+      "bonds": "Obligations et sukuk",
+      "funds": "Fonds",
+      "shares": "Actions",
+      "commodities": "Matières premières"
+    },
+    "liquidity": {
+      "immediate": "Disponible à tout moment",
+      "term": "Bloqué jusqu’à l’échéance",
+      "days": "Revendable en quelques jours, au prix du jour"
+    },
+    "horizonNone": "Aucune durée minimale",
+    "horizonMonths_one": "Au moins {{count}} mois",
+    "horizonMonths_other": "Au moins {{count}} mois",
+    "riskLabel": "Risque {{level}} sur 7",
+    "chartCaption": "Prix simulé de {{name}}, mois par mois",
+    "facts": {
+      "price": "Prix du mois",
+      "priceValue": "{{price}} ({{month}})",
+      "expected": "Rendement moyen supposé",
+      "expectedValue": "{{rate}} par an, soit {{real}} une fois l’inflation retirée",
+      "volatility": "Variation habituelle (volatilité)",
+      "liquidity": "Retrouver son argent",
+      "horizon": "Durée conseillée"
+    },
+    "seen": {
+      "title": "Ce que montre l’historique simulé",
+      "lastYear": "Sur les 12 derniers mois : {{value}}",
+      "perYear": "Par an depuis le début : {{value}}",
+      "volatility": "Variation constatée : {{value}}",
+      "worstMonth": "Pire mois : {{value}}",
+      "largestFall": "Plus forte baisse depuis un sommet : {{value}}"
+    },
+    "projection": {
+      "title": "Et si je plaçais… ?",
+      "amount": "Montant placé",
+      "years": "Pendant (années)",
+      "run": "Voir la fourchette",
+      "range": "Après {{years}} an(s) : entre {{low}} et {{high}}, et le plus souvent autour de {{median}}.",
+      "today": "Autour de {{value}} en argent d’aujourd’hui, une fois l’inflation retirée.",
+      "loss": "Chance de finir sous le montant placé : {{value}}.",
+      "notAPromise": "Une fourchette tirée des hypothèses : une chance sur dix de faire moins bien que le bas, une sur dix de faire mieux que le haut. Pas une promesse."
+    },
+    "buy": {
+      "units": "Nombre de parts",
+      "submit": "Acheter fictivement"
+    },
+    "instrumentNote": "Ajouté depuis le marché pédagogique (exemple fictif).",
+    "purchaseNote": "Achat depuis le marché pédagogique.",
+    "buyRefused": "Achat refusé : votre capital fictif ne suffit pas pour ce nombre de parts.",
+    "bought": "Achat fictif enregistré.",
+    "compare": "Comparer",
+    "comparison": {
+      "title": "Comparaison",
+      "intro": "Chaque support part de 100 au début de l’historique : on voit qui a monté, baissé, ou varié le plus."
+    },
+    "updatePrice": "Mettre au prix du marché pédagogique : {{price}} ({{month}})",
+    "priceUpdated": "Prix mis à jour.",
+    "supports": {
+      "livret": {
+        "name": "Livret d’épargne (exemple)",
+        "description": "Un compte d’épargne : l’argent reste disponible et ne baisse pas, mais rapporte peu — souvent moins que la hausse des prix."
+      },
+      "depot-terme": {
+        "name": "Dépôt à terme 12 mois (exemple)",
+        "description": "Une somme bloquée pour une durée fixée, contre un taux connu d’avance. Sortir avant l’échéance coûte une partie des intérêts."
+      },
+      "obligation-etat": {
+        "name": "Obligation d’État 5 ans (exemple)",
+        "description": "Un prêt à l’État, remboursé à l’échéance avec des intérêts. Son prix bouge un peu avec les taux en attendant."
+      },
+      "sukuk": {
+        "name": "Sukuk (exemple)",
+        "description": "Un titre conforme à la finance islamique, adossé à un actif réel : il rapporte une part des revenus de cet actif plutôt qu’un intérêt."
+      },
+      "fonds-diversifie": {
+        "name": "Fonds diversifié (exemple)",
+        "description": "Un panier qui mélange obligations et actions : moins de variations qu’une action seule, plus de rendement attendu qu’une obligation."
+      },
+      "action-grande": {
+        "name": "Action d’une grande entreprise (exemple)",
+        "description": "Une part d’une entreprise établie : plus de rendement attendu sur la durée, mais des années de baisse sont normales."
+      },
+      "action-petite": {
+        "name": "Action d’une petite entreprise (exemple)",
+        "description": "Une part d’une entreprise jeune ou petite : peut beaucoup monter ou beaucoup baisser. À n’envisager qu’en petite part, sur longtemps."
+      },
+      "or": {
+        "name": "Or (exemple)",
+        "description": "Une valeur refuge recherchée en temps de crise : ne verse rien, son prix varie fortement d’une année à l’autre."
+      }
+    }
   }
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeftRight, LifeBuoy, LogOut, Plus, UserRound } from 'lucide-react';
+import { ArrowLeftRight, LayoutDashboard, LifeBuoy, LogOut, Plus, UserRound } from 'lucide-react';
 import { useAuth } from '../../auth/useAuth.js';
 import { useApi } from '../../lib/useApi.js';
 import { ASSISTANT_OPEN_EVENT } from '../../lib/finControls.js';
@@ -17,7 +17,7 @@ import '../../layouts/AppLayout.css';
 // The top bar of BOTH applications (tab 03B; recette R2-03): the same bar,
 // the same buttons at the same place, whether one is in Gestion budgétaire
 // or in Gestion commune — only the highlighted half of the switcher changes.
-// `app` is 'budget' or 'shared'.
+// `app` is 'budget', 'shared' or 'admin'.
 export default function AppTopBar({ app = 'budget' }) {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
@@ -37,26 +37,33 @@ export default function AppTopBar({ app = 'budget' }) {
     }
   };
 
-  const shared = app === 'shared';
+  // « Gestion budgétaire / Gestion commune » (P9-01 point 1), and
+  // « Administration » for an administrator (recette R8-09): the one door
+  // between the windows, always at the same place.
+  const apps = [
+    { key: 'budget', to: '/app', labelKey: 'appNav.budgetApp', icon: ArrowLeftRight },
+    { key: 'shared', to: '/partage', labelKey: 'appNav.sharedApp', icon: ArrowLeftRight },
+    ...(user?.role === 'admin' ? [{ key: 'admin', to: '/admin', labelKey: 'nav.admin', icon: LayoutDashboard }] : []),
+  ];
+  const home = apps.find((entry) => entry.key === app)?.to ?? '/app';
 
   return (
     <header className="app-topbar">
-      <Link to={shared ? '/partage' : '/app'} className="app-brand">
+      <Link to={home} className="app-brand">
         <img src={brandMark} alt="" aria-hidden="true" width="28" height="28" />
         <span>{t('common.brand')}</span>
       </Link>
 
-      {/* « Gestion budgétaire / Gestion commune » (P9-01 point 1): out of the
-          financial menu. Gestion commune has its own address, `/partage` (P9-02). */}
       <nav className="app-switcher" aria-label={t('appNav.switcher')}>
-        <NavLink to="/app" className={`app-switcher-link${shared ? '' : ' app-switcher-current'}`} aria-current={shared ? undefined : 'page'}>
-          {shared && <ArrowLeftRight size={14} aria-hidden="true" />}
-          <span className={shared ? 'app-switcher-text' : undefined}>{t('appNav.budgetApp')}</span>
-        </NavLink>
-        <NavLink to="/partage" className={`app-switcher-link${shared ? ' app-switcher-current' : ''}`} aria-current={shared ? 'page' : undefined}>
-          {!shared && <ArrowLeftRight size={14} aria-hidden="true" />}
-          <span className={shared ? undefined : 'app-switcher-text'}>{t('appNav.sharedApp')}</span>
-        </NavLink>
+        {apps.map((entry) => {
+          const current = entry.key === app;
+          return (
+            <Link key={entry.key} to={entry.to} className={`app-switcher-link${current ? ' app-switcher-current' : ''}`} aria-current={current ? 'page' : undefined} title={t(entry.labelKey)}>
+              {!current && <entry.icon size={14} aria-hidden="true" />}
+              <span className={current ? undefined : 'app-switcher-text'}>{t(entry.labelKey)}</span>
+            </Link>
+          );
+        })}
       </nav>
 
       <div className="app-topbar-actions">

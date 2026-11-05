@@ -1,7 +1,8 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '../config/prisma.js';
 import { HttpError } from '../utils/httpError.js';
-import { clearSessionCookie, setSessionCookie } from '../services/token.service.js';
+import { SESSION_COOKIE, clearSessionCookie, setSessionCookie, verifySession } from '../services/token.service.js';
+import { createSession, revokeOtherSessions, revokeSession } from '../services/session.service.js';
 import { isSelectableAccountType } from '../services/accountTypes.service.js';
 
 const BCRYPT_COST = 12;
@@ -36,7 +37,7 @@ export async function register(req, res, next) {
       throw err;
     }
 
-    setSessionCookie(res, user.id);
+    setSessionCookie(res, user.id, await createSession(prisma, user.id, req));
     res.status(201).json({ user: toPublicUser(user) });
   } catch (err) {
     next(err);
@@ -53,7 +54,7 @@ export async function login(req, res, next) {
     // reveal that the account exists and is merely suspended.
     if (user.status === 'suspended') throw new HttpError(403, 'Account suspended');
 
-    setSessionCookie(res, user.id);
+    setSessionCookie(res, user.id, await createSession(prisma, user.id, req));
     res.json({ user: toPublicUser(user) });
   } catch (err) {
     next(err);
@@ -97,15 +98,32 @@ export async function changePassword(req, res, next) {
     if (!(await bcrypt.compare(currentPassword, req.user.passwordHash))) throw new HttpError(403, 'Wrong password');
     const passwordHash = await bcrypt.hash(newPassword, BCRYPT_COST);
     await prisma.user.update({ where: { id: req.user.id }, data: { passwordHash } });
+    // A changed password ends every OTHER session (P8-20): whoever knew the
+    // old one, or held a stolen session, is signed out; this device stays.
+    await revokeOtherSessions(prisma, req.user.id, req.sessionId ?? null);
     res.status(204).end();
   } catch (err) {
     next(err);
   }
 }
 
-export function logout(req, res) {
-  clearSessionCookie(res);
-  res.status(204).end();
+export async function logout(req, res, next) {
+  try {
+    // Signing out ends THIS session for good, not only the cookie.
+    const token = req.cookies?.[SESSION_COOKIE];
+    if (token) {
+      try {
+        const payload = verifySession(token);
+        if (payload.jti) await revokeSession(prisma, payload.sub, payload.jti);
+      } catch {
+        /* an expired or invalid token: there is nothing to revoke */
+      }
+    }
+    clearSessionCookie(res);
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
 }
 
 export function me(req, res) {

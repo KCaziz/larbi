@@ -24,7 +24,10 @@ const HEIGHT = 230;
 const PAD = { left: 70, right: 16, top: 14, bottom: 30 };
 const TICKS = 4;
 
-export default function LineChart({ series, currency, caption, format, xLabel }) {
+// `fromZero` (default): the value axis starts at zero, so a bar of money is never
+// exaggerated. A PRICE path (the learning market, R8-12) sets it to false: its
+// story is how it moved, which a scale from zero flattens.
+export default function LineChart({ series, currency, caption, format, xLabel, fromZero = true }) {
   const { t, i18n } = useTranslation();
   const [hover, setHover] = useState(null);
   const usable = series.filter((item) => item.points.filter((point) => point.value !== null).length >= 1);
@@ -39,8 +42,11 @@ export default function LineChart({ series, currency, caption, format, xLabel })
   if (months.length < 2) return <p className="chart-note">{t('charts.needTwoSteps')}</p>;
 
   const values = usable.flatMap((item) => item.points.map((point) => point.value)).filter((value) => value !== null);
-  const min = Math.min(...values, 0);
-  const max = Math.max(...values, 0);
+  const lowest = Math.min(...values);
+  const highest = Math.max(...values);
+  const margin = fromZero ? 0 : (highest - lowest) * 0.1 || Math.abs(highest) * 0.01 || 1;
+  const min = fromZero ? Math.min(lowest, 0) : lowest - margin;
+  const max = fromZero ? Math.max(highest, 0) : highest + margin;
   const span = max - min || 1;
   const innerW = WIDTH - PAD.left - PAD.right;
   const innerH = HEIGHT - PAD.top - PAD.bottom;

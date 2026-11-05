@@ -4,6 +4,7 @@ import {
   getAssetValuations,
   getAssets,
   getWealth,
+  getWealthHistory,
   getWealthReferences,
   patchAsset,
   postAsset,
@@ -36,6 +37,7 @@ router.param('id', uuidParam);
 
 router.get('/patrimoine/references', getWealthReferences);
 router.get('/patrimoine', validateQuery(wealthQuerySchema), asyncRoute(getWealth));
+router.get('/patrimoine/historique', validateQuery(wealthQuerySchema), asyncRoute(getWealthHistory));
 
 router.get('/actifs', asyncRoute(getAssets));
 router.post('/actifs', validateBody(createAssetSchema), asyncRoute(postAsset));

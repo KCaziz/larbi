@@ -12,7 +12,8 @@ import { SERVER_DIR } from '../helpers/env.js';
 
 const fr = JSON.parse(readFileSync(path.resolve(SERVER_DIR, '../client/src/i18n/locales/fr.json'), 'utf8'));
 // The order retained on 2026-10-28 (answer D3 and its improvements).
-const FINANCIAL_ENTRIES = ['home', 'today', 'accounts', 'movements', 'budgets', 'calendar', 'synthesis', 'health', 'goals', 'debts', 'wealth', 'paper', 'tools'].map((key) => fr.appNav[key]);
+// « Premiers pas » heads the menu since the recette (R4-04).
+const FINANCIAL_ENTRIES = ['settingsOnboarding', 'home', 'today', 'accounts', 'movements', 'budgets', 'calendar', 'synthesis', 'health', 'goals', 'debts', 'wealth', 'paper', 'tools'].map((key) => fr.appNav[key]);
 
 describe('the application shell, end to end', { skip: findChrome() ? false : 'no Chrome/Chromium found (set CHROME_PATH)' }, () => {
   let t;
@@ -23,7 +24,7 @@ describe('the application shell, end to end', { skip: findChrome() ? false : 'no
     await b.clearCookies();
     await b.send('Network.setCookie', { name: 'session', value: t.signSession(user.id), url: site.url, httpOnly: true });
   };
-  const sidebarLabels = () => b.ev("[...document.querySelectorAll('.app-sidebar .app-nav-text')].map((e) => e.textContent.trim())");
+  const sidebarLabels = () => b.ev("[...document.querySelectorAll('.app-sidebar .app-nav-link .app-nav-text')].map((e) => e.textContent.trim())");
 
   before(async () => {
     t = await boot();
@@ -45,7 +46,7 @@ describe('the application shell, end to end', { skip: findChrome() ? false : 'no
     for (const finPublic of ['LYC', 'SAL']) {
       await signIn(await t.adult({ finPublic }));
       await b.goto(`${site.url}/app`);
-      await b.waitFor("document.querySelectorAll('.app-sidebar .app-nav-text').length >= 16", 'the sidebar');
+      await b.waitFor("document.querySelectorAll('.app-sidebar .app-nav-link .app-nav-text').length >= 17", 'the sidebar');
       menus.push(await sidebarLabels());
     }
     assert.deepEqual(menus[0], menus[1]);
@@ -58,7 +59,7 @@ describe('the application shell, end to end', { skip: findChrome() ? false : 'no
     await b.goto(`${site.url}/app`);
     // The menu first renders before the account is loaded, with all 13 entries:
     // wait for the account's own menu, not for the first one.
-    await b.waitFor("document.querySelectorAll('.app-sidebar .app-nav-text').length === 14", 'the sidebar of a minor');
+    await b.waitFor("document.querySelectorAll('.app-sidebar .app-nav-link .app-nav-text').length === 15", 'the sidebar of a minor');
     const labels = await sidebarLabels();
     assert.ok(!labels.includes(fr.appNav.debts) && !labels.includes(fr.appNav.wealth), labels.join(', '));
   });

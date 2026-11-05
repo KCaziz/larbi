@@ -3,6 +3,7 @@ import {
   getSpaceGoalHistory,
   getSpaceGoals,
   patchSpaceGoal,
+  putGoalCalendar,
   postContribution,
   postSpaceGoal,
   removeContribution,
@@ -19,6 +20,7 @@ import {
   createContributionSchema,
   createProvisionSchema,
   createSpaceGoalSchema,
+  goalCalendarSchema,
   updateChildSchema,
   updateProvisionSchema,
   updateSpaceGoalSchema,
@@ -39,6 +41,7 @@ router.param('provisionId', uuidParam);
 router.get('/espaces/:id/objectifs-communs', asyncRoute(getSpaceGoals));
 router.post('/espaces/:id/objectifs-communs', validateBody(createSpaceGoalSchema), asyncRoute(postSpaceGoal));
 router.patch('/espaces/:id/objectifs-communs/:goalId', validateBody(updateSpaceGoalSchema), asyncRoute(patchSpaceGoal));
+router.put('/espaces/:id/objectifs-communs/:goalId/calendrier', validateBody(goalCalendarSchema), asyncRoute(putGoalCalendar));
 router.delete('/espaces/:id/objectifs-communs/:goalId', validateBody(deleteSchema), asyncRoute(removeSpaceGoal));
 router.get('/espaces/:id/objectifs-communs/:goalId/historique', asyncRoute(getSpaceGoalHistory));
 router.post('/espaces/:id/objectifs-communs/:goalId/contributions', validateBody(createContributionSchema), asyncRoute(postContribution));

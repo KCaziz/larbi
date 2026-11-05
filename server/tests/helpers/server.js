@@ -33,6 +33,23 @@ export async function boot({ production = false, extra = {} } = {}) {
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
   const storageDir = process.env.STORAGE_DIR;
 
+  // Requests still being answered. A browser journey can end one second after
+  // a page load, while that page's requests are still running; the website is
+  // then stopped, the server stops listening, but the handlers go on querying
+  // the database. Disconnecting Prisma under them left pool connections open,
+  // and the test process never exited (found 2026-11-05: a journey passed in
+  // one second, then hung forever). `close()` waits for them first.
+  let inFlight = 0;
+  server.on('request', (req, res) => {
+    inFlight += 1;
+    const end = res.end;
+    res.end = function finish(...args) {
+      inFlight -= 1;
+      res.end = end;
+      return end.apply(this, args);
+    };
+  });
+
   // ---- HTTP client ---------------------------------------------------------
   // `user` = a database user (a valid session cookie is forged for it, exactly
   // what login would set); `token` = a raw session value; `json` / `form` = body;
@@ -215,7 +232,11 @@ export async function boot({ production = false, extra = {} } = {}) {
   };
 
   async function close() {
-    await new Promise((resolve) => server.close(resolve));
+    const closed = new Promise((resolve) => server.close(resolve));
+    for (let waited = 0; inFlight > 0 && waited < 15_000; waited += 50) await new Promise((resolve) => setTimeout(resolve, 50));
+    // What is left is only idle keep-alive sockets: they would hold close() open.
+    server.closeAllConnections?.();
+    await closed;
     await prisma.$disconnect();
     rmSync(storageDir, { recursive: true, force: true });
   }

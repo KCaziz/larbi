@@ -79,7 +79,7 @@ describe('P1-12 — the navigation of the application', { skip: findChrome() ? f
     await b.goto(`${site.url}/app/aujourdhui`);
     assert.ok(await b.waitFor("!!document.querySelector('.app-sidebar .app-nav-link')", 'the menu'), 'no menu rendered');
     const headings = await b.ev("[...document.querySelectorAll('.app-sidebar .app-nav-heading')].map((h) => h.textContent.trim())");
-    assert.deepEqual(headings, Object.values(fr.appNav.sections), 'the five sections of the client, in order');
+    assert.deepEqual(headings, Object.values(fr.appNav.sections), 'the sections of the menu, in order (« Pour commencer » first since R4-04)');
 
     const sideBySide = await b.ev(`(() => {
       const nav = document.querySelector('.app-sidebar').getBoundingClientRect();

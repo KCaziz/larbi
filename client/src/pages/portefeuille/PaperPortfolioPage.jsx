@@ -30,6 +30,8 @@ export default function PaperPortfolioPage() {
   useDocumentMeta(t('paper.title'), t('paper.intro'));
 
   const portfolio = useApi('/fin/portefeuille');
+  // The pedagogical market (R8-12): its month's price for the supports bought there.
+  const market = useApi('/fin/portefeuille/marche');
   const references = useApi('/fin/portefeuille/references');
   const diagnostic = useApi('/fin/portefeuille/diagnostic');
   const journal = useApi('/fin/portefeuille/decisions');
@@ -75,6 +77,24 @@ export default function PaperPortfolioPage() {
           </p>
         )}
 
+        {/* How to train (recette R8-05): no list of placements nor any price
+            is published, so the person creates their own « supports » with a
+            price they choose — which an empty page never said. Shown until a
+            first position exists. */}
+        {view.positions.length === 0 && (
+          <section className="paper-guide" aria-labelledby="paper-guide">
+            <h2 id="paper-guide">{t('paper.guide.title')}</h2>
+            <ol>
+              <li>{t('paper.guide.step1')}</li>
+              <li>{t('paper.guide.step2', { amount: formatAmount(i18n.language, view.capital, view.currency) })}</li>
+              <li>{t('paper.guide.step3')}</li>
+              <li>{t('paper.guide.step4')}</li>
+            </ol>
+            <p className="paper-help">{t('paper.guide.why')}</p>
+            <Button to="/app/portefeuille/marche">{t('market.open')}</Button>
+          </section>
+        )}
+
         <section aria-labelledby="paper-figures">
           <h2 id="paper-figures">
             {t('paper.figuresTitle')}
@@ -107,7 +127,15 @@ export default function PaperPortfolioPage() {
           )}
         </section>
 
-        <PositionsSection t={t} language={i18n.language} view={view} formulas={formulas} currency={currency} run={run} />
+        <PositionsSection
+          t={t}
+          language={i18n.language}
+          view={view}
+          formulas={formulas}
+          currency={currency}
+          run={run}
+          marketPrices={new Map((market.data?.supports ?? []).map((support) => [t(`market.supports.${support.key}.name`), support]))}
+        />
         <ReadinessSection t={t} diagnostic={diagnostic.data} />
         <RiskSection t={t} references={references.data} />
         <JournalSection t={t} language={i18n.language} decisions={journal.data?.decisions ?? []} currency={view.currency} />
@@ -132,7 +160,7 @@ export default function PaperPortfolioPage() {
   );
 }
 
-function PositionsSection({ t, language, view, formulas, currency, run }) {
+function PositionsSection({ t, language, view, formulas, currency, run, marketPrices }) {
   const [adding, setAdding] = useState(false);
   const [trading, setTrading] = useState(null);
 
@@ -153,6 +181,17 @@ function PositionsSection({ t, language, view, formulas, currency, run }) {
                 {t('paper.markedAt', { price: formatAmount(language, position.markPrice, view.currency), date: formatDate(language, position.markedAt) })}
               </span>
               <FigureCard label={t('paper.gainLoss')} answer={position.gainPerte} formula={formulas.get('F039')} simulation />
+              {/* Bought on the pedagogical market: its price follows the month's
+                  simulated one, when the person asks (R8-12). */}
+              {marketPrices.get(position.label) && marketPrices.get(position.label).price !== position.markPrice && (
+                <button
+                  type="button"
+                  className="paper-plain"
+                  onClick={() => run(() => api.put(`/fin/portefeuille/instruments/${position.id}/prix`, { markPrice: marketPrices.get(position.label).price, markedAt: new Date().toISOString() }), 'market.priceUpdated')}
+                >
+                  {t('market.updatePrice', { price: formatAmount(language, marketPrices.get(position.label).price, view.currency), month: marketPrices.get(position.label).priceMonth })}
+                </button>
+              )}
               <button type="button" className="paper-plain" onClick={() => setTrading(trading === position.id ? null : position.id)}>
                 {t('paper.trade')}
               </button>
@@ -165,6 +204,7 @@ function PositionsSection({ t, language, view, formulas, currency, run }) {
       )}
 
       <div className="paper-actions">
+        <Button to="/app/portefeuille/marche">{t('market.open')}</Button>
         <Button type="button" variant="secondary" onClick={() => setAdding((value) => !value)}>
           <Plus size={16} aria-hidden="true" /> {t('paper.addInstrument')}
         </Button>

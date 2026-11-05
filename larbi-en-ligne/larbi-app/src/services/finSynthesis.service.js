@@ -8,8 +8,9 @@
 // never 0.
 
 import { computed } from './finance/contract.js';
-import { monthlyAmount, netFlow, totalExpenses, totalIncome } from './finance/formulas.js';
+import { monthlyAmount, netFlow, savingsRate, totalExpenses, totalIncome } from './finance/formulas.js';
 import { isFictional, isReal } from './finance/dataModel.js';
+import { markedSavingsInPeriod } from './finSavings.service.js';
 
 // First and last instant of a month, and of the month before it (the trend).
 const monthRange = (reference) => {
@@ -55,6 +56,13 @@ function monthlyResources(incomes, { currency }) {
   return { total: totalIncome(entries, { currency }), warnings };
 }
 
+// Money set aside for a goal, or taken back out of it (family `goal`, see
+// finSavings.service.js). It moves between the person's own pockets: PB-F004
+// and PB-F005 exclude transfers from income and expenses, so it is neither
+// (diagnostic n°2, C2). It is still counted where it belongs — F007, the
+// reserve, the goals — through finSavings.service.js.
+export const isSavingsMovement = (row) => row.category?.family === 'goal';
+
 const asEntries = (rows) => rows.map((row) => ({ amount: row.value, currency: row.currency }));
 
 // A total over NO row is not zero: we cannot tell "spent nothing" from
@@ -94,18 +102,25 @@ export function buildSynthesis({ incomes = [], movements = [], previous = [], fa
   const realised = realMovements.filter((row) => !row.planned);
   const planned = movements.filter((row) => row.planned);
 
-  const realExpenses = realised.filter((row) => row.kind === 'expense');
-  const realIncome = realised.filter((row) => row.kind === 'income');
-  const resources = resolved.mixed || incomes.length === 0 ? { total: null, warnings: [] } : monthlyResources(incomes, { currency });
+  // Income and expenses are what REALLY happened (PB-F004, PB-F005), savings
+  // movements excluded.
+  const counted = realised.filter((row) => !isSavingsMovement(row));
+  const realExpenses = counted.filter((row) => row.kind === 'expense');
+  const realIncome = counted.filter((row) => row.kind === 'income');
+  // Declared resources are split like movements: a lycéen's fictional pocket
+  // money is never part of the real « prévu », which also feeds the debt ratio.
+  const resourcesOf = (rows) => (resolved.mixed || rows.length === 0 ? { total: null, warnings: [] } : monthlyResources(rows, { currency }));
+  const fictionalIncomes = incomes.filter(isFictional);
+  const resources = resourcesOf(incomes.filter(isReal));
   const expenses = resolved.mixed ? null : totalOrNull(realExpenses, totalExpenses, { currency });
-  const movementIncome = resolved.mixed ? null : totalOrNull(realIncome, totalIncome, { currency });
 
-  // Resources are what recurs; a movement of kind "income" is what actually
-  // arrived. Both are income for F002, and summing them is the only honest
-  // reading of "total revenus" for the period. Either side may be absent — a
-  // salary with no one-off income is still a known total — but with NEITHER
-  // there is nothing to total.
-  const income = resources.total === null && movementIncome === null ? null : (resources.total ?? 0) + (movementIncome ?? 0);
+  // Diagnostic n°2, C1: this used to ADD the declared resources to the income
+  // actually received. A salary declared once and recorded on arrival counted
+  // twice; a salary declared but never received counted as received. The
+  // client's rule is « Σ transactions type=Revenu et statut=Réalisé »: a
+  // declared resource is what is EXPECTED, shown beside as `revenusPrevus`,
+  // never added to the real.
+  const income = resolved.mixed ? null : totalOrNull(realIncome, totalIncome, { currency });
 
   const inputs = {
     periode: period ? { debut: period.start.toISOString(), fin: period.end.toISOString() } : null,
@@ -117,20 +132,24 @@ export function buildSynthesis({ incomes = [], movements = [], previous = [], fa
   const allWarnings = [...warnings, ...resources.warnings];
   const answer = (id, result, extra = {}) => computed(id, result, { inputs, currency, warnings: allWarnings, now, ...extra });
 
-  const previousRows = previous.filter((row) => isReal(row) && !row.planned && row.kind === 'expense');
+  const previousRows = previous.filter((row) => isReal(row) && !row.planned && row.kind === 'expense' && !isSavingsMovement(row));
   const previousExpenses = resolved.mixed ? null : totalOrNull(previousRows, totalExpenses, { currency });
 
   return {
     currency,
     mixedCurrencies: resolved.mixed,
-    // F002, F003, F004 — the three figures the client's screen C05 shows.
-    revenus: answer('F002', income),
-    depenses: answer('F003', expenses),
-    fluxNet: answer('F004', netFlow(income, expenses)),
+    // PB-F004, PB-F005, PB-F006 — the client's final rules for the three
+    // figures of the synthesis (they supersede F002 to F004, P8-01 point 1).
+    revenus: answer('PB-F004', income),
+    depenses: answer('PB-F005', expenses),
+    fluxNet: answer('PB-F006', netFlow(income, expenses)),
+    // What the declared recurring resources add up to over a month (F001).
+    // EXPECTED, not received: shown as « prévu », never added to `revenus`.
+    revenusPrevus: answer('F001', resources.total),
     // The breakdown and the trend are descriptive, not formulas of the client's
     // catalogue: they are shown as plain data, without pretending to be a
     // computed indicator with a version.
-    repartition: resolved.mixed ? [] : breakdown(realised.filter((row) => row.kind === 'expense')),
+    repartition: resolved.mixed ? [] : breakdown(realExpenses),
     tendance: {
       moisPrecedent: previousExpenses,
       // The difference, not a percentage: a percentage of a month with no
@@ -138,20 +157,21 @@ export function buildSynthesis({ incomes = [], movements = [], previous = [], fa
       variation: previousExpenses === null || expenses === null ? null : expenses - previousExpenses,
     },
     prevuReel: {
-      prevu: resolved.mixed ? null : totalOrNull(planned.filter((row) => row.kind === 'expense'), totalExpenses, { currency }),
+      prevu: resolved.mixed ? null : totalOrNull(planned.filter((row) => row.kind === 'expense' && !isSavingsMovement(row)), totalExpenses, { currency }),
       reel: expenses,
     },
     // The fictional side, apart and badged. `null` when there is nothing
     // fictional at all: an empty simulation block would suggest one exists.
     simulation:
-      fictionalMovements.length === 0
+      fictionalMovements.length === 0 && fictionalIncomes.length === 0
         ? null
         : {
             badge: 'SIMULATION',
             depenses: resolved.mixed ? null : totalOrNull(fictionalMovements.filter((row) => row.kind === 'expense'), totalExpenses, { currency }),
             revenus: resolved.mixed ? null : totalOrNull(fictionalMovements.filter((row) => row.kind === 'income'), totalIncome, { currency }),
+            revenusPrevus: resourcesOf(fictionalIncomes).total,
           },
-    nonCategorisees: realised.filter((row) => row.categoryId === null).length,
+    nonCategorisees: counted.filter((row) => row.categoryId === null).length,
   };
 }
 
@@ -180,11 +200,11 @@ export async function loadSynthesisData(prisma, userId, period) {
     }),
     prisma.finTransaction.findMany({
       where: { userId, deletedAt: null, occurredAt: { gte: period.start, lte: period.end } },
-      select: { id: true, kind: true, value: true, currency: true, categoryId: true, planned: true, status: true },
+      select: { id: true, kind: true, value: true, currency: true, categoryId: true, planned: true, status: true, category: { select: { family: true, group: true, essential: true } } },
     }),
     prisma.finTransaction.findMany({
       where: { userId, deletedAt: null, occurredAt: { gte: before.start, lte: before.end } },
-      select: { kind: true, value: true, currency: true, planned: true, status: true },
+      select: { kind: true, value: true, currency: true, planned: true, status: true, category: { select: { family: true, group: true, essential: true } } },
     }),
   ]);
   return { incomes, movements, previous };
@@ -202,3 +222,74 @@ export function breakdown(rows) {
     .map(([categoryId, total]) => ({ categoryId, total }))
     .sort((a, b) => b.total - a.total);
 }
+
+// ---- history (P6-23) --------------------------------------------------------
+
+/**
+ * Revenus vs dépenses, one point per month, for the last `months` calendar
+ * months (this one included) — read the same way as "Mon argent"'s own
+ * figures (`loadSynthesisData` + `buildSynthesis`), never a parallel count
+ * that could drift from the screen that already shows the current month.
+ *
+ * A month resolved in another currency than the account's own is reported as
+ * `null` for both figures rather than converted or silently summed with the
+ * rest — the same rule `buildSynthesis` itself applies within one month.
+ */
+export async function monthlyMoneyHistory(prisma, userId, { months = 6, currency } = {}) {
+  const now = new Date();
+  const periods = Array.from({ length: months }, (_, index) => {
+    const monthsAgo = months - 1 - index;
+    return currentMonth(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - monthsAgo, 1)));
+  });
+  return historyOf(prisma, userId, periods, currency, (period) => period.start.toISOString().slice(0, 7));
+}
+
+/**
+ * The same figures by day or by week (G-05 « jour, semaine ou mois », G-03 the
+ * net flow): the last `count` days, or the last `count` weeks — a week starting
+ * on Sunday, the first working day in Algeria (the weekend is Friday-Saturday).
+ * Each point is named by its first day (`YYYY-MM-DD`).
+ */
+export const HISTORY_STEPS = { jour: 31, semaine: 12 };
+export async function stepMoneyHistory(prisma, userId, { step, count = HISTORY_STEPS[step], currency } = {}) {
+  const now = new Date();
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const DAY = 86_400_000;
+  const length = step === 'semaine' ? 7 : 1;
+  // The first day of the current step: today, or the Sunday of this week.
+  const current = step === 'semaine' ? today - new Date(today).getUTCDay() * DAY : today;
+  const periods = Array.from({ length: count }, (_, index) => {
+    const start = current - (count - 1 - index) * length * DAY;
+    return { start: new Date(start), end: new Date(start + length * DAY - 1) };
+  });
+  return historyOf(prisma, userId, periods, currency, (period) => period.start.toISOString().slice(0, 10));
+}
+
+function historyOf(prisma, userId, periods, currency, name) {
+  return Promise.all(
+    periods.map(async (period) => {
+      const { incomes, movements } = await loadSynthesisData(prisma, userId, period);
+      const synthesis = buildSynthesis({ incomes, movements, previous: [], fallbackCurrency: currency, period });
+      const inCurrency = !synthesis.mixedCurrencies && synthesis.currency === currency;
+      // F008 — the net savings of the month over its income, as on the
+      // Accueil: nothing set aside on record is « not computed », never 0 %.
+      const saved = inCurrency ? await markedSavingsInPeriod(prisma, userId, currency, { from: period.start, to: period.end }) : null;
+      return {
+        month: name(period),
+        revenus: inCurrency ? synthesis.revenus.resultat : null,
+        depenses: inCurrency ? synthesis.depenses.resultat : null,
+        // G-03: the net flow of the month, as the engine computed it.
+        fluxNet: inCurrency ? synthesis.fluxNet?.resultat ?? null : null,
+        tauxEpargne: saved === null ? null : savingsRate(saved.net, synthesis.revenus.resultat),
+      };
+    }),
+  );
+}
+
+// The net monthly income a DEBT RATIO is divided by (PB-F020). A ratio of
+// effort is structural: it asks what share of a normal month the instalments
+// take, so the declared recurring resources are the right base — this month's
+// receipts, before the salary has arrived, would make the same debt look
+// unbearable on the 5th and harmless on the 30th. Without any declared
+// resource, the income actually received is the only base there is.
+export const debtRatioIncome = (synthesis) => synthesis.revenusPrevus?.resultat ?? synthesis.revenus?.resultat ?? null;

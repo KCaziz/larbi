@@ -323,10 +323,16 @@ main {
 
 /* A field inside a composite control (a search box with its icon) belongs to
    the composite, which draws the border, the size and the focus ring. */
-:is(.global-search-box, .chatbot-search, .apprendre-search-input, .money-search, .tools-search) input {
+:is(.global-search-box, .chatbot-search, .apprendre-search-input, .money-search, .tools-search, .category-picker-search, .postal-search) input {
   min-block-size: 0;
   padding: 0;
+  border: 0;
   box-shadow: none;
+}
+/* Their own « clear » button replaces the browser's. */
+:is(.global-search-box, .chatbot-search, .apprendre-search-input, .money-search, .tools-search, .category-picker-search, .postal-search) input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 :where(textarea) {

@@ -121,6 +121,22 @@ export async function lockLesson(tx, courseId) {
   if (rows.length === 0) throw new HttpError(404, 'Not found');
 }
 
+// The block, read AFTER its lesson is locked. MariaDB 11.6+ isolates a
+// transaction on the snapshot of its first plain read (innodb_snapshot_isolation)
+// and refuses to update a row changed since (error 1020). Reading the block
+// first, then waiting for the lock while an upload renumbered the lesson, made
+// the save of a text block fail — the text was lost (found by the formation
+// journey, 2026-10-29). Its lesson is found outside the transaction, the lock
+// taken, and only then the block read.
+export async function lockBlockLesson(prisma, tx, blockId, { include } = {}) {
+  const found = await prisma.lessonBlock.findUnique({ where: { id: blockId }, select: { courseId: true } });
+  if (!found) throw new HttpError(404, 'Not found');
+  await lockLesson(tx, found.courseId);
+  const existing = await tx.lessonBlock.findUnique({ where: { id: blockId }, ...(include ? { include } : {}) });
+  if (!existing) throw new HttpError(404, 'Not found');
+  return existing;
+}
+
 // Writes positions 0..n-1 for the given ids, in that order.
 export async function renumberBlocks(tx, orderedIds) {
   for (const [position, id] of orderedIds.entries()) {

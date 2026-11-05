@@ -1,9 +1,12 @@
 // Debts (P6-10): the writes, the synthesis (F017-F019) and the avalanche /
 // snowball comparison (ALG-01), screens C13-C14. Scoped to one account.
+import { accountType } from '../constants/finAccounts.js';
+import { createTransfer, ownAccount } from './finAccount.service.js';
 import { debtPayoffPlan } from './finance/algorithms.js';
 import { computed } from './finance/contract.js';
 import { debtEffortRate, debtToAnnualIncome, monthlyDebtService, periodicRate } from './finance/formulas.js';
 import { HttpError } from '../utils/httpError.js';
+import { createEnvelope, currentBudget, updateEnvelope } from './finBudget.service.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
 
 export const DEBT_ENTITY = 'debt';
@@ -21,6 +24,10 @@ const DEBT_SELECT = {
   rate: true,
   knownTotalCost: true,
   dueDate: true,
+  direction: true,
+  debtType: true,
+  budgetEnvelopeId: true,
+  accountId: true,
   note: true,
   scope: true,
   source: true,
@@ -60,6 +67,8 @@ export async function createDebt(prisma, userId, body) {
         rate: body.rate ?? null,
         knownTotalCost: body.knownTotalCost ?? null,
         dueDate: body.dueDate ?? null,
+        direction: body.direction ?? 'owed',
+        debtType: body.debtType ?? null,
         note: body.note ?? null,
         scope: body.scope ?? 'personal',
         consentUses: body.consentUses ?? [],
@@ -117,6 +126,20 @@ export async function recordDebtPayment(prisma, userId, debtId, body) {
   const debt = await ownDebt(prisma, userId, debtId);
   if (body.currency !== debt.currency) throw new HttpError(422, "A payment must be in the debt's own currency", { reason: 'currencyMismatch' });
   const amount = Math.min(body.amount, debt.outstandingPrincipal);
+  // P8-13: a debt carried by an account is repaid by a REAL transfer — from
+  // the person's account to the loan, or, for a receivable, from the
+  // receivable back to the person's account. The movement and the remaining
+  // principal stay in step.
+  if (debt.accountId && body.accountId) {
+    const lent = debt.direction === 'lent';
+    await createTransfer(prisma, userId, {
+      fromAccountId: lent ? debt.accountId : body.accountId,
+      toAccountId: lent ? body.accountId : debt.accountId,
+      value: amount,
+      occurredAt: body.paidAt,
+      note: debt.label,
+    });
+  }
   return prisma.$transaction(async (tx) => {
     const payment = await tx.finDebtPayment.create({
       data: { userId, debtId, amount: body.amount, currency: body.currency, paidAt: body.paidAt, note: body.note ?? null },
@@ -126,6 +149,48 @@ export async function recordDebtPayment(prisma, userId, debtId, body) {
     await recordCorrection(tx, { userId, entity: DEBT_ENTITY, entityId: debtId, before: debt, after, reason: 'paiement enregistré' });
     return { payment, debt: after };
   });
+}
+
+// The categories an instalment is budgeted under: the client's « Dettes &
+// engagements » group, whose categories are the instalments themselves.
+export const DEBT_BUDGET_CATEGORY_KEYS = [
+  'fixed.remboursement_pret_personnel',
+  'fixed.credit_consommation',
+  'fixed.mensualite_financement_vehicule',
+  'fixed.remboursement_carte_de_credit',
+  'fixed.pension_engagement',
+];
+
+/**
+ * Plans a debt's monthly instalment in the current budget (P8-24, step P7 of
+ * the first steps: « chaque échéance se lie au calendrier ET AU BUDGET »).
+ *
+ * One fixed envelope, under the debt category the person picks, worth the
+ * instalment. Doing it again keeps the SAME envelope in step with the
+ * instalment instead of adding a second — nothing is counted twice. A debt I
+ * lent (a receivable) has no instalment to plan, and a debt with none says so.
+ */
+export async function budgetDebtInstalment(prisma, userId, debtId, { categoryId, now = new Date() }) {
+  const debt = await ownDebt(prisma, userId, debtId);
+  if (debt.direction === 'lent') throw new HttpError(422, 'A receivable has no instalment to plan', { reason: 'receivable' });
+  if (!debt.monthlyInstalment || debt.monthlyInstalment <= 0) throw new HttpError(422, 'This debt has no monthly instalment', { reason: 'noInstalment' });
+
+  const category = await prisma.finCategory.findFirst({ where: { id: categoryId, userId: null, deletedAt: null }, select: { id: true, key: true } });
+  if (!category || !DEBT_BUDGET_CATEGORY_KEYS.includes(category.key)) throw new HttpError(422, 'Pick one of the debt categories', { reason: 'notADebtCategory' });
+
+  const budget = await currentBudget(prisma, userId, now);
+  if (!budget) throw new HttpError(422, 'There is no budget for the current period', { reason: 'noBudget' });
+  if (budget.currency !== debt.currency) throw new HttpError(422, 'The budget is in another currency', { reason: 'currencyMismatch', expected: budget.currency });
+
+  // Still there, in THIS budget? Then it follows the instalment.
+  const existing = debt.budgetEnvelopeId
+    ? await prisma.finEnvelope.findFirst({ where: { id: debt.budgetEnvelopeId, budgetId: budget.id, userId, deletedAt: null }, select: { id: true } })
+    : null;
+  const envelope = existing
+    ? await updateEnvelope(prisma, userId, budget.id, existing.id, { categoryId: category.id, value: debt.monthlyInstalment, reason: 'mensualité de la dette' })
+    : await createEnvelope(prisma, userId, budget.id, { categoryId: category.id, kind: 'fixed', value: debt.monthlyInstalment, note: debt.label });
+  await prisma.finDebt.update({ where: { id: debtId }, data: { budgetEnvelopeId: envelope.id } });
+  return { envelope, budgetId: budget.id };
 }
 
 export function listDebtPayments(prisma, userId, debtId) {
@@ -140,7 +205,10 @@ export function listDebtPayments(prisma, userId, debtId) {
  * and showing one without them would be inventing a verdict.
  */
 export function buildDebtSynthesis(debts, { netMonthlyIncome = null, currency, now = new Date() } = {}) {
-  const active = debts.filter((debt) => debt.currency === currency);
+  // What I owe only: a receivable (« J'ai prêté », D-01) is money owed TO me,
+  // always kept apart (P8-13) and summed in `creances`.
+  const receivables = debts.filter((debt) => debt.direction === 'lent' && debt.currency === currency);
+  const active = debts.filter((debt) => debt.currency === currency && debt.direction !== 'lent');
   const warnings = debts.length !== active.length ? ["Des dettes dans une autre devise ne sont pas comptées : convertir sans taux daté donnerait un chiffre faux."] : [];
   const instalments = active.map((debt) => ({ amount: debt.monthlyInstalment, currency }));
   const inputs = { nombre_dettes: active.length };
@@ -152,9 +220,11 @@ export function buildDebtSynthesis(debts, { netMonthlyIncome = null, currency, n
     serviceMenuel: answer('F017', service),
     // F018 is shown only once a monthly instalment has actually been declared
     // — a rate of 0 % would otherwise read as "no debt", an answer nobody gave.
-    tauxEffort: active.length === 0 ? null : answer('F018', debtEffortRate(service, netMonthlyIncome)),
+    // PB-F020 — the client's final rule for the debt-to-income ratio.
+    tauxEffort: active.length === 0 ? null : answer('PB-F020', debtEffortRate(service, netMonthlyIncome)),
     detteRevenuAnnuel: answer('F019', debtToAnnualIncome(active.reduce((sum, debt) => sum + debt.outstandingPrincipal, 0), annualIncome)),
     encours: active.reduce((sum, debt) => sum + debt.outstandingPrincipal, 0),
+    creances: { nombre: receivables.length, encours: receivables.reduce((sum, debt) => sum + debt.outstandingPrincipal, 0) },
     avertissements: warnings,
   };
 }
@@ -166,7 +236,7 @@ export function buildDebtSynthesis(debts, { netMonthlyIncome = null, currency, n
  * what it cannot honestly simulate and says so.
  */
 export function buildPayoffComparison(debts, { extraPayment = 0, currency, now = new Date() } = {}) {
-  const usable = debts.filter((debt) => debt.currency === currency && debt.rate !== null && debt.rate !== undefined && debt.outstandingPrincipal > 0 && debt.monthlyInstalment > 0);
+  const usable = debts.filter((debt) => debt.direction !== 'lent' && debt.currency === currency && debt.rate !== null && debt.rate !== undefined && debt.outstandingPrincipal > 0 && debt.monthlyInstalment > 0);
   const excluded = debts.length - usable.length;
   const warnings = excluded > 0 ? [`${excluded} dette(s) sans taux connu ou sans mensualité ne peuvent pas entrer dans cette comparaison.`] : [];
   if (usable.length === 0) return { avalanche: null, bouleDeNeige: null, avertissements: [...warnings, 'Aucune dette avec un taux connu : rien à comparer.'] };
@@ -180,4 +250,56 @@ export function buildPayoffComparison(debts, { extraPayment = 0, currency, now =
     bouleDeNeige: answer(debtPayoffPlan({ debts: prepared, extraPayment, strategy: 'snowball' })),
     avertissements: warnings,
   };
+}
+
+/**
+ * A simple loan between people (P8-13, tab 09_Dettes): « J'ai prêté » (D-01,
+ * a receivable) or « On m'a prêté » (D-02, a simple debt). The money really
+ * moves the day it happens: it leaves the person's account towards a
+ * receivable account (AC-09), or arrives on it from a loan account (AC-08).
+ * Neither is income nor spending — it is a transfer — and the debt or the
+ * receivable is then followed apart, on its own account.
+ */
+export async function createSimpleLoan(prisma, userId, body) {
+  const lent = body.direction === 'lent';
+  const personal = await ownAccount(prisma, userId, body.accountId);
+  const typeId = lent ? 'AC-09' : 'AC-08';
+  const type = accountType(typeId);
+  const label = lent ? `Prêt à ${body.counterparty}` : `Prêt de ${body.counterparty}`;
+  const account = await prisma.finAccount.create({
+    data: {
+      userId,
+      label: label.slice(0, 80),
+      type: typeId,
+      currency: personal.currency,
+      openingDate: body.occurredAt,
+      includeInTotal: type.includeInTotal,
+      includeInNetWorth: type.includeInNetWorth,
+      source: 'manual',
+      status: 'declared',
+    },
+    select: { id: true },
+  });
+  await createTransfer(prisma, userId, {
+    fromAccountId: lent ? personal.id : account.id,
+    toAccountId: lent ? account.id : personal.id,
+    value: body.value,
+    occurredAt: body.occurredAt,
+    note: body.note ?? label,
+  });
+  return createDebt(prisma, userId, {
+    label: label.slice(0, 80),
+    lender: lent ? null : body.counterparty,
+    outstandingPrincipal: body.value,
+    monthlyInstalment: body.monthlyInstalment ?? 0,
+    currency: personal.currency,
+    dueDate: body.dueDate ?? null,
+    note: body.note ?? null,
+    direction: lent ? 'lent' : 'owed',
+    debtType: lent ? 'D-01' : 'D-02',
+    accountId: account.id,
+  }).then(async (debt) => {
+    await prisma.finDebt.update({ where: { id: debt.id }, data: { accountId: account.id } });
+    return { ...debt, accountId: account.id };
+  });
 }

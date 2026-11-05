@@ -20,7 +20,7 @@ import {
   ACTION_PRIORITIES,
   DASHBOARD_ACTIONS,
   DATA_AGE_WARNING_DAYS,
-  HEALTH_INDEX_BLOCKED,
+  HEALTH_INDEX_NOT_FOR_YOUTH,
   KPI_MAX,
   MINOR_ACTIONS_MAX,
   MINOR_ALERTS_MAX,
@@ -32,6 +32,7 @@ import {
 } from '../constants/finDashboard.js';
 import { isAdultAgeRange } from '../constants/finPublics.js';
 import { computed, isNotComputed } from './finance/contract.js';
+import { financialHealth } from './finHealth.service.js';
 import { dataAgeDays, savingsRate as savingsRateOf, studentAutonomy } from './finance/formulas.js';
 
 const DAY = 24 * 3600 * 1000;
@@ -131,6 +132,9 @@ export function buildDashboard({
   onboarding = null,
   uncategorised = 0,
   quality = null,
+  // The two dimensions of the health index that need the database (P8-33):
+  // { goalLines, dataQuality }, from finHealthMeasures.service.js.
+  healthMeasures = {},
   currency,
   now = new Date(),
 }) {
@@ -151,7 +155,9 @@ export function buildDashboard({
   const available = new Map();
   if (synthesis) {
     available.set('netFlow', synthesis.fluxNet);
-    available.set('monthlyResources', synthesis.revenus);
+    // « Ressources du mois » : the declared resources, expected (F001). The
+    // income actually received is `revenus` (PB-F004), never added to them.
+    available.set('monthlyResources', synthesis.revenusPrevus);
     available.set('monthExpenses', synthesis.depenses);
   }
   if (budgetView) {
@@ -221,6 +227,28 @@ export function buildDashboard({
     .slice(0, minor ? MINOR_ACTIONS_MAX : ACTIONS_MAX)
     .map((action) => ({ key: action.key, priority: action.priority, to: action.to, contexte: reasons.get(action.key) }));
 
+  // ---- santé financière (F053) -------------------------------------------
+  // Les mesures viennent des modules qui les possèdent ; aucune n'est
+  // recalculée ici. Celles qu'aucun module ne fournit (pas d'objectif noté, pas
+  // de donnée à mesurer) restent ABSENTES, donc hors du calcul, et le score l'annonce.
+  // Les mettre à zéro ferait baisser la note de quelqu'un pour une donnée que
+  // personne ne lui a demandée.
+  const income = synthesis?.revenus?.resultat ?? null;
+  const netFlowValue = synthesis?.fluxNet?.resultat ?? null;
+  const health = financialHealth(
+    {
+      balance: income && income !== 0 && netFlowValue !== null ? netFlowValue / income : null,
+      reserveMonths: reserve?.moisReserve?.resultat ?? null,
+      debtRatio: debts?.tauxEffort?.resultat ?? null,
+      savingsRate: available.get('savingsRate')?.resultat ?? null,
+      goalLines: healthMeasures.goalLines ?? null,
+      // P8-16, answer C5: each budget of the period, scored then weighted.
+      budgetLines: budgetLinesOf(budgetView),
+      dataQuality: healthMeasures.dataQuality ?? {},
+    },
+    { now },
+  );
+
   return {
     currency,
     publicCode,
@@ -236,15 +264,25 @@ export function buildDashboard({
     echeances: upcoming,
     objectifPrioritaire: topGoal ? { id: topGoal.id, label: topGoal.label, progres: topGoal.view.progres, reste: topGoal.view.reste } : null,
     qualite: quality,
-    // The salarié's « santé financière personnelle » (F053) is NOT published:
-    // its weights are a threshold the client still owes (P6-01 point 5), and a
-    // score computed on weights we invented would be a judgement nobody can
-    // check. The sub-scores it would be built from are the KPIs above, each
-    // readable on its own, which is what the client asks for anyway
-    // (« sous-scores cliquables, pondérations visibles »).
-    santeFinanciere: HEALTH_INDEX_BLOCKED,
+    // « Santé financière personnelle » (F053), enfin calculée : le
+    // référentiel maître du client fournit les pondérations qui manquaient
+    // (P6-22, chantier 2). Elle reste PARTIELLE tant que toutes les
+    // dimensions ne sont pas mesurables, et elle le dit elle-même.
+    //
+    // Pas d'indice global pour un compte jeune : le client exclut l'alerte
+    // adulte sur la réserve d'un lycéen, et une note « Priorité sécurité »
+    // affichée à un adolescent est le même jugement d'adulte.
+    santeFinanciere: minor ? HEALTH_INDEX_NOT_FOR_YOUTH : health,
     // Period the figures describe, so the screen can say what it is showing.
     periode: synthesis ? { debut: null, fin: null } : null,
     calculeLe: now.toISOString(),
   };
+}
+
+// « Respect des budgets » (P8-16, answer C5): one line per budget of the
+// period — its allocation (carry-over included) and what it really consumed.
+// null without a budget: the dimension is then not measured.
+function budgetLinesOf(view) {
+  if (!view?.enveloppes?.length) return null;
+  return view.enveloppes.map((line) => ({ allocated: line.prevu + (line.report ?? 0), spent: line.reel }));
 }

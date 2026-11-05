@@ -271,3 +271,177 @@
 .paper-risk-result {
   margin-block-start: 14px;
 }
+
+/* How to train (recette R8-05). */
+.paper-guide {
+  margin-block: var(--space-md);
+  padding: var(--space-md);
+  border-inline-start: 4px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent-bg);
+}
+.paper-guide h2 {
+  margin-block: 0 var(--space-xs);
+  font-size: 1.2rem;
+}
+.paper-guide ol {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 var(--space-xs);
+  padding-inline-start: 1.4em;
+  color: var(--text-h);
+}
+
+/* The pedagogical market (EP06, recette R8-12). */
+.market-page {
+  display: grid;
+  gap: var(--space-md);
+}
+.market-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr));
+  gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.market-card {
+  display: grid;
+  gap: var(--space-sm);
+  align-content: start;
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.market-card p {
+  margin: 0;
+}
+.market-card h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.market-card h3 {
+  margin: var(--space-xs) 0 0;
+  font-size: 1rem;
+}
+.market-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+.market-class {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.market-badge {
+  flex: none;
+  padding: 2px 10px;
+  border: 1px dashed var(--warn);
+  border-radius: 999px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.market-risk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.market-risk-text {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 0.9rem;
+}
+.market-risk-boxes {
+  display: inline-flex;
+  gap: 3px;
+}
+.market-risk-box {
+  inline-size: 18px;
+  block-size: 10px;
+  border-radius: 2px;
+  background: var(--border);
+}
+.market-risk-on {
+  background: var(--green);
+}
+.market-risk-on.market-risk-3,
+.market-risk-on.market-risk-4 {
+  background: var(--warn);
+}
+.market-risk-on.market-risk-5,
+.market-risk-on.market-risk-6,
+.market-risk-on.market-risk-7 {
+  background: var(--danger);
+}
+.market-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin: 0;
+  font-size: 0.9rem;
+}
+.market-facts dt {
+  color: var(--text);
+}
+.market-facts dd {
+  margin: 0;
+  color: var(--text-h);
+  font-weight: 500;
+}
+.market-seen {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding-inline-start: 1.2em;
+  font-size: 0.9rem;
+}
+.market-projection {
+  display: grid;
+  gap: var(--space-xs);
+  padding-block-start: var(--space-xs);
+  border-block-start: 1px solid var(--border);
+}
+.market-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-sm);
+}
+.market-inline > .fin-field {
+  flex: 1 1 160px;
+}
+.market-projection-result {
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  background: var(--bg-alt);
+}
+.market-projection-result p + p {
+  margin-block-start: 4px;
+}
+.market-buy {
+  padding-block-start: var(--space-xs);
+  border-block-start: 1px solid var(--border);
+}
+.market-compare {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+.market-comparison {
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.market-comparison h2 {
+  margin-block: 0 4px;
+  font-size: 1.2rem;
+}

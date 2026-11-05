@@ -24,9 +24,10 @@ Priorités : `🔴 high` (bloque l'utilisation) · `🟡 medium` (gêne réelle)
 | R5 — Textes, traductions et mentions internes | 6 | 6 |
 | R6 — Pages à rendre compréhensibles | 7 | 7 |
 | R7 — Graphiques | 5 | 5 |
-| **Total** | **50** | **50** |
+| R8 — Deuxième passage (2026-11-05) | 12 | 12 |
+| **Total** | **62** | **62** |
 
-Ordre de travail : les tâches 🚧 d'abord, puis R2-04, R3-05 à R3-09, R4-03, R4-05, R5-04 à R5-06, R6-02, R6-04, R6-06, R6-07, puis R7 (graphiques), et enfin R1-10 et R2-07.
+Ordre de travail (R8) : les corrections courtes d'abord (R8-07, R8-03, R8-09, R8-10, R8-11), puis le sélecteur de catégorie (R8-01, R8-02), les dettes (R8-06), le fonds d'urgence et les « non calculé » (R8-04, R8-08), enfin le portefeuille fictif (R8-05).
 
 ---
 
@@ -480,3 +481,112 @@ Identifier le graphique et ses données, corriger le tracé.
 - Réalisé (2026-11-04) : revue faite avec un compte de démonstration (graphiques budgets, dettes, patrimoine, santé, simulateurs, Gestion commune : tests navigateur `fin-charts-journey` 7/7 et `fin-charts2-journey` 12/12 : légende écrite, valeurs écrites, tableau des chiffres) et avec un compte vide (douze pages, aucune erreur, aucun « NaN » ni « undefined »).
 
 Passer chaque graphique de l'application (budgets, dettes, patrimoine, santé, simulateurs, gestion commune) avec des comptes de démonstration et un compte vide.
+
+---
+
+# R8 — Deuxième passage de recette (2026-11-05)
+
+### R8-01 — Sélecteur de catégorie : affichage des résultats de recherche
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 1 (2e passage)
+- Réalisé (2026-11-05) : En recherche, chaque résultat tient sur deux lignes (la sous-catégorie, puis « dans … » sa catégorie) ; la liste fait au moins 360 px (la largeur de l'écran sur téléphone), icônes et lignes agrandies, et un champ qui porte le sélecteur prend toute la ligne de son formulaire. Le champ de recherche n'a plus de boîte dans la boîte ni de double croix.
+
+En recherche, la sous-catégorie est coincée sous la catégorie (en navigation, l'affichage est correct). Le sélecteur doit avoir partout une taille suffisante : trop petit, il rend les catégories illisibles.
+
+### R8-02 — Sous-catégorie saisie en texte libre
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 2 (2e passage)
+- Réalisé (2026-11-05) : Le champ texte « sous-catégorie » est retiré de la saisie d'un mouvement et de la dépense commune : le sélecteur choisit la catégorie puis la sous-catégorie. Une valeur enregistrée avant est conservée.
+
+`/app/mouvements/nouveau` (et d'autres pages) gardent un champ texte « sous-catégorie » alors que le sélecteur choisit déjà une catégorie puis une sous-catégorie. Une seule façon : le sélecteur.
+
+### R8-03 — Expliquer « pointée », « rapprochée », « à vérifier »
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 3 (2e passage)
+- Réalisé (2026-11-05) : Chaque état de pointage s'explique au survol (liste et boutons de pointage), et une légende dépliable « Que veulent dire… ? », utilisable au toucher, est affichée sur Mouvements et sur Pointage.
+
+Une explication au survol (et au toucher) de chaque état de pointage dans Mouvements.
+
+### R8-04 — Fonds d'urgence : dire comment régler les dépenses essentielles
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 4 (2e passage)
+- Réalisé (2026-11-05) : L'étape 1 dit « Comment les régler » en trois points, chacun avec son lien : enregistrer les dépenses (Ajouter une dépense), choisir ce qui est essentiel (Mes catégories, case « Essentielle »), et, tant qu'il n'y a pas un mois d'historique, donner une estimation sur place.
+
+« Elles se calculent seules à partir de vos dépenses… » ne dit pas quoi faire. Dire concrètement : quelles catégories comptent, comment en marquer une comme essentielle, où enregistrer une dépense, avec les liens.
+
+### R8-05 — Portefeuille fictif presque vide
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 5 (2e passage)
+- Réalisé (2026-11-05) : Cause : aucune liste de placements ni aucun cours n'est fourni (le « marché pédagogique » attend toujours le client, `P6-01`), donc la personne crée elle-même ses supports avec un prix qu'elle choisit — et la page vide ne le disait pas. Ajout d'un mode d'emploi en quatre étapes (créer un support, acheter, changer le prix, noter sa décision), affiché tant qu'aucune position n'existe.
+- **Reste** (confié à `P6-01`) : une liste de supports pédagogiques fournie par le client, si elle vient.
+
+Il n'y a que l'ajout de support et le calcul du score. Établir si c'est faute de données ou d'intégration, et rendre la page utile.
+
+### R8-06 — Graphiques des dettes : montrer ce qui reste dû
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 6 (2e passage)
+- Réalisé (2026-11-05) : L'anneau par type (une seule dette = 100 %) est remplacé par « Où en sont mes dettes » : une barre par dette, sur la même échelle, en deux parties (déjà remboursé / reste dû), chiffres écrits, et un total. Le serveur renvoie, avec chaque dette, la somme de ses remboursements. Test : `finDebtProgress.test.js` (1 000 remboursés de 500 : reste 500 sur 1 000).
+
+Une dette de 1 000 remboursée de 500 s'affiche comme 500 = 100 %. Le graphique doit montrer le montant de départ et ce qui reste, qui baisse à chaque remboursement.
+
+### R8-07 — Outils : retirer les codes (CAL-01…)
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 7 (2e passage)
+- Réalisé (2026-11-05) : Le code (CAL-01…) est remplacé par une phrase qui dit à quoi sert l'outil, pour les 56 outils, en trois langues. Contrôle automatique (`screens.test.js`) : chaque outil a sa phrase dans chaque langue.
+
+Aucun code ni formule dans `/app/outils` ; au plus une ou deux phrases qui disent à quoi sert l'outil.
+
+### R8-08 — Chaque « non calculé » dit comment l'obtenir
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 8 (2e passage)
+- Réalisé (2026-11-05) : Sous chaque « non calculé », « Pour l'obtenir : » et un lien vers l'écran où donner ce qui manque. La carte de chiffre le déduit des données vides de la réponse du moteur (`lib/howToCompute.js`) ; les autres endroits (accueil, synthèse, comptes, calendrier, patrimoine, progression) donnent l'indication directement.
+
+À côté de chaque « non calculé » : ce qui manque, et un lien vers l'endroit où le donner.
+
+### R8-09 — Accès à l'administration
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 9 (2e passage)
+- Réalisé (2026-11-05) : L'administration a sa propre fenêtre, avec la barre de l'application ; le sélecteur « Gestion budgétaire | Gestion commune » propose « Administration » aux administrateurs seulement, dans les trois fenêtres. Un compte de démonstration administrateur est ajouté (`admin@demo.fincludia.local`, même mot de passe ; créé aussi par `npm run demo`).
+
+Un administrateur arrive sur `/app` sans moyen visible d'aller à l'administration. Ajouter « Administration » à côté de « Gestion budgétaire » et « Gestion commune », pour les administrateurs seulement.
+
+### R8-10 — Barre supérieure d'un administrateur : le « + » chevauche le nom
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 10 (2e passage)
+- Réalisé (2026-11-05) : Une fois connecté, la barre du site public ne garde que « Plus », la langue, le thème, « Mon espace » et la déconnexion : la recherche, les notifications, l'aide et l'administration sont dans la barre de l'application. Plus rien ne chevauche le nom, à toutes les largeurs (vérifié à 1 280 et 1 920 px).
+
+Connecté en administrateur, sur l'accueil du site et dans `/admin`, le bouton « Plus » disparaît dans le nom FINCLUDIA.
+
+### R8-11 — `/admin/missions-fincludia` incompréhensible
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 11 (2e passage)
+- Réalisé (2026-11-05) : Le JSON est remplacé par un formulaire : titre, présentation, profils (cases), somme de départ en dinars, étapes avec leurs choix (réponse, effets, explication), badges ; la règle de calcul est dite en mots. Boutons Modifier / Publier / Supprimer stylés et nommés. Les clés d'une mission existante sont gardées (parties déjà jouées). Parcours navigateur `fin-missions-journey` mis à jour.
+
+Les boutons modifier, voir et supprimer n'ont pas de style ; à l'ajout d'une mission, un JSON s'affiche sans explication.
+
+### R8-12 — Marché pédagogique fictif (écran EP06)
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : suite de `R8-05`, décision du 2026-11-05 (avancer sans attendre la liste du client)
+- Réalisé (2026-11-05) : page `/app/portefeuille/marche`, reliée au portefeuille. Huit supports types (`constants/finPaperMarket.js`, version 2026-11) : livret 2,5 %, dépôt à terme 3,5 %, obligation d'État 5 %, sukuk 5,5 %, fonds diversifié 6,5 %, grande entreprise 8 %, petite entreprise 10 %, or 5 %, avec leur volatilité, leur liquidité, leur horizon et un risque de 1 à 7. Historique mensuel simulé depuis janvier 2024 (`services/finance/paperMarket.js`), reproductible, qui gagne un mois chaque mois sans réécrire le passé ; mesures : 12 derniers mois, rendement par an, volatilité constatée, pire mois, plus forte baisse. Rendement réel avec l'inflation des simulateurs (5 %). Projection « Et si je plaçais… ? » : fourchette (1 chance sur 10 en dessous et au-dessus), médiane en argent d'aujourd'hui, chance de perte. Achat fictif au prix du mois ; dans le portefeuille, un bouton remet un support acheté au marché au prix simulé du mois. Comparaison de plusieurs supports en base 100. Badge « Exemple fictif » sur chaque carte. Tests : `paperMarket.test.js` (8), `finPaperMarket.test.js` (4), `fin-market-journey` (3).
+- **Reste** (confié à `P6-01`) : faire valider ou remplacer les hypothèses par le client ; les rendre modifiables dans l'administration s'il le demande.
+
+Les cahiers ne fournissent ni supports, ni prix, ni historique (vérifié dans les 9 classeurs et les 2 documents), mais l'écran EP06 autorise des « données fictives ou pédagogiques ». À construire :
+- une gamme de supports types (livret, dépôt à terme, obligation, sukuk, fonds diversifié, actions, or), aux noms génériques ;
+- pour chacun, des hypothèses écrites, datées et versionnées : rendement annuel moyen, volatilité, liquidité, horizon conseillé, niveau de risque ; ordres de grandeur prudents, cohérents avec l'inflation des simulateurs ;
+- un historique mensuel simulé à partir de ces hypothèses, reproductible, avec ses mesures (rendement constaté, volatilité, pire mois, plus forte baisse) ;
+- des fiches qui se comparent, et « Ajouter au portefeuille fictif » ;
+- partout le badge « exemple fictif — pas un cours réel ».
+
+À prévenir le client : les hypothèses sont les nôtres ; il les valide ou les remplace à la recette.

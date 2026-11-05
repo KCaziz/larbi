@@ -86,6 +86,12 @@ describe('the missions, end to end', { skip: findChrome() ? false : 'no Chrome/C
     await b.send('Network.setCookie', { name: 'session', value: t.signSession(admin.id), url: site.url, httpOnly: true });
     await b.goto(`${site.url}/admin/missions-fincludia`);
     assert.ok(await b.waitText('Missions pédagogiques'));
-    assert.ok(await b.waitText('mon-premier-salaire'));
+    assert.ok(await b.waitText('Mon premier salaire'));
+    // R8-11: the mission is edited in a form, never as raw JSON.
+    assert.ok(await b.click('Modifier'));
+    assert.ok(await b.waitFor("!!document.querySelector('form.missions-admin-form')", 'the form'));
+    assert.equal(await b.ev("document.getElementById('mission-title').value"), 'Mon premier salaire');
+    assert.equal(await b.ev("document.querySelectorAll('.missions-admin-choice').length"), 2, 'the two choices of the step');
+    assert.doesNotMatch(await b.text(), /\{\s*"slug"/, 'no JSON on screen');
   });
 });

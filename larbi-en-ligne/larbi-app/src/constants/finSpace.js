@@ -7,7 +7,9 @@
 // something somebody turns on.
 
 // The kinds of space the client names.
-export const SPACE_KINDS = ['flatshare', 'couple', 'household'];
+// `group` (P9-03, SP-04): a trip, an outing, a gift, an event — a TEMPORARY space
+// the owner closes, after which it is read-only.
+export const SPACE_KINDS = ['flatshare', 'couple', 'household', 'group'];
 
 // Roles, in the client's own order and with the client's own names. Ordered
 // from most to least powerful, which is what makes "at least this role" a

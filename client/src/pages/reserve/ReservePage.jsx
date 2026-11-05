@@ -118,7 +118,19 @@ export default function ReservePage() {
         <ol className="reserve-steps">
           <ReserveStep done={hasEssential} title={t('reserve.steps.essential.title')}>
             {hasEssential && <p>{t(r.sourceDepensesEssentielles === 'declared' ? 'reserve.steps.essential.doneDeclared' : 'reserve.steps.essential.done', { amount: money(r.depensesEssentielles) })}</p>}
-            <p className="fin-hint">{t(r.sourceDepensesEssentielles === 'history' ? 'reserve.steps.essential.fromHistory' : 'reserve.steps.essential.how')}</p>
+            {/* How to set them, step by step, each with its screen (recette
+                R8-04): a sentence saying « they are computed on their own »
+                left the person with nothing to do. */}
+            <p className="reserve-howto-lead">{t('reserve.howTo.lead')}</p>
+            <ol className="reserve-howto">
+              <li>
+                {t('reserve.howTo.record')} <Link to="/app/mouvements/nouveau">{t('reserve.howTo.recordLink')}</Link>
+              </li>
+              <li>
+                {t('reserve.howTo.mark')} <Link to="/app/parametres/categories">{t('reserve.howTo.markLink')}</Link>
+              </li>
+              {r.sourceDepensesEssentielles !== 'history' && <li>{t('reserve.howTo.estimate')}</li>}
+            </ol>
             {/* An estimate only counts while the history is shorter than a
                 month: offered then, not when it would change nothing. */}
             {r.sourceDepensesEssentielles !== 'history' && (

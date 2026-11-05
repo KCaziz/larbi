@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { FIN_DEEP_LINK_WHITELIST, FIN_INTENT_CODES } from '../constants/finAssistant.js';
+import { FIN_ALL_INTENT_CODES, FIN_DEEP_LINK_WHITELIST } from '../constants/finAssistant.js';
 
 const LIMITS = { label: 120, example: 200, keyword: 60, keywords: 30, response: 10_000, flowName: 150, stepKey: 60, prompt: 2000, optionLabel: 100, options: 8 };
 
@@ -21,7 +21,7 @@ export const updateFlowSchema = z.object({ name: z.string().trim().min(1).max(LI
 const option = z.object({
   label: z.string().trim().min(1).max(LIMITS.optionLabel),
   nextStepKey: z.string().trim().min(1).max(LIMITS.stepKey).nullable(),
-  intentCode: z.enum(FIN_INTENT_CODES).nullable(),
+  intentCode: z.enum(FIN_ALL_INTENT_CODES).nullable(),
 });
 
 export const createStepSchema = z

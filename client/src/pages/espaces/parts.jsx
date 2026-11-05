@@ -571,9 +571,6 @@ export function ExpenseForm({ t, spaceId, currency, members, references, run, on
   // P9-16: any of the 125 categories; left empty, the common category's own one is used.
   const [categoryId, setCategoryId] = useState('');
   const referenceCategories = useApi('/fin/categories');
-  // P9-14: a free label inside the category, suggested from what the space already used.
-  const [subCategory, setSubCategory] = useState('');
-  const subCategories = useApi(`/fin/espaces/${spaceId}/sous-categories`);
   // P9-08: the personal account the payer paid from, if any. One personal
   // expense is created there; it is never asked twice.
   const [personalAccountId, setPersonalAccountId] = useState('');
@@ -622,7 +619,6 @@ export function ExpenseForm({ t, spaceId, currency, members, references, run, on
               ...(planned ? { planned: true } : {}),
               ...(collectiveCategory ? { collectiveCategory } : {}),
               ...(categoryId ? { categoryId } : {}),
-              ...(subCategory.trim() ? { subCategory: subCategory.trim() } : {}),
               ...(personalAccountId && !planned && isMyPayment ? { personalLink: { accountId: personalAccountId } } : {}),
               ...(splitMode === 'usage' ? { usageUnit: usageUnit.trim() } : {}),
             }),
@@ -688,15 +684,8 @@ export function ExpenseForm({ t, spaceId, currency, members, references, run, on
             onChange={setCategoryId}
           />
         </div>
-        <label htmlFor="shared-expense-subcategory">
-          {t('spaces.shared.fields.subCategory')}
-          <input id="shared-expense-subcategory" type="text" list="shared-expense-subcategories" value={subCategory} onChange={(event) => setSubCategory(event.target.value)} maxLength={40} />
-          <datalist id="shared-expense-subcategories">
-            {(subCategories.data?.subCategories ?? []).map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
-        </label>
+        {/* No free « sous-catégorie » field (recette R8-02): the picker above
+            chooses the category and its sub-category. */}
         {splitMode === 'usage' && (
           <label htmlFor="shared-expense-unit">
             {t('spaces.shared.fields.usageUnit')}

@@ -56,6 +56,13 @@ export const env = {
   // Payment provider (P3-09): "fake" (simulated, development and tests only) or
   // "none" (default in production until the client's provider is wired, P3-10).
   paymentProvider: process.env.PAYMENT_PROVIDER || (process.env.NODE_ENV === 'production' ? 'none' : 'fake'),
+  // Web Push (P8-24): the VAPID keys that identify this server to the browsers'
+  // push services. Unset = the feature is OFF and says so (nothing is faked).
+  // Generate once with `npm run push:keys`; keep the private key in the
+  // environment of the application, never in the code or the browser.
+  vapidPublicKey: process.env.VAPID_PUBLIC_KEY || null,
+  vapidPrivateKey: process.env.VAPID_PRIVATE_KEY || null,
+  vapidSubject: process.env.VAPID_SUBJECT || null,
   // Built website (client/dist) served by this same process, for single-host
   // deployments (cPanel...). Unset = API only (development: Vite serves the site).
   clientDir: process.env.CLIENT_DIR

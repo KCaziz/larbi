@@ -15,6 +15,20 @@ export const updateSpaceGoalSchema = z
   .strict()
   .refine((body) => Object.keys(body).some((key) => key !== 'reason'), { message: 'Nothing to change' });
 
+// P9-17: null removes the calendar.
+export const goalCalendarSchema = z
+  .object({
+    calendar: z
+      .object({
+        everyMonths: z.number().int().min(1).max(12),
+        firstDueAt: isoDate,
+        shares: z.array(z.object({ memberId: z.string().uuid(), amount: amountSchema.min(1) }).strict()).min(1).max(30),
+      })
+      .strict()
+      .nullable(),
+  })
+  .strict();
+
 export const createContributionSchema = z.object({ amount: amountSchema.min(1), contributedAt: isoDate, note }).strict();
 
 export const createChildSchema = z

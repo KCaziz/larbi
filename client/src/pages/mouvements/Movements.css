@@ -178,3 +178,35 @@
   padding-inline-start: 20px;
   font-size: 0.9rem;
 }
+
+/* What the clearing states mean (recette R8-03). */
+.movements-clearing-legend {
+  margin-block: var(--space-xs) var(--space-sm);
+  font-size: 0.88rem;
+}
+.movements-clearing-legend summary {
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 500;
+}
+.movements-clearing-legend dl {
+  display: grid;
+  gap: 6px;
+  margin: var(--space-xs) 0 0;
+  padding: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.movements-clearing-legend dt {
+  display: inline;
+  color: var(--text-h);
+  font-weight: 600;
+}
+.movements-clearing-legend dt::after {
+  content: ' : ';
+}
+.movements-clearing-legend dd {
+  display: inline;
+  margin: 0;
+}

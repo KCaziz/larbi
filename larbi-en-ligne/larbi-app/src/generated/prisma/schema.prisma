@@ -1,0 +1,2890 @@
+// Prisma schema.
+// Only the models genuinely needed right now are defined here (P1-05
+// "modèles initiaux", ahead of P1-06 authentication). E-Learning, blog and
+// tools models are NOT anticipated — they belong to their own tasks
+// (P2-01, P3-01) per TASKS.md.
+
+// "prisma-client-js" (not the newer "prisma-client" generator) because it
+// outputs plain, ready-to-run JS + .d.ts — this server has no TypeScript
+// build step, so a TS-source-only client wouldn't run under plain Node.
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  finPushSubscriptions FinPushSubscription[]
+  finMissionAttempts   FinMissionAttempt[]
+  finSnapshots         FinSnapshot[]
+  id                   String                @id @default(uuid())
+  email                String                @unique @db.VarChar(254)
+  passwordHash         String
+  name                 String
+  // Free-form string, not a DB enum: the cahier des charges explicitly
+  // allows adding new account categories later ("autres catégories
+  // pouvant être ajoutées"), and a Postgres enum would need a migration
+  // for each new one. Allowed values are validated at the application
+  // layer (see P1-06).
+  accountType          String
+  // "standard" | "premium" (see TASKS.md section 1, "Accès aux
+  // fonctionnalités"). Same free-form-string reasoning as accountType.
+  accessLevel          String                @default("standard")
+  // "user" | "admin". Orthogonal to accessLevel: role = what you may
+  // manage (RBAC), accessLevel = which content tier you may consume.
+  // Never settable from a public endpoint (see auth.schemas.js).
+  role                 String                @default("user")
+  // "active" | "suspended" (P3-16). Checked on every request (requireAuth), so
+  // suspending an account takes effect immediately, on the same session.
+  status               String                @default("active")
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  // ---- FINCLUDIA publics (P3-18) --------------------------------------------
+  // The FINCLUDIA profile a user has chosen (one of the 8 publics of the
+  // client's own file, onglet "01_Publics": LYC/ETU/JAC/SAL/COL/COU/FAM/EPG),
+  // null until the person has gone through onboarding (C01/C02). Per the
+  // client's decision (2026-10-11): a user has ONE profile at a time — once
+  // finPublic is set, it is what defines the account, not `accountType`
+  // (kept only for the pre-FINCLUDIA features that still read it: comparator
+  // segments, article targeting...).
+  finPublic               String?
+  // Complementary roles (ex. SAL primary + COL complementary), same closed
+  // list as finPublic, never containing finPublic itself. Free-form JSON
+  // array of codes (small, bounded, validated at the application layer) —
+  // not a join table: there is no extra data attached to a secondary role.
+  finSecondaryPublics     Json                   @default("[]")
+  // Age bracket, not a birth date: the server only ever needs to know whether
+  // someone is "under18" (the 18+ gate, already settled project-wide) — a
+  // precise date of birth would be more personal data than that requires
+  // (rule 10, minimisation). The exact minimum age to register, and parental
+  // consent, remain open (P6-01 point 7) — this column is ready for both.
+  finAgeRange             String?
+  finCountry              String?                @db.VarChar(2)
+  // ISO 4217, defaults to DZD (the only currency used anywhere in the
+  // platform today): a placeholder until multi-currency is decided (P6-01
+  // point 4), never shown as a final decision.
+  finCurrency             String                 @default("DZD") @db.VarChar(3)
+  finSituation            String?
+  finMainIntention        String?
+  finHorizon              String?
+  finOnboardedAt          DateTime?
+  // Target months of essential expenses the person wants set aside (screen C12,
+  // P6-09). Null until THEY choose it: a default would be an invented
+  // recommendation, which the client's own wording ("cible choisie par
+  // l'utilisateur") rules out — F015/F016 read null as "non calculé", not 0.
+  finReserveTargetMonths  Int?
+  // « Régularité du revenu = Stable | Irrégulier | Saisonnier » (the client's
+  // answer C3, 2026-10-28): declared by the person, never changed by the
+  // system. Irregular or seasonal raises the emergency fund's default target
+  // to 6 months. `stable` | `irregular` | `seasonal` (FIN_INCOME_REGULARITIES).
+  finIncomeRegularity     String                 @default("stable") @db.VarChar(10)
+  // « Premiers pas » (P8-23, tab 02_Premier_Demarrage): the steps the person
+  // chose to skip for now, { "P4": true }. A step is done when its data exists;
+  // nothing here is ever a gate.
+  finFirstSteps           Json                   @default("{}")
+  // Per-type enable/opt-in (P6-18): { [type]: { enabled, optedIn } }. Absent
+  // keys fall back to the catalogue's own default (constants/finNotification.js)
+  // — this column only ever holds what someone actually changed.
+  finNotificationSettings Json                   @default("{}")
+  finProfileTransitions   FinProfileTransition[]
+  finConsents             FinConsent[]
+  finAuditLogs            FinAuditLog[]
+  learningFavorites       LearningFavorite[]
+  finCategories           FinCategory[]
+  finChanges              FinChange[]
+  finIncomes              FinIncome[]
+  finTransactions         FinTransaction[]
+  finAccounts             FinAccount[]
+  finOccurrences          FinOccurrence[]
+  finPayslips             FinPayslip[]
+  toolFavorites           ToolFavorite[]
+  finTags                 FinTag[]
+  sessions                UserSession[]
+  finOnboarding           FinOnboarding?
+  finBudgets              FinBudget[]
+  finEnvelopes            FinEnvelope[]
+  finRecurrences          FinRecurrence[]
+  finProvisions           FinProvision[]
+  finAssets               FinAsset[]
+  finSpaceMemberships     FinSpaceMember[]
+  finPaperPortfolio       FinPaperPortfolio?
+  finSpaceInvitesSent     FinSpaceInvite[]       @relation("SpaceInviteSender")
+  finSpaceInvitesTaken    FinSpaceInvite[]       @relation("SpaceInviteAcceptor")
+  finGoals                FinGoal[]
+  finDebts                FinDebt[]
+  finDebtPayments         FinDebtPayment[]
+  finNotifications        FinNotification[]
+  finBusiness             FinBusiness?
+
+  // E-Learning (P2-01)
+  formationsCreated Formation[]
+  mediaUploaded     Media[]
+  enrollments       Enrollment[]
+
+  // Blog (P3-01)
+  articlesAuthored Article[]
+
+  // CMS (P3-12)
+  lessonRevisions LessonRevision[]
+
+  // Simulation workshop (P4-16)
+  simulationScenarios SimulationScenario[]
+
+  // Payment (P3-09)
+  paymentOrders PaymentOrder[]
+
+  @@map("users")
+}
+
+// A simulation the user chose to keep (P4-16, screen C18). The client's rule for
+// this screen is explicit: "hypothèses sauvegardées avec résultat" and "chaque
+// simulateur porte version de formule". Hence three JSON columns instead of one:
+//
+//   inputs      what the person typed, in the units of the engine (centimes,
+//               decimal rates). The results are RECOMPUTED from these on every
+//               read-back, so a scenario is never a screenshot of numbers whose
+//               origin nobody can check.
+//   hypotheses  the assumptions the simulation ran under (a monthly return, an
+//               inflation rate, an horizon), as the simulator returned them.
+//   versions    { Fxxx: version } for every formula the result used.
+//
+// Why the versions are stored rather than looked up: a formula may change after
+// the scenario was saved. Keeping the version it ran under is what lets the
+// screen say, a year later, "this figure came from F021 version 1" instead of
+// silently showing a different number under the same name.
+model SimulationScenario {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Key of a simulator of constants/simulators.js. Free-form string, like the
+  // other application-level vocabularies here: the catalogue grows with the
+  // client's lots, and a DB enum would need a migration for each one.
+  simulator  String
+  // The name the person gave this scenario, to tell two of them apart.
+  title      String   @db.VarChar(120)
+  // ISO code the amounts are expressed in. Stored with the scenario: comparing
+  // two scenarios in different currencies is refused, never converted.
+  currency   String   @db.VarChar(3)
+  inputs     Json
+  hypotheses Json?
+  versions   Json     @default("{}")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@map("simulation_scenarios")
+}
+
+// ---- Payment (P3-09): provider-independent base ------------------------------
+// What can be bought. Prices are entered by an administrator from the client's
+// figures (never invented). Amounts are INTEGERS in the currency's smallest unit
+// (centimes...): no floating point anywhere in money.
+model PaymentOffer {
+  id          String         @id @default(uuid())
+  name        String         @db.VarChar(120)
+  description String?        @db.Text
+  amount      Int
+  // ISO 4217 code, upper case ("DZD", "EUR").
+  currency    String         @db.VarChar(3)
+  // Access level the purchase grants. Only "premium" exists today (P1-06, P3-04).
+  accessLevel String         @default("premium") @db.VarChar(20)
+  isActive    Boolean        @default(false)
+  position    Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  orders      PaymentOrder[]
+
+  @@map("payment_offers")
+}
+
+// One purchase attempt. Amount, currency and access level are COPIED from the
+// offer when the order is created: changing an offer's price later never changes
+// what an existing order is worth. Orders are kept for accounting: an offer or a
+// user with orders cannot be deleted (RESTRICT).
+model PaymentOrder {
+  id                String         @id @default(uuid())
+  userId            String
+  user              User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  offerId           String
+  offer             PaymentOffer   @relation(fields: [offerId], references: [id], onDelete: Restrict)
+  amount            Int
+  currency          String         @db.VarChar(3)
+  accessLevel       String         @db.VarChar(20)
+  // pending | paid | failed | cancelled | refunded (CHECK in the migration).
+  status            String         @default("pending") @db.VarChar(20)
+  provider          String         @db.VarChar(30)
+  // The provider's id for the checkout session: how its notifications find the order.
+  providerReference String?        @unique @db.VarChar(191)
+  paidAt            DateTime?
+  refundedAt        DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  events            PaymentEvent[]
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@map("payment_orders")
+}
+
+// Every notification received from a provider, once: the UNIQUE (provider,
+// externalId) pair is what makes a replayed or duplicated notification a no-op.
+// Only what is needed to audit the outcome is kept, never the raw payload
+// (it may hold personal data).
+model PaymentEvent {
+  id         String        @id @default(uuid())
+  provider   String        @db.VarChar(30)
+  externalId String        @db.VarChar(191)
+  type       String        @db.VarChar(60)
+  orderId    String?
+  order      PaymentOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  // What processing did: applied | ignored | unknown_order | amount_mismatch.
+  outcome    String        @db.VarChar(30)
+  receivedAt DateTime      @default(now())
+
+  @@unique([provider, externalId])
+  @@map("payment_events")
+}
+
+// ---- FINCLUDIA publics (P3-18) ------------------------------------------------
+// Changing public is proposed, never forced: a user switches by their own
+// action (ex. "étudiant" -> "jeune actif" at the first salary), and every
+// switch is kept here so the account's own history is never lost.
+model FinProfileTransition {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromPublic String?
+  toPublic   String
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("fin_profile_transitions")
+}
+
+// A consent the person explicitly accepted, with the exact version of the text
+// at the time (P6-01 point 9): re-accepting after a text changes adds a new
+// row, it never overwrites the old one — the account's consent history stays
+// intact exactly like the profile transitions above.
+model FinConsent {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // "finPrivacy" | "finNoAdvice" (constants/finPublics.js), never free-form.
+  textKey    String   @db.VarChar(40)
+  version    String   @db.VarChar(20)
+  acceptedAt DateTime @default(now())
+
+  @@index([userId, textKey])
+  @@map("fin_consents")
+}
+
+// A piece of "Apprendre" content someone kept (P2-08, the client's "favoris").
+// `kind` says which table `refId` points into ("course" | "article" | "term" |
+// "guide"), validated at the application layer against one closed list. No
+// foreign key on purpose: four nullable columns, three of them always null,
+// would be a worse model than one typed reference, and a favourite pointing at
+// content that has since been deleted or unpublished is simply dropped when the
+// list is read.
+// The favourite tools of the single catalogue (P8-15, OUT-01). A code of
+// constants/finToolsCatalogue.js, not a foreign key: the catalogue is a
+// constant, and a code that leaves it simply stops being shown.
+model ToolFavorite {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code      String   @db.VarChar(20)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, code])
+  @@index([userId, createdAt])
+  @@map("tool_favorites")
+}
+
+model LearningFavorite {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String   @db.VarChar(20)
+  refId     String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, kind, refId])
+  @@index([userId, createdAt])
+  @@map("learning_favorites")
+}
+
+// ---- FINCLUDIA common financial data model (P6-02) ---------------------------
+// THE METADATA SOCLE. The client's onglet "04_Donnees_Objets" lists the metadata
+// every important financial datum must carry; it is written once here and
+// repeated identically by every financial table of Phase 6, so a reader finds
+// the same columns with the same meaning everywhere:
+//
+//   scope       String    @default("personal") @db.VarChar(20)  // perimetre
+//   source      String    @db.VarChar(20)                       // how it got in
+//   sourceRef   String?   @db.VarChar(200)                      // reference_source
+//   status      String    @db.VarChar(20)                       // reel/declare/fictif...
+//   confidence  String?   @db.VarChar(10)                       // "lorsque pertinent"
+//   consentUses Json      @default("[]")                        // usages autorises
+//   effectiveAt DateTime                                        // date_effet
+//   collectedAt DateTime  @default(now())                       // date_collecte
+//   version     Int       @default(1)
+//   archivedAt  DateTime?                                       // hidden, still there
+//   deletedAt   DateTime?                                       // logical delete
+//
+// plus `value` (an INTEGER amount, smallest unit) and `currency` (ISO 4217) on
+// every table that carries an amount. The allowed values of each vocabulary are
+// in constants/finData.js, validated by zod AND by a SQL CHECK.
+//
+// A row that feeds a history is never erased: `deletedAt` is set and a
+// `FinChange` row says what happened. Physical deletion is reserved for a row
+// nothing has used yet, and for the account-wide erasure the privacy text
+// promises (P6-01 point 9, ON DELETE CASCADE below).
+
+// A category of the client's reference (onglet "03_Categories"), or one a user
+// made. Three shapes, and nothing else (the consistency control enforces it):
+//   - standard:  userId null, `key` set, `baseKey` null   -- global, read-only
+//   - own:       userId set,  `key` null, `baseKey` null  -- the user's own label
+//   - override:  userId set,  `key` null, `baseKey` set   -- this user renames or
+//                hides (archivedAt) the standard row of that key, for themselves
+//                only; the standard row itself is never touched.
+//
+// A category names a line, it is not a line: it carries the socle except
+// `value`, `currency` and `confidence`, which would be null on every row.
+model FinCategory {
+  id                String             @id @default(uuid())
+  userId            String?
+  user              User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // One of CATEGORY_FAMILY_CODES (constants/finCategories.js).
+  family            String             @db.VarChar(20)
+  key               String?            @unique @db.VarChar(80)
+  baseKey           String?            @db.VarChar(80)
+  label             String             @db.VarChar(80)
+  // From the client's universal reference (P8-08, `09_Categories`): the
+  // category a sub-category belongs to, its icon and colour, whether it is an
+  // essential expense, its typical recurrence, and the profiles it is SUGGESTED
+  // for (a display order, never a restriction). On a user's override,
+  // `essential` null means « as the reference says ».
+  group             String?            @db.VarChar(60)
+  icon              String?            @db.VarChar(16)
+  color             String?            @db.VarChar(9)
+  essential         Boolean?
+  recurrence        String?            @db.VarChar(40)
+  suggestedFor      Json               @default("[]")
+  scope             String             @default("personal") @db.VarChar(20)
+  source            String             @db.VarChar(20)
+  sourceRef         String?            @db.VarChar(200)
+  status            String             @db.VarChar(20)
+  consentUses       Json               @default("[]")
+  effectiveAt       DateTime           @default(now())
+  collectedAt       DateTime           @default(now())
+  version           Int                @default(1)
+  archivedAt        DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  finIncomes        FinIncome[]
+  finTransactions   FinTransaction[]
+  finEnvelopes      FinEnvelope[]
+  finRecurrences    FinRecurrence[]
+  finProvisions     FinProvision[]
+  finAssets         FinAsset[]
+  finSharedExpenses FinSharedExpense[]
+  finTagsAuto       FinTag[]
+
+  // One customisation of a given standard row per account, at most.
+  @@unique([userId, baseKey])
+  @@index([userId, family])
+  @@map("fin_categories")
+}
+
+// The correction trail. One row per thing that happened to a financial datum,
+// in the account that owns it: what object, which field, the value before and
+// the value after. `reason` is the sentence the person typed if the interface
+// asked for one — never required, never invented.
+//
+// Only the owner ever writes financial data (self-service; an administrator has
+// no screen that edits someone's money), so the actor is always the account in
+// `userId` and there is no second identity to keep here.
+model FinChange {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Which kind of object: "category" today, then "income", "transaction"...
+  entity    String   @db.VarChar(40)
+  entityId  String
+  // One of CHANGE_ACTIONS (constants/finData.js).
+  action    String   @db.VarChar(20)
+  field     String?  @db.VarChar(40)
+  before    Json?
+  after     Json?
+  reason    String?  @db.VarChar(200)
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId, createdAt])
+  @@index([userId, createdAt])
+  @@map("fin_changes")
+}
+
+// ---- FINCLUDIA "Mon argent" (P6-04) and onboarding (P6-03) -------------------
+// Both reuse the metadata socle documented above FinCategory: the same columns,
+// with the same meaning, plus `value` and `currency` where there is an amount.
+// Amounts are INTEGERS in the smallest unit of the currency, and the currency is
+// always stored next to its amount — nothing is ever converted without a dated
+// rate, so a mixed-currency total answers "not computable" instead of guessing.
+
+// A recurring resource (client object "Revenu": propriétaire, type, montant,
+// devise, fréquence, date_début, source, statut). `frequency` is NOT nullable
+// on purpose: the client's own error case for screen ET01 is « fréquence
+// manquante pour ressource périodique », and a yearly grant counted monthly
+// would be a twelve-fold lie. A ONE-OFF amount is not a resource — it is a
+// transaction, below.
+model FinIncome {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label       String       @db.VarChar(80)
+  // The category this resource belongs to. SetNull, never Cascade: losing a
+  // category must never take the money with it. The application NEVER deletes a
+  // category physically anyway (P6-02 deletes logically, so an old total keeps
+  // knowing what its lines were called), so this only ever fires when the whole
+  // account is erased — and then this row is going too, which is exactly what
+  // the privacy text promises (P6-01 point 9). Restrict was wrong here: it made
+  // that erasure fail for anyone who had used a category of their own.
+  categoryId  String?
+  category    FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  value       Int
+  currency    String       @db.VarChar(3)
+  // One of FREQUENCIES (constants/finance.js): hebdomadaire, mensuel,
+  // trimestriel, semestriel, annuel. F001 normalises it to the month.
+  frequency   String       @db.VarChar(20)
+  startDate   DateTime
+  endDate     DateTime?
+  scope       String       @default("personal") @db.VarChar(20)
+  source      String       @db.VarChar(20)
+  sourceRef   String?      @db.VarChar(200)
+  status      String       @db.VarChar(20)
+  confidence  String?      @db.VarChar(10)
+  consentUses Json         @default("[]")
+  effectiveAt DateTime     @default(now())
+  collectedAt DateTime     @default(now())
+  version     Int          @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId, deletedAt])
+  @@index([categoryId])
+  @@map("fin_incomes")
+}
+
+// A dated movement, in or out (screens C07 "Ajouter une dépense / revenu" and
+// C08 "Historique & recherche"). An uncategorised movement is legitimate and
+// kept apart rather than forced into a category (the client lists
+// « transactions non catégorisées à part »), so `categoryId` is nullable.
+// An account (P8-03, ARC-04): « les comptes sont la source de vérité des
+// soldes ». Its balance is never stored: it is PB-F001, computed from the
+// opening balance and the realised movements, so it can never drift from them.
+model FinAccount {
+  id                String           @id @default(uuid())
+  userId            String
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label             String           @db.VarChar(80)
+  // One of ACCOUNT_TYPES (AC-01 to AC-10, constants/finAccounts.js): it
+  // decides the nature (asset, liability...).
+  type              String           @db.VarChar(5)
+  currency          String           @db.VarChar(3)
+  openingBalance    Int              @default(0)
+  openingDate       DateTime         @default(now())
+  includeInTotal    Boolean
+  includeInNetWorth Boolean
+  // Null means the type's own colour and icon.
+  color             String?          @db.VarChar(9)
+  icon              String?          @db.VarChar(16)
+  minBalanceAlert   Int?
+  maxBalanceInfo    Int?
+  overdraftAllowed  Int?
+  note              String?          @db.VarChar(300)
+  // The metadata socle every financial row carries (P6-02).
+  scope             String           @default("personal") @db.VarChar(20)
+  source            String           @db.VarChar(20)
+  status            String           @db.VarChar(20)
+  confidence        String?          @db.VarChar(10)
+  consentUses       Json             @default("[]")
+  effectiveAt       DateTime         @default(now())
+  collectedAt       DateTime         @default(now())
+  version           Int              @default(1)
+  archivedAt        DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  transactions      FinTransaction[]
+  recurrences       FinRecurrence[]
+  goals             FinGoal[]
+  debts             FinDebt[]
+
+  @@index([userId, deletedAt])
+  @@map("fin_accounts")
+}
+
+// What happened to ONE occurrence of a recurrence (P8-11): confirmed (with
+// the movement it created), not received, or postponed to another day. An
+// occurrence with no row here is simply still expected. One row per
+// recurrence and due date, so a salary can never be credited twice (QA-P05).
+model FinOccurrence {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recurrenceId  String
+  recurrence    FinRecurrence @relation(fields: [recurrenceId], references: [id], onDelete: Cascade)
+  dueDate       DateTime
+  // « confirmed » | « missed » | « postponed »
+  outcome       String        @db.VarChar(12)
+  postponedTo   DateTime?
+  transactionId String?       @db.VarChar(191)
+  scope         String        @default("personal") @db.VarChar(20)
+  source        String        @db.VarChar(20)
+  status        String        @db.VarChar(20)
+  confidence    String?       @db.VarChar(10)
+  consentUses   Json          @default("[]")
+  effectiveAt   DateTime      @default(now())
+  collectedAt   DateTime      @default(now())
+  version       Int           @default(1)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([recurrenceId, dueDate])
+  @@index([userId])
+  @@map("fin_occurrences")
+}
+
+// A tag (« étiquette », P8-07, tab 07B): a name and a colour, across
+// categories and accounts. `autoCategoryId` is the client's « option
+// d'appliquer automatiquement aux nouveaux enregistrements similaires »:
+// a new movement in that category, entered without a tag, receives it.
+model FinTag {
+  id             String           @id @default(uuid())
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String           @db.VarChar(40)
+  color          String           @db.VarChar(9)
+  autoCategoryId String?
+  autoCategory   FinCategory?     @relation(fields: [autoCategoryId], references: [id], onDelete: SetNull)
+  scope          String           @default("personal") @db.VarChar(20)
+  source         String           @db.VarChar(20)
+  status         String           @db.VarChar(20)
+  confidence     String?          @db.VarChar(10)
+  consentUses    Json             @default("[]")
+  effectiveAt    DateTime         @default(now())
+  collectedAt    DateTime         @default(now())
+  version        Int              @default(1)
+  archivedAt     DateTime?
+  deletedAt      DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  transactions   FinTransaction[]
+
+  @@index([userId, deletedAt])
+  @@map("fin_tags")
+}
+
+model FinTransaction {
+  // The collective expense paid from this transaction, when there is one (P9-08).
+  sharedExpense FinSharedExpense? @relation("SharedExpenseSource")
+  id            String            @id @default(uuid())
+  userId        String
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // "income" | "expense" (TRANSACTION_KINDS), or one side of a transfer:
+  // "transfer_out" | "transfer_in" (TRANSFER_KINDS, P8-03).
+  kind          String            @db.VarChar(12)
+  // The account credited or debited (ARC-04). Nullable in the database only
+  // so the rows written before P8-03 could be migrated; the service always
+  // sets it. Cascade, not Restrict (2026-10-28): the application never deletes
+  // an account, it archives it, so a real deletion only happens when the User
+  // is erased — and with Restrict MariaDB could reach the accounts before the
+  // movements and refuse the whole erasure (same defect as the category key,
+  // P6-04).
+  accountId     String?
+  account       FinAccount?       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  // The two writes of one transfer share this id (PB-PR-06), and are written
+  // together in one database transaction.
+  transferId    String?           @db.VarChar(36)
+  value         Int
+  currency      String            @db.VarChar(3)
+  occurredAt    DateTime
+  categoryId    String?
+  category      FinCategory?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  // Free text, unlike the category: the client asks for a sub-category field
+  // and gives no reference list for it, so inventing a closed one would refuse
+  // answers it means to accept.
+  subcategory   String?           @db.VarChar(60)
+  // One of PM-01 to PM-10 (constants/finAccounts.js, the client's tab
+  // `05B_Moyens_Paiement`, P8-07) — an instrument, never an account.
+  paymentMethod String?           @db.VarChar(20)
+  // « Étiquette » (P8-07): a free cross-cutting mark, name and colour.
+  tagId         String?
+  tag           FinTag?           @relation(fields: [tagId], references: [id], onDelete: SetNull)
+  // Who paid, when it was someone else; never a share (that is Gestion
+  // commune, Phase 9). And where, as the person typed it.
+  payer         String?           @db.VarChar(80)
+  place         String?           @db.VarChar(120)
+  // « Pointage » (tab 08C): unchecked, checked, reconciled, to_verify. It
+  // never changes a balance, only how far the figures can be trusted.
+  clearing      String            @default("unchecked") @db.VarChar(12)
+  note          String?           @db.VarChar(300)
+  // Marked for a shared space by an explicit action, never by default: the
+  // phase rule is « rien n'entre dans un espace partagé sans action explicite ».
+  shared        Boolean           @default(false)
+  // A movement that has not happened yet. The ONLY case where `occurredAt` may
+  // be in the future, and only for an expense (client: « date future seulement
+  // pour une dépense planifiée »).
+  planned       Boolean           @default(false)
+  receipt       Media?            @relation("TransactionReceipt")
+  scope         String            @default("personal") @db.VarChar(20)
+  source        String            @db.VarChar(20)
+  sourceRef     String?           @db.VarChar(200)
+  status        String            @db.VarChar(20)
+  confidence    String?           @db.VarChar(10)
+  consentUses   Json              @default("[]")
+  effectiveAt   DateTime          @default(now())
+  collectedAt   DateTime          @default(now())
+  version       Int               @default(1)
+  archivedAt    DateTime?
+  deletedAt     DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  // The history is always read by owner and date, and the duplicate check looks
+  // up the same owner, kind and amount around a date.
+  @@index([userId, occurredAt])
+  @@index([userId, kind, value, occurredAt])
+  @@index([categoryId])
+  @@index([accountId])
+  @@index([transferId])
+  @@index([tagId])
+  @@map("fin_transactions")
+}
+
+// Where someone is in the progressive onboarding (P6-03, screens C03, LY01,
+// ET01, SA01, EP01). One per account.
+//
+// `answers` holds what was answered, keyed by question (constants/
+// finOnboarding.js), with a skipped question recorded AS skipped rather than
+// absent — « Passer » is a real answer and must not look like a question nobody
+// reached. The resource answers also become real FinIncome rows; the amounts
+// whose own table does not exist yet (épargne disponible, mensualités de dette,
+// montant de l'objectif) stay here as DECLARED values until P6-05, P6-08 and
+// P6-11 give them one, and the first budget is computed from them through the
+// versioned engine like any other figure.
+model FinOnboarding {
+  id          String    @id @default(uuid())
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currency    String    @db.VarChar(3)
+  answers     Json      @default("{}")
+  // The client's fictional starter budget for a lycéen (« commence avec 5 000 DA
+  // fictifs »). When true every figure of this onboarding is fictional and
+  // carries the SIMULATION badge; it is never added to a real total.
+  fictional   Boolean   @default(false)
+  completedAt DateTime?
+  scope       String    @default("personal") @db.VarChar(20)
+  source      String    @db.VarChar(20)
+  sourceRef   String?   @db.VarChar(200)
+  status      String    @db.VarChar(20)
+  confidence  String?   @db.VarChar(10)
+  consentUses Json      @default("[]")
+  effectiveAt DateTime  @default(now())
+  collectedAt DateTime  @default(now())
+  version     Int       @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("fin_onboardings")
+}
+
+// ---- FINCLUDIA budgets and envelopes (P6-05) ---------------------------------
+// A budget is a PERIOD of one account; an envelope is what that period plans for
+// one category. Both reuse the metadata socle of P6-02.
+//
+// Two tables rather than one JSON column of envelopes: an envelope is corrected
+// on its own, has its own journal trail, and points at a category with a real
+// foreign key — three things a JSON blob cannot do.
+
+model FinBudget {
+  id              String        @id @default(uuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label           String        @db.VarChar(80)
+  // The period this budget plans. Two live budgets of one account may never
+  // overlap (client: « chevauchement de périodes refusé »); that rule needs
+  // `userId`, a FOREIGN KEY column, so it lives in the service and in the
+  // consistency control rather than in a CHECK MariaDB would refuse.
+  periodStart     DateTime
+  periodEnd       DateTime
+  currency        String        @db.VarChar(3)
+  // One of BUDGET_RECURRENCES (constants/finBudget.js). `none` is a one-off
+  // budget, which must stay possible: a mandatory recurrence would invent a
+  // commitment nobody made.
+  recurrence      String        @default("monthly") @db.VarChar(20)
+  // The thresholds this budget alerts at, as RATIOS (0.8 = 80 %). Stored per
+  // budget because the client asks for them to be configurable, and visible in
+  // every answer because the engine must never hold a hidden coefficient.
+  alertThresholds Json          @default("[0.8, 1]")
+  // « Report du reste » (P8-09, PB-F008): the positive remainder of the
+  // previous period's envelopes is added to the same envelopes here —
+  // report = max(0 ; reste), the client's answer C1 (2026-10-28).
+  carryOver       Boolean       @default(false)
+  // And, only if the person chooses it (answer C1), last period's overspend
+  // is taken from the same envelopes here. Off by default: an overspend stays
+  // visible in its own month, it does not silently shrink the next one.
+  carryOverspend  Boolean       @default(false)
+  // The person's own pocket for a client category group, for the optional
+  // methods (tab 12B: « le mapping est éditable »). Empty = the defaults.
+  methodMapping   Json          @default("{}")
+  note            String?       @db.VarChar(300)
+  scope           String        @default("personal") @db.VarChar(20)
+  source          String        @db.VarChar(20)
+  sourceRef       String?       @db.VarChar(200)
+  status          String        @db.VarChar(20)
+  confidence      String?       @db.VarChar(10)
+  consentUses     Json          @default("[]")
+  effectiveAt     DateTime      @default(now())
+  collectedAt     DateTime      @default(now())
+  version         Int           @default(1)
+  archivedAt      DateTime?
+  deletedAt       DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  envelopes       FinEnvelope[]
+
+  @@index([userId, periodStart])
+  @@map("fin_budgets")
+}
+
+// What one period plans for one category. `value` is the planned amount; `cap`
+// is the client's optional « plafond », a ceiling the person sets for
+// themselves — passing it is SIGNALLED, never refused, because the money has
+// already been spent and refusing it would only make the figure wrong.
+//
+// `categoryId` is nullable like everywhere else in Phase 6 (SetNull), but an
+// envelope without a category makes no sense, so the service never creates one:
+// the column is nullable only so erasing an account cannot be blocked.
+model FinEnvelope {
+  id            String       @id @default(uuid())
+  // Denormalised on purpose: every read is « the envelopes of MY budget », and
+  // checking ownership through the budget on each row would be a join per row.
+  // The consistency control checks the two agree.
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  budgetId      String
+  budget        FinBudget    @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  categoryId    String?
+  category      FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  // A client category (« Logement », « Alimentation »…, P8-09) instead of one
+  // sub-category: the envelope then covers every sub-category of the group
+  // that has no envelope of its own (« le plus spécifique », tab 10B). An
+  // envelope has a category OR a group, never both (checked in the service:
+  // MariaDB refuses a CHECK on a foreign-key column).
+  categoryGroup String?      @db.VarChar(60)
+  // One of ENVELOPE_KINDS: the client's own « fixe / variable ».
+  kind          String       @db.VarChar(10)
+  value         Int
+  currency      String       @db.VarChar(3)
+  cap           Int?
+  // Whether this envelope is carried over when the budget is duplicated for the
+  // next period. A one-off envelope (a trip, school fees) must not silently
+  // reappear next month.
+  recurring     Boolean      @default(true)
+  note          String?      @db.VarChar(300)
+  scope         String       @default("personal") @db.VarChar(20)
+  source        String       @db.VarChar(20)
+  sourceRef     String?      @db.VarChar(200)
+  status        String       @db.VarChar(20)
+  confidence    String?      @db.VarChar(10)
+  consentUses   Json         @default("[]")
+  effectiveAt   DateTime     @default(now())
+  collectedAt   DateTime     @default(now())
+  version       Int          @default(1)
+  archivedAt    DateTime?
+  deletedAt     DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([budgetId])
+  @@index([userId, deletedAt])
+  @@index([categoryId])
+  @@map("fin_envelopes")
+}
+
+// ---- Financial goals (P6-08), screens C09-C11 --------------------------------
+// A savings goal: a target, a date, and how much is already set aside. The
+// client's catalogue of templates (constants/finGoal.js) only supplies a label
+// and an icon key — never a suggested amount, which the client explicitly
+// forbids ("valeurs d'exemple non présélectionnées comme recommandation").
+model FinGoal {
+  id                  String      @id @default(uuid())
+  userId              String
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label               String      @db.VarChar(80)
+  // One of GOAL_TEMPLATES (constants/finGoal.js), or null for a fully custom
+  // goal. Purely a starting label/icon; nothing here is read back as data.
+  templateKey         String?     @db.VarChar(40)
+  // « Autre objectif » with its own name, icon and colour (the client's answer
+  // D1, 2026-10-28; C09 in red). Null = the model's icon and colour.
+  icon                String?     @db.VarChar(16)
+  color               String?     @db.VarChar(7)
+  target              Int
+  currency            String      @db.VarChar(3)
+  // "Date future" the client asks for at creation. Nullable all the same: a
+  // goal corrected later or a fictional one may lose its date without losing
+  // its meaning, and ALG-03 already reports "non calculé" when it is absent.
+  targetDate          DateTime?
+  // "Capital déjà affecté". Bounded against this account's own marked savings
+  // (F007) at the service layer — a CHECK cannot read another table — except
+  // for a fictional goal, which plays with money that was never really saved.
+  allocated           Int         @default(0)
+  monthlyContribution Int?
+  // « En cours / Atteint / En pause / Arrêté » (P8-12, tab 10B). Separate
+  // from the socle's `status`, which says how the row is known.
+  progressStatus      String      @default("active") @db.VarChar(10)
+  // The account the goal's money sits on (P8-12, ARC-04): a contribution is
+  // a TRANSFER to it, and the goal's capital is then that account's balance.
+  accountId           String?
+  account             FinAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  // Annual expected return, a RATIO (0.05 = 5 %), for ALG-03's trajectory. Null
+  // means a simple cash goal: no return is assumed, never invented.
+  rate                Float?
+  priority            Int         @default(0)
+  note                String?     @db.VarChar(300)
+  scope               String      @default("personal") @db.VarChar(20)
+  source              String      @db.VarChar(20)
+  sourceRef           String?     @db.VarChar(200)
+  status              String      @db.VarChar(20)
+  confidence          String?     @db.VarChar(10)
+  consentUses         Json        @default("[]")
+  effectiveAt         DateTime    @default(now())
+  collectedAt         DateTime    @default(now())
+  version             Int         @default(1)
+  archivedAt          DateTime?
+  deletedAt           DateTime?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  @@index([userId, deletedAt])
+  @@map("fin_goals")
+}
+
+// ---- Debts (P6-10), screens C13-C14 ------------------------------------------
+// A declared debt: what is left to pay, the instalment, and — when the client
+// knows it — a rate or a known total cost (an informal loan may have neither).
+model FinDebt {
+  id                   String           @id @default(uuid())
+  userId               String
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label                String           @db.VarChar(80)
+  lender               String?          @db.VarChar(120)
+  purpose              String?          @db.VarChar(200)
+  // The real asset this debt financed, if any (a car, a flat) — informational
+  // only; linking it to P6-11's patrimony is for when that task exists.
+  assetFinanced        String?          @db.VarChar(120)
+  outstandingPrincipal Int
+  monthlyInstalment    Int
+  currency             String           @db.VarChar(3)
+  // A ratio (0.07 = 7 %) when the client knows it, null otherwise — never
+  // guessed from the instalment, which would invent a rate nobody declared.
+  rate                 Float?
+  // The alternative when the rate is not known: a total cost already declared
+  // by the lender (a store credit's fixed total, for instance).
+  knownTotalCost       Int?
+  dueDate              DateTime?
+  // P8-13 (tab 09_Dettes): « owed » — what I owe (D-02 to D-05) — or « lent »
+  // — a receivable, what is owed to me (D-01). Always kept apart.
+  direction            String           @default("owed") @db.VarChar(5)
+  // D-01 to D-05, when the person said which kind it is.
+  debtType             String?          @db.VarChar(4)
+  // The budget envelope this debt's monthly instalment is planned in (P8-24): one, in the current budget, kept in step with the instalment.
+  budgetEnvelopeId     String?          @db.VarChar(191)
+  // The account that carries it (P8-13, ARC-04): a receivable (AC-09) or a
+  // loan (AC-08). Lending and repaying are then real transfers.
+  accountId            String?
+  account              FinAccount?      @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  note                 String?          @db.VarChar(300)
+  scope                String           @default("personal") @db.VarChar(20)
+  source               String           @db.VarChar(20)
+  sourceRef            String?          @db.VarChar(200)
+  status               String           @db.VarChar(20)
+  confidence           String?          @db.VarChar(10)
+  consentUses          Json             @default("[]")
+  effectiveAt          DateTime         @default(now())
+  collectedAt          DateTime         @default(now())
+  version              Int              @default(1)
+  archivedAt           DateTime?
+  deletedAt            DateTime?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  payments             FinDebtPayment[]
+
+  @@index([userId, deletedAt])
+  @@map("fin_debts")
+}
+
+// One payment against one debt, so the outstanding principal is a FACT
+// (declared, then paid down) rather than something recomputed from a
+// standalone instalment figure that may have changed since.
+model FinDebtPayment {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  debtId    String
+  debt      FinDebt   @relation(fields: [debtId], references: [id], onDelete: Cascade)
+  amount    Int
+  currency  String    @db.VarChar(3)
+  paidAt    DateTime
+  note      String?   @db.VarChar(300)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  @@index([debtId])
+  @@index([userId, deletedAt])
+  @@map("fin_debt_payments")
+}
+
+// ---- FINCLUDIA calendar and recurring expenses (P6-07) -----------------------
+// Two tables, and deliberately NOT a third: a planned payment is already a
+// movement marked `planned` in `fin_transactions` (P6-04), so the calendar reads
+// it there. Copying planned events into their own table would be the double
+// counting the client forbids — one row, one reading, « Marquer payé » flips it
+// to real in place.
+
+// A recurring expense or income the person confirmed: a subscription, a rent, a
+// salary. Detection (ALG-04) only ever PROPOSES one; nothing is created without
+// an explicit confirmation, and nothing is ever cancelled on anybody's behalf
+// (« jamais de résiliation automatique » — this table has no notion of
+// terminating a contract, only of no longer tracking it).
+model FinRecurrence {
+  id           String          @id @default(uuid())
+  userId       String
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label        String          @db.VarChar(80)
+  categoryId   String?
+  category     FinCategory?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  // "income" | "expense" (TRANSACTION_KINDS): a recurrence is money that comes
+  // in or goes out, like the movement it will become.
+  kind         String          @db.VarChar(10)
+  value        Int
+  currency     String          @db.VarChar(3)
+  // One of FREQUENCIES (constants/finance.js). F049 normalises it to the month
+  // so the monthly and yearly cost of a subscription can be shown.
+  frequency    String          @db.VarChar(20)
+  // The next date this is expected. Advanced when an occurrence is confirmed;
+  // the calendar projects the following ones from the frequency.
+  nextDate     DateTime
+  endDate      DateTime?
+  // Days BEFORE `nextDate` to remind. The channel is P6-18's; until then this
+  // is read by the interface and pushed nowhere.
+  reminderDays Json            @default("[7, 1]")
+  // Where this row came from: `detected` means ALG-04 proposed it and the
+  // person confirmed it, `manual` means they typed it. Kept apart from the
+  // socle's `source` (which says HOW the value entered) because the client asks
+  // specifically for a detection that is proposed then confirmed.
+  detected     Boolean         @default(false)
+  // P8-11 (tab 08B): the account credited or debited, how an occurrence
+  // becomes real — « confirm » (asked the day it falls, recommended for
+  // income), « auto_real » (recorded as realised on its own), « planned »
+  // (shown as planned until marked paid) — and what to do when the usual day
+  // falls on a weekend (PB-F021's « règle jour »; « previous » working day by
+  // default, the value retained until the client answers question C4).
+  accountId    String?
+  account      FinAccount?     @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  creationMode String          @default("confirm") @db.VarChar(12)
+  weekendRule  String          @default("previous") @db.VarChar(10)
+  occurrences  FinOccurrence[]
+  note         String?         @db.VarChar(300)
+  scope        String          @default("personal") @db.VarChar(20)
+  source       String          @db.VarChar(20)
+  sourceRef    String?         @db.VarChar(200)
+  status       String          @db.VarChar(20)
+  confidence   String?         @db.VarChar(10)
+  consentUses  Json            @default("[]")
+  effectiveAt  DateTime        @default(now())
+  collectedAt  DateTime        @default(now())
+  version      Int             @default(1)
+  archivedAt   DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([userId, nextDate])
+  @@index([categoryId])
+  @@map("fin_recurrences")
+}
+
+// Money set aside month by month for a dated expense: school fees in September,
+// an insurance premium in March (the client's « provisions de dépenses
+// annuelles ou d'études »).
+//
+// A provision NEVER creates a realised expense — the client says so explicitly.
+// `provisioned` is what has been put aside so far, and F045 computes what is
+// left to put aside per month; neither is a movement, and neither enters a
+// total of what was spent.
+model FinProvision {
+  id           String       @id @default(uuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label        String       @db.VarChar(80)
+  categoryId   String?
+  category     FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  // The amount the dated expense is expected to be.
+  value        Int
+  currency     String       @db.VarChar(3)
+  // What has already been set aside for it.
+  provisioned  Int          @default(0)
+  // The date the expense falls due.
+  targetDate   DateTime
+  reminderDays Json         @default("[7, 1]")
+  note         String?      @db.VarChar(300)
+  scope        String       @default("personal") @db.VarChar(20)
+  source       String       @db.VarChar(20)
+  sourceRef    String?      @db.VarChar(200)
+  status       String       @db.VarChar(20)
+  confidence   String?      @db.VarChar(10)
+  consentUses  Json         @default("[]")
+  effectiveAt  DateTime     @default(now())
+  collectedAt  DateTime     @default(now())
+  version      Int          @default(1)
+  archivedAt   DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([userId, targetDate])
+  @@index([categoryId])
+  @@map("fin_provisions")
+}
+
+// ---- FINCLUDIA real patrimony (P6-11) ----------------------------------------
+// Assets only. The client's screen C16 shows « actifs et passifs », but the
+// liabilities already have their table (`fin_debts`, P6-10) and F035 reads them
+// there: a second table of liabilities would be two places to correct the same
+// debt, and net worth would depend on which one the caller used.
+//
+// The fictional status is FORBIDDEN here — the client's own sentence. The whole
+// point of F035 is that net worth is real, and one fictional row in it makes the
+// figure a lie. Enforced by zod, by a CHECK, and by the consistency control.
+model FinAsset {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label       String       @db.VarChar(80)
+  // One of ASSET_KINDS (constants/finWealth.js): the client's own list.
+  kind        String       @db.VarChar(20)
+  categoryId  String?
+  category    FinCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  value       Int
+  currency    String       @db.VarChar(3)
+  // WHEN the value was established. Not `updatedAt`: re-reading a row does not
+  // make its valuation fresher, and the client's « alerte valeur de plus de 90
+  // jours » is measured on this date (F055).
+  valuedAt    DateTime
+  // One of ASSET_LIQUIDITY. F014 (« réserve en mois ») requires the illiquid to
+  // be excluded and the engine cannot tell an account from a flat on its own.
+  liquidity   String       @db.VarChar(20)
+  // Where it is held, as the person wrote it (a bank's name, "coffre",
+  // "maison"). Free text: the client gives no list, and inventing a closed one
+  // would refuse answers it means to accept.
+  holder      String?      @db.VarChar(80)
+  note        String?      @db.VarChar(300)
+  scope       String       @default("personal") @db.VarChar(20)
+  source      String       @db.VarChar(20)
+  sourceRef   String?      @db.VarChar(200)
+  status      String       @db.VarChar(20)
+  confidence  String?      @db.VarChar(10)
+  consentUses Json         @default("[]")
+  effectiveAt DateTime     @default(now())
+  collectedAt DateTime     @default(now())
+  version     Int          @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId, deletedAt])
+  @@index([userId, valuedAt])
+  @@index([categoryId])
+  @@map("fin_assets")
+}
+
+// ---- FINCLUDIA shared spaces (P6-13) -----------------------------------------
+// The « À plusieurs » hub: a space, its members with their role, what each
+// member chooses to share, and the invitations.
+//
+// The phase rule the whole design serves: « données privées par défaut ; rien
+// n'entre dans un espace partagé sans action explicite ». So sharing is stored
+// PER MEMBER, not per space: joining a space reveals nothing, and each person
+// decides, kind by kind, what the others may see of theirs.
+
+model FinSpace {
+  id           String              @id @default(uuid())
+  // One of SPACE_KINDS (constants/finSpace.js): flatshare, couple, household.
+  kind         String              @db.VarChar(20)
+  label        String              @db.VarChar(80)
+  // The currency the space's shared figures are expressed in. One per space:
+  // the engine never converts without a dated rate, so a space that mixed
+  // currencies could not total anything.
+  currency     String              @db.VarChar(3)
+  // Default split rule for shared expenses (SPLIT_RULES). Used by P6-14; set
+  // here because the client asks for it at creation.
+  splitRule    String              @default("equal") @db.VarChar(30)
+  // Below this amount a debt is no longer PROPOSED as a repayment (P9-04, the
+  // client's « petit solde », 200 DA by default, editable). It only hides a
+  // proposal: the balance itself is never erased.
+  smallBalance Int                 @default(20000)
+  // Set when the owner closes a TEMPORARY space (P9-03, rule B3): from then on
+  // nothing is written in it; the history, balances, reports and exports stay readable.
+  closedAt     DateTime?
+  note         String?             @db.VarChar(300)
+  // The space is not itself a financial datum — it holds no amount — but it
+  // carries the socle's traceability columns, because who created it and when
+  // is part of the trail of every figure computed inside it.
+  source       String              @db.VarChar(20)
+  status       String              @db.VarChar(20)
+  version      Int                 @default(1)
+  archivedAt   DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  members      FinSpaceMember[]
+  invitations  FinSpaceInvite[]
+  expenses     FinSharedExpense[]
+  budgets      FinSpaceBudget[]
+  tasks        FinSpaceTask[]
+  inflows      FinSpaceInflow[]
+  settlements  FinSettlement[]
+  goals        FinSpaceGoal[]
+  children     FinChild[]
+  provisions   FinSpaceProvision[]
+
+  @@index([kind])
+  @@map("fin_spaces")
+}
+
+// One person in one space, with their role and what THEY share.
+//
+// `onDelete: Cascade` on both sides: a space that goes takes its memberships,
+// and an account that is erased leaves none behind — the complete deletion the
+// privacy text promises (P6-01 point 9).
+model FinSpaceMember {
+  id                  String                     @id @default(uuid())
+  spaceId             String
+  space               FinSpace                   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  userId              String
+  user                User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // One of SPACE_ROLES: owner, admin, member, viewer.
+  role                String                     @db.VarChar(20)
+  // What this member shares with the others, per data kind (SHAREABLE_KINDS),
+  // at one of SHARING_LEVELS. The default is every kind `private`, and it is
+  // the member — never an admin — who changes it.
+  sharing             Json                       @default("{}")
+  // The name the others see. Separate from the account's own name on purpose:
+  // joining a flatshare should not hand over one's legal name.
+  displayName         String?                    @db.VarChar(60)
+  joinedAt            DateTime                   @default(now())
+  leftAt              DateTime?
+  paidExpenses        FinSharedExpense[]         @relation("ExpensePayer")
+  recordedExpenses    FinSharedExpense[]         @relation("ExpenseRecorder")
+  shares              FinSharedShare[]
+  settlementsFrom     FinSettlement[]            @relation("SettlementFrom")
+  settlementsTo       FinSettlement[]            @relation("SettlementTo")
+  recordedSettlements FinSettlement[]            @relation("SettlementRecorder")
+  goalContributions   FinSpaceGoalContribution[]
+  goalShares          FinSpaceGoalShare[]
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+
+  // One membership per person per space. A second one would make "my role" a
+  // question with two answers.
+  @@unique([spaceId, userId])
+  @@index([userId])
+  @@map("fin_space_members")
+}
+
+// An invitation to join a space. The token is the secret; it is stored HASHED,
+// like a session or a password-reset token, so a leaked database does not hand
+// over the ability to join somebody's household.
+model FinSpaceInvite {
+  id           String    @id @default(uuid())
+  spaceId      String
+  space        FinSpace  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  // Who sent it. Kept to show « invité par » and to refuse an invitation from
+  // somebody who has since lost the right to invite.
+  invitedById  String
+  invitedBy    User      @relation("SpaceInviteSender", fields: [invitedById], references: [id], onDelete: Cascade)
+  // SHA-256 of the token handed out. The plain token exists only in the link.
+  tokenHash    String    @unique @db.VarChar(64)
+  // The role the invitee will get. Never `owner`: a space has exactly one, and
+  // it is not something an invitation can grant.
+  role         String    @db.VarChar(20)
+  // One of INVITE_STATUSES.
+  status       String    @default("pending") @db.VarChar(20)
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  acceptedById String?
+  acceptedBy   User?     @relation("SpaceInviteAcceptor", fields: [acceptedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+
+  @@index([spaceId, status])
+  @@map("fin_space_invites")
+}
+
+// ---- FINCLUDIA paper portfolio (P6-12) ---------------------------------------
+// Fictional from end to end: « badge SIMULATION permanent, aucune exécution,
+// aucune valeur fictive dans le patrimoine réel ». P6-11 forbids the reverse
+// too, so the two can never meet.
+//
+// There is no instrument catalogue and no price table, because the client has
+// supplied neither and its own rule for this task forbids inventing them
+// (« uniquement des données fournies ou validées par le client »). The person
+// names the instrument and states the simulated price themselves — their own
+// simulation, not reference data the platform publishes.
+
+model FinPaperPortfolio {
+  id          String               @id @default(uuid())
+  // One per account: « le portefeuille fictif », and « réinitialisation » means
+  // starting this one over rather than keeping a drawer of them.
+  userId      String               @unique
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // The fictional starting capital. The client's own default is 100 000 DA,
+  // and it is « modifiable ».
+  capital     Int
+  // Fictional cash not currently invested. Kept as a column rather than derived
+  // from the trades: it is what the next buy is checked against, and deriving
+  // it on every write would make that check a race.
+  cash        Int
+  currency    String               @db.VarChar(3)
+  // Simulated fee rate, as a decimal of the traded amount. Stored per portfolio
+  // so it is visible and editable — never a hidden coefficient.
+  feeRate     Float                @default(0.01)
+  // When the portfolio was last reset, so the figures can say what period they
+  // describe.
+  resetAt     DateTime             @default(now())
+  // The socle's traceability columns. `status` is always `fictional` here, and
+  // a CHECK says so: that is what keeps this table out of every real total.
+  source      String               @db.VarChar(20)
+  status      String               @db.VarChar(20)
+  version     Int                  @default(1)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  instruments FinPaperInstrument[]
+  trades      FinPaperTrade[]
+
+  @@map("fin_paper_portfolios")
+}
+
+// An instrument the person chose to practise with, and the simulated price THEY
+// stated. `markedAt` dates that price, exactly as a real asset's valuation is
+// dated in P6-11: a price nobody can date is a price nobody can check.
+model FinPaperInstrument {
+  id          String            @id @default(uuid())
+  portfolioId String
+  portfolio   FinPaperPortfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  // Free text: see the note above. The day the client supplies a catalogue,
+  // this becomes a key into it.
+  label       String            @db.VarChar(80)
+  // The person's own simulated price per unit, in centimes.
+  markPrice   Int
+  markedAt    DateTime
+  note        String?           @db.VarChar(300)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  trades      FinPaperTrade[]
+
+  // One row per instrument in a portfolio: two would split the same position.
+  @@unique([portfolioId, label])
+  @@map("fin_paper_instruments")
+}
+
+// One fictional decision. This table IS the client's « journal de décisions »:
+// what was done, at what simulated price, with what fee — and `note`, which is
+// WHY. The reason is the point of the journal; the amounts are the easy part.
+model FinPaperTrade {
+  id           String             @id @default(uuid())
+  portfolioId  String
+  portfolio    FinPaperPortfolio  @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  instrumentId String
+  instrument   FinPaperInstrument @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+  // "buy" | "sell" (PAPER_TRADE_KINDS). Nothing else: there is no execution,
+  // no order type, no leverage and no short.
+  kind         String             @db.VarChar(10)
+  // Whole units. A workshop does not need fractional shares, and an integer is
+  // a quantity somebody can check.
+  quantity     Int
+  unitPrice    Int
+  // The simulated fee actually applied, stored rather than recomputed: a later
+  // change of the portfolio's rate must not rewrite the past.
+  fee          Int
+  currency     String             @db.VarChar(3)
+  decidedAt    DateTime
+  note         String?            @db.VarChar(300)
+  status       String             @db.VarChar(20)
+  createdAt    DateTime           @default(now())
+
+  @@index([portfolioId, decidedAt])
+  @@index([instrumentId])
+  @@map("fin_paper_trades")
+}
+
+// ---- FINCLUDIA shared expenses and settlements (P6-14) -----------------------
+// Screens P02 and P03, F041 / F042 / F043 and ALG-02.
+//
+// Everything lives inside a shared space (P6-13), in that space's currency: the
+// engine never converts without a dated rate, so a space that mixed currencies
+// could not total anything.
+//
+// A settlement is DECLARATIVE. Nothing in FINCLUDIA moves money — the client is
+// explicit about it — so this table records what people say they have settled
+// between themselves, and nothing else.
+
+model FinSharedExpense {
+  id                    String           @id @default(uuid())
+  spaceId               String
+  space                 FinSpace         @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  // Who paid. A MEMBERSHIP, not a user: the expense belongs to the space, and
+  // a member who later leaves must still be readable as the payer of a past
+  // expense (their membership row survives with `leftAt` set).
+  payerId               String
+  payer                 FinSpaceMember   @relation("ExpensePayer", fields: [payerId], references: [id], onDelete: Cascade)
+  label                 String           @db.VarChar(80)
+  value                 Int
+  currency              String           @db.VarChar(3)
+  occurredAt            DateTime
+  // One of SPLIT_MODES (constants/finShared.js). Stored so the screen can say
+  // HOW it was divided, and so a correction can redo the same kind of split.
+  splitMode             String           @db.VarChar(30)
+  // The category of the client's own reference, when the person chose one.
+  categoryId            String?
+  category              FinCategory?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  note                  String?          @db.VarChar(300)
+  // « réalisée / prévue / annulée » (P9-04). Only a `done` expense counts in
+  // the balances; a cancelled one stays readable, with its trace.
+  lifecycle             String           @default("done") @db.VarChar(12)
+  cancelledAt           DateTime?
+  // The free unit of a split by usage (« kWh », « nuits »): one per expense.
+  usageUnit             String?          @db.VarChar(30)
+  // One of the 19 collective categories (COLC-nn, constants/finCollectiveCategories.js):
+  // what the common budget of the space reads (P9-05).
+  collectiveCategory    String?          @db.VarChar(8)
+  // The ONE personal transaction this expense is paid from (P9-08, COL-F13,
+  // B5): unique, so 1 collective expense <-> 0 or 1 personal transaction. Only
+  // its payer can see it.
+  // An optional, free label inside the category, THIS space's own (P9-14): the workbook gives no list.
+  subCategory           String?          @db.VarChar(40)
+  // The receipt of this expense, if any.
+  receipt               Media?           @relation("SharedExpenseReceipt")
+  // P9-15: what the payer's own money did. The transfer of the part that is not
+  // theirs towards their receivable account (the pair's id), the amount of their
+  // existing transaction before it was cut to their share, and whether the
+  // personal expense was made BY this record (then it goes back with it).
+  advanceTransferId     String?          @db.VarChar(36)
+  advanceOriginalValue  Int?
+  personalCreated       Boolean          @default(false)
+  personalTransactionId String?          @unique
+  personalTransaction   FinTransaction?  @relation("SharedExpenseSource", fields: [personalTransactionId], references: [id], onDelete: SetNull)
+  // Who recorded it, which is not always the payer: a flatmate may enter the
+  // rent somebody else paid.
+  recordedById          String
+  recordedBy            FinSpaceMember   @relation("ExpenseRecorder", fields: [recordedById], references: [id], onDelete: Cascade)
+  source                String           @db.VarChar(20)
+  status                String           @db.VarChar(20)
+  version               Int              @default(1)
+  deletedAt             DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  shares                FinSharedShare[]
+
+  @@index([spaceId, occurredAt])
+  @@index([payerId])
+  @@index([categoryId])
+  @@map("fin_shared_expenses")
+}
+
+// One participant's share of one expense.
+//
+// The shares of an expense add up to its amount EXACTLY — the client states it
+// as a rule, and it is checked by the service and by the consistency control.
+// The payer may have no share at all (« payeur pouvant ne pas participer »),
+// which is why this is a separate table rather than a column on the expense.
+model FinSharedShare {
+  id        String           @id @default(uuid())
+  expenseId String
+  expense   FinSharedExpense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  memberId  String
+  member    FinSpaceMember   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  // What this participant owes of the expense, in centimes.
+  share     Int
+  // The weight that produced it, when the split was proportional: a percentage
+  // in hundredths of a percent, or the income used. Kept so the screen can
+  // show WHY a share is what it is, and so the figure can be argued with.
+  weight    Int?
+  createdAt DateTime         @default(now())
+
+  // One share per participant per expense: two would split the same money
+  // twice and break the "shares add up to the amount" rule silently.
+  @@unique([expenseId, memberId])
+  @@index([memberId])
+  @@map("fin_shared_shares")
+}
+
+// A settlement one member declares having made to another. DECLARATIVE ONLY:
+// no payment integration, and nothing here moves any money.
+model FinSettlement {
+  id           String         @id @default(uuid())
+  spaceId      String
+  space        FinSpace       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  fromId       String
+  from         FinSpaceMember @relation("SettlementFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  toId         String
+  to           FinSpaceMember @relation("SettlementTo", fields: [toId], references: [id], onDelete: Cascade)
+  value        Int
+  currency     String         @db.VarChar(3)
+  settledAt    DateTime
+  note         String?        @db.VarChar(300)
+  // Who declared it. Either side may: the one who paid, or the one who was
+  // paid. The trail says which, because a settlement nobody can attribute is
+  // a settlement nobody can dispute.
+  recordedById String
+  recordedBy   FinSpaceMember @relation("SettlementRecorder", fields: [recordedById], references: [id], onDelete: Cascade)
+  // P9-15: the transfer from the receivable account to the account that received the money, when the receiver said where it arrived.
+  transferId   String?        @db.VarChar(36)
+  source       String         @db.VarChar(20)
+  status       String         @db.VarChar(20)
+  deletedAt    DateTime?
+  createdAt    DateTime       @default(now())
+
+  @@index([spaceId, settledAt])
+  @@index([fromId])
+  @@index([toId])
+  @@map("fin_settlements")
+}
+
+// ---- Shared goals, children and provisions (P6-15) ---------------------------
+// Colocation, couple, family: screens P05, CO02-CO06, CP02-CP04, FA02-FA06.
+//
+// A common goal or envelope belongs to the SPACE, not to one account — unlike
+// `FinGoal` (P6-08), which is personal. That is the point: everyone who is a
+// member sees it by construction, the same way a shared expense (P6-14)
+// already does, rather than through the permission matrix (P6-13), which only
+// ever governs PERSONAL data someone chooses to reveal.
+
+model FinSpaceGoal {
+  id                      String                     @id @default(uuid())
+  spaceId                 String
+  space                   FinSpace                   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  label                   String                     @db.VarChar(80)
+  target                  Int
+  currency                String                     @db.VarChar(3)
+  targetDate              DateTime?
+  note                    String?                    @db.VarChar(300)
+  version                 Int                        @default(1)
+  archivedAt              DateTime?
+  deletedAt               DateTime?
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
+  // P9-17: the calendar of contributions. Every `contributionEveryMonths` months
+  // from `firstDueAt`, each member owes the share set for them below. Without it
+  // there is no due date, hence no delay to measure (only milestones).
+  contributionEveryMonths Int?
+  firstDueAt              DateTime?
+  contributions           FinSpaceGoalContribution[]
+  shares                  FinSpaceGoalShare[]
+
+  @@index([spaceId, deletedAt])
+  @@map("fin_space_goals")
+}
+
+// What one member actually put in — the FACT a common goal's progress is
+// built from, rather than a single editable "allocated" number nobody can
+// attribute (unlike a personal goal, several people pay into this one).
+model FinSpaceGoalContribution {
+  id            String         @id @default(uuid())
+  spaceGoalId   String
+  spaceGoal     FinSpaceGoal   @relation(fields: [spaceGoalId], references: [id], onDelete: Cascade)
+  memberId      String
+  member        FinSpaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  amount        Int
+  currency      String         @db.VarChar(3)
+  contributedAt DateTime
+  note          String?        @db.VarChar(300)
+  createdAt     DateTime       @default(now())
+  deletedAt     DateTime?
+
+  @@index([spaceGoalId])
+  @@index([memberId])
+  @@map("fin_space_goal_contributions")
+}
+
+// What one member is expected to put in at each due date of a common goal (P9-17).
+model FinSpaceGoalShare {
+  id          String         @id @default(uuid())
+  spaceGoalId String
+  spaceGoal   FinSpaceGoal   @relation(fields: [spaceGoalId], references: [id], onDelete: Cascade)
+  memberId    String
+  member      FinSpaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  amount      Int
+
+  @@unique([spaceGoalId, memberId])
+  @@index([memberId])
+  @@map("fin_space_goal_shares")
+}
+
+// A household's child (P6-15, famille): MINIMAL data on purpose — a first
+// name and a birth year, never a full birth date, never a national id or
+// anything that identifies the child outside this one household's planning.
+model FinChild {
+  id         String    @id @default(uuid())
+  spaceId    String
+  space      FinSpace  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  firstName  String    @db.VarChar(60)
+  birthYear  Int
+  note       String?   @db.VarChar(300)
+  archivedAt DateTime?
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([spaceId, deletedAt])
+  @@map("fin_children")
+}
+
+// A household's annual or irregular expense, provisioned month by month
+// (F045): school fees, an insurance renewal, a family trip. `alreadyProvisioned`
+// is corrected as the household sets money aside; it is never recomputed from
+// elsewhere, because nothing else in FINCLUDIA tracks it.
+model FinSpaceProvision {
+  id                 String    @id @default(uuid())
+  spaceId            String
+  space              FinSpace  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  label              String    @db.VarChar(80)
+  plannedAmount      Int
+  alreadyProvisioned Int       @default(0)
+  currency           String    @db.VarChar(3)
+  targetDate         DateTime
+  note               String?   @db.VarChar(300)
+  version            Int       @default(1)
+  archivedAt         DateTime?
+  deletedAt          DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([spaceId, deletedAt])
+  @@map("fin_space_provisions")
+}
+
+// ---- Notifications (P6-18), screen C24 ---------------------------------------
+// In-app only for now: « canal in-app d'abord ; e-mail / push selon P6-01 » —
+// the client's own order, and e-mail/push are a reserve exactly like every
+// other P6-01 placeholder in this schema.
+//
+// `type` is a closed catalogue (constants/finNotification.js), never free
+// text: the server decides what a notification says, through i18n keys and
+// `params`, so nothing typed by anyone ends up rendered as a notification.
+model FinNotification {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String    @db.VarChar(40)
+  // The client's three filters: action / information / sécurité.
+  category    String    @db.VarChar(20)
+  // The client's own ordering for competing alerts: sécurité > échéance >
+  // budget > apprentissage (ACTION_PRIORITIES, shared with the home
+  // dashboard's action list, P6-06) — a SORT key, not the filter above.
+  priority    String    @db.VarChar(20)
+  // i18n interpolation values for this notification's text (amounts, labels,
+  // ids already safe to show back to their own owner) — never a rendered
+  // sentence, so the text stays translated like everything else.
+  params      Json      @default("{}")
+  // Where the client's own « lien vers l'écran concerné » leads. Always a
+  // path this server itself constructs, never user input.
+  link        String?   @db.VarChar(200)
+  // What this notification is ABOUT (a budget, an envelope, a goal...), for
+  // the anti-repetition rule: created once per (type, referenceId) at a given
+  // signal, never once per read.
+  referenceId String?   @db.VarChar(191)
+  read        Boolean   @default(false)
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId, read, createdAt])
+  @@index([userId, type, referenceId])
+  @@map("fin_notifications")
+}
+
+// ---- "Apprendre" glossary and mini-guides (P2-08) -----------------------------
+// Both are written by an administrator (rule: nothing financial, legal or
+// tariff-specific is invented — only general definitions), in one language,
+// like articles and formations.
+model GlossaryTerm {
+  id           String   @id @default(uuid())
+  slug         String   @unique
+  term         String   @db.VarChar(120)
+  definition   String   @db.Text
+  example      String?  @db.Text
+  // Slugs of other terms (closed set: validated against existing terms).
+  // Key of a simulator (constants/simulators.js) this entry sends to, for the
+  // client's "Simuler" button (C21). An ADMINISTRATOR picks it and the server
+  // validates it against the registry: guessing it from the wording would send
+  // people to the wrong calculator.
+  simulatorKey String?  @db.VarChar(60)
+  relatedTerms Json     @default("[]")
+  // "beginner" | "intermediate" | "advanced", nullable (not every term needs one).
+  level        String?
+  theme        String?  @db.VarChar(60)
+  status       String   @default("draft")
+  language     String   @default("fr")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  revisions GlossaryTermRevision[]
+
+  @@map("glossary_terms")
+}
+
+// A snapshot taken right before a term's definition changes (the client
+// requires a history: "une définition remplacée garde son historique"),
+// exactly the pattern already used for lessons (LessonRevision).
+model GlossaryTermRevision {
+  id         String       @id @default(uuid())
+  termId     String
+  term       GlossaryTerm @relation(fields: [termId], references: [id], onDelete: Cascade)
+  definition String       @db.Text
+  example    String?      @db.Text
+  createdAt  DateTime     @default(now())
+
+  @@index([termId, createdAt])
+  @@map("glossary_term_revisions")
+}
+
+model MiniGuide {
+  id           String   @id @default(uuid())
+  slug         String   @unique
+  title        String   @db.VarChar(150)
+  // Sanitised rich text (sanitizeRichText), same allow-list as articles/lessons.
+  body         String   @db.MediumText
+  level        String?
+  theme        String?  @db.VarChar(60)
+  // Key of a simulator (constants/simulators.js) this entry sends to, for the
+  // client's "Simuler" button (C21). An ADMINISTRATOR picks it and the server
+  // validates it against the registry: guessing it from the wording would send
+  // people to the wrong calculator.
+  simulatorKey String?  @db.VarChar(60)
+  status       String   @default("draft")
+  language     String   @default("fr")
+  position     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("mini_guides")
+}
+
+// ---- FINCLUDIA deterministic assistant (P3-19) ---------------------------------
+// Closed catalogue of intentions, taken as-is from the client's own file
+// (FINCLUDIA_Cahier_des_Charges_Complet.xlsx, onglet "13_Chatbot"): the 8 codes,
+// their example phrasing and their allowed answer are the client's, not invented.
+model FinIntent {
+  id               String   @id @default(uuid())
+  // NAVIGUER | EXPLIQUER_INDICATEUR | CRÉER_OBJECTIF | AIDE_BUDGET | AIDE_DETTE |
+  // APPRENDRE_TERME | CHERCHER_SOLUTION | DÉPENSE_PARTAGÉE (the client's closed list).
+  code             String   @unique @db.VarChar(40)
+  label            String   @db.VarChar(120)
+  exampleQuery     String   @db.VarChar(200)
+  // Keywords/synonyms the resolver matches against (admin-editable, P3-19 "Résolveur
+  // d'intentions": "mots-clés, synonymes et contexte écran").
+  keywords         Json     @default("[]")
+  // Sanitised rich text, pre-written (never generated): "Moteur de modèles" in the
+  // client's words — "textes pré-écrits avec variables provenant des API." No
+  // variable is substituted yet (the financial-profile APIs it would read from,
+  // P6-02, do not exist until P6-01 is answered); the text itself must stand on
+  // its own until then.
+  responseTemplate String   @db.Text
+  // A path of this SITE the intent can open ("Liens profonds"), or null when the
+  // client's own target screen (C07, C14, P03...) is not built yet — the resolver
+  // then shows a "not available yet" message instead of a dead or wrong link.
+  deepLinkPath     String?  @db.VarChar(200)
+  status           String   @default("draft")
+  position         Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("fin_intents")
+}
+
+// "Moteur de parcours" — a state machine: parcours_id / étape_id / réponses
+// possibles / étape_suivante, in the client's own words.
+model FinFlow {
+  id        String        @id @default(uuid())
+  key       String        @unique @db.VarChar(60)
+  name      String        @db.VarChar(150)
+  status    String        @default("draft")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  steps     FinFlowStep[]
+
+  @@map("fin_flows")
+}
+
+model FinFlowStep {
+  id        String   @id @default(uuid())
+  flowId    String
+  flow      FinFlow  @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  stepKey   String   @db.VarChar(60)
+  prompt    String   @db.Text
+  // [{ label, nextStepKey | null (ends the flow), intentCode | null }]
+  options   Json     @default("[]")
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([flowId, stepKey])
+  @@map("fin_flow_steps")
+}
+
+// "Audit": intention, parcours, version du modèle, action cliquée, erreur —
+// in the client's words, "sans donnée financière en clair": only codes are kept,
+// never the free text the visitor typed nor any amount.
+model FinAuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  intentCode String?  @db.VarChar(40)
+  flowKey    String?  @db.VarChar(60)
+  stepKey    String?  @db.VarChar(60)
+  // resolved | fallback | deep_link_opened | flow_started | flow_step | flow_ended | not_available
+  action     String   @db.VarChar(30)
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("fin_audit_logs")
+}
+
+// Guided assistant (P3-07): a question the visitor picks from a list and the
+// answer shown for it. No free text, no AI: an administrator writes both. One
+// language per entry, like articles; the public API only returns published
+// entries of the visitor's language, in the administrator's order.
+model ChatbotEntry {
+  id        String   @id @default(uuid())
+  question  String   @db.VarChar(200)
+  // Sanitised rich text (sanitizeRichText), never raw HTML from the browser.
+  answer    String   @db.Text
+  language  String   @default("fr") @db.VarChar(2)
+  status    String   @default("draft") @db.VarChar(20)
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([language, status, position])
+  @@map("chatbot_entries")
+}
+
+// Messages sent through the public contact form (P1-07). Stored in the DB
+// because no email provider is defined yet; an admin view/notification comes
+// later. Only what the form needs: no IP or other personal data is kept.
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @db.VarChar(254)
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
+}
+
+// Account categories offered at registration (P3-15). A real table, not a
+// hardcoded list: an administrator can add, rename, reorder or deactivate a
+// category from the admin panel, without a code change or a migration. Kept
+// as a soft reference from `User.accountType` (a plain string, unchanged
+// since P1-06) rather than a foreign key: it is validated against this table
+// at the application layer, exactly like the free-form status fields
+// elsewhere in this schema, so no existing relation, index or test fixture
+// had to move.
+model AccountType {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  label     String
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("account_types")
+}
+
+// Small set of platform-wide switches an administrator can change without a
+// deployment (P3-16): maintenance mode, public contact details, and any
+// future key the admin panel adds. Free-form key/value on purpose: adding a
+// new setting never needs a migration.
+model PlatformSetting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+
+  @@map("platform_settings")
+}
+
+// ---------------------------------------------------------------------------
+// E-Learning (P2-01)
+//
+// Conventions, same as User:
+// - Status-like fields are plain strings validated in the application layer
+//   (constants in src/constants/elearning.js) AND guarded by CHECK constraints
+//   added by hand in the migration, so no code path can store an invalid value.
+// - Only the model lives here. Endpoints belong to P2-02 (admin) and
+//   P2-03/P2-04 (learner), media handling to P2-06.
+// ---------------------------------------------------------------------------
+
+model FormationCategory {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  formations Formation[]
+
+  @@map("formation_categories")
+}
+
+// A training programme made of an ordered list of courses.
+// The number of courses is NOT stored: it is count(courses), so it can never
+// disagree with the real list (P2-02 "définir le nombre de cours").
+model Formation {
+  id                  String @id @default(uuid())
+  slug                String @unique
+  title               String
+  description         String @db.Text
+  // "draft" | "published". Only published formations are visible to learners.
+  status              String @default("draft")
+  // "standard" | "premium": lowest access level allowed to enrol.
+  // Checked server-side, never only in the UI (TASKS.md rule 1).
+  requiredAccessLevel String @default("standard")
+  // Account types this formation is suggested to first (client request: a
+  // simple suggestion by account type, never a computed score). Empty = no
+  // particular order. Same JSON-array shape as Article.targetAccountTypes,
+  // same reason: no array column type on MySQL/MariaDB.
+  targetAccountTypes  Json   @default("[]")
+  // The educational profiles it is recommended to (P8-17: LYC, ETU, JAC, SAL,
+  // EPG, AUT). Empty = for everyone. A recommendation, never a restriction.
+  educationProfiles   Json   @default("[]")
+
+  categoryId String?
+  category   FormationCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  coverImageId String? @unique
+  coverImage   Media?  @relation("FormationCover", fields: [coverImageId], references: [id], onDelete: SetNull)
+
+  // Certification information (P2-02 / P2-05).
+  certificationEnabled     Boolean @default(true)
+  certificationTitle       String?
+  certificationDescription String? @db.Text
+
+  // Pedagogical presentation (P3-11). The total duration is NOT stored: it is the sum
+  // of the lessons' estimated minutes, so it can never disagree with the real plan.
+  subtitle      String?
+  // "beginner" | "intermediate" | "advanced" (CHECK in the migration), null = not set.
+  level         String?
+  // Teaching theme, same free-form vocabulary as the glossary (P2-08): the
+  // "Apprendre" search filters courses, articles, terms and guides on the
+  // same two axes, so the column has to exist on all four.
+  theme         String? @db.VarChar(60)
+  // MySQL/MariaDB has no array column type: stored as a JSON array (still a
+  // plain JS array end to end, Prisma (de)serialises it automatically).
+  objectives    Json    @default("[]")
+  prerequisites Json    @default("[]")
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  courses     Course[]
+  sections    Section[]
+  enrollments Enrollment[]
+
+  // Quizzes of the formation (P3-13); `finalQuiz` is the one at the end of the formation.
+  quizzes   Quiz[] @relation("FormationQuizzes")
+  finalQuiz Quiz?  @relation("FinalQuiz")
+
+  @@index([status])
+  @@map("formations")
+}
+
+// One lesson of a formation.
+model Course {
+  id          String    @id @default(uuid())
+  formationId String
+  formation   Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+
+  title            String
+  summary          String?  @db.Text
+  // Text content of the lesson. Videos / documents are Media rows.
+  body             String?  @db.MediumText
+  // Display order inside the formation (0-based). Not unique on purpose: a
+  // unique constraint makes reordering (swap) fail mid-transaction; the
+  // service reorders in one transaction and lists by (position, createdAt).
+  position         Int
+  // Required courses must all be completed to finish the formation (P2-04).
+  isRequired       Boolean  @default(true)
+  estimatedMinutes Int?
+  // Chapter of the lesson (P3-11). COMPOSITE foreign key (sectionId, formationId) ->
+  // sections(id, formationId): a lesson can never sit in a chapter of another formation, and
+  // a chapter that still holds lessons cannot be deleted (RESTRICT). `position` stays the
+  // GLOBAL order of the lessons inside the formation (chapters first, then the order in the
+  // chapter): the learner side and the progress code keep reading it unchanged.
+  sectionId        String?
+  section          Section? @relation(fields: [sectionId, formationId], references: [id, formationId], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  media     Media[]
+  progress  CourseProgress[]
+  blocks    LessonBlock[]
+  revisions LessonRevision[]
+  quizzes   Quiz[]
+
+  // Target of the composite foreign key from CourseProgress: guarantees a
+  // progress row can only point to a course of the SAME formation as its
+  // enrollment.
+  @@unique([id, formationId])
+  @@index([formationId, position])
+  @@map("courses")
+}
+
+// A file (video, image, document). The file itself lives in PRIVATE storage:
+// storageKey is an internal key, it must never be serialised to a client or
+// used as a public URL (TASKS.md rule 4, P2-06 signed/temporary access).
+model Media {
+  id           String @id @default(uuid())
+  // "video" | "image" | "document"
+  kind         String
+  storageKey   String @unique
+  originalName String @db.VarChar(255)
+  mimeType     String
+  sizeBytes    Int
+
+  courseId String?
+  course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  uploadedById String?
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  coverOf Formation? @relation("FormationCover")
+
+  // Blog (P3-01): a file attached to an article, or the cover of an article.
+  // A file belongs to at most one lesson OR one article (CHECK in the migration).
+  articleId      String?
+  article        Article? @relation("ArticleMedia", fields: [articleId], references: [id], onDelete: Cascade)
+  articleCoverOf Article? @relation("ArticleCover")
+
+  // Blocks of a lesson that show this file (P3-12). Deleting the file deletes those blocks.
+  blocks LessonBlock[]
+
+  // Receipt of a movement (P6-04, "justificatif optionnel"). Private storage
+  // like every other file here, served only to its owner: there is no public
+  // URL for a receipt, ever.
+  //
+  // The key is on THIS side, like courseId and articleId above, so the file row
+  // dies with the movement it documents — and therefore with the account, which
+  // is what the privacy text promises (P6-01 point 9). With the key on the
+  // transaction instead, erasing an account left every receipt behind.
+  finTransactionId String?         @unique
+  finTransaction   FinTransaction? @relation("TransactionReceipt", fields: [finTransactionId], references: [id], onDelete: Cascade)
+
+  // The receipt of a SHARED expense (P9-14): private storage, readable by the members of the space only,
+  // and gone with the expense it documents. Never a public URL.
+  sharedExpenseId String?           @unique
+  sharedExpense   FinSharedExpense? @relation("SharedExpenseReceipt", fields: [sharedExpenseId], references: [id], onDelete: Cascade)
+
+  // Target of the composite foreign key from lesson_blocks: a block can only show a file
+  // that belongs to ITS OWN lesson.
+  @@unique([id, courseId])
+  @@index([courseId])
+  @@index([articleId])
+  @@map("media")
+}
+
+// A user's enrolment in a formation. One per (user, formation).
+model Enrollment {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Restrict: a formation that has learners cannot be deleted (and their
+  // certificates lost); unpublish it instead.
+  formationId String
+  formation   Formation @relation(fields: [formationId], references: [id], onDelete: Restrict)
+
+  // "active" | "completed"
+  status      String    @default("active")
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+
+  courseProgress CourseProgress[]
+  certification  Certification?
+  quizAttempts   QuizAttempt[]
+
+  @@unique([userId, formationId])
+  @@unique([id, formationId])
+  @@index([formationId])
+  @@map("enrollments")
+}
+
+// Progress of one enrolment on one course.
+// formationId is stored on purpose: the two composite foreign keys below make
+// the database itself reject a progress row whose course is not part of the
+// enrolled formation (P2-04 "empêcher une validation incohérente").
+model CourseProgress {
+  id           String @id @default(uuid())
+  enrollmentId String
+  courseId     String
+  formationId  String
+
+  enrollment Enrollment @relation(fields: [enrollmentId, formationId], references: [id, formationId], onDelete: Cascade)
+  course     Course     @relation(fields: [courseId, formationId], references: [id, formationId], onDelete: Cascade)
+
+  // "in_progress" | "completed"
+  status      String    @default("in_progress")
+  openedAt    DateTime  @default(now())
+  completedAt DateTime?
+
+  @@unique([enrollmentId, courseId])
+  @@index([courseId])
+  @@map("course_progress")
+}
+
+// Issued when an enrolment is completed. The holder name and formation title
+// are snapshotted so the certificate stays valid and verifiable even if the
+// account or the formation is later renamed. At most one per enrolment.
+model Certification {
+  id                String     @id @default(uuid())
+  // Public, unguessable identifier used for verification. Generated by the
+  // application (P2-05), never sequential.
+  certificateNumber String     @unique
+  enrollmentId      String     @unique
+  enrollment        Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  holderName         String
+  formationTitle     String
+  // Name of the certification as defined by the admin when it was issued
+  // (nullable: falls back to the formation title when the admin left it empty).
+  certificationTitle String?
+  issuedAt           DateTime @default(now())
+
+  // Revocation (P3-16, admin only): the certificate stays on record (never deleted, the
+  // learner's achievement is not erased) but public verification and the learner's own
+  // page show it as revoked. `revokedReason` implies `revokedAt` (CHECK in the migration).
+  revokedAt     DateTime?
+  revokedReason String?   @db.Text
+
+  @@map("certifications")
+}
+
+// ---------------------------------------------------------------------------
+// Blog (P3-01)
+//
+// Same conventions as E-Learning: string status guarded by CHECK constraints
+// (see the blog_model migration), files live in the shared private Media store,
+// the author is a User whose deletion never deletes the article.
+// ---------------------------------------------------------------------------
+
+model ArticleCategory {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  articles Article[]
+
+  @@map("article_categories")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  articles ArticleTag[]
+
+  @@map("tags")
+}
+
+// One blog article. Only the sanitised HTML "body" is stored for reading;
+// "bodyText" is its plain-text copy, kept in sync by the application, used for
+// search and reading time (parsing HTML on every list request would be wasteful).
+model Article {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  // Language the title / excerpt / body are WRITTEN in (fr | en | ar). Other
+  // languages live in article_translations; a visitor whose language has no
+  // translation simply gets this one.
+  language    String    @default("fr")
+  title       String
+  // Short summary shown on cards and used as the default page description.
+  excerpt     String    @default("") @db.Text
+  body        String?   @db.MediumText
+  bodyText    String    @default("") @db.MediumText
+  // "draft" | "published". Only published articles are public.
+  status      String    @default("draft")
+  publishedAt DateTime?
+
+  // Visibility by profile (P3-04). "standard" = readable by every visitor,
+  // "premium" = the text and files need a premium account (the card, title and
+  // excerpt stay public as a teaser). Enforced by the server, never only in the UI.
+  requiredAccessLevel String @default("standard")
+  // Account types this article is recommended to (values of ACCOUNT_TYPES).
+  // Empty = for everybody. It only ORDERS recommendations, it never hides anything.
+  // JSON array (no array column type on MySQL/MariaDB) — membership is checked
+  // in application code (blogAccess.js), not with a DB-side array filter.
+  targetAccountTypes  Json   @default("[]")
+
+  categoryId String?
+  category   ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  coverImageId String? @unique
+  coverImage   Media?  @relation("ArticleCover", fields: [coverImageId], references: [id], onDelete: SetNull)
+
+  // Deleting the author's account (right to erasure) keeps the article.
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  // SEO: both optional, the page falls back to the title / excerpt.
+  // Level and theme of the "Apprendre" search (P2-08). Optional: the blog
+  // existed before, and an article without them is simply not filtered out
+  // by an axis it does not carry.
+  level           String?
+  theme           String? @db.VarChar(60)
+  metaTitle       String?
+  metaDescription String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tags         ArticleTag[]
+  media        Media[]              @relation("ArticleMedia")
+  translations ArticleTranslation[]
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+  @@map("articles")
+}
+
+// The language-dependent part of an article (title, summary, text, SEO) in ONE
+// other language. Everything else (address, cover, files, category, tags,
+// status, access level) stays on the article and is shared by all languages.
+model ArticleTranslation {
+  id              String   @id @default(uuid())
+  articleId       String
+  article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  language        String
+  title           String
+  excerpt         String   @default("") @db.Text
+  body            String?  @db.MediumText
+  bodyText        String   @default("") @db.MediumText
+  metaTitle       String?
+  metaDescription String?
+  // true = this row is a raw COPY of the article's own text (from "duplicate to
+  // start"), not yet reviewed by a human: it must never be shown to a visitor as
+  // a real translation. An explicit save (saveTranslation) always clears it.
+  pending         Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([articleId, language])
+  @@map("article_translations")
+}
+
+model ArticleTag {
+  articleId String
+  tagId     String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@index([tagId])
+  @@map("article_tags")
+}
+
+// ---------------------------------------------------------------------------
+// Newsletter (P3-05). Double opt-in: an address is only "confirmed" once its
+// owner clicked the link sent to it; the confirmation date is the proof of
+// consent. Links carry a signed token (HMAC) computed from the row id, so no
+// token is stored. Deleting a row erases the person completely.
+// ---------------------------------------------------------------------------
+model NewsletterSubscriber {
+  id     String @id @default(uuid())
+  // Always stored lower-cased and trimmed (CHECK in the migration).
+  email  String @unique @db.VarChar(254)
+  // "pending" | "confirmed" | "unsubscribed"
+  status String @default("pending")
+  // Language of the subscriber's interface, for the language of the e-mails.
+  locale String @default("fr")
+
+  createdAt      DateTime  @default(now())
+  confirmedAt    DateTime?
+  unsubscribedAt DateTime?
+  // Last confirmation e-mail sent: limits how often one address can be mailed.
+  lastEmailAt    DateTime?
+
+  @@index([status])
+  @@map("newsletter_subscribers")
+}
+
+// A chapter of a formation (P3-11): groups lessons. A chapter that still contains
+// lessons cannot be deleted (RESTRICT): progress lives on the lessons.
+model Section {
+  id          String    @id @default(uuid())
+  formationId String
+  formation   Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String? @db.Text
+  position    Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courses Course[]
+  quizzes Quiz[]
+
+  // Target of the composite foreign key from courses.
+  @@unique([id, formationId])
+  @@index([formationId, position])
+  @@map("sections")
+}
+
+// ---------------------------------------------------------------------------
+// Content of a lesson as an ordered list of typed blocks (P3-12). The server validates
+// `data` for each type (services/blocks.service.js): the browser never sends raw HTML that
+// is stored as is. `courses.body` and the files attached before blocks existed are kept
+// (expand / contract): a lesson WITHOUT blocks is still read the old way.
+// ---------------------------------------------------------------------------
+model LessonBlock {
+  id       String @id @default(uuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // text | image | video | file | code | table | quote | callout | resources (CHECK)
+  type     String
+  position Int
+  data     Json   @default("{}")
+
+  // image / video / file blocks show a file of the same lesson.
+  mediaId String?
+  media   Media?  @relation(fields: [mediaId, courseId], references: [id, courseId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId, position])
+  @@map("lesson_blocks")
+}
+
+// Snapshot of the blocks of a lesson: history with restoration. Taken automatically (at most
+// one every few minutes while editing) and on demand.
+model LessonRevision {
+  id       String @id @default(uuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  blocks Json
+  label  String?
+
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([courseId, createdAt])
+  @@map("lesson_revisions")
+}
+
+// ---------------------------------------------------------------------------
+// Quizzes (P3-13). A quiz is attached to a lesson, to a chapter or to the END of the
+// formation (at most one per target). Correct answers, explanations and accepted answers
+// NEVER leave the server before a learner has submitted an attempt; grading is done by the
+// server. A REQUIRED quiz must be passed to finish the formation (and get the certificate).
+// ---------------------------------------------------------------------------
+model Quiz {
+  id          String    @id @default(uuid())
+  formationId String
+  formation   Formation @relation("FormationQuizzes", fields: [formationId], references: [id], onDelete: Cascade)
+
+  // "course" (a lesson) | "section" (a chapter) | "formation" (the end of it). CHECK in the migration.
+  scope            String
+  courseId         String?
+  course           Course?    @relation(fields: [courseId, formationId], references: [id, formationId], onDelete: Cascade)
+  sectionId        String?
+  section          Section?   @relation(fields: [sectionId, formationId], references: [id, formationId], onDelete: Cascade)
+  // Set (to the formation id) only for the final quiz: makes "one final quiz per formation" a unique key.
+  finalFormationId String?    @unique
+  finalOf          Formation? @relation("FinalQuiz", fields: [finalFormationId], references: [id], onDelete: Cascade)
+
+  title            String
+  instructions     String  @default("") @db.Text
+  // Percentage of the points needed to pass (0..100).
+  passingScore     Int     @default(70)
+  // null = unlimited attempts.
+  maxAttempts      Int?
+  shuffleQuestions Boolean @default(false)
+  // A required quiz must be passed to finish the formation.
+  isRequired       Boolean @default(false)
+  // Show the right answers and the explanations after an attempt.
+  showCorrection   Boolean @default(true)
+  // Denormalised: true when the quiz has questions and every question is well formed (a right
+  // answer, enough choices...). Kept up to date by the CMS at every change; only a complete quiz
+  // is served to learners, and only a complete REQUIRED quiz blocks the end of a formation. The
+  // consistency check recomputes it.
+  isComplete       Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@unique([id, formationId])
+  @@unique([courseId])
+  @@unique([sectionId])
+  @@index([formationId])
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id     String @id @default(uuid())
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  // "single" | "multiple" | "true_false" | "text" (CHECK). true_false has exactly two choices
+  // whose texts are "true" and "false" (the interface translates them).
+  type            String
+  position        Int
+  prompt          String @default("") @db.Text
+  // Shown after the correction.
+  explanation     String @default("") @db.Text
+  points          Int    @default(1)
+  // "text" questions: the answers accepted (compared without case, accents or extra spaces).
+  // JSON array (no array column type on MySQL/MariaDB).
+  acceptedAnswers Json   @default("[]")
+
+  choices QuizChoice[]
+
+  @@index([quizId, position])
+  @@map("quiz_questions")
+}
+
+model QuizChoice {
+  id         String       @id @default(uuid())
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  position   Int
+  text       String       @db.Text
+  isCorrect  Boolean      @default(false)
+
+  @@index([questionId, position])
+  @@map("quiz_choices")
+}
+
+// One try of a learner. Created when the learner starts (the questions are served then, without
+// the answers), completed when the learner submits (graded by the server, once).
+model QuizAttempt {
+  id           String     @id @default(uuid())
+  quizId       String
+  formationId  String
+  quiz         Quiz       @relation(fields: [quizId, formationId], references: [id, formationId], onDelete: Cascade)
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId, formationId], references: [id, formationId], onDelete: Cascade)
+
+  startedAt     DateTime  @default(now())
+  submittedAt   DateTime?
+  // Order the questions were served in (fixed per attempt, so resuming shows the same order).
+  // JSON array (no array column type on MySQL/MariaDB).
+  questionOrder Json      @default("[]")
+  score         Int?
+  earnedPoints  Int?
+  totalPoints   Int?
+  passed        Boolean?
+
+  answers QuizAttemptAnswer[]
+
+  @@index([enrollmentId, quizId])
+  @@index([quizId])
+  @@map("quiz_attempts")
+}
+
+model QuizAttemptAnswer {
+  id         String      @id @default(uuid())
+  attemptId  String
+  attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  // No foreign key: the history of a graded attempt outlives an edited question.
+  questionId String
+  // JSON array (no array column type on MySQL/MariaDB).
+  choiceIds  Json        @default("[]")
+  text       String      @default("") @db.Text
+  correct    Boolean
+  points     Int
+
+  @@unique([attemptId, questionId])
+  @@map("quiz_attempt_answers")
+}
+
+// ---------------------------------------------------------------------------
+// Bank comparator (P4-06)
+//
+// Built from the client's workbooks (conditions of 13 Algerian banks, 11
+// rubrics). Texts are kept exactly as provided; the rubrics and their columns
+// are defined in src/constants/comparator.js.
+// ---------------------------------------------------------------------------
+
+model ComparatorBank {
+  id         String                @id @default(uuid())
+  // As the client writes it (e.g. "BNP Paribas", "TBA"): no full name is invented.
+  name       String                @unique
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  conditions ComparatorCondition[]
+
+  @@map("comparator_banks")
+}
+
+model ComparatorCondition {
+  id        String         @id @default(uuid())
+  bankId    String
+  bank      ComparatorBank @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  // One of COMPARATOR_THEMES (CHECK in the migration).
+  theme     String
+  // particulier | professionnel | entreprise | non_precise — set only when the
+  // client's file states it (CHECK in the migration).
+  segment   String         @default("non_precise")
+  // Only for the rubrics that have a "Catégorie" column (e.g. Retrait / Versement).
+  category  String?
+  // Account type, operation, card, product... (the rubric's first column).
+  label     String         @db.Text
+  // { field: text } — the rubric's own columns, as written by the client.
+  values    Json           @default("{}")
+  // Order of the client's file within a rubric; new rows go last.
+  position  Int            @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([theme, position])
+  @@index([bankId])
+  @@map("comparator_conditions")
+}
+
+// One row (id = 1): when the comparator's data last changed, for the public
+// "données mises à jour le". Every administration write moves it, deletions
+// included (a deleted row leaves no updatedAt behind to read).
+model ComparatorMeta {
+  id            Int      @id @default(1)
+  dataUpdatedAt DateTime @default(now())
+
+  @@map("comparator_meta")
+}
+
+// ---------------------------------------------------------------------------
+// Espace entreprise (P7-02) — le socle de l'ERP annoncé par l'annexe 1 du
+// contrat : entreprises, PME, PMI, micro-entreprises, auto-entrepreneurs,
+// micro-importateurs et professions libérales.
+//
+// CE QUI EST MODÉLISÉ ICI ne dépend d'aucun référentiel comptable : des tiers,
+// des documents de vente et d'achat tels que l'entreprise les émet ou les
+// reçoit, et les règlements qui les soldent. De quoi répondre à « qui me doit
+// quoi, qu'est-ce que je dois, et combien est réellement entré ce mois-ci ».
+//
+// CE QUI N'EST PAS MODÉLISÉ, et pourquoi : bilan, compte de résultat, TVA à
+// déclarer, amortissements, stock. Tout cela suppose le Système Comptable
+// Financier algérien et des règles fiscales datées que le client n'a pas
+// fournies. Les inventer produirait des états faux présentés comme
+// comptables — la faute la plus coûteuse que ce projet puisse commettre.
+// Voir `P7-01` et `BUSINESS_BLOCKED_STATEMENTS`.
+//
+// Le socle de métadonnées de `P6-02` s'applique à chaque table qui porte un
+// montant : scope, source, sourceRef, status, confidence, consentUses,
+// effectiveAt, collectedAt, version, archivedAt, deletedAt.
+
+model FinBusiness {
+  id                   String                @id @default(uuid())
+  userId               String                @unique
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                 String                @db.VarChar(160)
+  // Forme juridique DÉCLARÉE par le compte, pas déduite : les obligations
+  // attachées à chaque forme relèvent du droit algérien, que nous ne
+  // modélisons pas (P7-01).
+  legalForm            String?               @db.VarChar(40)
+  // Identifiants fiscaux et commerciaux : saisis tels quels, jamais validés
+  // contre un format inventé. Un NIF refusé à tort empêche d'enregistrer une
+  // entreprise réelle.
+  taxId                String?               @db.VarChar(40)
+  tradeRegister        String?               @db.VarChar(40)
+  statisticalId        String?               @db.VarChar(40)
+  activity             String?               @db.VarChar(160)
+  currency             String                @db.VarChar(3)
+  // Début de l'exercice : un mois (1-12). Le client n'a fourni aucune règle
+  // d'exercice, donc il est déclaré et non supposé janvier.
+  fiscalYearStartMonth Int                   @default(1)
+  scope                String                @default("business") @db.VarChar(20)
+  source               String                @db.VarChar(20)
+  sourceRef            String?               @db.VarChar(200)
+  status               String                @db.VarChar(20)
+  consentUses          Json                  @default("[]")
+  effectiveAt          DateTime              @default(now())
+  collectedAt          DateTime              @default(now())
+  version              Int                   @default(1)
+  archivedAt           DateTime?
+  deletedAt            DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  contacts             FinBusinessContact[]
+  documents            FinBusinessDocument[]
+  payments             FinBusinessPayment[]
+
+  @@map("fin_businesses")
+}
+
+model FinBusinessContact {
+  id          String                @id @default(uuid())
+  businessId  String
+  business    FinBusiness           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  // "client" | "supplier" (BUSINESS_CONTACT_KINDS). Un même tiers peut être
+  // les deux : il est alors enregistré deux fois, parce qu'un client et un
+  // fournisseur n'ont ni le même solde ni le même délai.
+  kind        String                @db.VarChar(10)
+  name        String                @db.VarChar(160)
+  taxId       String?               @db.VarChar(40)
+  email       String?               @db.VarChar(254)
+  phone       String?               @db.VarChar(40)
+  address     String?               @db.VarChar(300)
+  country     String?               @db.VarChar(2)
+  note        String?               @db.VarChar(300)
+  scope       String                @default("business") @db.VarChar(20)
+  source      String                @db.VarChar(20)
+  sourceRef   String?               @db.VarChar(200)
+  status      String                @db.VarChar(20)
+  consentUses Json                  @default("[]")
+  effectiveAt DateTime              @default(now())
+  collectedAt DateTime              @default(now())
+  version     Int                   @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  documents   FinBusinessDocument[]
+
+  @@index([businessId, kind])
+  @@map("fin_business_contacts")
+}
+
+model FinBusinessDocument {
+  id          String               @id @default(uuid())
+  businessId  String
+  business    FinBusiness          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  contactId   String?
+  contact     FinBusinessContact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  // "sale" | "purchase" (BUSINESS_DOCUMENT_KINDS) : ce que l'entreprise émet
+  // et ce qu'elle reçoit. Le sens du montant en dépend entièrement.
+  kind        String               @db.VarChar(10)
+  number      String               @db.VarChar(40)
+  label       String               @db.VarChar(200)
+  issuedAt    DateTime
+  dueAt       DateTime?
+  // Montants en centimes, comme partout dans le moteur. Hors taxe et taxe sont
+  // DÉCLARÉS tous les deux : le taux de TVA appliqué appartient au document
+  // réel, et aucun taux n'est supposé ici (voir P7-01).
+  amountExcl  Int
+  taxAmount   Int                  @default(0)
+  currency    String               @db.VarChar(3)
+  note        String?              @db.VarChar(300)
+  scope       String               @default("business") @db.VarChar(20)
+  source      String               @db.VarChar(20)
+  sourceRef   String?              @db.VarChar(200)
+  status      String               @db.VarChar(20)
+  confidence  String?              @db.VarChar(20)
+  consentUses Json                 @default("[]")
+  effectiveAt DateTime             @default(now())
+  collectedAt DateTime             @default(now())
+  version     Int                  @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  payments    FinBusinessPayment[]
+
+  // Un numéro de document est unique dans l'entreprise qui l'émet : deux
+  // factures portant le même numéro sont une erreur de saisie, pas deux
+  // factures.
+  @@unique([businessId, kind, number])
+  @@index([businessId, issuedAt])
+  @@map("fin_business_documents")
+}
+
+model FinBusinessPayment {
+  id          String              @id @default(uuid())
+  businessId  String
+  business    FinBusiness         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  documentId  String
+  document    FinBusinessDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  value       Int
+  currency    String              @db.VarChar(3)
+  receivedAt  DateTime
+  method      String?             @db.VarChar(20)
+  note        String?             @db.VarChar(300)
+  scope       String              @default("business") @db.VarChar(20)
+  source      String              @db.VarChar(20)
+  sourceRef   String?             @db.VarChar(200)
+  status      String              @db.VarChar(20)
+  consentUses Json                @default("[]")
+  effectiveAt DateTime            @default(now())
+  collectedAt DateTime            @default(now())
+  version     Int                 @default(1)
+  archivedAt  DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([businessId, receivedAt])
+  @@index([documentId])
+  @@map("fin_business_payments")
+}
+
+// A payslip the person chose to keep (P8-15, the client's answer D5:
+// « historique »). Kept only with their explicit consent — P4-14 kept none,
+// a payslip being sensitive. The lines as typed, and what the decoder made of
+// them; the net feeds the monthly income only when the person confirms.
+model FinPayslip {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  period      String?   @db.VarChar(20)
+  // [{ kind, label, value }] as the decoder accepts them.
+  lines       Json
+  // In centimes: the gross, the net the lines give, the net printed on it.
+  gross       Int
+  value       Int
+  declaredNet Int?
+  currency    String    @default("DZD") @db.VarChar(3)
+  scope       String    @default("personal") @db.VarChar(20)
+  source      String    @db.VarChar(20)
+  status      String    @db.VarChar(20)
+  confidence  String?   @db.VarChar(10)
+  consentUses Json      @default("[]")
+  effectiveAt DateTime  @default(now())
+  collectedAt DateTime  @default(now())
+  version     Int       @default(1)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId, deletedAt])
+  @@map("fin_payslips")
+}
+
+// A signed-in device (P8-20, « appareils et sessions connectés »). The cookie
+// carries this row's id (`jti`): revoking the row ends that session on its
+// very next request. Only a coarse device label is kept — no address, no
+// precise fingerprint — because the person needs to recognise a device, not
+// be tracked.
+model UserSession {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device     String    @db.VarChar(120)
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  revokedAt  DateTime?
+
+  @@index([userId, revokedAt])
+  @@map("user_sessions")
+}
+
+// A common budget (P9-05, COL-F06 / F07): one envelope per category and month
+// of a space. It belongs to the space and touches NO personal budget (QC-06):
+// the only thing it reads is the space's own shared expenses.
+model FinSpaceBudget {
+  id        String    @id @default(uuid())
+  spaceId   String
+  space     FinSpace  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  // COLC-nn, one of the 19 collective categories.
+  category  String    @db.VarChar(8)
+  // `YYYY-MM`.
+  period    String    @db.VarChar(7)
+  value     Int
+  setById   String
+  version   Int       @default(1)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([spaceId, category, period])
+  @@index([spaceId, period])
+  @@map("fin_space_budgets")
+}
+
+// A task of a space (P9-06, tab 08 of the collective workbook): chores, bills to
+// pay, errands. A module apart from the finances — it is linked to an expense
+// or a bill for information only, and NEVER creates a financial movement (QC-07).
+model FinSpaceTask {
+  id              String    @id @default(uuid())
+  spaceId         String
+  space           FinSpace  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  title           String    @db.VarChar(120)
+  description     String?   @db.VarChar(500)
+  // One of TASK_CATEGORIES (constants/finSpaceTask.js).
+  category        String    @db.VarChar(20)
+  // A MEMBERSHIP, like the payer of an expense: it survives the member leaving.
+  assigneeId      String
+  // Other members taking part: a JSON list of membership ids.
+  participants    Json      @default("[]")
+  dueDate         DateTime?
+  priority        String    @default("normal") @db.VarChar(10)
+  // none, daily, weekly, monthly (ALG-C04).
+  recurrence      String    @default("none") @db.VarChar(10)
+  // [{ label, done }]
+  checklist       Json      @default("[]")
+  // The client's rule A2: the weight of a task, 1, 2 or 3 (default 1).
+  weight          Int       @default(1)
+  status          String    @default("todo") @db.VarChar(10)
+  completedAt     DateTime?
+  // Days before the due date at which the person is reminded.
+  reminderDays    Int?
+  // Informative links only.
+  linkedExpenseId String?
+  createdById     String
+  version         Int       @default(1)
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([spaceId, status])
+  @@index([spaceId, dueDate])
+  @@map("fin_space_tasks")
+}
+
+// What comes INTO a space's common pot (P9-09, the client's rule A1): the
+// opening balance, the contributions members make, other entries. Only a
+// `confirmed` one counts; a planned contribution is a promise, not money.
+//   common resources = opening balance + confirmed contributions + other
+//                      confirmed entries
+//   group balance    = common resources - realised expenses
+model FinSpaceInflow {
+  id           String    @id @default(uuid())
+  spaceId      String
+  space        FinSpace  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  // opening, contribution, other
+  kind         String    @db.VarChar(12)
+  // The member who contributed, for a contribution.
+  memberId     String?
+  value        Int
+  occurredAt   DateTime
+  status       String    @default("confirmed") @db.VarChar(10)
+  note         String?   @db.VarChar(300)
+  recordedById String
+  version      Int       @default(1)
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([spaceId, status])
+  @@map("fin_space_inflows")
+}
+
+// What was true at a date, kept as it was (P8-24): a monthly report the person
+// chose to keep, and the month's financial-health index. A snapshot is never
+// recomputed — that is the point: a later correction of an old movement does not
+// rewrite what the person saw then. One per (person, kind, month); keeping the
+// same month again replaces it and says so (`version`).
+model FinSnapshot {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // `report` or `health`.
+  kind       String   @db.VarChar(10)
+  // `YYYY-MM`.
+  period     String   @db.VarChar(7)
+  payload    Json
+  version    Int      @default(1)
+  capturedAt DateTime @default(now())
+
+  @@unique([userId, kind, period])
+  @@map("fin_snapshots")
+}
+
+// A pedagogical mission (P8-17): a short series of choices on a FICTIVE sum, whose
+// contents are written by the client and entered by an administrator. See
+// constants/finMissions.js for the scoring rule, which is the same for every one.
+model FinMission {
+  id             String              @id @default(uuid())
+  slug           String              @unique @db.VarChar(80)
+  title          String              @db.VarChar(120)
+  summary        String              @db.VarChar(500)
+  // Education profile codes it is offered to; an empty list means everybody.
+  profiles       Json                @default("[]")
+  startingAmount Int
+  currency       String              @db.VarChar(3)
+  // [{ key, prompt, choices: [{ key, label, cash, savings, resilience, explanation }] }]
+  steps          Json
+  // [{ key, label, minResilience }]
+  badges         Json                @default("[]")
+  status         String              @default("draft") @db.VarChar(10)
+  position       Int                 @default(0)
+  version        Int                 @default(1)
+  publishedAt    DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  attempts       FinMissionAttempt[]
+
+  @@index([status, position])
+  @@map("fin_missions")
+}
+
+// One play of a mission. Kept (the last few per person) so a badge can be shown
+// and a mission replayed; it holds only the choices and the computed result.
+model FinMissionAttempt {
+  id        String     @id @default(uuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  missionId String
+  mission   FinMission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  choices   Json
+  result    Json
+  createdAt DateTime   @default(now())
+
+  @@index([userId, missionId])
+  @@map("fin_mission_attempts")
+}
+
+// A browser that agreed to receive the person's notifications (P8-24, Web Push).
+// One row per browser; the endpoint is the push service's own address for it and
+// is secret enough that it is never sent to anybody else. Removed the moment the
+// push service says the browser is gone (404 / 410) or the person turns it off.
+model FinPushSubscription {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint   String    @unique @db.VarChar(700)
+  p256dh     String    @db.VarChar(200)
+  auth       String    @db.VarChar(100)
+  // The browser's own name, from its User-Agent — what the person recognises in
+  // their list; no address, no fingerprint (same rule as the sessions).
+  label      String    @db.VarChar(80)
+  createdAt  DateTime  @default(now())
+  lastSentAt DateTime?
+
+  @@index([userId])
+  @@map("fin_push_subscriptions")
+}

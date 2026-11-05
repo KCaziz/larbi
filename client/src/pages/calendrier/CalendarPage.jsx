@@ -12,7 +12,7 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import FigureCard from '../../components/fincludia/FigureCard.jsx';
+import FigureCard, { HowToCompute } from '../../components/fincludia/FigureCard.jsx';
 import GroupedBars from '../../components/fincludia/charts/GroupedBars.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import { flowClass } from '../../lib/flows.js';
@@ -125,7 +125,10 @@ export default function CalendarPage() {
 
           <dl className="calendar-projection">
             <dt>{t('calendar.projectedCash')}</dt>
-            <dd>{cal.cashFinProjete === null ? <span className="fin-not-computed">{t('fincludia.notComputed')}</span> : formatAmount(i18n.language, cal.cashFinProjete, cal.currency)}</dd>
+            <dd>
+              {cal.cashFinProjete === null ? <span className="fin-not-computed">{t('fincludia.notComputed')}</span> : formatAmount(i18n.language, cal.cashFinProjete, cal.currency)}
+              {cal.cashFinProjete === null && <HowToCompute hint={{ key: 'accounts', to: '/app/comptes/nouveau' }} />}
+            </dd>
             <dt>{t('calendar.firstTensionDay')}</dt>
             <dd>
               {cal.premierJourTension === null ? (

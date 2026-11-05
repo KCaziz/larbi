@@ -5,6 +5,7 @@ import { formatDate } from '../../lib/format.js';
 import { useApi } from '../../lib/useApi.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
+import { HowToCompute } from '../../components/fincludia/FigureCard.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
@@ -62,12 +63,14 @@ export default function PassportPage() {
             <p className={p.dimensions.formationsCompletion === null ? 'fin-figure-value fin-figure-unknown' : 'fin-figure-value'}>
               {percent(p.dimensions.formationsCompletion)}
             </p>
+            {p.dimensions.formationsCompletion === null && <HowToCompute hint={{ key: 'formation', to: '/app/formation' }} />}
           </article>
           <article className="fin-figure">
             <h3 className="fin-figure-label">{t('passport.dimensions.quizzesAverage')}</h3>
             <p className={p.dimensions.quizzesAverage === null ? 'fin-figure-value fin-figure-unknown' : 'fin-figure-value'}>
               {percent(p.dimensions.quizzesAverage)}
             </p>
+            {p.dimensions.quizzesAverage === null && <HowToCompute hint={{ key: 'formation', to: '/app/formation' }} />}
           </article>
           <article className="fin-figure">
             <h3 className="fin-figure-label">{t('passport.dimensions.securityModule')}</h3>

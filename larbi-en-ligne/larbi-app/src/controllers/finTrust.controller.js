@@ -3,12 +3,12 @@ import { clearSessionCookie } from '../services/token.service.js';
 import {
   buildCompleteness,
   buildDataInventory,
-  connectedDevices,
   deleteAccount,
   exportAccountData,
   listConsents,
   withdrawSpaceSharing,
 } from '../services/finTrust.service.js';
+import { listSessions, revokeOtherSessions, revokeSession } from '../services/session.service.js';
 import { assertCurrentPassword } from '../utils/reauth.js';
 import { HttpError } from '../utils/httpError.js';
 
@@ -33,7 +33,27 @@ export async function postWithdrawSharing(req, res) {
 }
 
 export async function getDevices(req, res) {
-  res.json(connectedDevices());
+  const sessions = await listSessions(prisma, req.user.id);
+  res.json({
+    disponible: true,
+    appareils: sessions.map((session) => ({ ...session, courant: session.id === req.sessionId })),
+    // A session opened before this existed has no row: it still works and is
+    // not listed. Said, so the list is never read as complete when it is not.
+    sessionCourantSuivie: Boolean(req.sessionId),
+  });
+}
+
+// « Déconnecter un appareil » is a sensitive action: the password is asked
+// again, so that a stolen open session cannot sign the owner out of theirs.
+export async function postDisconnectDevice(req, res) {
+  await assertCurrentPassword(req);
+  if ((await revokeSession(prisma, req.user.id, req.params.id)) === 0) throw new HttpError(404, 'Device not found');
+  res.json({ deconnecte: true });
+}
+
+export async function postDisconnectOthers(req, res) {
+  await assertCurrentPassword(req);
+  res.json({ deconnectes: await revokeOtherSessions(prisma, req.user.id, req.sessionId ?? null) });
 }
 
 export async function postExport(req, res) {

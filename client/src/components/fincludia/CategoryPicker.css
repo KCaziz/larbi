@@ -104,3 +104,28 @@
   padding: var(--space-sm);
   opacity: 0.8;
 }
+
+/* Large enough wherever it is used (recette R8-01): the list never shrinks to
+   a narrow field — it takes at least 360 px (the screen's width on a phone),
+   and a field holding the picker takes a whole row of its form grid. */
+.category-picker-panel {
+  min-inline-size: min(360px, calc(100vw - 32px));
+  max-block-size: min(480px, 70vh);
+}
+:where([class$='-grid'], [class*='-grid ']) > :where(.fin-field, label):has(> .category-picker) {
+  grid-column: 1 / -1;
+}
+.category-picker-button,
+.category-picker-row {
+  min-block-size: 44px;
+}
+.category-picker-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-inline-size: 0;
+  line-height: 1.3;
+}
+.category-picker-result .category-picker-group {
+  font-size: 0.82em;
+}

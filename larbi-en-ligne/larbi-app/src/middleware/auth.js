@@ -3,6 +3,7 @@ import { HttpError } from '../utils/httpError.js';
 import { SESSION_COOKIE, verifySession } from '../services/token.service.js';
 import { hasAccessLevel } from '../constants/roles.js';
 import { isAdultAgeRange } from '../constants/finPublics.js';
+import { checkSession } from '../services/session.service.js';
 
 // Loads the user from the DB on every request (not from token claims), so a
 // role/level change or account deletion takes effect immediately.
@@ -22,6 +23,12 @@ export async function requireAuth(req, res, next) {
     // A suspended account (P3-16) is treated exactly like a deleted one: the
     // session dies at once, on every route, without revealing why.
     if (!user || user.status === 'suspended') throw new HttpError(401, 'Invalid or expired session');
+    // A session ended from the « appareils connectés » list dies at once
+    // (P8-20). A token with no session id predates it and stays valid.
+    if (payload.jti) {
+      if (!(await checkSession(prisma, payload.jti, user.id))) throw new HttpError(401, 'Invalid or expired session');
+      req.sessionId = payload.jti;
+    }
 
     req.user = user;
     next();

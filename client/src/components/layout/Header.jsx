@@ -1,12 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronDown, LayoutDashboard, LifeBuoy, LogOut, Menu, UserRound, X } from 'lucide-react';
+import { ChevronDown, LayoutDashboard, LogOut, Menu, UserRound, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth.js';
 import Navigation from './Navigation.jsx';
-import GlobalSearch from './GlobalSearch.jsx';
-import NotificationBell from './NotificationBell.jsx';
-import { ASSISTANT_OPEN_EVENT } from '../../lib/finControls.js';
 import Button from '../ui/Button.jsx';
 import ThemeToggle from '../ui/ThemeToggle.jsx';
 import LanguageSwitcher from '../ui/LanguageSwitcher.jsx';
@@ -49,13 +46,6 @@ export default function Header() {
     );
   }
 
-  // The assistant is a floating panel, not a page: the bar asks for it rather
-  // than navigating to it (see <ChatbotWidget>).
-  const openAssistant = () => {
-    closeMenu();
-    document.dispatchEvent(new CustomEvent(ASSISTANT_OPEN_EVENT));
-  };
-
   const handleLogout = async () => {
     setLogoutFailed(false);
     try {
@@ -68,7 +58,7 @@ export default function Header() {
   };
 
   return (
-    <header className={`site-header${user?.role === 'admin' ? ' site-header-admin' : ''}`}>
+    <header className="site-header">
       <div className="site-header-inner">
         {/* La marque officielle de la charte (P1-13), à la place de la lettre
             « L » héritée de l'ancien nom. L'image est décorative : le nom est
@@ -132,24 +122,16 @@ export default function Header() {
           <div className="header-controls">
             <LanguageSwitcher />
             <ThemeToggle />
-            {status === 'authenticated' && <GlobalSearch />}
-            {/* The top bar the client specifies (P1-12): global search
-                (P6-20), notifications (P6-18), help / assistant (P3-19) and
-                the profile. The assistant also floats on every screen as a
-                bubble (P3-07); the bar entry is for the people who look for
-                help in the bar, which is where the client put it. */}
-            {status === 'authenticated' && <NotificationBell />}
+            {/* Signed in, the showcase only leads back to the windows where the
+                work is done — the application and, for an administrator, the
+                back office, both reached from « Mon espace » (recette R8-09,
+                R8-10). Search, notifications and help live in their bar. */}
             {status === 'authenticated' && (
               <div className="auth-actions">
-                <Button
-                  variant="secondary"
-                  className="btn-collapse"
-                  title={t('nav.assistant')}
-                  onClick={openAssistant}
-                >
-                  <LifeBuoy size={16} strokeWidth={1.75} aria-hidden="true" />
-                  <span className="btn-label">{t('nav.assistant')}</span>
-                </Button>
+                {/* An administrator's way to the back office, kept on the
+                    showcase (asked on 2026-11-05): the bar has room for it
+                    now that search, notifications and help live in the
+                    application's bar. */}
                 {user?.role === 'admin' && (
                   <Button to="/admin" variant="secondary" onClick={closeMenu}>
                     <LayoutDashboard size={16} strokeWidth={1.75} aria-hidden="true" />

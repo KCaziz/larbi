@@ -21,7 +21,14 @@ export const consentUsesSchema = z
 
 // An amount in the smallest unit of the currency: a whole number, never a float
 // (a float has already lost centimes before it reaches us).
-export const amountSchema = z.number().int().safe();
+// Bounded by what the database keeps exactly. The money columns were 32-bit
+// integers, and MariaDB outside strict mode CLAMPS a larger value instead of
+// refusing it — 999 999 999 999 DA became 21 474 836,47 DA without a word
+// (recette R1-06). They are now DOUBLE (R1-10), which holds every integer below
+// 2^53 exactly; 10^15 minor units (10 000 000 000 000 DA) leaves room to add
+// thousands of them. A larger figure is refused here, never stored differently.
+export const MAX_STORED_AMOUNT = 1_000_000_000_000_000;
+export const amountSchema = z.number().int().min(-MAX_STORED_AMOUNT).max(MAX_STORED_AMOUNT);
 export const currencySchema = z
   .string()
   .trim()
@@ -39,6 +46,9 @@ export const createCategorySchema = z
   .object({
     family: z.enum(CATEGORY_FAMILY_CODES),
     label: labelSchema,
+    essential: z.boolean().optional(),
+    // The person's own colour for it (P8-27); else its family's.
+    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
   })
@@ -49,12 +59,13 @@ export const createCategorySchema = z
 export const updateCategorySchema = z
   .object({
     label: labelSchema.optional(),
+    essential: z.boolean().optional(),
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
     reason: reasonSchema.optional(),
   })
   .strict()
-  .refine((body) => ['label', 'scope', 'consentUses'].some((field) => field in body), {
+  .refine((body) => ['label', 'essential', 'scope', 'consentUses'].some((field) => field in body), {
     message: 'Nothing to change',
   });
 
@@ -64,10 +75,12 @@ export const customiseCategorySchema = z
   .object({
     label: labelSchema.optional(),
     hidden: z.boolean().optional(),
+    // « Essentielle ? », the person's own reading (P8-08).
+    essential: z.boolean().optional(),
     reason: reasonSchema.optional(),
   })
   .strict()
-  .refine((body) => 'label' in body || 'hidden' in body, { message: 'Nothing to change' });
+  .refine((body) => 'label' in body || 'hidden' in body || 'essential' in body, { message: 'Nothing to change' });
 
 export const archiveCategorySchema = z.object({ archived: z.boolean(), reason: reasonSchema.optional() }).strict();
 

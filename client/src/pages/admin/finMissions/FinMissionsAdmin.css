@@ -1,0 +1,126 @@
+/* Pedagogical missions in the back office (recette R8-11). */
+.missions-admin-list {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.missions-admin-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.missions-admin-main p {
+  margin: 4px 0 0;
+}
+
+.missions-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+.missions-admin-danger {
+  color: var(--danger);
+}
+
+.missions-admin-form {
+  display: grid;
+  gap: var(--space-md);
+  max-inline-size: 900px;
+}
+.missions-admin-intro {
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  border-inline-start: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent-bg);
+  color: var(--text-h);
+}
+
+.missions-admin-form fieldset {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.missions-admin-form legend {
+  padding-inline: 6px;
+  color: var(--text-h);
+  font-family: var(--display);
+  font-weight: 600;
+}
+.missions-admin-step {
+  position: relative;
+}
+
+.missions-admin-label {
+  color: var(--text-h);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.missions-admin-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.missions-admin-checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.missions-admin-choice {
+  display: grid;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+.missions-admin-choice-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.missions-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-sm);
+  align-items: end;
+}
+.missions-admin-wide {
+  grid-column: 1 / -1;
+}
+
+.missions-admin-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 4px;
+  min-block-size: 32px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--danger);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .missions-admin-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

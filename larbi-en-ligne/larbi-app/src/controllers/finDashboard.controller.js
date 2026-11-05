@@ -4,7 +4,7 @@ import {
   ACTION_PRIORITIES,
   DASHBOARDS,
   DATA_AGE_WARNING_DAYS,
-  HEALTH_INDEX_BLOCKED,
+  HEALTH_INDEX_NOT_FOR_YOUTH,
   KPI_KEYS,
   KPI_MAX,
   KPI_MIN,
@@ -13,21 +13,32 @@ import {
   UPCOMING_DAYS,
   dashboardFor,
 } from '../constants/finDashboard.js';
+import { HEALTH_BANDS, HEALTH_DIMENSIONS, HEALTH_VERSION, REFERENTIAL_DIVERGENCES } from '../constants/finHealth.js';
 import { questionsForPublic } from '../constants/finOnboarding.js';
 import { isAdultAgeRange } from '../constants/finPublics.js';
 import { currentBudget, loadBudgetData } from '../services/finBudget.service.js';
 import { buildBudgetView } from '../services/finBudgetView.service.js';
 import { loadCalendarData } from '../services/finCalendar.service.js';
 import { collectEvents, recurringCost } from '../services/finCalendarView.service.js';
+import { generateAlerts } from '../services/finAlerts.service.js';
+import { clearingView } from '../services/finMovement.service.js';
+import { occurrencesWithOutcome } from '../services/finOccurrence.service.js';
+
 import { buildDebtSynthesis, listDebts } from '../services/finDebt.service.js';
 import { buildGoalView, listGoals } from '../services/finGoal.service.js';
 import { completeness } from '../services/finOnboarding.service.js';
+import { firstStepsState } from '../services/finFirstSteps.service.js';
 import { buildReserveView } from '../services/finReserve.service.js';
 import { markedSavingsInPeriod } from '../services/finSavings.service.js';
-import { buildSynthesis, currentMonth, loadSynthesisData } from '../services/finSynthesis.service.js';
+import { buildSynthesis, currentMonth, debtRatioIncome, loadSynthesisData } from '../services/finSynthesis.service.js';
 import { autonomy, buildDashboard, dataQuality } from '../services/finDashboard.service.js';
+import { dataQualityMeasures, goalLinesOf } from '../services/finHealthMeasures.service.js';
+import { recordHealthSnapshot } from '../services/finSnapshot.service.js';
 import { describeFormula } from '../services/finance/describe.js';
 import { monthlyAmount } from '../services/finance/formulas.js';
+
+// How far back an unconfirmed income or payment is still asked about.
+const CONFIRM_LOOKBACK_DAYS = 31;
 
 // The "Aujourd'hui" home screen (P6-06), screens C04 / LY02 / ET02 / JA02 /
 // SA02. One request, one answer: the question is « où j'en suis, que faire
@@ -44,9 +55,22 @@ export function getDashboardReferences(req, res) {
     priorities: ACTION_PRIORITIES,
     dashboards: Object.fromEntries(Object.entries(DASHBOARDS).map(([code, dashboard]) => [code, dashboard.title])),
     dataAgeWarningDays: DATA_AGE_WARNING_DAYS,
-    // Declared, not hidden: what the overall financial-health score is waiting
-    // for, and the definition F047 reads.
-    santeFinanciere: HEALTH_INDEX_BLOCKED,
+    // L'indice de santé financière n'attend plus rien (P6-22, chantier 2) :
+    // ses pondérations sont dans le référentiel maître du client. Ce qui est
+    // publié ici, c'est le barème retenu, ses dimensions et leurs poids —
+    // « sous-scores cliquables, pondérations visibles » est la demande du
+    // client — plus la seule règle d'affichage qui reste.
+    santeFinanciere: {
+      version: HEALTH_VERSION,
+      dimensions: HEALTH_DIMENSIONS,
+      bandes: HEALTH_BANDS.map((row) => ({ min: row.min, max: row.max, label: row.label })),
+      compteJeune: HEALTH_INDEX_NOT_FOR_YOUTH,
+    },
+    // Les divergences que le client signale dans son propre référentiel, et le
+    // choix fait en attendant sa réponse. Publiées plutôt que notées : un
+    // barème choisi par le prestataire parce qu'il fallait bien en choisir un
+    // devient une décision du client par usure s'il ne se voit pas.
+    divergencesReferentiel: REFERENTIAL_DIVERGENCES,
     definitionRevenusPersonnels: { version: PERSONAL_INCOME_DEFINITION_VERSION, categories: PERSONAL_INCOME_CATEGORY_KEYS },
     formulas: ['F002', 'F003', 'F004', 'F008', 'F009', 'F012', 'F014', 'F018', 'F025', 'F047', 'F049', 'F055'].map(describeFormula),
   });
@@ -56,6 +80,9 @@ export async function getToday(req, res) {
   const now = new Date();
   const currency = req.user.finCurrency;
   const period = currentMonth(now);
+  // The alerts (P8-18) are raised when the day's list is read, too: it is the
+  // screen people open most.
+  await generateAlerts(prisma, req.user, { now });
 
   // ---- the money of the month (P6-04) -------------------------------------
   const { incomes, movements, previous } = await loadSynthesisData(prisma, req.user.id, period);
@@ -76,7 +103,9 @@ export async function getToday(req, res) {
   const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const horizon = new Date(startOfToday.getTime() + UPCOMING_DAYS * 24 * 3600 * 1000);
   const calendarData = await loadCalendarData(prisma, req.user.id, { from: startOfToday, to: horizon });
-  const upcoming = collectEvents({ ...calendarData, from: startOfToday, to: horizon, currency }).slice(0, 5);
+  // With what was said about each occurrence (P8-11): a salary already
+  // confirmed is not « coming up » any more.
+  const upcoming = collectEvents({ ...calendarData, from: startOfToday, to: horizon, currency, occurrencesOf: occurrencesWithOutcome }).slice(0, 5);
   const subscriptions = recurringCost(calendarData.recurrences, { currency, now });
 
   // ---- reserve (P6-09), goals (P6-08), debts (P6-10) ----------------------
@@ -84,7 +113,7 @@ export async function getToday(req, res) {
   const goalRows = await listGoals(prisma, req.user.id);
   const goals = goalRows.map((goal) => ({ id: goal.id, label: goal.label, priority: goal.priority, view: buildGoalView(goal, { now }) }));
   const debtRows = await listDebts(prisma, req.user.id);
-  const debts = debtRows.length === 0 ? null : buildDebtSynthesis(debtRows, { netMonthlyIncome: synthesis.revenus.resultat, currency, now });
+  const debts = debtRows.length === 0 ? null : buildDebtSynthesis(debtRows, { netMonthlyIncome: debtRatioIncome(synthesis), currency, now });
 
   // ---- F047, for the student dashboard ------------------------------------
   // The monthly amount of each resource, with the category key the versioned
@@ -101,6 +130,13 @@ export async function getToday(req, res) {
   const onboardingRow = await prisma.finOnboarding.findUnique({ where: { userId: req.user.id }, select: { answers: true, completedAt: true } });
   const questions = questionsForPublic(req.user.finPublic, { minor: isAdultAgeRange(req.user.finAgeRange) === false });
   const onboarding = onboardingRow ? completeness(questions, onboardingRow.answers ?? {}) : { applicable: questions.length, answered: 0, skipped: 0, remaining: questions.length, ratio: 0 };
+  // What « Premiers pas » still offers (recette R1-08): the steps neither done
+  // nor set aside. The former questionnaire above still measures how complete
+  // the profile is, but it is no longer what the person is asked to finish —
+  // reminding them of it said « 7 questions left » to someone who had done
+  // every step.
+  const firstSteps = await firstStepsState(prisma, req.user.id);
+  const firstStepsLeft = firstSteps.steps.filter((step) => !step.done && !step.skipped).length;
 
   // ---- the quality banner (F055) ------------------------------------------
   // The most recent thing the person actually recorded, across the tables that
@@ -125,9 +161,10 @@ export async function getToday(req, res) {
     autonomyAnswer,
     periodSavings,
     upcoming,
-    onboarding,
+    onboarding: { remaining: firstStepsLeft },
     uncategorised: synthesis.nonCategorisees,
     quality,
+    healthMeasures: { goalLines: await goalLinesOf(prisma, req.user.id, { now }), dataQuality: await dataQualityMeasures(prisma, req.user.id, { onboarding, now }) },
     currency,
     now,
   });
@@ -141,6 +178,50 @@ export async function getToday(req, res) {
   );
   dashboard.alertes = dashboard.alertes.map((alert) => ({ ...alert, categoryLabel: alert.categoryId ? (labels.get(alert.categoryId) ?? null) : null }));
   dashboard.echeances = dashboard.echeances.map((event) => ({ ...event, categoryLabel: event.categoryId ? (labels.get(event.categoryId) ?? null) : null }));
+
+  // ---- « Aujourd'hui », the list of what is left to do (answer D3) ----------
+  // The client's own list: actions to finish, income to confirm, movements to
+  // clear, due dates, missing answers, alerts and courses to go on with. The
+  // Accueil shows the figures; this is the to-do list, with its count.
+  const lookBack = new Date(startOfToday.getTime() - CONFIRM_LOOKBACK_DAYS * 24 * 3600 * 1000);
+  const endOfToday = new Date(startOfToday.getTime() + 24 * 3600 * 1000 - 1);
+  const pastData = await loadCalendarData(prisma, req.user.id, { from: lookBack, to: endOfToday });
+  const toConfirm = collectEvents({ ...pastData, from: lookBack, to: endOfToday, currency, occurrencesOf: occurrencesWithOutcome }).filter(
+    (event) => event.confirmable && !event.informational,
+  );
+  const [clearing, courses] = await Promise.all([
+    clearingView(prisma, req.user.id, { now }),
+    prisma.enrollment.findMany({
+      where: { userId: req.user.id, completedAt: null, status: 'active' },
+      select: { id: true, formation: { select: { title: true, slug: true } } },
+      orderBy: { enrolledAt: 'desc' },
+      take: 5,
+    }),
+  ]);
+  const healthToComplete = (dashboard.santeFinanciere?.dimensions ?? []).filter((dimension) => dimension.score === null).map((dimension) => dimension.key);
+  const aFaire = {
+    actions: dashboard.actions,
+    revenusAConfirmer: toConfirm.filter((event) => event.inflow),
+    paiementsAConfirmer: toConfirm.filter((event) => !event.inflow),
+    aPointer: clearing.counts.unchecked + clearing.counts.to_verify,
+    echeances: dashboard.echeances,
+    questions: { premiersPas: firstStepsLeft, sante: healthToComplete },
+    alertes: dashboard.alertes,
+    formations: courses.map((row) => ({ id: row.id, title: row.formation.title, slug: row.formation.slug })),
+  };
+  // The count of the menu badge: things to do, not things to read.
+  aFaire.total =
+    aFaire.actions.length +
+    aFaire.revenusAConfirmer.length +
+    aFaire.paiementsAConfirmer.length +
+    (aFaire.aPointer > 0 ? 1 : 0) +
+    aFaire.alertes.length +
+    (aFaire.questions.premiersPas > 0 ? 1 : 0);
+  dashboard.aFaire = aFaire;
+
+  // The month's health index is KEPT as it is read (P8-24), so it has a history.
+  // A minor is shown no index, and nothing of it is kept.
+  if (!dashboard.minor && dashboard.santeFinanciere?.answer) await recordHealthSnapshot(prisma, req.user.id, period.start.toISOString().slice(0, 7), dashboard.santeFinanciere).catch(() => null);
 
   res.json({
     aujourdhui: dashboard,

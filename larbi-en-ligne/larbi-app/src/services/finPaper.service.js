@@ -54,22 +54,47 @@ export const feeFor = (amount, feeRate) => Math.round(amount * feeRate);
  * starting this one over rather than keeping a drawer of them.
  */
 export async function getOrCreatePortfolio(prisma, userId, { currency, capital } = {}) {
+  const start = capital ?? DEFAULT_PAPER_CAPITAL;
+  // `upsert` et non « chercher puis créer ».
+  //
+  // La page du portefeuille lance QUATRE requêtes en parallèle au montage, et
+  // plusieurs d'entre elles passent ici. Avec un `findUnique` suivi d'un
+  // `create`, toutes voyaient « pas de portefeuille » en même temps et toutes
+  // tentaient de le créer : la contrainte d'unicité sur `userId` en refusait
+  // une, et la PREMIÈRE visite de tout nouveau compte échouait en 409.
+  //
+  // Le défaut ne se voyait qu'avec un vrai navigateur — un test qui appelle
+  // les routes l'une après l'autre ne le reproduit jamais. C'est le balayage
+  // du site qui l'a signalé.
+  //
+  // `upsert` ne suffit pas : sous MariaDB, Prisma l'émule par une lecture
+  // suivie d'une écriture, donc la course demeure. La seule façon fiable est
+  // de LAISSER la base trancher — elle seule sait qui est arrivé premier — et
+  // de relire quand elle refuse le doublon.
   const existing = await prisma.finPaperPortfolio.findUnique({ where: { userId }, select: PORTFOLIO_SELECT });
   if (existing) return existing;
-  const start = capital ?? DEFAULT_PAPER_CAPITAL;
-  return prisma.finPaperPortfolio.create({
-    data: {
-      userId,
-      capital: start,
-      // All of it is cash to begin with: nothing has been "bought" yet.
-      cash: start,
-      currency: currency ?? 'DZD',
-      feeRate: DEFAULT_PAPER_FEE_RATE,
-      source: 'manual',
-      status: PAPER_STATUS,
-    },
-    select: PORTFOLIO_SELECT,
-  });
+
+  try {
+    return await prisma.finPaperPortfolio.create({
+      data: {
+        userId,
+        capital: start,
+        // All of it is cash to begin with: nothing has been "bought" yet.
+        cash: start,
+        currency: currency ?? 'DZD',
+        feeRate: DEFAULT_PAPER_FEE_RATE,
+        source: 'manual',
+        status: PAPER_STATUS,
+      },
+      select: PORTFOLIO_SELECT,
+    });
+  } catch (error) {
+    // P2002 = contrainte d'unicité : quelqu'un d'autre vient de le créer. Ce
+    // n'est pas une erreur du point de vue de l'appelant, qui voulait un
+    // portefeuille et va en recevoir un.
+    if (error?.code !== 'P2002') throw error;
+    return prisma.finPaperPortfolio.findUnique({ where: { userId }, select: PORTFOLIO_SELECT });
+  }
 }
 
 /**

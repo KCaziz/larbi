@@ -1,5 +1,7 @@
 import { prisma } from '../config/prisma.js';
-import { EXPORT_COLUMNS, PAYMENT_METHODS, TRANSACTION_KINDS, TRANSACTION_SORTS } from '../constants/finMoney.js';
+import { CLEARING_STATES, EXPORT_COLUMNS, PAYMENT_METHODS, TRANSACTION_KINDS, TRANSACTION_SORTS } from '../constants/finMoney.js';
+import { PAYMENT_METHODS_REFERENCE } from '../constants/finAccounts.js';
+import { clearingView, createTag, deleteTag, listTags, setClearing, updateTag } from '../services/finMovement.service.js';
 import { FREQUENCIES } from '../constants/finance.js';
 import { listChanges } from '../services/finChange.service.js';
 import {
@@ -10,6 +12,7 @@ import {
   createTransaction,
   deleteIncome,
   deleteTransaction,
+  findDuplicates,
   getTransaction,
   listIncomes,
   listTransactions,
@@ -18,7 +21,8 @@ import {
   updateTransaction,
 } from '../services/finMoney.service.js';
 import { describeFormula } from '../services/finance/describe.js';
-import { buildSynthesis, currentMonth, loadSynthesisData } from '../services/finSynthesis.service.js';
+import { monthlyAmount } from '../services/finance/formulas.js';
+import { buildSynthesis, currentMonth, loadSynthesisData, monthlyMoneyHistory, stepMoneyHistory } from '../services/finSynthesis.service.js';
 import { sendStoredMedia } from '../services/mediaResponse.js';
 import { discardTemp, ingestUpload, removeStored } from '../services/storage.service.js';
 import { HttpError } from '../utils/httpError.js';
@@ -31,6 +35,9 @@ export function getMoneyReferences(req, res) {
   res.json({
     kinds: TRANSACTION_KINDS,
     paymentMethods: PAYMENT_METHODS,
+    // The client's own labels, icons and colours (PM-01 to PM-10, P8-07).
+    paymentMethodReference: PAYMENT_METHODS_REFERENCE,
+    clearingStates: CLEARING_STATES,
     frequencies: FREQUENCIES,
     sorts: TRANSACTION_SORTS,
     exportColumns: EXPORT_COLUMNS,
@@ -44,7 +51,8 @@ export function getMoneyReferences(req, res) {
 
 export async function getIncomes(req, res) {
   const incomes = await listIncomes(prisma, req.user.id, { includeArchived: req.query.includeArchived === 'true' });
-  res.json({ incomes });
+  // The monthly equivalent (F001) is the engine's; the screen draws the share of each source from it.
+  res.json({ incomes: incomes.map((income) => ({ ...income, monthlyValue: monthlyAmount(income.value, income.frequency) })) });
 }
 
 export async function postIncome(req, res) {
@@ -77,12 +85,50 @@ export async function postTransaction(req, res) {
   res.status(201).json({ transaction, duplicates });
 }
 
+// « Doublon suspect demandé en confirmation » (P8-07): checked BEFORE the
+// movement is written, so the person decides; nothing is ever removed for them.
+export async function postDuplicateCheck(req, res) {
+  const duplicates = await findDuplicates(prisma, req.user.id, { ...req.body, categoryId: req.body.categoryId ?? null });
+  res.json({ duplicates });
+}
+
+export async function putClearing(req, res) {
+  res.json(await setClearing(prisma, req.user.id, req.params.id, req.body.clearing));
+}
+
+export async function getClearing(req, res) {
+  res.json(await clearingView(prisma, req.user.id, { from: req.query.from ?? null, to: req.query.to ?? null }));
+}
+
+export async function getTags(req, res) {
+  res.json({ tags: await listTags(prisma, req.user.id) });
+}
+
+export async function postTag(req, res) {
+  res.status(201).json({ tag: await createTag(prisma, req.user.id, req.body) });
+}
+
+export async function patchTag(req, res) {
+  res.json({ tag: await updateTag(prisma, req.user.id, req.params.id, req.body) });
+}
+
+export async function removeTag(req, res) {
+  res.json(await deleteTag(prisma, req.user.id, req.params.id, { reason: req.body?.reason }));
+}
+
 export async function patchTransaction(req, res) {
   res.json({ transaction: await updateTransaction(prisma, req.user.id, req.params.id, req.body) });
 }
 
 export async function removeTransaction(req, res) {
   res.json(await deleteTransaction(prisma, req.user.id, req.params.id, { reason: req.body?.reason }));
+}
+
+// One movement, for its own screen (TRX-03, P8-25). Someone else's is a 404,
+// like every other verb on it.
+export async function getOneTransaction(req, res) {
+  const { userId, ...transaction } = await getTransaction(prisma, req.user.id, req.params.id);
+  res.json({ transaction });
 }
 
 export async function getTransactionHistory(req, res) {
@@ -210,4 +256,17 @@ export async function getSynthesis(req, res) {
   synthesis.repartition = synthesis.repartition.map((row) => ({ ...row, label: row.categoryId ? (labels.get(row.categoryId) ?? null) : null }));
 
   res.json({ periode: { debut: period.start, fin: period.end }, synthese: synthesis });
+}
+
+// Revenus vs dépenses, one point per month (P6-23). Capped at 12: a longer
+// window would be a different screen (a yearly report), not the curve the
+// client asked for on "Mon argent". `pas` (G-05): by day or by week instead.
+export async function getMoneySynthesisHistory(req, res) {
+  const step = req.query.pas ?? 'mois';
+  const currency = req.user.finCurrency;
+  const points =
+    step === 'mois'
+      ? await monthlyMoneyHistory(prisma, req.user.id, { months: req.query.months ?? 6, currency })
+      : await stepMoneyHistory(prisma, req.user.id, { step, currency });
+  res.json({ currency, pas: step, points });
 }

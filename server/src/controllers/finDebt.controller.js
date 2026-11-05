@@ -44,7 +44,17 @@ async function netMonthlyIncome(prisma, userId, currency) {
 
 export async function getDebts(req, res) {
   const currency = req.query.currency ?? req.user.finCurrency;
-  const debts = await listDebts(prisma, req.user.id, { includeArchived: req.query.includeArchived === 'true' });
+  const listed = await listDebts(prisma, req.user.id, { includeArchived: req.query.includeArchived === 'true' });
+  // What has been repaid on each debt (recette R8-06): the screen draws the
+  // starting amount — what is left plus what was repaid — and what is left,
+  // so a repayment visibly shrinks the debt instead of the rest becoming 100 %.
+  const repaid = await prisma.finDebtPayment.groupBy({
+    by: ['debtId'],
+    where: { userId: req.user.id, deletedAt: null, debtId: { in: listed.map((debt) => debt.id) } },
+    _sum: { amount: true },
+  });
+  const repaidOf = new Map(repaid.map((row) => [row.debtId, row._sum.amount ?? 0]));
+  const debts = listed.map((debt) => ({ ...debt, repaid: repaidOf.get(debt.id) ?? 0 }));
   const income = await netMonthlyIncome(prisma, req.user.id, currency);
   res.json({ debts, synthese: buildDebtSynthesis(debts, { netMonthlyIncome: income, currency }) });
 }

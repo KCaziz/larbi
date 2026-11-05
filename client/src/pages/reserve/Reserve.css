@@ -59,3 +59,16 @@
 .reserve-inline-form > .fin-field {
   flex: 0 1 280px;
 }
+
+/* How to set the essential expenses (recette R8-04). */
+.reserve-howto-lead {
+  margin: var(--space-xs) 0 4px;
+  color: var(--text-h);
+  font-weight: 500;
+}
+.reserve-howto {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 var(--space-sm);
+  padding-inline-start: 1.4em;
+}

@@ -31,6 +31,9 @@ const validDebt = (debt) =>
 // first. That reallocation is the point of both methods and the client asks for
 // it explicitly.
 //
+// `soldes` is what is still owed at the end of each month, all debts together:
+// the curve that compares the two orders month by month.
+//
 // `completed: false` means the debts are not repaid within the horizon (50
 // years): with minimums that do not even cover the interest, no order of
 // payment clears them, and that is an answer worth showing.
@@ -42,6 +45,7 @@ export function debtPayoffPlan({ debts, extraPayment = 0, strategy = 'avalanche'
 
   const open = debts.map((debt) => ({ id: debt.id, balance: debt.principal, rate: debt.monthlyRate, minimum: debt.minimumPayment }));
   const payoff = [];
+  const balances = [];
   let totalPaid = 0;
   let totalInterest = 0;
   let months = 0;
@@ -84,6 +88,7 @@ export function debtPayoffPlan({ debts, extraPayment = 0, strategy = 'avalanche'
       totalPaid += paid;
       if (debt.balance <= 0) payoff.push({ id: debt.id, month: months });
     }
+    balances.push(roundAmount(open.reduce((sum, debt) => sum + Math.max(0, debt.balance), 0)));
 
     // The month changed nothing, or made it worse: the payments do not even
     // cover the interest. The balance only grows from here (interest grows with
@@ -102,6 +107,7 @@ export function debtPayoffPlan({ debts, extraPayment = 0, strategy = 'avalanche'
     totalInterest: roundAmount(totalInterest),
     payoff,
     remaining: open.filter((debt) => debt.balance > 0).map((debt) => ({ id: debt.id, balance: roundAmount(debt.balance) })),
+    soldes: balances,
   };
 }
 

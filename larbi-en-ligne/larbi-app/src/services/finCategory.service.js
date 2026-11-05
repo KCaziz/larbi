@@ -10,7 +10,7 @@
 // A standard row is NEVER written to: one account's choice must not change what
 // another account sees.
 
-import { CATEGORY_FAMILIES, categoryFamilyByCode } from '../constants/finCategories.js';
+import { CATEGORY_FAMILIES, GROUP_COLORS, categoryColor, categoryFamilyByCode } from '../constants/finCategories.js';
 import { DEFAULT_DATA_SCOPE } from '../constants/finData.js';
 import { HttpError } from '../utils/httpError.js';
 import { listChanges, recordChange, recordCorrection } from './finChange.service.js';
@@ -29,6 +29,12 @@ const SELECT = {
   key: true,
   baseKey: true,
   label: true,
+  group: true,
+  icon: true,
+  color: true,
+  essential: true,
+  recurrence: true,
+  suggestedFor: true,
   scope: true,
   source: true,
   sourceRef: true,
@@ -49,6 +55,16 @@ const toCategory = (row, { origin, customised = false, archived = false, referen
   key: row.key ?? null,
   family: row.family,
   label: row.label,
+  // The client's universal reference (P8-08). `essential` is what this person
+  // sees: their own choice when they made one, the reference's otherwise.
+  group: row.group ?? null,
+  icon: row.icon ?? null,
+  // Never null (P8-27): its own, else its group's, else its family's.
+  color: categoryColor(row),
+  groupColor: row.group ? (GROUP_COLORS[`${row.family}:${row.group}`] ?? null) : null,
+  essential: Boolean(row.essential),
+  recurrence: row.recurrence ?? null,
+  suggestedFor: row.suggestedFor ?? [],
   origin,
   customised,
   archived,
@@ -78,12 +94,18 @@ export async function listCategories(prisma, userId, { includeArchived = false }
   const cards = [];
   for (const row of standard) {
     const override = overrides.get(row.key);
-    const archived = Boolean(override?.archivedAt);
+    // Hidden by the person, or retired for everyone: an old category the
+    // client's 125 replace (answer D4) is archived in the reference itself.
+    const archived = Boolean(override?.archivedAt) || Boolean(row.archivedAt);
     if (archived && !includeArchived) continue;
     // What the person sees comes from their override when there is one, and so
     // does its metadata: a label they typed is "declared", not the client's
     // "official" reference, and saying otherwise would misreport its source.
-    const merged = override ? { ...row, ...override, id: row.id, key: row.key } : row;
+    // The override carries no reference data of its own; only its label and,
+    // when the person changed it, its essential flag replace the standard's.
+    const merged = override
+      ? { ...row, ...override, id: row.id, key: row.key, group: row.group, icon: row.icon, color: row.color, recurrence: row.recurrence, suggestedFor: row.suggestedFor, essential: override.essential ?? row.essential }
+      : row;
     cards.push(
       toCategory(merged, {
         origin: 'standard',
@@ -129,7 +151,7 @@ async function assertLabelFree(prisma, userId, family, label, { exceptId = null 
   if (taken) throw new HttpError(409, 'Category label already used', { reason: 'labelTaken' });
 }
 
-export async function createCategory(prisma, userId, { family, label, scope = DEFAULT_DATA_SCOPE, consentUses = [] }) {
+export async function createCategory(prisma, userId, { family, label, essential = false, color = null, scope = DEFAULT_DATA_SCOPE, consentUses = [] }) {
   if (!categoryFamilyByCode(family)) throw new HttpError(422, 'Unknown category family', { reason: 'unknownFamily' });
   const clean = cleanLabel(label);
   await assertLabelFree(prisma, userId, family, clean);
@@ -141,7 +163,7 @@ export async function createCategory(prisma, userId, { family, label, scope = DE
     const row = await tx.finCategory.create({
       // A category the person typed: source "manuelle", statut "déclarée".
       // Nothing here is official — only the client's reference is.
-      data: { userId, family, label: clean, scope, consentUses, source: 'manual', status: 'declared' },
+      data: { userId, family, label: clean, essential, color, scope, consentUses, source: 'manual', status: 'declared' },
       select: SELECT,
     });
     await recordChange(tx, { userId, entity: ENTITY, entityId: row.id, action: 'create', after: { family, label: clean, scope, consentUses } });
@@ -149,7 +171,7 @@ export async function createCategory(prisma, userId, { family, label, scope = DE
   });
 }
 
-export async function updateCategory(prisma, userId, id, { label, scope, consentUses, reason }) {
+export async function updateCategory(prisma, userId, id, { label, essential, scope, consentUses, reason }) {
   const row = await ownRow(prisma, userId, id);
   const data = {};
   if (label !== undefined) {
@@ -157,6 +179,7 @@ export async function updateCategory(prisma, userId, id, { label, scope, consent
     await assertLabelFree(prisma, userId, row.family, clean, { exceptId: id });
     data.label = clean;
   }
+  if (essential !== undefined) data.essential = essential;
   if (scope !== undefined) data.scope = scope;
   if (consentUses !== undefined) data.consentUses = consentUses;
   const origin = row.baseKey ? 'standard' : 'own';
@@ -221,7 +244,7 @@ export async function listCategoryChanges(prisma, userId, id) {
 // Customising a standard category: an override row of this account. Renaming it
 // and hiding it are the same operation from the client's point of view
 // ("standard et personnalisables"), so they share one entry point.
-export async function customiseStandard(prisma, userId, key, { label, hidden, reason }) {
+export async function customiseStandard(prisma, userId, key, { label, hidden, essential, reason }) {
   const standard = await prisma.finCategory.findFirst({ where: { key, userId: null, deletedAt: null }, select: SELECT });
   if (!standard) throw new HttpError(404, 'Category not found');
 
@@ -232,9 +255,16 @@ export async function customiseStandard(prisma, userId, key, { label, hidden, re
   return prisma.$transaction(async (tx) => {
     const archivedAt = hidden === undefined ? (existing?.archivedAt ?? null) : hidden ? new Date() : null;
     const nextLabel = clean ?? existing?.label ?? standard.label;
+    // « Drapeau essentielle modifiable » (P8-08): the person's own reading of a
+    // standard category, kept on their override.
+    const nextEssential = essential === undefined ? (existing?.essential ?? null) : essential;
     let row;
     if (existing) {
-      row = await tx.finCategory.update({ where: { id: existing.id }, data: { label: nextLabel, archivedAt, version: { increment: 1 } }, select: SELECT });
+      row = await tx.finCategory.update({
+        where: { id: existing.id },
+        data: { label: nextLabel, archivedAt, essential: nextEssential, version: { increment: 1 } },
+        select: SELECT,
+      });
       await recordCorrection(tx, { userId, entity: ENTITY, entityId: existing.id, before: existing, after: row, reason: reason ?? null });
     } else {
       row = await tx.finCategory.create({
@@ -243,6 +273,7 @@ export async function customiseStandard(prisma, userId, key, { label, hidden, re
           baseKey: key,
           family: standard.family,
           label: nextLabel,
+          essential: nextEssential,
           scope: standard.scope,
           consentUses: [],
           source: 'manual',
@@ -253,7 +284,7 @@ export async function customiseStandard(prisma, userId, key, { label, hidden, re
       });
       await recordChange(tx, { userId, entity: ENTITY, entityId: row.id, action: 'create', after: { baseKey: key, label: nextLabel, hidden: Boolean(archivedAt) } });
     }
-    return toCategory({ ...standard, ...row, id: standard.id, key: standard.key }, {
+    return toCategory({ ...standard, ...row, id: standard.id, key: standard.key, group: standard.group, icon: standard.icon, color: standard.color, recurrence: standard.recurrence, suggestedFor: standard.suggestedFor, essential: row.essential ?? standard.essential }, {
       origin: 'standard',
       customised: true,
       archived: Boolean(archivedAt),
@@ -272,4 +303,22 @@ export async function resetStandard(prisma, userId, key) {
     await recordChange(tx, { userId, entity: ENTITY, entityId: existing.id, action: 'delete', field: 'deletedAt', before: null, after: true });
   });
   return { key };
+}
+
+/**
+ * The categories this person counts as ESSENTIAL expenses (P8-08, AN-F001):
+ * the reference's « Essentielle ? » flag, unless they changed it on their
+ * override, plus their own categories they flagged. Read by the reserve
+ * (PB-F017, PB-F018) — no list of essential categories is hard-coded any more.
+ */
+export async function essentialCategoryIds(prisma, userId) {
+  const [standard, mine] = await Promise.all([
+    prisma.finCategory.findMany({ where: { userId: null, deletedAt: null }, select: { id: true, key: true, essential: true } }),
+    prisma.finCategory.findMany({ where: { userId, deletedAt: null }, select: { id: true, baseKey: true, essential: true } }),
+  ]);
+  const overrides = new Map(mine.filter((row) => row.baseKey).map((row) => [row.baseKey, row.essential]));
+  return [
+    ...standard.filter((row) => (overrides.get(row.key) ?? row.essential) === true).map((row) => row.id),
+    ...mine.filter((row) => !row.baseKey && row.essential === true).map((row) => row.id),
+  ];
 }

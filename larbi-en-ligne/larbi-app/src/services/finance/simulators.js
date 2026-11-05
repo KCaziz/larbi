@@ -23,11 +23,30 @@ import { debtPayoffPlan } from './algorithms.js';
 import { computed } from './contract.js';
 import * as f from './formulas.js';
 import { yearly } from './money.js';
+import { effectiveAnnualRate, interestValue, periodRate } from './interest.js';
+import { CONTRIBUTION_MONTHS, DURATION_MONTHS, interestPeriodMonths } from '../../constants/simulators.js';
 
 // `hypotheses` is filled only for simulators that project into the future: the
 // client requires the assumptions of a simulation to be visible, and sending the
 // field on a plain monthly total would suggest a projection that never happened.
-const run = (resultats, hypotheses = null) => ({ resultats, hypotheses });
+// `serie` is for a simulator that also shows a value PER STEP (the compound
+// interest table, year by year): each of its values is itself a contract answer.
+const run = (resultats, hypotheses = null, serie = null) => ({ resultats, hypotheses, serie });
+
+// The steps of a series: every year of a horizon given in years; for one given
+// in months, every month up to two years, then every twelve months — always
+// ending on the horizon itself. A horizon that is not a whole positive number
+// has no series (its results already say they are not computed).
+const MAX_YEARS = 100;
+const yearSteps = (years) => (Number.isInteger(years) && years > 0 && years <= MAX_YEARS ? Array.from({ length: years }, (_, i) => i + 1) : []);
+function monthSteps(months) {
+  if (!Number.isInteger(months) || months <= 0 || months > MAX_YEARS * 12) return [];
+  const step = months <= 24 ? 1 : 12;
+  const steps = [];
+  for (let month = step; month < months; month += step) steps.push(month);
+  steps.push(months);
+  return steps;
+}
 
 const entry = (amount, currency) => ({ amount, currency });
 
@@ -158,6 +177,64 @@ export const SIMULATOR_FUNCTIONS = {
         versementRequis: computed('F032', f.paymentWithReturn({ target, initial: capital, rate: monthlyRate, periods: months }), { inputs: { target, capital, monthlyRate, months }, ...ctx }),
       },
       { rendement_mensuel: monthlyRate, horizon_mois: months },
+      // F031 at each step up to the horizon, beside what was paid in and the
+      // target: the curve shows when — and whether — the capital meets it.
+      monthSteps(months).map((month) => {
+        const stepArgs = { ...args, periods: month };
+        return { mois: month, verse: capital + contribution * month, valeur: computed('F031', f.futureValueTotal(stepArgs), { inputs: stepArgs, ...ctx }), cible: target };
+      }),
+    );
+  },
+
+  // CAL-IC — Intérêts simples et composés (client's request of 2026-11-01, rules
+  // of 2026-11-02). The rate of a period is never divided (INT-F01); the value is
+  // built period by period (services/finance/interest.js) and rounded once. The
+  // `serie` gives the total after each step (every month up to two years, then
+  // every twelve), with what was paid in, so the interface can show how much of it
+  // is interest — the difference of two values it holds, left to the interface
+  // like every other difference here.
+  'interet-compose': (input, ctx) => {
+    const { capital, periodicContribution, rate, ratePeriod, annualRateKind, interestKind, duration, durationUnit, compounding, contributionFrequency, contributionTiming } = input;
+    const periodMonths = interestPeriodMonths(input);
+    const totalMonths = duration * DURATION_MONTHS[durationUnit];
+    const periods = totalMonths / periodMonths;
+    const every = contributionFrequency ? CONTRIBUTION_MONTHS[contributionFrequency] / periodMonths : 1;
+    const r = periodRate({ rate, ratePeriod, rateKind: annualRateKind, periodMonths });
+    const at = (n) => ({ initial: capital, payment: periodicContribution, rate: r, periods: n, every, kind: interestKind, timing: contributionTiming });
+    const value = interestValue(at(periods));
+    const rateInputs = { rate, ratePeriod, annualRateKind, periodMonths };
+    const serie = monthSteps(totalMonths)
+      .filter((month) => month % periodMonths === 0)
+      .map((month) => {
+        const step = interestValue(at(month / periodMonths));
+        const row = {
+          mois: month,
+          verse: step === null ? null : capital + step.paid,
+          valeur: computed('INT-F04', step === null ? null : step.lump + step.payments, { inputs: at(month / periodMonths), ...ctx }),
+        };
+        if (month % 12 === 0) row.annee = month / 12;
+        return row;
+      });
+    return run(
+      {
+        tauxPeriode: computed('INT-F01', r, { inputs: rateInputs, ...ctx }),
+        valeurFutureCapital: computed('INT-F02', value === null ? null : value.lump, { inputs: at(periods), ...ctx }),
+        valeurFutureVersements: computed('INT-F03', value === null ? null : value.payments, { inputs: at(periods), ...ctx }),
+        valeurFutureTotale: computed('INT-F04', value === null ? null : value.lump + value.payments, { inputs: at(periods), ...ctx }),
+        // The yearly rate that a compounded period rate is worth; in simple interest the rate does not compound.
+        ...(interestKind === 'compound' ? { tauxAnnuelEffectif: computed('INT-F05', effectiveAnnualRate(r, periodMonths), { inputs: { rate: r, periodMonths }, ...ctx }) } : {}),
+      },
+      {
+        type_interet: interestKind,
+        taux_saisi: rate,
+        periodicite_taux: ratePeriod,
+        ...(ratePeriod === 'annual' ? { type_taux_annuel: annualRateKind, capitalisation: compounding } : {}),
+        duree_mois: totalMonths,
+        periode_calcul_mois: periodMonths,
+        nombre_periodes: periods,
+        ...(periodicContribution > 0 ? { frequence_versement: contributionFrequency, moment_versement: contributionTiming } : {}),
+      },
+      serie,
     );
   },
 
@@ -170,6 +247,12 @@ export const SIMULATOR_FUNCTIONS = {
         rendementReel: computed('F034', f.realReturn(nominalReturn, inflationRate), { inputs: { nominalReturn, inflation: inflationRate }, ...ctx }),
       },
       { inflation: inflationRate, horizon_annees: years, rendement_nominal: nominalReturn },
+      // F033 year by year: the same sum, in the money of each year.
+      yearSteps(years).map((year) => ({
+        annee: year,
+        nominal: nominalValue,
+        reel: computed('F033', f.realValue({ nominalValue, inflation: inflationRate, years: year }), { inputs: { nominalValue, inflation: inflationRate, years: year }, ...ctx }),
+      })),
     );
   },
 
@@ -221,6 +304,17 @@ export const SIMULATOR_FUNCTIONS = {
         capitalReel: computed('F033', nominal === null ? null : f.realValue({ nominalValue: nominal, inflation: inflationRate, years }), { inputs: { nominal, inflation: inflationRate, years }, ...ctx }),
       },
       { rendement_mensuel: monthlyRate, inflation: inflationRate, horizon_annees: years },
+      // F031 at the end of each year, and the same capital in today's money (F033).
+      yearSteps(years).map((year) => {
+        const stepArgs = { ...args, periods: year * 12 };
+        const value = f.futureValueTotal(stepArgs);
+        return {
+          annee: year,
+          verse: capital + monthlyContribution * year * 12,
+          valeur: computed('F031', value, { inputs: stepArgs, ...ctx }),
+          reel: computed('F033', value === null ? null : f.realValue({ nominalValue: value, inflation: inflationRate, years: year }), { inputs: { nominal: value, inflation: inflationRate, years: year }, ...ctx }),
+        };
+      }),
     );
   },
 
@@ -344,10 +438,11 @@ export const SIMULATOR_FUNCTIONS = {
     return run(
       {
         ...resultats,
-        // The savings are the envelope, the down payment is what is taken out of
-        // it: that is exactly F009's shape, and it answers the client's "réserve
-        // après apport" without inventing a formula.
-        reserveApresApport: computed('F009', f.remainingBudget(input.liquidSavings, input.downPayment), {
+        // The down payment is a withdrawal from the savings: what is left is
+        // F007, net savings once the withdrawal is deducted. It used to carry
+        // F009 (« budget restant »), whose « Pourquoi ? » then spoke of a budget
+        // that does not exist here (diagnostic n°2, C6).
+        reserveApresApport: computed('F007', f.netSavings(input.liquidSavings, input.downPayment), {
           inputs: { liquidSavings: input.liquidSavings, downPayment: input.downPayment },
           ...ctx,
         }),

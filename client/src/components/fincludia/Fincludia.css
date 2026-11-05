@@ -668,3 +668,13 @@
   flex: none;
   vertical-align: -0.2em;
 }
+
+/* What to do for a « non calculé » to become a figure (recette R8-08). */
+.fin-howto {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.fin-howto a {
+  font-weight: 500;
+}

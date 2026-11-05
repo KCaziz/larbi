@@ -16,7 +16,19 @@ export function createApp() {
   const app = express();
   app.set('trust proxy', env.trustProxy);
 
-  app.use(helmet());
+  // The default policy, with the two things the in-browser payslip reader needs
+  // (P8-30): WebAssembly for the OCR engine (`'wasm-unsafe-eval'` allows ONLY
+  // WebAssembly, not eval of strings) and workers from this same site. Nothing
+  // third-party is allowed: the OCR engine, its worker and its language data are
+  // served from `/ocr`.
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: { 'script-src': ["'self'", "'wasm-unsafe-eval'"], 'worker-src': ["'self'", 'blob:'] },
+      },
+    }),
+  );
   app.use(
     cors({
       origin: env.corsOrigin,

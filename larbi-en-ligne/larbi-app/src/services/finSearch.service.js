@@ -38,12 +38,12 @@ const containsAny = (field, terms) => terms.map((term) => ({ [field]: { contains
  */
 export async function searchMyData(prisma, userId, query) {
   const terms = expandTerms(query);
-  if (terms.length === 0) return { transactions: [], budgets: [], debts: [] };
+  if (terms.length === 0) return { transactions: [], budgets: [], debts: [], accounts: [] };
 
-  const [transactions, budgets, debts] = await Promise.all([
+  const [transactions, budgets, debts, accounts] = await Promise.all([
     prisma.finTransaction.findMany({
       where: { userId, deletedAt: null, OR: [...containsAny('note', terms), ...containsAny('subcategory', terms)] },
-      select: { id: true, note: true, subcategory: true, value: true, currency: true, occurredAt: true, kind: true },
+      select: { id: true, note: true, subcategory: true, value: true, currency: true, occurredAt: true, kind: true, transferId: true },
       orderBy: { occurredAt: 'desc' },
       take: SEARCH_RESULTS_MAX,
     }),
@@ -57,8 +57,14 @@ export async function searchMyData(prisma, userId, query) {
       select: { id: true, label: true, lender: true },
       take: SEARCH_RESULTS_MAX,
     }),
+    // P8-19: the accounts, found by name, with a deep link to their page.
+    prisma.finAccount.findMany({
+      where: { userId, deletedAt: null, OR: containsAny('label', terms) },
+      select: { id: true, label: true, type: true, currency: true },
+      take: SEARCH_RESULTS_MAX,
+    }),
   ]);
-  return { transactions, budgets, debts };
+  return { transactions, budgets, debts, accounts };
 }
 
 // "Objectifs": this account's own personal goals (P6-08). Common/space goals
@@ -70,6 +76,25 @@ export async function searchGoals(prisma, userId, query) {
   return prisma.finGoal.findMany({
     where: { userId, deletedAt: null, OR: containsAny('label', terms) },
     select: { id: true, label: true, target: true, currency: true },
+    take: SEARCH_RESULTS_MAX,
+  });
+}
+
+// « Formations » (P8-24): the PUBLISHED formations whose title, description or
+// one of whose courses' titles match. These are the platform's own public
+// contents — nothing personal — so no owner filter, but a draft is never
+// found: only what a learner can open. Each result leads to its page in the
+// application, `/app/formation/:slug`.
+export async function searchFormations(prisma, query) {
+  const terms = expandTerms(query);
+  if (terms.length === 0) return [];
+  return prisma.formation.findMany({
+    where: {
+      status: 'published',
+      OR: [...containsAny('title', terms), ...containsAny('description', terms), { courses: { some: { OR: containsAny('title', terms) } } }],
+    },
+    select: { id: true, slug: true, title: true },
+    orderBy: { title: 'asc' },
     take: SEARCH_RESULTS_MAX,
   });
 }

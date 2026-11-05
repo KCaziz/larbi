@@ -9,7 +9,7 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import FigureCard from '../../components/fincludia/FigureCard.jsx';
+import FigureCard, { HowToCompute } from '../../components/fincludia/FigureCard.jsx';
 import NextActionCard from '../../components/fincludia/NextActionCard.jsx';
 import CategoryChip from '../../components/fincludia/CategoryChip.jsx';
 import { flowClass, flowOf } from '../../lib/flows.js';
@@ -117,6 +117,7 @@ export default function HomePage() {
                   ? t('fincludia.notComputed')
                   : formatAmount(i18n.language, total.soldeTotal.resultat, total.currency)}
             </Link>
+            {!shownAccount && (total?.soldeTotal.resultat === null || !total) && <HowToCompute hint={{ key: 'accounts', to: '/app/comptes/nouveau' }} />}
           </div>
           <Link to="/app/synthese" className="home-synthesis-link">
             <PieChart size={18} aria-hidden="true" /> {t('appNav.synthesis')}
@@ -313,6 +314,7 @@ export default function HomePage() {
               <Link to="/app/objectifs/fonds-urgence">{t('appHome.emergencyFund')}</Link> :{' '}
               {reserve.moisReserve.resultat === null ? t('fincludia.notComputed') : t('fincludia.months', { count: Math.round(reserve.moisReserve.resultat * 10) / 10 })}
             </p>
+            {reserve.moisReserve.resultat === null && <HowToCompute answer={reserve.moisReserve} />}
           </section>
 
           {/* The next due dates, and the way to the calendar. */}
@@ -347,9 +349,12 @@ export default function HomePage() {
               </h2>
             </div>
             {view?.santeFinanciere?.answer ? (
-              <p className="home-health-score">
-                {view.santeFinanciere.answer.resultat === null ? t('fincludia.notComputed') : `${view.santeFinanciere.answer.resultat} / 100`}
-              </p>
+              <>
+                <p className="home-health-score">
+                  {view.santeFinanciere.answer.resultat === null ? t('fincludia.notComputed') : `${view.santeFinanciere.answer.resultat} / 100`}
+                </p>
+                {view.santeFinanciere.answer.resultat === null && <HowToCompute hint={{ key: 'health', to: '/app/sante' }} />}
+              </>
             ) : (
               <p className="fin-hint">{t('health.notForYouth')}</p>
             )}

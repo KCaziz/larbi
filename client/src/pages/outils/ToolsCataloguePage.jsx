@@ -133,11 +133,11 @@ export default function ToolsCataloguePage() {
   );
 }
 
-// One tool: its name, its code and formulas, where it opens, and its star.
+// One tool: its name, what it is for, where it opens, and its star.
 function ToolCard({ tool, label, favorite, onToggle }) {
   const { t } = useTranslation();
   return (
-    <li className="tools-item">
+    <li className="tools-item" data-code={tool.code}>
       <div className="tools-item-head">
         <Calculator size={16} aria-hidden="true" />
         <strong>{label}</strong>
@@ -152,9 +152,9 @@ function ToolCard({ tool, label, favorite, onToggle }) {
           <Star size={18} aria-hidden="true" />
         </button>
       </div>
-      <p className="tools-item-meta">
-        <span>{tool.code}</span>
-      </p>
+      {/* What the tool is for, in a sentence (recette R8-07): no code, no
+          formula on screen. The code stays an attribute for the tests. */}
+      <p className="tools-item-meta">{t(`toolsCatalogue.descriptions.${tool.code}`, { defaultValue: '' })}</p>
       {tool.pending ? (
         <p className="tools-item-pending">{t('toolsCatalogue.pending')}</p>
       ) : (

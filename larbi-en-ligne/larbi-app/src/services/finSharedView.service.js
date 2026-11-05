@@ -18,6 +18,7 @@ import { HttpError } from '../utils/httpError.js';
 import { minimalSettlements } from './finance/algorithms.js';
 import { computed } from './finance/contract.js';
 import { equalShare, incomeProportionalShare, sharedMemberBalance } from './finance/formulas.js';
+import { splitByWeights } from './finance/money.js';
 
 /**
  * The shares of one expense, whatever the mode — and they add up to the amount.
@@ -60,6 +61,8 @@ export function computeShares({ mode, amount, participants, incomes = null }) {
     return participants.map((participant, index) => ({ ...participant, share: shares[index], weight: participant.weight }));
   }
 
+  if (mode === 'weighted' || mode === 'usage') return weightedShares({ mode, amount, participants });
+
   // income_proportional — F042 proper. The incomes come from the caller, which
   // is also where the consent was checked (see incomesForSplit).
   if (!incomes) throw new HttpError(422, 'The income split needs the participants incomes', { reason: 'incomesMissing' });
@@ -73,6 +76,21 @@ export function computeShares({ mode, amount, participants, incomes = null }) {
     throw new HttpError(422, 'No declared income to split in proportion to', { reason: 'incomesZero' });
   }
   const shares = incomeProportionalShare(amount, weights);
+  return participants.map((participant, index) => ({ ...participant, share: shares[index], weight: weights[index] }));
+}
+
+// COL-F03 for `weighted` and `usage`: amount × weight_i / Σ weights, the same
+// largest-remainder rounding as every other mode. Nothing is hidden: the weight
+// that produced each share is stored with it.
+function weightedShares({ mode, amount, participants }) {
+  const weights = participants.map((participant) => participant.weight);
+  if (mode === 'weighted' && weights.some((weight) => !(weight > 0))) {
+    throw new HttpError(422, 'Weights must be positive', { reason: 'weightsNotPositive' });
+  }
+  if (weights.reduce((sum, weight) => sum + weight, 0) === 0) {
+    throw new HttpError(422, 'No usage to split in proportion to', { reason: 'usageZero' });
+  }
+  const shares = splitByWeights(amount, weights);
   return participants.map((participant, index) => ({ ...participant, share: shares[index], weight: weights[index] }));
 }
 
@@ -152,7 +170,7 @@ export function buildBalances({ members, expenses = [], settlements = [], curren
  * states it as a requirement, and a plan that quietly moved money between two
  * people would be a different debt wearing the same name.
  */
-export function settlementPlan(balances, { currency, now = new Date() } = {}) {
+export function settlementPlan(balances, { currency, now = new Date(), smallBalance = 0 } = {}) {
   const entries = balances
     .filter((row) => row.solde.resultat !== null && row.solde.resultat !== 0)
     .map((row) => ({ member: row.memberId, balance: row.solde.resultat }));
@@ -190,15 +208,21 @@ export function settlementPlan(balances, { currency, now = new Date() } = {}) {
     throw new Error('ALG-02 changed a net position, which it must never do');
   }
 
+  const described = transfers.map((transfer) => ({
+    from: transfer.from,
+    to: transfer.to,
+    amount: transfer.amount,
+    // The plan is a computed answer, not a list somebody typed, so each
+    // transfer carries the contract too.
+    montant: computed('ALG-02', transfer.amount, { inputs: { de: transfer.from, vers: transfer.to, soldes: entries }, currency, now }),
+  }));
+  // The small balance (A4) only HIDES a proposal below the threshold: the
+  // balances above are untouched and the hidden transfers are still reported,
+  // so nothing is erased.
   return {
-    transferts: transfers.map((transfer) => ({
-      from: transfer.from,
-      to: transfer.to,
-      amount: transfer.amount,
-      // The plan is a computed answer, not a list somebody typed, so each
-      // transfer carries the contract too.
-      montant: computed('ALG-02', transfer.amount, { inputs: { de: transfer.from, vers: transfer.to, soldes: entries }, currency, now }),
-    })),
+    transferts: described.filter((transfer) => transfer.amount >= smallBalance),
+    masques: described.filter((transfer) => transfer.amount < smallBalance),
+    seuilPetitSolde: smallBalance,
     equilibre: true,
     algorithme: 'ALG-02',
     avertissements: [],

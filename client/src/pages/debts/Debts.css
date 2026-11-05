@@ -188,3 +188,72 @@
   align-items: center;
   gap: 2px;
 }
+
+/* Where each debt stands (recette R8-06). */
+.debts-progress {
+  display: grid;
+  gap: var(--space-sm);
+  margin-block: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.debts-progress h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.debts-progress-total {
+  margin: 0;
+  color: var(--text-h);
+  font-weight: 500;
+}
+.debts-progress-list {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.debts-progress-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-block-end: 4px;
+  font-size: 0.9rem;
+}
+.debts-progress-track {
+  display: flex;
+  block-size: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+}
+.debts-progress-repaid,
+.debts-swatch-repaid {
+  background: var(--green);
+}
+.debts-progress-left,
+.debts-swatch-left {
+  background: var(--flow-expense);
+}
+.debts-swatch {
+  display: inline-block;
+  inline-size: 12px;
+  block-size: 12px;
+  margin-inline-end: 6px;
+  border-radius: 3px;
+}
+.debts-progress .chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.88rem;
+}
+.debts-progress .chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+}

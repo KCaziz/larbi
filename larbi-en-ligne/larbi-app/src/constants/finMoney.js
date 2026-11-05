@@ -6,13 +6,18 @@
 // "Type" and offers nothing else.
 export const TRANSACTION_KINDS = ['income', 'expense'];
 
-// Screen C07 asks for a "mode de paiement" and the client does NOT enumerate
-// the values anywhere in its file. These are OURS, declared as such: the three
-// ways money actually moves here plus the CCP the client's own asset categories
-// already name, and "other" so nobody is ever forced into a wrong answer. The
-// column is nullable, so "not stated" stays different from "cash". If the client
-// gives its own list, only this one changes.
-export const PAYMENT_METHODS = ['cash', 'card', 'transfer', 'cheque', 'ccp', 'other'];
+// The two sides of a transfer between two of the person's accounts (P8-03,
+// ARC-04). Never entered as such: a transfer is created through its own route,
+// which writes both sides at once, and it is neither income nor spending.
+export const TRANSFER_KINDS = ['transfer_out', 'transfer_in'];
+
+// The payment methods are the client's own since P8-07 (PM-01 to PM-10, tab
+// `05B_Moyens_Paiement`, generated in constants/finAccounts.js). The column is
+// nullable, so "not stated" stays different from "cash".
+export { PAYMENT_METHOD_IDS as PAYMENT_METHODS } from './finAccounts.js';
+
+// « Pointage » (tab 08C): never a balance, only how far a movement is trusted.
+export const CLEARING_STATES = ['unchecked', 'checked', 'reconciled', 'to_verify'];
 
 // How the history may be ordered (screen C08: "tri"). A closed list, because it
 // becomes an ORDER BY: a column name taken from a query string would be an

@@ -1,4 +1,7 @@
 import { prisma } from '../config/prisma.js';
+import { HttpError } from '../utils/httpError.js';
+import { MARKET_HYPOTHESES_DATE, MARKET_INFLATION, MARKET_START, MARKET_SUPPORTS, MARKET_VERSION } from '../constants/finPaperMarket.js';
+import { projection, realReturn, seriesMeasures, simulatedSeries } from '../services/finance/paperMarket.js';
 import {
   DEFAULT_PAPER_CAPITAL,
   DEFAULT_PAPER_FEE_RATE,
@@ -28,7 +31,7 @@ import {
   updatePortfolio,
 } from '../services/finPaper.service.js';
 import { buildReserveView } from '../services/finReserve.service.js';
-import { buildSynthesis, currentMonth, loadSynthesisData } from '../services/finSynthesis.service.js';
+import { buildSynthesis, currentMonth, debtRatioIncome, loadSynthesisData } from '../services/finSynthesis.service.js';
 import { describeFormula } from '../services/finance/describe.js';
 
 // Paper portfolio and investment workshop (P6-12), screens C17 and EP03-EP07.
@@ -186,7 +189,7 @@ export async function getReadiness(req, res) {
     loadSynthesisData(prisma, req.user.id, period),
   ]);
   const synthesis = buildSynthesis({ ...synthesisData, fallbackCurrency: currency, period });
-  const debts = debtRows.length === 0 ? null : buildDebtSynthesis(debtRows, { netMonthlyIncome: synthesis.revenus.resultat, currency });
+  const debts = debtRows.length === 0 ? null : buildDebtSynthesis(debtRows, { netMonthlyIncome: debtRatioIncome(synthesis), currency });
 
   res.json({
     diagnostic: readiness({
@@ -205,4 +208,40 @@ export function postRiskProfile(req, res) {
   // (P6-01). F057 therefore returns no category, and none is invented here: the
   // score is shown, the label is not.
   res.json({ profil: riskProfile(req.body) });
+}
+
+// ---- the pedagogical market (EP06, recette R8-12) --------------------------
+// Archetypes with written hypotheses and their simulated histories: an
+// example to learn from, never a quote. Nothing here is the person's: the
+// same market for everybody, recomputed from the hypotheses each time.
+export function getMarket(req, res) {
+  const now = new Date();
+  res.json({
+    version: MARKET_VERSION,
+    hypothesesDate: MARKET_HYPOTHESES_DATE,
+    inflation: MARKET_INFLATION,
+    supports: MARKET_SUPPORTS.map((support) => {
+      const series = simulatedSeries(support, { version: MARKET_VERSION, start: MARKET_START, now });
+      return {
+        key: support.key,
+        assetClass: support.assetClass,
+        yearlyReturn: support.yearlyReturn,
+        realReturn: realReturn(support.yearlyReturn, MARKET_INFLATION),
+        volatility: support.volatility,
+        liquidity: support.liquidity,
+        horizonMonths: support.horizonMonths,
+        risk: support.risk,
+        price: series.at(-1).price,
+        priceMonth: series.at(-1).month,
+        series,
+        measures: seriesMeasures(series),
+      };
+    }),
+  });
+}
+
+export function getMarketProjection(req, res) {
+  const support = MARKET_SUPPORTS.find((row) => row.key === req.params.key);
+  if (!support) throw new HttpError(404, 'Unknown support');
+  res.json({ projection: projection(support, { amount: req.query.montant, years: req.query.annees, inflation: MARKET_INFLATION }) });
 }

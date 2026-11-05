@@ -14,7 +14,7 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import AdultOnly from '../../components/fincludia/AdultOnly.jsx';
 import { adultRefusalReason, isAdultRefusal } from '../../lib/adultRefusal.js';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import FigureCard from '../../components/fincludia/FigureCard.jsx';
+import FigureCard, { HowToCompute } from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import NetWorthChart from '../../components/fincludia/NetWorthChart.jsx';
 import RingChart from '../../components/fincludia/RingChart.jsx';
@@ -85,7 +85,10 @@ export default function WealthPage() {
           </div>
           <dl className="wealth-totals">
             <dt>{t('wealth.totalAssets')}</dt>
-            <dd>{view.totalActifs === null ? <span className="fin-not-computed">{t('fincludia.notComputed')}</span> : formatAmount(i18n.language, view.totalActifs, view.currency)}</dd>
+            <dd>
+              {view.totalActifs === null ? <span className="fin-not-computed">{t('fincludia.notComputed')}</span> : formatAmount(i18n.language, view.totalActifs, view.currency)}
+              {view.totalActifs === null && <HowToCompute hint={{ key: 'assets', to: '/app/patrimoine' }} />}
+            </dd>
             <dt>{t('wealth.totalDebts')}</dt>
             <dd>{view.totalDettes === null ? <span className="fin-not-computed">{t('wealth.noDebt')}</span> : formatAmount(i18n.language, view.totalDettes, view.currency)}</dd>
             <dt>{t('wealth.quicklyAvailable')}</dt>

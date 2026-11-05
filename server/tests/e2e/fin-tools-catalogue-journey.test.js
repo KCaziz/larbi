@@ -79,13 +79,14 @@ describe('the single tools catalogue', { skip: findChrome() ? false : 'no Chrome
     await b.type('#compare-weight-cost', '3');
     assert.ok(await b.click(fr.compare.compare));
     assert.ok(await b.waitFor("!!document.querySelector('.comparison-score-row')", 'a score with weights'));
-    assert.ok(await b.waitText('min-max'), 'its method is shown with it');
+    // The method in words (R5-02: no formula name on screen).
+    assert.ok(await b.waitText('ramené à une échelle de 0 à 100'), 'its method is shown with it');
     assert.ok(await b.waitText(fr.compare.export));
     await b.shot('p8-15-compare');
   });
 
   test('a favourite: starred, kept in head of the catalogue after a reload, filtered, unstarred', async () => {
-    const star = (code) => `[...document.querySelectorAll('.tools-item')].find((li) => li.querySelector('.tools-item-meta span')?.textContent === '${code}')?.querySelector('.tools-star')`;
+    const star = (code) => `[...document.querySelectorAll('.tools-item')].find((li) => li.dataset.code === '${code}')?.querySelector('.tools-star')`;
     await b.goto(`${site.url}/app/outils`);
     assert.ok(await b.waitFor(`${items()} === ${TOOLS_CATALOGUE.length}`, 'the whole catalogue'));
     assert.equal(await b.ev("!!document.querySelector('.tools-favorites')"), false, 'no favourite yet');

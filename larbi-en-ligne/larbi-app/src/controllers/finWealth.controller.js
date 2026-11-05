@@ -1,4 +1,5 @@
 import { prisma } from '../config/prisma.js';
+import { accountsWithBalances } from '../services/finAccount.service.js';
 import {
   ASSET_KINDS,
   ASSET_LIQUIDITY,
@@ -16,6 +17,7 @@ import {
   deleteAsset,
   getAsset,
   listAssets,
+  netWorthHistory,
   setAssetArchived,
   updateAsset,
   valuationHistory,
@@ -78,13 +80,52 @@ export async function getAssetValuations(req, res) {
   res.json({ valuations: await valuationHistory(prisma, req.user.id, req.params.id) });
 }
 
+// The history behind the patrimony's net-worth curve (P6-23). Same currency
+// default as `getWealth`, so a caller who never passes `?currency=` sees the
+// series line up with the figure it leads to.
+export async function getWealthHistory(req, res) {
+  const currency = req.query.currency ?? req.user.finCurrency;
+  res.json({ currency, points: await accountsNetWorthHistory(prisma, req.user.id, currency) });
+}
+
+/**
+ * The net worth at the end of each of the last twelve months, read like the
+ * patrimony itself (P8-24): the accounts counted in the net worth as they stood
+ * at that date (PB-F001 then), the declared assets of the other classes valued
+ * by then, and the debts as the correction journal had them. A person with no
+ * account keeps the former series, which reads the declared assets only.
+ */
+export async function accountsNetWorthHistory(prisma, userId, currency, { months = 12, now = new Date() } = {}) {
+  if ((await prisma.finAccount.count({ where: { userId, deletedAt: null } })) === 0) return netWorthHistory(prisma, userId, currency);
+  const [declared, debts] = await Promise.all([listAssets(prisma, userId), listDebts(prisma, userId)]);
+  const points = [];
+  for (let back = months - 1; back >= 0; back -= 1) {
+    const end = new Date(Math.min(now.getTime(), Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - back + 1, 1) - 1));
+    const { accounts } = await accountsWithBalances(prisma, userId, { includeArchived: true, now: end });
+    // An account that did not exist yet contributes nothing, rather than its
+    // opening balance read backwards.
+    const existing = accounts.filter((account) => new Date(account.openingDate) <= end);
+    const { assets, liabilities } = wealthFromAccounts({
+      declared: declared.filter((asset) => asset.valuedAt <= end),
+      // A debt carried by an account is counted through it; the others as they
+      // stand today: their own history is not kept as dated balances.
+      debts: debts.filter((debt) => !debt.accountId),
+      accounts: existing,
+      now: end,
+    });
+    const sum = (rows, field) => rows.filter((row) => row.currency === currency).reduce((total, row) => total + row[field], 0);
+    points.push({ date: end.toISOString().slice(0, 10), net: sum(assets, 'value') - sum(liabilities, 'outstandingPrincipal') });
+  }
+  return points;
+}
+
 export async function getWealth(req, res) {
   const currency = req.query.currency ?? req.user.finCurrency;
-  const [assets, debts] = await Promise.all([listAssets(prisma, req.user.id), listDebts(prisma, req.user.id)]);
+  const [declared, debts, { accounts }] = await Promise.all([listAssets(prisma, req.user.id), listDebts(prisma, req.user.id), accountsWithBalances(prisma, req.user.id)]);
+  const { assets, liabilities } = wealthFromAccounts({ declared, debts, accounts });
   const view = buildWealthView({
     assets,
-    // The liabilities of F035 come from P6-10, never from a second table here.
-    debts,
+    debts: liabilities,
     currency,
     staleDays: req.query.staleDays ?? VALUATION_STALE_DAYS,
     noticeShare: req.query.noticeShare ?? CONCENTRATION_NOTICE_SHARE,
@@ -98,5 +139,51 @@ export async function getWealth(req, res) {
   );
   view.actifs = view.actifs.map((row) => ({ ...row, categoryLabel: row.categoryId ? (labels.get(row.categoryId) ?? null) : null }));
 
-  res.json({ patrimoine: view, formulas: ['F035', 'F036', 'F037'].map(describeFormula) });
+  res.json({ patrimoine: view, formulas: ['PB-F024', 'F036', 'F037'].map(describeFormula) });
+}
+
+// The kinds of declared asset an account now stands for: once the person has
+// accounts, cash and bank balances come from them, never typed a second time.
+const LIQUID_DECLARED = ['cash', 'account', 'ccp'];
+const LIQUIDITY_OF = { liquid: 'liquid', savings: 'liquid', investment: 'semi_liquid', receivable: 'illiquid', configurable: 'semi_liquid' };
+
+/**
+ * The patrimony of P8-14 (PB-F003, PB-F024), without counting anything twice:
+ * - the liquidities come AUTOMATICALLY from the accounts counted in the net
+ *   worth (their balance, PB-F001); a declared cash or bank asset is then
+ *   left out, the account already holds it;
+ * - the other classes (real estate, gold, vehicle, business, real
+ *   investments) stay declared and dated;
+ * - the liabilities are the debts, plus the liability accounts (cards,
+ *   loans) — a debt carried by an account is counted once, through it;
+ * - a receivable (« J'ai prêté ») is an ASSET, never a liability.
+ */
+export function wealthFromAccounts({ declared, debts, accounts, now = new Date() }) {
+  const open = accounts.filter((account) => !account.archivedAt && account.includeInNetWorth);
+  const hasAccounts = open.length > 0;
+  const fromAccounts = open
+    .filter((account) => !account.liability && account.solde.resultat !== null && account.solde.resultat > 0)
+    .map((account) => ({
+      id: `account:${account.id}`,
+      label: account.label,
+      kind: account.nature === 'receivable' ? 'receivable' : account.nature === 'investment' ? 'investment' : 'account',
+      liquidity: LIQUIDITY_OF[account.nature] ?? 'liquid',
+      value: account.solde.resultat,
+      currency: account.currency,
+      valuedAt: now,
+      categoryId: null,
+      status: 'real',
+      fromAccount: true,
+    }));
+  const liabilityAccounts = open
+    .filter((account) => account.liability && account.solde.resultat !== null && account.solde.resultat > 0)
+    .map((account) => ({ id: `account:${account.id}`, outstandingPrincipal: account.solde.resultat, currency: account.currency }));
+
+  const assets = [...fromAccounts, ...declared.filter((asset) => !(hasAccounts && LIQUID_DECLARED.includes(asset.kind)))];
+  // A receivable without its own account is still an asset.
+  for (const debt of debts.filter((row) => row.direction === 'lent' && !row.accountId && row.outstandingPrincipal > 0)) {
+    assets.push({ id: `receivable:${debt.id}`, label: debt.label, kind: 'receivable', liquidity: 'illiquid', value: debt.outstandingPrincipal, currency: debt.currency, valuedAt: now, categoryId: null, status: 'real' });
+  }
+  const liabilities = [...debts.filter((row) => row.direction !== 'lent' && !row.accountId), ...liabilityAccounts];
+  return { assets, liabilities };
 }

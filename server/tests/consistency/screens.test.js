@@ -23,6 +23,14 @@ describe('the texts a person reads', () => {
     }
   });
 
+  test('every tool of the catalogue says in a sentence what it is for, in every language (R8-07: no code on screen)', async () => {
+    const { TOOLS_CATALOGUE } = await import('../../src/constants/finToolsCatalogue.js');
+    for (const lang of ['fr', 'en', 'ar']) {
+      const descriptions = load(lang).toolsCatalogue.descriptions ?? {};
+      assert.deepEqual(TOOLS_CATALOGUE.map((tool) => tool.code).filter((code) => !descriptions[code]), [], lang);
+    }
+  });
+
   // « Client » as a customer of the person (an invoice, receivables) is fine; the
   // client OF THE PROJECT, a workbook, a tab, a formula code, are not.
   const FORBIDDEN = [

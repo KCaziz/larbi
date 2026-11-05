@@ -9,6 +9,9 @@
 import { FREQUENCIES } from '../constants/finance.js';
 import { DUPLICATE_WINDOW_HOURS, TRANSACTIONS_MAX_PAGE_SIZE, TRANSACTIONS_PAGE_SIZE } from '../constants/finMoney.js';
 import { HttpError } from '../utils/httpError.js';
+import { TRANSFER_KINDS } from '../constants/finMoney.js';
+import { ensureCashAccount, usableAccount } from './finAccount.service.js';
+import { automaticTag, usableTag } from './finMovement.service.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
 import { removeStored } from './storage.service.js';
 
@@ -36,6 +39,12 @@ const INCOME_SELECT = {
 const TRANSACTION_SELECT = {
   id: true,
   kind: true,
+  accountId: true,
+  transferId: true,
+  tagId: true,
+  payer: true,
+  place: true,
+  clearing: true,
   value: true,
   currency: true,
   occurredAt: true,
@@ -221,6 +230,11 @@ export async function findDuplicates(prisma, userId, { kind, value, currency, ca
 
 export async function createTransaction(prisma, userId, body) {
   const categoryId = await usableCategory(prisma, userId, body.categoryId ?? null);
+  // Every movement goes on exactly one account (ARC-04). Chosen, it must be
+  // this person's, open, and in the movement's currency.
+  if (body.accountId) await usableAccount(prisma, userId, body.accountId, body.currency);
+  // The tag chosen, or the one set to follow this category (P8-07).
+  const tagId = body.tagId ? await usableTag(prisma, userId, body.tagId) : await automaticTag(prisma, userId, categoryId);
   assertDate(body.kind, body.occurredAt, body.planned ?? false);
 
   const duplicates = await findDuplicates(prisma, userId, {
@@ -232,10 +246,17 @@ export async function createTransaction(prisma, userId, body) {
   });
 
   const row = await prisma.$transaction(async (tx) => {
+    // None chosen: the « Espèces » account, created on the first movement if
+    // there is none (PB-PR-04).
+    const accountId = body.accountId ?? (await ensureCashAccount(tx, userId, body.currency));
     const created = await tx.finTransaction.create({
       data: {
         userId,
         kind: body.kind,
+        accountId,
+        tagId,
+        payer: body.payer ?? null,
+        place: body.place ?? null,
         value: body.value,
         currency: body.currency,
         occurredAt: body.occurredAt,
@@ -279,7 +300,14 @@ export const getTransaction = (prisma, userId, id) => ownTransaction(prisma, use
 
 export async function updateTransaction(prisma, userId, id, body) {
   const before = await ownTransaction(prisma, userId, id);
+  // One side of a transfer is never corrected alone: its other side would no
+  // longer match. A transfer is deleted and entered again.
+  if (TRANSFER_KINDS.includes(before.kind)) throw new HttpError(422, 'Transfer side', { reason: 'transferSide' });
   const { reason, ...fields } = body;
+  if (fields.tagId) fields.tagId = await usableTag(prisma, userId, fields.tagId);
+  if (fields.accountId !== undefined || fields.currency !== undefined) {
+    await usableAccount(prisma, userId, fields.accountId ?? before.accountId, fields.currency ?? before.currency);
+  }
   if (fields.categoryId !== undefined) fields.categoryId = await usableCategory(prisma, userId, fields.categoryId);
   assertDate(fields.kind ?? before.kind, fields.occurredAt ?? before.occurredAt, fields.planned ?? before.planned);
 
@@ -291,9 +319,11 @@ export async function updateTransaction(prisma, userId, id, body) {
 }
 
 export async function deleteTransaction(prisma, userId, id, { reason } = {}) {
-  await ownTransaction(prisma, userId, id);
+  const row = await ownTransaction(prisma, userId, id);
   await prisma.$transaction(async (tx) => {
-    await tx.finTransaction.update({ where: { id }, data: { deletedAt: new Date() } });
+    // A side of a transfer takes its other side with it.
+    if (row.transferId) await tx.finTransaction.updateMany({ where: { userId, transferId: row.transferId }, data: { deletedAt: new Date() } });
+    else await tx.finTransaction.update({ where: { id }, data: { deletedAt: new Date() } });
     await recordChange(tx, { userId, entity: TRANSACTION_ENTITY, entityId: id, action: 'delete', field: 'deletedAt', after: true, reason: reason ?? null });
   });
   return { id };
@@ -307,6 +337,11 @@ export async function deleteTransaction(prisma, userId, id, { reason } = {}) {
 export function historyWhere(userId, query = {}) {
   const where = { userId, deletedAt: null };
   if (query.kind) where.kind = query.kind;
+  if (query.accountId) where.accountId = query.accountId;
+  if (query.tagId) where.tagId = query.tagId;
+  if (query.clearing) where.clearing = query.clearing;
+  // The three tabs of TRX-01: a transfer has two sides, both listed.
+  if (query.tab === 'transfers') where.kind = { in: TRANSFER_KINDS };
   if (query.status) where.status = query.status;
   if (query.source) where.source = query.source;
   if (query.scope) where.scope = query.scope;
@@ -353,7 +388,7 @@ export async function listTransactions(prisma, userId, query = {}) {
   const size = Math.min(query.pageSize ?? TRANSACTIONS_PAGE_SIZE, TRANSACTIONS_MAX_PAGE_SIZE);
   const page = query.page ?? 1;
 
-  const [rows, total, groups] = await Promise.all([
+  const [rows, total, groups, savingsGroups] = await Promise.all([
     prisma.finTransaction.findMany({
       where,
       select: TRANSACTION_SELECT,
@@ -370,9 +405,18 @@ export async function listTransactions(prisma, userId, query = {}) {
       _sum: { value: true },
       _count: { _all: true },
     }),
+    // The savings movements of the same set (family `goal`): listed, but kept
+    // out of the income and expense totals (PB-F004, PB-F005 exclude
+    // transfers — diagnostic n°2, C2).
+    prisma.finTransaction.groupBy({
+      by: ['kind', 'currency', 'status', 'planned'],
+      where: { AND: [where, { category: { family: 'goal' } }] },
+      _sum: { value: true },
+      _count: { _all: true },
+    }),
   ]);
 
-  return { transactions: rows, page, pageSize: size, total, pages: Math.max(1, Math.ceil(total / size)), totals: foldTotals(groups) };
+  return { transactions: rows, page, pageSize: size, total, pages: Math.max(1, Math.ceil(total / size)), totals: foldTotals(groups, savingsGroups) };
 }
 
 // Folds the SQL groups into the totals a screen may show. THREE buckets, never
@@ -382,12 +426,16 @@ export async function listTransactions(prisma, userId, query = {}) {
 //
 // A set holding more than one currency totals `null`: the engine never converts
 // without a dated rate, and neither does a total.
-export function foldTotals(groups) {
+//
+// `savingsGroups` are the same groups restricted to savings movements: they
+// stay in the counts (they are rows of the list) but leave the sums.
+export function foldTotals(groups, savingsGroups = []) {
   const currencies = [...new Set(groups.map((g) => g.currency))];
   const mixed = currencies.length > 1;
   const bucketOf = (g) => (g.status === 'fictional' ? 'fictional' : g.planned ? 'planned' : 'real');
-  const sum = (bucket, kind) =>
-    groups.filter((g) => bucketOf(g) === bucket && g.kind === kind).reduce((acc, g) => acc + (g._sum.value ?? 0), 0);
+  const sumOf = (set, bucket, kind) =>
+    set.filter((g) => bucketOf(g) === bucket && g.kind === kind).reduce((acc, g) => acc + (g._sum.value ?? 0), 0);
+  const sum = (bucket, kind) => sumOf(groups, bucket, kind) - sumOf(savingsGroups, bucket, kind);
   const count = (bucket) => groups.filter((g) => bucketOf(g) === bucket).reduce((acc, g) => acc + g._count._all, 0);
   // Mixed currencies: the bucket still exists (so a screen knows there is
   // something there), its totals are simply not computable.

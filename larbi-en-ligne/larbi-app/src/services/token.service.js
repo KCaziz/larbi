@@ -12,9 +12,11 @@ export const cookieOptions = {
   path: '/',
 };
 
-export function signSession(userId) {
+export function signSession(userId, sessionId = null) {
   return jwt.sign({}, env.jwtSecret, {
     subject: userId,
+    // The id of the revocable session row (P8-20), when there is one.
+    ...(sessionId ? { jwtid: sessionId } : {}),
     expiresIn: env.jwtExpiresInSeconds,
     algorithm: 'HS256',
   });
@@ -24,8 +26,8 @@ export function verifySession(token) {
   return jwt.verify(token, env.jwtSecret, { algorithms: ['HS256'] });
 }
 
-export function setSessionCookie(res, userId) {
-  res.cookie(SESSION_COOKIE, signSession(userId), {
+export function setSessionCookie(res, userId, sessionId = null) {
+  res.cookie(SESSION_COOKIE, signSession(userId, sessionId), {
     ...cookieOptions,
     maxAge: env.jwtExpiresInSeconds * 1000,
   });

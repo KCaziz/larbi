@@ -34,13 +34,35 @@ export const createSharedExpenseSchema = z
     participants: z.array(participantSchema).min(1).max(PARTICIPANTS_MAX),
     categoryId: z.string().uuid().nullable().optional(),
     note,
+    // A planned expense has not happened yet: it may be dated ahead and counts
+    // for nothing until it is confirmed (P9-04).
+    planned: z.boolean().optional(),
+    // The free unit of a split by usage, one per expense.
+    usageUnit: z.string().trim().min(1).max(30).optional(),
+    // A free label inside the category, this space's own (P9-14): « Électricité » under « Factures »,
+    // whatever the group calls it. Suggested from what the space already used.
+    subCategory: z.string().trim().min(1).max(40).nullable().optional(),
+    // One of the 19 collective categories (P9-05): what the common budget reads.
+    collectiveCategory: z.string().regex(/^COLC-\d{2}$/).nullable().optional(),
+    // Paid with personal money (P9-08): EITHER a personal expense is created on
+    // the chosen account, OR an existing personal expense is designated — never
+    // both, so the amount can never be counted twice in a personal budget.
+    personalLink: z
+      .object({ accountId: z.string().uuid().optional(), transactionId: z.string().uuid().optional() })
+      .strict()
+      .refine((link) => (link.accountId === undefined) !== (link.transactionId === undefined), { message: 'Give an account OR a transaction, not both' })
+      .optional(),
   })
   .strict()
   // The modes that need a weight per participant say so here, so the refusal
   // is precise instead of being "the shares do not add up".
-  .refine((body) => !['amounts', 'percent'].includes(body.splitMode) || body.participants.every((p) => p.weight !== undefined), {
+  .refine((body) => !['amounts', 'percent', 'weighted', 'usage'].includes(body.splitMode) || body.participants.every((p) => p.weight !== undefined), {
     message: 'This split mode needs a value for every participant',
     path: ['participants'],
+  })
+  .refine((body) => body.splitMode !== 'usage' || body.usageUnit !== undefined, {
+    message: 'A split by usage names its unit',
+    path: ['usageUnit'],
   });
 
 export const createSettlementSchema = z
@@ -51,12 +73,16 @@ export const createSettlementSchema = z
     currency: currencySchema.optional(),
     settledAt: isoDate,
     note,
+    // The account that received the money (only the receiver can say): the advance comes down and the account goes up.
+    accountId: z.string().uuid().optional(),
   })
   .strict()
   // Nobody settles with themselves: it would move no money and change nothing,
   // so it can only be a mistake. Refused here as well as in the service,
   // because MariaDB will not take it as a CHECK (both columns are foreign keys).
   .refine((body) => body.fromId !== body.toId, { message: 'A settlement needs two different members', path: ['toId'] });
+
+export const linkPersonalSchema = z.object({ transactionId: z.string().uuid() }).strict();
 
 export const deleteSharedSchema = z.object({ reason: reasonSchema.optional() }).strict();
 

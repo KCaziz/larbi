@@ -5,6 +5,7 @@ import MaintenanceGate from '../components/auth/MaintenanceGate.jsx';
 import MainLayout from '../layouts/MainLayout.jsx';
 import AppLayout from '../layouts/AppLayout.jsx';
 import SharedLayout from '../layouts/SharedLayout.jsx';
+import AdminShell from '../layouts/AdminShell.jsx';
 import AppRedirectWhenSignedIn from '../components/auth/AppRedirectWhenSignedIn.jsx';
 import LegacyRedirect from '../components/auth/LegacyRedirect.jsx';
 import { LEGACY_REDIRECTS } from '../config/appNavigation.js';
@@ -103,6 +104,8 @@ const appRoutes = {
             { path: 'patrimoine/:id', lazy: lazyPage(() => import('../pages/patrimoine/AssetDetailPage.jsx')) },
             { path: 'financement', lazy: lazyPage(() => import('../pages/funding/FundingReadinessPage.jsx')) },
             { path: 'portefeuille', lazy: lazyPage(() => import('../pages/portefeuille/PaperPortfolioPage.jsx')) },
+            // EP06, the pedagogical market (recette R8-12).
+            { path: 'portefeuille/marche', lazy: lazyPage(() => import('../pages/portefeuille/MarketPage.jsx')) },
             // The single catalogue of the Tools (P8-15); the showcase keeps its presentation page.
             { path: 'outils', lazy: lazyPage(() => import('../pages/outils/ToolsCataloguePage.jsx')) },
             { path: 'outils/comparateur', lazy: lazyPage(() => import('../pages/outils/ComparatorPage.jsx')) },
@@ -191,9 +194,98 @@ const sharedRoutes = {
   ],
 };
 
+// Administration (recette R8-09): a window of its own, like the two
+// applications, with the same top bar — its switcher offers « Administration »
+// to administrators only. It used to sit inside the showcase site's layout,
+// whose bar had no room for it.
+const adminRoutes = {
+  path: '/admin',
+  errorElement: <ErrorPage />,
+  element: <RequireAuth />,
+  children: [
+    {
+      element: <RequireRole role="admin" />,
+      children: [
+        {
+          element: <AdminShell />,
+          children: [
+            {
+              lazy: lazyPage(() => import('../pages/admin/AdminLayout.jsx')),
+              children: [
+                { index: true, lazy: lazyPage(() => import('../pages/admin/AdminDashboardPage.jsx')) },
+                {
+                  path: 'formations',
+                  lazy: lazyPage(() => import('../pages/admin/formations/FormationsListPage.jsx')),
+                },
+                {
+                  path: 'formations/:id',
+                  lazy: lazyPage(() => import('../pages/admin/formations/FormationEditorPage.jsx')),
+                },
+                {
+                  path: 'articles',
+                  lazy: lazyPage(() => import('../pages/admin/articles/ArticlesListPage.jsx')),
+                },
+                {
+                  path: 'articles/:id',
+                  lazy: lazyPage(() => import('../pages/admin/articles/ArticleEditorPage.jsx')),
+                },
+                {
+                  path: 'newsletter',
+                  lazy: lazyPage(() => import('../pages/admin/newsletter/NewsletterPage.jsx')),
+                },
+                {
+                  path: 'media',
+                  lazy: lazyPage(() => import('../pages/admin/platform/MediaLibraryPage.jsx')),
+                },
+                {
+                  path: 'certificates',
+                  lazy: lazyPage(() => import('../pages/admin/platform/CertificatesAdminPage.jsx')),
+                },
+                {
+                  path: 'apprendre',
+                  lazy: lazyPage(() => import('../pages/admin/apprendre/GlossaryAdminPage.jsx')),
+                },
+                {
+                  path: 'assistant',
+                  lazy: lazyPage(() => import('../pages/admin/chatbot/ChatbotAdminPage.jsx')),
+                },
+                {
+                  path: 'missions-fincludia',
+                  lazy: lazyPage(() => import('../pages/admin/finMissions/FinMissionsAdminPage.jsx')),
+                },
+                {
+                  path: 'assistant-fincludia',
+                  lazy: lazyPage(() => import('../pages/admin/finAssistant/FinAssistantAdminPage.jsx')),
+                },
+                {
+                  path: 'paiements',
+                  lazy: lazyPage(() => import('../pages/admin/payments/PaymentsAdminPage.jsx')),
+                },
+                {
+                  path: 'comparateur',
+                  lazy: lazyPage(() => import('../pages/admin/comparator/ComparatorAdminPage.jsx')),
+                },
+                {
+                  path: 'users',
+                  lazy: lazyPage(() => import('../pages/admin/platform/UsersPage.jsx')),
+                },
+                {
+                  path: 'settings',
+                  lazy: lazyPage(() => import('../pages/admin/platform/SettingsPage.jsx')),
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
 export const router = createBrowserRouter([
   appRoutes,
   sharedRoutes,
+  adminRoutes,
   { path: '/espaces', element: <Navigate to="/partage" replace /> },
   {
     path: '/',
@@ -253,83 +345,6 @@ export const router = createBrowserRouter([
             path: redirect.prefix ? `${redirect.from}/*` : redirect.from,
             element: <LegacyRedirect to={redirect.to} prefix={redirect.prefix} />,
           })),
-          {
-            element: <RequireAuth />,
-            children: [
-              {
-                element: <RequireRole role="admin" />,
-                children: [
-                  {
-                    path: 'admin',
-                    lazy: lazyPage(() => import('../pages/admin/AdminLayout.jsx')),
-                    children: [
-                      { index: true, lazy: lazyPage(() => import('../pages/admin/AdminDashboardPage.jsx')) },
-                      {
-                        path: 'formations',
-                        lazy: lazyPage(() => import('../pages/admin/formations/FormationsListPage.jsx')),
-                      },
-                      {
-                        path: 'formations/:id',
-                        lazy: lazyPage(() => import('../pages/admin/formations/FormationEditorPage.jsx')),
-                      },
-                      {
-                        path: 'articles',
-                        lazy: lazyPage(() => import('../pages/admin/articles/ArticlesListPage.jsx')),
-                      },
-                      {
-                        path: 'articles/:id',
-                        lazy: lazyPage(() => import('../pages/admin/articles/ArticleEditorPage.jsx')),
-                      },
-                      {
-                        path: 'newsletter',
-                        lazy: lazyPage(() => import('../pages/admin/newsletter/NewsletterPage.jsx')),
-                      },
-                      {
-                        path: 'media',
-                        lazy: lazyPage(() => import('../pages/admin/platform/MediaLibraryPage.jsx')),
-                      },
-                      {
-                        path: 'certificates',
-                        lazy: lazyPage(() => import('../pages/admin/platform/CertificatesAdminPage.jsx')),
-                      },
-                      {
-                        path: 'apprendre',
-                        lazy: lazyPage(() => import('../pages/admin/apprendre/GlossaryAdminPage.jsx')),
-                      },
-                      {
-                        path: 'assistant',
-                        lazy: lazyPage(() => import('../pages/admin/chatbot/ChatbotAdminPage.jsx')),
-                      },
-                      {
-                        path: 'missions-fincludia',
-                        lazy: lazyPage(() => import('../pages/admin/finMissions/FinMissionsAdminPage.jsx')),
-                      },
-                      {
-                        path: 'assistant-fincludia',
-                        lazy: lazyPage(() => import('../pages/admin/finAssistant/FinAssistantAdminPage.jsx')),
-                      },
-                      {
-                        path: 'paiements',
-                        lazy: lazyPage(() => import('../pages/admin/payments/PaymentsAdminPage.jsx')),
-                      },
-                      {
-                        path: 'comparateur',
-                        lazy: lazyPage(() => import('../pages/admin/comparator/ComparatorAdminPage.jsx')),
-                      },
-                      {
-                        path: 'users',
-                        lazy: lazyPage(() => import('../pages/admin/platform/UsersPage.jsx')),
-                      },
-                      {
-                        path: 'settings',
-                        lazy: lazyPage(() => import('../pages/admin/platform/SettingsPage.jsx')),
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
           { path: '*', element: <NotFoundPage /> },
         ],
       },

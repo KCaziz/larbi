@@ -8,6 +8,7 @@ import {
   deleteContribution,
   deleteSpaceGoal,
   listSpaceGoals,
+  setGoalCalendar,
   ownSpaceGoalWithContributions,
   updateSpaceGoal,
 } from '../services/finSpaceGoal.service.js';
@@ -44,6 +45,12 @@ export async function postSpaceGoal(req, res) {
 
 export async function patchSpaceGoal(req, res) {
   await updateSpaceGoal(prisma, req.user.id, req.params.id, req.params.goalId, req.body);
+  const full = await ownSpaceGoalWithContributions(prisma, req.user.id, req.params.id, req.params.goalId);
+  res.json({ goal: await withNames(prisma, req.params.id, full) });
+}
+
+export async function putGoalCalendar(req, res) {
+  await setGoalCalendar(prisma, req.user.id, req.params.id, req.params.goalId, req.body.calendar);
   const full = await ownSpaceGoalWithContributions(prisma, req.user.id, req.params.id, req.params.goalId);
   res.json({ goal: await withNames(prisma, req.params.id, full) });
 }

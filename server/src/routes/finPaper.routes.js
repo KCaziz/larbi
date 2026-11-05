@@ -2,6 +2,8 @@ import { Router } from 'express';
 import {
   exportTrades,
   getInstruments,
+  getMarket,
+  getMarketProjection,
   getPaperReferences,
   getPortfolio,
   getReadiness,
@@ -20,6 +22,7 @@ import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
 import {
   addInstrumentSchema,
   markInstrumentSchema,
+  marketProjectionQuerySchema,
   portfolioQuerySchema,
   rebalanceSchema,
   resetPortfolioSchema,
@@ -36,6 +39,9 @@ router.use(requireAuth);
 router.param('id', uuidParam);
 
 router.get('/portefeuille/references', getPaperReferences);
+// The pedagogical market (EP06, recette R8-12): examples, never quotes.
+router.get('/portefeuille/marche', getMarket);
+router.get('/portefeuille/marche/:key/projection', validateQuery(marketProjectionQuerySchema), getMarketProjection);
 // The saver's path (EP03): answers, never blocks.
 router.get('/portefeuille/diagnostic', asyncRoute(getReadiness));
 router.post('/portefeuille/profil-risque', validateBody(riskAnswersSchema), postRiskProfile);

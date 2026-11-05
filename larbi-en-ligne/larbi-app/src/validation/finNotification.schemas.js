@@ -22,3 +22,11 @@ export const settingsSchema = z
   .object(Object.fromEntries(NOTIFICATION_TYPE_KEYS.map((key) => [key, typeSettingSchema.optional()])))
   .strict()
   .refine((body) => Object.keys(body).length > 0, { message: 'Nothing to change' });
+
+// Une action sans corps. `.strict()` sur un objet vide : la route n'attend
+// rien, et un champ envoyé quand même est refusé plutôt qu'ignoré.
+//
+// Ce n'est pas du zèle. Une route sans schéma est précisément celle où
+// quelqu'un ajoutera un champ dans six mois sans penser à en écrire un —
+// l'audit P5-02 l'a trouvée en balayant toutes les routes d'écriture.
+export const emptyBodySchema = z.object({}).strict();

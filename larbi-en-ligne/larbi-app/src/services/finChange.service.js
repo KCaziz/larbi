@@ -12,12 +12,20 @@ import { CHANGE_ACTIONS } from '../constants/finData.js';
 // is not journalled: that is how a future table says what matters, instead of
 // dumping whole rows (which would also copy data the trail does not need).
 export const JOURNALLED_FIELDS = {
-  category: ['family', 'label', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
+  category: ['family', 'label', 'essential', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
   // "Mon argent" (P6-04). The amount, the date and the category are what a
   // person actually corrects, and what an old total was built from.
   income: ['label', 'categoryId', 'value', 'currency', 'frequency', 'startDate', 'endDate', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
+  // Accounts (P8-03): what changes a balance or where it is counted.
+  account: ['label', 'type', 'openingBalance', 'openingDate', 'includeInTotal', 'includeInNetWorth', 'overdraftAllowed', 'archivedAt', 'deletedAt'],
+  tag: ['name', 'color', 'autoCategoryId', 'archivedAt', 'deletedAt'],
   transaction: [
     'kind',
+    'accountId',
+    'tagId',
+    'payer',
+    'place',
+    'clearing',
     'value',
     'currency',
     'occurredAt',
@@ -43,6 +51,8 @@ export const JOURNALLED_FIELDS = {
   envelope: ['categoryId', 'kind', 'value', 'currency', 'cap', 'recurring', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
   // Calendar and recurring expenses (P6-07). The DATE is journalled as much as
   // the amount: moving a due date changes which period a figure belongs to.
+  // Tasks of a space (P9-06): who it is on, when, and how it stands.
+  spaceTask: ['title', 'description', 'category', 'assigneeId', 'participants', 'dueDate', 'priority', 'recurrence', 'checklist', 'weight', 'status', 'reminderDays', 'linkedExpenseId', 'deletedAt'],
   recurrence: ['label', 'categoryId', 'kind', 'value', 'currency', 'frequency', 'nextDate', 'endDate', 'reminderDays', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
   provision: ['label', 'categoryId', 'value', 'currency', 'provisioned', 'targetDate', 'reminderDays', 'note', 'scope', 'consentUses', 'archivedAt', 'deletedAt'],
   // Goals (P6-08) and debts (P6-10). Both services already call

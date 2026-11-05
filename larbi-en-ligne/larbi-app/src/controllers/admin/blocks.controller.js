@@ -6,6 +6,7 @@ import {
   MAX_BLOCKS_PER_LESSON,
   currentBlockIds,
   isMediaBlock,
+  lockBlockLesson,
   lockLesson,
   renumberBlocks,
   snapshotIfDue,
@@ -97,9 +98,7 @@ export async function uploadBlockFile(req, res) {
 
 export async function updateBlock(req, res) {
   const block = await prisma.$transaction(async (tx) => {
-    const existing = await tx.lessonBlock.findUnique({ where: { id: req.params.id } });
-    if (!existing) throw new HttpError(404, 'Not found');
-    await lockLesson(tx, existing.courseId);
+    const existing = await lockBlockLesson(prisma, tx, req.params.id);
     await snapshotIfDue(tx, existing.courseId, req.user.id);
     return tx.lessonBlock.update({
       where: { id: existing.id },
@@ -112,10 +111,8 @@ export async function updateBlock(req, res) {
 
 export async function duplicateBlock(req, res) {
   const block = await prisma.$transaction(async (tx) => {
-    const existing = await tx.lessonBlock.findUnique({ where: { id: req.params.id } });
-    if (!existing) throw new HttpError(404, 'Not found');
+    const existing = await lockBlockLesson(prisma, tx, req.params.id);
     if (isMediaBlock(existing.type)) throw new HttpError(400, 'A block that shows a file cannot be duplicated: upload the file again');
-    await lockLesson(tx, existing.courseId);
     await assertRoom(tx, existing.courseId);
     await snapshotIfDue(tx, existing.courseId, req.user.id);
     const created = await tx.lessonBlock.create({ data: { courseId: existing.courseId, type: existing.type, position: 0, data: existing.data } });
@@ -130,9 +127,7 @@ export async function duplicateBlock(req, res) {
 export async function deleteBlock(req, res) {
   const keys = [];
   await prisma.$transaction(async (tx) => {
-    const existing = await tx.lessonBlock.findUnique({ where: { id: req.params.id }, include: WITH_MEDIA });
-    if (!existing) throw new HttpError(404, 'Not found');
-    await lockLesson(tx, existing.courseId);
+    const existing = await lockBlockLesson(prisma, tx, req.params.id, { include: WITH_MEDIA });
     await snapshotIfDue(tx, existing.courseId, req.user.id);
     await tx.lessonBlock.delete({ where: { id: existing.id } });
     if (existing.media) {

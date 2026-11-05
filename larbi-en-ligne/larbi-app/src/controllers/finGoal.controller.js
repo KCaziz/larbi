@@ -1,9 +1,13 @@
 import { prisma } from '../config/prisma.js';
-import { GOAL_TEMPLATES, MAX_GOALS } from '../constants/finGoal.js';
+import { GOAL_CATALOG, GOAL_PROGRESS_STATUSES, GOAL_TEMPLATES, MAX_GOALS } from '../constants/finGoal.js';
 import { listChanges } from '../services/finChange.service.js';
 import {
   GOAL_ENTITY,
+  addGoalContribution,
   buildGoalView,
+  goalScenario,
+  goalsWithCapital,
+  listGoalContributions,
   createGoal,
   deleteGoal,
   listGoals,
@@ -19,11 +23,17 @@ import { HttpError } from '../utils/httpError.js';
 // read and write is scoped to the caller's own rows, exactly like budgets.
 
 export function getGoalReferences(req, res) {
-  res.json({ templates: GOAL_TEMPLATES, formulas: ['F025', 'F026', 'F027', 'F028', 'F032', 'ALG-03'].map(describeFormula) });
+  res.json({
+    templates: GOAL_TEMPLATES,
+    // The catalogue since P8-12: GO-01 to GO-11 and six kept models (17).
+    catalogue: GOAL_CATALOG,
+    progressStatuses: GOAL_PROGRESS_STATUSES,
+    formulas: ['PB-F014', 'PB-F015', 'PB-F016', 'F028', 'F032', 'ALG-03'].map(describeFormula),
+  });
 }
 
 export async function getGoals(req, res) {
-  const goals = await listGoals(prisma, req.user.id, { includeArchived: req.query.includeArchived === 'true' });
+  const goals = await goalsWithCapital(prisma, req.user.id, await listGoals(prisma, req.user.id, { includeArchived: req.query.includeArchived === 'true' }));
   const withViews = goals.map((goal) => ({ ...goal, vue: buildGoalView(goal) }));
 
   // P6-18: a goal past its own target date, not reached, is a one-off fact —
@@ -34,7 +44,7 @@ export async function getGoals(req, res) {
     await createNotification(prisma, req.user.id, {
       type: 'goal_overdue',
       params: { label: goal.label },
-      link: '/objectifs',
+      link: '/app/objectifs',
       referenceId: goal.id,
       dedupeBy: 'reference',
     });
@@ -51,8 +61,17 @@ export async function postGoal(req, res) {
 }
 
 export async function getGoal(req, res) {
-  const goal = await ownGoal(prisma, req.user.id, req.params.id);
-  res.json({ goal: { ...goal, vue: buildGoalView(goal) } });
+  const [goal] = await goalsWithCapital(prisma, req.user.id, [await ownGoal(prisma, req.user.id, req.params.id)]);
+  res.json({ goal: { ...goal, vue: buildGoalView(goal) }, contributions: await listGoalContributions(prisma, req.user.id, req.params.id) });
+}
+
+export async function postGoalContribution(req, res) {
+  res.status(201).json(await addGoalContribution(prisma, req.user.id, req.params.id, req.body));
+}
+
+export async function postGoalScenario(req, res) {
+  const [goal] = await goalsWithCapital(prisma, req.user.id, [await ownGoal(prisma, req.user.id, req.params.id)]);
+  res.json({ scenario: goalScenario(goal, req.body) });
 }
 
 export async function patchGoal(req, res) {

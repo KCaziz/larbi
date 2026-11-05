@@ -64,6 +64,11 @@ export function getJourney(req, res) {
     // Stated rather than implied: these are refused server-side, and an account
     // that has not said its age bracket is treated as a minor.
     reserveAuxAdultes: { ecrans: ADULT_ONLY_SCREENS, routes: ADULT_ONLY_ROUTES, autorise: adult },
+    // A DECLARED minor (P8-02): the only case where the application's menu
+    // leaves the adults-only entries out. An account whose age is unknown still
+    // sees them, and the page explains what to fill in — hiding them would make
+    // them unfindable for an adult who has not said their age yet.
+    mineurDeclare: isAdultAgeRange(req.user.finAgeRange) === false,
     // Somebody who has not chosen a public yet sees every screen: refusing them
     // would lock a new account out of its own money. The list is offered so the
     // interface can invite them to choose.

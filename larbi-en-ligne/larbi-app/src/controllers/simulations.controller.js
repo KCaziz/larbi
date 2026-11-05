@@ -14,7 +14,7 @@ const noStore = (res) => res.set('Cache-Control', 'no-store');
 
 // A repeated field carries the description of its own rows, so the form can draw
 // them without a second source of truth.
-const describeField = ({ key, type, required = false, min, max, maxLength, item, minItems, maxItems, default: value }) => ({
+const describeField = ({ key, type, required = false, min, max, maxLength, item, minItems, maxItems, options, showWhen, default: value }) => ({
   key,
   type,
   required,
@@ -22,6 +22,8 @@ const describeField = ({ key, type, required = false, min, max, maxLength, item,
   max,
   maxLength,
   default: value,
+  ...(options ? { options } : {}),
+  ...(showWhen ? { showWhen } : {}),
   ...(item ? { item: item.map(describeField), minItems, maxItems } : {}),
 });
 
@@ -51,8 +53,10 @@ export function runSimulation(req, res) {
   noStore(res);
   const simulator = simulatorByKey(req.params.key);
   const { currency, ...input } = req.body;
-  const { resultats, hypotheses } = SIMULATOR_FUNCTIONS[simulator.key](input, { currency });
+  const { resultats, hypotheses, serie } = SIMULATOR_FUNCTIONS[simulator.key](input, { currency });
   const answer = { simulator: simulator.key, calculator: simulator.calculator, resultats };
   if (hypotheses !== null) answer.hypotheses = hypotheses;
+  // A step-by-step series (compound interest, year by year), when the simulator has one.
+  if (serie) answer.serie = serie;
   res.json(answer);
 }

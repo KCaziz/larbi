@@ -60,6 +60,15 @@ export const FINANCIAL_TABLES = [
   { model: 'finCategory', table: 'fin_categories', label: 'category', amounts: false, currency: false },
   { model: 'finIncome', table: 'fin_incomes', label: 'income', amounts: true, currency: true },
   { model: 'finTransaction', table: 'fin_transactions', label: 'transaction', amounts: true, currency: true },
+  // Accounts (P8-03): an opening balance, not a `value`; a currency.
+  { model: 'finAccount', table: 'fin_accounts', label: 'account', amounts: false, currency: true },
+  // Tags (P8-07): a name and a colour, no amount, no currency.
+  { model: 'finTag', table: 'fin_tags', label: 'tag', amounts: false, currency: false },
+  // What was said about one occurrence of a recurrence (P8-11); its amount
+  // lives on the movement it created.
+  { model: 'finOccurrence', table: 'fin_occurrences', label: 'occurrence', amounts: false, currency: false, softDelete: false },
+  // Payslips kept by choice (P8-15): its `value` is the net the lines give.
+  { model: 'finPayslip', table: 'fin_payslips', label: 'payslip', amounts: true, currency: true },
   // An onboarding record holds SEVERAL declared amounts (in `answers`) rather
   // than one `value`, but it does carry the currency they are all expressed in,
   // so the currency rule applies to it and the amount rule does not.
@@ -113,3 +122,9 @@ export const FINANCIAL_TABLES = [
  * verrait pas.
  */
 export const ownerFilter = (table, userId) => (table.ownerWhere ? table.ownerWhere(userId) : { userId });
+
+// The live rows of a table: owned by the account and not logically deleted.
+// A table declared `softDelete: false` has no `deletedAt` (an occurrence's
+// outcome is replaced, never deleted), and Prisma rejects a filter on a column
+// that does not exist — which made the inventory and the export answer 500.
+export const liveFilter = (table, userId) => ({ ...ownerFilter(table, userId), ...(table.softDelete === false ? {} : { deletedAt: null }) });

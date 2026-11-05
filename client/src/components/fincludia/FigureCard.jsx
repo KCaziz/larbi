@@ -1,6 +1,8 @@
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Info } from 'lucide-react';
 import { formatAmount, formatRatio } from '../../lib/format.js';
+import { howToCompute } from '../../lib/howToCompute.js';
 import './Fincludia.css';
 
 // One computed figure (P6-03, P6-04, and the KPI card of P1-12). It takes an
@@ -40,6 +42,9 @@ export default function FigureCard({ label, answer, simulation = false, children
         {simulation && <span className="fin-badge-simulation">{t('fincludia.simulationBadge')}</span>}
       </h3>
       <p className={unknown ? 'fin-figure-value fin-figure-unknown' : 'fin-figure-value'}>{value()}</p>
+      {/* Never a bare « non calculé » (recette R8-08): what is missing, and
+          the screen where to give it. */}
+      {unknown && !simulation && <HowToCompute answer={answer} />}
       {children}
 
       <details className="fin-why">
@@ -56,5 +61,17 @@ export default function FigureCard({ label, answer, simulation = false, children
         )}
       </details>
     </article>
+  );
+}
+
+// `answer`: an engine answer, read for what is missing; or `hint`: { key, to }
+// when the figure does not come from one.
+export function HowToCompute({ answer = null, hint = null, className = 'fin-howto' }) {
+  const { t } = useTranslation();
+  const { key, to } = hint ?? howToCompute(answer);
+  return (
+    <p className={className}>
+      {t('fincludia.howTo.lead')} <Link to={to}>{t(`fincludia.howTo.${key}`)}</Link>
+    </p>
   );
 }

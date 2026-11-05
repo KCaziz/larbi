@@ -16,6 +16,8 @@
 //   rate  : a decimal rate (0.05 = 5 %), may be negative in a simulation
 //   count : a whole number of months, days or units
 //   text  : a short free label, only to name a row the user added
+//   choice: one of a fixed list of `options` (a rate's period, simple or compound);
+//           its `default` is the first option unless stated
 //   list  : a repeated group of the above (`item`), for the calculators the
 //           client describes with a "liste de dettes" rather than fixed slots
 // `min`/`max` are only bounds the client states or arithmetic requires; nothing
@@ -37,14 +39,24 @@ const da = (units) => units * 100;
 const money = (key, extra = {}) => ({ key, type: 'money', min: 0, ...extra });
 const count = (key, extra = {}) => ({ key, type: 'count', min: 0, ...extra });
 const rate = (key, extra = {}) => ({ key, type: 'rate', ...extra });
+const choice = (key, options, extra = {}) => ({ key, type: 'choice', options, default: options[0], ...extra });
 const text = (key, extra = {}) => ({ key, type: 'text', maxLength: 60, ...extra });
 const list = (key, item, extra = {}) => ({ key, type: 'list', item, minItems: 1, maxItems: 20, ...extra });
 
-export const SIMULATOR_FIELD_TYPES = ['money', 'rate', 'count', 'text', 'list'];
+export const SIMULATOR_FIELD_TYPES = ['money', 'rate', 'count', 'text', 'list', 'choice'];
 
 // Monthly credit, the convention of every calculator here. Named so the two
 // places that need it cannot disagree.
 const MONTHLY_PERIODS = 12;
+
+// Simple and compound interest (client's message of 2026-11-02).
+const INTEREST_PERIODS = ['monthly', 'quarterly', 'annual'];
+const DURATION_MONTHS = { months: 1, quarters: 3, years: 12 };
+const CONTRIBUTION_MONTHS = { monthly: 1, quarterly: 3, annual: 12 };
+// The calculation period, in months: the rate's own when it is monthly or
+// quarterly, the capitalisation chosen when the rate is yearly.
+export const interestPeriodMonths = (v) => CONTRIBUTION_MONTHS[v.ratePeriod === 'annual' ? v.compounding : v.ratePeriod];
+export { DURATION_MONTHS, CONTRIBUTION_MONTHS };
 const periodsPerYear = () => count('periodsPerYear', { min: 1, max: 365, default: MONTHLY_PERIODS });
 
 // `publics` repeats the client's "Publics" column. It is INFORMATIVE only: the
@@ -143,6 +155,42 @@ export const SIMULATORS = [
       money('contribution'),
       count('months', { required: true, min: 1 }),
       rate('monthlyRate', { required: true }),
+    ],
+  },
+  // « Simulateur des intérêts simples et composés » (asked by the client on
+  // 2026-11-01, formulas and fields given by him on 2026-11-02): what a sum, with
+  // or without regular payments, becomes at a simple or a compound rate. The rate
+  // is typed per MONTH, QUARTER or YEAR and is never divided when it is already the
+  // rate of a period; a yearly rate says whether it is nominal or effective.
+  // Compound capital and end-of-period payments are the client's F029 / F030;
+  // everything else is INT-F01 to INT-F05 (constants/finInterestFormulas.js).
+  // Taxes and account fees are not in the figures (he said so).
+  {
+    key: 'interet-compose',
+    example: { capital: da(100_000), rate: 0.01, ratePeriod: 'monthly', interestKind: 'compound', duration: 12, durationUnit: 'months', periodicContribution: da(5_000), contributionFrequency: 'monthly', contributionTiming: 'end' },
+    calculator: 'CAL-IC',
+    formulas: ['INT-F01', 'INT-F02', 'INT-F03', 'INT-F04', 'INT-F05'],
+    publics: ['tous'],
+    fields: [
+      money('capital'),
+      rate('rate', { required: true }),
+      choice('ratePeriod', INTEREST_PERIODS, { default: 'annual' }),
+      choice('annualRateKind', ['nominal', 'effective'], { showWhen: { ratePeriod: 'annual' } }),
+      choice('interestKind', ['compound', 'simple']),
+      count('duration', { required: true, min: 1, max: 720 }),
+      choice('durationUnit', ['years', 'quarters', 'months']),
+      choice('compounding', INTEREST_PERIODS, { showWhen: { ratePeriod: 'annual' } }),
+      money('periodicContribution'),
+      choice('contributionFrequency', INTEREST_PERIODS),
+      choice('contributionTiming', ['end', 'start']),
+    ],
+    // The calculation period is the rate's own period (monthly, quarterly) or, for
+    // a yearly rate, the capitalisation chosen. The duration and the payments must
+    // fall on whole periods: nothing is cut or rounded to make them fit.
+    refinements: [
+      { check: (v) => (v.duration * DURATION_MONTHS[v.durationUnit]) % interestPeriodMonths(v) === 0, path: 'duration' },
+      { check: (v) => v.periodicContribution === 0 || (CONTRIBUTION_MONTHS[v.contributionFrequency] % interestPeriodMonths(v) === 0), path: 'contributionFrequency' },
+      { check: (v) => v.duration * DURATION_MONTHS[v.durationUnit] <= 720, path: 'duration' },
     ],
   },
   {
@@ -325,7 +373,7 @@ export const SIMULATORS = [
     key: 'simulation-logement',
     example: { price: da(9_000_000), downPayment: da(1_500_000), annualRate: 0.055, periodsPerYear: 12, durationMonths: 240, fees: da(50_000), insurance: da(3_000), netIncome: da(180_000), currentLivingAllowance: da(90_000), currentDebtService: da(0), liquidSavings: da(2_000_000) },
     calculator: 'CAL-30',
-    formulas: ['F009', 'F020', 'F021', 'F022', 'F023', 'F056'],
+    formulas: ['F007', 'F020', 'F021', 'F022', 'F023', 'F056'],
     publics: ['jeune_actif', 'salarie', 'famille'],
     fields: [
       money('price', { required: true, min: 1 }),

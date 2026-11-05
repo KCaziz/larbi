@@ -8,7 +8,7 @@ import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
-import FigureCard from '../../components/fincludia/FigureCard.jsx';
+import FigureCard, { HowToCompute } from '../../components/fincludia/FigureCard.jsx';
 import IncomeExpenseChart from '../../components/fincludia/IncomeExpenseChart.jsx';
 import LineChart from '../../components/fincludia/charts/LineChart.jsx';
 import '../../components/fincludia/Fincludia.css';
@@ -252,6 +252,7 @@ export default function SynthesisPage() {
 
           <Block id="r08" title={t('synthesis.sections.R08')} to="/app/objectifs/fonds-urgence">
             <p>{s.R08.moisReserve.resultat === null ? t('fincludia.notComputed') : t('fincludia.months', { count: Math.round(s.R08.moisReserve.resultat * 10) / 10 })}</p>
+            {s.R08.moisReserve.resultat === null && <HowToCompute answer={s.R08.moisReserve} />}
             <p>
               {t('reserve.gap')} : {money(s.R08.manque.resultat)}
             </p>
@@ -280,6 +281,7 @@ export default function SynthesisPage() {
             <p>
               {t('movements.clearingRate')} : {s.R11.tauxPointage.resultat === null ? t('fincludia.notComputed') : formatRatio(i18n.language, s.R11.tauxPointage.resultat)}
             </p>
+            {s.R11.tauxPointage.resultat === null && <HowToCompute hint={{ key: 'movements', to: '/app/mouvements/nouveau' }} />}
             {s.R11.nonPointees > 0 && <p className="synthesis-alert">{t('synthesis.toClear', { count: s.R11.nonPointees })}</p>}
             {s.R11.nonCategorisees > 0 && (
               <p>
