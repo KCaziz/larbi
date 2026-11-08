@@ -454,3 +454,9 @@
   color: var(--flow);
   font-weight: 600;
 }
+
+/* Recette R9-09: a subscription, named as such. */
+.calendar-tag-subscription {
+  background: var(--blue-bg);
+  color: var(--blue);
+}

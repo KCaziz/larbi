@@ -1,7 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { HttpError } from '../utils/httpError.js';
 import { MARKET_HYPOTHESES_DATE, MARKET_INFLATION, MARKET_START, MARKET_SUPPORTS, MARKET_VERSION } from '../constants/finPaperMarket.js';
-import { projection, realReturn, seriesMeasures, simulatedSeries } from '../services/finance/paperMarket.js';
+import { COMPOUND_CLASSES, compoundBreakdown, projection, realReturn, seriesMeasures, simulatedSeries } from '../services/finance/paperMarket.js';
 import {
   DEFAULT_PAPER_CAPITAL,
   DEFAULT_PAPER_FEE_RATE,
@@ -238,6 +238,14 @@ export function getMarket(req, res) {
       };
     }),
   });
+}
+
+// P10-03: the part due to compound interest, for a support that yields.
+export function getMarketInterest(req, res) {
+  const support = MARKET_SUPPORTS.find((row) => row.key === req.params.key);
+  if (!support) throw new HttpError(404, 'Unknown support');
+  if (!COMPOUND_CLASSES.includes(support.assetClass)) throw new HttpError(422, 'This support does not pay interest', { reason: 'noInterest' });
+  res.json({ interets: compoundBreakdown(support, { amount: req.query.montant, months: req.query.mois }) });
 }
 
 export function getMarketProjection(req, res) {

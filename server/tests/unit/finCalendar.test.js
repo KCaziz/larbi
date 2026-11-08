@@ -217,13 +217,19 @@ describe('P6-07 — the calendar of a period', () => {
 describe('P6-07 — what the subscriptions cost', () => {
   test('each one is brought back to the month, and the year is twelve of them', () => {
     const cost = recurringCost(
-      [recurrence({ value: 120000, frequency: 'mensuel' }), recurrence({ id: 'r2', label: 'Assurance', value: 1200000, frequency: 'annuel' })],
+      [
+        recurrence({ value: 120000, frequency: 'mensuel' }),
+        recurrence({ id: 'r2', label: 'Box', value: 1200000, frequency: 'annuel', category: { key: 'fixed.internet', baseKey: null } }),
+        // Recette R9-09: a regular charge that is not a subscription.
+        recurrence({ id: 'r4', label: 'Assurance', value: 600000, frequency: 'mensuel' }),
+      ],
       { currency: 'DZD', now: D('2026-10-16') },
     );
     assert.equal(cost.coutMensuel.resultat, 220000, '120 000 + a twelfth of 1 200 000');
     assert.equal(cost.coutAnnuel.resultat, 2640000);
+    assert.equal(cost.chargesMensuelles.resultat, 820000, 'every regular charge, apart');
     assert.equal(cost.lignes[0].mensuel.formule_id, 'F049');
-    assert.deepEqual(cost.lignes.map((line) => line.label), ['Abonnement', 'Assurance'], 'sorted by what they actually cost per month');
+    assert.deepEqual(cost.lignes.map((line) => line.label), ['Abonnement', 'Box'], 'sorted by what they actually cost per month');
   });
 
   test('an incoming recurrence is not a subscription', () => {
@@ -237,7 +243,7 @@ describe('P6-07 — what the subscriptions cost', () => {
 
   test('another currency and an unusable frequency are reported, never guessed', () => {
     const cost = recurringCost(
-      [recurrence({ currency: 'EUR' }), recurrence({ id: 'r3', label: 'Mystère', frequency: 'quand-ça-vient' })],
+      [recurrence({ currency: 'EUR' }), recurrence({ id: 'r3', label: 'Abonnement mystère', frequency: 'quand-ça-vient' })],
       { currency: 'DZD' },
     );
     assert.equal(cost.coutMensuel.resultat, null);
@@ -264,6 +270,12 @@ describe('P6-07 — a provision', () => {
     assert.equal(view.provisionMensuelle.formule_id, 'F045');
     assert.equal(view.reste, 2000000);
     assert.equal(view.etat, 'active');
+  });
+
+  test('due later this month: the whole rest is to set aside this month (recette R9-15)', () => {
+    const view = buildProvisionView(provision({ targetDate: D('2026-10-25') }), { now: D('2026-10-05') });
+    assert.equal(view.moisRestants, 1);
+    assert.equal(view.provisionMensuelle.resultat, 2000000);
   });
 
   test('past the due date there is no month left to divide by', () => {

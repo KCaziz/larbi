@@ -70,7 +70,24 @@ describe('P8-04 — essential expenses over the months really covered (C4)', () 
     await spend('fixed.loyer', 3000000, 12);
     const r = await reserve();
     assert.notEqual(r.depensesEssentielles, 1000000);
-    assert.equal(r.depensesEssentielles, null, 'less than a month, nothing declared: unknown, not guessed');
+    // Recette R9-08: what is recorded is used, never ignored — as a floor.
+    assert.equal(r.depensesEssentielles, 3000000, 'less than a month, nothing declared: what is recorded so far');
+    assert.equal(r.sourceDepensesEssentielles, 'recorded');
+  });
+
+  test('less than a month: the budget’s essential envelopes come before the recorded floor (recette R9-08)', async () => {
+    await spend('fixed.loyer', 3000000, 12);
+    const now = new Date();
+    const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59));
+    const created = await t.request('POST', '/fin/budgets', {
+      user,
+      json: { label: 'Mois', periodStart: start.toISOString(), periodEnd: end.toISOString(), currency: 'DZD', envelopes: [{ categoryId: await categoryId('fixed.loyer'), kind: 'fixed', value: 3500000 }] },
+    });
+    assert.equal(created.status, 201, JSON.stringify(created.body));
+    const r = await reserve();
+    assert.equal(r.depensesEssentielles, 3500000);
+    assert.equal(r.sourceDepensesEssentielles, 'budget');
   });
 
   test('three months of history are averaged over three months', async () => {

@@ -37,15 +37,17 @@ export default function HomePage() {
   const [period, setPeriod] = useState('mois');
   const [custom, setCustom] = useState({ from: '', to: '' });
   const [ringTab, setRingTab] = useState('expenses');
+  const [tabChosen, setTabChosen] = useState(false);
   const [slice, setSlice] = useState(null);
   const [accountView, setAccountView] = useState('total');
 
   const range = periodRange(period, new Date(), custom);
-  const periodQuery = range ? `from=${new Date(`${range.from}T00:00:00.000Z`).toISOString()}&to=${new Date(`${range.to}T23:59:59.999Z`).toISOString()}` : '';
+  // One account chosen (recette R9-06): the ring, the flow, the figures and the
+  // movements are those of that account only.
+  const oneAccount = accountView !== 'total' ? accountView : null;
+  const periodQuery = [range ? `from=${new Date(`${range.from}T00:00:00.000Z`).toISOString()}&to=${new Date(`${range.to}T23:59:59.999Z`).toISOString()}` : '', oneAccount ? `accountId=${oneAccount}` : ''].filter(Boolean).join('&');
   const home = useApi(`/fin/accueil?${periodQuery}`);
   const today = useApi('/fin/aujourdhui');
-  // The net flow of the last months: the mini-curve that follows the scroll (G-03).
-  const flowHistory = useApi('/fin/argent/synthese/historique');
   // Keep the previous answer on screen while a new period loads.
   const [kept, setKept] = useState(null);
   if (home.data && home.data !== kept) setKept(home.data);
@@ -61,14 +63,19 @@ export default function HomePage() {
     if (ringTab === 'income') params.set('kind', 'income');
     if (slice && (ringTab === 'expenses' || ringTab === 'income')) params.set(slice === 'none' ? 'uncategorised' : 'categoryId', slice === 'none' ? 'true' : slice);
     if (slice && ringTab === 'accounts') params.set('accountId', slice);
+    if (oneAccount) params.set('accountId', oneAccount);
+    else if (!params.has('accountId')) params.set('inTotal', 'true');
     return params.toString();
-  }, [range?.from, range?.to, ringTab, slice]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [range?.from, range?.to, ringTab, slice, oneAccount]); // eslint-disable-line react-hooks/exhaustive-deps
   const movements = useApi(`/fin/transactions?${movementsQuery}`);
 
   if (!data && home.status === 'loading') return <LoadingState />;
   if (home.status === 'error' && !data) return <ErrorState message={t('state.loadError')} onRetry={home.reload} />;
 
   const { comptes, synthese, budget, objectifs, reserve, echeances } = data;
+  // A first income shows at once (recette R9-03): with income and no spending
+  // yet, the ring opens on « Revenus » — until the person picks a tab.
+  if (!tabChosen && ringTab === 'expenses' && synthese.depensesParCategorie.length === 0 && synthese.revenusParCategorie.length > 0) setRingTab('income');
   const currency = synthese.currency;
   const total = comptes.totals.find((row) => row.currency === currency) ?? comptes.totals[0] ?? null;
   const openAccounts = comptes.accounts.filter((account) => !account.archivedAt);
@@ -81,7 +88,7 @@ export default function HomePage() {
 
   const ringRows = {
     accounts: openAccounts
-      .filter((account) => !account.liability && account.solde.resultat > 0)
+      .filter((account) => !account.liability && account.solde.resultat > 0 && (oneAccount ? account.id === oneAccount : account.includeInTotal))
       .map((account) => ({ key: account.id, label: account.label, icon: account.icon, color: account.color, total: account.solde.resultat })),
     expenses: synthese.depensesParCategorie.map((row) => ({ key: row.categoryId ?? 'none', label: row.label ?? t('myMoney.noCategory'), icon: row.icon, color: row.color, total: row.total })),
     income: synthese.revenusParCategorie.map((row) => ({ key: row.categoryId ?? 'none', label: row.label ?? t('myMoney.noCategory'), icon: row.icon, color: row.color, total: row.total })),
@@ -119,9 +126,15 @@ export default function HomePage() {
             </Link>
             {!shownAccount && (total?.soldeTotal.resultat === null || !total) && <HowToCompute hint={{ key: 'accounts', to: '/app/comptes/nouveau' }} />}
           </div>
-          <Link to="/app/synthese" className="home-synthesis-link">
-            <PieChart size={18} aria-hidden="true" /> {t('appNav.synthesis')}
-          </Link>
+          {/* Recette R9-14: « + » right under « Synthèse ». */}
+          <div className="home-balance-side">
+            <Link to="/app/synthese" className="home-synthesis-link">
+              <PieChart size={18} aria-hidden="true" /> {t('appNav.synthesis')}
+            </Link>
+            <QuickAddLink className="home-add-link">
+              <Plus size={18} aria-hidden="true" /> {t('appHome.expensesAndIncome')}
+            </QuickAddLink>
+          </div>
         </section>
 
         {/* ACC-03: the three central shortcuts, always visible. */}
@@ -129,10 +142,6 @@ export default function HomePage() {
           <Link to="/app/comptes">
             <Wallet size={18} aria-hidden="true" /> {t('appNav.accounts')}
           </Link>
-          {/* On a phone: the quick-add sheet over this page, not the Mouvements page. */}
-          <QuickAddLink>
-            <Plus size={18} aria-hidden="true" /> {t('appHome.expensesAndIncome')}
-          </QuickAddLink>
           <button type="button" onClick={() => setRingTab('flow')}>
             {t('appHome.netFlow')} :{' '}
             <strong>{synthese.fluxNet.resultat === null ? t('fincludia.notComputed') : formatAmount(i18n.language, synthese.fluxNet.resultat, currency)}</strong>
@@ -172,7 +181,13 @@ export default function HomePage() {
 
         {/* ACC-04 / ACC-06: the tools square, then the ring of the active tab;
             a slice filters the movements under it (ACC-07 / ACC-08). */}
-        <MiniFlow targetId="home-ring-section" points={flowHistory.data?.points} currency={flowHistory.data?.currency ?? currency} />
+        <MiniFlow
+          targetId="home-ring-section"
+          rows={ringRows}
+          title={t(`appHome.ringTabs.${ringTab}`)}
+          figure={ringTab === 'flow' ? (synthese.revenus.resultat ?? 0) - (synthese.depenses.resultat ?? 0) : null}
+          currency={currency}
+        />
         <section id="home-ring-section" className="home-ring-section" aria-labelledby="home-ring-title">
           <h2 id="home-ring-title" className="sr-only">
             {t('appHome.distribution')}
@@ -187,6 +202,7 @@ export default function HomePage() {
                 className={ringTab === key ? 'movements-tab active' : 'movements-tab'}
                 onClick={() => {
                   setRingTab(key);
+                  setTabChosen(true);
                   setSlice(null);
                 }}
               >
@@ -199,7 +215,15 @@ export default function HomePage() {
               <Wrench size={22} aria-hidden="true" />
               <span>{t('appNav.tools')}</span>
             </Link>
-            <RingChart rows={ringRows} currency={currency} selected={slice} onSelect={ringTab === 'flow' ? null : setSlice} label={t(`appHome.ringTabs.${ringTab}`)} />
+            <RingChart
+              rows={ringRows}
+              currency={currency}
+              selected={slice}
+              onSelect={ringTab === 'flow' ? null : setSlice}
+              label={t(`appHome.ringTabs.${ringTab}`)}
+              center={ringTab === 'flow' ? { label: t('appHome.netFlow'), value: (synthese.revenus.resultat ?? 0) - (synthese.depenses.resultat ?? 0) } : null}
+              shares={ringTab !== 'flow'}
+            />
           </div>
 
           {movements.data && (
@@ -376,7 +400,7 @@ export default function HomePage() {
         <dl className="money-extras">
           <dt>{t('myMoney.plannedVsReal')}</dt>
           <dd>
-            {t('myMoney.plannedVsRealLine', {
+            {t(synthese.prevuReel.source === 'budget' ? 'myMoney.plannedVsRealBudget' : 'myMoney.plannedVsRealLine', {
               planned: synthese.prevuReel.prevu === null ? t('fincludia.notComputed') : formatAmount(i18n.language, synthese.prevuReel.prevu, currency),
               real: synthese.prevuReel.reel === null ? t('fincludia.notComputed') : formatAmount(i18n.language, synthese.prevuReel.reel, currency),
             })}

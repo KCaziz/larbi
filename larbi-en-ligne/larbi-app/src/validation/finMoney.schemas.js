@@ -149,6 +149,7 @@ export const historyQuerySchema = z
     text: z.string().trim().min(1).max(120).optional(),
     kind: z.enum([...TRANSACTION_KINDS, ...TRANSFER_KINDS]).optional(),
     accountId: z.string().uuid().optional(),
+    inTotal: queryBoolean,
     tagId: z.string().uuid().optional(),
     clearing: z.enum(CLEARING_STATES).optional(),
     tab: z.enum(['transfers']).optional(),
@@ -156,6 +157,7 @@ export const historyQuerySchema = z
     source: z.enum(['manual', 'imported', 'document', 'partner', 'computed']).optional(),
     scope: scopeSchema.optional(),
     categoryId: z.string().uuid().optional(),
+    categoryGroup: z.string().trim().min(1).max(60).optional(),
     uncategorised: queryBoolean,
     shared: queryBoolean,
     planned: queryBoolean,
@@ -176,7 +178,7 @@ export const historyQuerySchema = z
 
 // The synthesis of one period (screen C05). No period = the current month.
 export const synthesisQuerySchema = z
-  .object({ from: isoDate.optional(), to: isoDate.optional() })
+  .object({ from: isoDate.optional(), to: isoDate.optional(), accountId: z.string().uuid().optional() })
   .strict()
   .refine((query) => Boolean(query.from) === Boolean(query.to), { message: 'A period needs both ends' })
   .refine((query) => !query.from || query.to >= query.from, { message: 'to is before from', path: ['to'] });

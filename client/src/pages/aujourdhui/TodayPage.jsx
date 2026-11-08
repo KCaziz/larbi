@@ -33,7 +33,7 @@ export default function TodayPage() {
   const list = view.aFaire;
   const language = i18n.language;
   const nothing =
-    list.actions.length + list.revenusAConfirmer.length + list.paiementsAConfirmer.length + list.echeances.length + list.alertes.length + list.formations.length === 0 &&
+    list.actions.length + list.revenusAConfirmer.length + list.paiementsAConfirmer.length + list.echeances.length + list.alertes.length + list.formations.length + (list.remboursements?.length ?? 0) === 0 &&
     list.aPointer === 0 &&
     list.questions.premiersPas === 0 &&
     list.questions.sante.length === 0;
@@ -109,6 +109,30 @@ export default function TodayPage() {
 
         {toConfirm('today-income', 'today.incomeToConfirm', list.revenusAConfirmer)}
         {toConfirm('today-payments', 'today.paymentsToConfirm', list.paiementsAConfirmer)}
+
+        {/* Recette R9-11: loans and borrowings to repay, or to get repaid. */}
+        {list.remboursements?.length > 0 && (
+          <section aria-labelledby="today-debts">
+            <h2 id="today-debts">
+              <Wallet size={18} aria-hidden="true" /> {t('today.debtsTitle')} <span className="today-count">{list.remboursements.length}</span>
+            </h2>
+            <ul className="today-upcoming">
+              {list.remboursements.map((debt) => (
+                <li key={debt.id} className="today-upcoming-row">
+                  <span className="today-upcoming-date">{debt.echeance ? formatDate(language, debt.echeance) : t('today.debtThisMonth')}</span>
+                  <span className="today-upcoming-label">
+                    {t(debt.direction === 'lent' ? 'today.debtToCollect' : 'today.debtToRepay', { label: debt.label })}
+                    <small className="today-debt-left"> {t('today.debtLeft', { amount: formatAmount(language, debt.restant, view.currency) })}</small>
+                  </span>
+                  <span className="today-upcoming-amount">{formatAmount(language, debt.montant, view.currency)}</span>
+                  <Link to="/app/dettes" className="today-link">
+                    {t('today.debtRecord')}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {list.aPointer > 0 && (
           <section aria-labelledby="today-clearing">

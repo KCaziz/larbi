@@ -15,6 +15,7 @@ import FigureCard, { HowToCompute } from '../../components/fincludia/FigureCard.
 import CategoryIcon from '../../components/fincludia/CategoryIcon.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Accounts.css';
+import CounterValue from '../../components/fincludia/CounterValue.jsx';
 
 // « Mes comptes » (P8-05, screens COM-01 to COM-04): every account with its
 // balance (PB-F001, computed by the server), the total available (PB-F002)
@@ -74,6 +75,24 @@ export default function AccountsPage() {
             {totals.map((total) => (
               <FigureCard key={`net-${total.currency}`} label={t('accounts.netPosition', { currency: total.currency })} answer={total.positionNette} />
             ))}
+          </div>
+        )}
+        {/* Recette R9-13: how the two figures are made, in words and in figures. */}
+        {totals.length > 0 && (
+          <div className="accounts-explain">
+            <p>{t('accounts.explainTotal')}</p>
+            <p>{t('accounts.explainNet')}</p>
+            {totals
+              .filter((total) => total.positionNette.resultat !== null)
+              .map((total) => (
+                <p key={`explain-${total.currency}`} className="accounts-explain-figures">
+                  {t('accounts.explainNetFigures', {
+                    assets: formatAmount(i18n.language, total.actifs ?? 0, total.currency),
+                    liabilities: formatAmount(i18n.language, total.passifs ?? 0, total.currency),
+                    net: formatAmount(i18n.language, total.positionNette.resultat, total.currency),
+                  })}
+                </p>
+              ))}
           </div>
         )}
 
@@ -166,6 +185,8 @@ function AccountCard({ account, types, run }) {
           {!account.includeInTotal && ` · ${t('accounts.notInTotal')}`}
           {account.archivedAt && ` · ${t('accounts.archivedTag')}`}
         </p>
+        {/* P10-05: a foreign-currency account, in dinars at the official rate. */}
+        {account.currency !== 'DZD' && account.solde.resultat !== null && <CounterValue value={account.contreValeur} className="accounts-meta" />}
       </div>
       <p className="accounts-balance">
         {account.liability && <span className="accounts-owed">{t('accounts.owed')} </span>}

@@ -37,6 +37,9 @@ export default function CategoryPicker({ id, value, onChange, groups, emptyLabel
         map.get(key).categories.push(category);
       }
     }
+    // P10-01: in each group, the main category comes first — « Logement »
+    // without saying which kind.
+    for (const bucket of map.values()) bucket.categories.sort((a, b) => Number(Boolean(b.main)) - Number(Boolean(a.main)));
     return [...map.values()];
   }, [groups, t]);
 
@@ -132,9 +135,9 @@ export default function CategoryPicker({ id, value, onChange, groups, emptyLabel
                 </li>
                 {current.categories.map((category) => (
                   <li key={category.id}>
-                    <button type="button" className="category-picker-row" aria-current={category.id === value ? 'true' : undefined} onClick={() => pick(category.id)}>
+                    <button type="button" className={category.main ? 'category-picker-row category-picker-main' : 'category-picker-row'} aria-current={category.id === value ? 'true' : undefined} onClick={() => pick(category.id)}>
                       <CategoryIcon emoji={category.icon} size={18} />
-                      <span className="category-picker-name">{category.label}</span>
+                      <span className="category-picker-name">{category.main ? t('categoryPicker.wholeGroup', { group: category.label }) : category.label}</span>
                     </button>
                   </li>
                 ))}

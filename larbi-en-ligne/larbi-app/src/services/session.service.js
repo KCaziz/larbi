@@ -54,3 +54,17 @@ export async function revokeOtherSessions(prisma, userId, exceptId) {
   });
   return count;
 }
+
+// P10-06 — a non-subscriber has ONE screen at a time (client's rule,
+// 2026-11-08). A new sign-in is refused while another session is open; a
+// session idle for longer than this, or signed out, is not « open » any more,
+// so a screen closed without signing out never locks the person out for long.
+export const ONE_SCREEN_IDLE_MS = 30 * 60 * 1000;
+
+export async function hasOpenSession(prisma, userId, now = new Date()) {
+  const open = await prisma.userSession.findFirst({
+    where: { userId, revokedAt: null, lastSeenAt: { gte: new Date(now.getTime() - ONE_SCREEN_IDLE_MS) } },
+    select: { id: true },
+  });
+  return Boolean(open);
+}

@@ -3910,6 +3910,77 @@ Entre les deux : `P8-02` retire la gestion collective du menu personnel, mais `/
 
 ---
 
+# PHASE 10 — RETOURS DE RECETTE : NOUVELLES FONCTIONNALITÉS (2026-11-08)
+## Durée : hors des 8 semaines (estimation ci-dessous)
+## Objectif
+
+Les fonctionnalités nouvelles demandées par le client pendant le troisième passage de recette (`test.txt`, 2026-11-08). Les défauts relevés au même passage sont suivis dans `SUIVI_RECETTE.md` (section R9), pas ici.
+
+### P10-01 — Catégories principales et secondaires, chacune choisissable
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-08`
+- Durée cible : 2 jours (estimation)
+- Origine : `test.txt` l. 9 (2026-11-08)
+- Réalisé (2026-11-08) : une catégorie de référence « principale » par groupe du client (24, migration `20261108130000_fin_main_categories`, déclarées aussi dans `constants/finCategories.js` pour le contrôle de cohérence). Elle porte le groupe : une dépense rangée dans « Logement » compte dans l’enveloppe « Logement », les filtres et les répartitions sans autre règle. Le sélecteur la propose en tête de son groupe, « Logement (sans préciser) », puis les sous-catégories ; une enveloppe se crée sur le groupe entier plutôt que sur la catégorie principale. Famille de chaque principale : la plus fréquente de son groupe ; « Essentielle » si la majorité du groupe l’est. Tests : `finPhase10.test.js`, comptes du référentiel mis à jour (+24).
+
+Réorganiser les catégories en deux niveaux affichés comme tels (catégorie principale, puis secondaire) et laisser choisir l'une **ou** l'autre : une dépense peut être rangée dans « Logement » sans préciser « Loyer ». Aujourd'hui seule la sous-catégorie (une ligne `FinCategory`) se choisit ; la catégorie principale n'est qu'un libellé de regroupement (`group`). À décider : une ligne par catégorie principale, et ce que deviennent les budgets et rapports par groupe.
+
+### P10-02 — Couleurs personnalisables (catégories, budgets, comptes)
+- Statut : `✅ done`
+- Priorité : `🟢 low`
+- Dépendances : `P8-27`
+- Durée cible : 1 jour (estimation)
+- Origine : `test.txt` l. 13 (2026-11-08)
+- Réalisé (2026-11-08) : couleur au choix (palette de 10 couleurs contrastées, chacune nommée, plus « Par défaut ») pour : une catégorie (bouton « Couleur » sur la page Catégories ; une catégorie standard garde sa couleur sur la personnalisation de la personne), un budget (nouvelle colonne `fin_budgets.color`, migration `20261108120000_fin_colors` ; bande de couleur sur la liste et le détail ; gardée à la duplication) et un compte (création et modification). La couleur choisie pour une catégorie apparaît aussi sur l’anneau de l’Accueil. Tests : `finPhase10.test.js`.
+
+Choisir la couleur d'une catégorie (dépense ou revenu), d'un budget et d'un compte, parmi une palette contrastée (jamais la couleur seule pour porter un sens).
+
+### P10-03 — Intérêts composés dans le portefeuille fictif
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-12`
+- Durée cible : 2 jours (estimation)
+- Origine : `test.txt` l. 16 (2026-11-08)
+- Réalisé (2026-11-08) : sous chaque position du portefeuille fictif achetée sur le marché pédagogique et qui rapporte des intérêts (livret, dépôt à terme, obligation, sukuk), un volet « Intérêts composés » : depuis l’achat, intérêts gagnés dont intérêts sur intérêts, et projection à 1, 5, 10 et 20 ans (valeur, intérêts simples, composés, différence), avec la méthode en mots. Moteur : F029, capitalisation mensuelle au taux écrit du support (`compoundBreakdown`, route `GET /fin/portefeuille/marche/:key/interets`). Les prix simulés du marché étaient déjà « intérêts réinvestis » : le volet le rend visible. Tests : `paperMarket.test.js`, `finPhase10.test.js`.
+
+Un support à rendement (livret, dépôt, obligation, sukuk) capitalise ses intérêts dans le portefeuille fictif, mois après mois, et la page montre la part due aux intérêts composés (moteur des simulateurs, F029 à F031).
+
+### P10-04 — Marchés boursiers et leur évolution depuis la première cotation
+- Statut : `⛔ blocked`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-12`
+- Durée cible : 3 jours (estimation), une fois la source choisie
+- Origine : `test.txt` l. 17 (2026-11-08)
+
+Les différents marchés (Bourse d'Alger et grandes places étrangères) avec la tendance de leur évolution depuis leur première cotation. **Bloqué** : il faut une source de données réelle et autorisée (historiques d'indices ou de valeurs, droits de réutilisation, fréquence de mise à jour). Le marché pédagogique de `R8-12` reste fictif et ne peut pas tenir ce rôle.
+
+### P10-05 — Autres devises
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-03`
+- Durée cible : 2 jours (estimation)
+- Origine : `test.txt` l. 32 (2026-11-08)
+- Réalisé (2026-11-08) : devises DZD, EUR, USD, GBP, CAD (`constants/finCurrencies.js` ; toute autre devise refusée). Un compte ou un bien se crée dans l’une d’elles (choix « Devise du compte » / « Devise »), ses mouvements restent dans sa devise. Cours officiels Banque d’Algérie par date de référence : table `fin_exchange_rates` (migration `20261108140000_fin_exchange_rates`, premier jeu du 4 novembre 2026), page d’administration « Cours des devises » pour en enregistrer un nouveau (le plus récent s’applique), `GET /fin/devises`. Un compte en devise montre sa contre-valeur en dinars « au cours officiel de la Banque d’Algérie du … » ; il compte dans le patrimoine pour cette contre-valeur, jamais dans le solde en dinars ; sans cours, « à suivre ». Tests : `finPhase10.test.js`. **À faire au déploiement** : appliquer les migrations, et vérifier une fois le premier jeu de cours sur bank-of-algeria.dz.
+
+Ajouter des devises aux comptes et aux mouvements (au-delà de celles proposées aujourd'hui), avec la règle de conversion de référence (cours de la Banque d'Algérie) pour tout total qui mélange des devises.
+
+Règle du client (2026-11-08) : « Le compte devise reste en devise et c’est un patrimoine. La contre-valeur doit être en devise officielle, pas parallèle » ; un taux à une **date de référence**. Donc : un compte ou un actif en devise garde ses montants dans sa devise ; il compte dans le **patrimoine** pour sa contre-valeur en dinars au **cours officiel** (Banque d’Algérie) d’une date de référence affichée ; jamais au cours parallèle ; il n’entre pas dans le solde disponible en dinars. Sans cours officiel saisi, pas de contre-valeur (« À suivre »), conformément au cahier : « conversion uniquement avec taux daté ». Devises retenues (2026-11-08) : **DZD, EUR, USD, GBP, CAD**, avec leurs cours officiels à une date de référence (premier jeu : 4 novembre 2026, EUR 152,07 ; USD 135,91 ; GBP 182,39 ; CAD 97,21 DA, cours officiels Banque d’Algérie relevés par la presse, la page de la Banque d’Algérie n’étant pas lisible automatiquement), modifiables par un administrateur.
+
+### P10-06 — Un seul utilisateur pour les comptes non abonnés
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P3-09`
+- Durée cible : 1 jour (estimation), une fois la règle précisée
+- Origine : `test.txt` l. 35 (2026-11-08)
+- Réalisé (2026-11-08) : abonné = niveau d’accès « premium » ou administrateur (`services/subscription.service.js`). Sans abonnement : une invitation dans un espace partagé est refusée (403, « réservé aux abonnés ») ; une **nouvelle connexion est refusée** tant qu’un autre écran est ouvert (409, message « Un seul écran à la fois avec un compte gratuit… »). Un écran inactif depuis 30 minutes ou déconnecté ne bloque plus ; se reconnecter depuis le même navigateur remplace sa propre session. Tests : `auth.test.js` (3 nouveaux), `finPhase10.test.js` ; les tests « appareils connectés » utilisent désormais un compte abonné.
+
+« Restreindre l'accès aux utilisateurs à un seul pour les non abonnés ». À préciser avec le client : un compte gratuit ne peut-il pas inviter d'autres personnes en Gestion commune, ou un abonnement couvre-t-il plusieurs utilisateurs ? Puis appliquer la règle côté serveur, avec un message qui propose l'abonnement.
+
+Règle précisée (2026-11-08) : un compte **non abonné** ne peut **pas inviter** dans un espace partagé, et n’a accès qu’**avec un seul écran** à la fois (une seule session ouverte). Un abonné garde les invitations et plusieurs écrans. Précision (2026-11-08) : la **nouvelle** connexion est **refusée** tant qu’un autre écran est ouvert, avec un message (« Un seul écran à la fois avec un compte gratuit : déconnectez-vous de l’autre écran, ou abonnez-vous »). Un écran sans activité depuis 30 minutes (ou déconnecté) ne compte plus comme ouvert, pour que personne ne reste bloqué par un écran fermé sans déconnexion.
+
+---
+
 # 4. Fonctionnalités volontairement hors MVP 8 semaines
 
 Ces éléments ne doivent pas être développés avant les fonctionnalités prioritaires :
@@ -4031,7 +4102,7 @@ Le 2026-10-18, plusieurs tâches marquées comme terminées ont été re-vérifi
 - Toute nouvelle route API est contrôlée par l'audit d'autorisation automatique (`tests/security/authorization.test.js`) : la déclarer publique ou la protéger explicitement.
 - En début de session : `npm run reprise` (dans `server/`), qui régénère le client Prisma et applique les migrations en attente. Sur une machine neuve : `npm install` dans `client/` et `server/`, `prisma migrate deploy`, `JWT_SECRET` dans `server/.env`.
 - `npm run deliverables` régénère `LIVRABLES/MATRICE_RECETTE.md` et `INVENTAIRE_COMPOSANTS.md` depuis ce fichier et la suite de tests — à relancer après tout changement de statut d'une tâche.
-- Le paquet de déploiement `larbi-en-ligne/` a été régénéré et mis en ligne le 2026-10-17 (confirmé fonctionnel via `/api/health`), puis **régénéré le 2026-11-05** (recette R1 à R8 comprise) : serveur sans tests ni client Prisma généré, 61 migrations, site compilé dans `public_site/`, `.env` modèle et `app.cjs` inchangés, `base-de-donnees.sql` exporté de `larbi_dev` (vérifié en le rechargeant dans une base temporaire : mêmes nombres de lignes). Sur l'hébergeur : `npm install`, `npx prisma generate`, importer la base, redémarrer l'application. À régénérer de nouveau avant toute nouvelle mise en ligne si le code a changé depuis.
+- Le paquet de déploiement `larbi-en-ligne/` a été régénéré et mis en ligne le 2026-10-17 (confirmé fonctionnel via `/api/health`), puis **régénéré le 2026-11-05** (recette R1 à R8 comprise) : serveur sans tests ni client Prisma généré, 61 migrations, site compilé dans `public_site/`, `.env` modèle et `app.cjs` inchangés, `base-de-donnees.sql` exporté de `larbi_dev` (vérifié en le rechargeant dans une base temporaire : mêmes nombres de lignes). Sur l'hébergeur : `npm install`, `npx prisma generate`, importer la base, redémarrer l'application. **Régénéré le 2026-11-08** (recette R9, Phase 10) : client Prisma généré inclus, 64 migrations (dont `fin_colors`, `fin_main_categories`, `fin_exchange_rates`), site recompilé, `base-de-donnees.sql` exporté de `larbi_dev` et vérifié en le rechargeant (mêmes nombres de lignes, 90 tables) ; sa dernière ligne ferme les sessions de développement (règle « un seul écran »). **Le zip ne contient plus `.env`** (740 fichiers) : celui de l’hébergeur reste en place. À régénérer de nouveau avant toute nouvelle mise en ligne si le code a changé depuis.
 
 Objectif final :
 Livrer FINCLUDIA, en respectant l'ordre des phases ci-dessus. Le MVP d'origine (e-learning/blog/outils) est entièrement livré. **Corrigé le 2026-10-27** : il ne reste pas seulement des décisions du client — les Phases 8 et 9 sont du vrai développement (environ 105 jours ouvrés estimés), qui commence par la correction des calculs faux (`P8-04`), puis suit l'ordre des lots du client.

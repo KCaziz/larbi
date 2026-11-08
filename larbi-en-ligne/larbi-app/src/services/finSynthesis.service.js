@@ -183,12 +183,16 @@ export function buildSynthesis({ incomes = [], movements = [], previous = [], fa
  * writing their own query is how two screens end up disagreeing about the same
  * month.
  */
-export async function loadSynthesisData(prisma, userId, period) {
+// R9-06: an account kept apart (includeInTotal false) is not part of the global
+// figures; with accountId, only that account is read, and the declared
+// resources (not tied to an account) are left out.
+export async function loadSynthesisData(prisma, userId, period, { accountId = null } = {}) {
   const before = previousMonth(period.start);
+  const scope = accountId ? { accountId } : { OR: [{ accountId: null }, { account: { includeInTotal: true } }] };
   const [incomes, movements, previous] = await Promise.all([
     // Resources active during the period: one that ended before it started, or
     // starts after it ended, is not part of it.
-    prisma.finIncome.findMany({
+    accountId ? [] : prisma.finIncome.findMany({
       where: {
         userId,
         deletedAt: null,
@@ -199,11 +203,11 @@ export async function loadSynthesisData(prisma, userId, period) {
       select: { id: true, label: true, value: true, currency: true, frequency: true, status: true, categoryId: true, category: { select: { key: true, family: true } } },
     }),
     prisma.finTransaction.findMany({
-      where: { userId, deletedAt: null, occurredAt: { gte: period.start, lte: period.end } },
+      where: { userId, deletedAt: null, ...scope, occurredAt: { gte: period.start, lte: period.end } },
       select: { id: true, kind: true, value: true, currency: true, categoryId: true, planned: true, status: true, category: { select: { family: true, group: true, essential: true } } },
     }),
     prisma.finTransaction.findMany({
-      where: { userId, deletedAt: null, occurredAt: { gte: before.start, lte: before.end } },
+      where: { userId, deletedAt: null, ...scope, occurredAt: { gte: before.start, lte: before.end } },
       select: { kind: true, value: true, currency: true, planned: true, status: true, category: { select: { family: true, group: true, essential: true } } },
     }),
   ]);

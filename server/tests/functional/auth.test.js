@@ -98,8 +98,9 @@ describe('registration', () => {
 describe('login and session', () => {
   test('login with the right password starts a session; logout ends it', async () => {
     const body = valid();
-    await register(body);
-    const login = await t.request('POST', '/auth/login', { json: { email: body.email, password: body.password } });
+    // Signing in again from the screen that registered (its cookie comes along).
+    const same = sessionOf(await register(body));
+    const login = await t.request('POST', '/auth/login', { token: same, json: { email: body.email, password: body.password } });
     assert.equal(login.status, 200);
     const token = sessionOf(login);
     assert.equal((await t.request('GET', '/auth/me', { token })).status, 200);
@@ -111,8 +112,8 @@ describe('login and session', () => {
 
   test('login is case-insensitive on the e-mail', async () => {
     const body = valid();
-    await register(body);
-    assert.equal((await t.request('POST', '/auth/login', { json: { email: body.email.toUpperCase(), password: body.password } })).status, 200);
+    const same = sessionOf(await register(body));
+    assert.equal((await t.request('POST', '/auth/login', { token: same, json: { email: body.email.toUpperCase(), password: body.password } })).status, 200);
   });
 
   test('a wrong password and an unknown e-mail give the SAME answer (no account enumeration)', async () => {
@@ -134,6 +135,33 @@ describe('login and session', () => {
 
   test('/auth/me needs a session', async () => {
     assert.equal((await t.request('GET', '/auth/me')).status, 401);
+  });
+});
+
+// P10-06 — without a subscription, one screen at a time.
+describe('one screen for a free account', () => {
+  test('a second screen is refused while the first is open, and allowed once it signs out', async () => {
+    const body = valid();
+    const first = sessionOf(await register(body));
+    const second = await t.request('POST', '/auth/login', { json: { email: body.email, password: body.password } });
+    assert.equal(second.status, 409);
+    assert.equal(second.body.error.details.reason, 'oneScreen');
+    await t.request('POST', '/auth/logout', { token: first });
+    assert.equal((await t.request('POST', '/auth/login', { json: { email: body.email, password: body.password } })).status, 200);
+  });
+
+  test('a subscriber keeps several screens', async () => {
+    const body = valid();
+    const res = await register(body);
+    await t.prisma.user.update({ where: { id: res.body.user.id }, data: { accessLevel: 'premium' } });
+    assert.equal((await t.request('POST', '/auth/login', { json: { email: body.email, password: body.password } })).status, 200);
+  });
+
+  test('a screen idle for more than 30 minutes no longer blocks', async () => {
+    const body = valid();
+    const res = await register(body);
+    await t.prisma.userSession.updateMany({ where: { userId: res.body.user.id }, data: { lastSeenAt: new Date(Date.now() - 31 * 60 * 1000) } });
+    assert.equal((await t.request('POST', '/auth/login', { json: { email: body.email, password: body.password } })).status, 200);
   });
 });
 
@@ -174,7 +202,7 @@ describe('own profile: name, e-mail, password', () => {
     const ok = await t.request('PATCH', '/auth/me', { token, json: { email: 'Nouveau@Example.com', currentPassword: valid().password } });
     assert.equal(ok.status, 200);
     assert.equal(ok.body.user.email, 'nouveau@example.com');
-    assert.equal((await t.request('POST', '/auth/login', { json: { email: 'nouveau@example.com', password: valid().password } })).status, 200);
+    assert.equal((await t.request('POST', '/auth/login', { token, json: { email: 'nouveau@example.com', password: valid().password } })).status, 200);
   });
 
   test('the password changes only with the current one, and the new one works', async () => {
@@ -187,7 +215,7 @@ describe('own profile: name, e-mail, password', () => {
     assert.equal((await t.request('POST', '/auth/password', { token, json: { ...good, extra: 1 } })).status, 400);
     assert.equal((await t.request('POST', '/auth/password', { token, json: good })).status, 204);
     assert.equal((await t.request('POST', '/auth/login', { json: { email: res.body.user.email, password: valid().password } })).status, 401);
-    assert.equal((await t.request('POST', '/auth/login', { json: { email: res.body.user.email, password: good.newPassword } })).status, 200);
+    assert.equal((await t.request('POST', '/auth/login', { token, json: { email: res.body.user.email, password: good.newPassword } })).status, 200);
   });
 });
 

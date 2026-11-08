@@ -105,7 +105,7 @@ export default function FirstStepsPage() {
                   {t('firstSteps.ownPage')}
                 </Link>
               )}
-              {step.key === 'P2' && <SalaryStep salary={salary} currency={currency} run={run} />}
+              {step.key === 'P2' && <SalaryStep key={salary?.id ?? 'none'} salary={salary} currency={currency} run={run} done={step.done} />}
               {LINKS[step.key] && (
                 <div className="steps-actions">
                   <Link className="btn btn-secondary" to={LINKS[step.key]}>
@@ -142,24 +142,30 @@ export function ProfileStep({ done, run }) {
   const publics = t('account.fin.publics', { returnObjects: true });
   const [choice, setChoice] = useState('');
   const [accepted, setAccepted] = useState(false);
+  const [problem, setProblem] = useState(null);
   if (!profile.data) return null;
   const { consented, finPublic } = profile.data.profile;
   const COLLECTIVE = ['COL', 'COU', 'FAM'];
   const options = (Array.isArray(publics) ? publics : []).filter(({ code }) => !COLLECTIVE.includes(code));
 
+  // What is missing is said in words (recette R9-07): left to the browser's
+  // own bubble, an unticked box made « Enregistrer » look like it did nothing.
   const submit = async (event) => {
     event.preventDefault();
-    if (!choice) return;
+    if (!choice) return setProblem(t('firstSteps.profileMissing'));
+    if (!consented && !accepted) return setProblem(t('account.fin.consentRequired'));
+    setProblem(null);
     await run(() => api.put('/profile/fin', { finPublic: choice, ...(consented ? {} : { acceptConsents: true }) }));
     profile.reload();
+    return undefined;
   };
 
   if (done) return <p className="steps-value">{options.find((option) => option.code === finPublic)?.label ?? finPublic}</p>;
   return (
-    <form className="steps-form" onSubmit={submit}>
+    <form className="steps-form" onSubmit={submit} noValidate>
       <div className="fin-field">
         <label htmlFor="steps-profile">{t('account.fin.publicLabel')}</label>
-        <select id="steps-profile" value={choice} required onChange={(event) => setChoice(event.target.value)}>
+        <select id="steps-profile" value={choice} onChange={(event) => setChoice(event.target.value)}>
           <option value="">{t('firstSteps.choose')}</option>
           {options.map(({ code, label }) => (
             <option key={code} value={code}>
@@ -168,11 +174,24 @@ export function ProfileStep({ done, run }) {
           ))}
         </select>
       </div>
+      {/* The two points accepted, written above the box that accepts them. */}
       {!consented && (
-        <label className="money-check" htmlFor="steps-consent">
-          <input id="steps-consent" type="checkbox" checked={accepted} required onChange={(event) => setAccepted(event.target.checked)} />
-          {t('account.fin.consentAccept')}
-        </label>
+        <div className="steps-consent">
+          <p>{t('account.fin.consentIntro')}</p>
+          <ul>
+            <li>{t('account.fin.consentPrivacy')}</li>
+            <li>{t('account.fin.consentNoAdvice')}</li>
+          </ul>
+          <label className="money-check" htmlFor="steps-consent">
+            <input id="steps-consent" type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} />
+            {t('account.fin.consentAccept')}
+          </label>
+        </div>
+      )}
+      {problem && (
+        <p className="form-error" role="alert">
+          {problem}
+        </p>
       )}
       <Button type="submit">{t('firstSteps.save')}</Button>
     </form>
@@ -192,7 +211,7 @@ export function IncomeStep({ currency, run }) {
   const suggested = (category) => (SUGGEST_LABEL[finPublic] ? category.suggestedFor?.includes(SUGGEST_LABEL[finPublic]) : false);
   const ordered = [...incomeCategories].sort((a, b) => Number(suggested(b)) - Number(suggested(a)));
   const frequencies = ['mensuel', 'hebdomadaire', 'trimestriel', 'semestriel', 'annuel'];
-  const [form, setForm] = useState({ label: '', categoryId: '', amount: '', frequency: 'mensuel', nextDate: new Date().toISOString().slice(0, 10), accountId: '' });
+  const [form, setForm] = useState({ label: '', categoryId: '', amount: '', frequency: 'mensuel', nextDate: new Date().toISOString().slice(0, 10), accountId: '', received: true });
   const [error, setError] = useState(null);
   const own = accounts.data?.accounts?.filter((account) => !account.archivedAt && !account.liability && account.currency === currency) ?? [];
 
@@ -213,6 +232,8 @@ export function IncomeStep({ currency, run }) {
         frequency: form.frequency,
         nextDate: new Date(`${form.nextDate}T00:00:00.000Z`).toISOString(),
         accountId: form.accountId || null,
+        // On or before today, « déjà reçu » credits the account at once (R9-06).
+        received: form.received && form.nextDate <= new Date().toISOString().slice(0, 10),
       }),
     );
   };
@@ -269,6 +290,12 @@ export function IncomeStep({ currency, run }) {
           </p>
         )}
       </div>
+      {form.nextDate <= new Date().toISOString().slice(0, 10) && (
+        <label className="money-check" htmlFor="income-received">
+          <input id="income-received" type="checkbox" checked={form.received} onChange={(event) => setForm({ ...form, received: event.target.checked })} />
+          {t('firstSteps.income.received')}
+        </label>
+      )}
       <Button type="submit">{t('firstSteps.save')}</Button>
     </form>
   );
@@ -277,9 +304,11 @@ export function IncomeStep({ currency, run }) {
 // P2: when and how the income is confirmed — the day, the weekend rule, the
 // account and whether the credit asks for confirmation (QA-P05). It edits the
 // recurrence created by P1.
-function SalaryStep({ salary, currency, run }) {
-  const { t } = useTranslation();
+function SalaryStep({ salary, currency, run, done }) {
+  const { t, i18n } = useTranslation();
   const accounts = useApi('/fin/comptes');
+  const [editing, setEditing] = useState(false);
+  const [problem, setProblem] = useState(null);
   const [form, setForm] = useState(() => ({
     nextDate: salary ? new Date(salary.nextDate).toISOString().slice(0, 10) : '',
     weekendRule: salary?.weekendRule ?? 'previous',
@@ -290,9 +319,32 @@ function SalaryStep({ salary, currency, run }) {
   const own = accounts.data?.accounts?.filter((account) => !account.archivedAt && !account.liability && account.currency === currency) ?? [];
   const set = (name) => (event) => setForm({ ...form, [name]: event.target.value });
 
-  const submit = (event) => {
+  // Done, the step shows what is saved (recette R9-07): the form kept on
+  // screen with its first values made a saved step look unsaved.
+  if (done && !editing) {
+    const account = own.find((row) => row.id === salary.accountId);
+    return (
+      <div className="steps-saved">
+        <p className="steps-value">
+          {t('firstSteps.salary.saved', {
+            date: new Intl.DateTimeFormat(i18n.language === 'tzm' ? 'fr' : i18n.language, { day: 'numeric', month: 'long' }).format(new Date(salary.nextDate)),
+            account: account?.label ?? '—',
+            mode: t(`calendar.creationModes.${salary.creationMode}`),
+          })}
+        </p>
+        <button type="button" className="steps-skip" onClick={() => setEditing(true)}>
+          {t('firstSteps.edit')}
+        </button>
+      </div>
+    );
+  }
+
+  const submit = async (event) => {
     event.preventDefault();
-    run(() =>
+    if (!form.nextDate) return setProblem(t('firstSteps.salary.dateMissing'));
+    if (!form.accountId) return setProblem(t('firstSteps.salary.accountMissing'));
+    setProblem(null);
+    const ok = await run(() =>
       api.patch(`/fin/recurrences/${salary.id}`, {
         nextDate: new Date(`${form.nextDate}T00:00:00.000Z`).toISOString(),
         weekendRule: form.weekendRule,
@@ -300,10 +352,17 @@ function SalaryStep({ salary, currency, run }) {
         accountId: form.accountId || null,
       }),
     );
+    if (ok) setEditing(false);
+    return undefined;
   };
 
   return (
-    <form className="steps-form" onSubmit={submit}>
+    <form className="steps-form" onSubmit={submit} noValidate>
+      {problem && (
+        <p className="form-error" role="alert">
+          {problem}
+        </p>
+      )}
       <div className="fin-field">
         <label htmlFor="salary-date">{t('firstSteps.salary.day')}</label>
         <input id="salary-date" type="date" value={form.nextDate} required onChange={set('nextDate')} />

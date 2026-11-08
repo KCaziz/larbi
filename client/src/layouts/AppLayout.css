@@ -525,3 +525,20 @@
     padding: 0;
   }
 }
+
+/* Recette (2026-11-08) : entre 768 et 1 199 px, « FINCLUDIA » passait sous
+   « Gestion budgétaire » et le profil sortait de l’écran. La marque garde son
+   logo et cède son nom ; ni elle ni le sélecteur ne se compriment l’un sous
+   l’autre : c’est la recherche qui rétrécit. */
+.app-topbar .app-brand,
+.app-topbar .app-switcher {
+  flex-shrink: 0;
+}
+.app-topbar .app-topbar-actions {
+  min-inline-size: 0;
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .app-topbar .app-brand span {
+    display: none;
+  }
+}

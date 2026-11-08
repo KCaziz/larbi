@@ -187,6 +187,11 @@ export function buildCalendar({
   openingBalance = null,
   tensionFloor = DEFAULT_TENSION_FLOOR,
   realised = [],
+  // Recette R9-10: the occurrences of the period already confirmed. They are
+  // real movements now, so they never enter the projected cash — but they
+  // were planned, and the « prévu » of the period keeps them.
+  recurrences = [],
+  outcomes = [],
   now = new Date(),
 }) {
   const warnings = [];
@@ -216,8 +221,16 @@ export function buildCalendar({
   const asEntries = (list) => list.map((event) => ({ amount: event.value, currency }));
   // F003 / F002 over an EMPTY set is `null`, not 0: nothing planned is not the
   // same statement as "zero planned".
-  const totalOut = dueOutflows.length === 0 ? null : totalExpenses(asEntries(dueOutflows), { currency });
-  const totalIn = inflows.length === 0 ? null : totalIncome(asEntries(inflows), { currency });
+  const byId = new Map(recurrences.filter((row) => row.currency === currency).map((row) => [row.id, row]));
+  const done = outcomes
+    .filter((row) => row.outcome === 'confirmed' && row.dueDate >= from && row.dueDate <= to && byId.has(row.recurrenceId))
+    .map((row) => byId.get(row.recurrenceId));
+  const doneOut = done.filter((row) => row.kind === 'expense').map((row) => ({ amount: row.value, currency }));
+  const doneIn = done.filter((row) => row.kind === 'income').map((row) => ({ amount: row.value, currency }));
+  const outEntries = [...asEntries(dueOutflows), ...doneOut];
+  const inEntries = [...asEntries(inflows), ...doneIn];
+  const totalOut = outEntries.length === 0 ? null : totalExpenses(outEntries, { currency });
+  const totalIn = inEntries.length === 0 ? null : totalIncome(inEntries, { currency });
 
   // Day by day: what falls on it, and the running cash once it has.
   let running = openingBalance;
@@ -270,6 +283,7 @@ export function buildCalendar({
   // next to the facts. Realised only: the planned rows are the plan.
   const realisedRows = realised.filter((row) => row.currency === currency && isReal(row) && !row.planned);
   const realisedOut = realisedRows.filter((row) => row.kind === 'expense');
+  const realisedIn = realisedRows.filter((row) => row.kind === 'income');
 
   return {
     currency,
@@ -282,6 +296,7 @@ export function buildCalendar({
     // ones: « prévu » and « réel » are two readings, and the client keeps them
     // apart everywhere.
     totalReelSorties: answer('F003', realisedOut.length === 0 ? null : totalExpenses(asEntries(realisedOut), { currency })),
+    totalReelEntrees: answer('F002', realisedIn.length === 0 ? null : totalIncome(asEntries(realisedIn), { currency })),
     cashFinProjete: days.length === 0 ? null : days[days.length - 1].cashProjete,
     joursTension: tensionDays.map((day) => ({ jour: day.jour, cashProjete: day.cashProjete })),
     // The first day the money runs out, which is the one thing a person acts
@@ -299,10 +314,18 @@ export function buildCalendar({
  * months. Only EXPENSES: the client's screen is about what subscriptions cost,
  * and mixing a salary in would make the number meaningless.
  */
+// The reference categories that are subscriptions (recette R9-09): telecom and
+// digital services billed on a rhythm, and the gym. A regular charge whose
+// name says « abonnement » is one too, whatever its category.
+const SUBSCRIPTION_KEYS = new Set(['fixed.telephone', 'fixed.internet', 'fixed.streaming_video', 'fixed.musique_media', 'fixed.cloud_stockage', 'fixed.logiciel_application', 'fixed.sport_salle']);
+export const isSubscription = (row) =>
+  row.kind === 'expense' && (SUBSCRIPTION_KEYS.has(row.category?.key ?? row.category?.baseKey ?? '') || /abonnement|subscription|اشتراك/i.test(row.label ?? ''));
+
 export function recurringCost(recurrences, { currency, now = new Date() } = {}) {
   const warnings = [];
-  const expenses = recurrences.filter((row) => row.kind === 'expense' && row.currency === currency);
-  const skipped = recurrences.filter((row) => row.kind === 'expense' && row.currency !== currency).length;
+  const allExpenses = recurrences.filter((row) => row.kind === 'expense' && row.currency === currency);
+  const expenses = allExpenses.filter(isSubscription);
+  const skipped = recurrences.filter((row) => isSubscription(row) && row.currency !== currency).length;
   if (skipped > 0) {
     warnings.push(`${skipped} abonnement(s) dans une autre devise ne sont pas comptés : convertir sans taux daté donnerait un chiffre faux.`);
   }
@@ -319,6 +342,10 @@ export function recurringCost(recurrences, { currency, now = new Date() } = {}) 
 
   const inputs = { abonnements: entries.length, devise: currency };
   const total = entries.length === 0 ? null : totalExpenses(entries, { currency });
+  // Every regular charge (rent, insurance, subscriptions…), by the month: shown
+  // beside, never mixed into the subscriptions' own cost.
+  const charges = allExpenses.map((row) => normalizedRecurringCost(row.value, row.frequency)).filter((value) => value !== null);
+  const chargesTotal = charges.length === 0 ? null : charges.reduce((sum, value) => sum + value, 0);
   return {
     currency,
     // F049 per line, so a screen can sort the subscriptions by what they
@@ -335,6 +362,7 @@ export function recurringCost(recurrences, { currency, now = new Date() } = {}) 
     // frequency-factor row, used here in the other direction — the same reading
     // CAL-04 already makes when it annualises a monthly saving capacity.
     coutAnnuel: computed('F001', total === null ? null : total * 12, { inputs: { ...inputs, mois: 12 }, currency, warnings, now }),
+    chargesMensuelles: computed('F003', chargesTotal, { inputs: { charges: charges.length, devise: currency }, currency, now }),
     avertissements: warnings,
   };
 }
@@ -348,10 +376,12 @@ export function recurringCost(recurrences, { currency, now = new Date() } = {}) 
  * the whole remaining amount.
  */
 export function buildProvisionView(provision, { now = new Date() } = {}) {
-  const monthsLeft = Math.max(
-    0,
-    (provision.targetDate.getUTCFullYear() - now.getUTCFullYear()) * 12 + (provision.targetDate.getUTCMonth() - now.getUTCMonth()),
-  );
+  // Recette R9-15: a due date later THIS month left 0 months, and the monthly
+  // amount read « non calculé » when the whole rest is due this month. While
+  // the due date is ahead, there is at least this month to set it aside.
+  const monthsLeft = provision.targetDate < now
+    ? 0
+    : Math.max(1, (provision.targetDate.getUTCFullYear() - now.getUTCFullYear()) * 12 + (provision.targetDate.getUTCMonth() - now.getUTCMonth()));
   const inputs = {
     montant_prevu: provision.value,
     deja_provisionne: provision.provisioned,

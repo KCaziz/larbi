@@ -124,6 +124,6 @@ describe('erasing an account erases its financial data', () => {
 
     assert.equal(await t.prisma.finCategory.count({ where: { userId: owner.id } }), 0);
     assert.equal(await t.prisma.finChange.count({ where: { userId: owner.id } }), 0);
-    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91 + 98, 'the reference is untouched (91 rows of P6-02, 98 of P8-08)');
+    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91 + 98 + 24, 'the reference is untouched (91 rows of P6-02, 98 of P8-08, 24 main ones of P10-01)');
   });
 });

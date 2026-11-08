@@ -100,7 +100,10 @@ describe('P6-07 — recurrences', () => {
 
   test('the subscriptions cost per month and per year', async () => {
     await addRecurrence({ value: 120000, frequency: 'mensuel' });
-    await addRecurrence({ label: 'Assurance', value: 1200000, frequency: 'annuel' });
+    await addRecurrence({ label: 'Abonnement presse', value: 1200000, frequency: 'annuel' });
+    // Recette R9-09: a regular charge that is not a subscription is shown
+    // apart, never added to the subscriptions' cost.
+    await addRecurrence({ label: 'Loyer', value: 3000000, frequency: 'mensuel' });
     // A salary is a recurrence too, and must not be counted as a subscription.
     await addRecurrence({ label: 'Salaire', kind: 'income', value: 6000000, categoryId: null });
 
@@ -108,6 +111,7 @@ describe('P6-07 — recurrences', () => {
     assert.equal(res.status, 200);
     assert.equal(res.body.abonnements.coutMensuel.resultat, 220000);
     assert.equal(res.body.abonnements.coutAnnuel.resultat, 2640000);
+    assert.equal(res.body.abonnements.chargesMensuelles.resultat, 3220000);
     assert.equal(res.body.abonnements.lignes.length, 2);
     assert.equal(res.body.abonnements.lignes[0].mensuel.formule_id, 'F049');
   });

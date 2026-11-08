@@ -243,7 +243,7 @@ export async function removeReceipt(req, res) {
 
 export async function getSynthesis(req, res) {
   const period = req.query.from ? { start: req.query.from, end: req.query.to } : currentMonth();
-  const { incomes, movements, previous } = await loadSynthesisData(prisma, req.user.id, period);
+  const { incomes, movements, previous } = await loadSynthesisData(prisma, req.user.id, period, { accountId: req.query.accountId ?? null });
 
   const synthesis = buildSynthesis({ incomes, movements, previous, fallbackCurrency: req.user.finCurrency, period });
 

@@ -116,7 +116,7 @@ describe('a realistic history leaves the system consistent', () => {
     // Erasing the account takes its categories and its trail with it, and leaves
     // the client's reference intact.
     await t.prisma.user.delete({ where: { id: person.id } });
-    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91 + 98, 'the 91 rows of P6-02 and the 98 universal categories of P8-08');
+    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91 + 98 + 24, 'the 91 rows of P6-02, the 98 universal categories of P8-08 and the 24 main categories of P10-01');
     assert.deepEqual(await check(), []);
   });
 });
@@ -187,7 +187,7 @@ describe('a realistic history of money leaves the system consistent (P6-03, P6-0
     // very function « Supprimer mon compte » calls.
     await deleteAccount(t.prisma, person.id);
     assert.equal(await t.prisma.finTransaction.count(), 0);
-    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91 + 98, 'the 91 rows of P6-02 and the 98 universal categories of P8-08');
+    assert.equal(await t.prisma.finCategory.count({ where: { userId: null } }), 91 + 98 + 24, 'the 91 rows of P6-02, the 98 universal categories of P8-08 and the 24 main categories of P10-01');
     assert.deepEqual(await check(), []);
   });
 

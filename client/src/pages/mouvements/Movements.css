@@ -210,3 +210,23 @@
   display: inline;
   margin: 0;
 }
+
+/* Recette R9-04: a group chosen from a budget envelope. */
+.movements-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.movements-filter-group-clear {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--blue);
+  padding: 0.15rem 0.7rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}

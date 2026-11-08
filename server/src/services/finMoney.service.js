@@ -338,6 +338,8 @@ export function historyWhere(userId, query = {}) {
   const where = { userId, deletedAt: null };
   if (query.kind) where.kind = query.kind;
   if (query.accountId) where.accountId = query.accountId;
+  // Recette R9-06: the global view lists only the accounts counted in the total.
+  else if (query.inTotal) where.AND = [...(where.AND ?? []), { OR: [{ accountId: null }, { account: { includeInTotal: true } }] }];
   if (query.tagId) where.tagId = query.tagId;
   if (query.clearing) where.clearing = query.clearing;
   // The three tabs of TRX-01: a transfer has two sides, both listed.
@@ -351,6 +353,8 @@ export function historyWhere(userId, query = {}) {
   // in silently with a category filter.
   if (query.uncategorised) where.categoryId = null;
   else if (query.categoryId) where.categoryId = query.categoryId;
+  // A whole group of the client's (« Alimentation »), as a budget envelope covers it.
+  else if (query.categoryGroup) where.category = { group: query.categoryGroup };
   if (query.from || query.to) {
     where.occurredAt = {};
     if (query.from) where.occurredAt.gte = query.from;

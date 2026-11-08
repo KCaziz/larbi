@@ -95,3 +95,30 @@
   margin-block: var(--space-xs);
   font-size: 0.85rem;
 }
+
+/* The two points accepted, written above their box (recette R9-07). */
+.steps-consent {
+  display: grid;
+  gap: 6px;
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  background: var(--bg-alt);
+  font-size: 0.9rem;
+}
+.steps-consent p {
+  margin: 0;
+  color: var(--text-h);
+  font-weight: 500;
+}
+.steps-consent ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-inline-start: 1.2em;
+}
+.steps-saved {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}

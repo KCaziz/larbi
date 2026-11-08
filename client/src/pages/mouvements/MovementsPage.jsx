@@ -36,6 +36,7 @@ const EMPTY_FILTERS = {
   text: '',
   accountId: '',
   categoryId: '',
+  categoryGroup: '',
   tagId: '',
   clearing: '',
   uncategorised: false,
@@ -55,9 +56,13 @@ export default function MovementsPage() {
     ...EMPTY_FILTERS,
     accountId: searchParams.get('compte') ?? '',
     categoryId: searchParams.get('categorie') ?? '',
+    // From a budget envelope (recette R9-04): its group, its period.
+    categoryGroup: searchParams.get('groupe') ?? '',
+    from: searchParams.get('du') ?? '',
+    to: searchParams.get('au') ?? '',
     uncategorised: searchParams.get('sansCategorie') === '1',
   };
-  const [tab, setTab] = useState('all');
+  const [tab, setTab] = useState(searchParams.get('type') === 'depense' ? 'expense' : 'all');
   const [filters, setFilters] = useState(startFilters);
   const [applied, setApplied] = useState(startFilters);
   const location = useLocation();
@@ -110,7 +115,7 @@ export default function MovementsPage() {
         </div>
 
         <section>
-            <Filters filters={filters} setFilters={setFilters} lookups={lookups} references={references.data} query={query} onApply={() => setApplied(filters)} onClear={() => {
+            <Filters tab={tab} filters={filters} setFilters={setFilters} lookups={lookups} references={references.data} query={query} onApply={() => setApplied(filters)} onClear={() => {
               setFilters(EMPTY_FILTERS);
               setApplied(EMPTY_FILTERS);
             }} />
@@ -132,6 +137,10 @@ export default function MovementsPage() {
   );
 }
 
+// The categories a movement can take (recette R9-01): an income, only the
+// income family; an expense, every family but income.
+export const groupsForKind = (groups, kind) => (groups ?? []).filter((group) => (kind === 'income' ? group.code === 'income' : group.code !== 'income'));
+
 function buildQuery(filters, tab, currency) {
   const params = new URLSearchParams();
   if (tab === 'income' || tab === 'expense') params.set('kind', tab);
@@ -141,6 +150,7 @@ function buildQuery(filters, tab, currency) {
   if (filters.tagId) params.set('tagId', filters.tagId);
   if (filters.clearing) params.set('clearing', filters.clearing);
   if (filters.categoryId) params.set('categoryId', filters.categoryId);
+  else if (filters.categoryGroup) params.set('categoryGroup', filters.categoryGroup);
   if (filters.uncategorised) params.set('uncategorised', 'true');
   if (filters.from) params.set('from', new Date(filters.from).toISOString());
   if (filters.to) params.set('to', new Date(`${filters.to}T23:59:59`).toISOString());
@@ -291,7 +301,7 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
         <div className="money-entry-grid">
           <div className="fin-field">
             <label htmlFor="entry-kind">{t('myMoney.kind')}</label>
-            <select {...field('kind')} disabled={editing} onChange={(event) => setForm({ ...form, kind: event.target.value, planned: false })}>
+            <select {...field('kind')} disabled={editing} onChange={(event) => setForm({ ...form, kind: event.target.value, planned: false, categoryId: '' })}>
               <option value="expense">{t('myMoney.kinds.expense')}</option>
               <option value="income">{t('myMoney.kinds.income')}</option>
             </select>
@@ -311,7 +321,7 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
 
           <div className="fin-field">
             <label htmlFor="entry-categoryId">{t('myMoney.category')}</label>
-            <CategoryPicker id="entry-categoryId" value={form.categoryId} groups={lookups.categoryGroups} emptyLabel={t('myMoney.noCategory')} onChange={(categoryId) => setForm({ ...form, categoryId })} />
+            <CategoryPicker id="entry-categoryId" value={form.categoryId} groups={groupsForKind(lookups.categoryGroups, form.kind)} emptyLabel={t('myMoney.noCategory')} onChange={(categoryId) => setForm({ ...form, categoryId })} />
             {/* P8-27: the chosen category with its colour, icon and group. */}
             {form.categoryId && <CategoryChip category={lookups.categories.find((row) => row.id === form.categoryId)} />}
           </div>
@@ -321,7 +331,9 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
 
           <div className="fin-field">
             <label htmlFor="entry-accountId">{t('movements.account')}</label>
-            <select {...field('accountId')} disabled={editing}>
+            {/* The account can change on a correction (recette R9-05): moving an
+                income from « Espèces » to the bank account is a correction. */}
+            <select {...field('accountId')}>
               <option value="">{t('movements.defaultAccount')}</option>
               {lookups.accounts
                 .filter((row) => !row.archivedAt)
@@ -404,7 +416,7 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
 
 // ---- list --------------------------------------------------------------------
 
-function Filters({ filters, setFilters, lookups, references, query, onApply, onClear }) {
+function Filters({ tab, filters, setFilters, lookups, references, query, onApply, onClear }) {
   const { t } = useTranslation();
   const set = (name) => (event) => setFilters({ ...filters, [name]: event.target.value });
   return (
@@ -437,7 +449,15 @@ function Filters({ filters, setFilters, lookups, references, query, onApply, onC
       <label className="sr-only" htmlFor="filter-category">
         {t('myMoney.category')}
       </label>
-      <CategoryPicker id="filter-category" className="movements-filter-category" value={filters.categoryId} groups={lookups.categoryGroups} emptyLabel={t('myMoney.allCategories')} label={t('myMoney.category')} onChange={(categoryId) => setFilters({ ...filters, categoryId, uncategorised: false })} />
+      <CategoryPicker id="filter-category" className="movements-filter-category" value={filters.categoryId} groups={tab === 'income' || tab === 'expense' ? groupsForKind(lookups.categoryGroups, tab) : lookups.categoryGroups} emptyLabel={t('myMoney.allCategories')} label={t('myMoney.category')} onChange={(categoryId) => setFilters({ ...filters, categoryId, categoryGroup: '', uncategorised: false })} />
+      {filters.categoryGroup && !filters.categoryId && (
+        <p className="movements-filter-group">
+          {t('movements.groupFilter', { group: filters.categoryGroup })}{' '}
+          <button type="button" className="movements-filter-group-clear" onClick={() => setFilters({ ...filters, categoryGroup: '' })}>
+            {t('movements.groupFilterClear')}
+          </button>
+        </p>
+      )}
       <label className="sr-only" htmlFor="filter-tag">
         {t('movements.tag')}
       </label>
@@ -551,7 +571,7 @@ export function Row({ transaction, lookups, run, detail = true }) {
               id={`category-${transaction.id}`}
               className="movements-category-pick"
               value=""
-              groups={lookups.categoryGroups}
+              groups={groupsForKind(lookups.categoryGroups, transaction.kind)}
               emptyLabel={t('movements.chooseCategory')}
               onChange={(categoryId) => categoryId && run(() => api.patch(`/fin/transactions/${transaction.id}`, { categoryId }), 'movements.categorised')}
             />

@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatAmount } from '../../lib/format.js';
 
-// G-03 on the Accueil: « devient mini-graphe lors du scroll ». While the ring
-// is on screen nothing shows; once the person has scrolled past it, a slim bar
-// stays at the top with the net flow of the last months as a small curve and
-// the figure written beside it, so the one number that matters does not leave
-// the screen. The curve is decoration (`aria-hidden`): the figure carries the
-// meaning, and a month with no figure is a gap, never a zero.
-export default function MiniFlow({ targetId, points, currency }) {
-  const { t, i18n } = useTranslation();
+// G-03 on the Accueil: « devient mini-graphe lors du scroll », and the client's
+// own words at the recette (R9-17): « le camembert doit devenir plat lorsque
+// nous glissons vers le bas ». While the ring is on screen nothing shows; once
+// the person has scrolled past it, the SAME ring stays at the top, flattened
+// into a slim bar — the same slices, the same colours, the same tab — with its
+// figure written beside it. The bar is decoration (`aria-hidden`): the figure
+// and the tab's name carry the meaning.
+export default function MiniFlow({ targetId, rows, title, figure, currency }) {
+  const { i18n } = useTranslation();
   const [past, setPast] = useState(false);
 
   // Read on scroll, against the element as it is NOW: the ring's section may be
@@ -33,29 +34,22 @@ export default function MiniFlow({ targetId, points, currency }) {
     };
   }, [targetId]);
 
-  const usable = (points ?? []).filter((point) => point.fluxNet !== null && point.fluxNet !== undefined);
-  const show = past && usable.length >= 2;
-  if (!show) return <div className="home-miniflow-anchor" />;
-
-  const width = 120;
-  const height = 28;
-  const values = usable.map((point) => point.fluxNet);
-  const min = Math.min(...values, 0);
-  const max = Math.max(...values, 0);
-  const span = max - min || 1;
-  const line = usable.map((point, index) => `${(index / (usable.length - 1)) * width},${height - ((point.fluxNet - min) / span) * height}`).join(' ');
-  const last = usable[usable.length - 1].fluxNet;
+  const slices = (rows ?? []).filter((row) => row.total > 0);
+  const sum = slices.reduce((acc, row) => acc + row.total, 0);
+  if (!past || sum === 0) return <div className="home-miniflow-anchor" />;
 
   return (
     <div className="home-miniflow-anchor">
-    <div className="home-miniflow" role="status" aria-label={t('appHome.miniFlow')}>
-      <svg viewBox={`0 0 ${width} ${height}`} className="home-miniflow-svg" aria-hidden="true" preserveAspectRatio="none">
-        <polyline points={line} fill="none" stroke="var(--accent)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-      </svg>
-      <span>
-        {t('appHome.netFlow')} : <strong>{formatAmount(i18n.language, last, currency)}</strong>
-      </span>
-    </div>
+      <div className="home-miniflow" role="status" aria-label={title}>
+        <span className="home-miniflow-bar" aria-hidden="true">
+          {slices.map((row) => (
+            <span key={row.key} style={{ flexGrow: row.total, background: row.color ?? 'var(--border-strong)' }} />
+          ))}
+        </span>
+        <span>
+          {title} : <strong>{formatAmount(i18n.language, figure ?? sum, currency)}</strong>
+        </span>
+      </div>
     </div>
   );
 }

@@ -39,6 +39,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 12px;
+  align-items: start;
 }
 
 .goals-create-grid select,
@@ -276,4 +277,36 @@
 }
 .goals-action h3 {
   margin-block: 0 var(--space-xs);
+}
+
+/* Recette R9-12: the simulation year by year. */
+.goals-years-lead {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.goals-years-scroll {
+  overflow-x: auto;
+}
+
+.goals-years-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.goals-years-table th,
+.goals-years-table td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  text-align: end;
+  white-space: nowrap;
+}
+
+.goals-years-table th:first-child {
+  text-align: start;
+}
+
+.goals-years-reached {
+  background: var(--green-bg);
 }

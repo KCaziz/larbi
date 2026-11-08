@@ -1,7 +1,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MARKET_INFLATION, MARKET_START, MARKET_SUPPORTS, MARKET_VERSION } from '../../src/constants/finPaperMarket.js';
-import { marketMonths, projection, realReturn, seriesMeasures, simulatedSeries } from '../../src/services/finance/paperMarket.js';
+import { compoundBreakdown, marketMonths, projection, realReturn, seriesMeasures, simulatedSeries } from '../../src/services/finance/paperMarket.js';
 
 // The pedagogical market's engine (EP06, recette R8-12): simulated histories
 // that are reproducible, coherent with their written hypotheses, and
@@ -69,5 +69,25 @@ describe('a projection', () => {
   test('the real return takes inflation out', () => {
     assert.ok(Math.abs(realReturn(0.05, 0.05)) < 1e-12);
     assert.ok(realReturn(0.025, MARKET_INFLATION) < 0);
+  });
+});
+
+// P10-03 — compound interest in the paper portfolio.
+describe('P10-03 — the part due to compound interest', () => {
+  const livret = MARKET_SUPPORTS.find((support) => support.key === 'livret');
+
+  test('monthly capitalisation earns more than simple interest, and the difference is the interest on interest', () => {
+    const result = compoundBreakdown(livret, { amount: 10_000_000, months: 24 });
+    assert.equal(result.simpleInterest, 500_000, '2,5 % a year on 100 000 DA for two years');
+    assert.equal(result.interest, 512_164, 'C0 × (1 + r/12)^24 − C0 (F029)');
+    assert.equal(result.onInterest, result.interest - result.simpleInterest);
+    assert.deepEqual(result.projection.map((row) => row.years), [1, 5, 10, 20]);
+    assert.ok(result.projection.every((row, index, all) => index === 0 || row.onInterest > all[index - 1].onInterest), 'it grows with time');
+  });
+
+  test('nothing held yet is nothing earned', () => {
+    const result = compoundBreakdown(livret, { amount: 10_000_000, months: 0 });
+    assert.equal(result.interest, 0);
+    assert.equal(result.onInterest, 0);
   });
 });

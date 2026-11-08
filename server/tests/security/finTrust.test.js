@@ -120,6 +120,10 @@ describe('export', () => {
 });
 
 describe('connected devices (P8-20)', () => {
+  // Several screens at once are part of the subscription (P10-06).
+  beforeEach(async () => {
+    await t.prisma.user.update({ where: { id: owner.id }, data: { accessLevel: 'premium' } });
+  });
   // A real login, so the session row and its cookie exist exactly as in use.
   const login = async () => {
     const res = await t.request('POST', '/auth/login', { json: { email: owner.email, password: PASSWORD } });

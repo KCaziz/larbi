@@ -25,7 +25,10 @@ Priorités : `🔴 high` (bloque l'utilisation) · `🟡 medium` (gêne réelle)
 | R6 — Pages à rendre compréhensibles | 7 | 7 |
 | R7 — Graphiques | 5 | 5 |
 | R8 — Deuxième passage (2026-11-05) | 12 | 12 |
-| **Total** | **62** | **62** |
+| R9 — Troisième passage (2026-11-08) | 19 | 18 |
+| **Total** | **81** | **80** |
+
+R9 : reste R9-18 (fiche de paie), aucun défaut reproduit, à préciser avec le client.
 
 Ordre de travail (R8) : les corrections courtes d'abord (R8-07, R8-03, R8-09, R8-10, R8-11), puis le sélecteur de catégorie (R8-01, R8-02), les dettes (R8-06), le fonds d'urgence et les « non calculé » (R8-04, R8-08), enfin le portefeuille fictif (R8-05).
 
@@ -590,3 +593,148 @@ Les cahiers ne fournissent ni supports, ni prix, ni historique (vérifié dans l
 - partout le badge « exemple fictif — pas un cours réel ».
 
 À prévenir le client : les hypothèses sont les nôtres ; il les valide ou les remplace à la recette.
+
+---
+
+# R9 — Troisième passage de recette, avec le client (2026-11-08)
+
+Les remarques de `test.txt` (3e passage) qui sont des défauts ou des réglages de l'existant. Les nouvelles fonctionnalités demandées au même passage sont en Phase 10 de [TASKS.md](TASKS.md) : catégories principales choisissables (l. 9), couleurs personnalisables (l. 13), intérêts composés dans le portefeuille fictif (l. 16), marchés boursiers (l. 17), autres devises (l. 32), accès limité à un seul utilisateur pour les non-abonnés (l. 35).
+
+### R9-01 — Dépense : seulement les catégories de dépense ; revenu : seulement celles de revenu
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 1 et 6 (3e passage)
+- Réalisé (2026-11-08) : Le type du mouvement filtre les catégories proposées : à la saisie, à la correction, au classement direct dans la liste, et dans le filtre de la liste quand l'onglet Revenus ou Dépenses est ouvert. Changer le type vide la catégorie choisie.
+
+Le choix de catégorie d'une dépense propose aussi les catégories de revenus, et inversement. Le type du mouvement filtre les catégories proposées, partout (saisie, saisie rapide, correction, filtres de liste).
+
+### R9-02 — Le flux net de l'anneau additionne au lieu de soustraire
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 2 (3e passage)
+- Réalisé (2026-11-08) : L'onglet « Flux » affiche au centre le flux net, revenus − dépenses, avec son signe ; les deux parts de l'anneau restent revenus et dépenses, sans pourcentage trompeur.
+
+L'onglet « Flux » de l'Accueil affiche au centre la somme revenus + dépenses. Il doit afficher revenus − dépenses, avec son signe.
+
+### R9-03 — Anneau de l'Accueil : visible dès un premier revenu, vide sans mouvement
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 3 (3e passage)
+- Réalisé (2026-11-08) : Sans mouvement, l'anneau est un cercle gris « Aucun mouvement » avec une invitation à saisir. Avec des revenus mais aucune dépense, l'Accueil s'ouvre sur l'onglet « Revenus » jusqu'à ce que la personne choisisse un onglet.
+
+### R9-04 — Budgets liés aux catégories de dépenses, et création d'un second budget
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 4, 7 et 10 (3e passage)
+- Réalisé (2026-11-08) : Les enveloppes se créent sur une catégorie (ou un groupe) de dépense, et chaque dépense de cette catégorie s’y impute (vérifié : Loyer 15 000 sur 20 000, Alimentation 3 000 sur 10 000). Chaque enveloppe a un lien « Voir les dépenses de cette enveloppe » qui ouvre les mouvements filtrés sur sa catégorie ou son groupe et sur la période du budget. Un second budget sur la même période reste refusé (règle du cahier : « chevauchement de périodes refusé »), mais l’écran dit maintenant quel budget couvre déjà la période et propose de l’ouvrir pour y ajouter la catégorie. Les dépenses d’un compte à part ne comptent plus dans le budget. Si le client veut plusieurs budgets en parallèle sur un même mois, c’est un changement de règle à lui faire confirmer.
+
+Les compartiments d'un budget ne sont pas tous renseignés ; impossible de créer un autre budget. Une enveloppe se crée sur une catégorie (ou sous-catégorie) de dépense, et chaque dépense de cette catégorie s'y impute automatiquement : consommé, reste, dépassement, visibles en creusant le budget jusqu'à la dépense. Une dépense sans budget reste possible.
+
+### R9-05 — Impossible de changer le compte d'un revenu
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 5 (3e passage)
+- Réalisé (2026-11-08) : En modification, le champ « Compte » n'est plus bloqué : un revenu passe d'« Espèces » à un compte bancaire (le serveur vérifie la devise du compte).
+
+En modification, le champ « Compte » est bloqué : on ne peut pas passer un revenu d'« Espèces » à un compte bancaire.
+
+### R9-06 — Comptes : chaque mouvement sur un compte, et des calculs par compte
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 8, 28 et 34 (3e passage)
+- Réalisé (2026-11-08) : Chaque mouvement porte son compte (Espèces s'il n'est pas choisi) et la liste l'affiche. Un compte « à part » n'entre plus dans le global : solde, revenus, dépenses, flux, anneau et liste de l'Accueil, Synthèse. Choisir un compte sur l'Accueil donne l'anneau, le flux, les chiffres et les mouvements de ce compte seul. La fiche d'un compte affiche ses revenus, ses dépenses et son flux du mois. Vérifié : revenu de 80 000 DA reçu sur le compte bancaire, dépenses de 15 000 (banque) et 3 000 (Espèces), 5 000 sur un compte à part exclus du global.
+
+Chaque dépense et chaque revenu précise son compte. Un compte « intégré au total » compte dans le solde global, l'anneau et le flux ; un compte à part est calculé seul (ses revenus, dépenses, transferts, enveloppes). Le compte bancaire créé n'affiche aucun revenu ; vue par compte à rendre cohérente.
+
+### R9-07 — Premiers pas : « Choisir mon profil » et « Confirmer mon revenu » ne s'enregistrent pas
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 12 (3e passage)
+- Réalisé (2026-11-08) : « Choisir mon profil » : les deux engagements à accepter sont écrits à côté de la case, et un oubli (profil ou case) donne un message clair au lieu de la bulle du navigateur. « Confirmer mon revenu » : une fois enregistré, l'étape affiche ce qui est retenu (date, compte, mode) avec « Modifier ». Premier revenu : une case « Je l'ai déjà reçu » l'enregistre aussi comme mouvement, il apparaît aussitôt dans l'Accueil et sur son compte.
+
+### R9-08 — Fonds d'urgence et réserve de sécurité : définition et calcul
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 14 et 37 (3e passage)
+- Réalisé (2026-11-08) : Avant un mois complet d’historique, les dépenses essentielles ne sont plus « inconnues » : votre estimation, sinon les enveloppes essentielles du budget, sinon les dépenses essentielles déjà enregistrées (un minimum, dit comme tel). Ajouts de l’écran C12 du cahier : la date estimée (à l’épargne mensuelle prévue pour le fonds) et un bloc « Comment c’est calculé » en mots (dépenses essentielles, montant visé, mois couverts, reste à mettre de côté, date, ce qui ne compte pas).
+
+La page dit que budget, dépenses et revenus ne sont pas enregistrés alors qu'ils le sont, et la méthode de calcul n'apparaît pas.
+
+### R9-09 — Abonnements : coût mensuel et annuel, et affichage comme abonnements
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 18 et 25 (3e passage)
+- Réalisé (2026-11-08) : Un abonnement est reconnu par sa catégorie (téléphone, internet, streaming, musique, stockage en ligne, logiciel, salle de sport) ou par son nom (« abonnement »). Le coût mensuel et annuel ne compte que les abonnements ; toutes les charges régulières (loyer compris) ont leur propre total à côté. Chaque abonnement porte l’étiquette « Abonnement » dans le calendrier. Vérifié : box internet 2 500 DA/mois, 30 000 DA/an ; charges régulières 22 500 DA/mois.
+
+### R9-10 — Entrées et sorties prévues, prévu et réel : non calculés
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 19, 24 et 36 (3e passage)
+- Réalisé (2026-11-08) : Calendrier : le prévu de la période garde les échéances déjà confirmées (le salaire reçu le 5 compte dans les entrées prévues), les revenus réels s’affichent à côté des dépenses réelles, et une phrase explique prévu et réel. Les comptes à part ne comptent plus dans le réel. Accueil : « Prévu / réel » prend le budget du mois comme prévu quand il existe (vérifié : prévu 30 000, réalisé 18 000).
+
+Les sorties prévues doivent se calculer, ou se relier aux dépenses enregistrées.
+
+### R9-11 — Prêts et emprunts : effet sur « À faire », les comptes, les revenus et l'évolution des soldes
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 20, 21 et 33 (3e passage)
+- Réalisé (2026-11-08) : Cause trouvée : le formulaire de prêt envoyait la date du jour à 12 h (heure universelle) ; avant 13 h en Algérie, le prêt était « dans le futur » et refusé, mais son compte était déjà créé — d’où un prêt sans argent, sans dette et sans rien dans « À faire ». Corrigé : la date ne dépasse jamais l’instant de l’enregistrement, et la création est tout-ou-rien (rien n’est gardé si une étape échoue). Un prêt ou un emprunt fait bien bouger le compte choisi (vérifié : emprunt de 20 000 DA, compte BNA de 65 000 à 85 000 DA) et la position nette tient compte de la dette. Nouveau champ « Remboursement par mois (facultatif) » ; « Aujourd’hui » a une rubrique « Prêts et emprunts » (à rembourser / à vous rembourser, montant du mois, reste, échéance dans les 30 jours). Le formulaire dit qu’un emprunt n’est pas un revenu (c’est de l’argent à rendre) et qu’un prêt n’est pas une dépense.
+
+Un prêt ou un emprunt enregistré n'apparaît ni dans « À faire », ni sur le compte touché, ni dans l'évolution des soldes.
+
+### R9-12 — Objectif : en combien de mois, et simulation année par année
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 22 (3e passage)
+- Réalisé (2026-11-08) : La fiche d’un objectif montre « Simulation année par année », toujours visible : à partir du capital déjà mis de côté, de l’épargne mensuelle et du taux de l’objectif s’il en a un, chaque année avec ce qui est mis de côté, les intérêts, le capital en fin d’année et la part de la cible ; la ligne de l’année où l’objectif est atteint est surlignée, et la phrase de tête dit en combien de mois (vérifié : voiture de 1 200 000 DA à 20 000 DA par mois, atteinte en 60 mois, novembre 2031). Sans épargne mensuelle, l’écran dit où l’indiquer.
+
+### R9-13 — Position nette : dire comment elle est calculée
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 27 (3e passage)
+- Réalisé (2026-11-08) : La page Comptes explique les deux totaux, en mots et en chiffres : « Solde total » = somme des comptes comptés dans le total ; « Position nette » = ce que vous possédez (comptes comptés dans le patrimoine : comptes, espèces, épargne, sommes prêtées) − ce que vous devez (emprunts et crédits suivis sur un compte), avec la ligne « Aujourd’hui : 77 000 possédés − 20 000 dus = 57 000 ».
+
+### R9-14 — Accueil : placer « + » juste sous « Synthèse »
+- Statut : `✅ done`
+- Priorité : `🟢 low`
+- Origine : `test.txt` l. 29 (3e passage)
+- Réalisé (2026-11-08) : Sur l’Accueil, le bouton « + Dépenses & revenus » est juste sous « Synthèse », dans le bloc du solde (en pleine largeur sur téléphone) ; il n’est plus répété dans les raccourcis.
+
+### R9-15 — Provisions : montant mensuel incompréhensible ou faux
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 30 (3e passage)
+- Réalisé (2026-11-08) : Le montant mensuel est « reste à mettre de côté ÷ mois jusqu’à l’échéance ». Défaut corrigé : une échéance plus tard dans le mois courant donnait 0 mois, donc « non calculé » ; il reste maintenant au moins ce mois-ci (tout le reste est à mettre de côté maintenant). Sous chaque provision, le calcul est écrit en chiffres (« il reste X avant le JJ/MM, soit N mois : X ÷ N = Y par mois »). Test unitaire ajouté.
+
+### R9-16 — « DZD » déborde du champ montant
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 31 (3e passage)
+- Réalisé (2026-11-08) : Les cartes chiffrées mesurent leur largeur : un long montant réduit sa taille et ne sort plus du cadre (vérifié à 900 px avec 1 200 000,00 DZD) ; dans un champ montant, « DZD » ne se comprime plus et le champ ne dépasse plus de sa colonne. Suite (page budget, retour du 2026-11-08) : dans le formulaire « Ajouter une enveloppe », le champ montant recevait une seconde bordure et la grille étirait les champs, si bien que « DZD » se décalait et sortait du cadre entre 900 et 1 200 px ; corrigé pour tous les formulaires (budget, dettes, objectifs). Même passe : entre 768 et 1 199 px, « FINCLUDIA » passait sous « Gestion budgétaire » et le profil sortait de l’écran ; la marque garde son logo et cède son nom à ces largeurs. Vérifié à 375, 900, 1 100 et 1 280 px, sans aucun élément qui dépasse.
+
+### R9-17 — L'anneau se réduit en barre en faisant défiler
+- Statut : `✅ done`
+- Priorité : `🟢 low`
+- Origine : `test.txt` l. 38 (3e passage)
+- Réalisé (2026-11-08) : Une fois l’anneau dépassé en faisant défiler, il reste en haut de l’écran aplati en barre : mêmes parts, mêmes couleurs, même onglet, avec son total (« Dépenses : 18 000,00 DZD »). Avant, ce bandeau n’apparaissait qu’avec deux mois d’historique, donc jamais chez un nouvel utilisateur.
+
+### R9-18 — Fiche de paie
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 23 (3e passage)
+
+Remarque sans détail : à reproduire (import, décodage, lien avec le revenu) et à préciser avec le client.
+
+Vérifié le 2026-11-08 : le décodeur (Outils → Décodeur de fiche de paie) s’ouvre, accepte les lignes (salaire de base 80 000, cotisation 7 200, IRG 9 000) et affiche « Votre fiche, expliquée ». Aucun défaut reproduit : à préciser avec le client (quel écran, quelle fiche, quel résultat attendu).
+
+### R9-19 — Le patrimoine réel n’inclut pas tous les actifs
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : remarque orale du client (2026-11-08), en plus de `test.txt`
+- Réalisé (2026-11-08) : un compte à découvert compte comme une dette ; un actif déclaré « espèces », « compte » ou « CCP » n’est écarté que si un compte du même type ouvert par la personne le représente (le compte « Espèces » créé automatiquement ne masque plus rien). La page Patrimoine liste ce qui n’est pas compté et pourquoi, et dit ce qui compte. Vérifié : patrimoine net 57 000 DA = position nette des comptes. Tests ajoutés (CCP et espèces déclarés avec le compte automatique, découvert).
+
+Deux causes trouvées :
+- un compte à solde négatif (découvert) n’apparaît ni en actif ni en dette : le patrimoine net ne correspond plus à la position nette de la page Comptes ;
+- les actifs déclarés « espèces », « compte » ou « CCP » sont écartés dès qu’il existe un seul compte, alors que le compte « Espèces » est créé automatiquement à la première dépense : un CCP ou un compte bancaire déclaré disparaît sans qu’aucun compte ne le représente.
+
+À faire : un découvert compte comme une dette ; un actif déclaré n’est écarté que si un compte du même type le représente ; la page dit ce qui n’est pas compté et pourquoi.

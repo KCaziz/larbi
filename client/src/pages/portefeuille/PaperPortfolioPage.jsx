@@ -15,6 +15,7 @@ import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './PaperPortfolio.css';
+import CompoundInterest, { COMPOUND_CLASSES } from './CompoundInterest.jsx';
 
 // Paper portfolio and investment workshop (P6-12), screens C17 and EP03-EP07.
 //
@@ -181,6 +182,10 @@ function PositionsSection({ t, language, view, formulas, currency, run, marketPr
                 {t('paper.markedAt', { price: formatAmount(language, position.markPrice, view.currency), date: formatDate(language, position.markedAt) })}
               </span>
               <FigureCard label={t('paper.gainLoss')} answer={position.gainPerte} formula={formulas.get('F039')} simulation />
+              {/* P10-03: a support that pays interest shows what compounding adds. */}
+              {position.quantity > 0 && COMPOUND_CLASSES.includes(marketPrices.get(position.label)?.assetClass) && (
+                <CompoundInterest support={marketPrices.get(position.label)} amount={position.cost} since={position.firstBoughtAt} currency={view.currency} />
+              )}
               {/* Bought on the pedagogical market: its price follows the month's
                   simulated one, when the person asks (R8-12). */}
               {marketPrices.get(position.label) && marketPrices.get(position.label).price !== position.markPrice && (

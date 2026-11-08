@@ -8,6 +8,8 @@ import { POCKET_RULES } from '../constants/finBudgetMethods.js';
 
 const label = z.string().trim().min(1).max(80);
 const note = z.string().trim().min(1).max(300).nullable().optional();
+// P10-02: the person's own colour (#RRGGBB); null goes back to the default.
+const color = z.string().regex(/^#[0-9A-Fa-f]{6}$/).nullable().optional();
 const isoDate = z.coerce.date();
 // A planned amount is positive: an envelope IS an allocation, so a negative one
 // would mean the opposite of itself.
@@ -45,6 +47,7 @@ const envelopeFields = {
 export const createBudgetSchema = z
   .object({
     label,
+    color,
     periodStart: isoDate,
     periodEnd: isoDate,
     currency: currencySchema,
@@ -72,6 +75,7 @@ export const createBudgetSchema = z
 export const updateBudgetSchema = z
   .object({
     label: label.optional(),
+    color,
     periodStart: isoDate.optional(),
     periodEnd: isoDate.optional(),
     currency: currencySchema.optional(),

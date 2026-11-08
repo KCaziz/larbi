@@ -127,6 +127,19 @@ export default function WealthPage() {
               ))}
             </ul>
           )}
+
+          {/* Recette R9-19: what is not counted, and why — never a silent gap. */}
+          {view.nonComptes?.length > 0 && (
+            <div className="wealth-not-counted">
+              <p>{t('wealth.notCountedTitle')}</p>
+              <ul className="wealth-warnings">
+                {view.nonComptes.map((row) => (
+                  <li key={`${row.reason}-${row.label}`}>{t(`wealth.notCounted.${row.reason}`, { label: row.label })}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <p className="fin-hint">{t('wealth.countedHint')}</p>
         </section>
 
         {history.data?.points?.length >= 2 && (
@@ -172,6 +185,12 @@ export default function WealthPage() {
                     <span className="wealth-tag">{t(`wealth.kinds.${row.kind}`, row.kind)}</span>
                     <span className="wealth-tag">{t(`wealth.liquidity.${row.liquidity}`)}</span>
                     <span className="wealth-row-amount">{formatAmount(i18n.language, row.value, row.currency)}</span>
+                    {/* P10-05: held in a foreign currency, counted at the official rate. */}
+                    {row.devise && (
+                      <span className="wealth-tag">
+                        {t('currencies.held', { amount: formatAmount(i18n.language, row.devise.value, row.devise.currency), date: formatDate(i18n.language, row.devise.referenceDate) })}
+                      </span>
+                    )}
                     <span className="wealth-row-date">
                       {formatDate(i18n.language, row.valuedAt)}
                       {row.valeurAncienne && (
@@ -218,7 +237,10 @@ export default function WealthPage() {
   );
 }
 
-function AssetForm({ t, currency, references, run, onDone }) {
+function AssetForm({ t, currency: defaultCurrency, references, run, onDone }) {
+  // P10-05: an asset may be held in a foreign currency (counted at the official rate).
+  const [currency, setCurrency] = useState(defaultCurrency);
+  const currencies = useApi('/fin/devises');
   const [label, setLabel] = useState('');
   const [kind, setKind] = useState('account');
   const [amount, setAmount] = useState('');
@@ -266,6 +288,16 @@ function AssetForm({ t, currency, references, run, onDone }) {
             {(references?.kinds ?? ['account']).map((option) => (
               <option key={option} value={option}>
                 {t(`wealth.kinds.${option}`, option)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label htmlFor="asset-currency">
+          {t('accounts.fields.currency')}
+          <select id="asset-currency" value={currency} onChange={(event) => setCurrency(event.target.value)}>
+            {(currencies.data?.devises ?? [defaultCurrency]).map((code) => (
+              <option key={code} value={code}>
+                {t(`currencies.${code}`, code)}
               </option>
             ))}
           </select>

@@ -89,6 +89,10 @@ export const api = {
 // shown to the user. Callers can pass status-specific overrides.
 export function errorKey(err, overrides = {}) {
   const status = err instanceof ApiError ? err.status : -1;
+  // P10-06: two refusals that say what to do, wherever they happen.
+  const reason = err instanceof ApiError ? err.details?.reason : null;
+  if (reason === 'oneScreen') return 'errors.oneScreen';
+  if (reason === 'subscriptionRequired') return 'errors.subscriptionRequired';
   if (overrides[status]) return overrides[status];
   if (status === 0) return 'errors.network';
   if (status === 400) return 'errors.invalid';

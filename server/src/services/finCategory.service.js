@@ -58,6 +58,8 @@ const toCategory = (row, { origin, customised = false, archived = false, referen
   // The client's universal reference (P8-08). `essential` is what this person
   // sees: their own choice when they made one, the reference's otherwise.
   group: row.group ?? null,
+  // P10-01: the main category itself (« Logement »), choosable like any other.
+  main: Boolean(row.key?.startsWith('main.')),
   icon: row.icon ?? null,
   // Never null (P8-27): its own, else its group's, else its family's.
   color: categoryColor(row),
@@ -104,7 +106,7 @@ export async function listCategories(prisma, userId, { includeArchived = false }
     // The override carries no reference data of its own; only its label and,
     // when the person changed it, its essential flag replace the standard's.
     const merged = override
-      ? { ...row, ...override, id: row.id, key: row.key, group: row.group, icon: row.icon, color: row.color, recurrence: row.recurrence, suggestedFor: row.suggestedFor, essential: override.essential ?? row.essential }
+      ? { ...row, ...override, id: row.id, key: row.key, group: row.group, icon: row.icon, color: override.color ?? row.color, recurrence: row.recurrence, suggestedFor: row.suggestedFor, essential: override.essential ?? row.essential }
       : row;
     cards.push(
       toCategory(merged, {
@@ -171,7 +173,7 @@ export async function createCategory(prisma, userId, { family, label, essential 
   });
 }
 
-export async function updateCategory(prisma, userId, id, { label, essential, scope, consentUses, reason }) {
+export async function updateCategory(prisma, userId, id, { label, essential, color, scope, consentUses, reason }) {
   const row = await ownRow(prisma, userId, id);
   const data = {};
   if (label !== undefined) {
@@ -180,6 +182,7 @@ export async function updateCategory(prisma, userId, id, { label, essential, sco
     data.label = clean;
   }
   if (essential !== undefined) data.essential = essential;
+  if (color !== undefined) data.color = color;
   if (scope !== undefined) data.scope = scope;
   if (consentUses !== undefined) data.consentUses = consentUses;
   const origin = row.baseKey ? 'standard' : 'own';
@@ -244,7 +247,7 @@ export async function listCategoryChanges(prisma, userId, id) {
 // Customising a standard category: an override row of this account. Renaming it
 // and hiding it are the same operation from the client's point of view
 // ("standard et personnalisables"), so they share one entry point.
-export async function customiseStandard(prisma, userId, key, { label, hidden, essential, reason }) {
+export async function customiseStandard(prisma, userId, key, { label, hidden, essential, color, reason }) {
   const standard = await prisma.finCategory.findFirst({ where: { key, userId: null, deletedAt: null }, select: SELECT });
   if (!standard) throw new HttpError(404, 'Category not found');
 
@@ -258,11 +261,13 @@ export async function customiseStandard(prisma, userId, key, { label, hidden, es
     // « Drapeau essentielle modifiable » (P8-08): the person's own reading of a
     // standard category, kept on their override.
     const nextEssential = essential === undefined ? (existing?.essential ?? null) : essential;
+    // P10-02: the person's colour for it, kept on their override (null = the reference's).
+    const nextColor = color === undefined ? (existing?.color ?? null) : color;
     let row;
     if (existing) {
       row = await tx.finCategory.update({
         where: { id: existing.id },
-        data: { label: nextLabel, archivedAt, essential: nextEssential, version: { increment: 1 } },
+        data: { label: nextLabel, archivedAt, essential: nextEssential, color: nextColor, version: { increment: 1 } },
         select: SELECT,
       });
       await recordCorrection(tx, { userId, entity: ENTITY, entityId: existing.id, before: existing, after: row, reason: reason ?? null });
@@ -274,6 +279,7 @@ export async function customiseStandard(prisma, userId, key, { label, hidden, es
           family: standard.family,
           label: nextLabel,
           essential: nextEssential,
+          color: nextColor,
           scope: standard.scope,
           consentUses: [],
           source: 'manual',
@@ -284,7 +290,7 @@ export async function customiseStandard(prisma, userId, key, { label, hidden, es
       });
       await recordChange(tx, { userId, entity: ENTITY, entityId: row.id, action: 'create', after: { baseKey: key, label: nextLabel, hidden: Boolean(archivedAt) } });
     }
-    return toCategory({ ...standard, ...row, id: standard.id, key: standard.key, group: standard.group, icon: standard.icon, color: standard.color, recurrence: standard.recurrence, suggestedFor: standard.suggestedFor, essential: row.essential ?? standard.essential }, {
+    return toCategory({ ...standard, ...row, id: standard.id, key: standard.key, group: standard.group, icon: standard.icon, color: row.color ?? standard.color, recurrence: standard.recurrence, suggestedFor: standard.suggestedFor, essential: row.essential ?? standard.essential }, {
       origin: 'standard',
       customised: true,
       archived: Boolean(archivedAt),
@@ -321,4 +327,21 @@ export async function essentialCategoryIds(prisma, userId) {
     ...standard.filter((row) => (overrides.get(row.key) ?? row.essential) === true).map((row) => row.id),
     ...mine.filter((row) => !row.baseKey && row.essential === true).map((row) => row.id),
   ];
+}
+
+// P10-02: the colours this person chose for standard categories (kept on their
+// override rows), by the standard category's id. Screens that join categories
+// by id apply them, so a colour chosen once shows everywhere.
+export async function chosenColors(prisma, userId, ids = null) {
+  const overrides = await prisma.finCategory.findMany({
+    where: { userId, deletedAt: null, baseKey: { not: null }, color: { not: null } },
+    select: { baseKey: true, color: true },
+  });
+  if (overrides.length === 0) return new Map();
+  const standard = await prisma.finCategory.findMany({
+    where: { userId: null, key: { in: overrides.map((row) => row.baseKey) }, ...(ids ? { id: { in: ids } } : {}) },
+    select: { id: true, key: true },
+  });
+  const byKey = new Map(overrides.map((row) => [row.baseKey, row.color]));
+  return new Map(standard.map((row) => [row.id, byKey.get(row.key)]));
 }

@@ -14,12 +14,29 @@ import '../../pages/accueil/Home.css';
 const MAX_SLICES = 5;
 const OTHER_COLOR = 'var(--border-strong)';
 
-export default function RingChart({ rows, currency, selected, onSelect, label }) {
+// `center` ({ label, value }) replaces the « Total » written in the middle: the
+// net flow is income MINUS spending, never their sum (recette R9-02);
+// `shares` hides the percentages where a part of a whole means nothing.
+export default function RingChart({ rows, currency, selected, onSelect, label, center = null, shares = true }) {
   const { t, i18n } = useTranslation();
   const [hover, setHover] = useState(null);
   const positive = rows.filter((row) => row.total > 0);
   const total = positive.reduce((sum, row) => sum + row.total, 0);
-  if (total === 0) return <p className="fin-hint">{t('appHome.ringEmpty')}</p>;
+  // Nothing to share out: the ring is drawn empty, not replaced by a sentence
+  // (recette R9-03) — the place stays the same as the figures arrive.
+  if (total === 0) {
+    return (
+      <div className="home-ring home-ring-empty">
+        <svg viewBox="0 0 100 100" className="home-ring-svg" role="img" aria-label={label}>
+          <circle cx="50" cy="50" r="40" fill="none" stroke="var(--bg-alt)" strokeWidth="14" />
+          <text x="50" y="53" textAnchor="middle" className="home-ring-center-label">
+            {t('appHome.ringNothing')}
+          </text>
+        </svg>
+        <p className="fin-hint">{t('appHome.ringEmpty')}</p>
+      </div>
+    );
+  }
 
   const sorted = [...positive].sort((a, b) => b.total - a.total);
   const shown = sorted.slice(0, MAX_SLICES);
@@ -66,10 +83,10 @@ export default function RingChart({ rows, currency, selected, onSelect, label })
           </circle>
         ))}
         <text x="50" y="47" textAnchor="middle" className="home-ring-center-label">
-          {focus ? focus.label : t('appHome.total')}
+          {focus ? focus.label : (center?.label ?? t('appHome.total'))}
         </text>
         <text x="50" y="58" textAnchor="middle" className="home-ring-center-value">
-          {formatAmount(i18n.language, focus ? focus.total : total, currency)}
+          {formatAmount(i18n.language, focus ? focus.total : (center ? center.value : total), currency)}
         </text>
       </svg>
 
@@ -88,7 +105,8 @@ export default function RingChart({ rows, currency, selected, onSelect, label })
                 {arc.icon && <CategoryIcon emoji={arc.icon} size={13} />} {arc.label}
               </span>
               <span className="home-ring-legend-value">
-                {formatAmount(i18n.language, arc.total, currency)} · {share(arc.total)}
+                {formatAmount(i18n.language, arc.total, currency)}
+                {shares && ` · ${share(arc.total)}`}
               </span>
             </button>
           </li>

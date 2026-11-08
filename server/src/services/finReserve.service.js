@@ -98,7 +98,42 @@ export async function essentialMonthlyExpenses(prisma, userId, currency, now = n
     return { amount: Math.round((sum._sum.value ?? 0) / months), source: 'history', months };
   }
   const declared = await declaredEssentialExpenses(prisma, userId, currency);
-  return { amount: declared, source: declared === null ? null : 'declared', months: 0 };
+  if (declared !== null) return { amount: declared, source: 'declared', months: 0 };
+  // Recette R9-08: less than a month of history and no estimate — what is
+  // already recorded is used, never ignored: first the budget's essential
+  // envelopes (what the person plans to spend on them each month), then the
+  // essential expenses recorded so far (a floor, said so).
+  const planned = await budgetedEssentialExpenses(prisma, userId, currency, categoryIds, now);
+  if (planned !== null) return { amount: planned, source: 'budget', months: 0 };
+  if (first) {
+    const sum = await prisma.finTransaction.aggregate({ where: { ...where, occurredAt: { lte: now } }, _sum: { value: true } });
+    if (sum._sum.value) return { amount: Math.round(sum._sum.value), source: 'recorded', months: 0 };
+  }
+  return { amount: null, source: null, months: 0 };
+}
+
+// The current budget's planned amount on essential categories, by the month,
+// or null. An envelope on a whole group counts when the group holds an
+// essential category.
+async function budgetedEssentialExpenses(prisma, userId, currency, categoryIds, now) {
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const budget = await prisma.finBudget.findFirst({
+    where: { userId, deletedAt: null, archivedAt: null, currency, periodStart: { lte: now }, periodEnd: { gte: today } },
+    select: { periodStart: true, periodEnd: true, envelopes: { where: { deletedAt: null, archivedAt: null }, select: { categoryId: true, categoryGroup: true, value: true } } },
+    orderBy: { periodStart: 'desc' },
+  });
+  if (!budget || budget.envelopes.length === 0) return null;
+  const essential = new Set(categoryIds);
+  const groups = new Set(
+    (await prisma.finCategory.findMany({ where: { id: { in: categoryIds } }, select: { group: true } })).map((row) => row.group).filter(Boolean),
+  );
+  const total = budget.envelopes
+    .filter((line) => (line.categoryId ? essential.has(line.categoryId) : groups.has(line.categoryGroup)))
+    .reduce((sum, line) => sum + line.value, 0);
+  if (total === 0) return null;
+  // A budget of about a month is taken as is; another length is brought to the month.
+  const days = Math.max(1, Math.round((budget.periodEnd - budget.periodStart) / 86400000));
+  return Math.round(days >= 27 && days <= 31 ? total : (total * 30.4375) / days);
 }
 
 // PB-F018's « capital_fonds_urgence »: what is allocated to this account's
@@ -136,6 +171,8 @@ export async function buildReserveView(prisma, userId, { currency, targetMonths,
   if (essential.source === 'declared') {
     warnings.push('Votre historique couvre moins d’un mois : les dépenses essentielles sont celles déclarées à l’inscription.');
   }
+  if (essential.source === 'budget') warnings.push('Votre historique couvre moins d’un mois : les dépenses essentielles sont celles prévues dans votre budget.');
+  if (essential.source === 'recorded') warnings.push('Votre historique couvre moins d’un mois : les dépenses essentielles sont celles déjà enregistrées, un minimum.');
   if (essential.amount === null) warnings.push('Les dépenses essentielles ne sont pas encore connues : ni l’historique, ni l’inscription ne les renseignent.');
   if (targetMonths === null || targetMonths === undefined) warnings.push('Aucune cible en mois n’a encore été choisie.');
 
@@ -150,6 +187,19 @@ export async function buildReserveView(prisma, userId, { currency, targetMonths,
 
   const target = targetMonths === null || targetMonths === undefined ? null : safetyFundTarget(targetMonths, essential.amount);
   const gap = target === null || capital === null ? null : safetyFundGap(target, capital);
+  // C12's « date estimée » (recette R9-08): at the fund's planned monthly
+  // saving, the month the gap is closed. Unknown without a monthly saving.
+  const contributions = capital === null ? [] : await prisma.finGoal.findMany({
+    where: { userId, deletedAt: null, archivedAt: null, currency, status: { not: 'fictional' }, ...EMERGENCY_GOAL_WHERE },
+    select: { monthlyContribution: true },
+  });
+  const monthly = contributions.reduce((sum, row) => sum + (row.monthlyContribution ?? 0), 0);
+  let estimatedDate = null;
+  if (gap === 0) estimatedDate = now.toISOString();
+  else if (gap > 0 && monthly > 0) {
+    const months = Math.ceil(gap / monthly);
+    estimatedDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + months, 1)).toISOString();
+  }
 
   return {
     currency,
@@ -164,6 +214,8 @@ export async function buildReserveView(prisma, userId, { currency, targetMonths,
     manque: answer('PB-F019', gap),
     cibleMois: targetMonths ?? null,
     cibleParDefaut: defaultTarget,
+    epargneMensuelle: monthly > 0 ? monthly : null,
+    dateEstimee: estimatedDate,
     avertissements: warnings,
   };
 }

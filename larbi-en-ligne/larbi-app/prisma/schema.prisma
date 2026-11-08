@@ -721,6 +721,8 @@ model FinBudget {
   userId          String
   user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   label           String        @db.VarChar(80)
+  // P10-02: the person's own colour for this budget (#RRGGBB), null = default.
+  color           String?       @db.VarChar(9)
   // The period this budget plans. Two live budgets of one account may never
   // overlap (client: « chevauchement de périodes refusé »); that rule needs
   // `userId`, a FOREIGN KEY column, so it lives in the service and in the
@@ -2887,4 +2889,21 @@ model FinPushSubscription {
 
   @@index([userId])
   @@map("fin_push_subscriptions")
+}
+
+// P10-05 — the official exchange rates (Banque d'Algérie), one per currency and
+// reference date: how many dinars for ONE unit. Entered by an administrator
+// (no authorised automatic source); the counter-value of a foreign-currency
+// account uses the latest rate on or before the day, and says its date.
+model FinExchangeRate {
+  id            String   @id @default(uuid())
+  currency      String   @db.VarChar(3)
+  rate          Float
+  referenceDate DateTime @db.Date
+  source        String   @db.VarChar(200)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([currency, referenceDate])
+  @@map("fin_exchange_rates")
 }

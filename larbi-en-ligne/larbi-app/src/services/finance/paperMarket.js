@@ -9,6 +9,8 @@
 // history is the same for everybody and on every reload, and a new month adds
 // one step without rewriting the past. It is an EXAMPLE, never a quote.
 
+import { futureValueLumpSum } from './formulas.js';
+
 // A small, well-known seeded generator (mulberry32): the same seed gives the
 // same sequence, which is what makes the histories reproducible and testable.
 function generator(seedText) {
@@ -107,3 +109,37 @@ export function projection(support, { amount, years, inflation }) {
 
 // The return once inflation is taken out — the real one.
 export const realReturn = (yearlyReturn, inflation) => (1 + yearlyReturn) / (1 + inflation) - 1;
+
+// P10-03 — compound interest on a support that yields (savings, bonds): what an
+// amount placed for `months` earns when each month's interest is left in and
+// earns in turn (F029, monthly rate = yearly rate / 12), against simple
+// interest on the amount alone. The difference is the « intérêts sur
+// intérêts » — the part due to compounding — and a projection over 1, 5, 10
+// and 20 years shows it growing. Hypotheses of the support, never a quote.
+export const COMPOUND_CLASSES = ['savings', 'bonds'];
+export const COMPOUND_HORIZONS = [1, 5, 10, 20];
+
+export function compoundBreakdown(support, { amount, months }) {
+  const rate = support.yearlyReturn / 12;
+  const at = (periods) => {
+    const compound = futureValueLumpSum({ initial: amount, rate, periods });
+    const simple = Math.round(amount * rate * periods);
+    const interest = compound === null ? null : compound - amount;
+    return { periods, value: compound, interest, simple, onInterest: interest === null ? null : interest - simple };
+  };
+  const held = at(Math.max(0, months));
+  return {
+    key: support.key,
+    yearlyReturn: support.yearlyReturn,
+    monthlyRate: rate,
+    amount,
+    months: held.periods,
+    interest: held.interest,
+    simpleInterest: held.simple,
+    onInterest: held.onInterest,
+    projection: COMPOUND_HORIZONS.map((years) => {
+      const row = at(years * 12);
+      return { years, value: row.value, interest: row.interest, simpleInterest: row.simple, onInterest: row.onInterest };
+    }),
+  };
+}

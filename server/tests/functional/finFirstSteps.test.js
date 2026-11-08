@@ -58,6 +58,17 @@ describe('P8-23 — the first income', () => {
     assert.equal(synthesis.revenusPrevus.resultat, 6000000);
   });
 
+  test('« déjà reçu »: a first income dated today or before is recorded as received at once (recette R9-07)', async () => {
+    const res = await t.request('POST', '/fin/premiers-pas/revenu', {
+      user,
+      json: { label: 'Salaire', value: 6000000, currency: 'DZD', frequency: 'mensuel', nextDate: new Date(Date.now() - 60_000).toISOString(), received: true },
+    });
+    assert.equal(res.status, 201, JSON.stringify(res.body).slice(0, 200));
+    assert.ok(res.body.received, 'the occurrence is confirmed');
+    const synthesis = (await t.request('GET', '/fin/argent/synthese', { user })).body.synthese;
+    assert.equal(synthesis.revenus.resultat, 6000000, 'received, so counted');
+  });
+
   test('another person sees none of it', async () => {
     await t.request('POST', '/fin/premiers-pas/revenu', { user, json: { label: 'Salaire', value: 6000000, currency: 'DZD', frequency: 'mensuel', nextDate } });
     const other = await t.adult({ name: 'Curieux' });

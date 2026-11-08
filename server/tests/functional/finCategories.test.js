@@ -36,7 +36,7 @@ describe('reading the reference', () => {
     );
     assert.equal(
       res.body.groups.reduce((total, g) => total + g.categories.length, 0),
-      91 + 98 - Object.keys(RETIRED_CATEGORIES).length,
+      91 + 98 + 24 - Object.keys(RETIRED_CATEGORIES).length,
       'the standard categories, minus the old ones the 125 replace (answer D4)',
     );
     // A retired category is never offered again, and a new movement cannot use it.

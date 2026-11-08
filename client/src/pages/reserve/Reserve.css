@@ -72,3 +72,27 @@
   margin: 0 0 var(--space-sm);
   padding-inline-start: 1.4em;
 }
+
+/* Recette R9-08: the estimated date and the method in words. */
+.reserve-date {
+  margin: 0.5rem 0 1rem;
+  color: var(--text);
+}
+
+.reserve-method {
+  margin-top: 2rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.reserve-method h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.reserve-method ul {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  line-height: 1.6;
+}

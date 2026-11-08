@@ -18,6 +18,7 @@ import BarList from '../../components/fincludia/charts/BarList.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import { toMinorUnits } from '../../lib/money.js';
 import CategoryIcon from '../../components/fincludia/CategoryIcon.jsx';
+import GoalYears, { yearByYear } from './GoalYears.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Goals.css';
 
@@ -191,6 +192,13 @@ export function GoalDetail({ goal, formulas, statuses, accounts, contributions, 
 
       {goal.vue.trajectoire.atteignable === true && goal.vue.trajectoire.dateEstimee && (
         <p className="goals-estimate">{t('goals.estimatedDate', { date: formatDate(i18n.language, goal.vue.trajectoire.dateEstimee) })}</p>
+      )}
+      {/* Recette R9-12: the simulation year by year, always visible. */}
+      {goal.vue.reste?.resultat > 0 && (
+        <section className="goals-action" aria-labelledby={`goal-years-${goal.id}`}>
+          <h3 id={`goal-years-${goal.id}`}>{t('goals.years.title')}</h3>
+          <GoalYears rows={yearByYear({ capital: goal.allocated ?? 0, monthly: goal.monthlyContribution ?? 0, rate: goal.rate ?? 0, target: goal.target })} currency={goal.currency} target={goal.target} />
+        </section>
       )}
       {goal.vue.avertissements.map((warning, index) => (
         <p key={index} className="fin-hint">

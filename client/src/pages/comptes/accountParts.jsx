@@ -6,6 +6,7 @@ import { fromMinorUnits, toMinorUnits } from '../../lib/money.js';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
+import ColorPicker from '../../components/fincludia/ColorPicker.jsx';
 
 // The pieces of « Mes comptes » that the list, the detail, the form and the
 // transfer screens share (P8-25: each screen of the client at its own
@@ -42,8 +43,13 @@ export function AccountForm({ types, currency, initial, onSubmit }) {
     type: initial?.type ?? types[0]?.id ?? 'AC-01',
     opening: initial ? fromMinorUnits(initial.openingBalance, initial.currency) : '0',
     openingDate: (initial?.openingDate ? new Date(initial.openingDate) : new Date()).toISOString().slice(0, 10),
+    color: null,
+    // P10-05: the account's currency, chosen once (it decides how every
+    // movement on it reads).
+    currency: initial?.currency ?? currency,
   }));
-  const accountCurrency = initial?.currency ?? currency;
+  const currencies = useApi('/fin/devises');
+  const accountCurrency = state.currency;
   const [error, setError] = useState(null);
 
   const submit = (event) => {
@@ -54,7 +60,7 @@ export function AccountForm({ types, currency, initial, onSubmit }) {
       return;
     }
     setError(null);
-    onSubmit({ label: state.label.trim(), type: state.type, currency: accountCurrency, openingBalance, openingDate: new Date(state.openingDate).toISOString() });
+    onSubmit({ label: state.label.trim(), type: state.type, currency: accountCurrency, openingBalance, openingDate: new Date(state.openingDate).toISOString(), ...(state.color ? { color: state.color } : {}) });
   };
 
   return (
@@ -75,6 +81,17 @@ export function AccountForm({ types, currency, initial, onSubmit }) {
         <p className="fin-hint">{types.find((type) => type.id === state.type)?.rule}</p>
       </div>
       <div className="fin-field">
+        <label htmlFor="account-currency">{t('accounts.fields.currency')}</label>
+        <select id="account-currency" value={state.currency} onChange={(event) => setState({ ...state, currency: event.target.value })}>
+          {(currencies.data?.devises ?? [currency]).map((code) => (
+            <option key={code} value={code}>
+              {t(`currencies.${code}`, code)}
+            </option>
+          ))}
+        </select>
+        {state.currency !== (currencies.data?.officielle ?? 'DZD') && <p className="fin-hint">{t('accounts.foreignHint')}</p>}
+      </div>
+      <div className="fin-field">
         <label htmlFor="account-opening">{t('accounts.fields.opening', { currency: accountCurrency })}</label>
         <input id="account-opening" inputMode="decimal" value={state.opening} onChange={(event) => setState({ ...state, opening: event.target.value })} aria-invalid={Boolean(error)} />
         {error && <p className="form-error">{error}</p>}
@@ -83,6 +100,8 @@ export function AccountForm({ types, currency, initial, onSubmit }) {
         <label htmlFor="account-opening-date">{t('accounts.fields.openingDate')}</label>
         <input id="account-opening-date" type="date" value={state.openingDate} required onChange={(event) => setState({ ...state, openingDate: event.target.value })} />
       </div>
+      {/* P10-02 */}
+      <ColorPicker name="account-color" value={state.color} onChange={(color) => setState({ ...state, color })} />
       <Button type="submit">{t('accounts.save')}</Button>
     </form>
   );
@@ -100,6 +119,7 @@ export function AccountEditForm({ account, onSubmit }) {
     minBalanceAlert: money(account.minBalanceAlert),
     overdraftAllowed: money(account.overdraftAllowed),
     note: account.note ?? '',
+    color: account.customColor ?? null,
   });
   const [error, setError] = useState(null);
 
@@ -120,6 +140,7 @@ export function AccountEditForm({ account, onSubmit }) {
       minBalanceAlert,
       overdraftAllowed,
       note: state.note.trim() || null,
+      color: state.color,
     });
   };
 
@@ -152,6 +173,8 @@ export function AccountEditForm({ account, onSubmit }) {
         <label htmlFor={id('note')}>{t('accounts.fields.note')}</label>
         <input id={id('note')} value={state.note} maxLength={300} onChange={(event) => setState({ ...state, note: event.target.value })} />
       </div>
+      {/* P10-02 */}
+      <ColorPicker name={id('color')} value={state.color} onChange={(color) => setState({ ...state, color })} />
       {error && <p className="form-error">{error}</p>}
       <Button type="submit">{t('accounts.save')}</Button>
     </form>

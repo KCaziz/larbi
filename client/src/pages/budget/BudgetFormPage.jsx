@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Pencil, Plus } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
@@ -10,6 +10,7 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
+import ColorPicker from '../../components/fincludia/ColorPicker.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Budget.css';
 
@@ -64,21 +65,33 @@ function BudgetForm({ budget, onSubmit }) {
     periodEnd: budget ? day(budget.periodEnd) : new Date(Date.UTC(today.getFullYear(), today.getMonth() + 1, 0)).toISOString().slice(0, 10),
     recurrence: budget?.recurrence ?? 'monthly',
     note: budget?.note ?? '',
+    color: budget?.color ?? null,
   }));
   const [error, setError] = useState(null);
+  // Recette R9-04: the period is already covered — say by which budget, and
+  // offer to add the categories to it (one budget per period, its envelopes
+  // one per category).
+  const [clash, setClash] = useState(null);
 
   const submit = async (event) => {
     event.preventDefault();
     setError(null);
+    setClash(null);
     try {
       await onSubmit({
         label: form.label.trim(),
         periodStart: new Date(form.periodStart).toISOString(),
         periodEnd: new Date(`${form.periodEnd}T23:59:59`).toISOString(),
         recurrence: form.recurrence,
+        // P10-02: a new budget sends a colour only when one was chosen.
+        ...(budget || form.color ? { color: form.color } : {}),
         ...(budget ? { note: form.note.trim() || null } : {}),
       });
     } catch (err) {
+      if (err?.details?.reason === 'overlappingPeriod') {
+        setClash({ id: err.details.budgetId, label: err.details.label });
+        return;
+      }
       setError(t(errorKey(err, { 422: 'budget.errors.refused' })));
     }
   };
@@ -89,6 +102,12 @@ function BudgetForm({ budget, onSubmit }) {
         <p className="form-error" role="alert">
           {error}
         </p>
+      )}
+      {clash && (
+        <div className="form-error" role="alert">
+          <p>{t('budget.errors.overlap', { label: clash.label })}</p>
+          <Link to={`/app/budgets/${clash.id}`}>{t('budget.errors.overlapOpen', { label: clash.label })}</Link>
+        </div>
       )}
       <div className="budget-create-grid">
         <div className="fin-field">
@@ -120,6 +139,8 @@ function BudgetForm({ budget, onSubmit }) {
           </div>
         )}
       </div>
+      {/* P10-02 */}
+      <ColorPicker name="budget-color" value={form.color} onChange={(color) => setForm({ ...form, color })} />
       <div className="budget-create-actions">
         <Button type="submit">{t('budget.save')}</Button>
       </div>

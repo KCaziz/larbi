@@ -9,6 +9,7 @@ import { occurrencesWithOutcome } from '../services/finOccurrence.service.js';
 import { buildReserveView } from '../services/finReserve.service.js';
 import { breakdown, buildSynthesis, currentMonth, isSavingsMovement, loadSynthesisData } from '../services/finSynthesis.service.js';
 import { isReal } from '../services/finance/dataModel.js';
+import { chosenColors } from '../services/finCategory.service.js';
 
 // The Accueil of the application (P8-06, tab 03_Accueil_Synthese): ONE screen,
 // the same for every profile (ARC-01), in one request. Every figure comes from
@@ -23,7 +24,7 @@ export async function getHome(req, res) {
 
   const [accounts, synthesisData, budget, goalRows, reserve] = await Promise.all([
     accountsWithBalances(prisma, req.user.id, { now }),
-    loadSynthesisData(prisma, req.user.id, period),
+    loadSynthesisData(prisma, req.user.id, period, { accountId: req.query.accountId ?? null }),
     currentBudget(prisma, req.user.id, now),
     listGoals(prisma, req.user.id),
     buildReserveView(prisma, req.user.id, { currency, targetMonths: req.user.finReserveTargetMonths ?? null, now }),
@@ -41,9 +42,10 @@ export async function getHome(req, res) {
   const categories = new Map(
     (await prisma.finCategory.findMany({ where: { id: { in: ids } }, select: { id: true, label: true, icon: true, color: true, group: true } })).map((row) => [row.id, row]),
   );
+  const colors = await chosenColors(prisma, req.user.id, ids);
   const describe = (row) => {
     const category = categories.get(row.categoryId) ?? null;
-    return { ...row, label: category?.label ?? null, icon: category?.icon ?? null, color: category?.color ?? null, group: category?.group ?? null };
+    return { ...row, label: category?.label ?? null, icon: category?.icon ?? null, color: colors.get(row.categoryId) ?? category?.color ?? null, group: category?.group ?? null };
   };
 
   // The declared resources, the salary FIRST (P8-24, P8-11): « Salaire & emploi »
@@ -72,6 +74,15 @@ export async function getHome(req, res) {
     budgetCard.enveloppes = budgetCard.enveloppes.map((line) => ({ ...line, label: line.categoryGroup ?? lineLabels.get(line.categoryId) ?? null }));
   }
 
+  // Recette R9-10: « prévu / réel » of the spending. The plan of the month is
+  // the budget when there is one (its envelopes are what the person planned to
+  // spend); otherwise the payments marked as planned. One account chosen: the
+  // budget covers every account, so only the planned payments apply.
+  const budgetPlan = !req.query.accountId && budgetCard?.totalPrevu?.resultat !== null && budgetCard?.totalPrevu?.resultat !== undefined && budget.currency === synthesis.currency;
+  const prevuReel = budgetPlan
+    ? { prevu: budgetCard.totalPrevu.resultat, reel: synthesis.prevuReel.reel, source: 'budget' }
+    : { ...synthesis.prevuReel, source: synthesis.prevuReel.prevu === null ? null : 'planned' };
+
   // At most three priority goals (tab 04): the highest priority first.
   const goals = goalRows
     .filter((goal) => goal.status !== 'fictional')
@@ -95,7 +106,7 @@ export async function getHome(req, res) {
       fluxNet: synthesis.fluxNet,
       revenusPrevus: synthesis.revenusPrevus,
       revenusDeclares,
-      prevuReel: synthesis.prevuReel,
+      prevuReel,
       tendance: synthesis.tendance,
       depensesParCategorie: synthesis.repartition.map(describe),
       revenusParCategorie: incomeBreakdown.map(describe),

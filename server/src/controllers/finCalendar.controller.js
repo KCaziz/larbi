@@ -96,6 +96,8 @@ export async function getCalendar(req, res) {
     openingBalance,
     tensionFloor: req.query.seuilTension ?? DEFAULT_TENSION_FLOOR,
     realised: data.realised,
+    recurrences: data.recurrences,
+    outcomes: data.outcomes,
   });
 
   // The events carry category ids; the labels are joined here so the interface

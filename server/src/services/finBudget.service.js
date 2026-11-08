@@ -20,6 +20,7 @@ export const ENVELOPE_ENTITY = 'envelope';
 const BUDGET_SELECT = {
   id: true,
   label: true,
+  color: true,
   periodStart: true,
   periodEnd: true,
   currency: true,
@@ -229,6 +230,7 @@ export async function createBudget(prisma, userId, body) {
       data: {
         userId,
         label: body.label,
+        color: body.color ?? null,
         periodStart: body.periodStart,
         periodEnd: body.periodEnd,
         currency: body.currency,
@@ -387,6 +389,7 @@ export async function duplicateBudget(prisma, userId, id, { label } = {}) {
 
   return createBudget(prisma, userId, {
     label: label ?? budget.label,
+    color: budget.color ?? null,
     periodStart: period.periodStart,
     periodEnd: period.periodEnd,
     currency: budget.currency,
@@ -488,7 +491,8 @@ export async function loadBudgetData(prisma, userId, budget) {
   const [envelopes, movements, incomes, goals, provisions] = await Promise.all([
     listEnvelopes(prisma, userId, budget.id),
     prisma.finTransaction.findMany({
-      where: { userId, deletedAt: null, occurredAt: { gte: budget.periodStart, lte: budget.periodEnd } },
+      // Recette R9-06: an account kept apart from the total is not spent from the budget.
+      where: { userId, deletedAt: null, OR: [{ accountId: null }, { account: { includeInTotal: true } }], occurredAt: { gte: budget.periodStart, lte: budget.periodEnd } },
       select: {
         id: true,
         kind: true,

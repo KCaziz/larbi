@@ -79,7 +79,8 @@ export default function BudgetDetailPage() {
   return (
     <>
       <PageHeader icon={PiggyBank} title={budget.label} subtitle={t('budget.detailSubtitle')} maxWidth={1040} />
-      <div className="budget-page">
+      {/* P10-02: the budget's own colour, as a band under its title. */}
+      <div className="budget-page" style={budget.color ? { borderBlockStart: `5px solid ${budget.color}`, paddingBlockStart: 12 } : undefined}>
         <p>
           <Link to="/app/budgets" className="budget-plain">
             <ChevronLeft size={15} aria-hidden="true" /> {t('budget.backToList')}
@@ -224,7 +225,7 @@ export default function BudgetDetailPage() {
           ) : (
             <ul className="budget-envelope-list">
               {vue.enveloppes.map((line) => (
-                <EnvelopeRow key={line.id} budgetId={id} line={line} category={envelopeCategory(line, flatCategories)} currency={currency} run={run} />
+                <EnvelopeRow key={line.id} budgetId={id} budget={budget} line={line} category={envelopeCategory(line, flatCategories)} currency={currency} run={run} />
               ))}
             </ul>
           )}
@@ -327,7 +328,7 @@ function envelopeCategory(line, categories) {
   return line.categoryGroup ? { label: line.categoryGroup, icon: member?.icon ?? null, color: member?.groupColor ?? member?.color ?? null } : null;
 }
 
-function EnvelopeRow({ budgetId, line, category, currency, run }) {
+function EnvelopeRow({ budgetId, budget, line, category, currency, run }) {
   const { t, i18n } = useTranslation();
   const alertClass = { none: '', warning: 'budget-alert-warning', reached: 'budget-alert-reached', exceeded: 'budget-alert-exceeded' }[line.alerte.niveau];
 
@@ -361,6 +362,12 @@ function EnvelopeRow({ budgetId, line, category, currency, run }) {
       </p>
       <BudgetMeter prevu={line.prevu} reel={line.reel} currency={currency} alertLevel={line.alerte.niveau} />
       <FigureCard label={t('budget.gap')} answer={line.ecart} />
+      {/* Recette R9-04: from the envelope down to the expenses it counts. */}
+      {(line.categoryId || line.categoryGroup) && budget && (
+        <Link className="budget-plain" to={`/app/mouvements?type=depense&${line.categoryId ? `categorie=${line.categoryId}` : `groupe=${encodeURIComponent(line.categoryGroup)}`}&du=${String(budget.periodStart).slice(0, 10)}&au=${String(budget.periodEnd).slice(0, 10)}`}>
+          {t('budget.seeExpenses')}
+        </Link>
+      )}
       {line.note && <p className="budget-envelope-note">{line.note}</p>}
     </li>
   );
@@ -368,7 +375,8 @@ function EnvelopeRow({ budgetId, line, category, currency, run }) {
 
 function EnvelopeForm({ budgetId, currency, groups, usedGroups, categories, usedCategoryIds, onDone, onCancel }) {
   const { t } = useTranslation();
-  const available = categories.filter((category) => !usedCategoryIds.has(category.id));
+  // A main category (P10-01) is budgeted as its whole group, offered above.
+  const available = categories.filter((category) => !usedCategoryIds.has(category.id) && !category.main);
   const availableGroups = groups.filter((row) => !usedGroups.has(row.group));
   // `target` is « group:<name> » or « category:<id> »: a whole client category
   // (« Logement ») or one sub-category (P8-09).

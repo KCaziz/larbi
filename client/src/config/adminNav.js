@@ -1,4 +1,4 @@
-import { Award, BookOpen, FileImage, GraduationCap, Landmark, LayoutDashboard, Mail, MessageCircleQuestion, MessagesSquare, Newspaper, Receipt, Settings, Users, Target } from 'lucide-react';
+import { Award, BookOpen, Coins, FileImage, GraduationCap, Landmark, LayoutDashboard, Mail, MessageCircleQuestion, MessagesSquare, Newspaper, Receipt, Settings, Users, Target } from 'lucide-react';
 
 // Entries of the CMS side menu. The CMS base is shared: each module (articles,
 // newsletter, users, media, certificates, settings...) simply adds its own entry
@@ -16,6 +16,8 @@ export const adminNavItems = [
   { to: '/admin/missions-fincludia', icon: Target, labelKey: 'admin.nav.missions' },
   { to: '/admin/paiements', icon: Receipt, labelKey: 'admin.nav.payments' },
   { to: '/admin/comparateur', icon: Landmark, labelKey: 'admin.nav.comparator' },
+  // P10-05: the official exchange rates.
+  { to: '/admin/cours-devises', icon: Coins, labelKey: 'admin.nav.rates' },
   { to: '/admin/users', icon: Users, labelKey: 'admin.nav.users' },
   { to: '/admin/settings', icon: Settings, labelKey: 'admin.nav.settings' },
 ];

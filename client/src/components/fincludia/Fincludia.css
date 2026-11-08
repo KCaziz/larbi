@@ -678,3 +678,116 @@
 .fin-howto a {
   font-weight: 500;
 }
+
+/* Recette R9-16: a long amount never leaves its border: the value is a little
+   smaller on narrower screens, and wraps between words if it must. */
+/* Not a size container: a card placed in a row that sizes to its content
+   (a portfolio position) would lose its natural width and crush its text. */
+.fin-figure {
+  min-width: 0;
+}
+
+.fin-figure-value {
+  font-size: clamp(1.1rem, 0.85rem + 0.9vw, 1.5rem);
+  overflow-wrap: break-word;
+}
+
+.fin-amount {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.fin-amount-currency {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.fin-field {
+  min-width: 0;
+}
+
+/* Recette R9-16 (suite) : dans un formulaire qui style ses propres champs
+   (« .budget-create-grid input »...), le champ montant garde UN cadre, le sien :
+   le champ interne ne redessine ni bordure ni fond, et « DZD » reste collé à
+   droite, à la même hauteur. */
+.fin-field .fin-amount > input {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  max-inline-size: none;
+  min-inline-size: 0;
+}
+
+/* P10-02 : choisir une couleur (palette contrastée, chaque couleur nommée). */
+.fin-color-picker {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+.fin-color-picker legend {
+  padding: 0;
+  margin-block-end: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.fin-color-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.fin-color-option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 36px;
+  min-block-size: 36px;
+  padding: 3px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.fin-color-option input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.fin-color-option:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.fin-color-chosen {
+  border-color: var(--text-h);
+}
+.fin-color-swatch {
+  display: block;
+  inline-size: 24px;
+  block-size: 24px;
+  border-radius: 999px;
+}
+.fin-color-default {
+  padding-inline: 10px;
+  border-color: var(--border-strong);
+  font-size: 0.85rem;
+}
+.fin-color-default.fin-color-chosen {
+  border-color: var(--text-h);
+  font-weight: 600;
+}
+
+/* Recette R9-16 (suite, 2026-11-08) : dans une grille de cartes, chaque carte a
+   une largeur fixée par la grille ; la valeur prend une taille proportionnelle à
+   cette largeur, pour que « 79 000,00 DZD » tienne sur une ligne au lieu de se
+   couper en « DZ / D ». Hors grille (une ligne qui s’ajuste au contenu), la
+   carte garde sa largeur naturelle. */
+.fin-figure-grid > .fin-figure {
+  container-type: inline-size;
+}
+.fin-figure-grid > .fin-figure .fin-figure-value {
+  font-size: clamp(0.95rem, 10cqi, 1.5rem);
+  overflow-wrap: normal;
+}

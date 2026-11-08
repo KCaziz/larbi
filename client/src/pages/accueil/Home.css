@@ -328,17 +328,58 @@
   border-block-end: 1px solid var(--border);
   font-size: 0.9rem;
 }
-.home-miniflow-svg {
-  direction: ltr;
-  inline-size: 120px;
-  block-size: 28px;
-  overflow: visible;
+/* Recette R9-17: the ring, flattened into a bar. */
+.home-miniflow-bar {
+  display: flex;
+  flex: 1 1 auto;
+  max-inline-size: 320px;
+  min-inline-size: 72px;
+  block-size: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-alt);
+}
+.home-miniflow-bar > span {
+  flex-basis: 0;
+  min-inline-size: 2px;
 }
 .home-miniflow {
   white-space: nowrap;
 }
 @media (max-width: 767px) {
-  .home-miniflow-svg {
-    inline-size: 72px;
+  .home-miniflow-bar {
+    max-inline-size: 120px;
+  }
+}
+
+/* Recette R9-14: « Synthèse », and « + » right under it. */
+.home-balance-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-xs);
+}
+
+.home-add-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-block-size: 44px;
+  padding-inline: var(--space-sm);
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.home-add-link:hover {
+  background: var(--accent-hover);
+}
+
+@media (max-width: 560px) {
+  .home-balance-side {
+    align-items: stretch;
+    inline-size: 100%;
   }
 }

@@ -83,6 +83,14 @@ export const portfolioQuerySchema = z
 
 // « If I place this amount for this many years » on a support of the
 // pedagogical market (EP06, recette R8-12). The amount in centimes.
+// P10-03: the compound interest of an amount held for some months.
+export const marketInterestQuerySchema = z
+  .object({
+    montant: z.coerce.number().int().min(1).max(MAX_STORED_AMOUNT),
+    mois: z.coerce.number().int().min(0).max(PROJECTION_MAX_YEARS * 12),
+  })
+  .strict();
+
 export const marketProjectionQuerySchema = z
   .object({
     montant: z.coerce.number().int().min(100).max(MAX_STORED_AMOUNT),

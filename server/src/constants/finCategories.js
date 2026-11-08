@@ -174,6 +174,36 @@ export const RETIRED_CATEGORIES = {
   'seasonal.autre_depense_annuelle': 'variable.autre_depense_variable',
 };
 
+// P10-01 — one main category per group of the client's (« Logement »,
+// « Alimentation »…), choosable on its own: a movement can be put in
+// « Logement » without saying « Loyer ». Same rule as the migration
+// 20261108130000_fin_main_categories that stores them: the group's most common
+// family, essential when most of the group is. « Autre » already has its rows.
+const slugOf = (text) => text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+function mainCategories() {
+  const groups = new Map();
+  for (const c of REFERENCE_CATEGORIES) {
+    if (!c.group || c.group === 'Autre') continue;
+    const entry = groups.get(c.group) ?? { group: c.group, families: {}, essential: 0, count: 0, icon: c.icon };
+    entry.families[c.family] = (entry.families[c.family] ?? 0) + 1;
+    entry.count += 1;
+    if (c.essential) entry.essential += 1;
+    groups.set(c.group, entry);
+  }
+  return [...groups.values()].map((entry) => ({
+    key: `main.${slugOf(entry.group)}`,
+    family: Object.entries(entry.families).sort((a, b) => b[1] - a[1])[0][0],
+    label: entry.group,
+    group: entry.group,
+    icon: entry.icon,
+    color: null,
+    essential: entry.essential * 2 > entry.count,
+    recurrence: null,
+    suggestedFor: [],
+    main: true,
+  }));
+}
+
 export const STANDARD_CATEGORIES = [
   ...P6_02_CATEGORIES.map((c) =>
     absorbed.has(c.key)
@@ -190,6 +220,7 @@ export const STANDARD_CATEGORIES = [
         },
   ),
   ...REFERENCE_CATEGORIES.filter((c) => !c.mergedFrom).map(fromReference),
+  ...mainCategories(),
 ];
 
 export const STANDARD_CATEGORY_KEYS = STANDARD_CATEGORIES.map((c) => c.key);

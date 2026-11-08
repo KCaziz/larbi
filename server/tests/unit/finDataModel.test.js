@@ -34,7 +34,7 @@ describe("the client's category reference", () => {
   test('holds the 8 families: the 91 rows of P6-02 plus the 98 universal categories none of them covered (P8-08)', () => {
     assert.equal(CATEGORY_FAMILIES.length, 8);
     // 125 universal categories, 27 of which absorbed an old row in place.
-    assert.equal(STANDARD_CATEGORIES.length, 91 + 98);
+    assert.equal(STANDARD_CATEGORIES.length, 91 + 98 + 24);
   });
 
   test('every category belongs to a declared family, and every family has categories', () => {
@@ -49,14 +49,18 @@ describe("the client's category reference", () => {
   test('keys are unique, and built from the family and the label', () => {
     assert.equal(new Set(STANDARD_CATEGORY_KEYS).size, STANDARD_CATEGORY_KEYS.length);
     for (const category of STANDARD_CATEGORIES) {
-      assert.ok(category.key.startsWith(`${category.family}.`), `${category.key} is not in its family`);
+      // P10-01: a main category is keyed by its group, « main.logement ».
+      const prefix = category.main ? 'main.' : `${category.family}.`;
+      assert.ok(category.key.startsWith(prefix), `${category.key} is not in its family`);
       assert.match(category.key, /^[a-z]+\.[a-z0-9_]+$/);
     }
   });
 
   test('labels repeat ACROSS families but never inside one', () => {
     for (const code of CATEGORY_FAMILY_CODES) {
-      const labels = standardCategoriesOfFamily(code).map((c) => c.label);
+      // A retired category is never offered again: a main category (P10-01)
+      // may take its name back (« Animaux »).
+      const labels = standardCategoriesOfFamily(code).filter((c) => !c.retiredTo).map((c) => c.label);
       assert.equal(new Set(labels).size, labels.length, `${code} has a duplicate label`);
     }
     // "Loyer" is both a fixed charge and a shared expense in the client's file:

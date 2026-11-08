@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getAccountHistory, getAccounts, patchAccount, postAccount, postTransfer, putAccountArchived, removeTransfer } from '../controllers/finAccount.controller.js';
 import { getHome } from '../controllers/finHome.controller.js';
+import { getCurrencies } from '../controllers/finExchange.controller.js';
 import { exportReport, getComparison, getReport } from '../controllers/finReport.controller.js';
 import { reportCompareQuerySchema, reportExportQuerySchema, reportQuerySchema } from '../validation/finAccount.schemas.js';
 import { requireAuth } from '../middleware/auth.js';
@@ -25,6 +26,8 @@ router.param('transferId', uuidParam);
 
 // The Accueil of the application (P8-06): one screen, one request.
 router.get('/accueil', validateQuery(synthesisQuerySchema), asyncRoute(getHome));
+// P10-05: the currencies one can hold, and the official rates in use.
+router.get('/devises', asyncRoute(getCurrencies));
 // The Synthèse and its monthly report (P8-10).
 router.get('/rapport', validateQuery(reportQuerySchema), asyncRoute(getReport));
 router.get('/rapport/comparaison', validateQuery(reportCompareQuerySchema), asyncRoute(getComparison));

@@ -9,6 +9,8 @@ import { TRANSFER_KINDS } from '../constants/finMoney.js';
 import { HttpError } from '../utils/httpError.js';
 import { computed } from './finance/contract.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
+import { OFFICIAL_CURRENCY } from '../constants/finCurrencies.js';
+import { counterValue, latestRates } from './finExchange.service.js';
 
 export const ACCOUNT_ENTITY = 'account';
 export const TRANSFER_ENTITY = 'transfer';
@@ -17,6 +19,8 @@ const ACCOUNT_SELECT = {
   id: true,
   label: true,
   type: true,
+  // 'computed' for the « Espèces » account opened on its own (recette R9-19).
+  source: true,
   currency: true,
   openingBalance: true,
   openingDate: true,
@@ -164,6 +168,9 @@ export function accountBalance(account, groups) {
  */
 export async function accountsWithBalances(prisma, userId, { includeArchived = false, now = new Date() } = {}) {
   const accounts = await listAccounts(prisma, userId, { includeArchived });
+  // P10-05: an account in a foreign currency shows its counter-value in dinars
+  // at the official rate of a reference date (only read when one exists).
+  const rates = accounts.some((account) => account.currency !== OFFICIAL_CURRENCY) ? await latestRates(prisma, now) : new Map();
   const groups =
     accounts.length === 0
       ? []
@@ -183,7 +190,10 @@ export async function accountsWithBalances(prisma, userId, { includeArchived = f
       liability: isLiability(account.type),
       alertes: accountAlerts(account, balance),
       color: account.color ?? type.color,
+      // P10-02: the colour the person chose, null when it is the type's.
+      customColor: account.color ?? null,
       icon: account.icon ?? type.icon,
+      contreValeur: account.currency === OFFICIAL_CURRENCY ? null : counterValue(balance, account.currency, rates),
       solde: computed('PB-F001', balance, {
         inputs: { compte: account.id, solde_initial: account.openingBalance, date_solde_initial: account.openingDate },
         currency: account.currency,
@@ -208,6 +218,10 @@ export async function accountsWithBalances(prisma, userId, { includeArchived = f
         currency,
         now,
       }),
+      // Recette R9-13: the two sides of the net position, so the screen can
+      // show how it is made.
+      actifs: assets.length === 0 ? null : sum(assets),
+      passifs: liabilities.length === 0 ? null : sum(liabilities),
     };
   });
 

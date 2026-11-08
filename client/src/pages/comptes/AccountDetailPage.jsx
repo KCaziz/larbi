@@ -13,11 +13,31 @@ import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import { BalanceHistory } from './accountParts.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Accounts.css';
+import CounterValue from '../../components/fincludia/CounterValue.jsx';
 
 // COM-03, « Détail compte », at its own address (P8-25): `/app/comptes/:id`.
 // The balance (PB-F001, the server's), the alerts in words, the balance month
 // by month, and what can be done with the account: see its movements, correct
 // it, archive or restore it.
+// With some movement on the account this month, a side with none is zero — an
+// answer — not « non calculé ».
+function MonthFigures({ synthesis, t }) {
+  const { revenus, depenses, fluxNet } = synthesis;
+  if (!revenus || !depenses) return null;
+  const any = revenus.resultat !== null || depenses.resultat !== null;
+  const known = (answer) => (any && answer && answer.resultat === null ? { ...answer, resultat: 0 } : answer);
+  const income = known(revenus);
+  const spent = known(depenses);
+  const flow = any && fluxNet?.resultat === null ? { ...fluxNet, resultat: income.resultat - spent.resultat } : fluxNet;
+  return (
+    <>
+      <FigureCard label={t('accounts.monthIncome')} answer={income} />
+      <FigureCard label={t('accounts.monthExpenses')} answer={spent} />
+      <FigureCard label={t('accounts.monthFlow')} answer={flow} />
+    </>
+  );
+}
+
 export default function AccountDetailPage() {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -25,6 +45,8 @@ export default function AccountDetailPage() {
   const [message, setMessage] = useState(location.state?.message ? { kind: 'ok', text: location.state.message } : null);
   const data = useApi('/fin/comptes?includeArchived=true');
   const account = data.data?.accounts.find((row) => row.id === id);
+  // Recette R9-06: the income, spending and flow of the month, this account only.
+  const month = useApi(`/fin/argent/synthese?accountId=${id}`);
   useDocumentMeta(account?.label ?? t('accounts.detailTitle'));
 
   if (data.status === 'loading' && !data.data) return <LoadingState />;
@@ -55,7 +77,9 @@ export default function AccountDetailPage() {
 
         <div className="fin-figure-grid">
           <FigureCard label={account.liability ? t('accounts.owed') : t('accounts.balance')} answer={account.solde} />
+          {month.data?.synthese && <MonthFigures synthesis={month.data.synthese} t={t} />}
         </div>
+        {account.currency !== 'DZD' && account.solde.resultat !== null && <CounterValue value={account.contreValeur} />}
         <p className="accounts-meta">
           {!account.includeInTotal && t('accounts.notInTotal')}
           {account.archivedAt && ` ${t('accounts.archivedTag')}`}

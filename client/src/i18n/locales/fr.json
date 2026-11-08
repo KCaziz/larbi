@@ -686,7 +686,9 @@
     "fileTooLarge": "Ce fichier est trop volumineux.",
     "fileUnsupported": "Ce type de fichier n'est pas accepté.",
     "conflict": "Cette action n’est pas possible dans l’état actuel.",
-    "refused": "Cette valeur ou cette demande n’est pas acceptée. Vérifiez les champs."
+    "refused": "Cette valeur ou cette demande n’est pas acceptée. Vérifiez les champs.",
+    "oneScreen": "Un seul écran à la fois avec un compte gratuit : votre compte est déjà ouvert sur un autre écran. Déconnectez-vous de l’autre écran puis réessayez (un écran inactif depuis 30 minutes se libère tout seul), ou abonnez-vous pour utiliser plusieurs écrans.",
+    "subscriptionRequired": "Inviter quelqu’un dans un espace partagé est réservé aux abonnés. Abonnez-vous depuis « Offres » pour inviter d’autres personnes."
   },
   "state": {
     "loading": "Chargement…",
@@ -713,7 +715,8 @@
       "payments": "Paiements",
       "glossary": "Apprendre",
       "finAssistant": "Assistant FINCLUDIA",
-      "missions": "Missions"
+      "missions": "Missions",
+      "rates": "Cours des devises"
     },
     "shell": {
       "title": "Administration",
@@ -2798,7 +2801,9 @@
     },
     "essential": "Essentielle",
     "search": "Rechercher une catégorie (nom, groupe)",
-    "jump": "Aller à une famille"
+    "jump": "Aller à une famille",
+    "color": "Couleur",
+    "colorLegend": "Couleur de « {{label}} »"
   },
   "fincludia": {
     "notComputed": "non calculé",
@@ -3149,7 +3154,8 @@
       "amount_asc": "Montant croissant"
     },
     "expectedIncome": "Revenus prévus",
-    "incomeGroup": "Revenus · {{group}}"
+    "incomeGroup": "Revenus · {{group}}",
+    "plannedVsRealBudget": "Prévu (votre budget du mois) : {{planned}} · Réalisé : {{real}}"
   },
   "budget": {
     "title": "Budget",
@@ -3182,7 +3188,9 @@
     "deleteConfirm": "Supprimer définitivement le budget « {{label}} » ?",
     "deleted": "Supprimé.",
     "errors": {
-      "refused": "Cette action a été refusée. Vérifiez les informations saisies."
+      "refused": "Cette action a été refusée. Vérifiez les informations saisies.",
+      "overlap": "Le budget « {{label}} » couvre déjà cette période. Un budget regroupe toutes les catégories d'une période : ajoutez-y une enveloppe par catégorie, ou choisissez d'autres dates.",
+      "overlapOpen": "Ouvrir « {{label}} » pour y ajouter une catégorie"
     },
     "detailSubtitle": "Prévu, réel, alertes et ce qu’il reste à affecter.",
     "backToList": "Retour aux budgets",
@@ -3277,7 +3285,8 @@
     "paceChart": "Dépense cumulée contre le rythme prévu",
     "paceDay": "Jour",
     "paceReal": "Dépense cumulée",
-    "pacePlanned": "Rythme prévu (réparti sur la période)"
+    "pacePlanned": "Rythme prévu (réparti sur la période)",
+    "seeExpenses": "Voir les dépenses de cette enveloppe"
   },
   "goals": {
     "title": "Objectifs",
@@ -3362,7 +3371,23 @@
     "contributeHelp": "Déplace de l’argent : le montant quitte l’un de vos comptes et arrive sur le compte de l’objectif. C’est un virement réel, ni une dépense ni un revenu.",
     "editTitle": "Corriger les chiffres de l’objectif",
     "editHelp": "Ne déplace aucun argent : sert à ajuster à la main le capital déjà mis de côté et la contribution mensuelle prévue.",
-    "editHelpAccount": "Ne déplace aucun argent : le capital de cet objectif est le solde de son compte, il ne se saisit pas ici. Vous ajustez seulement la contribution mensuelle prévue."
+    "editHelpAccount": "Ne déplace aucun argent : le capital de cet objectif est le solde de son compte, il ne se saisit pas ici. Vous ajustez seulement la contribution mensuelle prévue.",
+    "years": {
+      "title": "Simulation année par année",
+      "none": "Indiquez combien vous mettez de côté chaque mois (« Modifier l’objectif ») : la simulation année par année s’affichera ici.",
+      "reached_one": "Objectif atteint en {{count}} mois.",
+      "reached_other": "Objectif atteint en {{count}} mois.",
+      "notReached": "Au bout de {{years}} ans : {{capital}} sur {{target}}. Augmentez l’épargne mensuelle pour l’atteindre plus tôt.",
+      "caption": "Capital de l’objectif à la fin de chaque année",
+      "year": "Année",
+      "yearLabel": "Année {{year}} ({{date}})",
+      "saved": "Mis de côté dans l’année",
+      "interest": "Intérêts",
+      "capital": "Capital en fin d’année",
+      "share": "Part de la cible",
+      "reachedWholeYears": "Objectif atteint en {{count}} mois ({{years}} an(s)).",
+      "reachedYearsMonths": "Objectif atteint en {{count}} mois ({{years}} an(s) et {{months}} mois)."
+    }
   },
   "debts": {
     "title": "Dettes",
@@ -3412,14 +3437,16 @@
     "loans": {
       "lent": "J’ai prêté",
       "borrowed": "On m’a prêté",
-      "lentHint": "L’argent quitte votre compte aujourd’hui ; la somme qu’on vous doit est suivie à part, jamais comptée comme une dépense.",
-      "borrowedHint": "L’argent arrive sur votre compte ; la dette est suivie à part, jamais comptée comme un revenu.",
+      "lentHint": "L’argent quitte votre compte aujourd’hui (son solde baisse) ; la somme qu’on vous doit est suivie à part, jamais comptée comme une dépense : elle doit vous revenir.",
+      "borrowedHint": "L’argent arrive sur votre compte (son solde augmente) ; la dette est suivie à part, jamais comptée comme un revenu : c’est de l’argent à rendre.",
       "lentWho": "À qui ?",
       "borrowedWho": "Qui vous a prêté ?",
       "amount": "Montant",
       "dueDate": "Remboursement prévu le (facultatif)",
       "saved": "Prêt enregistré, avec le mouvement réel sur votre compte.",
-      "noAccount": "Créez d’abord un compte dans « Mes comptes »."
+      "noAccount": "Créez d’abord un compte dans « Mes comptes ».",
+      "instalment": "Remboursement par mois (facultatif)",
+      "instalmentHint": "Indiqué, il apparaît chaque mois dans « Aujourd’hui » jusqu’à ce qu’un remboursement soit enregistré."
     },
     "backToList": "Retour à mes dettes",
     "created": "Dette enregistrée.",
@@ -3495,7 +3522,9 @@
         "how": "Elles se calculent seules à partir de vos dépenses enregistrées dans les catégories essentielles (loyer, alimentation, énergie, transport, santé, téléphone…) sur les trois derniers mois. En attendant, indiquez une estimation : elle suffit pour commencer.",
         "declare": "Mon estimation par mois",
         "change": "Corriger mon estimation par mois",
-        "fromHistory": "Calculées à partir de vos dépenses enregistrées dans les catégories essentielles (loyer, alimentation, énergie, transport, santé, téléphone…) sur les trois derniers mois. Elles se mettent à jour à chaque nouvelle dépense."
+        "fromHistory": "Calculées à partir de vos dépenses enregistrées dans les catégories essentielles (loyer, alimentation, énergie, transport, santé, téléphone…) sur les trois derniers mois. Elles se mettent à jour à chaque nouvelle dépense.",
+        "doneBudget": "{{amount}} par mois, d’après les enveloppes essentielles de votre budget (en attendant un mois de dépenses enregistrées).",
+        "doneRecorded": "Au moins {{amount}} par mois : les dépenses essentielles déjà enregistrées. Le chiffre s’affine dès un mois complet."
       },
       "target": {
         "title": "2. Combien de mois voulez-vous pouvoir tenir ?",
@@ -3518,6 +3547,18 @@
       "mark": "Choisissez ce qui compte comme essentiel : dans vos catégories, cochez ou décochez « Essentielle ».",
       "markLink": "Mes catégories",
       "estimate": "En attendant un mois de dépenses enregistrées, donnez une estimation ci-dessous : elle est utilisée jusque-là."
+    },
+    "dateEstimated": "Date estimée : {{date}}, en mettant {{amount}} de côté chaque mois.",
+    "dateReached": "Votre fonds d’urgence atteint déjà sa cible.",
+    "dateUnknown": "Date estimée : à suivre. Indiquez dans votre objectif « Fonds d’urgence » combien vous mettez de côté chaque mois.",
+    "method": {
+      "title": "Comment c’est calculé",
+      "essential": "Dépenses essentielles par mois : la moyenne de vos dépenses rangées dans des catégories essentielles (logement, alimentation, énergie, transport, santé…) sur les 3 derniers mois complets. Avant un mois complet : votre estimation, sinon les enveloppes essentielles de votre budget, sinon ce qui est déjà enregistré.",
+      "target": "Montant visé = dépenses essentielles par mois × nombre de mois choisi.",
+      "months": "Mois couverts = argent de votre fonds d’urgence ÷ dépenses essentielles par mois.",
+      "gap": "Reste à mettre de côté = montant visé − argent de votre fonds d’urgence.",
+      "date": "Date estimée = aujourd’hui + (reste à mettre de côté ÷ épargne mensuelle prévue pour le fonds).",
+      "excluded": "Ne comptent pas : le portefeuille fictif, les biens difficiles à vendre (immobilier, véhicule…) et l’argent réservé à d’autres objectifs."
     }
   },
   "calendar": {
@@ -3658,7 +3699,14 @@
     "weekChart": "Charge des échéances, semaine par semaine",
     "weekOf": "Semaine du {{date}}",
     "weekIn": "Entrées prévues",
-    "weekOut": "Sorties prévues"
+    "weekOut": "Sorties prévues",
+    "allChargesCost": "Toutes les charges régulières, par mois",
+    "subscriptionTag": "Abonnement",
+    "subscriptionsHint": "Comptent comme abonnements : téléphone, internet, streaming, musique, stockage en ligne, logiciels, salle de sport, et toute charge régulière dont le nom contient « abonnement ».",
+    "realIn": "Revenus réels de la période",
+    "plannedHint": "« Prévu » : ce qui était attendu sur la période — charges et revenus réguliers (déjà confirmés ou à venir) et paiements planifiés. « Réel » : les mouvements enregistrés. Pour qu’une dépense compte dans le prévu, déclarez-la comme charge régulière ou planifiez-la.",
+    "provisionHow_one": "Calcul : il reste {{left}} à mettre de côté avant le {{date}} ; l’échéance tombe d’ici un mois, donc tout est à mettre de côté maintenant : {{monthly}}.",
+    "provisionHow_other": "Calcul : il reste {{left}} à mettre de côté avant le {{date}}, soit {{count}} mois d’ici l’échéance : {{left}} ÷ {{count}} = {{monthly}} par mois."
   },
   "today": {
     "title": "Aujourd'hui",
@@ -3740,7 +3788,13 @@
     "seeCalendar": "Voir le calendrier",
     "healthPending": "L'indice de santé financière n'est pas encore affiché ici : cette partie est en développement. Les sous-scores ci-dessus sont lisibles un par un.",
     "pickPublic": "Choisir votre parcours adapte ce tableau à votre situation.",
-    "pickPublicLink": "Choisir mon parcours"
+    "pickPublicLink": "Choisir mon parcours",
+    "debtsTitle": "Prêts et emprunts",
+    "debtThisMonth": "Ce mois-ci",
+    "debtToRepay": "Rembourser : {{label}}",
+    "debtToCollect": "À vous rembourser : {{label}}",
+    "debtLeft": "(reste {{amount}})",
+    "debtRecord": "Enregistrer un remboursement"
   },
   "wealth": {
     "title": "Patrimoine",
@@ -3806,7 +3860,13 @@
     "revalueTitle": "Nouvelle valorisation",
     "revalued": "Valeur mise à jour, avec sa date.",
     "deleteShort": "Supprimer",
-    "assetsVsDebts": "Ce que je possède et ce que je dois"
+    "assetsVsDebts": "Ce que je possède et ce que je dois",
+    "notCountedTitle": "Non compté dans le patrimoine :",
+    "notCounted": {
+      "heldByAccount": "« {{label}} » : déjà compté par votre compte du même type (pour ne pas compter deux fois le même argent).",
+      "accountExcluded": "Compte « {{label}} » : réglé pour ne pas compter dans le patrimoine (modifiable dans ce compte)."
+    },
+    "countedHint": "Comptent : vos comptes (leur solde), vos biens déclarés (immobilier, véhicule, or, placements…) et les sommes qu’on vous doit. Se retirent : vos dettes, crédits et comptes à découvert. Le portefeuille fictif ne compte jamais."
   },
   "paper": {
     "title": "Portefeuille d’entraînement",
@@ -3920,6 +3980,21 @@
       "step3": "Changez son prix pour simuler une hausse ou une baisse, et regardez votre gain ou votre perte et votre rendement.",
       "step4": "Notez pourquoi vous avez acheté ou vendu dans le journal de décisions, puis relisez-le plus tard.",
       "why": "Aucune liste de placements ni aucun cours n’est fourni ici : c’est vous qui créez les supports, pour apprendre sans qu’un prix réel ne vous soit suggéré."
+    },
+    "compound": {
+      "title": "Intérêts composés (taux de l’exemple : {{rate}} par an)",
+      "sinceBuy_one": "Depuis l’achat ({{count}} mois) : {{interest}} d’intérêts, dont {{onInterest}} d’intérêts sur intérêts (en intérêts simples : {{simple}}).",
+      "sinceBuy_other": "Depuis l’achat ({{count}} mois) : {{interest}} d’intérêts, dont {{onInterest}} d’intérêts sur intérêts (en intérêts simples : {{simple}}).",
+      "caption": "Si les {{amount}} placés restent, intérêts laissés sur le support :",
+      "horizon": "Durée",
+      "value": "Valeur",
+      "simple": "Intérêts simples",
+      "compound": "Intérêts composés",
+      "onInterest": "Dont intérêts sur intérêts",
+      "years_one": "{{count}} an",
+      "years_other": "{{count}} ans",
+      "how": "Chaque mois, les intérêts (taux annuel ÷ 12) s’ajoutent à la somme et rapportent à leur tour. Intérêts simples : calculés sur la somme de départ seulement. Exemple pédagogique, à partir du taux écrit pour ce support, jamais un cours réel.",
+      "boughtThisMonth": "Acheté ce mois-ci : les premiers intérêts s’ajoutent à la fin du premier mois. Voici ce que donnerait la suite :"
     }
   },
   "spaces": {
@@ -4878,7 +4953,8 @@
       "includeInTotal": "Compter dans le solde total",
       "includeInNetWorth": "Compter dans le patrimoine",
       "minBalanceAlert": "Me prévenir sous ce solde ({{currency}}, facultatif)",
-      "overdraftAllowed": "Découvert autorisé ({{currency}}, facultatif)"
+      "overdraftAllowed": "Découvert autorisé ({{currency}}, facultatif)",
+      "currency": "Devise du compte"
     },
     "errors": {
       "refused": "Cette opération n’a pas pu être enregistrée. Vérifiez les comptes et la devise.",
@@ -4917,7 +4993,14 @@
     "chartTitle": "Évolution des soldes",
     "chartFilter": "Compte",
     "chartAll": "Tous les comptes",
-    "chartCurrencies": "Les comptes d’une autre devise ne sont pas tracés sur la même échelle."
+    "chartCurrencies": "Les comptes d’une autre devise ne sont pas tracés sur la même échelle.",
+    "monthIncome": "Revenus du mois",
+    "monthExpenses": "Dépenses du mois",
+    "monthFlow": "Flux net du mois",
+    "explainTotal": "Solde total : l’argent disponible, c’est-à-dire la somme des comptes « comptés dans le total » (les comptes gardés à part n’y sont pas).",
+    "explainNet": "Position nette : ce que vous possédez moins ce que vous devez. Ce que vous possédez : les comptes comptés dans le patrimoine (comptes courants, espèces, épargne, sommes prêtées à quelqu’un). Ce que vous devez : les emprunts et crédits suivis sur un compte.",
+    "explainNetFigures": "Aujourd’hui : {{assets}} possédés − {{liabilities}} dus = {{net}}.",
+    "foreignHint": "Le compte reste en devise : ses mouvements se saisissent dans cette devise. Il compte dans votre patrimoine pour sa contre-valeur en dinars au cours officiel de la Banque d’Algérie (jamais au cours parallèle), mais pas dans votre solde en dinars."
   },
   "health": {
     "title": "Santé financière",
@@ -5017,7 +5100,9 @@
       "checked": "Vous avez vérifié que ce mouvement est juste (montant, date, catégorie).",
       "reconciled": "Vous l’avez retrouvé sur votre relevé de banque ou de CCP : il est confirmé par le compte lui-même.",
       "to_verify": "Quelque chose cloche (montant, doublon, opération inconnue) : à revoir plus tard."
-    }
+    },
+    "groupFilter": "Catégorie : {{group}}",
+    "groupFilterClear": "Retirer"
   },
   "appHome": {
     "title": "Accueil",
@@ -5059,7 +5144,8 @@
     "manageIncome": "Gérer mes revenus prévus",
     "quickAddClose": "Fermer l’ajout rapide",
     "quickAddFull": "Ouvrir le formulaire complet",
-    "miniFlow": "Flux net des derniers mois"
+    "miniFlow": "Flux net des derniers mois",
+    "ringNothing": "Aucun mouvement"
   },
   "finProfile": {
     "incomeRegularity": "Régularité de mon revenu",
@@ -5444,12 +5530,16 @@
       "amount": "Montant attendu",
       "nextDate": "Prochaine date de réception (le jour habituel)",
       "account": "Compte à créditer",
-      "noAccount": "Aucun compte pour l’instant."
+      "noAccount": "Aucun compte pour l’instant.",
+      "received": "Je l’ai déjà reçu : l’enregistrer maintenant sur ce compte."
     },
     "salary": {
       "needIncome": "Ajoutez d’abord votre premier revenu (étape P1).",
       "day": "Prochaine date de réception",
-      "confirmHint": "Recommandé : « me demander de confirmer », le jour venu."
+      "confirmHint": "Recommandé : « me demander de confirmer », le jour venu.",
+      "dateMissing": "Indiquez le jour où le revenu arrive.",
+      "accountMissing": "Choisissez le compte sur lequel le revenu arrive.",
+      "saved": "Le revenu arrive le {{date}} sur « {{account}} » ({{mode}})."
     },
     "plan": {
       "title": "Mon plan du premier revenu",
@@ -5494,7 +5584,9 @@
     },
     "ownPage": "Ouvrir sur sa propre page",
     "stepSaved": "Étape enregistrée.",
-    "backToSteps": "Retour aux premiers pas"
+    "backToSteps": "Retour aux premiers pas",
+    "profileMissing": "Choisissez d’abord votre profil dans la liste.",
+    "edit": "Modifier"
   },
   "incomes": {
     "title": "Revenus prévus",
@@ -5596,7 +5688,8 @@
     "clearSearch": "Effacer la recherche",
     "noResult": "Aucune catégorie ne correspond.",
     "back": "Retour",
-    "inGroup": "dans {{group}}"
+    "inGroup": "dans {{group}}",
+    "wholeGroup": "{{group}} (sans préciser)"
   },
   "tips": {
     "accueil": [
@@ -5802,6 +5895,53 @@
         "name": "Or (exemple)",
         "description": "Une valeur refuge recherchée en temps de crise : ne verse rien, son prix varie fortement d’une année à l’autre."
       }
+    }
+  },
+  "colorPicker": {
+    "legend": "Couleur",
+    "default": "Par défaut",
+    "colors": {
+      "blue": "Bleu",
+      "teal": "Bleu-vert",
+      "green": "Vert",
+      "olive": "Olive",
+      "amber": "Ambre",
+      "red": "Rouge",
+      "pink": "Rose",
+      "violet": "Violet",
+      "indigo": "Indigo",
+      "slate": "Ardoise"
+    }
+  },
+  "currencies": {
+    "DZD": "DZD — dinar algérien",
+    "EUR": "EUR — euro",
+    "USD": "USD — dollar américain",
+    "GBP": "GBP — livre sterling",
+    "CAD": "CAD — dollar canadien",
+    "counterValue": "Contre-valeur : {{amount}} au cours officiel de la Banque d’Algérie du {{date}} (1 = {{rate}} DA).",
+    "counterValueUnknown": "Contre-valeur en dinars : à suivre (cours officiel pas encore renseigné).",
+    "held": "{{amount}} au cours officiel du {{date}}"
+  },
+  "adminRates": {
+    "title": "Cours officiels des devises",
+    "intro": "Les cours officiels de la Banque d’Algérie utilisés pour la contre-valeur en dinars des comptes et biens en devise. Jamais le cours parallèle.",
+    "caption": "Cours en vigueur, par devise",
+    "currency": "Devise",
+    "rate": "Cours",
+    "date": "Date de référence",
+    "source": "Source",
+    "none": "Non renseigné",
+    "perUnit": "1 {{currency}} = {{rate}} DA",
+    "addTitle": "Enregistrer un cours officiel",
+    "addHint": "Relevez le cours sur le site de la Banque d’Algérie (taux de change journalier). Enregistrer à nouveau une même date corrige le cours de cette date ; le cours le plus récent s’applique.",
+    "rateLabel": "Dinars pour 1 {{currency}}",
+    "sourceHint": "Facultatif : par défaut « Banque d’Algérie, cours officiel du … ».",
+    "defaultSource": "Banque d’Algérie, cours officiel du {{date}}",
+    "save": "Enregistrer le cours",
+    "saved": "Cours enregistré.",
+    "errors": {
+      "rate": "Indiquez un cours supérieur à zéro."
     }
   }
 }

@@ -6,6 +6,7 @@
 import { HttpError } from '../utils/httpError.js';
 import { createIncome } from './finMoney.service.js';
 import { createRecurrence } from './finCalendar.service.js';
+import { recordOccurrence } from './finOccurrence.service.js';
 
 export const FIRST_STEPS = ['P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7'];
 
@@ -94,5 +95,18 @@ export async function createFirstIncome(prisma, userId, body) {
     creationMode: body.autoCredit ? 'auto_real' : 'confirm',
     weekendRule: body.weekendRule ?? 'previous',
   });
-  return { income, recurrence };
+  // « Je l'ai déjà reçu » (recette R9-06): the first payment, on or before
+  // today, is confirmed at once — the same confirmation as « Reçu » in
+  // Aujourd'hui, so it can never be credited twice — and the account shows it.
+  let received = null;
+  if (body.received && body.nextDate <= new Date()) {
+    try {
+      received = await recordOccurrence(prisma, userId, { recurrenceId: recurrence.id, dueDate: body.nextDate, action: 'confirm' });
+    } catch (err) {
+      // A payday that a weekend moves to tomorrow is not received yet: the
+      // income is saved, and « Reçu » comes on the day.
+      if (err.details?.reason !== 'futureDate') throw err;
+    }
+  }
+  return { income, recurrence, received };
 }

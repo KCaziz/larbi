@@ -42,6 +42,8 @@ const RECURRENCE_SELECT = {
   consentUses: true,
   version: true,
   archivedAt: true,
+  // To tell a subscription from another regular charge (recette R9-09).
+  category: { select: { key: true, baseKey: true } },
 };
 
 const PROVISION_SELECT = {
@@ -534,6 +536,8 @@ export async function loadCalendarData(prisma, userId, { from, to }) {
         // The reminders read it (P8-11): without it, no recurrence was ever
         // reminded of (found by QA-P05, 2026-10-28).
         reminderDays: true,
+        // A subscription or another regular charge (recette R9-09).
+        category: { select: { key: true, baseKey: true } },
       },
     }),
     prisma.finProvision.findMany({
@@ -541,7 +545,8 @@ export async function loadCalendarData(prisma, userId, { from, to }) {
       select: { id: true, label: true, value: true, provisioned: true, currency: true, targetDate: true, categoryId: true },
     }),
     prisma.finTransaction.findMany({
-      where: { userId, deletedAt: null, planned: false, occurredAt: { gte: from, lte: to } },
+      // Recette R9-06: an account kept apart from the total is not part of it.
+      where: { userId, deletedAt: null, planned: false, OR: [{ accountId: null }, { account: { includeInTotal: true } }], occurredAt: { gte: from, lte: to } },
       select: { id: true, kind: true, value: true, currency: true, planned: true, status: true },
     }),
   ]);

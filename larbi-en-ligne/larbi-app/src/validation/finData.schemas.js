@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { CATEGORY_FAMILY_CODES } from '../constants/finCategories.js';
 import { CONFIDENCE_LEVELS, CONSENT_USES, DATA_SCOPES, DATA_SOURCES, DATA_STATUSES } from '../constants/finData.js';
+import { SUPPORTED_CURRENCIES } from '../constants/finCurrencies.js';
 
 // The metadata socle as validation (P6-02). The vocabularies come from
 // constants/finData.js — the same lists the database CHECKs are built from and
@@ -29,11 +30,13 @@ export const consentUsesSchema = z
 // thousands of them. A larger figure is refused here, never stored differently.
 export const MAX_STORED_AMOUNT = 1_000_000_000_000_000;
 export const amountSchema = z.number().int().min(-MAX_STORED_AMOUNT).max(MAX_STORED_AMOUNT);
+// P10-05: the dinar and the four foreign currencies the client chose.
 export const currencySchema = z
   .string()
   .trim()
   .toUpperCase()
-  .regex(/^[A-Z]{3}$/);
+  .regex(/^[A-Z]{3}$/)
+  .refine((code) => SUPPORTED_CURRENCIES.includes(code), { message: 'Unsupported currency' });
 
 // Why a correction was made, if the person wrote it down. Never required: the
 // client asks for a traceable correction, not for a justification to be typed
@@ -60,12 +63,14 @@ export const updateCategorySchema = z
   .object({
     label: labelSchema.optional(),
     essential: z.boolean().optional(),
+    // P10-02: the person's own colour; null goes back to the family's.
+    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).nullable().optional(),
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
     reason: reasonSchema.optional(),
   })
   .strict()
-  .refine((body) => ['label', 'essential', 'scope', 'consentUses'].some((field) => field in body), {
+  .refine((body) => ['label', 'essential', 'color', 'scope', 'consentUses'].some((field) => field in body), {
     message: 'Nothing to change',
   });
 
@@ -77,10 +82,12 @@ export const customiseCategorySchema = z
     hidden: z.boolean().optional(),
     // « Essentielle ? », the person's own reading (P8-08).
     essential: z.boolean().optional(),
+    // P10-02: a colour for a standard category, this person only; null = the reference's.
+    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).nullable().optional(),
     reason: reasonSchema.optional(),
   })
   .strict()
-  .refine((body) => 'label' in body || 'hidden' in body || 'essential' in body, { message: 'Nothing to change' });
+  .refine((body) => 'label' in body || 'hidden' in body || 'essential' in body || 'color' in body, { message: 'Nothing to change' });
 
 export const archiveCategorySchema = z.object({ archived: z.boolean(), reason: reasonSchema.optional() }).strict();
 

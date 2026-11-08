@@ -109,6 +109,12 @@ export default function ReservePage() {
               <FigureCard label={t('reserve.gap')} answer={r.manque} formula={formulas.get('F016')} />
             </div>
             {/* G-08: the months covered against the target, in colour and in words. */}
+            {/* C12's « date estimée » (recette R9-08). */}
+            <p className="reserve-date">
+              {r.dateEstimee
+                ? t(r.manque?.resultat === 0 ? 'reserve.dateReached' : 'reserve.dateEstimated', { date: new Intl.DateTimeFormat(i18n.language === 'tzm' ? 'fr' : i18n.language, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(r.dateEstimee)), amount: money(r.epargneMensuelle) })
+                : t('reserve.dateUnknown')}
+            </p>
             <Gauge value={r.moisReserve?.resultat ?? null} target={r.cibleMois ?? null} unitLabel={t('reserve.monthsUnit')} caption={t('reserve.gaugeCaption')} />
           </>
         ) : (
@@ -117,7 +123,7 @@ export default function ReservePage() {
 
         <ol className="reserve-steps">
           <ReserveStep done={hasEssential} title={t('reserve.steps.essential.title')}>
-            {hasEssential && <p>{t(r.sourceDepensesEssentielles === 'declared' ? 'reserve.steps.essential.doneDeclared' : 'reserve.steps.essential.done', { amount: money(r.depensesEssentielles) })}</p>}
+            {hasEssential && <p>{t({ declared: 'reserve.steps.essential.doneDeclared', budget: 'reserve.steps.essential.doneBudget', recorded: 'reserve.steps.essential.doneRecorded' }[r.sourceDepensesEssentielles] ?? 'reserve.steps.essential.done', { amount: money(r.depensesEssentielles) })}</p>}
             {/* How to set them, step by step, each with its screen (recette
                 R8-04): a sentence saying « they are computed on their own »
                 left the person with nothing to do. */}
@@ -172,6 +178,19 @@ export default function ReservePage() {
           </ReserveStep>
 
         </ol>
+
+        {/* Recette R9-08: the method, in words, always visible. */}
+        <section className="reserve-method" aria-labelledby="reserve-method-title">
+          <h2 id="reserve-method-title">{t('reserve.method.title')}</h2>
+          <ul>
+            <li>{t('reserve.method.essential')}</li>
+            <li>{t('reserve.method.target')}</li>
+            <li>{t('reserve.method.months')}</li>
+            <li>{t('reserve.method.gap')}</li>
+            <li>{t('reserve.method.date')}</li>
+            <li>{t('reserve.method.excluded')}</li>
+          </ul>
+        </section>
       </div>
     </>
   );

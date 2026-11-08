@@ -23,6 +23,8 @@ import {
   valuationHistory,
 } from '../services/finWealth.service.js';
 import { describeFormula } from '../services/finance/describe.js';
+import { OFFICIAL_CURRENCY } from '../constants/finCurrencies.js';
+import { counterValue, latestRates } from '../services/finExchange.service.js';
 
 // Real patrimony (P6-11), screens C16 and JA07. Session required everywhere,
 // and every read and write is scoped to the caller's own rows: what somebody
@@ -119,10 +121,27 @@ export async function accountsNetWorthHistory(prisma, userId, currency, { months
   return points;
 }
 
+async function inOfficialCurrency({ assets, liabilities }) {
+  if (![...assets, ...liabilities].some((row) => row.currency !== OFFICIAL_CURRENCY)) return { assets, liabilities };
+  const rates = await latestRates(prisma);
+  const convert = (row, field) => {
+    if (row.currency === OFFICIAL_CURRENCY) return row;
+    const cv = counterValue(row[field], row.currency, rates);
+    if (!cv) return row;
+    return { ...row, [field]: cv.value, currency: OFFICIAL_CURRENCY, devise: { currency: row.currency, value: row[field], rate: cv.rate, referenceDate: cv.referenceDate } };
+  };
+  return { assets: assets.map((row) => convert(row, 'value')), liabilities: liabilities.map((row) => convert(row, 'outstandingPrincipal')) };
+}
+
 export async function getWealth(req, res) {
   const currency = req.query.currency ?? req.user.finCurrency;
   const [declared, debts, { accounts }] = await Promise.all([listAssets(prisma, req.user.id), listDebts(prisma, req.user.id), accountsWithBalances(prisma, req.user.id)]);
-  const { assets, liabilities } = wealthFromAccounts({ declared, debts, accounts });
+  const found = wealthFromAccounts({ declared, debts, accounts });
+  // P10-05: what is held in a foreign currency stays in it, and counts in the
+  // patrimony for its counter-value in dinars at the official rate of a
+  // reference date. Without an official rate, it is left out and said so.
+  const { assets, liabilities } = currency === OFFICIAL_CURRENCY ? await inOfficialCurrency(found) : found;
+  const { notCounted } = found;
   const view = buildWealthView({
     assets,
     debts: liabilities,
@@ -139,12 +158,18 @@ export async function getWealth(req, res) {
   );
   view.actifs = view.actifs.map((row) => ({ ...row, categoryLabel: row.categoryId ? (labels.get(row.categoryId) ?? null) : null }));
 
+  view.nonComptes = notCounted;
   res.json({ patrimoine: view, formulas: ['PB-F024', 'F036', 'F037'].map(describeFormula) });
 }
 
 // The kinds of declared asset an account now stands for: once the person has
 // accounts, cash and bank balances come from them, never typed a second time.
 const LIQUID_DECLARED = ['cash', 'account', 'ccp'];
+// Recette R9-19: which account types stand for which declared kind. A declared
+// CCP is left out only when a CCP account holds it — not because some other
+// account exists (the « Espèces » account opens on its own at the first
+// expense, and used to make every declared bank balance vanish).
+const ACCOUNT_TYPES_OF = { cash: ['AC-01'], ccp: ['AC-03'], account: ['AC-02', 'AC-04'] };
 const LIQUIDITY_OF = { liquid: 'liquid', savings: 'liquid', investment: 'semi_liquid', receivable: 'illiquid', configurable: 'semi_liquid' };
 
 /**
@@ -160,7 +185,9 @@ const LIQUIDITY_OF = { liquid: 'liquid', savings: 'liquid', investment: 'semi_li
  */
 export function wealthFromAccounts({ declared, debts, accounts, now = new Date() }) {
   const open = accounts.filter((account) => !account.archivedAt && account.includeInNetWorth);
-  const hasAccounts = open.length > 0;
+  // The types held by accounts the person opened (not the automatic one).
+  const heldTypes = new Set(open.filter((account) => account.source !== 'computed').map((account) => account.type));
+  const representedByAccount = (asset) => LIQUID_DECLARED.includes(asset.kind) && (ACCOUNT_TYPES_OF[asset.kind] ?? []).some((type) => heldTypes.has(type));
   const fromAccounts = open
     .filter((account) => !account.liability && account.solde.resultat !== null && account.solde.resultat > 0)
     .map((account) => ({
@@ -178,12 +205,23 @@ export function wealthFromAccounts({ declared, debts, accounts, now = new Date()
   const liabilityAccounts = open
     .filter((account) => account.liability && account.solde.resultat !== null && account.solde.resultat > 0)
     .map((account) => ({ id: `account:${account.id}`, outstandingPrincipal: account.solde.resultat, currency: account.currency }));
+  // Recette R9-19: an account in the red (an overdraft) is money owed. It used
+  // to be counted neither as an asset nor as a debt, so the net worth did not
+  // match the net position of the accounts.
+  const overdrawn = open
+    .filter((account) => !account.liability && account.solde.resultat !== null && account.solde.resultat < 0)
+    .map((account) => ({ id: `overdraft:${account.id}`, label: account.label, outstandingPrincipal: -account.solde.resultat, currency: account.currency }));
 
-  const assets = [...fromAccounts, ...declared.filter((asset) => !(hasAccounts && LIQUID_DECLARED.includes(asset.kind)))];
+  const assets = [...fromAccounts, ...declared.filter((asset) => !representedByAccount(asset))];
   // A receivable without its own account is still an asset.
   for (const debt of debts.filter((row) => row.direction === 'lent' && !row.accountId && row.outstandingPrincipal > 0)) {
     assets.push({ id: `receivable:${debt.id}`, label: debt.label, kind: 'receivable', liquidity: 'illiquid', value: debt.outstandingPrincipal, currency: debt.currency, valuedAt: now, categoryId: null, status: 'real' });
   }
-  const liabilities = [...debts.filter((row) => row.direction !== 'lent' && !row.accountId), ...liabilityAccounts];
-  return { assets, liabilities };
+  const liabilities = [...debts.filter((row) => row.direction !== 'lent' && !row.accountId), ...liabilityAccounts, ...overdrawn];
+  // What is NOT counted, and why — said on the screen (recette R9-19).
+  const notCounted = [
+    ...declared.filter(representedByAccount).map((asset) => ({ label: asset.label, reason: 'heldByAccount' })),
+    ...accounts.filter((account) => !account.archivedAt && !account.includeInNetWorth).map((account) => ({ label: account.label, reason: 'accountExcluded' })),
+  ];
+  return { assets, liabilities, notCounted };
 }

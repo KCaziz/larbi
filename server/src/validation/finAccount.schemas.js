@@ -81,3 +81,14 @@ export const reportQuerySchema = z.object({ mois: monthKey.optional(), reduction
 // « comparer deux mois »: both are required, and they must differ.
 export const reportCompareQuerySchema = z.object({ mois: monthKey, avec: monthKey }).strict().refine((q) => q.mois !== q.avec, { message: 'Two different months' });
 export const reportExportQuerySchema = z.object({ mois: monthKey.optional(), format: z.enum(['csv', 'xlsx']).optional() }).strict();
+
+// P10-05 — an official rate (Banque d'Algérie) recorded by an administrator:
+// how many dinars for one unit, on a reference date.
+export const exchangeRateSchema = z
+  .object({
+    currency: z.enum(['EUR', 'USD', 'GBP', 'CAD']),
+    rate: z.number().positive().max(100000),
+    referenceDate: z.coerce.date(),
+    source: z.string().trim().min(1).max(200),
+  })
+  .strict();

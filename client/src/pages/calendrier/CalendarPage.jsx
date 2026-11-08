@@ -118,10 +118,13 @@ export default function CalendarPage() {
           <p className="fin-hint">{t('calendar.fromAccounts')}</p>
 
           <div className="fin-cards">
+            {/* Recette R9-10: planned and real side by side, out then in. */}
             <FigureCard label={t('calendar.plannedOut')} answer={cal.totalPrevuSorties} formula={formula('F003')} />
-            <FigureCard label={t('calendar.plannedIn')} answer={cal.totalPrevuEntrees} formula={formula('F002')} />
             <FigureCard label={t('calendar.realOut')} answer={cal.totalReelSorties} formula={formula('F003')} />
+            <FigureCard label={t('calendar.plannedIn')} answer={cal.totalPrevuEntrees} formula={formula('F002')} />
+            {cal.totalReelEntrees && <FigureCard label={t('calendar.realIn')} answer={cal.totalReelEntrees} formula={formula('F002')} />}
           </div>
+          <p className="fin-hint">{t('calendar.plannedHint')}</p>
 
           <dl className="calendar-projection">
             <dt>{t('calendar.projectedCash')}</dt>
@@ -367,6 +370,8 @@ function PlanSection({ t, run }) {
 function RecurrenceSection({ t, language, currency, recurrences, subscriptions, formula, run }) {
   const [showDetection, setShowDetection] = useState(false);
   const detection = useApi(showDetection ? '/fin/recurrences/detection' : null);
+  // Recette R9-09: the subscriptions are named as such.
+  const subscriptionIds = new Set((subscriptions?.lignes ?? []).map((line) => line.id));
 
   return (
     <section aria-labelledby="calendar-recurrences">
@@ -378,8 +383,10 @@ function RecurrenceSection({ t, language, currency, recurrences, subscriptions, 
         <div className="fin-cards">
           <FigureCard label={t('calendar.monthlyCost')} answer={subscriptions.coutMensuel} formula={formula('F003')} />
           <FigureCard label={t('calendar.yearlyCost')} answer={subscriptions.coutAnnuel} formula={formula('F049')} />
+          {subscriptions.chargesMensuelles && <FigureCard label={t('calendar.allChargesCost')} answer={subscriptions.chargesMensuelles} />}
         </div>
       )}
+      {subscriptions && <p className="calendar-help">{t('calendar.subscriptionsHint')}</p>}
 
       {recurrences.length === 0 ? (
         <p className="calendar-empty">{t('calendar.noRecurrence')}</p>
@@ -390,6 +397,7 @@ function RecurrenceSection({ t, language, currency, recurrences, subscriptions, 
               <span className="calendar-row-label">{row.label}</span>
               <span className="calendar-row-amount">{formatAmount(language, row.value, row.currency)}</span>
               <span className="calendar-tag">{t(`calendar.frequencies.${row.frequency}`, row.frequency)}</span>
+              {subscriptionIds.has(row.id) && <span className="calendar-tag calendar-tag-subscription">{t('calendar.subscriptionTag')}</span>}
               <span className="calendar-row-date">{formatDate(language, row.nextDate)}</span>
               {row.detected && <span className="calendar-tag calendar-tag-detected">{t('calendar.detected')}</span>}
               <button
@@ -638,6 +646,17 @@ function ProvisionSection({ t, language, currency, provisions, formula, run }) {
                 <dd>{formatDate(language, row.targetDate)}</dd>
               </dl>
               <FigureCard label={t('calendar.monthlyProvision')} answer={row.provisionMensuelle} formula={formula('F045')} />
+              {/* Recette R9-15: the calculation, in figures. */}
+              {row.provisionMensuelle.resultat !== null && row.reste > 0 && (
+                <p className="calendar-help">
+                  {t('calendar.provisionHow', {
+                    count: row.moisRestants,
+                    left: formatAmount(language, row.reste, row.currency),
+                    date: formatDate(language, row.targetDate),
+                    monthly: formatAmount(language, row.provisionMensuelle.resultat, row.currency),
+                  })}
+                </p>
+              )}
             </li>
           ))}
         </ul>

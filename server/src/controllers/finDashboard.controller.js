@@ -198,6 +198,24 @@ export async function getToday(req, res) {
       take: 5,
     }),
   ]);
+  // Recette R9-11: loans and borrowings in the list. A monthly instalment not
+  // yet paid this month, or a due date in the next 30 days, is something to do:
+  // repay (what I owe) or get repaid (what I lent).
+  const paidThisMonth = new Set(
+    (await prisma.finDebtPayment.findMany({ where: { userId: req.user.id, deletedAt: null, paidAt: { gte: period.start } }, select: { debtId: true } })).map((row) => row.debtId),
+  );
+  const dueSoon = new Date(startOfToday.getTime() + 30 * 24 * 3600 * 1000);
+  const remboursements = debtRows
+    .filter((debt) => debt.outstandingPrincipal > 0 && debt.currency === currency)
+    .filter((debt) => (debt.monthlyInstalment > 0 && !paidThisMonth.has(debt.id)) || (debt.dueDate && debt.dueDate <= dueSoon))
+    .map((debt) => ({
+      id: debt.id,
+      label: debt.label,
+      direction: debt.direction,
+      montant: debt.monthlyInstalment > 0 ? Math.min(debt.monthlyInstalment, debt.outstandingPrincipal) : debt.outstandingPrincipal,
+      restant: debt.outstandingPrincipal,
+      echeance: debt.dueDate ?? null,
+    }));
   const healthToComplete = (dashboard.santeFinanciere?.dimensions ?? []).filter((dimension) => dimension.score === null).map((dimension) => dimension.key);
   const aFaire = {
     actions: dashboard.actions,
@@ -207,6 +225,7 @@ export async function getToday(req, res) {
     echeances: dashboard.echeances,
     questions: { premiersPas: firstStepsLeft, sante: healthToComplete },
     alertes: dashboard.alertes,
+    remboursements,
     formations: courses.map((row) => ({ id: row.id, title: row.formation.title, slug: row.formation.slug })),
   };
   // The count of the menu badge: things to do, not things to read.
@@ -216,6 +235,7 @@ export async function getToday(req, res) {
     aFaire.paiementsAConfirmer.length +
     (aFaire.aPointer > 0 ? 1 : 0) +
     aFaire.alertes.length +
+    aFaire.remboursements.length +
     (aFaire.questions.premiersPas > 0 ? 1 : 0);
   dashboard.aFaire = aFaire;
 

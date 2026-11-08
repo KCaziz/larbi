@@ -1,0 +1,1 @@
+- il faut absolument continuer a unifromiser les entre element exemple dans /app/portefeuille dans le form de Profil de risque pédagogique entre les input et le bouttons ou bien dans /app/budgets/e34414c7-fb80-4d72-897b-d767ce4a2253 entre les checkbox Reporter le reste et Reporter aussi

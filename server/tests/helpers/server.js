@@ -111,6 +111,10 @@ export async function boot({ production = false, extra = {} } = {}) {
     await replayMigrationInserts('_fin_categories_125', 'fin_categories', { updates: true });
     // And the old categories the 125 replace, archived (answer D4).
     await replayMigrationInserts('_fin_categories_retired', 'fin_categories', { updates: true });
+    // And the main categories, choosable on their own (P10-01).
+    await replayMigrationInserts('_fin_main_categories', 'fin_categories');
+    // And the official exchange rates of reference (P10-05).
+    await replayMigrationInserts('_fin_exchange_rates', 'fin_exchange_rates');
   }
 
   // Replays the INSERT statements a migration carries for ONE table. Used for

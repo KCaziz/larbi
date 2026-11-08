@@ -24,14 +24,38 @@ describe('P8-14 — the patrimony reads the accounts', () => {
     const post = (url, json) => t.request('POST', url, { user, json });
     await post('/fin/comptes', { label: 'Courant', type: 'AC-02', currency: 'DZD', openingBalance: 5000000, openingDate: ago(30) });
     await post('/fin/comptes', { label: 'Carte', type: 'AC-07', currency: 'DZD', openingBalance: 800000, openingDate: ago(30) });
-    await post('/fin/actifs', { label: 'Espèces déclarées', kind: 'cash', value: 9999999, currency: 'DZD', valuedAt: ago(10) });
+    await post('/fin/actifs', { label: 'Compte déclaré', kind: 'account', value: 9999999, currency: 'DZD', valuedAt: ago(10) });
     await post('/fin/actifs', { label: 'Or', kind: 'gold', value: 2000000, currency: 'DZD', valuedAt: ago(10) });
 
     const view = (await t.request('GET', '/fin/patrimoine', { user })).body.patrimoine;
-    assert.equal(view.totalActifs, 5000000 + 2000000, 'the account and the gold, not the declared cash');
+    assert.equal(view.totalActifs, 5000000 + 2000000, 'the account and the gold, not the declared bank balance the account holds');
+    assert.deepEqual(view.nonComptes, [{ label: 'Compte déclaré', reason: 'heldByAccount' }], 'and the screen says why');
     assert.equal(view.totalDettes, 800000, 'the card is owed');
     assert.equal(view.patrimoineNet.resultat, 7000000 - 800000);
     assert.equal(view.patrimoineNet.formule_id, 'PB-F024');
+  });
+
+  // Recette R9-19: the patrimony did not include every asset.
+  test('a declared CCP or cash balance stays counted when no account of that kind holds it', async () => {
+    const post = (url, json) => t.request('POST', url, { user, json });
+    await post('/fin/actifs', { label: 'CCP', kind: 'ccp', value: 4000000, currency: 'DZD', valuedAt: ago(10) });
+    await post('/fin/actifs', { label: 'Espèces à la maison', kind: 'cash', value: 500000, currency: 'DZD', valuedAt: ago(10) });
+    // A first expense with no account opens « Espèces » on its own.
+    await post('/fin/transactions', { kind: 'expense', value: 100000, currency: 'DZD', occurredAt: ago(1) });
+    const view = (await t.request('GET', '/fin/patrimoine', { user })).body.patrimoine;
+    assert.equal(view.totalActifs, 4000000 + 500000, 'the automatic cash account hides nothing');
+    assert.equal(view.totalDettes, 100000, 'and its overdraft is owed');
+  });
+
+  test('an overdrawn account is a debt, so the net worth matches the net position', async () => {
+    const post = (url, json) => t.request('POST', url, { user, json });
+    await post('/fin/comptes', { label: 'Courant', type: 'AC-02', currency: 'DZD', openingBalance: -300000, openingDate: ago(30) });
+    await post('/fin/comptes', { label: 'Épargne', type: 'AC-04', currency: 'DZD', openingBalance: 1000000, openingDate: ago(30) });
+    const view = (await t.request('GET', '/fin/patrimoine', { user })).body.patrimoine;
+    const position = (await t.request('GET', '/fin/comptes', { user })).body.totals[0].positionNette.resultat;
+    assert.equal(view.totalDettes, 300000);
+    assert.equal(view.patrimoineNet.resultat, 700000);
+    assert.equal(view.patrimoineNet.resultat, position);
   });
 
   test('a receivable is an asset, never a debt', async () => {

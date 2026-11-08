@@ -129,3 +129,9 @@
 .category-picker-result .category-picker-group {
   font-size: 0.82em;
 }
+
+/* P10-01 : la catégorie principale, en tête de son groupe. */
+.category-picker-main {
+  font-weight: 600;
+  border-block-end: 1px solid var(--border);
+}

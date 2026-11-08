@@ -266,6 +266,10 @@ const adminRoutes = {
                   lazy: lazyPage(() => import('../pages/admin/comparator/ComparatorAdminPage.jsx')),
                 },
                 {
+                  path: 'cours-devises',
+                  lazy: lazyPage(() => import('../pages/admin/currencies/CurrencyRatesAdminPage.jsx')),
+                },
+                {
                   path: 'users',
                   lazy: lazyPage(() => import('../pages/admin/platform/UsersPage.jsx')),
                 },

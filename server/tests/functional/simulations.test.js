@@ -4,6 +4,11 @@ import assert from 'node:assert/strict';
 import { boot } from '../helpers/server.js';
 import { SIMULATORS } from '../../src/constants/simulators.js';
 import { ALGORITHM_IDS, FORMULA_IDS } from '../../src/constants/finance.js';
+import { INTEREST_FORMULAS } from '../../src/constants/finInterestFormulas.js';
+
+// The compound-interest simulator answers with its own catalogue (INT-F01 to
+// INT-F05), formulas with a condition like the client's.
+const INTEREST_IDS = INTEREST_FORMULAS.map((formula) => formula.id);
 
 // FINCLUDIA simulators (P4-10) through the real API. They compute and nothing
 // else: no session, no database read, no row written — so these tests are about
@@ -92,11 +97,11 @@ describe('catalogue', () => {
     for (const simulator of body.simulators) {
       assert.ok(simulator.formulas.length > 0, simulator.key);
       for (const formula of simulator.formulas) {
-        assert.ok([...FORMULA_IDS, ...ALGORITHM_IDS].includes(formula.id), `${simulator.key}: ${formula.id}`);
+        assert.ok([...FORMULA_IDS, ...INTEREST_IDS, ...ALGORITHM_IDS].includes(formula.id), `${simulator.key}: ${formula.id}`);
         for (const field of ['label', 'rule']) assert.ok(formula[field]?.length > 0, `${formula.id}.${field}`);
         // Only a formula has a condition column in the client's workbook; an
         // algorithm answers null rather than an invented sentence.
-        if (FORMULA_IDS.includes(formula.id)) assert.ok(formula.condition?.length > 0, `${formula.id}.condition`);
+        if (FORMULA_IDS.includes(formula.id) || INTEREST_IDS.includes(formula.id)) assert.ok(formula.condition?.length > 0, `${formula.id}.condition`);
         else assert.equal(formula.condition, null, `${formula.id}.condition`);
         assert.ok(Number.isInteger(formula.version));
       }

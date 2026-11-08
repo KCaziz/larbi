@@ -225,3 +225,16 @@
 .fincat-family {
   scroll-margin-block-start: 80px;
 }
+
+/* P10-02 : la couleur de la catégorie. */
+.fincat-swatch {
+  display: inline-block;
+  inline-size: 12px;
+  block-size: 12px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.fincat-color {
+  flex-basis: 100%;
+  padding-block: 8px;
+}

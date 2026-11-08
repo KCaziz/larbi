@@ -263,6 +263,10 @@ export function buildPayoffComparison(debts, { extraPayment = 0, currency, now =
 export async function createSimpleLoan(prisma, userId, body) {
   const lent = body.direction === 'lent';
   const personal = await ownAccount(prisma, userId, body.accountId);
+  // Recette R9-11: checked BEFORE anything is written. A loan dated ahead used
+  // to be refused by the transfer after its account was created, leaving a
+  // loan account with no money, no debt and nothing in « À faire ».
+  if (body.occurredAt.getTime() > Date.now()) throw new HttpError(422, 'Future date', { reason: 'futureDate' });
   const typeId = lent ? 'AC-09' : 'AC-08';
   const type = accountType(typeId);
   const label = lent ? `Prêt à ${body.counterparty}` : `Prêt de ${body.counterparty}`;
@@ -280,26 +284,35 @@ export async function createSimpleLoan(prisma, userId, body) {
     },
     select: { id: true },
   });
-  await createTransfer(prisma, userId, {
-    fromAccountId: lent ? personal.id : account.id,
-    toAccountId: lent ? account.id : personal.id,
-    value: body.value,
-    occurredAt: body.occurredAt,
-    note: body.note ?? label,
-  });
-  return createDebt(prisma, userId, {
-    label: label.slice(0, 80),
-    lender: lent ? null : body.counterparty,
-    outstandingPrincipal: body.value,
-    monthlyInstalment: body.monthlyInstalment ?? 0,
-    currency: personal.currency,
-    dueDate: body.dueDate ?? null,
-    note: body.note ?? null,
-    direction: lent ? 'lent' : 'owed',
-    debtType: lent ? 'D-01' : 'D-02',
-    accountId: account.id,
-  }).then(async (debt) => {
+  // All or nothing: if the transfer or the debt fails, the account and both
+  // sides of the transfer go too.
+  try {
+    await createTransfer(prisma, userId, {
+      fromAccountId: lent ? personal.id : account.id,
+      toAccountId: lent ? account.id : personal.id,
+      value: body.value,
+      occurredAt: body.occurredAt,
+      note: body.note ?? label,
+    });
+    const debt = await createDebt(prisma, userId, {
+      label: label.slice(0, 80),
+      lender: lent ? null : body.counterparty,
+      outstandingPrincipal: body.value,
+      monthlyInstalment: body.monthlyInstalment ?? 0,
+      currency: personal.currency,
+      dueDate: body.dueDate ?? null,
+      note: body.note ?? null,
+      direction: lent ? 'lent' : 'owed',
+      debtType: lent ? 'D-01' : 'D-02',
+      accountId: account.id,
+    });
     await prisma.finDebt.update({ where: { id: debt.id }, data: { accountId: account.id } });
     return { ...debt, accountId: account.id };
-  });
+  } catch (err) {
+    const sides = await prisma.finTransaction.findMany({ where: { userId, accountId: account.id }, select: { transferId: true } });
+    const transferIds = sides.map((row) => row.transferId).filter(Boolean);
+    await prisma.finTransaction.deleteMany({ where: { userId, OR: [{ accountId: account.id }, { transferId: { in: transferIds } }] } });
+    await prisma.finAccount.delete({ where: { id: account.id } });
+    throw err;
+  }
 }

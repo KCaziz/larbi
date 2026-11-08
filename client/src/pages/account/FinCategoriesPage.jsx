@@ -12,6 +12,7 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import CategoryIcon from '../../components/fincludia/CategoryIcon.jsx';
 import '../Pages.css';
 import './FinCategories.css';
+import ColorPicker from '../../components/fincludia/ColorPicker.jsx';
 
 // "Mes catégories" (P6-02): the client's own category reference (onglet
 // "03_Categories", 91 standard categories in 8 families), what this account
@@ -173,6 +174,7 @@ const normalise = (text) => String(text ?? '').normalize('NFD').replace(/[̀-ͯ]
 function CategoryRow({ category, historyOpen, onToggleHistory, run }) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
+  const [coloring, setColoring] = useState(false);
   const [label, setLabel] = useState(category.label);
   const standard = category.origin === 'standard';
   // A standard category is customised by key (this account's own label for it);
@@ -188,6 +190,9 @@ function CategoryRow({ category, historyOpen, onToggleHistory, run }) {
   // « Essentielle ? » (P8-08): what the reserve counts as an essential
   // expense. The client's reference sets it; the person may change it.
   const setEssential = (essential) => run(() => api.patch(path, { essential }), 'finCategories.saved');
+
+  // P10-02: the person's own colour (null gives back the reference's).
+  const setColor = (color) => run(() => api.patch(path, { color }), 'finCategories.saved');
 
   const setArchived = (archived) =>
     run(
@@ -223,6 +228,7 @@ function CategoryRow({ category, historyOpen, onToggleHistory, run }) {
       ) : (
         <>
           <span className="fincat-label">
+            {category.color && <span className="fincat-swatch" style={{ background: category.color }} aria-hidden="true" />}
             {category.icon && <CategoryIcon emoji={category.icon} size={16} />}
             <span className="fincat-name">{category.label}</span>
           </span>
@@ -243,6 +249,9 @@ function CategoryRow({ category, historyOpen, onToggleHistory, run }) {
                 {t('finCategories.essential')}
               </label>
             )}
+            <button type="button" className="fincat-plain" aria-expanded={coloring} onClick={() => setColoring((value) => !value)}>
+              {t('finCategories.color')}
+            </button>
             <button type="button" className="fincat-icon" title={t('finCategories.rename')} onClick={() => setEditing(true)}>
               <Pencil size={15} aria-hidden="true" />
               <span className="sr-only">{t('finCategories.rename')}</span>
@@ -286,6 +295,11 @@ function CategoryRow({ category, historyOpen, onToggleHistory, run }) {
         </>
       )}
 
+      {coloring && (
+        <div className="fincat-color">
+          <ColorPicker name={`fincat-color-${category.id}`} value={category.customised || !standard ? category.color : null} onChange={setColor} legend={t('finCategories.colorLegend', { label: category.label })} />
+        </div>
+      )}
       {historyOpen && <CategoryHistory id={category.id} />}
     </li>
   );

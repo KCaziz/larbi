@@ -686,7 +686,9 @@
     "fileTooLarge": "This file is too large.",
     "fileUnsupported": "This file type is not accepted.",
     "conflict": "This action is not possible in the current state.",
-    "refused": "This value or request is not accepted. Check the fields."
+    "refused": "This value or request is not accepted. Check the fields.",
+    "oneScreen": "One screen at a time with a free account: your account is already open on another screen. Sign out of the other screen and try again (a screen idle for 30 minutes is freed on its own), or subscribe to use several screens.",
+    "subscriptionRequired": "Inviting someone into a shared space is for subscribers. Subscribe from “Offers” to invite other people."
   },
   "state": {
     "loading": "Loading…",
@@ -713,7 +715,8 @@
       "payments": "Payments",
       "glossary": "Learn",
       "finAssistant": "FINCLUDIA assistant",
-      "missions": "Missions"
+      "missions": "Missions",
+      "rates": "Exchange rates"
     },
     "shell": {
       "title": "Administration",
@@ -2797,7 +2800,9 @@
     },
     "essential": "Essential",
     "search": "Search a category (name, group)",
-    "jump": "Go to a family"
+    "jump": "Go to a family",
+    "color": "Colour",
+    "colorLegend": "Colour of “{{label}}”"
   },
   "fincludia": {
     "notComputed": "not computed",
@@ -3148,7 +3153,8 @@
       "amount_asc": "Smallest amount"
     },
     "expectedIncome": "Expected income",
-    "incomeGroup": "Income · {{group}}"
+    "incomeGroup": "Income · {{group}}",
+    "plannedVsRealBudget": "Planned (your budget for the month): {{planned}} · Done: {{real}}"
   },
   "budget": {
     "title": "Budget",
@@ -3181,7 +3187,9 @@
     "deleteConfirm": "Permanently delete budget \"{{label}}\"?",
     "deleted": "Deleted.",
     "errors": {
-      "refused": "This action was refused. Check the information entered."
+      "refused": "This action was refused. Check the information entered.",
+      "overlap": "The budget “{{label}}” already covers this period. A budget gathers every category of a period: add one envelope per category to it, or choose other dates.",
+      "overlapOpen": "Open “{{label}}” to add a category"
     },
     "detailSubtitle": "Planned, real, alerts and what is left to allocate.",
     "backToList": "Back to budgets",
@@ -3276,7 +3284,8 @@
     "paceChart": "Cumulative spending against the planned pace",
     "paceDay": "Day",
     "paceReal": "Cumulative spending",
-    "pacePlanned": "Planned pace (spread over the period)"
+    "pacePlanned": "Planned pace (spread over the period)",
+    "seeExpenses": "See this envelope's expenses"
   },
   "goals": {
     "title": "Goals",
@@ -3361,7 +3370,23 @@
     "contributeHelp": "This moves money: the amount leaves one of your accounts and arrives on the goal’s account. It is a real transfer, neither an expense nor an income.",
     "editTitle": "Correct the goal’s figures",
     "editHelp": "This moves no money: use it to adjust by hand the capital already set aside and the planned monthly contribution.",
-    "editHelpAccount": "This moves no money: this goal’s capital is the balance of its account, it is not typed here. You only adjust the planned monthly contribution."
+    "editHelpAccount": "This moves no money: this goal’s capital is the balance of its account, it is not typed here. You only adjust the planned monthly contribution.",
+    "years": {
+      "title": "Year-by-year simulation",
+      "none": "Say how much you put aside each month (“Edit the goal”): the year-by-year simulation will show here.",
+      "reached_one": "Goal reached in {{count}} month.",
+      "reached_other": "Goal reached in {{count}} months.",
+      "notReached": "After {{years}} years: {{capital}} out of {{target}}. Raise the monthly saving to get there sooner.",
+      "caption": "Goal capital at the end of each year",
+      "year": "Year",
+      "yearLabel": "Year {{year}} ({{date}})",
+      "saved": "Set aside during the year",
+      "interest": "Interest",
+      "capital": "Capital at year end",
+      "share": "Share of target",
+      "reachedWholeYears": "Goal reached in {{count}} months ({{years}} year(s)).",
+      "reachedYearsMonths": "Goal reached in {{count}} months ({{years}} year(s) and {{months}} month(s))."
+    }
   },
   "debts": {
     "title": "Debts",
@@ -3411,14 +3436,16 @@
     "loans": {
       "lent": "I lent money",
       "borrowed": "Someone lent me money",
-      "lentHint": "The money leaves your account today; what you are owed is followed apart, never counted as spending.",
-      "borrowedHint": "The money arrives on your account; the debt is followed apart, never counted as income.",
+      "lentHint": "The money leaves your account today (its balance goes down); what you are owed is tracked apart, never counted as spending: it should come back to you.",
+      "borrowedHint": "The money arrives on your account (its balance goes up); the debt is tracked apart, never counted as income: it is money to give back.",
       "lentWho": "To whom?",
       "borrowedWho": "Who lent it?",
       "amount": "Amount",
       "dueDate": "Repayment expected on (optional)",
       "saved": "Loan saved, with the real movement on your account.",
-      "noAccount": "First create an account in « My accounts »."
+      "noAccount": "First create an account in « My accounts ».",
+      "instalment": "Repayment per month (optional)",
+      "instalmentHint": "When given, it shows each month in “Today” until a repayment is recorded."
     },
     "backToList": "Back to my debts",
     "created": "Debt saved.",
@@ -3494,7 +3521,9 @@
         "how": "They are computed on their own from your spending recorded in the essential categories (rent, food, energy, transport, health, phone…) over the last three months. Meanwhile, give an estimate: it is enough to start.",
         "declare": "My estimate per month",
         "change": "Correct my estimate per month",
-        "fromHistory": "Computed from your spending recorded in the essential categories (rent, food, energy, transport, health, phone…) over the last three months. They update with every new expense."
+        "fromHistory": "Computed from your spending recorded in the essential categories (rent, food, energy, transport, health, phone…) over the last three months. They update with every new expense.",
+        "doneBudget": "{{amount}} a month, from your budget’s essential envelopes (until a month of recorded spending).",
+        "doneRecorded": "At least {{amount}} a month: the essential spending recorded so far. The figure sharpens after a full month."
       },
       "target": {
         "title": "2. How many months do you want to be able to hold?",
@@ -3517,6 +3546,18 @@
       "mark": "Choose what counts as essential: in your categories, tick or untick \"Essential\".",
       "markLink": "My categories",
       "estimate": "Until a month of spending is recorded, give an estimate below: it is used meanwhile."
+    },
+    "dateEstimated": "Estimated date: {{date}}, putting {{amount}} aside each month.",
+    "dateReached": "Your emergency fund has already reached its target.",
+    "dateUnknown": "Estimated date: to follow. In your “Emergency fund” goal, say how much you put aside each month.",
+    "method": {
+      "title": "How it is calculated",
+      "essential": "Essential spending per month: the average of your spending in essential categories (housing, food, energy, transport, health…) over the last 3 full months. Before a full month: your estimate, otherwise your budget’s essential envelopes, otherwise what is already recorded.",
+      "target": "Target amount = essential spending per month × number of months chosen.",
+      "months": "Months covered = money in your emergency fund ÷ essential spending per month.",
+      "gap": "Still to put aside = target amount − money in your emergency fund.",
+      "date": "Estimated date = today + (still to put aside ÷ monthly saving planned for the fund).",
+      "excluded": "Not counted: the paper portfolio, assets that are hard to sell (property, vehicle…) and money set aside for other goals."
     }
   },
   "calendar": {
@@ -3657,7 +3698,14 @@
     "weekChart": "Load of the due items, week by week",
     "weekOf": "Week of {{date}}",
     "weekIn": "Expected inflows",
-    "weekOut": "Expected outflows"
+    "weekOut": "Expected outflows",
+    "allChargesCost": "All regular charges, per month",
+    "subscriptionTag": "Subscription",
+    "subscriptionsHint": "Counted as subscriptions: phone, internet, streaming, music, online storage, software, gym, and any regular charge whose name contains “subscription”.",
+    "realIn": "Real income of the period",
+    "plannedHint": "“Planned”: what was expected over the period — regular charges and income (already confirmed or still to come) and planned payments. “Real”: the movements recorded. For an expense to count as planned, declare it as a regular charge or plan it.",
+    "provisionHow_one": "Calculation: {{left}} is left to set aside before {{date}}; the due date is within a month, so it all goes aside now: {{monthly}}.",
+    "provisionHow_other": "Calculation: {{left}} is left to set aside before {{date}}, that is {{count}} months until the due date: {{left}} ÷ {{count}} = {{monthly}} a month."
   },
   "today": {
     "title": "Today",
@@ -3739,7 +3787,13 @@
     "seeCalendar": "See the calendar",
     "healthPending": "The financial-health index is not shown here yet: this part is under development. The sub-scores above are readable one by one.",
     "pickPublic": "Choosing your path tailors this dashboard to your situation.",
-    "pickPublicLink": "Choose my path"
+    "pickPublicLink": "Choose my path",
+    "debtsTitle": "Loans and borrowings",
+    "debtThisMonth": "This month",
+    "debtToRepay": "Repay: {{label}}",
+    "debtToCollect": "To be repaid to you: {{label}}",
+    "debtLeft": "({{amount}} left)",
+    "debtRecord": "Record a repayment"
   },
   "wealth": {
     "title": "Patrimony",
@@ -3805,7 +3859,13 @@
     "revalueTitle": "New valuation",
     "revalued": "Value updated, with its date.",
     "deleteShort": "Delete",
-    "assetsVsDebts": "What I own and what I owe"
+    "assetsVsDebts": "What I own and what I owe",
+    "notCountedTitle": "Not counted in your net worth:",
+    "notCounted": {
+      "heldByAccount": "“{{label}}”: already counted through your account of the same kind (so the same money is not counted twice).",
+      "accountExcluded": "Account “{{label}}”: set not to count in your net worth (can be changed on that account)."
+    },
+    "countedHint": "Counted: your accounts (their balance), your declared assets (property, vehicle, gold, investments…) and money owed to you. Taken off: your debts, credits and overdrawn accounts. The paper portfolio never counts."
   },
   "paper": {
     "title": "Practice portfolio",
@@ -3919,6 +3979,21 @@
       "step3": "Change its price to simulate a rise or a fall, and watch your gain or loss and your return.",
       "step4": "Write down why you bought or sold in the decision journal, then read it again later.",
       "why": "No list of placements and no price is given here: you create the holdings yourself, to learn without a real price being suggested to you."
+    },
+    "compound": {
+      "title": "Compound interest (example rate: {{rate}} a year)",
+      "sinceBuy_one": "Since the purchase ({{count}} month): {{interest}} of interest, of which {{onInterest}} is interest on interest (simple interest: {{simple}}).",
+      "sinceBuy_other": "Since the purchase ({{count}} months): {{interest}} of interest, of which {{onInterest}} is interest on interest (simple interest: {{simple}}).",
+      "caption": "If the {{amount}} placed stay, interest left on the support:",
+      "horizon": "Duration",
+      "value": "Value",
+      "simple": "Simple interest",
+      "compound": "Compound interest",
+      "onInterest": "Of which interest on interest",
+      "years_one": "{{count}} year",
+      "years_other": "{{count}} years",
+      "how": "Each month, the interest (yearly rate ÷ 12) is added to the amount and earns in turn. Simple interest: computed on the starting amount only. A teaching example, from the rate written for this support, never a real quote.",
+      "boughtThisMonth": "Bought this month: the first interest is added at the end of the first month. Here is what would follow:"
     }
   },
   "spaces": {
@@ -4877,7 +4952,8 @@
       "includeInTotal": "Count in the total balance",
       "includeInNetWorth": "Count in net worth",
       "minBalanceAlert": "Warn me below this balance ({{currency}}, optional)",
-      "overdraftAllowed": "Authorised overdraft ({{currency}}, optional)"
+      "overdraftAllowed": "Authorised overdraft ({{currency}}, optional)",
+      "currency": "Account currency"
     },
     "errors": {
       "refused": "This could not be saved. Check the accounts and the currency.",
@@ -4916,7 +4992,14 @@
     "chartTitle": "Balances over time",
     "chartFilter": "Account",
     "chartAll": "All accounts",
-    "chartCurrencies": "Accounts in another currency are not drawn on the same scale."
+    "chartCurrencies": "Accounts in another currency are not drawn on the same scale.",
+    "monthIncome": "Income this month",
+    "monthExpenses": "Spending this month",
+    "monthFlow": "Net flow this month",
+    "explainTotal": "Total balance: the money available, i.e. the sum of the accounts “counted in the total” (accounts kept apart are not in it).",
+    "explainNet": "Net position: what you own minus what you owe. What you own: the accounts counted in your net worth (current accounts, cash, savings, money lent to someone). What you owe: the loans and credits tracked on an account.",
+    "explainNetFigures": "Today: {{assets}} owned − {{liabilities}} owed = {{net}}.",
+    "foreignHint": "The account stays in its currency: its movements are entered in it. It counts in your net worth for its counter-value in dinars at the Bank of Algeria official rate (never the parallel rate), but not in your dinar balance."
   },
   "health": {
     "title": "Financial health",
@@ -5016,7 +5099,9 @@
       "checked": "You have checked that this movement is right (amount, date, category).",
       "reconciled": "You found it on your bank or CCP statement: the account itself confirms it.",
       "to_verify": "Something is wrong (amount, duplicate, unknown operation): to look at again later."
-    }
+    },
+    "groupFilter": "Category: {{group}}",
+    "groupFilterClear": "Remove"
   },
   "appHome": {
     "title": "Home",
@@ -5058,7 +5143,8 @@
     "manageIncome": "Manage my expected income",
     "quickAddClose": "Close quick add",
     "quickAddFull": "Open the full form",
-    "miniFlow": "Net flow of the last months"
+    "miniFlow": "Net flow of the last months",
+    "ringNothing": "No movement"
   },
   "finProfile": {
     "incomeRegularity": "How regular my income is",
@@ -5443,12 +5529,16 @@
       "amount": "Expected amount",
       "nextDate": "Next date of receipt (the usual day)",
       "account": "Account to credit",
-      "noAccount": "No account yet."
+      "noAccount": "No account yet.",
+      "received": "Already received: record it now on this account."
     },
     "salary": {
       "needIncome": "First add your first income (step P1).",
       "day": "Next date of receipt",
-      "confirmHint": "Recommended: « ask me to confirm », on the day."
+      "confirmHint": "Recommended: « ask me to confirm », on the day.",
+      "dateMissing": "Give the day the income arrives.",
+      "accountMissing": "Choose the account the income arrives on.",
+      "saved": "The income arrives on {{date}} on \"{{account}}\" ({{mode}})."
     },
     "plan": {
       "title": "My first-income plan",
@@ -5493,7 +5583,9 @@
     },
     "ownPage": "Open on its own page",
     "stepSaved": "Step saved.",
-    "backToSteps": "Back to first steps"
+    "backToSteps": "Back to first steps",
+    "profileMissing": "First choose your profile in the list.",
+    "edit": "Edit"
   },
   "incomes": {
     "title": "Expected income",
@@ -5595,7 +5687,8 @@
     "clearSearch": "Clear the search",
     "noResult": "No category matches.",
     "back": "Back",
-    "inGroup": "in {{group}}"
+    "inGroup": "in {{group}}",
+    "wholeGroup": "{{group}} (without specifying)"
   },
   "tips": {
     "accueil": [
@@ -5801,6 +5894,53 @@
         "name": "Gold (example)",
         "description": "A safe haven sought in times of crisis: pays nothing, its price varies strongly from one year to the next."
       }
+    }
+  },
+  "colorPicker": {
+    "legend": "Colour",
+    "default": "Default",
+    "colors": {
+      "blue": "Blue",
+      "teal": "Teal",
+      "green": "Green",
+      "olive": "Olive",
+      "amber": "Amber",
+      "red": "Red",
+      "pink": "Pink",
+      "violet": "Violet",
+      "indigo": "Indigo",
+      "slate": "Slate"
+    }
+  },
+  "currencies": {
+    "DZD": "DZD — Algerian dinar",
+    "EUR": "EUR — euro",
+    "USD": "USD — US dollar",
+    "GBP": "GBP — pound sterling",
+    "CAD": "CAD — Canadian dollar",
+    "counterValue": "Counter-value: {{amount}} at the Bank of Algeria official rate of {{date}} (1 = {{rate}} DA).",
+    "counterValueUnknown": "Counter-value in dinars: to follow (official rate not entered yet).",
+    "held": "{{amount}} at the official rate of {{date}}"
+  },
+  "adminRates": {
+    "title": "Official exchange rates",
+    "intro": "The Bank of Algeria official rates used for the dinar counter-value of foreign-currency accounts and assets. Never the parallel rate.",
+    "caption": "Rates in use, by currency",
+    "currency": "Currency",
+    "rate": "Rate",
+    "date": "Reference date",
+    "source": "Source",
+    "none": "Not entered",
+    "perUnit": "1 {{currency}} = {{rate}} DA",
+    "addTitle": "Record an official rate",
+    "addHint": "Read the rate on the Bank of Algeria website (daily exchange rates). Recording the same date again corrects that date’s rate; the latest rate applies.",
+    "rateLabel": "Dinars for 1 {{currency}}",
+    "sourceHint": "Optional: by default “Bank of Algeria, official rate of …”.",
+    "defaultSource": "Bank of Algeria, official rate of {{date}}",
+    "save": "Save the rate",
+    "saved": "Rate saved.",
+    "errors": {
+      "rate": "Enter a rate above zero."
     }
   }
 }

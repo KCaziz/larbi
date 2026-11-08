@@ -177,6 +177,8 @@ import { createMissionSchema, updateMissionSchema } from '../validation/finMissi
 import { prisma as missionPrisma } from '../config/prisma.js';
 import { createFlowSchema, createStepSchema, updateIntentSchema, updateStepSchema } from '../validation/finAssistant.schemas.js';
 import { bankSchema, conditionsQuerySchema, createConditionSchema, updateConditionSchema } from '../validation/comparator.schemas.js';
+import { getCurrencies, postRate } from '../controllers/finExchange.controller.js';
+import { exchangeRateSchema } from '../validation/finAccount.schemas.js';
 
 // CMS administration API. EVERY route below requires an authenticated admin,
 // checked here on the server (the React admin area is only a convenience).
@@ -360,5 +362,9 @@ router.post('/fin-assistant/flows/:id/steps', validateBody(createStepSchema), as
 router.patch('/fin-assistant/flows/:id/steps/:stepId', validateBody(updateStepSchema), asyncRoute(updateStep));
 router.delete('/fin-assistant/flows/:id/steps/:stepId', asyncRoute(deleteStep));
 router.get('/fin-assistant/audit-log', asyncRoute(listAuditLog));
+
+// P10-05 — the official exchange rates (Banque d'Algérie), by reference date.
+router.get('/fin/cours', asyncRoute(getCurrencies));
+router.post('/fin/cours', validateBody(exchangeRateSchema), asyncRoute(postRate));
 
 export default router;

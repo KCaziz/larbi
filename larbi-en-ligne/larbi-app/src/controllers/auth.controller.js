@@ -2,7 +2,8 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../config/prisma.js';
 import { HttpError } from '../utils/httpError.js';
 import { SESSION_COOKIE, clearSessionCookie, setSessionCookie, verifySession } from '../services/token.service.js';
-import { createSession, revokeOtherSessions, revokeSession } from '../services/session.service.js';
+import { createSession, hasOpenSession, revokeOtherSessions, revokeSession } from '../services/session.service.js';
+import { isSubscriber } from '../services/subscription.service.js';
 import { isSelectableAccountType } from '../services/accountTypes.service.js';
 
 const BCRYPT_COST = 12;
@@ -53,6 +54,23 @@ export async function login(req, res, next) {
     // Checked after the password (never before): a wrong password must never
     // reveal that the account exists and is merely suspended.
     if (user.status === 'suspended') throw new HttpError(403, 'Account suspended');
+    // P10-06: without a subscription, one screen at a time — the new sign-in
+    // is refused while another screen is open (after the password, like the
+    // suspension: it must not reveal anything to someone without it).
+    // Signing in again on the SAME screen (its own session cookie comes with
+    // the request) replaces that session: one's own screen never blocks itself.
+    const previous = req.cookies?.[SESSION_COOKIE];
+    if (previous) {
+      try {
+        const payload = verifySession(previous);
+        if (payload.sub === user.id && payload.jti) await revokeSession(prisma, user.id, payload.jti);
+      } catch {
+        /* an expired or invalid token: nothing to replace */
+      }
+    }
+    if (!isSubscriber(user) && (await hasOpenSession(prisma, user.id))) {
+      throw new HttpError(409, 'Another screen is open', { reason: 'oneScreen' });
+    }
 
     setSessionCookie(res, user.id, await createSession(prisma, user.id, req));
     res.json({ user: toPublicUser(user) });

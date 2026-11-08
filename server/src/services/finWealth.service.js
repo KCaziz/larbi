@@ -240,6 +240,8 @@ export function buildWealthView({ assets = [], debts = [], currency, now = new D
         holder: row.holder ?? null,
         value: row.value,
         currency: row.currency,
+        // P10-05: held in a foreign currency, counted at its official counter-value.
+        devise: row.devise ?? null,
         valuedAt: row.valuedAt,
         categoryId: row.categoryId,
         // F055 on the date the value was ESTABLISHED, and the client's own

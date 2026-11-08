@@ -453,6 +453,11 @@ export type FinMissionAttempt = $Result.DefaultSelection<Prisma.$FinMissionAttem
  * 
  */
 export type FinPushSubscription = $Result.DefaultSelection<Prisma.$FinPushSubscriptionPayload>
+/**
+ * Model FinExchangeRate
+ * 
+ */
+export type FinExchangeRate = $Result.DefaultSelection<Prisma.$FinExchangeRatePayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -1454,6 +1459,16 @@ export class PrismaClient<
     * ```
     */
   get finPushSubscription(): Prisma.FinPushSubscriptionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.finExchangeRate`: Exposes CRUD operations for the **FinExchangeRate** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FinExchangeRates
+    * const finExchangeRates = await prisma.finExchangeRate.findMany()
+    * ```
+    */
+  get finExchangeRate(): Prisma.FinExchangeRateDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1988,7 +2003,8 @@ export namespace Prisma {
     FinSnapshot: 'FinSnapshot',
     FinMission: 'FinMission',
     FinMissionAttempt: 'FinMissionAttempt',
-    FinPushSubscription: 'FinPushSubscription'
+    FinPushSubscription: 'FinPushSubscription',
+    FinExchangeRate: 'FinExchangeRate'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -2004,7 +2020,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "simulationScenario" | "paymentOffer" | "paymentOrder" | "paymentEvent" | "finProfileTransition" | "finConsent" | "toolFavorite" | "learningFavorite" | "finCategory" | "finChange" | "finIncome" | "finAccount" | "finOccurrence" | "finTag" | "finTransaction" | "finOnboarding" | "finBudget" | "finEnvelope" | "finGoal" | "finDebt" | "finDebtPayment" | "finRecurrence" | "finProvision" | "finAsset" | "finSpace" | "finSpaceMember" | "finSpaceInvite" | "finPaperPortfolio" | "finPaperInstrument" | "finPaperTrade" | "finSharedExpense" | "finSharedShare" | "finSettlement" | "finSpaceGoal" | "finSpaceGoalContribution" | "finSpaceGoalShare" | "finChild" | "finSpaceProvision" | "finNotification" | "glossaryTerm" | "glossaryTermRevision" | "miniGuide" | "finIntent" | "finFlow" | "finFlowStep" | "finAuditLog" | "chatbotEntry" | "contactMessage" | "accountType" | "platformSetting" | "formationCategory" | "formation" | "course" | "media" | "enrollment" | "courseProgress" | "certification" | "articleCategory" | "tag" | "article" | "articleTranslation" | "articleTag" | "newsletterSubscriber" | "section" | "lessonBlock" | "lessonRevision" | "quiz" | "quizQuestion" | "quizChoice" | "quizAttempt" | "quizAttemptAnswer" | "comparatorBank" | "comparatorCondition" | "comparatorMeta" | "finBusiness" | "finBusinessContact" | "finBusinessDocument" | "finBusinessPayment" | "finPayslip" | "userSession" | "finSpaceBudget" | "finSpaceTask" | "finSpaceInflow" | "finSnapshot" | "finMission" | "finMissionAttempt" | "finPushSubscription"
+      modelProps: "user" | "simulationScenario" | "paymentOffer" | "paymentOrder" | "paymentEvent" | "finProfileTransition" | "finConsent" | "toolFavorite" | "learningFavorite" | "finCategory" | "finChange" | "finIncome" | "finAccount" | "finOccurrence" | "finTag" | "finTransaction" | "finOnboarding" | "finBudget" | "finEnvelope" | "finGoal" | "finDebt" | "finDebtPayment" | "finRecurrence" | "finProvision" | "finAsset" | "finSpace" | "finSpaceMember" | "finSpaceInvite" | "finPaperPortfolio" | "finPaperInstrument" | "finPaperTrade" | "finSharedExpense" | "finSharedShare" | "finSettlement" | "finSpaceGoal" | "finSpaceGoalContribution" | "finSpaceGoalShare" | "finChild" | "finSpaceProvision" | "finNotification" | "glossaryTerm" | "glossaryTermRevision" | "miniGuide" | "finIntent" | "finFlow" | "finFlowStep" | "finAuditLog" | "chatbotEntry" | "contactMessage" | "accountType" | "platformSetting" | "formationCategory" | "formation" | "course" | "media" | "enrollment" | "courseProgress" | "certification" | "articleCategory" | "tag" | "article" | "articleTranslation" | "articleTag" | "newsletterSubscriber" | "section" | "lessonBlock" | "lessonRevision" | "quiz" | "quizQuestion" | "quizChoice" | "quizAttempt" | "quizAttemptAnswer" | "comparatorBank" | "comparatorCondition" | "comparatorMeta" | "finBusiness" | "finBusinessContact" | "finBusinessDocument" | "finBusinessPayment" | "finPayslip" | "userSession" | "finSpaceBudget" | "finSpaceTask" | "finSpaceInflow" | "finSnapshot" | "finMission" | "finMissionAttempt" | "finPushSubscription" | "finExchangeRate"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -7816,6 +7832,72 @@ export namespace Prisma {
           }
         }
       }
+      FinExchangeRate: {
+        payload: Prisma.$FinExchangeRatePayload<ExtArgs>
+        fields: Prisma.FinExchangeRateFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FinExchangeRateFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinExchangeRatePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FinExchangeRateFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinExchangeRatePayload>
+          }
+          findFirst: {
+            args: Prisma.FinExchangeRateFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinExchangeRatePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FinExchangeRateFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinExchangeRatePayload>
+          }
+          findMany: {
+            args: Prisma.FinExchangeRateFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinExchangeRatePayload>[]
+          }
+          create: {
+            args: Prisma.FinExchangeRateCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinExchangeRatePayload>
+          }
+          createMany: {
+            args: Prisma.FinExchangeRateCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.FinExchangeRateDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinExchangeRatePayload>
+          }
+          update: {
+            args: Prisma.FinExchangeRateUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinExchangeRatePayload>
+          }
+          deleteMany: {
+            args: Prisma.FinExchangeRateDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FinExchangeRateUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.FinExchangeRateUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinExchangeRatePayload>
+          }
+          aggregate: {
+            args: Prisma.FinExchangeRateAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFinExchangeRate>
+          }
+          groupBy: {
+            args: Prisma.FinExchangeRateGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FinExchangeRateGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FinExchangeRateCountArgs<ExtArgs>
+            result: $Utils.Optional<FinExchangeRateCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -8027,6 +8109,7 @@ export namespace Prisma {
     finMission?: FinMissionOmit
     finMissionAttempt?: FinMissionAttemptOmit
     finPushSubscription?: FinPushSubscriptionOmit
+    finExchangeRate?: FinExchangeRateOmit
   }
 
   /* Types for Logging */
@@ -23072,7 +23155,7 @@ export namespace Prisma {
     readonly userId: FieldRef<"FinIncome", 'String'>
     readonly label: FieldRef<"FinIncome", 'String'>
     readonly categoryId: FieldRef<"FinIncome", 'String'>
-    readonly value: FieldRef<"FinIncome", 'Int'>
+    readonly value: FieldRef<"FinIncome", 'Float'>
     readonly currency: FieldRef<"FinIncome", 'String'>
     readonly frequency: FieldRef<"FinIncome", 'String'>
     readonly startDate: FieldRef<"FinIncome", 'DateTime'>
@@ -24327,15 +24410,15 @@ export namespace Prisma {
     readonly label: FieldRef<"FinAccount", 'String'>
     readonly type: FieldRef<"FinAccount", 'String'>
     readonly currency: FieldRef<"FinAccount", 'String'>
-    readonly openingBalance: FieldRef<"FinAccount", 'Int'>
+    readonly openingBalance: FieldRef<"FinAccount", 'Float'>
     readonly openingDate: FieldRef<"FinAccount", 'DateTime'>
     readonly includeInTotal: FieldRef<"FinAccount", 'Boolean'>
     readonly includeInNetWorth: FieldRef<"FinAccount", 'Boolean'>
     readonly color: FieldRef<"FinAccount", 'String'>
     readonly icon: FieldRef<"FinAccount", 'String'>
-    readonly minBalanceAlert: FieldRef<"FinAccount", 'Int'>
-    readonly maxBalanceInfo: FieldRef<"FinAccount", 'Int'>
-    readonly overdraftAllowed: FieldRef<"FinAccount", 'Int'>
+    readonly minBalanceAlert: FieldRef<"FinAccount", 'Float'>
+    readonly maxBalanceInfo: FieldRef<"FinAccount", 'Float'>
+    readonly overdraftAllowed: FieldRef<"FinAccount", 'Float'>
     readonly note: FieldRef<"FinAccount", 'String'>
     readonly scope: FieldRef<"FinAccount", 'String'>
     readonly source: FieldRef<"FinAccount", 'String'>
@@ -27942,7 +28025,7 @@ export namespace Prisma {
     readonly kind: FieldRef<"FinTransaction", 'String'>
     readonly accountId: FieldRef<"FinTransaction", 'String'>
     readonly transferId: FieldRef<"FinTransaction", 'String'>
-    readonly value: FieldRef<"FinTransaction", 'Int'>
+    readonly value: FieldRef<"FinTransaction", 'Float'>
     readonly currency: FieldRef<"FinTransaction", 'String'>
     readonly occurredAt: FieldRef<"FinTransaction", 'DateTime'>
     readonly categoryId: FieldRef<"FinTransaction", 'String'>
@@ -29567,6 +29650,7 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     label: string | null
+    color: string | null
     periodStart: Date | null
     periodEnd: Date | null
     currency: string | null
@@ -29592,6 +29676,7 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     label: string | null
+    color: string | null
     periodStart: Date | null
     periodEnd: Date | null
     currency: string | null
@@ -29617,6 +29702,7 @@ export namespace Prisma {
     id: number
     userId: number
     label: number
+    color: number
     periodStart: number
     periodEnd: number
     currency: number
@@ -29655,6 +29741,7 @@ export namespace Prisma {
     id?: true
     userId?: true
     label?: true
+    color?: true
     periodStart?: true
     periodEnd?: true
     currency?: true
@@ -29680,6 +29767,7 @@ export namespace Prisma {
     id?: true
     userId?: true
     label?: true
+    color?: true
     periodStart?: true
     periodEnd?: true
     currency?: true
@@ -29705,6 +29793,7 @@ export namespace Prisma {
     id?: true
     userId?: true
     label?: true
+    color?: true
     periodStart?: true
     periodEnd?: true
     currency?: true
@@ -29820,6 +29909,7 @@ export namespace Prisma {
     id: string
     userId: string
     label: string
+    color: string | null
     periodStart: Date
     periodEnd: Date
     currency: string
@@ -29867,6 +29957,7 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     label?: boolean
+    color?: boolean
     periodStart?: boolean
     periodEnd?: boolean
     currency?: boolean
@@ -29900,6 +29991,7 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     label?: boolean
+    color?: boolean
     periodStart?: boolean
     periodEnd?: boolean
     currency?: boolean
@@ -29924,7 +30016,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FinBudgetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "label" | "periodStart" | "periodEnd" | "currency" | "recurrence" | "alertThresholds" | "carryOver" | "carryOverspend" | "methodMapping" | "note" | "scope" | "source" | "sourceRef" | "status" | "confidence" | "consentUses" | "effectiveAt" | "collectedAt" | "version" | "archivedAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["finBudget"]>
+  export type FinBudgetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "label" | "color" | "periodStart" | "periodEnd" | "currency" | "recurrence" | "alertThresholds" | "carryOver" | "carryOverspend" | "methodMapping" | "note" | "scope" | "source" | "sourceRef" | "status" | "confidence" | "consentUses" | "effectiveAt" | "collectedAt" | "version" | "archivedAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["finBudget"]>
   export type FinBudgetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     envelopes?: boolean | FinBudget$envelopesArgs<ExtArgs>
@@ -29941,6 +30033,7 @@ export namespace Prisma {
       id: string
       userId: string
       label: string
+      color: string | null
       periodStart: Date
       periodEnd: Date
       currency: string
@@ -30337,6 +30430,7 @@ export namespace Prisma {
     readonly id: FieldRef<"FinBudget", 'String'>
     readonly userId: FieldRef<"FinBudget", 'String'>
     readonly label: FieldRef<"FinBudget", 'String'>
+    readonly color: FieldRef<"FinBudget", 'String'>
     readonly periodStart: FieldRef<"FinBudget", 'DateTime'>
     readonly periodEnd: FieldRef<"FinBudget", 'DateTime'>
     readonly currency: FieldRef<"FinBudget", 'String'>
@@ -31554,9 +31648,9 @@ export namespace Prisma {
     readonly categoryId: FieldRef<"FinEnvelope", 'String'>
     readonly categoryGroup: FieldRef<"FinEnvelope", 'String'>
     readonly kind: FieldRef<"FinEnvelope", 'String'>
-    readonly value: FieldRef<"FinEnvelope", 'Int'>
+    readonly value: FieldRef<"FinEnvelope", 'Float'>
     readonly currency: FieldRef<"FinEnvelope", 'String'>
-    readonly cap: FieldRef<"FinEnvelope", 'Int'>
+    readonly cap: FieldRef<"FinEnvelope", 'Float'>
     readonly recurring: FieldRef<"FinEnvelope", 'Boolean'>
     readonly note: FieldRef<"FinEnvelope", 'String'>
     readonly scope: FieldRef<"FinEnvelope", 'String'>
@@ -32820,11 +32914,11 @@ export namespace Prisma {
     readonly templateKey: FieldRef<"FinGoal", 'String'>
     readonly icon: FieldRef<"FinGoal", 'String'>
     readonly color: FieldRef<"FinGoal", 'String'>
-    readonly target: FieldRef<"FinGoal", 'Int'>
+    readonly target: FieldRef<"FinGoal", 'Float'>
     readonly currency: FieldRef<"FinGoal", 'String'>
     readonly targetDate: FieldRef<"FinGoal", 'DateTime'>
-    readonly allocated: FieldRef<"FinGoal", 'Int'>
-    readonly monthlyContribution: FieldRef<"FinGoal", 'Int'>
+    readonly allocated: FieldRef<"FinGoal", 'Float'>
+    readonly monthlyContribution: FieldRef<"FinGoal", 'Float'>
     readonly progressStatus: FieldRef<"FinGoal", 'String'>
     readonly accountId: FieldRef<"FinGoal", 'String'>
     readonly rate: FieldRef<"FinGoal", 'Float'>
@@ -34103,11 +34197,11 @@ export namespace Prisma {
     readonly lender: FieldRef<"FinDebt", 'String'>
     readonly purpose: FieldRef<"FinDebt", 'String'>
     readonly assetFinanced: FieldRef<"FinDebt", 'String'>
-    readonly outstandingPrincipal: FieldRef<"FinDebt", 'Int'>
-    readonly monthlyInstalment: FieldRef<"FinDebt", 'Int'>
+    readonly outstandingPrincipal: FieldRef<"FinDebt", 'Float'>
+    readonly monthlyInstalment: FieldRef<"FinDebt", 'Float'>
     readonly currency: FieldRef<"FinDebt", 'String'>
     readonly rate: FieldRef<"FinDebt", 'Float'>
-    readonly knownTotalCost: FieldRef<"FinDebt", 'Int'>
+    readonly knownTotalCost: FieldRef<"FinDebt", 'Float'>
     readonly dueDate: FieldRef<"FinDebt", 'DateTime'>
     readonly direction: FieldRef<"FinDebt", 'String'>
     readonly debtType: FieldRef<"FinDebt", 'String'>
@@ -35180,7 +35274,7 @@ export namespace Prisma {
     readonly id: FieldRef<"FinDebtPayment", 'String'>
     readonly userId: FieldRef<"FinDebtPayment", 'String'>
     readonly debtId: FieldRef<"FinDebtPayment", 'String'>
-    readonly amount: FieldRef<"FinDebtPayment", 'Int'>
+    readonly amount: FieldRef<"FinDebtPayment", 'Float'>
     readonly currency: FieldRef<"FinDebtPayment", 'String'>
     readonly paidAt: FieldRef<"FinDebtPayment", 'DateTime'>
     readonly note: FieldRef<"FinDebtPayment", 'String'>
@@ -36404,7 +36498,7 @@ export namespace Prisma {
     readonly label: FieldRef<"FinRecurrence", 'String'>
     readonly categoryId: FieldRef<"FinRecurrence", 'String'>
     readonly kind: FieldRef<"FinRecurrence", 'String'>
-    readonly value: FieldRef<"FinRecurrence", 'Int'>
+    readonly value: FieldRef<"FinRecurrence", 'Float'>
     readonly currency: FieldRef<"FinRecurrence", 'String'>
     readonly frequency: FieldRef<"FinRecurrence", 'String'>
     readonly nextDate: FieldRef<"FinRecurrence", 'DateTime'>
@@ -37641,9 +37735,9 @@ export namespace Prisma {
     readonly userId: FieldRef<"FinProvision", 'String'>
     readonly label: FieldRef<"FinProvision", 'String'>
     readonly categoryId: FieldRef<"FinProvision", 'String'>
-    readonly value: FieldRef<"FinProvision", 'Int'>
+    readonly value: FieldRef<"FinProvision", 'Float'>
     readonly currency: FieldRef<"FinProvision", 'String'>
-    readonly provisioned: FieldRef<"FinProvision", 'Int'>
+    readonly provisioned: FieldRef<"FinProvision", 'Float'>
     readonly targetDate: FieldRef<"FinProvision", 'DateTime'>
     readonly reminderDays: FieldRef<"FinProvision", 'Json'>
     readonly note: FieldRef<"FinProvision", 'String'>
@@ -38841,7 +38935,7 @@ export namespace Prisma {
     readonly label: FieldRef<"FinAsset", 'String'>
     readonly kind: FieldRef<"FinAsset", 'String'>
     readonly categoryId: FieldRef<"FinAsset", 'String'>
-    readonly value: FieldRef<"FinAsset", 'Int'>
+    readonly value: FieldRef<"FinAsset", 'Float'>
     readonly currency: FieldRef<"FinAsset", 'String'>
     readonly valuedAt: FieldRef<"FinAsset", 'DateTime'>
     readonly liquidity: FieldRef<"FinAsset", 'String'>
@@ -39989,7 +40083,7 @@ export namespace Prisma {
     readonly label: FieldRef<"FinSpace", 'String'>
     readonly currency: FieldRef<"FinSpace", 'String'>
     readonly splitRule: FieldRef<"FinSpace", 'String'>
-    readonly smallBalance: FieldRef<"FinSpace", 'Int'>
+    readonly smallBalance: FieldRef<"FinSpace", 'Float'>
     readonly closedAt: FieldRef<"FinSpace", 'DateTime'>
     readonly note: FieldRef<"FinSpace", 'String'>
     readonly source: FieldRef<"FinSpace", 'String'>
@@ -43527,8 +43621,8 @@ export namespace Prisma {
   interface FinPaperPortfolioFieldRefs {
     readonly id: FieldRef<"FinPaperPortfolio", 'String'>
     readonly userId: FieldRef<"FinPaperPortfolio", 'String'>
-    readonly capital: FieldRef<"FinPaperPortfolio", 'Int'>
-    readonly cash: FieldRef<"FinPaperPortfolio", 'Int'>
+    readonly capital: FieldRef<"FinPaperPortfolio", 'Float'>
+    readonly cash: FieldRef<"FinPaperPortfolio", 'Float'>
     readonly currency: FieldRef<"FinPaperPortfolio", 'String'>
     readonly feeRate: FieldRef<"FinPaperPortfolio", 'Float'>
     readonly resetAt: FieldRef<"FinPaperPortfolio", 'DateTime'>
@@ -44587,7 +44681,7 @@ export namespace Prisma {
     readonly id: FieldRef<"FinPaperInstrument", 'String'>
     readonly portfolioId: FieldRef<"FinPaperInstrument", 'String'>
     readonly label: FieldRef<"FinPaperInstrument", 'String'>
-    readonly markPrice: FieldRef<"FinPaperInstrument", 'Int'>
+    readonly markPrice: FieldRef<"FinPaperInstrument", 'Float'>
     readonly markedAt: FieldRef<"FinPaperInstrument", 'DateTime'>
     readonly note: FieldRef<"FinPaperInstrument", 'String'>
     readonly createdAt: FieldRef<"FinPaperInstrument", 'DateTime'>
@@ -45666,8 +45760,8 @@ export namespace Prisma {
     readonly instrumentId: FieldRef<"FinPaperTrade", 'String'>
     readonly kind: FieldRef<"FinPaperTrade", 'String'>
     readonly quantity: FieldRef<"FinPaperTrade", 'Int'>
-    readonly unitPrice: FieldRef<"FinPaperTrade", 'Int'>
-    readonly fee: FieldRef<"FinPaperTrade", 'Int'>
+    readonly unitPrice: FieldRef<"FinPaperTrade", 'Float'>
+    readonly fee: FieldRef<"FinPaperTrade", 'Float'>
     readonly currency: FieldRef<"FinPaperTrade", 'String'>
     readonly decidedAt: FieldRef<"FinPaperTrade", 'DateTime'>
     readonly note: FieldRef<"FinPaperTrade", 'String'>
@@ -46884,7 +46978,7 @@ export namespace Prisma {
     readonly spaceId: FieldRef<"FinSharedExpense", 'String'>
     readonly payerId: FieldRef<"FinSharedExpense", 'String'>
     readonly label: FieldRef<"FinSharedExpense", 'String'>
-    readonly value: FieldRef<"FinSharedExpense", 'Int'>
+    readonly value: FieldRef<"FinSharedExpense", 'Float'>
     readonly currency: FieldRef<"FinSharedExpense", 'String'>
     readonly occurredAt: FieldRef<"FinSharedExpense", 'DateTime'>
     readonly splitMode: FieldRef<"FinSharedExpense", 'String'>
@@ -46896,7 +46990,7 @@ export namespace Prisma {
     readonly collectiveCategory: FieldRef<"FinSharedExpense", 'String'>
     readonly subCategory: FieldRef<"FinSharedExpense", 'String'>
     readonly advanceTransferId: FieldRef<"FinSharedExpense", 'String'>
-    readonly advanceOriginalValue: FieldRef<"FinSharedExpense", 'Int'>
+    readonly advanceOriginalValue: FieldRef<"FinSharedExpense", 'Float'>
     readonly personalCreated: FieldRef<"FinSharedExpense", 'Boolean'>
     readonly personalTransactionId: FieldRef<"FinSharedExpense", 'String'>
     readonly recordedById: FieldRef<"FinSharedExpense", 'String'>
@@ -47971,8 +48065,8 @@ export namespace Prisma {
     readonly id: FieldRef<"FinSharedShare", 'String'>
     readonly expenseId: FieldRef<"FinSharedShare", 'String'>
     readonly memberId: FieldRef<"FinSharedShare", 'String'>
-    readonly share: FieldRef<"FinSharedShare", 'Int'>
-    readonly weight: FieldRef<"FinSharedShare", 'Int'>
+    readonly share: FieldRef<"FinSharedShare", 'Float'>
+    readonly weight: FieldRef<"FinSharedShare", 'Float'>
     readonly createdAt: FieldRef<"FinSharedShare", 'DateTime'>
   }
     
@@ -49043,7 +49137,7 @@ export namespace Prisma {
     readonly spaceId: FieldRef<"FinSettlement", 'String'>
     readonly fromId: FieldRef<"FinSettlement", 'String'>
     readonly toId: FieldRef<"FinSettlement", 'String'>
-    readonly value: FieldRef<"FinSettlement", 'Int'>
+    readonly value: FieldRef<"FinSettlement", 'Float'>
     readonly currency: FieldRef<"FinSettlement", 'String'>
     readonly settledAt: FieldRef<"FinSettlement", 'DateTime'>
     readonly note: FieldRef<"FinSettlement", 'String'>
@@ -50127,7 +50221,7 @@ export namespace Prisma {
     readonly id: FieldRef<"FinSpaceGoal", 'String'>
     readonly spaceId: FieldRef<"FinSpaceGoal", 'String'>
     readonly label: FieldRef<"FinSpaceGoal", 'String'>
-    readonly target: FieldRef<"FinSpaceGoal", 'Int'>
+    readonly target: FieldRef<"FinSpaceGoal", 'Float'>
     readonly currency: FieldRef<"FinSpaceGoal", 'String'>
     readonly targetDate: FieldRef<"FinSpaceGoal", 'DateTime'>
     readonly note: FieldRef<"FinSpaceGoal", 'String'>
@@ -51196,7 +51290,7 @@ export namespace Prisma {
     readonly id: FieldRef<"FinSpaceGoalContribution", 'String'>
     readonly spaceGoalId: FieldRef<"FinSpaceGoalContribution", 'String'>
     readonly memberId: FieldRef<"FinSpaceGoalContribution", 'String'>
-    readonly amount: FieldRef<"FinSpaceGoalContribution", 'Int'>
+    readonly amount: FieldRef<"FinSpaceGoalContribution", 'Float'>
     readonly currency: FieldRef<"FinSpaceGoalContribution", 'String'>
     readonly contributedAt: FieldRef<"FinSpaceGoalContribution", 'DateTime'>
     readonly note: FieldRef<"FinSpaceGoalContribution", 'String'>
@@ -52162,7 +52256,7 @@ export namespace Prisma {
     readonly id: FieldRef<"FinSpaceGoalShare", 'String'>
     readonly spaceGoalId: FieldRef<"FinSpaceGoalShare", 'String'>
     readonly memberId: FieldRef<"FinSpaceGoalShare", 'String'>
-    readonly amount: FieldRef<"FinSpaceGoalShare", 'Int'>
+    readonly amount: FieldRef<"FinSpaceGoalShare", 'Float'>
   }
     
 
@@ -54229,8 +54323,8 @@ export namespace Prisma {
     readonly id: FieldRef<"FinSpaceProvision", 'String'>
     readonly spaceId: FieldRef<"FinSpaceProvision", 'String'>
     readonly label: FieldRef<"FinSpaceProvision", 'String'>
-    readonly plannedAmount: FieldRef<"FinSpaceProvision", 'Int'>
-    readonly alreadyProvisioned: FieldRef<"FinSpaceProvision", 'Int'>
+    readonly plannedAmount: FieldRef<"FinSpaceProvision", 'Float'>
+    readonly alreadyProvisioned: FieldRef<"FinSpaceProvision", 'Float'>
     readonly currency: FieldRef<"FinSpaceProvision", 'String'>
     readonly targetDate: FieldRef<"FinSpaceProvision", 'DateTime'>
     readonly note: FieldRef<"FinSpaceProvision", 'String'>
@@ -94197,8 +94291,8 @@ export namespace Prisma {
     readonly label: FieldRef<"FinBusinessDocument", 'String'>
     readonly issuedAt: FieldRef<"FinBusinessDocument", 'DateTime'>
     readonly dueAt: FieldRef<"FinBusinessDocument", 'DateTime'>
-    readonly amountExcl: FieldRef<"FinBusinessDocument", 'Int'>
-    readonly taxAmount: FieldRef<"FinBusinessDocument", 'Int'>
+    readonly amountExcl: FieldRef<"FinBusinessDocument", 'Float'>
+    readonly taxAmount: FieldRef<"FinBusinessDocument", 'Float'>
     readonly currency: FieldRef<"FinBusinessDocument", 'String'>
     readonly note: FieldRef<"FinBusinessDocument", 'String'>
     readonly scope: FieldRef<"FinBusinessDocument", 'String'>
@@ -95377,7 +95471,7 @@ export namespace Prisma {
     readonly id: FieldRef<"FinBusinessPayment", 'String'>
     readonly businessId: FieldRef<"FinBusinessPayment", 'String'>
     readonly documentId: FieldRef<"FinBusinessPayment", 'String'>
-    readonly value: FieldRef<"FinBusinessPayment", 'Int'>
+    readonly value: FieldRef<"FinBusinessPayment", 'Float'>
     readonly currency: FieldRef<"FinBusinessPayment", 'String'>
     readonly receivedAt: FieldRef<"FinBusinessPayment", 'DateTime'>
     readonly method: FieldRef<"FinBusinessPayment", 'String'>
@@ -96505,9 +96599,9 @@ export namespace Prisma {
     readonly userId: FieldRef<"FinPayslip", 'String'>
     readonly period: FieldRef<"FinPayslip", 'String'>
     readonly lines: FieldRef<"FinPayslip", 'Json'>
-    readonly gross: FieldRef<"FinPayslip", 'Int'>
-    readonly value: FieldRef<"FinPayslip", 'Int'>
-    readonly declaredNet: FieldRef<"FinPayslip", 'Int'>
+    readonly gross: FieldRef<"FinPayslip", 'Float'>
+    readonly value: FieldRef<"FinPayslip", 'Float'>
+    readonly declaredNet: FieldRef<"FinPayslip", 'Float'>
     readonly currency: FieldRef<"FinPayslip", 'String'>
     readonly scope: FieldRef<"FinPayslip", 'String'>
     readonly source: FieldRef<"FinPayslip", 'String'>
@@ -98486,7 +98580,7 @@ export namespace Prisma {
     readonly spaceId: FieldRef<"FinSpaceBudget", 'String'>
     readonly category: FieldRef<"FinSpaceBudget", 'String'>
     readonly period: FieldRef<"FinSpaceBudget", 'String'>
-    readonly value: FieldRef<"FinSpaceBudget", 'Int'>
+    readonly value: FieldRef<"FinSpaceBudget", 'Float'>
     readonly setById: FieldRef<"FinSpaceBudget", 'String'>
     readonly version: FieldRef<"FinSpaceBudget", 'Int'>
     readonly deletedAt: FieldRef<"FinSpaceBudget", 'DateTime'>
@@ -100687,7 +100781,7 @@ export namespace Prisma {
     readonly spaceId: FieldRef<"FinSpaceInflow", 'String'>
     readonly kind: FieldRef<"FinSpaceInflow", 'String'>
     readonly memberId: FieldRef<"FinSpaceInflow", 'String'>
-    readonly value: FieldRef<"FinSpaceInflow", 'Int'>
+    readonly value: FieldRef<"FinSpaceInflow", 'Float'>
     readonly occurredAt: FieldRef<"FinSpaceInflow", 'DateTime'>
     readonly status: FieldRef<"FinSpaceInflow", 'String'>
     readonly note: FieldRef<"FinSpaceInflow", 'String'>
@@ -102748,7 +102842,7 @@ export namespace Prisma {
     readonly title: FieldRef<"FinMission", 'String'>
     readonly summary: FieldRef<"FinMission", 'String'>
     readonly profiles: FieldRef<"FinMission", 'Json'>
-    readonly startingAmount: FieldRef<"FinMission", 'Int'>
+    readonly startingAmount: FieldRef<"FinMission", 'Float'>
     readonly currency: FieldRef<"FinMission", 'String'>
     readonly steps: FieldRef<"FinMission", 'Json'>
     readonly badges: FieldRef<"FinMission", 'Json'>
@@ -105057,6 +105151,949 @@ export namespace Prisma {
 
 
   /**
+   * Model FinExchangeRate
+   */
+
+  export type AggregateFinExchangeRate = {
+    _count: FinExchangeRateCountAggregateOutputType | null
+    _avg: FinExchangeRateAvgAggregateOutputType | null
+    _sum: FinExchangeRateSumAggregateOutputType | null
+    _min: FinExchangeRateMinAggregateOutputType | null
+    _max: FinExchangeRateMaxAggregateOutputType | null
+  }
+
+  export type FinExchangeRateAvgAggregateOutputType = {
+    rate: number | null
+  }
+
+  export type FinExchangeRateSumAggregateOutputType = {
+    rate: number | null
+  }
+
+  export type FinExchangeRateMinAggregateOutputType = {
+    id: string | null
+    currency: string | null
+    rate: number | null
+    referenceDate: Date | null
+    source: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FinExchangeRateMaxAggregateOutputType = {
+    id: string | null
+    currency: string | null
+    rate: number | null
+    referenceDate: Date | null
+    source: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FinExchangeRateCountAggregateOutputType = {
+    id: number
+    currency: number
+    rate: number
+    referenceDate: number
+    source: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FinExchangeRateAvgAggregateInputType = {
+    rate?: true
+  }
+
+  export type FinExchangeRateSumAggregateInputType = {
+    rate?: true
+  }
+
+  export type FinExchangeRateMinAggregateInputType = {
+    id?: true
+    currency?: true
+    rate?: true
+    referenceDate?: true
+    source?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FinExchangeRateMaxAggregateInputType = {
+    id?: true
+    currency?: true
+    rate?: true
+    referenceDate?: true
+    source?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FinExchangeRateCountAggregateInputType = {
+    id?: true
+    currency?: true
+    rate?: true
+    referenceDate?: true
+    source?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FinExchangeRateAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FinExchangeRate to aggregate.
+     */
+    where?: FinExchangeRateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FinExchangeRates to fetch.
+     */
+    orderBy?: FinExchangeRateOrderByWithRelationInput | FinExchangeRateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FinExchangeRateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FinExchangeRates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FinExchangeRates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FinExchangeRates
+    **/
+    _count?: true | FinExchangeRateCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FinExchangeRateAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FinExchangeRateSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FinExchangeRateMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FinExchangeRateMaxAggregateInputType
+  }
+
+  export type GetFinExchangeRateAggregateType<T extends FinExchangeRateAggregateArgs> = {
+        [P in keyof T & keyof AggregateFinExchangeRate]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFinExchangeRate[P]>
+      : GetScalarType<T[P], AggregateFinExchangeRate[P]>
+  }
+
+
+
+
+  export type FinExchangeRateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FinExchangeRateWhereInput
+    orderBy?: FinExchangeRateOrderByWithAggregationInput | FinExchangeRateOrderByWithAggregationInput[]
+    by: FinExchangeRateScalarFieldEnum[] | FinExchangeRateScalarFieldEnum
+    having?: FinExchangeRateScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FinExchangeRateCountAggregateInputType | true
+    _avg?: FinExchangeRateAvgAggregateInputType
+    _sum?: FinExchangeRateSumAggregateInputType
+    _min?: FinExchangeRateMinAggregateInputType
+    _max?: FinExchangeRateMaxAggregateInputType
+  }
+
+  export type FinExchangeRateGroupByOutputType = {
+    id: string
+    currency: string
+    rate: number
+    referenceDate: Date
+    source: string
+    createdAt: Date
+    updatedAt: Date
+    _count: FinExchangeRateCountAggregateOutputType | null
+    _avg: FinExchangeRateAvgAggregateOutputType | null
+    _sum: FinExchangeRateSumAggregateOutputType | null
+    _min: FinExchangeRateMinAggregateOutputType | null
+    _max: FinExchangeRateMaxAggregateOutputType | null
+  }
+
+  type GetFinExchangeRateGroupByPayload<T extends FinExchangeRateGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FinExchangeRateGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FinExchangeRateGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FinExchangeRateGroupByOutputType[P]>
+            : GetScalarType<T[P], FinExchangeRateGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FinExchangeRateSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    currency?: boolean
+    rate?: boolean
+    referenceDate?: boolean
+    source?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["finExchangeRate"]>
+
+
+
+  export type FinExchangeRateSelectScalar = {
+    id?: boolean
+    currency?: boolean
+    rate?: boolean
+    referenceDate?: boolean
+    source?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FinExchangeRateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "currency" | "rate" | "referenceDate" | "source" | "createdAt" | "updatedAt", ExtArgs["result"]["finExchangeRate"]>
+
+  export type $FinExchangeRatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FinExchangeRate"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      currency: string
+      rate: number
+      referenceDate: Date
+      source: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["finExchangeRate"]>
+    composites: {}
+  }
+
+  type FinExchangeRateGetPayload<S extends boolean | null | undefined | FinExchangeRateDefaultArgs> = $Result.GetResult<Prisma.$FinExchangeRatePayload, S>
+
+  type FinExchangeRateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FinExchangeRateFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FinExchangeRateCountAggregateInputType | true
+    }
+
+  export interface FinExchangeRateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FinExchangeRate'], meta: { name: 'FinExchangeRate' } }
+    /**
+     * Find zero or one FinExchangeRate that matches the filter.
+     * @param {FinExchangeRateFindUniqueArgs} args - Arguments to find a FinExchangeRate
+     * @example
+     * // Get one FinExchangeRate
+     * const finExchangeRate = await prisma.finExchangeRate.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FinExchangeRateFindUniqueArgs>(args: SelectSubset<T, FinExchangeRateFindUniqueArgs<ExtArgs>>): Prisma__FinExchangeRateClient<$Result.GetResult<Prisma.$FinExchangeRatePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FinExchangeRate that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FinExchangeRateFindUniqueOrThrowArgs} args - Arguments to find a FinExchangeRate
+     * @example
+     * // Get one FinExchangeRate
+     * const finExchangeRate = await prisma.finExchangeRate.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FinExchangeRateFindUniqueOrThrowArgs>(args: SelectSubset<T, FinExchangeRateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FinExchangeRateClient<$Result.GetResult<Prisma.$FinExchangeRatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FinExchangeRate that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinExchangeRateFindFirstArgs} args - Arguments to find a FinExchangeRate
+     * @example
+     * // Get one FinExchangeRate
+     * const finExchangeRate = await prisma.finExchangeRate.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FinExchangeRateFindFirstArgs>(args?: SelectSubset<T, FinExchangeRateFindFirstArgs<ExtArgs>>): Prisma__FinExchangeRateClient<$Result.GetResult<Prisma.$FinExchangeRatePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FinExchangeRate that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinExchangeRateFindFirstOrThrowArgs} args - Arguments to find a FinExchangeRate
+     * @example
+     * // Get one FinExchangeRate
+     * const finExchangeRate = await prisma.finExchangeRate.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FinExchangeRateFindFirstOrThrowArgs>(args?: SelectSubset<T, FinExchangeRateFindFirstOrThrowArgs<ExtArgs>>): Prisma__FinExchangeRateClient<$Result.GetResult<Prisma.$FinExchangeRatePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FinExchangeRates that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinExchangeRateFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FinExchangeRates
+     * const finExchangeRates = await prisma.finExchangeRate.findMany()
+     * 
+     * // Get first 10 FinExchangeRates
+     * const finExchangeRates = await prisma.finExchangeRate.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const finExchangeRateWithIdOnly = await prisma.finExchangeRate.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FinExchangeRateFindManyArgs>(args?: SelectSubset<T, FinExchangeRateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinExchangeRatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FinExchangeRate.
+     * @param {FinExchangeRateCreateArgs} args - Arguments to create a FinExchangeRate.
+     * @example
+     * // Create one FinExchangeRate
+     * const FinExchangeRate = await prisma.finExchangeRate.create({
+     *   data: {
+     *     // ... data to create a FinExchangeRate
+     *   }
+     * })
+     * 
+     */
+    create<T extends FinExchangeRateCreateArgs>(args: SelectSubset<T, FinExchangeRateCreateArgs<ExtArgs>>): Prisma__FinExchangeRateClient<$Result.GetResult<Prisma.$FinExchangeRatePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FinExchangeRates.
+     * @param {FinExchangeRateCreateManyArgs} args - Arguments to create many FinExchangeRates.
+     * @example
+     * // Create many FinExchangeRates
+     * const finExchangeRate = await prisma.finExchangeRate.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FinExchangeRateCreateManyArgs>(args?: SelectSubset<T, FinExchangeRateCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a FinExchangeRate.
+     * @param {FinExchangeRateDeleteArgs} args - Arguments to delete one FinExchangeRate.
+     * @example
+     * // Delete one FinExchangeRate
+     * const FinExchangeRate = await prisma.finExchangeRate.delete({
+     *   where: {
+     *     // ... filter to delete one FinExchangeRate
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FinExchangeRateDeleteArgs>(args: SelectSubset<T, FinExchangeRateDeleteArgs<ExtArgs>>): Prisma__FinExchangeRateClient<$Result.GetResult<Prisma.$FinExchangeRatePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FinExchangeRate.
+     * @param {FinExchangeRateUpdateArgs} args - Arguments to update one FinExchangeRate.
+     * @example
+     * // Update one FinExchangeRate
+     * const finExchangeRate = await prisma.finExchangeRate.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FinExchangeRateUpdateArgs>(args: SelectSubset<T, FinExchangeRateUpdateArgs<ExtArgs>>): Prisma__FinExchangeRateClient<$Result.GetResult<Prisma.$FinExchangeRatePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FinExchangeRates.
+     * @param {FinExchangeRateDeleteManyArgs} args - Arguments to filter FinExchangeRates to delete.
+     * @example
+     * // Delete a few FinExchangeRates
+     * const { count } = await prisma.finExchangeRate.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FinExchangeRateDeleteManyArgs>(args?: SelectSubset<T, FinExchangeRateDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FinExchangeRates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinExchangeRateUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FinExchangeRates
+     * const finExchangeRate = await prisma.finExchangeRate.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FinExchangeRateUpdateManyArgs>(args: SelectSubset<T, FinExchangeRateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one FinExchangeRate.
+     * @param {FinExchangeRateUpsertArgs} args - Arguments to update or create a FinExchangeRate.
+     * @example
+     * // Update or create a FinExchangeRate
+     * const finExchangeRate = await prisma.finExchangeRate.upsert({
+     *   create: {
+     *     // ... data to create a FinExchangeRate
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FinExchangeRate we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FinExchangeRateUpsertArgs>(args: SelectSubset<T, FinExchangeRateUpsertArgs<ExtArgs>>): Prisma__FinExchangeRateClient<$Result.GetResult<Prisma.$FinExchangeRatePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FinExchangeRates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinExchangeRateCountArgs} args - Arguments to filter FinExchangeRates to count.
+     * @example
+     * // Count the number of FinExchangeRates
+     * const count = await prisma.finExchangeRate.count({
+     *   where: {
+     *     // ... the filter for the FinExchangeRates we want to count
+     *   }
+     * })
+    **/
+    count<T extends FinExchangeRateCountArgs>(
+      args?: Subset<T, FinExchangeRateCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FinExchangeRateCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FinExchangeRate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinExchangeRateAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FinExchangeRateAggregateArgs>(args: Subset<T, FinExchangeRateAggregateArgs>): Prisma.PrismaPromise<GetFinExchangeRateAggregateType<T>>
+
+    /**
+     * Group by FinExchangeRate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinExchangeRateGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FinExchangeRateGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FinExchangeRateGroupByArgs['orderBy'] }
+        : { orderBy?: FinExchangeRateGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FinExchangeRateGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFinExchangeRateGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FinExchangeRate model
+   */
+  readonly fields: FinExchangeRateFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FinExchangeRate.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FinExchangeRateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FinExchangeRate model
+   */
+  interface FinExchangeRateFieldRefs {
+    readonly id: FieldRef<"FinExchangeRate", 'String'>
+    readonly currency: FieldRef<"FinExchangeRate", 'String'>
+    readonly rate: FieldRef<"FinExchangeRate", 'Float'>
+    readonly referenceDate: FieldRef<"FinExchangeRate", 'DateTime'>
+    readonly source: FieldRef<"FinExchangeRate", 'String'>
+    readonly createdAt: FieldRef<"FinExchangeRate", 'DateTime'>
+    readonly updatedAt: FieldRef<"FinExchangeRate", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FinExchangeRate findUnique
+   */
+  export type FinExchangeRateFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinExchangeRate
+     */
+    select?: FinExchangeRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinExchangeRate
+     */
+    omit?: FinExchangeRateOmit<ExtArgs> | null
+    /**
+     * Filter, which FinExchangeRate to fetch.
+     */
+    where: FinExchangeRateWhereUniqueInput
+  }
+
+  /**
+   * FinExchangeRate findUniqueOrThrow
+   */
+  export type FinExchangeRateFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinExchangeRate
+     */
+    select?: FinExchangeRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinExchangeRate
+     */
+    omit?: FinExchangeRateOmit<ExtArgs> | null
+    /**
+     * Filter, which FinExchangeRate to fetch.
+     */
+    where: FinExchangeRateWhereUniqueInput
+  }
+
+  /**
+   * FinExchangeRate findFirst
+   */
+  export type FinExchangeRateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinExchangeRate
+     */
+    select?: FinExchangeRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinExchangeRate
+     */
+    omit?: FinExchangeRateOmit<ExtArgs> | null
+    /**
+     * Filter, which FinExchangeRate to fetch.
+     */
+    where?: FinExchangeRateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FinExchangeRates to fetch.
+     */
+    orderBy?: FinExchangeRateOrderByWithRelationInput | FinExchangeRateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FinExchangeRates.
+     */
+    cursor?: FinExchangeRateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FinExchangeRates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FinExchangeRates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FinExchangeRates.
+     */
+    distinct?: FinExchangeRateScalarFieldEnum | FinExchangeRateScalarFieldEnum[]
+  }
+
+  /**
+   * FinExchangeRate findFirstOrThrow
+   */
+  export type FinExchangeRateFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinExchangeRate
+     */
+    select?: FinExchangeRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinExchangeRate
+     */
+    omit?: FinExchangeRateOmit<ExtArgs> | null
+    /**
+     * Filter, which FinExchangeRate to fetch.
+     */
+    where?: FinExchangeRateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FinExchangeRates to fetch.
+     */
+    orderBy?: FinExchangeRateOrderByWithRelationInput | FinExchangeRateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FinExchangeRates.
+     */
+    cursor?: FinExchangeRateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FinExchangeRates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FinExchangeRates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FinExchangeRates.
+     */
+    distinct?: FinExchangeRateScalarFieldEnum | FinExchangeRateScalarFieldEnum[]
+  }
+
+  /**
+   * FinExchangeRate findMany
+   */
+  export type FinExchangeRateFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinExchangeRate
+     */
+    select?: FinExchangeRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinExchangeRate
+     */
+    omit?: FinExchangeRateOmit<ExtArgs> | null
+    /**
+     * Filter, which FinExchangeRates to fetch.
+     */
+    where?: FinExchangeRateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FinExchangeRates to fetch.
+     */
+    orderBy?: FinExchangeRateOrderByWithRelationInput | FinExchangeRateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FinExchangeRates.
+     */
+    cursor?: FinExchangeRateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FinExchangeRates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FinExchangeRates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FinExchangeRates.
+     */
+    distinct?: FinExchangeRateScalarFieldEnum | FinExchangeRateScalarFieldEnum[]
+  }
+
+  /**
+   * FinExchangeRate create
+   */
+  export type FinExchangeRateCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinExchangeRate
+     */
+    select?: FinExchangeRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinExchangeRate
+     */
+    omit?: FinExchangeRateOmit<ExtArgs> | null
+    /**
+     * The data needed to create a FinExchangeRate.
+     */
+    data: XOR<FinExchangeRateCreateInput, FinExchangeRateUncheckedCreateInput>
+  }
+
+  /**
+   * FinExchangeRate createMany
+   */
+  export type FinExchangeRateCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FinExchangeRates.
+     */
+    data: FinExchangeRateCreateManyInput | FinExchangeRateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FinExchangeRate update
+   */
+  export type FinExchangeRateUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinExchangeRate
+     */
+    select?: FinExchangeRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinExchangeRate
+     */
+    omit?: FinExchangeRateOmit<ExtArgs> | null
+    /**
+     * The data needed to update a FinExchangeRate.
+     */
+    data: XOR<FinExchangeRateUpdateInput, FinExchangeRateUncheckedUpdateInput>
+    /**
+     * Choose, which FinExchangeRate to update.
+     */
+    where: FinExchangeRateWhereUniqueInput
+  }
+
+  /**
+   * FinExchangeRate updateMany
+   */
+  export type FinExchangeRateUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FinExchangeRates.
+     */
+    data: XOR<FinExchangeRateUpdateManyMutationInput, FinExchangeRateUncheckedUpdateManyInput>
+    /**
+     * Filter which FinExchangeRates to update
+     */
+    where?: FinExchangeRateWhereInput
+    /**
+     * Limit how many FinExchangeRates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FinExchangeRate upsert
+   */
+  export type FinExchangeRateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinExchangeRate
+     */
+    select?: FinExchangeRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinExchangeRate
+     */
+    omit?: FinExchangeRateOmit<ExtArgs> | null
+    /**
+     * The filter to search for the FinExchangeRate to update in case it exists.
+     */
+    where: FinExchangeRateWhereUniqueInput
+    /**
+     * In case the FinExchangeRate found by the `where` argument doesn't exist, create a new FinExchangeRate with this data.
+     */
+    create: XOR<FinExchangeRateCreateInput, FinExchangeRateUncheckedCreateInput>
+    /**
+     * In case the FinExchangeRate was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FinExchangeRateUpdateInput, FinExchangeRateUncheckedUpdateInput>
+  }
+
+  /**
+   * FinExchangeRate delete
+   */
+  export type FinExchangeRateDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinExchangeRate
+     */
+    select?: FinExchangeRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinExchangeRate
+     */
+    omit?: FinExchangeRateOmit<ExtArgs> | null
+    /**
+     * Filter which FinExchangeRate to delete.
+     */
+    where: FinExchangeRateWhereUniqueInput
+  }
+
+  /**
+   * FinExchangeRate deleteMany
+   */
+  export type FinExchangeRateDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FinExchangeRates to delete
+     */
+    where?: FinExchangeRateWhereInput
+    /**
+     * Limit how many FinExchangeRates to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FinExchangeRate without action
+   */
+  export type FinExchangeRateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinExchangeRate
+     */
+    select?: FinExchangeRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinExchangeRate
+     */
+    omit?: FinExchangeRateOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -105425,6 +106462,7 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     label: 'label',
+    color: 'color',
     periodStart: 'periodStart',
     periodEnd: 'periodEnd',
     currency: 'currency',
@@ -106697,6 +107735,19 @@ export namespace Prisma {
   export type FinPushSubscriptionScalarFieldEnum = (typeof FinPushSubscriptionScalarFieldEnum)[keyof typeof FinPushSubscriptionScalarFieldEnum]
 
 
+  export const FinExchangeRateScalarFieldEnum: {
+    id: 'id',
+    currency: 'currency',
+    rate: 'rate',
+    referenceDate: 'referenceDate',
+    source: 'source',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FinExchangeRateScalarFieldEnum = (typeof FinExchangeRateScalarFieldEnum)[keyof typeof FinExchangeRateScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -106995,6 +108046,7 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     label: 'label',
+    color: 'color',
     currency: 'currency',
     recurrence: 'recurrence',
     note: 'note',
@@ -107897,6 +108949,15 @@ export namespace Prisma {
   };
 
   export type FinPushSubscriptionOrderByRelevanceFieldEnum = (typeof FinPushSubscriptionOrderByRelevanceFieldEnum)[keyof typeof FinPushSubscriptionOrderByRelevanceFieldEnum]
+
+
+  export const FinExchangeRateOrderByRelevanceFieldEnum: {
+    id: 'id',
+    currency: 'currency',
+    source: 'source'
+  };
+
+  export type FinExchangeRateOrderByRelevanceFieldEnum = (typeof FinExchangeRateOrderByRelevanceFieldEnum)[keyof typeof FinExchangeRateOrderByRelevanceFieldEnum]
 
 
   /**
@@ -109041,7 +110102,7 @@ export namespace Prisma {
     userId?: StringFilter<"FinIncome"> | string
     label?: StringFilter<"FinIncome"> | string
     categoryId?: StringNullableFilter<"FinIncome"> | string | null
-    value?: IntFilter<"FinIncome"> | number
+    value?: FloatFilter<"FinIncome"> | number
     currency?: StringFilter<"FinIncome"> | string
     frequency?: StringFilter<"FinIncome"> | string
     startDate?: DateTimeFilter<"FinIncome"> | Date | string
@@ -109099,7 +110160,7 @@ export namespace Prisma {
     userId?: StringFilter<"FinIncome"> | string
     label?: StringFilter<"FinIncome"> | string
     categoryId?: StringNullableFilter<"FinIncome"> | string | null
-    value?: IntFilter<"FinIncome"> | number
+    value?: FloatFilter<"FinIncome"> | number
     currency?: StringFilter<"FinIncome"> | string
     frequency?: StringFilter<"FinIncome"> | string
     startDate?: DateTimeFilter<"FinIncome"> | Date | string
@@ -109159,7 +110220,7 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"FinIncome"> | string
     label?: StringWithAggregatesFilter<"FinIncome"> | string
     categoryId?: StringNullableWithAggregatesFilter<"FinIncome"> | string | null
-    value?: IntWithAggregatesFilter<"FinIncome"> | number
+    value?: FloatWithAggregatesFilter<"FinIncome"> | number
     currency?: StringWithAggregatesFilter<"FinIncome"> | string
     frequency?: StringWithAggregatesFilter<"FinIncome"> | string
     startDate?: DateTimeWithAggregatesFilter<"FinIncome"> | Date | string
@@ -109188,15 +110249,15 @@ export namespace Prisma {
     label?: StringFilter<"FinAccount"> | string
     type?: StringFilter<"FinAccount"> | string
     currency?: StringFilter<"FinAccount"> | string
-    openingBalance?: IntFilter<"FinAccount"> | number
+    openingBalance?: FloatFilter<"FinAccount"> | number
     openingDate?: DateTimeFilter<"FinAccount"> | Date | string
     includeInTotal?: BoolFilter<"FinAccount"> | boolean
     includeInNetWorth?: BoolFilter<"FinAccount"> | boolean
     color?: StringNullableFilter<"FinAccount"> | string | null
     icon?: StringNullableFilter<"FinAccount"> | string | null
-    minBalanceAlert?: IntNullableFilter<"FinAccount"> | number | null
-    maxBalanceInfo?: IntNullableFilter<"FinAccount"> | number | null
-    overdraftAllowed?: IntNullableFilter<"FinAccount"> | number | null
+    minBalanceAlert?: FloatNullableFilter<"FinAccount"> | number | null
+    maxBalanceInfo?: FloatNullableFilter<"FinAccount"> | number | null
+    overdraftAllowed?: FloatNullableFilter<"FinAccount"> | number | null
     note?: StringNullableFilter<"FinAccount"> | string | null
     scope?: StringFilter<"FinAccount"> | string
     source?: StringFilter<"FinAccount"> | string
@@ -109262,15 +110323,15 @@ export namespace Prisma {
     label?: StringFilter<"FinAccount"> | string
     type?: StringFilter<"FinAccount"> | string
     currency?: StringFilter<"FinAccount"> | string
-    openingBalance?: IntFilter<"FinAccount"> | number
+    openingBalance?: FloatFilter<"FinAccount"> | number
     openingDate?: DateTimeFilter<"FinAccount"> | Date | string
     includeInTotal?: BoolFilter<"FinAccount"> | boolean
     includeInNetWorth?: BoolFilter<"FinAccount"> | boolean
     color?: StringNullableFilter<"FinAccount"> | string | null
     icon?: StringNullableFilter<"FinAccount"> | string | null
-    minBalanceAlert?: IntNullableFilter<"FinAccount"> | number | null
-    maxBalanceInfo?: IntNullableFilter<"FinAccount"> | number | null
-    overdraftAllowed?: IntNullableFilter<"FinAccount"> | number | null
+    minBalanceAlert?: FloatNullableFilter<"FinAccount"> | number | null
+    maxBalanceInfo?: FloatNullableFilter<"FinAccount"> | number | null
+    overdraftAllowed?: FloatNullableFilter<"FinAccount"> | number | null
     note?: StringNullableFilter<"FinAccount"> | string | null
     scope?: StringFilter<"FinAccount"> | string
     source?: StringFilter<"FinAccount"> | string
@@ -109335,15 +110396,15 @@ export namespace Prisma {
     label?: StringWithAggregatesFilter<"FinAccount"> | string
     type?: StringWithAggregatesFilter<"FinAccount"> | string
     currency?: StringWithAggregatesFilter<"FinAccount"> | string
-    openingBalance?: IntWithAggregatesFilter<"FinAccount"> | number
+    openingBalance?: FloatWithAggregatesFilter<"FinAccount"> | number
     openingDate?: DateTimeWithAggregatesFilter<"FinAccount"> | Date | string
     includeInTotal?: BoolWithAggregatesFilter<"FinAccount"> | boolean
     includeInNetWorth?: BoolWithAggregatesFilter<"FinAccount"> | boolean
     color?: StringNullableWithAggregatesFilter<"FinAccount"> | string | null
     icon?: StringNullableWithAggregatesFilter<"FinAccount"> | string | null
-    minBalanceAlert?: IntNullableWithAggregatesFilter<"FinAccount"> | number | null
-    maxBalanceInfo?: IntNullableWithAggregatesFilter<"FinAccount"> | number | null
-    overdraftAllowed?: IntNullableWithAggregatesFilter<"FinAccount"> | number | null
+    minBalanceAlert?: FloatNullableWithAggregatesFilter<"FinAccount"> | number | null
+    maxBalanceInfo?: FloatNullableWithAggregatesFilter<"FinAccount"> | number | null
+    overdraftAllowed?: FloatNullableWithAggregatesFilter<"FinAccount"> | number | null
     note?: StringNullableWithAggregatesFilter<"FinAccount"> | string | null
     scope?: StringWithAggregatesFilter<"FinAccount"> | string
     source?: StringWithAggregatesFilter<"FinAccount"> | string
@@ -109614,7 +110675,7 @@ export namespace Prisma {
     kind?: StringFilter<"FinTransaction"> | string
     accountId?: StringNullableFilter<"FinTransaction"> | string | null
     transferId?: StringNullableFilter<"FinTransaction"> | string | null
-    value?: IntFilter<"FinTransaction"> | number
+    value?: FloatFilter<"FinTransaction"> | number
     currency?: StringFilter<"FinTransaction"> | string
     occurredAt?: DateTimeFilter<"FinTransaction"> | Date | string
     categoryId?: StringNullableFilter<"FinTransaction"> | string | null
@@ -109698,7 +110759,7 @@ export namespace Prisma {
     kind?: StringFilter<"FinTransaction"> | string
     accountId?: StringNullableFilter<"FinTransaction"> | string | null
     transferId?: StringNullableFilter<"FinTransaction"> | string | null
-    value?: IntFilter<"FinTransaction"> | number
+    value?: FloatFilter<"FinTransaction"> | number
     currency?: StringFilter<"FinTransaction"> | string
     occurredAt?: DateTimeFilter<"FinTransaction"> | Date | string
     categoryId?: StringNullableFilter<"FinTransaction"> | string | null
@@ -109780,7 +110841,7 @@ export namespace Prisma {
     kind?: StringWithAggregatesFilter<"FinTransaction"> | string
     accountId?: StringNullableWithAggregatesFilter<"FinTransaction"> | string | null
     transferId?: StringNullableWithAggregatesFilter<"FinTransaction"> | string | null
-    value?: IntWithAggregatesFilter<"FinTransaction"> | number
+    value?: FloatWithAggregatesFilter<"FinTransaction"> | number
     currency?: StringWithAggregatesFilter<"FinTransaction"> | string
     occurredAt?: DateTimeWithAggregatesFilter<"FinTransaction"> | Date | string
     categoryId?: StringNullableWithAggregatesFilter<"FinTransaction"> | string | null
@@ -109943,6 +111004,7 @@ export namespace Prisma {
     id?: StringFilter<"FinBudget"> | string
     userId?: StringFilter<"FinBudget"> | string
     label?: StringFilter<"FinBudget"> | string
+    color?: StringNullableFilter<"FinBudget"> | string | null
     periodStart?: DateTimeFilter<"FinBudget"> | Date | string
     periodEnd?: DateTimeFilter<"FinBudget"> | Date | string
     currency?: StringFilter<"FinBudget"> | string
@@ -109973,6 +111035,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     label?: SortOrder
+    color?: SortOrderInput | SortOrder
     periodStart?: SortOrder
     periodEnd?: SortOrder
     currency?: SortOrder
@@ -110007,6 +111070,7 @@ export namespace Prisma {
     NOT?: FinBudgetWhereInput | FinBudgetWhereInput[]
     userId?: StringFilter<"FinBudget"> | string
     label?: StringFilter<"FinBudget"> | string
+    color?: StringNullableFilter<"FinBudget"> | string | null
     periodStart?: DateTimeFilter<"FinBudget"> | Date | string
     periodEnd?: DateTimeFilter<"FinBudget"> | Date | string
     currency?: StringFilter<"FinBudget"> | string
@@ -110037,6 +111101,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     label?: SortOrder
+    color?: SortOrderInput | SortOrder
     periodStart?: SortOrder
     periodEnd?: SortOrder
     currency?: SortOrder
@@ -110073,6 +111138,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"FinBudget"> | string
     userId?: StringWithAggregatesFilter<"FinBudget"> | string
     label?: StringWithAggregatesFilter<"FinBudget"> | string
+    color?: StringNullableWithAggregatesFilter<"FinBudget"> | string | null
     periodStart?: DateTimeWithAggregatesFilter<"FinBudget"> | Date | string
     periodEnd?: DateTimeWithAggregatesFilter<"FinBudget"> | Date | string
     currency?: StringWithAggregatesFilter<"FinBudget"> | string
@@ -110107,9 +111173,9 @@ export namespace Prisma {
     categoryId?: StringNullableFilter<"FinEnvelope"> | string | null
     categoryGroup?: StringNullableFilter<"FinEnvelope"> | string | null
     kind?: StringFilter<"FinEnvelope"> | string
-    value?: IntFilter<"FinEnvelope"> | number
+    value?: FloatFilter<"FinEnvelope"> | number
     currency?: StringFilter<"FinEnvelope"> | string
-    cap?: IntNullableFilter<"FinEnvelope"> | number | null
+    cap?: FloatNullableFilter<"FinEnvelope"> | number | null
     recurring?: BoolFilter<"FinEnvelope"> | boolean
     note?: StringNullableFilter<"FinEnvelope"> | string | null
     scope?: StringFilter<"FinEnvelope"> | string
@@ -110171,9 +111237,9 @@ export namespace Prisma {
     categoryId?: StringNullableFilter<"FinEnvelope"> | string | null
     categoryGroup?: StringNullableFilter<"FinEnvelope"> | string | null
     kind?: StringFilter<"FinEnvelope"> | string
-    value?: IntFilter<"FinEnvelope"> | number
+    value?: FloatFilter<"FinEnvelope"> | number
     currency?: StringFilter<"FinEnvelope"> | string
-    cap?: IntNullableFilter<"FinEnvelope"> | number | null
+    cap?: FloatNullableFilter<"FinEnvelope"> | number | null
     recurring?: BoolFilter<"FinEnvelope"> | boolean
     note?: StringNullableFilter<"FinEnvelope"> | string | null
     scope?: StringFilter<"FinEnvelope"> | string
@@ -110236,9 +111302,9 @@ export namespace Prisma {
     categoryId?: StringNullableWithAggregatesFilter<"FinEnvelope"> | string | null
     categoryGroup?: StringNullableWithAggregatesFilter<"FinEnvelope"> | string | null
     kind?: StringWithAggregatesFilter<"FinEnvelope"> | string
-    value?: IntWithAggregatesFilter<"FinEnvelope"> | number
+    value?: FloatWithAggregatesFilter<"FinEnvelope"> | number
     currency?: StringWithAggregatesFilter<"FinEnvelope"> | string
-    cap?: IntNullableWithAggregatesFilter<"FinEnvelope"> | number | null
+    cap?: FloatNullableWithAggregatesFilter<"FinEnvelope"> | number | null
     recurring?: BoolWithAggregatesFilter<"FinEnvelope"> | boolean
     note?: StringNullableWithAggregatesFilter<"FinEnvelope"> | string | null
     scope?: StringWithAggregatesFilter<"FinEnvelope"> | string
@@ -110266,11 +111332,11 @@ export namespace Prisma {
     templateKey?: StringNullableFilter<"FinGoal"> | string | null
     icon?: StringNullableFilter<"FinGoal"> | string | null
     color?: StringNullableFilter<"FinGoal"> | string | null
-    target?: IntFilter<"FinGoal"> | number
+    target?: FloatFilter<"FinGoal"> | number
     currency?: StringFilter<"FinGoal"> | string
     targetDate?: DateTimeNullableFilter<"FinGoal"> | Date | string | null
-    allocated?: IntFilter<"FinGoal"> | number
-    monthlyContribution?: IntNullableFilter<"FinGoal"> | number | null
+    allocated?: FloatFilter<"FinGoal"> | number
+    monthlyContribution?: FloatNullableFilter<"FinGoal"> | number | null
     progressStatus?: StringFilter<"FinGoal"> | string
     accountId?: StringNullableFilter<"FinGoal"> | string | null
     rate?: FloatNullableFilter<"FinGoal"> | number | null
@@ -110338,11 +111404,11 @@ export namespace Prisma {
     templateKey?: StringNullableFilter<"FinGoal"> | string | null
     icon?: StringNullableFilter<"FinGoal"> | string | null
     color?: StringNullableFilter<"FinGoal"> | string | null
-    target?: IntFilter<"FinGoal"> | number
+    target?: FloatFilter<"FinGoal"> | number
     currency?: StringFilter<"FinGoal"> | string
     targetDate?: DateTimeNullableFilter<"FinGoal"> | Date | string | null
-    allocated?: IntFilter<"FinGoal"> | number
-    monthlyContribution?: IntNullableFilter<"FinGoal"> | number | null
+    allocated?: FloatFilter<"FinGoal"> | number
+    monthlyContribution?: FloatNullableFilter<"FinGoal"> | number | null
     progressStatus?: StringFilter<"FinGoal"> | string
     accountId?: StringNullableFilter<"FinGoal"> | string | null
     rate?: FloatNullableFilter<"FinGoal"> | number | null
@@ -110412,11 +111478,11 @@ export namespace Prisma {
     templateKey?: StringNullableWithAggregatesFilter<"FinGoal"> | string | null
     icon?: StringNullableWithAggregatesFilter<"FinGoal"> | string | null
     color?: StringNullableWithAggregatesFilter<"FinGoal"> | string | null
-    target?: IntWithAggregatesFilter<"FinGoal"> | number
+    target?: FloatWithAggregatesFilter<"FinGoal"> | number
     currency?: StringWithAggregatesFilter<"FinGoal"> | string
     targetDate?: DateTimeNullableWithAggregatesFilter<"FinGoal"> | Date | string | null
-    allocated?: IntWithAggregatesFilter<"FinGoal"> | number
-    monthlyContribution?: IntNullableWithAggregatesFilter<"FinGoal"> | number | null
+    allocated?: FloatWithAggregatesFilter<"FinGoal"> | number
+    monthlyContribution?: FloatNullableWithAggregatesFilter<"FinGoal"> | number | null
     progressStatus?: StringWithAggregatesFilter<"FinGoal"> | string
     accountId?: StringNullableWithAggregatesFilter<"FinGoal"> | string | null
     rate?: FloatNullableWithAggregatesFilter<"FinGoal"> | number | null
@@ -110447,11 +111513,11 @@ export namespace Prisma {
     lender?: StringNullableFilter<"FinDebt"> | string | null
     purpose?: StringNullableFilter<"FinDebt"> | string | null
     assetFinanced?: StringNullableFilter<"FinDebt"> | string | null
-    outstandingPrincipal?: IntFilter<"FinDebt"> | number
-    monthlyInstalment?: IntFilter<"FinDebt"> | number
+    outstandingPrincipal?: FloatFilter<"FinDebt"> | number
+    monthlyInstalment?: FloatFilter<"FinDebt"> | number
     currency?: StringFilter<"FinDebt"> | string
     rate?: FloatNullableFilter<"FinDebt"> | number | null
-    knownTotalCost?: IntNullableFilter<"FinDebt"> | number | null
+    knownTotalCost?: FloatNullableFilter<"FinDebt"> | number | null
     dueDate?: DateTimeNullableFilter<"FinDebt"> | Date | string | null
     direction?: StringFilter<"FinDebt"> | string
     debtType?: StringNullableFilter<"FinDebt"> | string | null
@@ -110523,11 +111589,11 @@ export namespace Prisma {
     lender?: StringNullableFilter<"FinDebt"> | string | null
     purpose?: StringNullableFilter<"FinDebt"> | string | null
     assetFinanced?: StringNullableFilter<"FinDebt"> | string | null
-    outstandingPrincipal?: IntFilter<"FinDebt"> | number
-    monthlyInstalment?: IntFilter<"FinDebt"> | number
+    outstandingPrincipal?: FloatFilter<"FinDebt"> | number
+    monthlyInstalment?: FloatFilter<"FinDebt"> | number
     currency?: StringFilter<"FinDebt"> | string
     rate?: FloatNullableFilter<"FinDebt"> | number | null
-    knownTotalCost?: IntNullableFilter<"FinDebt"> | number | null
+    knownTotalCost?: FloatNullableFilter<"FinDebt"> | number | null
     dueDate?: DateTimeNullableFilter<"FinDebt"> | Date | string | null
     direction?: StringFilter<"FinDebt"> | string
     debtType?: StringNullableFilter<"FinDebt"> | string | null
@@ -110600,11 +111666,11 @@ export namespace Prisma {
     lender?: StringNullableWithAggregatesFilter<"FinDebt"> | string | null
     purpose?: StringNullableWithAggregatesFilter<"FinDebt"> | string | null
     assetFinanced?: StringNullableWithAggregatesFilter<"FinDebt"> | string | null
-    outstandingPrincipal?: IntWithAggregatesFilter<"FinDebt"> | number
-    monthlyInstalment?: IntWithAggregatesFilter<"FinDebt"> | number
+    outstandingPrincipal?: FloatWithAggregatesFilter<"FinDebt"> | number
+    monthlyInstalment?: FloatWithAggregatesFilter<"FinDebt"> | number
     currency?: StringWithAggregatesFilter<"FinDebt"> | string
     rate?: FloatNullableWithAggregatesFilter<"FinDebt"> | number | null
-    knownTotalCost?: IntNullableWithAggregatesFilter<"FinDebt"> | number | null
+    knownTotalCost?: FloatNullableWithAggregatesFilter<"FinDebt"> | number | null
     dueDate?: DateTimeNullableWithAggregatesFilter<"FinDebt"> | Date | string | null
     direction?: StringWithAggregatesFilter<"FinDebt"> | string
     debtType?: StringNullableWithAggregatesFilter<"FinDebt"> | string | null
@@ -110633,7 +111699,7 @@ export namespace Prisma {
     id?: StringFilter<"FinDebtPayment"> | string
     userId?: StringFilter<"FinDebtPayment"> | string
     debtId?: StringFilter<"FinDebtPayment"> | string
-    amount?: IntFilter<"FinDebtPayment"> | number
+    amount?: FloatFilter<"FinDebtPayment"> | number
     currency?: StringFilter<"FinDebtPayment"> | string
     paidAt?: DateTimeFilter<"FinDebtPayment"> | Date | string
     note?: StringNullableFilter<"FinDebtPayment"> | string | null
@@ -110665,7 +111731,7 @@ export namespace Prisma {
     NOT?: FinDebtPaymentWhereInput | FinDebtPaymentWhereInput[]
     userId?: StringFilter<"FinDebtPayment"> | string
     debtId?: StringFilter<"FinDebtPayment"> | string
-    amount?: IntFilter<"FinDebtPayment"> | number
+    amount?: FloatFilter<"FinDebtPayment"> | number
     currency?: StringFilter<"FinDebtPayment"> | string
     paidAt?: DateTimeFilter<"FinDebtPayment"> | Date | string
     note?: StringNullableFilter<"FinDebtPayment"> | string | null
@@ -110699,7 +111765,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"FinDebtPayment"> | string
     userId?: StringWithAggregatesFilter<"FinDebtPayment"> | string
     debtId?: StringWithAggregatesFilter<"FinDebtPayment"> | string
-    amount?: IntWithAggregatesFilter<"FinDebtPayment"> | number
+    amount?: FloatWithAggregatesFilter<"FinDebtPayment"> | number
     currency?: StringWithAggregatesFilter<"FinDebtPayment"> | string
     paidAt?: DateTimeWithAggregatesFilter<"FinDebtPayment"> | Date | string
     note?: StringNullableWithAggregatesFilter<"FinDebtPayment"> | string | null
@@ -110716,7 +111782,7 @@ export namespace Prisma {
     label?: StringFilter<"FinRecurrence"> | string
     categoryId?: StringNullableFilter<"FinRecurrence"> | string | null
     kind?: StringFilter<"FinRecurrence"> | string
-    value?: IntFilter<"FinRecurrence"> | number
+    value?: FloatFilter<"FinRecurrence"> | number
     currency?: StringFilter<"FinRecurrence"> | string
     frequency?: StringFilter<"FinRecurrence"> | string
     nextDate?: DateTimeFilter<"FinRecurrence"> | Date | string
@@ -110792,7 +111858,7 @@ export namespace Prisma {
     label?: StringFilter<"FinRecurrence"> | string
     categoryId?: StringNullableFilter<"FinRecurrence"> | string | null
     kind?: StringFilter<"FinRecurrence"> | string
-    value?: IntFilter<"FinRecurrence"> | number
+    value?: FloatFilter<"FinRecurrence"> | number
     currency?: StringFilter<"FinRecurrence"> | string
     frequency?: StringFilter<"FinRecurrence"> | string
     nextDate?: DateTimeFilter<"FinRecurrence"> | Date | string
@@ -110868,7 +111934,7 @@ export namespace Prisma {
     label?: StringWithAggregatesFilter<"FinRecurrence"> | string
     categoryId?: StringNullableWithAggregatesFilter<"FinRecurrence"> | string | null
     kind?: StringWithAggregatesFilter<"FinRecurrence"> | string
-    value?: IntWithAggregatesFilter<"FinRecurrence"> | number
+    value?: FloatWithAggregatesFilter<"FinRecurrence"> | number
     currency?: StringWithAggregatesFilter<"FinRecurrence"> | string
     frequency?: StringWithAggregatesFilter<"FinRecurrence"> | string
     nextDate?: DateTimeWithAggregatesFilter<"FinRecurrence"> | Date | string
@@ -110902,9 +111968,9 @@ export namespace Prisma {
     userId?: StringFilter<"FinProvision"> | string
     label?: StringFilter<"FinProvision"> | string
     categoryId?: StringNullableFilter<"FinProvision"> | string | null
-    value?: IntFilter<"FinProvision"> | number
+    value?: FloatFilter<"FinProvision"> | number
     currency?: StringFilter<"FinProvision"> | string
-    provisioned?: IntFilter<"FinProvision"> | number
+    provisioned?: FloatFilter<"FinProvision"> | number
     targetDate?: DateTimeFilter<"FinProvision"> | Date | string
     reminderDays?: JsonFilter<"FinProvision">
     note?: StringNullableFilter<"FinProvision"> | string | null
@@ -110962,9 +112028,9 @@ export namespace Prisma {
     userId?: StringFilter<"FinProvision"> | string
     label?: StringFilter<"FinProvision"> | string
     categoryId?: StringNullableFilter<"FinProvision"> | string | null
-    value?: IntFilter<"FinProvision"> | number
+    value?: FloatFilter<"FinProvision"> | number
     currency?: StringFilter<"FinProvision"> | string
-    provisioned?: IntFilter<"FinProvision"> | number
+    provisioned?: FloatFilter<"FinProvision"> | number
     targetDate?: DateTimeFilter<"FinProvision"> | Date | string
     reminderDays?: JsonFilter<"FinProvision">
     note?: StringNullableFilter<"FinProvision"> | string | null
@@ -111024,9 +112090,9 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"FinProvision"> | string
     label?: StringWithAggregatesFilter<"FinProvision"> | string
     categoryId?: StringNullableWithAggregatesFilter<"FinProvision"> | string | null
-    value?: IntWithAggregatesFilter<"FinProvision"> | number
+    value?: FloatWithAggregatesFilter<"FinProvision"> | number
     currency?: StringWithAggregatesFilter<"FinProvision"> | string
-    provisioned?: IntWithAggregatesFilter<"FinProvision"> | number
+    provisioned?: FloatWithAggregatesFilter<"FinProvision"> | number
     targetDate?: DateTimeWithAggregatesFilter<"FinProvision"> | Date | string
     reminderDays?: JsonWithAggregatesFilter<"FinProvision">
     note?: StringNullableWithAggregatesFilter<"FinProvision"> | string | null
@@ -111054,7 +112120,7 @@ export namespace Prisma {
     label?: StringFilter<"FinAsset"> | string
     kind?: StringFilter<"FinAsset"> | string
     categoryId?: StringNullableFilter<"FinAsset"> | string | null
-    value?: IntFilter<"FinAsset"> | number
+    value?: FloatFilter<"FinAsset"> | number
     currency?: StringFilter<"FinAsset"> | string
     valuedAt?: DateTimeFilter<"FinAsset"> | Date | string
     liquidity?: StringFilter<"FinAsset"> | string
@@ -111116,7 +112182,7 @@ export namespace Prisma {
     label?: StringFilter<"FinAsset"> | string
     kind?: StringFilter<"FinAsset"> | string
     categoryId?: StringNullableFilter<"FinAsset"> | string | null
-    value?: IntFilter<"FinAsset"> | number
+    value?: FloatFilter<"FinAsset"> | number
     currency?: StringFilter<"FinAsset"> | string
     valuedAt?: DateTimeFilter<"FinAsset"> | Date | string
     liquidity?: StringFilter<"FinAsset"> | string
@@ -111180,7 +112246,7 @@ export namespace Prisma {
     label?: StringWithAggregatesFilter<"FinAsset"> | string
     kind?: StringWithAggregatesFilter<"FinAsset"> | string
     categoryId?: StringNullableWithAggregatesFilter<"FinAsset"> | string | null
-    value?: IntWithAggregatesFilter<"FinAsset"> | number
+    value?: FloatWithAggregatesFilter<"FinAsset"> | number
     currency?: StringWithAggregatesFilter<"FinAsset"> | string
     valuedAt?: DateTimeWithAggregatesFilter<"FinAsset"> | Date | string
     liquidity?: StringWithAggregatesFilter<"FinAsset"> | string
@@ -111210,7 +112276,7 @@ export namespace Prisma {
     label?: StringFilter<"FinSpace"> | string
     currency?: StringFilter<"FinSpace"> | string
     splitRule?: StringFilter<"FinSpace"> | string
-    smallBalance?: IntFilter<"FinSpace"> | number
+    smallBalance?: FloatFilter<"FinSpace"> | number
     closedAt?: DateTimeNullableFilter<"FinSpace"> | Date | string | null
     note?: StringNullableFilter<"FinSpace"> | string | null
     source?: StringFilter<"FinSpace"> | string
@@ -111270,7 +112336,7 @@ export namespace Prisma {
     label?: StringFilter<"FinSpace"> | string
     currency?: StringFilter<"FinSpace"> | string
     splitRule?: StringFilter<"FinSpace"> | string
-    smallBalance?: IntFilter<"FinSpace"> | number
+    smallBalance?: FloatFilter<"FinSpace"> | number
     closedAt?: DateTimeNullableFilter<"FinSpace"> | Date | string | null
     note?: StringNullableFilter<"FinSpace"> | string | null
     source?: StringFilter<"FinSpace"> | string
@@ -111324,7 +112390,7 @@ export namespace Prisma {
     label?: StringWithAggregatesFilter<"FinSpace"> | string
     currency?: StringWithAggregatesFilter<"FinSpace"> | string
     splitRule?: StringWithAggregatesFilter<"FinSpace"> | string
-    smallBalance?: IntWithAggregatesFilter<"FinSpace"> | number
+    smallBalance?: FloatWithAggregatesFilter<"FinSpace"> | number
     closedAt?: DateTimeNullableWithAggregatesFilter<"FinSpace"> | Date | string | null
     note?: StringNullableWithAggregatesFilter<"FinSpace"> | string | null
     source?: StringWithAggregatesFilter<"FinSpace"> | string
@@ -111538,8 +112604,8 @@ export namespace Prisma {
     NOT?: FinPaperPortfolioWhereInput | FinPaperPortfolioWhereInput[]
     id?: StringFilter<"FinPaperPortfolio"> | string
     userId?: StringFilter<"FinPaperPortfolio"> | string
-    capital?: IntFilter<"FinPaperPortfolio"> | number
-    cash?: IntFilter<"FinPaperPortfolio"> | number
+    capital?: FloatFilter<"FinPaperPortfolio"> | number
+    cash?: FloatFilter<"FinPaperPortfolio"> | number
     currency?: StringFilter<"FinPaperPortfolio"> | string
     feeRate?: FloatFilter<"FinPaperPortfolio"> | number
     resetAt?: DateTimeFilter<"FinPaperPortfolio"> | Date | string
@@ -111578,8 +112644,8 @@ export namespace Prisma {
     AND?: FinPaperPortfolioWhereInput | FinPaperPortfolioWhereInput[]
     OR?: FinPaperPortfolioWhereInput[]
     NOT?: FinPaperPortfolioWhereInput | FinPaperPortfolioWhereInput[]
-    capital?: IntFilter<"FinPaperPortfolio"> | number
-    cash?: IntFilter<"FinPaperPortfolio"> | number
+    capital?: FloatFilter<"FinPaperPortfolio"> | number
+    cash?: FloatFilter<"FinPaperPortfolio"> | number
     currency?: StringFilter<"FinPaperPortfolio"> | string
     feeRate?: FloatFilter<"FinPaperPortfolio"> | number
     resetAt?: DateTimeFilter<"FinPaperPortfolio"> | Date | string
@@ -111619,8 +112685,8 @@ export namespace Prisma {
     NOT?: FinPaperPortfolioScalarWhereWithAggregatesInput | FinPaperPortfolioScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"FinPaperPortfolio"> | string
     userId?: StringWithAggregatesFilter<"FinPaperPortfolio"> | string
-    capital?: IntWithAggregatesFilter<"FinPaperPortfolio"> | number
-    cash?: IntWithAggregatesFilter<"FinPaperPortfolio"> | number
+    capital?: FloatWithAggregatesFilter<"FinPaperPortfolio"> | number
+    cash?: FloatWithAggregatesFilter<"FinPaperPortfolio"> | number
     currency?: StringWithAggregatesFilter<"FinPaperPortfolio"> | string
     feeRate?: FloatWithAggregatesFilter<"FinPaperPortfolio"> | number
     resetAt?: DateTimeWithAggregatesFilter<"FinPaperPortfolio"> | Date | string
@@ -111638,7 +112704,7 @@ export namespace Prisma {
     id?: StringFilter<"FinPaperInstrument"> | string
     portfolioId?: StringFilter<"FinPaperInstrument"> | string
     label?: StringFilter<"FinPaperInstrument"> | string
-    markPrice?: IntFilter<"FinPaperInstrument"> | number
+    markPrice?: FloatFilter<"FinPaperInstrument"> | number
     markedAt?: DateTimeFilter<"FinPaperInstrument"> | Date | string
     note?: StringNullableFilter<"FinPaperInstrument"> | string | null
     createdAt?: DateTimeFilter<"FinPaperInstrument"> | Date | string
@@ -111669,7 +112735,7 @@ export namespace Prisma {
     NOT?: FinPaperInstrumentWhereInput | FinPaperInstrumentWhereInput[]
     portfolioId?: StringFilter<"FinPaperInstrument"> | string
     label?: StringFilter<"FinPaperInstrument"> | string
-    markPrice?: IntFilter<"FinPaperInstrument"> | number
+    markPrice?: FloatFilter<"FinPaperInstrument"> | number
     markedAt?: DateTimeFilter<"FinPaperInstrument"> | Date | string
     note?: StringNullableFilter<"FinPaperInstrument"> | string | null
     createdAt?: DateTimeFilter<"FinPaperInstrument"> | Date | string
@@ -111701,7 +112767,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"FinPaperInstrument"> | string
     portfolioId?: StringWithAggregatesFilter<"FinPaperInstrument"> | string
     label?: StringWithAggregatesFilter<"FinPaperInstrument"> | string
-    markPrice?: IntWithAggregatesFilter<"FinPaperInstrument"> | number
+    markPrice?: FloatWithAggregatesFilter<"FinPaperInstrument"> | number
     markedAt?: DateTimeWithAggregatesFilter<"FinPaperInstrument"> | Date | string
     note?: StringNullableWithAggregatesFilter<"FinPaperInstrument"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"FinPaperInstrument"> | Date | string
@@ -111717,8 +112783,8 @@ export namespace Prisma {
     instrumentId?: StringFilter<"FinPaperTrade"> | string
     kind?: StringFilter<"FinPaperTrade"> | string
     quantity?: IntFilter<"FinPaperTrade"> | number
-    unitPrice?: IntFilter<"FinPaperTrade"> | number
-    fee?: IntFilter<"FinPaperTrade"> | number
+    unitPrice?: FloatFilter<"FinPaperTrade"> | number
+    fee?: FloatFilter<"FinPaperTrade"> | number
     currency?: StringFilter<"FinPaperTrade"> | string
     decidedAt?: DateTimeFilter<"FinPaperTrade"> | Date | string
     note?: StringNullableFilter<"FinPaperTrade"> | string | null
@@ -111755,8 +112821,8 @@ export namespace Prisma {
     instrumentId?: StringFilter<"FinPaperTrade"> | string
     kind?: StringFilter<"FinPaperTrade"> | string
     quantity?: IntFilter<"FinPaperTrade"> | number
-    unitPrice?: IntFilter<"FinPaperTrade"> | number
-    fee?: IntFilter<"FinPaperTrade"> | number
+    unitPrice?: FloatFilter<"FinPaperTrade"> | number
+    fee?: FloatFilter<"FinPaperTrade"> | number
     currency?: StringFilter<"FinPaperTrade"> | string
     decidedAt?: DateTimeFilter<"FinPaperTrade"> | Date | string
     note?: StringNullableFilter<"FinPaperTrade"> | string | null
@@ -111795,8 +112861,8 @@ export namespace Prisma {
     instrumentId?: StringWithAggregatesFilter<"FinPaperTrade"> | string
     kind?: StringWithAggregatesFilter<"FinPaperTrade"> | string
     quantity?: IntWithAggregatesFilter<"FinPaperTrade"> | number
-    unitPrice?: IntWithAggregatesFilter<"FinPaperTrade"> | number
-    fee?: IntWithAggregatesFilter<"FinPaperTrade"> | number
+    unitPrice?: FloatWithAggregatesFilter<"FinPaperTrade"> | number
+    fee?: FloatWithAggregatesFilter<"FinPaperTrade"> | number
     currency?: StringWithAggregatesFilter<"FinPaperTrade"> | string
     decidedAt?: DateTimeWithAggregatesFilter<"FinPaperTrade"> | Date | string
     note?: StringNullableWithAggregatesFilter<"FinPaperTrade"> | string | null
@@ -111812,7 +112878,7 @@ export namespace Prisma {
     spaceId?: StringFilter<"FinSharedExpense"> | string
     payerId?: StringFilter<"FinSharedExpense"> | string
     label?: StringFilter<"FinSharedExpense"> | string
-    value?: IntFilter<"FinSharedExpense"> | number
+    value?: FloatFilter<"FinSharedExpense"> | number
     currency?: StringFilter<"FinSharedExpense"> | string
     occurredAt?: DateTimeFilter<"FinSharedExpense"> | Date | string
     splitMode?: StringFilter<"FinSharedExpense"> | string
@@ -111824,7 +112890,7 @@ export namespace Prisma {
     collectiveCategory?: StringNullableFilter<"FinSharedExpense"> | string | null
     subCategory?: StringNullableFilter<"FinSharedExpense"> | string | null
     advanceTransferId?: StringNullableFilter<"FinSharedExpense"> | string | null
-    advanceOriginalValue?: IntNullableFilter<"FinSharedExpense"> | number | null
+    advanceOriginalValue?: FloatNullableFilter<"FinSharedExpense"> | number | null
     personalCreated?: BoolFilter<"FinSharedExpense"> | boolean
     personalTransactionId?: StringNullableFilter<"FinSharedExpense"> | string | null
     recordedById?: StringFilter<"FinSharedExpense"> | string
@@ -111889,7 +112955,7 @@ export namespace Prisma {
     spaceId?: StringFilter<"FinSharedExpense"> | string
     payerId?: StringFilter<"FinSharedExpense"> | string
     label?: StringFilter<"FinSharedExpense"> | string
-    value?: IntFilter<"FinSharedExpense"> | number
+    value?: FloatFilter<"FinSharedExpense"> | number
     currency?: StringFilter<"FinSharedExpense"> | string
     occurredAt?: DateTimeFilter<"FinSharedExpense"> | Date | string
     splitMode?: StringFilter<"FinSharedExpense"> | string
@@ -111901,7 +112967,7 @@ export namespace Prisma {
     collectiveCategory?: StringNullableFilter<"FinSharedExpense"> | string | null
     subCategory?: StringNullableFilter<"FinSharedExpense"> | string | null
     advanceTransferId?: StringNullableFilter<"FinSharedExpense"> | string | null
-    advanceOriginalValue?: IntNullableFilter<"FinSharedExpense"> | number | null
+    advanceOriginalValue?: FloatNullableFilter<"FinSharedExpense"> | number | null
     personalCreated?: BoolFilter<"FinSharedExpense"> | boolean
     recordedById?: StringFilter<"FinSharedExpense"> | string
     source?: StringFilter<"FinSharedExpense"> | string
@@ -111961,7 +113027,7 @@ export namespace Prisma {
     spaceId?: StringWithAggregatesFilter<"FinSharedExpense"> | string
     payerId?: StringWithAggregatesFilter<"FinSharedExpense"> | string
     label?: StringWithAggregatesFilter<"FinSharedExpense"> | string
-    value?: IntWithAggregatesFilter<"FinSharedExpense"> | number
+    value?: FloatWithAggregatesFilter<"FinSharedExpense"> | number
     currency?: StringWithAggregatesFilter<"FinSharedExpense"> | string
     occurredAt?: DateTimeWithAggregatesFilter<"FinSharedExpense"> | Date | string
     splitMode?: StringWithAggregatesFilter<"FinSharedExpense"> | string
@@ -111973,7 +113039,7 @@ export namespace Prisma {
     collectiveCategory?: StringNullableWithAggregatesFilter<"FinSharedExpense"> | string | null
     subCategory?: StringNullableWithAggregatesFilter<"FinSharedExpense"> | string | null
     advanceTransferId?: StringNullableWithAggregatesFilter<"FinSharedExpense"> | string | null
-    advanceOriginalValue?: IntNullableWithAggregatesFilter<"FinSharedExpense"> | number | null
+    advanceOriginalValue?: FloatNullableWithAggregatesFilter<"FinSharedExpense"> | number | null
     personalCreated?: BoolWithAggregatesFilter<"FinSharedExpense"> | boolean
     personalTransactionId?: StringNullableWithAggregatesFilter<"FinSharedExpense"> | string | null
     recordedById?: StringWithAggregatesFilter<"FinSharedExpense"> | string
@@ -111992,8 +113058,8 @@ export namespace Prisma {
     id?: StringFilter<"FinSharedShare"> | string
     expenseId?: StringFilter<"FinSharedShare"> | string
     memberId?: StringFilter<"FinSharedShare"> | string
-    share?: IntFilter<"FinSharedShare"> | number
-    weight?: IntNullableFilter<"FinSharedShare"> | number | null
+    share?: FloatFilter<"FinSharedShare"> | number
+    weight?: FloatNullableFilter<"FinSharedShare"> | number | null
     createdAt?: DateTimeFilter<"FinSharedShare"> | Date | string
     expense?: XOR<FinSharedExpenseScalarRelationFilter, FinSharedExpenseWhereInput>
     member?: XOR<FinSpaceMemberScalarRelationFilter, FinSpaceMemberWhereInput>
@@ -112019,8 +113085,8 @@ export namespace Prisma {
     NOT?: FinSharedShareWhereInput | FinSharedShareWhereInput[]
     expenseId?: StringFilter<"FinSharedShare"> | string
     memberId?: StringFilter<"FinSharedShare"> | string
-    share?: IntFilter<"FinSharedShare"> | number
-    weight?: IntNullableFilter<"FinSharedShare"> | number | null
+    share?: FloatFilter<"FinSharedShare"> | number
+    weight?: FloatNullableFilter<"FinSharedShare"> | number | null
     createdAt?: DateTimeFilter<"FinSharedShare"> | Date | string
     expense?: XOR<FinSharedExpenseScalarRelationFilter, FinSharedExpenseWhereInput>
     member?: XOR<FinSpaceMemberScalarRelationFilter, FinSpaceMemberWhereInput>
@@ -112047,8 +113113,8 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"FinSharedShare"> | string
     expenseId?: StringWithAggregatesFilter<"FinSharedShare"> | string
     memberId?: StringWithAggregatesFilter<"FinSharedShare"> | string
-    share?: IntWithAggregatesFilter<"FinSharedShare"> | number
-    weight?: IntNullableWithAggregatesFilter<"FinSharedShare"> | number | null
+    share?: FloatWithAggregatesFilter<"FinSharedShare"> | number
+    weight?: FloatNullableWithAggregatesFilter<"FinSharedShare"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"FinSharedShare"> | Date | string
   }
 
@@ -112060,7 +113126,7 @@ export namespace Prisma {
     spaceId?: StringFilter<"FinSettlement"> | string
     fromId?: StringFilter<"FinSettlement"> | string
     toId?: StringFilter<"FinSettlement"> | string
-    value?: IntFilter<"FinSettlement"> | number
+    value?: FloatFilter<"FinSettlement"> | number
     currency?: StringFilter<"FinSettlement"> | string
     settledAt?: DateTimeFilter<"FinSettlement"> | Date | string
     note?: StringNullableFilter<"FinSettlement"> | string | null
@@ -112106,7 +113172,7 @@ export namespace Prisma {
     spaceId?: StringFilter<"FinSettlement"> | string
     fromId?: StringFilter<"FinSettlement"> | string
     toId?: StringFilter<"FinSettlement"> | string
-    value?: IntFilter<"FinSettlement"> | number
+    value?: FloatFilter<"FinSettlement"> | number
     currency?: StringFilter<"FinSettlement"> | string
     settledAt?: DateTimeFilter<"FinSettlement"> | Date | string
     note?: StringNullableFilter<"FinSettlement"> | string | null
@@ -112152,7 +113218,7 @@ export namespace Prisma {
     spaceId?: StringWithAggregatesFilter<"FinSettlement"> | string
     fromId?: StringWithAggregatesFilter<"FinSettlement"> | string
     toId?: StringWithAggregatesFilter<"FinSettlement"> | string
-    value?: IntWithAggregatesFilter<"FinSettlement"> | number
+    value?: FloatWithAggregatesFilter<"FinSettlement"> | number
     currency?: StringWithAggregatesFilter<"FinSettlement"> | string
     settledAt?: DateTimeWithAggregatesFilter<"FinSettlement"> | Date | string
     note?: StringNullableWithAggregatesFilter<"FinSettlement"> | string | null
@@ -112171,7 +113237,7 @@ export namespace Prisma {
     id?: StringFilter<"FinSpaceGoal"> | string
     spaceId?: StringFilter<"FinSpaceGoal"> | string
     label?: StringFilter<"FinSpaceGoal"> | string
-    target?: IntFilter<"FinSpaceGoal"> | number
+    target?: FloatFilter<"FinSpaceGoal"> | number
     currency?: StringFilter<"FinSpaceGoal"> | string
     targetDate?: DateTimeNullableFilter<"FinSpaceGoal"> | Date | string | null
     note?: StringNullableFilter<"FinSpaceGoal"> | string | null
@@ -112215,7 +113281,7 @@ export namespace Prisma {
     NOT?: FinSpaceGoalWhereInput | FinSpaceGoalWhereInput[]
     spaceId?: StringFilter<"FinSpaceGoal"> | string
     label?: StringFilter<"FinSpaceGoal"> | string
-    target?: IntFilter<"FinSpaceGoal"> | number
+    target?: FloatFilter<"FinSpaceGoal"> | number
     currency?: StringFilter<"FinSpaceGoal"> | string
     targetDate?: DateTimeNullableFilter<"FinSpaceGoal"> | Date | string | null
     note?: StringNullableFilter<"FinSpaceGoal"> | string | null
@@ -112260,7 +113326,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"FinSpaceGoal"> | string
     spaceId?: StringWithAggregatesFilter<"FinSpaceGoal"> | string
     label?: StringWithAggregatesFilter<"FinSpaceGoal"> | string
-    target?: IntWithAggregatesFilter<"FinSpaceGoal"> | number
+    target?: FloatWithAggregatesFilter<"FinSpaceGoal"> | number
     currency?: StringWithAggregatesFilter<"FinSpaceGoal"> | string
     targetDate?: DateTimeNullableWithAggregatesFilter<"FinSpaceGoal"> | Date | string | null
     note?: StringNullableWithAggregatesFilter<"FinSpaceGoal"> | string | null
@@ -112280,7 +113346,7 @@ export namespace Prisma {
     id?: StringFilter<"FinSpaceGoalContribution"> | string
     spaceGoalId?: StringFilter<"FinSpaceGoalContribution"> | string
     memberId?: StringFilter<"FinSpaceGoalContribution"> | string
-    amount?: IntFilter<"FinSpaceGoalContribution"> | number
+    amount?: FloatFilter<"FinSpaceGoalContribution"> | number
     currency?: StringFilter<"FinSpaceGoalContribution"> | string
     contributedAt?: DateTimeFilter<"FinSpaceGoalContribution"> | Date | string
     note?: StringNullableFilter<"FinSpaceGoalContribution"> | string | null
@@ -112312,7 +113378,7 @@ export namespace Prisma {
     NOT?: FinSpaceGoalContributionWhereInput | FinSpaceGoalContributionWhereInput[]
     spaceGoalId?: StringFilter<"FinSpaceGoalContribution"> | string
     memberId?: StringFilter<"FinSpaceGoalContribution"> | string
-    amount?: IntFilter<"FinSpaceGoalContribution"> | number
+    amount?: FloatFilter<"FinSpaceGoalContribution"> | number
     currency?: StringFilter<"FinSpaceGoalContribution"> | string
     contributedAt?: DateTimeFilter<"FinSpaceGoalContribution"> | Date | string
     note?: StringNullableFilter<"FinSpaceGoalContribution"> | string | null
@@ -112346,7 +113412,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"FinSpaceGoalContribution"> | string
     spaceGoalId?: StringWithAggregatesFilter<"FinSpaceGoalContribution"> | string
     memberId?: StringWithAggregatesFilter<"FinSpaceGoalContribution"> | string
-    amount?: IntWithAggregatesFilter<"FinSpaceGoalContribution"> | number
+    amount?: FloatWithAggregatesFilter<"FinSpaceGoalContribution"> | number
     currency?: StringWithAggregatesFilter<"FinSpaceGoalContribution"> | string
     contributedAt?: DateTimeWithAggregatesFilter<"FinSpaceGoalContribution"> | Date | string
     note?: StringNullableWithAggregatesFilter<"FinSpaceGoalContribution"> | string | null
@@ -112361,7 +113427,7 @@ export namespace Prisma {
     id?: StringFilter<"FinSpaceGoalShare"> | string
     spaceGoalId?: StringFilter<"FinSpaceGoalShare"> | string
     memberId?: StringFilter<"FinSpaceGoalShare"> | string
-    amount?: IntFilter<"FinSpaceGoalShare"> | number
+    amount?: FloatFilter<"FinSpaceGoalShare"> | number
     spaceGoal?: XOR<FinSpaceGoalScalarRelationFilter, FinSpaceGoalWhereInput>
     member?: XOR<FinSpaceMemberScalarRelationFilter, FinSpaceMemberWhereInput>
   }
@@ -112384,7 +113450,7 @@ export namespace Prisma {
     NOT?: FinSpaceGoalShareWhereInput | FinSpaceGoalShareWhereInput[]
     spaceGoalId?: StringFilter<"FinSpaceGoalShare"> | string
     memberId?: StringFilter<"FinSpaceGoalShare"> | string
-    amount?: IntFilter<"FinSpaceGoalShare"> | number
+    amount?: FloatFilter<"FinSpaceGoalShare"> | number
     spaceGoal?: XOR<FinSpaceGoalScalarRelationFilter, FinSpaceGoalWhereInput>
     member?: XOR<FinSpaceMemberScalarRelationFilter, FinSpaceMemberWhereInput>
   }, "id" | "spaceGoalId_memberId">
@@ -112408,7 +113474,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"FinSpaceGoalShare"> | string
     spaceGoalId?: StringWithAggregatesFilter<"FinSpaceGoalShare"> | string
     memberId?: StringWithAggregatesFilter<"FinSpaceGoalShare"> | string
-    amount?: IntWithAggregatesFilter<"FinSpaceGoalShare"> | number
+    amount?: FloatWithAggregatesFilter<"FinSpaceGoalShare"> | number
   }
 
   export type FinChildWhereInput = {
@@ -112496,8 +113562,8 @@ export namespace Prisma {
     id?: StringFilter<"FinSpaceProvision"> | string
     spaceId?: StringFilter<"FinSpaceProvision"> | string
     label?: StringFilter<"FinSpaceProvision"> | string
-    plannedAmount?: IntFilter<"FinSpaceProvision"> | number
-    alreadyProvisioned?: IntFilter<"FinSpaceProvision"> | number
+    plannedAmount?: FloatFilter<"FinSpaceProvision"> | number
+    alreadyProvisioned?: FloatFilter<"FinSpaceProvision"> | number
     currency?: StringFilter<"FinSpaceProvision"> | string
     targetDate?: DateTimeFilter<"FinSpaceProvision"> | Date | string
     note?: StringNullableFilter<"FinSpaceProvision"> | string | null
@@ -112534,8 +113600,8 @@ export namespace Prisma {
     NOT?: FinSpaceProvisionWhereInput | FinSpaceProvisionWhereInput[]
     spaceId?: StringFilter<"FinSpaceProvision"> | string
     label?: StringFilter<"FinSpaceProvision"> | string
-    plannedAmount?: IntFilter<"FinSpaceProvision"> | number
-    alreadyProvisioned?: IntFilter<"FinSpaceProvision"> | number
+    plannedAmount?: FloatFilter<"FinSpaceProvision"> | number
+    alreadyProvisioned?: FloatFilter<"FinSpaceProvision"> | number
     currency?: StringFilter<"FinSpaceProvision"> | string
     targetDate?: DateTimeFilter<"FinSpaceProvision"> | Date | string
     note?: StringNullableFilter<"FinSpaceProvision"> | string | null
@@ -112575,8 +113641,8 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"FinSpaceProvision"> | string
     spaceId?: StringWithAggregatesFilter<"FinSpaceProvision"> | string
     label?: StringWithAggregatesFilter<"FinSpaceProvision"> | string
-    plannedAmount?: IntWithAggregatesFilter<"FinSpaceProvision"> | number
-    alreadyProvisioned?: IntWithAggregatesFilter<"FinSpaceProvision"> | number
+    plannedAmount?: FloatWithAggregatesFilter<"FinSpaceProvision"> | number
+    alreadyProvisioned?: FloatWithAggregatesFilter<"FinSpaceProvision"> | number
     currency?: StringWithAggregatesFilter<"FinSpaceProvision"> | string
     targetDate?: DateTimeWithAggregatesFilter<"FinSpaceProvision"> | Date | string
     note?: StringNullableWithAggregatesFilter<"FinSpaceProvision"> | string | null
@@ -115665,8 +116731,8 @@ export namespace Prisma {
     label?: StringFilter<"FinBusinessDocument"> | string
     issuedAt?: DateTimeFilter<"FinBusinessDocument"> | Date | string
     dueAt?: DateTimeNullableFilter<"FinBusinessDocument"> | Date | string | null
-    amountExcl?: IntFilter<"FinBusinessDocument"> | number
-    taxAmount?: IntFilter<"FinBusinessDocument"> | number
+    amountExcl?: FloatFilter<"FinBusinessDocument"> | number
+    taxAmount?: FloatFilter<"FinBusinessDocument"> | number
     currency?: StringFilter<"FinBusinessDocument"> | string
     note?: StringNullableFilter<"FinBusinessDocument"> | string | null
     scope?: StringFilter<"FinBusinessDocument"> | string
@@ -115732,8 +116798,8 @@ export namespace Prisma {
     label?: StringFilter<"FinBusinessDocument"> | string
     issuedAt?: DateTimeFilter<"FinBusinessDocument"> | Date | string
     dueAt?: DateTimeNullableFilter<"FinBusinessDocument"> | Date | string | null
-    amountExcl?: IntFilter<"FinBusinessDocument"> | number
-    taxAmount?: IntFilter<"FinBusinessDocument"> | number
+    amountExcl?: FloatFilter<"FinBusinessDocument"> | number
+    taxAmount?: FloatFilter<"FinBusinessDocument"> | number
     currency?: StringFilter<"FinBusinessDocument"> | string
     note?: StringNullableFilter<"FinBusinessDocument"> | string | null
     scope?: StringFilter<"FinBusinessDocument"> | string
@@ -115799,8 +116865,8 @@ export namespace Prisma {
     label?: StringWithAggregatesFilter<"FinBusinessDocument"> | string
     issuedAt?: DateTimeWithAggregatesFilter<"FinBusinessDocument"> | Date | string
     dueAt?: DateTimeNullableWithAggregatesFilter<"FinBusinessDocument"> | Date | string | null
-    amountExcl?: IntWithAggregatesFilter<"FinBusinessDocument"> | number
-    taxAmount?: IntWithAggregatesFilter<"FinBusinessDocument"> | number
+    amountExcl?: FloatWithAggregatesFilter<"FinBusinessDocument"> | number
+    taxAmount?: FloatWithAggregatesFilter<"FinBusinessDocument"> | number
     currency?: StringWithAggregatesFilter<"FinBusinessDocument"> | string
     note?: StringNullableWithAggregatesFilter<"FinBusinessDocument"> | string | null
     scope?: StringWithAggregatesFilter<"FinBusinessDocument"> | string
@@ -115825,7 +116891,7 @@ export namespace Prisma {
     id?: StringFilter<"FinBusinessPayment"> | string
     businessId?: StringFilter<"FinBusinessPayment"> | string
     documentId?: StringFilter<"FinBusinessPayment"> | string
-    value?: IntFilter<"FinBusinessPayment"> | number
+    value?: FloatFilter<"FinBusinessPayment"> | number
     currency?: StringFilter<"FinBusinessPayment"> | string
     receivedAt?: DateTimeFilter<"FinBusinessPayment"> | Date | string
     method?: StringNullableFilter<"FinBusinessPayment"> | string | null
@@ -115879,7 +116945,7 @@ export namespace Prisma {
     NOT?: FinBusinessPaymentWhereInput | FinBusinessPaymentWhereInput[]
     businessId?: StringFilter<"FinBusinessPayment"> | string
     documentId?: StringFilter<"FinBusinessPayment"> | string
-    value?: IntFilter<"FinBusinessPayment"> | number
+    value?: FloatFilter<"FinBusinessPayment"> | number
     currency?: StringFilter<"FinBusinessPayment"> | string
     receivedAt?: DateTimeFilter<"FinBusinessPayment"> | Date | string
     method?: StringNullableFilter<"FinBusinessPayment"> | string | null
@@ -115935,7 +117001,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"FinBusinessPayment"> | string
     businessId?: StringWithAggregatesFilter<"FinBusinessPayment"> | string
     documentId?: StringWithAggregatesFilter<"FinBusinessPayment"> | string
-    value?: IntWithAggregatesFilter<"FinBusinessPayment"> | number
+    value?: FloatWithAggregatesFilter<"FinBusinessPayment"> | number
     currency?: StringWithAggregatesFilter<"FinBusinessPayment"> | string
     receivedAt?: DateTimeWithAggregatesFilter<"FinBusinessPayment"> | Date | string
     method?: StringNullableWithAggregatesFilter<"FinBusinessPayment"> | string | null
@@ -115962,9 +117028,9 @@ export namespace Prisma {
     userId?: StringFilter<"FinPayslip"> | string
     period?: StringNullableFilter<"FinPayslip"> | string | null
     lines?: JsonFilter<"FinPayslip">
-    gross?: IntFilter<"FinPayslip"> | number
-    value?: IntFilter<"FinPayslip"> | number
-    declaredNet?: IntNullableFilter<"FinPayslip"> | number | null
+    gross?: FloatFilter<"FinPayslip"> | number
+    value?: FloatFilter<"FinPayslip"> | number
+    declaredNet?: FloatNullableFilter<"FinPayslip"> | number | null
     currency?: StringFilter<"FinPayslip"> | string
     scope?: StringFilter<"FinPayslip"> | string
     source?: StringFilter<"FinPayslip"> | string
@@ -116012,9 +117078,9 @@ export namespace Prisma {
     userId?: StringFilter<"FinPayslip"> | string
     period?: StringNullableFilter<"FinPayslip"> | string | null
     lines?: JsonFilter<"FinPayslip">
-    gross?: IntFilter<"FinPayslip"> | number
-    value?: IntFilter<"FinPayslip"> | number
-    declaredNet?: IntNullableFilter<"FinPayslip"> | number | null
+    gross?: FloatFilter<"FinPayslip"> | number
+    value?: FloatFilter<"FinPayslip"> | number
+    declaredNet?: FloatNullableFilter<"FinPayslip"> | number | null
     currency?: StringFilter<"FinPayslip"> | string
     scope?: StringFilter<"FinPayslip"> | string
     source?: StringFilter<"FinPayslip"> | string
@@ -116065,9 +117131,9 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"FinPayslip"> | string
     period?: StringNullableWithAggregatesFilter<"FinPayslip"> | string | null
     lines?: JsonWithAggregatesFilter<"FinPayslip">
-    gross?: IntWithAggregatesFilter<"FinPayslip"> | number
-    value?: IntWithAggregatesFilter<"FinPayslip"> | number
-    declaredNet?: IntNullableWithAggregatesFilter<"FinPayslip"> | number | null
+    gross?: FloatWithAggregatesFilter<"FinPayslip"> | number
+    value?: FloatWithAggregatesFilter<"FinPayslip"> | number
+    declaredNet?: FloatNullableWithAggregatesFilter<"FinPayslip"> | number | null
     currency?: StringWithAggregatesFilter<"FinPayslip"> | string
     scope?: StringWithAggregatesFilter<"FinPayslip"> | string
     source?: StringWithAggregatesFilter<"FinPayslip"> | string
@@ -116151,7 +117217,7 @@ export namespace Prisma {
     spaceId?: StringFilter<"FinSpaceBudget"> | string
     category?: StringFilter<"FinSpaceBudget"> | string
     period?: StringFilter<"FinSpaceBudget"> | string
-    value?: IntFilter<"FinSpaceBudget"> | number
+    value?: FloatFilter<"FinSpaceBudget"> | number
     setById?: StringFilter<"FinSpaceBudget"> | string
     version?: IntFilter<"FinSpaceBudget"> | number
     deletedAt?: DateTimeNullableFilter<"FinSpaceBudget"> | Date | string | null
@@ -116184,7 +117250,7 @@ export namespace Prisma {
     spaceId?: StringFilter<"FinSpaceBudget"> | string
     category?: StringFilter<"FinSpaceBudget"> | string
     period?: StringFilter<"FinSpaceBudget"> | string
-    value?: IntFilter<"FinSpaceBudget"> | number
+    value?: FloatFilter<"FinSpaceBudget"> | number
     setById?: StringFilter<"FinSpaceBudget"> | string
     version?: IntFilter<"FinSpaceBudget"> | number
     deletedAt?: DateTimeNullableFilter<"FinSpaceBudget"> | Date | string | null
@@ -116219,7 +117285,7 @@ export namespace Prisma {
     spaceId?: StringWithAggregatesFilter<"FinSpaceBudget"> | string
     category?: StringWithAggregatesFilter<"FinSpaceBudget"> | string
     period?: StringWithAggregatesFilter<"FinSpaceBudget"> | string
-    value?: IntWithAggregatesFilter<"FinSpaceBudget"> | number
+    value?: FloatWithAggregatesFilter<"FinSpaceBudget"> | number
     setById?: StringWithAggregatesFilter<"FinSpaceBudget"> | string
     version?: IntWithAggregatesFilter<"FinSpaceBudget"> | number
     deletedAt?: DateTimeNullableWithAggregatesFilter<"FinSpaceBudget"> | Date | string | null
@@ -116373,7 +117439,7 @@ export namespace Prisma {
     spaceId?: StringFilter<"FinSpaceInflow"> | string
     kind?: StringFilter<"FinSpaceInflow"> | string
     memberId?: StringNullableFilter<"FinSpaceInflow"> | string | null
-    value?: IntFilter<"FinSpaceInflow"> | number
+    value?: FloatFilter<"FinSpaceInflow"> | number
     occurredAt?: DateTimeFilter<"FinSpaceInflow"> | Date | string
     status?: StringFilter<"FinSpaceInflow"> | string
     note?: StringNullableFilter<"FinSpaceInflow"> | string | null
@@ -116411,7 +117477,7 @@ export namespace Prisma {
     spaceId?: StringFilter<"FinSpaceInflow"> | string
     kind?: StringFilter<"FinSpaceInflow"> | string
     memberId?: StringNullableFilter<"FinSpaceInflow"> | string | null
-    value?: IntFilter<"FinSpaceInflow"> | number
+    value?: FloatFilter<"FinSpaceInflow"> | number
     occurredAt?: DateTimeFilter<"FinSpaceInflow"> | Date | string
     status?: StringFilter<"FinSpaceInflow"> | string
     note?: StringNullableFilter<"FinSpaceInflow"> | string | null
@@ -116452,7 +117518,7 @@ export namespace Prisma {
     spaceId?: StringWithAggregatesFilter<"FinSpaceInflow"> | string
     kind?: StringWithAggregatesFilter<"FinSpaceInflow"> | string
     memberId?: StringNullableWithAggregatesFilter<"FinSpaceInflow"> | string | null
-    value?: IntWithAggregatesFilter<"FinSpaceInflow"> | number
+    value?: FloatWithAggregatesFilter<"FinSpaceInflow"> | number
     occurredAt?: DateTimeWithAggregatesFilter<"FinSpaceInflow"> | Date | string
     status?: StringWithAggregatesFilter<"FinSpaceInflow"> | string
     note?: StringNullableWithAggregatesFilter<"FinSpaceInflow"> | string | null
@@ -116541,7 +117607,7 @@ export namespace Prisma {
     title?: StringFilter<"FinMission"> | string
     summary?: StringFilter<"FinMission"> | string
     profiles?: JsonFilter<"FinMission">
-    startingAmount?: IntFilter<"FinMission"> | number
+    startingAmount?: FloatFilter<"FinMission"> | number
     currency?: StringFilter<"FinMission"> | string
     steps?: JsonFilter<"FinMission">
     badges?: JsonFilter<"FinMission">
@@ -116583,7 +117649,7 @@ export namespace Prisma {
     title?: StringFilter<"FinMission"> | string
     summary?: StringFilter<"FinMission"> | string
     profiles?: JsonFilter<"FinMission">
-    startingAmount?: IntFilter<"FinMission"> | number
+    startingAmount?: FloatFilter<"FinMission"> | number
     currency?: StringFilter<"FinMission"> | string
     steps?: JsonFilter<"FinMission">
     badges?: JsonFilter<"FinMission">
@@ -116628,7 +117694,7 @@ export namespace Prisma {
     title?: StringWithAggregatesFilter<"FinMission"> | string
     summary?: StringWithAggregatesFilter<"FinMission"> | string
     profiles?: JsonWithAggregatesFilter<"FinMission">
-    startingAmount?: IntWithAggregatesFilter<"FinMission"> | number
+    startingAmount?: FloatWithAggregatesFilter<"FinMission"> | number
     currency?: StringWithAggregatesFilter<"FinMission"> | string
     steps?: JsonWithAggregatesFilter<"FinMission">
     badges?: JsonWithAggregatesFilter<"FinMission">
@@ -116773,6 +117839,72 @@ export namespace Prisma {
     label?: StringWithAggregatesFilter<"FinPushSubscription"> | string
     createdAt?: DateTimeWithAggregatesFilter<"FinPushSubscription"> | Date | string
     lastSentAt?: DateTimeNullableWithAggregatesFilter<"FinPushSubscription"> | Date | string | null
+  }
+
+  export type FinExchangeRateWhereInput = {
+    AND?: FinExchangeRateWhereInput | FinExchangeRateWhereInput[]
+    OR?: FinExchangeRateWhereInput[]
+    NOT?: FinExchangeRateWhereInput | FinExchangeRateWhereInput[]
+    id?: StringFilter<"FinExchangeRate"> | string
+    currency?: StringFilter<"FinExchangeRate"> | string
+    rate?: FloatFilter<"FinExchangeRate"> | number
+    referenceDate?: DateTimeFilter<"FinExchangeRate"> | Date | string
+    source?: StringFilter<"FinExchangeRate"> | string
+    createdAt?: DateTimeFilter<"FinExchangeRate"> | Date | string
+    updatedAt?: DateTimeFilter<"FinExchangeRate"> | Date | string
+  }
+
+  export type FinExchangeRateOrderByWithRelationInput = {
+    id?: SortOrder
+    currency?: SortOrder
+    rate?: SortOrder
+    referenceDate?: SortOrder
+    source?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: FinExchangeRateOrderByRelevanceInput
+  }
+
+  export type FinExchangeRateWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    currency_referenceDate?: FinExchangeRateCurrencyReferenceDateCompoundUniqueInput
+    AND?: FinExchangeRateWhereInput | FinExchangeRateWhereInput[]
+    OR?: FinExchangeRateWhereInput[]
+    NOT?: FinExchangeRateWhereInput | FinExchangeRateWhereInput[]
+    currency?: StringFilter<"FinExchangeRate"> | string
+    rate?: FloatFilter<"FinExchangeRate"> | number
+    referenceDate?: DateTimeFilter<"FinExchangeRate"> | Date | string
+    source?: StringFilter<"FinExchangeRate"> | string
+    createdAt?: DateTimeFilter<"FinExchangeRate"> | Date | string
+    updatedAt?: DateTimeFilter<"FinExchangeRate"> | Date | string
+  }, "id" | "currency_referenceDate">
+
+  export type FinExchangeRateOrderByWithAggregationInput = {
+    id?: SortOrder
+    currency?: SortOrder
+    rate?: SortOrder
+    referenceDate?: SortOrder
+    source?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FinExchangeRateCountOrderByAggregateInput
+    _avg?: FinExchangeRateAvgOrderByAggregateInput
+    _max?: FinExchangeRateMaxOrderByAggregateInput
+    _min?: FinExchangeRateMinOrderByAggregateInput
+    _sum?: FinExchangeRateSumOrderByAggregateInput
+  }
+
+  export type FinExchangeRateScalarWhereWithAggregatesInput = {
+    AND?: FinExchangeRateScalarWhereWithAggregatesInput | FinExchangeRateScalarWhereWithAggregatesInput[]
+    OR?: FinExchangeRateScalarWhereWithAggregatesInput[]
+    NOT?: FinExchangeRateScalarWhereWithAggregatesInput | FinExchangeRateScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FinExchangeRate"> | string
+    currency?: StringWithAggregatesFilter<"FinExchangeRate"> | string
+    rate?: FloatWithAggregatesFilter<"FinExchangeRate"> | number
+    referenceDate?: DateTimeWithAggregatesFilter<"FinExchangeRate"> | Date | string
+    source?: StringWithAggregatesFilter<"FinExchangeRate"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"FinExchangeRate"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FinExchangeRate"> | Date | string
   }
 
   export type UserCreateInput = {
@@ -118057,7 +119189,7 @@ export namespace Prisma {
   export type FinIncomeUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -118084,7 +119216,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -118132,7 +119264,7 @@ export namespace Prisma {
   export type FinIncomeUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -118157,7 +119289,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -118250,15 +119382,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -118285,15 +119417,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -118348,15 +119480,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -118378,15 +119510,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -118758,7 +119890,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subcategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118796,7 +119928,7 @@ export namespace Prisma {
     kind?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118864,7 +119996,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subcategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118896,7 +120028,7 @@ export namespace Prisma {
     kind?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119080,6 +120212,7 @@ export namespace Prisma {
   export type FinBudgetCreateInput = {
     id?: string
     label: string
+    color?: string | null
     periodStart: Date | string
     periodEnd: Date | string
     currency: string
@@ -119110,6 +120243,7 @@ export namespace Prisma {
     id?: string
     userId: string
     label: string
+    color?: string | null
     periodStart: Date | string
     periodEnd: Date | string
     currency: string
@@ -119138,6 +120272,7 @@ export namespace Prisma {
   export type FinBudgetUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -119168,6 +120303,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -119197,6 +120333,7 @@ export namespace Prisma {
     id?: string
     userId: string
     label: string
+    color?: string | null
     periodStart: Date | string
     periodEnd: Date | string
     currency: string
@@ -119224,6 +120361,7 @@ export namespace Prisma {
   export type FinBudgetUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -119252,6 +120390,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -119334,9 +120473,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -119364,9 +120503,9 @@ export namespace Prisma {
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -119415,9 +120554,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -119442,9 +120581,9 @@ export namespace Prisma {
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -119532,11 +120671,11 @@ export namespace Prisma {
     templateKey?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    allocated?: IntFieldUpdateOperationsInput | number
-    monthlyContribution?: NullableIntFieldUpdateOperationsInput | number | null
+    allocated?: FloatFieldUpdateOperationsInput | number
+    monthlyContribution?: NullableFloatFieldUpdateOperationsInput | number | null
     progressStatus?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
     priority?: IntFieldUpdateOperationsInput | number
@@ -119565,11 +120704,11 @@ export namespace Prisma {
     templateKey?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    allocated?: IntFieldUpdateOperationsInput | number
-    monthlyContribution?: NullableIntFieldUpdateOperationsInput | number | null
+    allocated?: FloatFieldUpdateOperationsInput | number
+    monthlyContribution?: NullableFloatFieldUpdateOperationsInput | number | null
     progressStatus?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -119628,11 +120767,11 @@ export namespace Prisma {
     templateKey?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    allocated?: IntFieldUpdateOperationsInput | number
-    monthlyContribution?: NullableIntFieldUpdateOperationsInput | number | null
+    allocated?: FloatFieldUpdateOperationsInput | number
+    monthlyContribution?: NullableFloatFieldUpdateOperationsInput | number | null
     progressStatus?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
     priority?: IntFieldUpdateOperationsInput | number
@@ -119659,11 +120798,11 @@ export namespace Prisma {
     templateKey?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    allocated?: IntFieldUpdateOperationsInput | number
-    monthlyContribution?: NullableIntFieldUpdateOperationsInput | number | null
+    allocated?: FloatFieldUpdateOperationsInput | number
+    monthlyContribution?: NullableFloatFieldUpdateOperationsInput | number | null
     progressStatus?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -119758,11 +120897,11 @@ export namespace Prisma {
     lender?: NullableStringFieldUpdateOperationsInput | string | null
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
     assetFinanced?: NullableStringFieldUpdateOperationsInput | string | null
-    outstandingPrincipal?: IntFieldUpdateOperationsInput | number
-    monthlyInstalment?: IntFieldUpdateOperationsInput | number
+    outstandingPrincipal?: FloatFieldUpdateOperationsInput | number
+    monthlyInstalment?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
-    knownTotalCost?: NullableIntFieldUpdateOperationsInput | number | null
+    knownTotalCost?: NullableFloatFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     direction?: StringFieldUpdateOperationsInput | string
     debtType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119793,11 +120932,11 @@ export namespace Prisma {
     lender?: NullableStringFieldUpdateOperationsInput | string | null
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
     assetFinanced?: NullableStringFieldUpdateOperationsInput | string | null
-    outstandingPrincipal?: IntFieldUpdateOperationsInput | number
-    monthlyInstalment?: IntFieldUpdateOperationsInput | number
+    outstandingPrincipal?: FloatFieldUpdateOperationsInput | number
+    monthlyInstalment?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
-    knownTotalCost?: NullableIntFieldUpdateOperationsInput | number | null
+    knownTotalCost?: NullableFloatFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     direction?: StringFieldUpdateOperationsInput | string
     debtType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119859,11 +120998,11 @@ export namespace Prisma {
     lender?: NullableStringFieldUpdateOperationsInput | string | null
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
     assetFinanced?: NullableStringFieldUpdateOperationsInput | string | null
-    outstandingPrincipal?: IntFieldUpdateOperationsInput | number
-    monthlyInstalment?: IntFieldUpdateOperationsInput | number
+    outstandingPrincipal?: FloatFieldUpdateOperationsInput | number
+    monthlyInstalment?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
-    knownTotalCost?: NullableIntFieldUpdateOperationsInput | number | null
+    knownTotalCost?: NullableFloatFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     direction?: StringFieldUpdateOperationsInput | string
     debtType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119891,11 +121030,11 @@ export namespace Prisma {
     lender?: NullableStringFieldUpdateOperationsInput | string | null
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
     assetFinanced?: NullableStringFieldUpdateOperationsInput | string | null
-    outstandingPrincipal?: IntFieldUpdateOperationsInput | number
-    monthlyInstalment?: IntFieldUpdateOperationsInput | number
+    outstandingPrincipal?: FloatFieldUpdateOperationsInput | number
+    monthlyInstalment?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
-    knownTotalCost?: NullableIntFieldUpdateOperationsInput | number | null
+    knownTotalCost?: NullableFloatFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     direction?: StringFieldUpdateOperationsInput | string
     debtType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119943,7 +121082,7 @@ export namespace Prisma {
 
   export type FinDebtPaymentUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119957,7 +121096,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     debtId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119979,7 +121118,7 @@ export namespace Prisma {
 
   export type FinDebtPaymentUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119991,7 +121130,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     debtId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -120069,7 +121208,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -120104,7 +121243,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -120167,7 +121306,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -120198,7 +121337,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -120279,9 +121418,9 @@ export namespace Prisma {
   export type FinProvisionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    provisioned?: IntFieldUpdateOperationsInput | number
+    provisioned?: FloatFieldUpdateOperationsInput | number
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     reminderDays?: JsonNullValueInput | InputJsonValue
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -120307,9 +121446,9 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    provisioned?: IntFieldUpdateOperationsInput | number
+    provisioned?: FloatFieldUpdateOperationsInput | number
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     reminderDays?: JsonNullValueInput | InputJsonValue
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -120357,9 +121496,9 @@ export namespace Prisma {
   export type FinProvisionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    provisioned?: IntFieldUpdateOperationsInput | number
+    provisioned?: FloatFieldUpdateOperationsInput | number
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     reminderDays?: JsonNullValueInput | InputJsonValue
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -120383,9 +121522,9 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    provisioned?: IntFieldUpdateOperationsInput | number
+    provisioned?: FloatFieldUpdateOperationsInput | number
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     reminderDays?: JsonNullValueInput | InputJsonValue
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -120462,7 +121601,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     valuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     liquidity?: StringFieldUpdateOperationsInput | string
@@ -120491,7 +121630,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     valuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     liquidity?: StringFieldUpdateOperationsInput | string
@@ -120543,7 +121682,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     valuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     liquidity?: StringFieldUpdateOperationsInput | string
@@ -120570,7 +121709,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     valuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     liquidity?: StringFieldUpdateOperationsInput | string
@@ -120653,7 +121792,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -120681,7 +121820,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -120727,7 +121866,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -120745,7 +121884,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -121002,8 +122141,8 @@ export namespace Prisma {
 
   export type FinPaperPortfolioUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    capital?: IntFieldUpdateOperationsInput | number
-    cash?: IntFieldUpdateOperationsInput | number
+    capital?: FloatFieldUpdateOperationsInput | number
+    cash?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     feeRate?: FloatFieldUpdateOperationsInput | number
     resetAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -121020,8 +122159,8 @@ export namespace Prisma {
   export type FinPaperPortfolioUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    capital?: IntFieldUpdateOperationsInput | number
-    cash?: IntFieldUpdateOperationsInput | number
+    capital?: FloatFieldUpdateOperationsInput | number
+    cash?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     feeRate?: FloatFieldUpdateOperationsInput | number
     resetAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -121051,8 +122190,8 @@ export namespace Prisma {
 
   export type FinPaperPortfolioUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    capital?: IntFieldUpdateOperationsInput | number
-    cash?: IntFieldUpdateOperationsInput | number
+    capital?: FloatFieldUpdateOperationsInput | number
+    cash?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     feeRate?: FloatFieldUpdateOperationsInput | number
     resetAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -121066,8 +122205,8 @@ export namespace Prisma {
   export type FinPaperPortfolioUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    capital?: IntFieldUpdateOperationsInput | number
-    cash?: IntFieldUpdateOperationsInput | number
+    capital?: FloatFieldUpdateOperationsInput | number
+    cash?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     feeRate?: FloatFieldUpdateOperationsInput | number
     resetAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -121105,7 +122244,7 @@ export namespace Prisma {
   export type FinPaperInstrumentUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    markPrice?: IntFieldUpdateOperationsInput | number
+    markPrice?: FloatFieldUpdateOperationsInput | number
     markedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -121118,7 +122257,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     portfolioId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    markPrice?: IntFieldUpdateOperationsInput | number
+    markPrice?: FloatFieldUpdateOperationsInput | number
     markedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -121140,7 +122279,7 @@ export namespace Prisma {
   export type FinPaperInstrumentUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    markPrice?: IntFieldUpdateOperationsInput | number
+    markPrice?: FloatFieldUpdateOperationsInput | number
     markedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -121151,7 +122290,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     portfolioId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    markPrice?: IntFieldUpdateOperationsInput | number
+    markPrice?: FloatFieldUpdateOperationsInput | number
     markedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -121192,8 +122331,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    unitPrice?: IntFieldUpdateOperationsInput | number
-    fee?: IntFieldUpdateOperationsInput | number
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    fee?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     decidedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121209,8 +122348,8 @@ export namespace Prisma {
     instrumentId?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    unitPrice?: IntFieldUpdateOperationsInput | number
-    fee?: IntFieldUpdateOperationsInput | number
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    fee?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     decidedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121237,8 +122376,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    unitPrice?: IntFieldUpdateOperationsInput | number
-    fee?: IntFieldUpdateOperationsInput | number
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    fee?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     decidedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121252,8 +122391,8 @@ export namespace Prisma {
     instrumentId?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    unitPrice?: IntFieldUpdateOperationsInput | number
-    fee?: IntFieldUpdateOperationsInput | number
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    fee?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     decidedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121326,7 +122465,7 @@ export namespace Prisma {
   export type FinSharedExpenseUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -121337,7 +122476,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -121359,7 +122498,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     payerId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -121371,7 +122510,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     personalTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedById?: StringFieldUpdateOperationsInput | string
@@ -121417,7 +122556,7 @@ export namespace Prisma {
   export type FinSharedExpenseUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -121428,7 +122567,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -121443,7 +122582,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     payerId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -121455,7 +122594,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     personalTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedById?: StringFieldUpdateOperationsInput | string
@@ -121487,8 +122626,8 @@ export namespace Prisma {
 
   export type FinSharedShareUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    share?: IntFieldUpdateOperationsInput | number
-    weight?: NullableIntFieldUpdateOperationsInput | number | null
+    share?: FloatFieldUpdateOperationsInput | number
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expense?: FinSharedExpenseUpdateOneRequiredWithoutSharesNestedInput
     member?: FinSpaceMemberUpdateOneRequiredWithoutSharesNestedInput
@@ -121498,8 +122637,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     expenseId?: StringFieldUpdateOperationsInput | string
     memberId?: StringFieldUpdateOperationsInput | string
-    share?: IntFieldUpdateOperationsInput | number
-    weight?: NullableIntFieldUpdateOperationsInput | number | null
+    share?: FloatFieldUpdateOperationsInput | number
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -121514,8 +122653,8 @@ export namespace Prisma {
 
   export type FinSharedShareUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    share?: IntFieldUpdateOperationsInput | number
-    weight?: NullableIntFieldUpdateOperationsInput | number | null
+    share?: FloatFieldUpdateOperationsInput | number
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -121523,8 +122662,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     expenseId?: StringFieldUpdateOperationsInput | string
     memberId?: StringFieldUpdateOperationsInput | string
-    share?: IntFieldUpdateOperationsInput | number
-    weight?: NullableIntFieldUpdateOperationsInput | number | null
+    share?: FloatFieldUpdateOperationsInput | number
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -121564,7 +122703,7 @@ export namespace Prisma {
 
   export type FinSettlementUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121584,7 +122723,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     fromId?: StringFieldUpdateOperationsInput | string
     toId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121615,7 +122754,7 @@ export namespace Prisma {
 
   export type FinSettlementUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121631,7 +122770,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     fromId?: StringFieldUpdateOperationsInput | string
     toId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121684,7 +122823,7 @@ export namespace Prisma {
   export type FinSpaceGoalUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121704,7 +122843,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121739,7 +122878,7 @@ export namespace Prisma {
   export type FinSpaceGoalUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121756,7 +122895,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121795,7 +122934,7 @@ export namespace Prisma {
 
   export type FinSpaceGoalContributionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     contributedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121809,7 +122948,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceGoalId?: StringFieldUpdateOperationsInput | string
     memberId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     contributedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121831,7 +122970,7 @@ export namespace Prisma {
 
   export type FinSpaceGoalContributionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     contributedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121843,7 +122982,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceGoalId?: StringFieldUpdateOperationsInput | string
     memberId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     contributedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121867,7 +123006,7 @@ export namespace Prisma {
 
   export type FinSpaceGoalShareUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     spaceGoal?: FinSpaceGoalUpdateOneRequiredWithoutSharesNestedInput
     member?: FinSpaceMemberUpdateOneRequiredWithoutGoalSharesNestedInput
   }
@@ -121876,7 +123015,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceGoalId?: StringFieldUpdateOperationsInput | string
     memberId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
   }
 
   export type FinSpaceGoalShareCreateManyInput = {
@@ -121888,14 +123027,14 @@ export namespace Prisma {
 
   export type FinSpaceGoalShareUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
   }
 
   export type FinSpaceGoalShareUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     spaceGoalId?: StringFieldUpdateOperationsInput | string
     memberId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
   }
 
   export type FinChildCreateInput = {
@@ -122016,8 +123155,8 @@ export namespace Prisma {
   export type FinSpaceProvisionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    plannedAmount?: IntFieldUpdateOperationsInput | number
-    alreadyProvisioned?: IntFieldUpdateOperationsInput | number
+    plannedAmount?: FloatFieldUpdateOperationsInput | number
+    alreadyProvisioned?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -122033,8 +123172,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    plannedAmount?: IntFieldUpdateOperationsInput | number
-    alreadyProvisioned?: IntFieldUpdateOperationsInput | number
+    plannedAmount?: FloatFieldUpdateOperationsInput | number
+    alreadyProvisioned?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -122064,8 +123203,8 @@ export namespace Prisma {
   export type FinSpaceProvisionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    plannedAmount?: IntFieldUpdateOperationsInput | number
-    alreadyProvisioned?: IntFieldUpdateOperationsInput | number
+    plannedAmount?: FloatFieldUpdateOperationsInput | number
+    alreadyProvisioned?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -122080,8 +123219,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    plannedAmount?: IntFieldUpdateOperationsInput | number
-    alreadyProvisioned?: IntFieldUpdateOperationsInput | number
+    plannedAmount?: FloatFieldUpdateOperationsInput | number
+    alreadyProvisioned?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -125463,8 +126602,8 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    amountExcl?: IntFieldUpdateOperationsInput | number
-    taxAmount?: IntFieldUpdateOperationsInput | number
+    amountExcl?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -125494,8 +126633,8 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    amountExcl?: IntFieldUpdateOperationsInput | number
-    taxAmount?: IntFieldUpdateOperationsInput | number
+    amountExcl?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -125549,8 +126688,8 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    amountExcl?: IntFieldUpdateOperationsInput | number
-    taxAmount?: IntFieldUpdateOperationsInput | number
+    amountExcl?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -125577,8 +126716,8 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    amountExcl?: IntFieldUpdateOperationsInput | number
-    taxAmount?: IntFieldUpdateOperationsInput | number
+    amountExcl?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -125644,7 +126783,7 @@ export namespace Prisma {
 
   export type FinBusinessPaymentUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     method?: NullableStringFieldUpdateOperationsInput | string | null
@@ -125669,7 +126808,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
     documentId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     method?: NullableStringFieldUpdateOperationsInput | string | null
@@ -125713,7 +126852,7 @@ export namespace Prisma {
 
   export type FinBusinessPaymentUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     method?: NullableStringFieldUpdateOperationsInput | string | null
@@ -125736,7 +126875,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
     documentId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     method?: NullableStringFieldUpdateOperationsInput | string | null
@@ -125803,9 +126942,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     period?: NullableStringFieldUpdateOperationsInput | string | null
     lines?: JsonNullValueInput | InputJsonValue
-    gross?: IntFieldUpdateOperationsInput | number
-    value?: IntFieldUpdateOperationsInput | number
-    declaredNet?: NullableIntFieldUpdateOperationsInput | number | null
+    gross?: FloatFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    declaredNet?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -125826,9 +126965,9 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     period?: NullableStringFieldUpdateOperationsInput | string | null
     lines?: JsonNullValueInput | InputJsonValue
-    gross?: IntFieldUpdateOperationsInput | number
-    value?: IntFieldUpdateOperationsInput | number
-    declaredNet?: NullableIntFieldUpdateOperationsInput | number | null
+    gross?: FloatFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    declaredNet?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -125869,9 +127008,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     period?: NullableStringFieldUpdateOperationsInput | string | null
     lines?: JsonNullValueInput | InputJsonValue
-    gross?: IntFieldUpdateOperationsInput | number
-    value?: IntFieldUpdateOperationsInput | number
-    declaredNet?: NullableIntFieldUpdateOperationsInput | number | null
+    gross?: FloatFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    declaredNet?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -125891,9 +127030,9 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     period?: NullableStringFieldUpdateOperationsInput | string | null
     lines?: JsonNullValueInput | InputJsonValue
-    gross?: IntFieldUpdateOperationsInput | number
-    value?: IntFieldUpdateOperationsInput | number
-    declaredNet?: NullableIntFieldUpdateOperationsInput | number | null
+    gross?: FloatFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    declaredNet?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -126000,7 +127139,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
     period?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     setById?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -126014,7 +127153,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
     period?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     setById?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -126039,7 +127178,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
     period?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     setById?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -126052,7 +127191,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
     period?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     setById?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -126263,7 +127402,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     memberId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126280,7 +127419,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     memberId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126311,7 +127450,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     memberId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126327,7 +127466,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     memberId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126451,7 +127590,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     summary?: StringFieldUpdateOperationsInput | string
     profiles?: JsonNullValueInput | InputJsonValue
-    startingAmount?: IntFieldUpdateOperationsInput | number
+    startingAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     steps?: JsonNullValueInput | InputJsonValue
     badges?: JsonNullValueInput | InputJsonValue
@@ -126470,7 +127609,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     summary?: StringFieldUpdateOperationsInput | string
     profiles?: JsonNullValueInput | InputJsonValue
-    startingAmount?: IntFieldUpdateOperationsInput | number
+    startingAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     steps?: JsonNullValueInput | InputJsonValue
     badges?: JsonNullValueInput | InputJsonValue
@@ -126507,7 +127646,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     summary?: StringFieldUpdateOperationsInput | string
     profiles?: JsonNullValueInput | InputJsonValue
-    startingAmount?: IntFieldUpdateOperationsInput | number
+    startingAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     steps?: JsonNullValueInput | InputJsonValue
     badges?: JsonNullValueInput | InputJsonValue
@@ -126525,7 +127664,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     summary?: StringFieldUpdateOperationsInput | string
     profiles?: JsonNullValueInput | InputJsonValue
-    startingAmount?: IntFieldUpdateOperationsInput | number
+    startingAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     steps?: JsonNullValueInput | InputJsonValue
     badges?: JsonNullValueInput | InputJsonValue
@@ -126672,6 +127811,76 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type FinExchangeRateCreateInput = {
+    id?: string
+    currency: string
+    rate: number
+    referenceDate: Date | string
+    source: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FinExchangeRateUncheckedCreateInput = {
+    id?: string
+    currency: string
+    rate: number
+    referenceDate: Date | string
+    source: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FinExchangeRateUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    currency?: StringFieldUpdateOperationsInput | string
+    rate?: FloatFieldUpdateOperationsInput | number
+    referenceDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    source?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinExchangeRateUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    currency?: StringFieldUpdateOperationsInput | string
+    rate?: FloatFieldUpdateOperationsInput | number
+    referenceDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    source?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinExchangeRateCreateManyInput = {
+    id?: string
+    currency: string
+    rate: number
+    referenceDate: Date | string
+    source: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FinExchangeRateUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    currency?: StringFieldUpdateOperationsInput | string
+    rate?: FloatFieldUpdateOperationsInput | number
+    referenceDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    source?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinExchangeRateUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    currency?: StringFieldUpdateOperationsInput | string
+    rate?: FloatFieldUpdateOperationsInput | number
+    referenceDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    source?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -127926,6 +129135,17 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
   export type FinCategoryNullableScalarRelationFilter = {
     is?: FinCategoryWhereInput | null
     isNot?: FinCategoryWhereInput | null
@@ -128018,6 +129238,33 @@ export namespace Prisma {
   export type FinIncomeSumOrderByAggregateInput = {
     value?: SortOrder
     version?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type FinAccountOrderByRelevanceInput = {
@@ -128128,6 +129375,22 @@ export namespace Prisma {
     maxBalanceInfo?: SortOrder
     overdraftAllowed?: SortOrder
     version?: SortOrder
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type FinRecurrenceScalarRelationFilter = {
@@ -128506,6 +129769,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     label?: SortOrder
+    color?: SortOrder
     periodStart?: SortOrder
     periodEnd?: SortOrder
     currency?: SortOrder
@@ -128538,6 +129802,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     label?: SortOrder
+    color?: SortOrder
     periodStart?: SortOrder
     periodEnd?: SortOrder
     currency?: SortOrder
@@ -128563,6 +129828,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     label?: SortOrder
+    color?: SortOrder
     periodStart?: SortOrder
     periodEnd?: SortOrder
     currency?: SortOrder
@@ -128690,17 +129956,6 @@ export namespace Prisma {
     version?: SortOrder
   }
 
-  export type FloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
   export type FinGoalOrderByRelevanceInput = {
     fields: FinGoalOrderByRelevanceFieldEnum | FinGoalOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -128817,22 +130072,6 @@ export namespace Prisma {
     rate?: SortOrder
     priority?: SortOrder
     version?: SortOrder
-  }
-
-  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type FinDebtOrderByRelevanceInput = {
@@ -129572,17 +130811,6 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
-  export type FloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
   export type FinPaperInstrumentListRelationFilter = {
     every?: FinPaperInstrumentWhereInput
     some?: FinPaperInstrumentWhereInput
@@ -129666,22 +130894,6 @@ export namespace Prisma {
     cash?: SortOrder
     feeRate?: SortOrder
     version?: SortOrder
-  }
-
-  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type FinPaperPortfolioScalarRelationFilter = {
@@ -133080,6 +134292,55 @@ export namespace Prisma {
     lastSentAt?: SortOrder
   }
 
+  export type FinExchangeRateOrderByRelevanceInput = {
+    fields: FinExchangeRateOrderByRelevanceFieldEnum | FinExchangeRateOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type FinExchangeRateCurrencyReferenceDateCompoundUniqueInput = {
+    currency: string
+    referenceDate: Date | string
+  }
+
+  export type FinExchangeRateCountOrderByAggregateInput = {
+    id?: SortOrder
+    currency?: SortOrder
+    rate?: SortOrder
+    referenceDate?: SortOrder
+    source?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FinExchangeRateAvgOrderByAggregateInput = {
+    rate?: SortOrder
+  }
+
+  export type FinExchangeRateMaxOrderByAggregateInput = {
+    id?: SortOrder
+    currency?: SortOrder
+    rate?: SortOrder
+    referenceDate?: SortOrder
+    source?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FinExchangeRateMinOrderByAggregateInput = {
+    id?: SortOrder
+    currency?: SortOrder
+    rate?: SortOrder
+    referenceDate?: SortOrder
+    source?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FinExchangeRateSumOrderByAggregateInput = {
+    rate?: SortOrder
+  }
+
   export type FinPushSubscriptionCreateNestedManyWithoutUserInput = {
     create?: XOR<FinPushSubscriptionCreateWithoutUserInput, FinPushSubscriptionUncheckedCreateWithoutUserInput> | FinPushSubscriptionCreateWithoutUserInput[] | FinPushSubscriptionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: FinPushSubscriptionCreateOrConnectWithoutUserInput | FinPushSubscriptionCreateOrConnectWithoutUserInput[]
@@ -135304,6 +136565,14 @@ export namespace Prisma {
     connect?: FinCategoryWhereUniqueInput
   }
 
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type UserUpdateOneRequiredWithoutFinIncomesNestedInput = {
     create?: XOR<UserCreateWithoutFinIncomesInput, UserUncheckedCreateWithoutFinIncomesInput>
     connectOrCreate?: UserCreateOrConnectWithoutFinIncomesInput
@@ -135382,6 +136651,14 @@ export namespace Prisma {
     connectOrCreate?: FinDebtCreateOrConnectWithoutAccountInput | FinDebtCreateOrConnectWithoutAccountInput[]
     createMany?: FinDebtCreateManyAccountInputEnvelope
     connect?: FinDebtWhereUniqueInput | FinDebtWhereUniqueInput[]
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type UserUpdateOneRequiredWithoutFinAccountsNestedInput = {
@@ -135854,14 +137131,6 @@ export namespace Prisma {
     create?: XOR<FinAccountCreateWithoutGoalsInput, FinAccountUncheckedCreateWithoutGoalsInput>
     connectOrCreate?: FinAccountCreateOrConnectWithoutGoalsInput
     connect?: FinAccountWhereUniqueInput
-  }
-
-  export type NullableFloatFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type UserUpdateOneRequiredWithoutFinGoalsNestedInput = {
@@ -136990,14 +138259,6 @@ export namespace Prisma {
     connectOrCreate?: FinPaperTradeCreateOrConnectWithoutPortfolioInput | FinPaperTradeCreateOrConnectWithoutPortfolioInput[]
     createMany?: FinPaperTradeCreateManyPortfolioInputEnvelope
     connect?: FinPaperTradeWhereUniqueInput | FinPaperTradeWhereUniqueInput[]
-  }
-
-  export type FloatFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type UserUpdateOneRequiredWithoutFinPaperPortfolioNestedInput = {
@@ -140148,22 +141409,6 @@ export namespace Prisma {
     _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
-  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[]
@@ -140178,6 +141423,22 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type FinPushSubscriptionCreateWithoutUserInput = {
@@ -140938,6 +142199,7 @@ export namespace Prisma {
   export type FinBudgetCreateWithoutUserInput = {
     id?: string
     label: string
+    color?: string | null
     periodStart: Date | string
     periodEnd: Date | string
     currency: string
@@ -140966,6 +142228,7 @@ export namespace Prisma {
   export type FinBudgetUncheckedCreateWithoutUserInput = {
     id?: string
     label: string
+    color?: string | null
     periodStart: Date | string
     periodEnd: Date | string
     currency: string
@@ -142294,7 +143557,7 @@ export namespace Prisma {
     userId?: StringFilter<"FinIncome"> | string
     label?: StringFilter<"FinIncome"> | string
     categoryId?: StringNullableFilter<"FinIncome"> | string | null
-    value?: IntFilter<"FinIncome"> | number
+    value?: FloatFilter<"FinIncome"> | number
     currency?: StringFilter<"FinIncome"> | string
     frequency?: StringFilter<"FinIncome"> | string
     startDate?: DateTimeFilter<"FinIncome"> | Date | string
@@ -142339,7 +143602,7 @@ export namespace Prisma {
     kind?: StringFilter<"FinTransaction"> | string
     accountId?: StringNullableFilter<"FinTransaction"> | string | null
     transferId?: StringNullableFilter<"FinTransaction"> | string | null
-    value?: IntFilter<"FinTransaction"> | number
+    value?: FloatFilter<"FinTransaction"> | number
     currency?: StringFilter<"FinTransaction"> | string
     occurredAt?: DateTimeFilter<"FinTransaction"> | Date | string
     categoryId?: StringNullableFilter<"FinTransaction"> | string | null
@@ -142392,15 +143655,15 @@ export namespace Prisma {
     label?: StringFilter<"FinAccount"> | string
     type?: StringFilter<"FinAccount"> | string
     currency?: StringFilter<"FinAccount"> | string
-    openingBalance?: IntFilter<"FinAccount"> | number
+    openingBalance?: FloatFilter<"FinAccount"> | number
     openingDate?: DateTimeFilter<"FinAccount"> | Date | string
     includeInTotal?: BoolFilter<"FinAccount"> | boolean
     includeInNetWorth?: BoolFilter<"FinAccount"> | boolean
     color?: StringNullableFilter<"FinAccount"> | string | null
     icon?: StringNullableFilter<"FinAccount"> | string | null
-    minBalanceAlert?: IntNullableFilter<"FinAccount"> | number | null
-    maxBalanceInfo?: IntNullableFilter<"FinAccount"> | number | null
-    overdraftAllowed?: IntNullableFilter<"FinAccount"> | number | null
+    minBalanceAlert?: FloatNullableFilter<"FinAccount"> | number | null
+    maxBalanceInfo?: FloatNullableFilter<"FinAccount"> | number | null
+    overdraftAllowed?: FloatNullableFilter<"FinAccount"> | number | null
     note?: StringNullableFilter<"FinAccount"> | string | null
     scope?: StringFilter<"FinAccount"> | string
     source?: StringFilter<"FinAccount"> | string
@@ -142479,9 +143742,9 @@ export namespace Prisma {
     userId?: StringFilter<"FinPayslip"> | string
     period?: StringNullableFilter<"FinPayslip"> | string | null
     lines?: JsonFilter<"FinPayslip">
-    gross?: IntFilter<"FinPayslip"> | number
-    value?: IntFilter<"FinPayslip"> | number
-    declaredNet?: IntNullableFilter<"FinPayslip"> | number | null
+    gross?: FloatFilter<"FinPayslip"> | number
+    value?: FloatFilter<"FinPayslip"> | number
+    declaredNet?: FloatNullableFilter<"FinPayslip"> | number | null
     currency?: StringFilter<"FinPayslip"> | string
     scope?: StringFilter<"FinPayslip"> | string
     source?: StringFilter<"FinPayslip"> | string
@@ -142665,6 +143928,7 @@ export namespace Prisma {
     id?: StringFilter<"FinBudget"> | string
     userId?: StringFilter<"FinBudget"> | string
     label?: StringFilter<"FinBudget"> | string
+    color?: StringNullableFilter<"FinBudget"> | string | null
     periodStart?: DateTimeFilter<"FinBudget"> | Date | string
     periodEnd?: DateTimeFilter<"FinBudget"> | Date | string
     currency?: StringFilter<"FinBudget"> | string
@@ -142715,9 +143979,9 @@ export namespace Prisma {
     categoryId?: StringNullableFilter<"FinEnvelope"> | string | null
     categoryGroup?: StringNullableFilter<"FinEnvelope"> | string | null
     kind?: StringFilter<"FinEnvelope"> | string
-    value?: IntFilter<"FinEnvelope"> | number
+    value?: FloatFilter<"FinEnvelope"> | number
     currency?: StringFilter<"FinEnvelope"> | string
-    cap?: IntNullableFilter<"FinEnvelope"> | number | null
+    cap?: FloatNullableFilter<"FinEnvelope"> | number | null
     recurring?: BoolFilter<"FinEnvelope"> | boolean
     note?: StringNullableFilter<"FinEnvelope"> | string | null
     scope?: StringFilter<"FinEnvelope"> | string
@@ -142760,7 +144024,7 @@ export namespace Prisma {
     label?: StringFilter<"FinRecurrence"> | string
     categoryId?: StringNullableFilter<"FinRecurrence"> | string | null
     kind?: StringFilter<"FinRecurrence"> | string
-    value?: IntFilter<"FinRecurrence"> | number
+    value?: FloatFilter<"FinRecurrence"> | number
     currency?: StringFilter<"FinRecurrence"> | string
     frequency?: StringFilter<"FinRecurrence"> | string
     nextDate?: DateTimeFilter<"FinRecurrence"> | Date | string
@@ -142810,9 +144074,9 @@ export namespace Prisma {
     userId?: StringFilter<"FinProvision"> | string
     label?: StringFilter<"FinProvision"> | string
     categoryId?: StringNullableFilter<"FinProvision"> | string | null
-    value?: IntFilter<"FinProvision"> | number
+    value?: FloatFilter<"FinProvision"> | number
     currency?: StringFilter<"FinProvision"> | string
-    provisioned?: IntFilter<"FinProvision"> | number
+    provisioned?: FloatFilter<"FinProvision"> | number
     targetDate?: DateTimeFilter<"FinProvision"> | Date | string
     reminderDays?: JsonFilter<"FinProvision">
     note?: StringNullableFilter<"FinProvision"> | string | null
@@ -142856,7 +144120,7 @@ export namespace Prisma {
     label?: StringFilter<"FinAsset"> | string
     kind?: StringFilter<"FinAsset"> | string
     categoryId?: StringNullableFilter<"FinAsset"> | string | null
-    value?: IntFilter<"FinAsset"> | number
+    value?: FloatFilter<"FinAsset"> | number
     currency?: StringFilter<"FinAsset"> | string
     valuedAt?: DateTimeFilter<"FinAsset"> | Date | string
     liquidity?: StringFilter<"FinAsset"> | string
@@ -142922,8 +144186,8 @@ export namespace Prisma {
 
   export type FinPaperPortfolioUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    capital?: IntFieldUpdateOperationsInput | number
-    cash?: IntFieldUpdateOperationsInput | number
+    capital?: FloatFieldUpdateOperationsInput | number
+    cash?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     feeRate?: FloatFieldUpdateOperationsInput | number
     resetAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -142938,8 +144202,8 @@ export namespace Prisma {
 
   export type FinPaperPortfolioUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    capital?: IntFieldUpdateOperationsInput | number
-    cash?: IntFieldUpdateOperationsInput | number
+    capital?: FloatFieldUpdateOperationsInput | number
+    cash?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     feeRate?: FloatFieldUpdateOperationsInput | number
     resetAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -143026,11 +144290,11 @@ export namespace Prisma {
     templateKey?: StringNullableFilter<"FinGoal"> | string | null
     icon?: StringNullableFilter<"FinGoal"> | string | null
     color?: StringNullableFilter<"FinGoal"> | string | null
-    target?: IntFilter<"FinGoal"> | number
+    target?: FloatFilter<"FinGoal"> | number
     currency?: StringFilter<"FinGoal"> | string
     targetDate?: DateTimeNullableFilter<"FinGoal"> | Date | string | null
-    allocated?: IntFilter<"FinGoal"> | number
-    monthlyContribution?: IntNullableFilter<"FinGoal"> | number | null
+    allocated?: FloatFilter<"FinGoal"> | number
+    monthlyContribution?: FloatNullableFilter<"FinGoal"> | number | null
     progressStatus?: StringFilter<"FinGoal"> | string
     accountId?: StringNullableFilter<"FinGoal"> | string | null
     rate?: FloatNullableFilter<"FinGoal"> | number | null
@@ -143077,11 +144341,11 @@ export namespace Prisma {
     lender?: StringNullableFilter<"FinDebt"> | string | null
     purpose?: StringNullableFilter<"FinDebt"> | string | null
     assetFinanced?: StringNullableFilter<"FinDebt"> | string | null
-    outstandingPrincipal?: IntFilter<"FinDebt"> | number
-    monthlyInstalment?: IntFilter<"FinDebt"> | number
+    outstandingPrincipal?: FloatFilter<"FinDebt"> | number
+    monthlyInstalment?: FloatFilter<"FinDebt"> | number
     currency?: StringFilter<"FinDebt"> | string
     rate?: FloatNullableFilter<"FinDebt"> | number | null
-    knownTotalCost?: IntNullableFilter<"FinDebt"> | number | null
+    knownTotalCost?: FloatNullableFilter<"FinDebt"> | number | null
     dueDate?: DateTimeNullableFilter<"FinDebt"> | Date | string | null
     direction?: StringFilter<"FinDebt"> | string
     debtType?: StringNullableFilter<"FinDebt"> | string | null
@@ -143126,7 +144390,7 @@ export namespace Prisma {
     id?: StringFilter<"FinDebtPayment"> | string
     userId?: StringFilter<"FinDebtPayment"> | string
     debtId?: StringFilter<"FinDebtPayment"> | string
-    amount?: IntFilter<"FinDebtPayment"> | number
+    amount?: FloatFilter<"FinDebtPayment"> | number
     currency?: StringFilter<"FinDebtPayment"> | string
     paidAt?: DateTimeFilter<"FinDebtPayment"> | Date | string
     note?: StringNullableFilter<"FinDebtPayment"> | string | null
@@ -146278,7 +147542,7 @@ export namespace Prisma {
     spaceId?: StringFilter<"FinSharedExpense"> | string
     payerId?: StringFilter<"FinSharedExpense"> | string
     label?: StringFilter<"FinSharedExpense"> | string
-    value?: IntFilter<"FinSharedExpense"> | number
+    value?: FloatFilter<"FinSharedExpense"> | number
     currency?: StringFilter<"FinSharedExpense"> | string
     occurredAt?: DateTimeFilter<"FinSharedExpense"> | Date | string
     splitMode?: StringFilter<"FinSharedExpense"> | string
@@ -146290,7 +147554,7 @@ export namespace Prisma {
     collectiveCategory?: StringNullableFilter<"FinSharedExpense"> | string | null
     subCategory?: StringNullableFilter<"FinSharedExpense"> | string | null
     advanceTransferId?: StringNullableFilter<"FinSharedExpense"> | string | null
-    advanceOriginalValue?: IntNullableFilter<"FinSharedExpense"> | number | null
+    advanceOriginalValue?: FloatNullableFilter<"FinSharedExpense"> | number | null
     personalCreated?: BoolFilter<"FinSharedExpense"> | boolean
     personalTransactionId?: StringNullableFilter<"FinSharedExpense"> | string | null
     recordedById?: StringFilter<"FinSharedExpense"> | string
@@ -148008,7 +149272,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -148042,7 +149306,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -149028,7 +150292,7 @@ export namespace Prisma {
   export type FinSharedExpenseUpdateWithoutPersonalTransactionInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -149039,7 +150303,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -149060,7 +150324,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     payerId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -149072,7 +150336,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     recordedById?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -149240,15 +150504,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -149274,15 +150538,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -150234,6 +151498,7 @@ export namespace Prisma {
   export type FinBudgetCreateWithoutEnvelopesInput = {
     id?: string
     label: string
+    color?: string | null
     periodStart: Date | string
     periodEnd: Date | string
     currency: string
@@ -150263,6 +151528,7 @@ export namespace Prisma {
     id?: string
     userId: string
     label: string
+    color?: string | null
     periodStart: Date | string
     periodEnd: Date | string
     currency: string
@@ -150518,6 +151784,7 @@ export namespace Prisma {
   export type FinBudgetUpdateWithoutEnvelopesInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -150547,6 +151814,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -151009,15 +152277,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -151043,15 +152311,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -151461,15 +152729,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -151495,15 +152763,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -151898,11 +153166,11 @@ export namespace Prisma {
     lender?: NullableStringFieldUpdateOperationsInput | string | null
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
     assetFinanced?: NullableStringFieldUpdateOperationsInput | string | null
-    outstandingPrincipal?: IntFieldUpdateOperationsInput | number
-    monthlyInstalment?: IntFieldUpdateOperationsInput | number
+    outstandingPrincipal?: FloatFieldUpdateOperationsInput | number
+    monthlyInstalment?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
-    knownTotalCost?: NullableIntFieldUpdateOperationsInput | number | null
+    knownTotalCost?: NullableFloatFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     direction?: StringFieldUpdateOperationsInput | string
     debtType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -151932,11 +153200,11 @@ export namespace Prisma {
     lender?: NullableStringFieldUpdateOperationsInput | string | null
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
     assetFinanced?: NullableStringFieldUpdateOperationsInput | string | null
-    outstandingPrincipal?: IntFieldUpdateOperationsInput | number
-    monthlyInstalment?: IntFieldUpdateOperationsInput | number
+    outstandingPrincipal?: FloatFieldUpdateOperationsInput | number
+    monthlyInstalment?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
-    knownTotalCost?: NullableIntFieldUpdateOperationsInput | number | null
+    knownTotalCost?: NullableFloatFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     direction?: StringFieldUpdateOperationsInput | string
     debtType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -152517,15 +153785,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -152551,15 +153819,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -153958,7 +155226,7 @@ export namespace Prisma {
     spaceId?: StringFilter<"FinSpaceBudget"> | string
     category?: StringFilter<"FinSpaceBudget"> | string
     period?: StringFilter<"FinSpaceBudget"> | string
-    value?: IntFilter<"FinSpaceBudget"> | number
+    value?: FloatFilter<"FinSpaceBudget"> | number
     setById?: StringFilter<"FinSpaceBudget"> | string
     version?: IntFilter<"FinSpaceBudget"> | number
     deletedAt?: DateTimeNullableFilter<"FinSpaceBudget"> | Date | string | null
@@ -154033,7 +155301,7 @@ export namespace Prisma {
     spaceId?: StringFilter<"FinSpaceInflow"> | string
     kind?: StringFilter<"FinSpaceInflow"> | string
     memberId?: StringNullableFilter<"FinSpaceInflow"> | string | null
-    value?: IntFilter<"FinSpaceInflow"> | number
+    value?: FloatFilter<"FinSpaceInflow"> | number
     occurredAt?: DateTimeFilter<"FinSpaceInflow"> | Date | string
     status?: StringFilter<"FinSpaceInflow"> | string
     note?: StringNullableFilter<"FinSpaceInflow"> | string | null
@@ -154068,7 +155336,7 @@ export namespace Prisma {
     spaceId?: StringFilter<"FinSettlement"> | string
     fromId?: StringFilter<"FinSettlement"> | string
     toId?: StringFilter<"FinSettlement"> | string
-    value?: IntFilter<"FinSettlement"> | number
+    value?: FloatFilter<"FinSettlement"> | number
     currency?: StringFilter<"FinSettlement"> | string
     settledAt?: DateTimeFilter<"FinSettlement"> | Date | string
     note?: StringNullableFilter<"FinSettlement"> | string | null
@@ -154103,7 +155371,7 @@ export namespace Prisma {
     id?: StringFilter<"FinSpaceGoal"> | string
     spaceId?: StringFilter<"FinSpaceGoal"> | string
     label?: StringFilter<"FinSpaceGoal"> | string
-    target?: IntFilter<"FinSpaceGoal"> | number
+    target?: FloatFilter<"FinSpaceGoal"> | number
     currency?: StringFilter<"FinSpaceGoal"> | string
     targetDate?: DateTimeNullableFilter<"FinSpaceGoal"> | Date | string | null
     note?: StringNullableFilter<"FinSpaceGoal"> | string | null
@@ -154170,8 +155438,8 @@ export namespace Prisma {
     id?: StringFilter<"FinSpaceProvision"> | string
     spaceId?: StringFilter<"FinSpaceProvision"> | string
     label?: StringFilter<"FinSpaceProvision"> | string
-    plannedAmount?: IntFilter<"FinSpaceProvision"> | number
-    alreadyProvisioned?: IntFilter<"FinSpaceProvision"> | number
+    plannedAmount?: FloatFilter<"FinSpaceProvision"> | number
+    alreadyProvisioned?: FloatFilter<"FinSpaceProvision"> | number
     currency?: StringFilter<"FinSpaceProvision"> | string
     targetDate?: DateTimeFilter<"FinSpaceProvision"> | Date | string
     note?: StringNullableFilter<"FinSpaceProvision"> | string | null
@@ -154737,7 +156005,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -154764,7 +156032,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -154979,8 +156247,8 @@ export namespace Prisma {
     id?: StringFilter<"FinSharedShare"> | string
     expenseId?: StringFilter<"FinSharedShare"> | string
     memberId?: StringFilter<"FinSharedShare"> | string
-    share?: IntFilter<"FinSharedShare"> | number
-    weight?: IntNullableFilter<"FinSharedShare"> | number | null
+    share?: FloatFilter<"FinSharedShare"> | number
+    weight?: FloatNullableFilter<"FinSharedShare"> | number | null
     createdAt?: DateTimeFilter<"FinSharedShare"> | Date | string
   }
 
@@ -155055,7 +156323,7 @@ export namespace Prisma {
     id?: StringFilter<"FinSpaceGoalContribution"> | string
     spaceGoalId?: StringFilter<"FinSpaceGoalContribution"> | string
     memberId?: StringFilter<"FinSpaceGoalContribution"> | string
-    amount?: IntFilter<"FinSpaceGoalContribution"> | number
+    amount?: FloatFilter<"FinSpaceGoalContribution"> | number
     currency?: StringFilter<"FinSpaceGoalContribution"> | string
     contributedAt?: DateTimeFilter<"FinSpaceGoalContribution"> | Date | string
     note?: StringNullableFilter<"FinSpaceGoalContribution"> | string | null
@@ -155086,7 +156354,7 @@ export namespace Prisma {
     id?: StringFilter<"FinSpaceGoalShare"> | string
     spaceGoalId?: StringFilter<"FinSpaceGoalShare"> | string
     memberId?: StringFilter<"FinSpaceGoalShare"> | string
-    amount?: IntFilter<"FinSpaceGoalShare"> | number
+    amount?: FloatFilter<"FinSpaceGoalShare"> | number
   }
 
   export type FinSpaceCreateWithoutInvitationsInput = {
@@ -155431,7 +156699,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -155458,7 +156726,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -156122,7 +157390,7 @@ export namespace Prisma {
     id?: StringFilter<"FinPaperInstrument"> | string
     portfolioId?: StringFilter<"FinPaperInstrument"> | string
     label?: StringFilter<"FinPaperInstrument"> | string
-    markPrice?: IntFilter<"FinPaperInstrument"> | number
+    markPrice?: FloatFilter<"FinPaperInstrument"> | number
     markedAt?: DateTimeFilter<"FinPaperInstrument"> | Date | string
     note?: StringNullableFilter<"FinPaperInstrument"> | string | null
     createdAt?: DateTimeFilter<"FinPaperInstrument"> | Date | string
@@ -156154,8 +157422,8 @@ export namespace Prisma {
     instrumentId?: StringFilter<"FinPaperTrade"> | string
     kind?: StringFilter<"FinPaperTrade"> | string
     quantity?: IntFilter<"FinPaperTrade"> | number
-    unitPrice?: IntFilter<"FinPaperTrade"> | number
-    fee?: IntFilter<"FinPaperTrade"> | number
+    unitPrice?: FloatFilter<"FinPaperTrade"> | number
+    fee?: FloatFilter<"FinPaperTrade"> | number
     currency?: StringFilter<"FinPaperTrade"> | string
     decidedAt?: DateTimeFilter<"FinPaperTrade"> | Date | string
     note?: StringNullableFilter<"FinPaperTrade"> | string | null
@@ -156251,8 +157519,8 @@ export namespace Prisma {
 
   export type FinPaperPortfolioUpdateWithoutInstrumentsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    capital?: IntFieldUpdateOperationsInput | number
-    cash?: IntFieldUpdateOperationsInput | number
+    capital?: FloatFieldUpdateOperationsInput | number
+    cash?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     feeRate?: FloatFieldUpdateOperationsInput | number
     resetAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -156268,8 +157536,8 @@ export namespace Prisma {
   export type FinPaperPortfolioUncheckedUpdateWithoutInstrumentsInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    capital?: IntFieldUpdateOperationsInput | number
-    cash?: IntFieldUpdateOperationsInput | number
+    capital?: FloatFieldUpdateOperationsInput | number
+    cash?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     feeRate?: FloatFieldUpdateOperationsInput | number
     resetAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -156374,8 +157642,8 @@ export namespace Prisma {
 
   export type FinPaperPortfolioUpdateWithoutTradesInput = {
     id?: StringFieldUpdateOperationsInput | string
-    capital?: IntFieldUpdateOperationsInput | number
-    cash?: IntFieldUpdateOperationsInput | number
+    capital?: FloatFieldUpdateOperationsInput | number
+    cash?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     feeRate?: FloatFieldUpdateOperationsInput | number
     resetAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -156391,8 +157659,8 @@ export namespace Prisma {
   export type FinPaperPortfolioUncheckedUpdateWithoutTradesInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    capital?: IntFieldUpdateOperationsInput | number
-    cash?: IntFieldUpdateOperationsInput | number
+    capital?: FloatFieldUpdateOperationsInput | number
+    cash?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     feeRate?: FloatFieldUpdateOperationsInput | number
     resetAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -156418,7 +157686,7 @@ export namespace Prisma {
   export type FinPaperInstrumentUpdateWithoutTradesInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    markPrice?: IntFieldUpdateOperationsInput | number
+    markPrice?: FloatFieldUpdateOperationsInput | number
     markedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -156430,7 +157698,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     portfolioId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    markPrice?: IntFieldUpdateOperationsInput | number
+    markPrice?: FloatFieldUpdateOperationsInput | number
     markedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -156816,7 +158084,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -156843,7 +158111,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -157054,7 +158322,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subcategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -157091,7 +158359,7 @@ export namespace Prisma {
     kind?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -157311,7 +158579,7 @@ export namespace Prisma {
   export type FinSharedExpenseUpdateWithoutSharesInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -157322,7 +158590,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -157343,7 +158611,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     payerId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -157355,7 +158623,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     personalTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedById?: StringFieldUpdateOperationsInput | string
@@ -157630,7 +158898,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -157657,7 +158925,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -157961,7 +159229,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -157988,7 +159256,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -158141,7 +159409,7 @@ export namespace Prisma {
   export type FinSpaceGoalUpdateWithoutContributionsInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -158160,7 +159428,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -158325,7 +159593,7 @@ export namespace Prisma {
   export type FinSpaceGoalUpdateWithoutSharesInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -158344,7 +159612,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -158485,7 +159753,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -158512,7 +159780,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -158609,7 +159877,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -158636,7 +159904,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -161698,7 +162966,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subcategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -161735,7 +163003,7 @@ export namespace Prisma {
     kind?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -161778,7 +163046,7 @@ export namespace Prisma {
   export type FinSharedExpenseUpdateWithoutReceiptInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -161789,7 +163057,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -161810,7 +163078,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     payerId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -161822,7 +163090,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     personalTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedById?: StringFieldUpdateOperationsInput | string
@@ -166018,8 +167286,8 @@ export namespace Prisma {
     label?: StringFilter<"FinBusinessDocument"> | string
     issuedAt?: DateTimeFilter<"FinBusinessDocument"> | Date | string
     dueAt?: DateTimeNullableFilter<"FinBusinessDocument"> | Date | string | null
-    amountExcl?: IntFilter<"FinBusinessDocument"> | number
-    taxAmount?: IntFilter<"FinBusinessDocument"> | number
+    amountExcl?: FloatFilter<"FinBusinessDocument"> | number
+    taxAmount?: FloatFilter<"FinBusinessDocument"> | number
     currency?: StringFilter<"FinBusinessDocument"> | string
     note?: StringNullableFilter<"FinBusinessDocument"> | string | null
     scope?: StringFilter<"FinBusinessDocument"> | string
@@ -166060,7 +167328,7 @@ export namespace Prisma {
     id?: StringFilter<"FinBusinessPayment"> | string
     businessId?: StringFilter<"FinBusinessPayment"> | string
     documentId?: StringFilter<"FinBusinessPayment"> | string
-    value?: IntFilter<"FinBusinessPayment"> | number
+    value?: FloatFilter<"FinBusinessPayment"> | number
     currency?: StringFilter<"FinBusinessPayment"> | string
     receivedAt?: DateTimeFilter<"FinBusinessPayment"> | Date | string
     method?: StringNullableFilter<"FinBusinessPayment"> | string | null
@@ -166798,8 +168066,8 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    amountExcl?: IntFieldUpdateOperationsInput | number
-    taxAmount?: IntFieldUpdateOperationsInput | number
+    amountExcl?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -166828,8 +168096,8 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    amountExcl?: IntFieldUpdateOperationsInput | number
-    taxAmount?: IntFieldUpdateOperationsInput | number
+    amountExcl?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -167467,7 +168735,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -167494,7 +168762,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -167591,7 +168859,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -167618,7 +168886,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -167715,7 +168983,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -167742,7 +169010,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     splitRule?: StringFieldUpdateOperationsInput | string
-    smallBalance?: IntFieldUpdateOperationsInput | number
+    smallBalance?: FloatFieldUpdateOperationsInput | number
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -168407,7 +169675,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     summary?: StringFieldUpdateOperationsInput | string
     profiles?: JsonNullValueInput | InputJsonValue
-    startingAmount?: IntFieldUpdateOperationsInput | number
+    startingAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     steps?: JsonNullValueInput | InputJsonValue
     badges?: JsonNullValueInput | InputJsonValue
@@ -168425,7 +169693,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     summary?: StringFieldUpdateOperationsInput | string
     profiles?: JsonNullValueInput | InputJsonValue
-    startingAmount?: IntFieldUpdateOperationsInput | number
+    startingAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     steps?: JsonNullValueInput | InputJsonValue
     badges?: JsonNullValueInput | InputJsonValue
@@ -168966,6 +170234,7 @@ export namespace Prisma {
   export type FinBudgetCreateManyUserInput = {
     id?: string
     label: string
+    color?: string | null
     periodStart: Date | string
     periodEnd: Date | string
     currency: string
@@ -169628,7 +170897,7 @@ export namespace Prisma {
   export type FinIncomeUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -169653,7 +170922,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -169677,7 +170946,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -169701,7 +170970,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subcategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -169737,7 +171006,7 @@ export namespace Prisma {
     kind?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -169772,7 +171041,7 @@ export namespace Prisma {
     kind?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -169805,15 +171074,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -169838,15 +171107,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -169871,15 +171140,15 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
-    openingBalance?: IntFieldUpdateOperationsInput | number
+    openingBalance?: FloatFieldUpdateOperationsInput | number
     openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
     includeInTotal?: BoolFieldUpdateOperationsInput | boolean
     includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    minBalanceAlert?: NullableIntFieldUpdateOperationsInput | number | null
-    maxBalanceInfo?: NullableIntFieldUpdateOperationsInput | number | null
-    overdraftAllowed?: NullableIntFieldUpdateOperationsInput | number | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -169956,9 +171225,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     period?: NullableStringFieldUpdateOperationsInput | string | null
     lines?: JsonNullValueInput | InputJsonValue
-    gross?: IntFieldUpdateOperationsInput | number
-    value?: IntFieldUpdateOperationsInput | number
-    declaredNet?: NullableIntFieldUpdateOperationsInput | number | null
+    gross?: FloatFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    declaredNet?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -169977,9 +171246,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     period?: NullableStringFieldUpdateOperationsInput | string | null
     lines?: JsonNullValueInput | InputJsonValue
-    gross?: IntFieldUpdateOperationsInput | number
-    value?: IntFieldUpdateOperationsInput | number
-    declaredNet?: NullableIntFieldUpdateOperationsInput | number | null
+    gross?: FloatFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    declaredNet?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -169998,9 +171267,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     period?: NullableStringFieldUpdateOperationsInput | string | null
     lines?: JsonNullValueInput | InputJsonValue
-    gross?: IntFieldUpdateOperationsInput | number
-    value?: IntFieldUpdateOperationsInput | number
-    declaredNet?: NullableIntFieldUpdateOperationsInput | number | null
+    gross?: FloatFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
+    declaredNet?: NullableFloatFieldUpdateOperationsInput | number | null
     currency?: StringFieldUpdateOperationsInput | string
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
@@ -170119,6 +171388,7 @@ export namespace Prisma {
   export type FinBudgetUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -170147,6 +171417,7 @@ export namespace Prisma {
   export type FinBudgetUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -170175,6 +171446,7 @@ export namespace Prisma {
   export type FinBudgetUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
@@ -170203,9 +171475,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -170231,9 +171503,9 @@ export namespace Prisma {
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -170257,9 +171529,9 @@ export namespace Prisma {
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -170281,7 +171553,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -170314,7 +171586,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -170346,7 +171618,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -170375,9 +171647,9 @@ export namespace Prisma {
   export type FinProvisionUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    provisioned?: IntFieldUpdateOperationsInput | number
+    provisioned?: FloatFieldUpdateOperationsInput | number
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     reminderDays?: JsonNullValueInput | InputJsonValue
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -170401,9 +171673,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    provisioned?: IntFieldUpdateOperationsInput | number
+    provisioned?: FloatFieldUpdateOperationsInput | number
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     reminderDays?: JsonNullValueInput | InputJsonValue
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -170426,9 +171698,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    provisioned?: IntFieldUpdateOperationsInput | number
+    provisioned?: FloatFieldUpdateOperationsInput | number
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     reminderDays?: JsonNullValueInput | InputJsonValue
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -170451,7 +171723,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     valuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     liquidity?: StringFieldUpdateOperationsInput | string
@@ -170478,7 +171750,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     valuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     liquidity?: StringFieldUpdateOperationsInput | string
@@ -170504,7 +171776,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     valuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     liquidity?: StringFieldUpdateOperationsInput | string
@@ -170655,11 +171927,11 @@ export namespace Prisma {
     templateKey?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    allocated?: IntFieldUpdateOperationsInput | number
-    monthlyContribution?: NullableIntFieldUpdateOperationsInput | number | null
+    allocated?: FloatFieldUpdateOperationsInput | number
+    monthlyContribution?: NullableFloatFieldUpdateOperationsInput | number | null
     progressStatus?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
     priority?: IntFieldUpdateOperationsInput | number
@@ -170686,11 +171958,11 @@ export namespace Prisma {
     templateKey?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    allocated?: IntFieldUpdateOperationsInput | number
-    monthlyContribution?: NullableIntFieldUpdateOperationsInput | number | null
+    allocated?: FloatFieldUpdateOperationsInput | number
+    monthlyContribution?: NullableFloatFieldUpdateOperationsInput | number | null
     progressStatus?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -170717,11 +171989,11 @@ export namespace Prisma {
     templateKey?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    allocated?: IntFieldUpdateOperationsInput | number
-    monthlyContribution?: NullableIntFieldUpdateOperationsInput | number | null
+    allocated?: FloatFieldUpdateOperationsInput | number
+    monthlyContribution?: NullableFloatFieldUpdateOperationsInput | number | null
     progressStatus?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -170748,11 +172020,11 @@ export namespace Prisma {
     lender?: NullableStringFieldUpdateOperationsInput | string | null
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
     assetFinanced?: NullableStringFieldUpdateOperationsInput | string | null
-    outstandingPrincipal?: IntFieldUpdateOperationsInput | number
-    monthlyInstalment?: IntFieldUpdateOperationsInput | number
+    outstandingPrincipal?: FloatFieldUpdateOperationsInput | number
+    monthlyInstalment?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
-    knownTotalCost?: NullableIntFieldUpdateOperationsInput | number | null
+    knownTotalCost?: NullableFloatFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     direction?: StringFieldUpdateOperationsInput | string
     debtType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -170781,11 +172053,11 @@ export namespace Prisma {
     lender?: NullableStringFieldUpdateOperationsInput | string | null
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
     assetFinanced?: NullableStringFieldUpdateOperationsInput | string | null
-    outstandingPrincipal?: IntFieldUpdateOperationsInput | number
-    monthlyInstalment?: IntFieldUpdateOperationsInput | number
+    outstandingPrincipal?: FloatFieldUpdateOperationsInput | number
+    monthlyInstalment?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
-    knownTotalCost?: NullableIntFieldUpdateOperationsInput | number | null
+    knownTotalCost?: NullableFloatFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     direction?: StringFieldUpdateOperationsInput | string
     debtType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -170814,11 +172086,11 @@ export namespace Prisma {
     lender?: NullableStringFieldUpdateOperationsInput | string | null
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
     assetFinanced?: NullableStringFieldUpdateOperationsInput | string | null
-    outstandingPrincipal?: IntFieldUpdateOperationsInput | number
-    monthlyInstalment?: IntFieldUpdateOperationsInput | number
+    outstandingPrincipal?: FloatFieldUpdateOperationsInput | number
+    monthlyInstalment?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
-    knownTotalCost?: NullableIntFieldUpdateOperationsInput | number | null
+    knownTotalCost?: NullableFloatFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     direction?: StringFieldUpdateOperationsInput | string
     debtType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -170842,7 +172114,7 @@ export namespace Prisma {
 
   export type FinDebtPaymentUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -170854,7 +172126,7 @@ export namespace Prisma {
   export type FinDebtPaymentUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     debtId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -170865,7 +172137,7 @@ export namespace Prisma {
   export type FinDebtPaymentUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     debtId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -171564,7 +172836,7 @@ export namespace Prisma {
   export type FinIncomeUpdateWithoutCategoryInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -171589,7 +172861,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -171613,7 +172885,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -171637,7 +172909,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subcategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -171674,7 +172946,7 @@ export namespace Prisma {
     kind?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subcategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -171709,7 +172981,7 @@ export namespace Prisma {
     kind?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subcategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -171740,9 +173012,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -171768,9 +173040,9 @@ export namespace Prisma {
     budgetId?: StringFieldUpdateOperationsInput | string
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -171794,9 +173066,9 @@ export namespace Prisma {
     budgetId?: StringFieldUpdateOperationsInput | string
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -171818,7 +173090,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -171851,7 +173123,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -171883,7 +173155,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -171912,9 +173184,9 @@ export namespace Prisma {
   export type FinProvisionUpdateWithoutCategoryInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    provisioned?: IntFieldUpdateOperationsInput | number
+    provisioned?: FloatFieldUpdateOperationsInput | number
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     reminderDays?: JsonNullValueInput | InputJsonValue
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -171938,9 +173210,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    provisioned?: IntFieldUpdateOperationsInput | number
+    provisioned?: FloatFieldUpdateOperationsInput | number
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     reminderDays?: JsonNullValueInput | InputJsonValue
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -171963,9 +173235,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    provisioned?: IntFieldUpdateOperationsInput | number
+    provisioned?: FloatFieldUpdateOperationsInput | number
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     reminderDays?: JsonNullValueInput | InputJsonValue
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -171988,7 +173260,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     valuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     liquidity?: StringFieldUpdateOperationsInput | string
@@ -172015,7 +173287,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     valuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     liquidity?: StringFieldUpdateOperationsInput | string
@@ -172041,7 +173313,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     valuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     liquidity?: StringFieldUpdateOperationsInput | string
@@ -172065,7 +173337,7 @@ export namespace Prisma {
   export type FinSharedExpenseUpdateWithoutCategoryInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -172076,7 +173348,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -172097,7 +173369,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     payerId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -172108,7 +173380,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     personalTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedById?: StringFieldUpdateOperationsInput | string
@@ -172127,7 +173399,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     payerId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -172138,7 +173410,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     personalTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedById?: StringFieldUpdateOperationsInput | string
@@ -172340,7 +173612,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subcategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -172376,7 +173648,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -172411,7 +173683,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -172443,7 +173715,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -172477,7 +173749,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -172509,7 +173781,7 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     frequency?: StringFieldUpdateOperationsInput | string
     nextDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -172540,11 +173812,11 @@ export namespace Prisma {
     templateKey?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    allocated?: IntFieldUpdateOperationsInput | number
-    monthlyContribution?: NullableIntFieldUpdateOperationsInput | number | null
+    allocated?: FloatFieldUpdateOperationsInput | number
+    monthlyContribution?: NullableFloatFieldUpdateOperationsInput | number | null
     progressStatus?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
     priority?: IntFieldUpdateOperationsInput | number
@@ -172572,11 +173844,11 @@ export namespace Prisma {
     templateKey?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    allocated?: IntFieldUpdateOperationsInput | number
-    monthlyContribution?: NullableIntFieldUpdateOperationsInput | number | null
+    allocated?: FloatFieldUpdateOperationsInput | number
+    monthlyContribution?: NullableFloatFieldUpdateOperationsInput | number | null
     progressStatus?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
     priority?: IntFieldUpdateOperationsInput | number
@@ -172603,11 +173875,11 @@ export namespace Prisma {
     templateKey?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    allocated?: IntFieldUpdateOperationsInput | number
-    monthlyContribution?: NullableIntFieldUpdateOperationsInput | number | null
+    allocated?: FloatFieldUpdateOperationsInput | number
+    monthlyContribution?: NullableFloatFieldUpdateOperationsInput | number | null
     progressStatus?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
     priority?: IntFieldUpdateOperationsInput | number
@@ -172633,11 +173905,11 @@ export namespace Prisma {
     lender?: NullableStringFieldUpdateOperationsInput | string | null
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
     assetFinanced?: NullableStringFieldUpdateOperationsInput | string | null
-    outstandingPrincipal?: IntFieldUpdateOperationsInput | number
-    monthlyInstalment?: IntFieldUpdateOperationsInput | number
+    outstandingPrincipal?: FloatFieldUpdateOperationsInput | number
+    monthlyInstalment?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
-    knownTotalCost?: NullableIntFieldUpdateOperationsInput | number | null
+    knownTotalCost?: NullableFloatFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     direction?: StringFieldUpdateOperationsInput | string
     debtType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -172667,11 +173939,11 @@ export namespace Prisma {
     lender?: NullableStringFieldUpdateOperationsInput | string | null
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
     assetFinanced?: NullableStringFieldUpdateOperationsInput | string | null
-    outstandingPrincipal?: IntFieldUpdateOperationsInput | number
-    monthlyInstalment?: IntFieldUpdateOperationsInput | number
+    outstandingPrincipal?: FloatFieldUpdateOperationsInput | number
+    monthlyInstalment?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
-    knownTotalCost?: NullableIntFieldUpdateOperationsInput | number | null
+    knownTotalCost?: NullableFloatFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     direction?: StringFieldUpdateOperationsInput | string
     debtType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -172700,11 +173972,11 @@ export namespace Prisma {
     lender?: NullableStringFieldUpdateOperationsInput | string | null
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
     assetFinanced?: NullableStringFieldUpdateOperationsInput | string | null
-    outstandingPrincipal?: IntFieldUpdateOperationsInput | number
-    monthlyInstalment?: IntFieldUpdateOperationsInput | number
+    outstandingPrincipal?: FloatFieldUpdateOperationsInput | number
+    monthlyInstalment?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     rate?: NullableFloatFieldUpdateOperationsInput | number | null
-    knownTotalCost?: NullableIntFieldUpdateOperationsInput | number | null
+    knownTotalCost?: NullableFloatFieldUpdateOperationsInput | number | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     direction?: StringFieldUpdateOperationsInput | string
     debtType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -172762,7 +174034,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     subcategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -172799,7 +174071,7 @@ export namespace Prisma {
     kind?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -172834,7 +174106,7 @@ export namespace Prisma {
     kind?: StringFieldUpdateOperationsInput | string
     accountId?: NullableStringFieldUpdateOperationsInput | string | null
     transferId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -172891,9 +174163,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -172919,9 +174191,9 @@ export namespace Prisma {
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -172945,9 +174217,9 @@ export namespace Prisma {
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    cap?: NullableIntFieldUpdateOperationsInput | number | null
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
     recurring?: BoolFieldUpdateOperationsInput | boolean
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -172978,7 +174250,7 @@ export namespace Prisma {
 
   export type FinDebtPaymentUpdateWithoutDebtInput = {
     id?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -172990,7 +174262,7 @@ export namespace Prisma {
   export type FinDebtPaymentUncheckedUpdateWithoutDebtInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173001,7 +174273,7 @@ export namespace Prisma {
   export type FinDebtPaymentUncheckedUpdateManyWithoutDebtInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173336,7 +174608,7 @@ export namespace Prisma {
   export type FinSharedExpenseUpdateWithoutSpaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -173347,7 +174619,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -173367,7 +174639,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     payerId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -173379,7 +174651,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     personalTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedById?: StringFieldUpdateOperationsInput | string
@@ -173397,7 +174669,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     payerId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -173409,7 +174681,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     personalTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedById?: StringFieldUpdateOperationsInput | string
@@ -173425,7 +174697,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
     period?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     setById?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -173437,7 +174709,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
     period?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     setById?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -173449,7 +174721,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
     period?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     setById?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -173530,7 +174802,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     memberId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173545,7 +174817,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     memberId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173560,7 +174832,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     memberId?: NullableStringFieldUpdateOperationsInput | string | null
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173573,7 +174845,7 @@ export namespace Prisma {
 
   export type FinSettlementUpdateWithoutSpaceInput = {
     id?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173591,7 +174863,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     fromId?: StringFieldUpdateOperationsInput | string
     toId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173607,7 +174879,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     fromId?: StringFieldUpdateOperationsInput | string
     toId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173622,7 +174894,7 @@ export namespace Prisma {
   export type FinSpaceGoalUpdateWithoutSpaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173640,7 +174912,7 @@ export namespace Prisma {
   export type FinSpaceGoalUncheckedUpdateWithoutSpaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173658,7 +174930,7 @@ export namespace Prisma {
   export type FinSpaceGoalUncheckedUpdateManyWithoutSpaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    target?: IntFieldUpdateOperationsInput | number
+    target?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173707,8 +174979,8 @@ export namespace Prisma {
   export type FinSpaceProvisionUpdateWithoutSpaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    plannedAmount?: IntFieldUpdateOperationsInput | number
-    alreadyProvisioned?: IntFieldUpdateOperationsInput | number
+    plannedAmount?: FloatFieldUpdateOperationsInput | number
+    alreadyProvisioned?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173722,8 +174994,8 @@ export namespace Prisma {
   export type FinSpaceProvisionUncheckedUpdateWithoutSpaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    plannedAmount?: IntFieldUpdateOperationsInput | number
-    alreadyProvisioned?: IntFieldUpdateOperationsInput | number
+    plannedAmount?: FloatFieldUpdateOperationsInput | number
+    alreadyProvisioned?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173737,8 +175009,8 @@ export namespace Prisma {
   export type FinSpaceProvisionUncheckedUpdateManyWithoutSpaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    plannedAmount?: IntFieldUpdateOperationsInput | number
-    alreadyProvisioned?: IntFieldUpdateOperationsInput | number
+    plannedAmount?: FloatFieldUpdateOperationsInput | number
+    alreadyProvisioned?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173881,7 +175153,7 @@ export namespace Prisma {
   export type FinSharedExpenseUpdateWithoutPayerInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -173892,7 +175164,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -173912,7 +175184,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -173924,7 +175196,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     personalTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedById?: StringFieldUpdateOperationsInput | string
@@ -173942,7 +175214,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -173954,7 +175226,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     personalTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedById?: StringFieldUpdateOperationsInput | string
@@ -173969,7 +175241,7 @@ export namespace Prisma {
   export type FinSharedExpenseUpdateWithoutRecordedByInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -173980,7 +175252,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -174001,7 +175273,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     payerId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -174013,7 +175285,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     personalTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -174031,7 +175303,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     payerId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     splitMode?: StringFieldUpdateOperationsInput | string
@@ -174043,7 +175315,7 @@ export namespace Prisma {
     collectiveCategory?: NullableStringFieldUpdateOperationsInput | string | null
     subCategory?: NullableStringFieldUpdateOperationsInput | string | null
     advanceTransferId?: NullableStringFieldUpdateOperationsInput | string | null
-    advanceOriginalValue?: NullableIntFieldUpdateOperationsInput | number | null
+    advanceOriginalValue?: NullableFloatFieldUpdateOperationsInput | number | null
     personalCreated?: BoolFieldUpdateOperationsInput | boolean
     personalTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
@@ -174056,8 +175328,8 @@ export namespace Prisma {
 
   export type FinSharedShareUpdateWithoutMemberInput = {
     id?: StringFieldUpdateOperationsInput | string
-    share?: IntFieldUpdateOperationsInput | number
-    weight?: NullableIntFieldUpdateOperationsInput | number | null
+    share?: FloatFieldUpdateOperationsInput | number
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expense?: FinSharedExpenseUpdateOneRequiredWithoutSharesNestedInput
   }
@@ -174065,22 +175337,22 @@ export namespace Prisma {
   export type FinSharedShareUncheckedUpdateWithoutMemberInput = {
     id?: StringFieldUpdateOperationsInput | string
     expenseId?: StringFieldUpdateOperationsInput | string
-    share?: IntFieldUpdateOperationsInput | number
-    weight?: NullableIntFieldUpdateOperationsInput | number | null
+    share?: FloatFieldUpdateOperationsInput | number
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type FinSharedShareUncheckedUpdateManyWithoutMemberInput = {
     id?: StringFieldUpdateOperationsInput | string
     expenseId?: StringFieldUpdateOperationsInput | string
-    share?: IntFieldUpdateOperationsInput | number
-    weight?: NullableIntFieldUpdateOperationsInput | number | null
+    share?: FloatFieldUpdateOperationsInput | number
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type FinSettlementUpdateWithoutFromInput = {
     id?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174098,7 +175370,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceId?: StringFieldUpdateOperationsInput | string
     toId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174114,7 +175386,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceId?: StringFieldUpdateOperationsInput | string
     toId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174128,7 +175400,7 @@ export namespace Prisma {
 
   export type FinSettlementUpdateWithoutToInput = {
     id?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174146,7 +175418,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceId?: StringFieldUpdateOperationsInput | string
     fromId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174162,7 +175434,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     spaceId?: StringFieldUpdateOperationsInput | string
     fromId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174176,7 +175448,7 @@ export namespace Prisma {
 
   export type FinSettlementUpdateWithoutRecordedByInput = {
     id?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174195,7 +175467,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     fromId?: StringFieldUpdateOperationsInput | string
     toId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174211,7 +175483,7 @@ export namespace Prisma {
     spaceId?: StringFieldUpdateOperationsInput | string
     fromId?: StringFieldUpdateOperationsInput | string
     toId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     settledAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174224,7 +175496,7 @@ export namespace Prisma {
 
   export type FinSpaceGoalContributionUpdateWithoutMemberInput = {
     id?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     contributedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174236,7 +175508,7 @@ export namespace Prisma {
   export type FinSpaceGoalContributionUncheckedUpdateWithoutMemberInput = {
     id?: StringFieldUpdateOperationsInput | string
     spaceGoalId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     contributedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174247,7 +175519,7 @@ export namespace Prisma {
   export type FinSpaceGoalContributionUncheckedUpdateManyWithoutMemberInput = {
     id?: StringFieldUpdateOperationsInput | string
     spaceGoalId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     contributedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174257,20 +175529,20 @@ export namespace Prisma {
 
   export type FinSpaceGoalShareUpdateWithoutMemberInput = {
     id?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     spaceGoal?: FinSpaceGoalUpdateOneRequiredWithoutSharesNestedInput
   }
 
   export type FinSpaceGoalShareUncheckedUpdateWithoutMemberInput = {
     id?: StringFieldUpdateOperationsInput | string
     spaceGoalId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
   }
 
   export type FinSpaceGoalShareUncheckedUpdateManyWithoutMemberInput = {
     id?: StringFieldUpdateOperationsInput | string
     spaceGoalId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
   }
 
   export type FinPaperInstrumentCreateManyPortfolioInput = {
@@ -174300,7 +175572,7 @@ export namespace Prisma {
   export type FinPaperInstrumentUpdateWithoutPortfolioInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    markPrice?: IntFieldUpdateOperationsInput | number
+    markPrice?: FloatFieldUpdateOperationsInput | number
     markedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -174311,7 +175583,7 @@ export namespace Prisma {
   export type FinPaperInstrumentUncheckedUpdateWithoutPortfolioInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    markPrice?: IntFieldUpdateOperationsInput | number
+    markPrice?: FloatFieldUpdateOperationsInput | number
     markedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -174322,7 +175594,7 @@ export namespace Prisma {
   export type FinPaperInstrumentUncheckedUpdateManyWithoutPortfolioInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
-    markPrice?: IntFieldUpdateOperationsInput | number
+    markPrice?: FloatFieldUpdateOperationsInput | number
     markedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -174333,8 +175605,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    unitPrice?: IntFieldUpdateOperationsInput | number
-    fee?: IntFieldUpdateOperationsInput | number
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    fee?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     decidedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174348,8 +175620,8 @@ export namespace Prisma {
     instrumentId?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    unitPrice?: IntFieldUpdateOperationsInput | number
-    fee?: IntFieldUpdateOperationsInput | number
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    fee?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     decidedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174362,8 +175634,8 @@ export namespace Prisma {
     instrumentId?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    unitPrice?: IntFieldUpdateOperationsInput | number
-    fee?: IntFieldUpdateOperationsInput | number
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    fee?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     decidedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174389,8 +175661,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    unitPrice?: IntFieldUpdateOperationsInput | number
-    fee?: IntFieldUpdateOperationsInput | number
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    fee?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     decidedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174404,8 +175676,8 @@ export namespace Prisma {
     portfolioId?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    unitPrice?: IntFieldUpdateOperationsInput | number
-    fee?: IntFieldUpdateOperationsInput | number
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    fee?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     decidedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174418,8 +175690,8 @@ export namespace Prisma {
     portfolioId?: StringFieldUpdateOperationsInput | string
     kind?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    unitPrice?: IntFieldUpdateOperationsInput | number
-    fee?: IntFieldUpdateOperationsInput | number
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    fee?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     decidedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174437,8 +175709,8 @@ export namespace Prisma {
 
   export type FinSharedShareUpdateWithoutExpenseInput = {
     id?: StringFieldUpdateOperationsInput | string
-    share?: IntFieldUpdateOperationsInput | number
-    weight?: NullableIntFieldUpdateOperationsInput | number | null
+    share?: FloatFieldUpdateOperationsInput | number
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     member?: FinSpaceMemberUpdateOneRequiredWithoutSharesNestedInput
   }
@@ -174446,16 +175718,16 @@ export namespace Prisma {
   export type FinSharedShareUncheckedUpdateWithoutExpenseInput = {
     id?: StringFieldUpdateOperationsInput | string
     memberId?: StringFieldUpdateOperationsInput | string
-    share?: IntFieldUpdateOperationsInput | number
-    weight?: NullableIntFieldUpdateOperationsInput | number | null
+    share?: FloatFieldUpdateOperationsInput | number
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type FinSharedShareUncheckedUpdateManyWithoutExpenseInput = {
     id?: StringFieldUpdateOperationsInput | string
     memberId?: StringFieldUpdateOperationsInput | string
-    share?: IntFieldUpdateOperationsInput | number
-    weight?: NullableIntFieldUpdateOperationsInput | number | null
+    share?: FloatFieldUpdateOperationsInput | number
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -174478,7 +175750,7 @@ export namespace Prisma {
 
   export type FinSpaceGoalContributionUpdateWithoutSpaceGoalInput = {
     id?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     contributedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174490,7 +175762,7 @@ export namespace Prisma {
   export type FinSpaceGoalContributionUncheckedUpdateWithoutSpaceGoalInput = {
     id?: StringFieldUpdateOperationsInput | string
     memberId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     contributedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174501,7 +175773,7 @@ export namespace Prisma {
   export type FinSpaceGoalContributionUncheckedUpdateManyWithoutSpaceGoalInput = {
     id?: StringFieldUpdateOperationsInput | string
     memberId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     contributedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174511,20 +175783,20 @@ export namespace Prisma {
 
   export type FinSpaceGoalShareUpdateWithoutSpaceGoalInput = {
     id?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
     member?: FinSpaceMemberUpdateOneRequiredWithoutGoalSharesNestedInput
   }
 
   export type FinSpaceGoalShareUncheckedUpdateWithoutSpaceGoalInput = {
     id?: StringFieldUpdateOperationsInput | string
     memberId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
   }
 
   export type FinSpaceGoalShareUncheckedUpdateManyWithoutSpaceGoalInput = {
     id?: StringFieldUpdateOperationsInput | string
     memberId?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
   }
 
   export type GlossaryTermRevisionCreateManyTermInput = {
@@ -176009,8 +177281,8 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    amountExcl?: IntFieldUpdateOperationsInput | number
-    taxAmount?: IntFieldUpdateOperationsInput | number
+    amountExcl?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -176038,8 +177310,8 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    amountExcl?: IntFieldUpdateOperationsInput | number
-    taxAmount?: IntFieldUpdateOperationsInput | number
+    amountExcl?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -176066,8 +177338,8 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    amountExcl?: IntFieldUpdateOperationsInput | number
-    taxAmount?: IntFieldUpdateOperationsInput | number
+    amountExcl?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -176087,7 +177359,7 @@ export namespace Prisma {
 
   export type FinBusinessPaymentUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     method?: NullableStringFieldUpdateOperationsInput | string | null
@@ -176110,7 +177382,7 @@ export namespace Prisma {
   export type FinBusinessPaymentUncheckedUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
     documentId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     method?: NullableStringFieldUpdateOperationsInput | string | null
@@ -176132,7 +177404,7 @@ export namespace Prisma {
   export type FinBusinessPaymentUncheckedUpdateManyWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
     documentId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     method?: NullableStringFieldUpdateOperationsInput | string | null
@@ -176185,8 +177457,8 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    amountExcl?: IntFieldUpdateOperationsInput | number
-    taxAmount?: IntFieldUpdateOperationsInput | number
+    amountExcl?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -176214,8 +177486,8 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    amountExcl?: IntFieldUpdateOperationsInput | number
-    taxAmount?: IntFieldUpdateOperationsInput | number
+    amountExcl?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -176242,8 +177514,8 @@ export namespace Prisma {
     label?: StringFieldUpdateOperationsInput | string
     issuedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    amountExcl?: IntFieldUpdateOperationsInput | number
-    taxAmount?: IntFieldUpdateOperationsInput | number
+    amountExcl?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
@@ -176285,7 +177557,7 @@ export namespace Prisma {
 
   export type FinBusinessPaymentUpdateWithoutDocumentInput = {
     id?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     method?: NullableStringFieldUpdateOperationsInput | string | null
@@ -176308,7 +177580,7 @@ export namespace Prisma {
   export type FinBusinessPaymentUncheckedUpdateWithoutDocumentInput = {
     id?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     method?: NullableStringFieldUpdateOperationsInput | string | null
@@ -176330,7 +177602,7 @@ export namespace Prisma {
   export type FinBusinessPaymentUncheckedUpdateManyWithoutDocumentInput = {
     id?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
-    value?: IntFieldUpdateOperationsInput | number
+    value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     method?: NullableStringFieldUpdateOperationsInput | string | null

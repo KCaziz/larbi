@@ -424,6 +424,7 @@ exports.Prisma.FinBudgetScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   label: 'label',
+  color: 'color',
   periodStart: 'periodStart',
   periodEnd: 'periodEnd',
   currency: 'currency',
@@ -1483,6 +1484,16 @@ exports.Prisma.FinPushSubscriptionScalarFieldEnum = {
   lastSentAt: 'lastSentAt'
 };
 
+exports.Prisma.FinExchangeRateScalarFieldEnum = {
+  id: 'id',
+  currency: 'currency',
+  rate: 'rate',
+  referenceDate: 'referenceDate',
+  source: 'source',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1712,6 +1723,7 @@ exports.Prisma.FinBudgetOrderByRelevanceFieldEnum = {
   id: 'id',
   userId: 'userId',
   label: 'label',
+  color: 'color',
   currency: 'currency',
   recurrence: 'recurrence',
   note: 'note',
@@ -2406,6 +2418,12 @@ exports.Prisma.FinPushSubscriptionOrderByRelevanceFieldEnum = {
   label: 'label'
 };
 
+exports.Prisma.FinExchangeRateOrderByRelevanceFieldEnum = {
+  id: 'id',
+  currency: 'currency',
+  source: 'source'
+};
+
 
 exports.Prisma.ModelName = {
   User: 'User',
@@ -2495,7 +2513,8 @@ exports.Prisma.ModelName = {
   FinSnapshot: 'FinSnapshot',
   FinMission: 'FinMission',
   FinMissionAttempt: 'FinMissionAttempt',
-  FinPushSubscription: 'FinPushSubscription'
+  FinPushSubscription: 'FinPushSubscription',
+  FinExchangeRate: 'FinExchangeRate'
 };
 
 /**

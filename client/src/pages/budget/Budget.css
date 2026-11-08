@@ -44,6 +44,9 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 12px;
+  /* A field keeps its own height: a long hint under one field no longer
+     stretches the select or the amount field beside it. */
+  align-items: start;
 }
 
 .budget-create-grid > * {

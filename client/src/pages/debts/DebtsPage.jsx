@@ -340,13 +340,18 @@ function DebtRow({ debt, accounts, budgetCategories, run }) {
 export function LoanForm({ direction, accounts, run }) {
   const { t } = useTranslation();
   const usable = accounts.filter((account) => !account.archivedAt && !account.liability && account.type !== 'AC-09');
-  const [state, setState] = useState({ counterparty: '', accountId: usable[0]?.id ?? '', amount: '', date: new Date().toISOString().slice(0, 10), dueDate: '' });
+  const [state, setState] = useState({ counterparty: '', accountId: usable[0]?.id ?? '', amount: '', date: new Date().toISOString().slice(0, 10), dueDate: '', instalment: '' });
   const account = usable.find((row) => row.id === state.accountId);
   if (usable.length === 0) return <p className="fin-hint">{t('debts.loans.noAccount')}</p>;
   const submit = (event) => {
     event.preventDefault();
     const value = toMinorUnits(state.amount, account?.currency ?? 'DZD');
     if (value === null) return;
+    const instalment = state.instalment ? toMinorUnits(state.instalment, account?.currency ?? 'DZD') : null;
+    // Recette R9-11: today at noon UTC is still ahead in the morning, and a
+    // loan dated ahead is refused — the moment of saving is used then.
+    const noon = new Date(`${state.date}T12:00:00.000Z`);
+    const occurredAt = noon > new Date() ? new Date() : noon;
     run(
       () =>
         api.post('/fin/debts/pret', {
@@ -354,8 +359,9 @@ export function LoanForm({ direction, accounts, run }) {
           counterparty: state.counterparty.trim(),
           accountId: state.accountId,
           value,
-          occurredAt: new Date(`${state.date}T12:00:00.000Z`).toISOString(),
+          occurredAt: occurredAt.toISOString(),
           dueDate: state.dueDate ? new Date(state.dueDate).toISOString() : null,
+          ...(instalment ? { monthlyInstalment: instalment } : {}),
         }),
       'debts.loans.saved',
     );
@@ -385,6 +391,7 @@ export function LoanForm({ direction, accounts, run }) {
         <label htmlFor="loan-due">{t('debts.loans.dueDate')}</label>
         <input id="loan-due" type="date" value={state.dueDate} onChange={(event) => setState({ ...state, dueDate: event.target.value })} />
       </div>
+      <AmountField id="loan-instalment" label={t('debts.loans.instalment')} value={state.instalment} currency={account?.currency ?? 'DZD'} onChange={(instalment) => setState({ ...state, instalment })} hint={t('debts.loans.instalmentHint')} />
       <Button type="submit">{t('debts.save')}</Button>
     </form>
   );

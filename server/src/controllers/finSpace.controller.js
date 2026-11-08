@@ -34,6 +34,7 @@ import {
 import { totalsByReality } from '../services/finance/dataModel.js';
 import { computed } from '../services/finance/contract.js';
 import { describeFormula } from '../services/finance/describe.js';
+import { assertSubscriber } from '../services/subscription.service.js';
 
 // Shared spaces (P6-13), screens P01 / P04 / CO01 / CP01 / FA01.
 //
@@ -133,6 +134,8 @@ export async function removeMember(req, res) {
 }
 
 export async function postInvite(req, res) {
+  // P10-06: inviting someone into a shared space is part of the subscription.
+  assertSubscriber(req.user, 'invite');
   const { invite, token } = await inviteToSpace(prisma, req.user.id, req.params.id, { role: req.body.role });
   // The token is returned ONCE and stored only as a hash. The caller puts it in
   // the link it sends; there is no way to read it back afterwards.

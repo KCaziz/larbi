@@ -19,5 +19,8 @@ export const firstIncomeSchema = z
     accountId: z.string().uuid().nullable().optional(),
     weekendRule: z.enum(['previous', 'next', 'none']).optional(),
     autoCredit: z.boolean().optional(),
+    // Already received (recette R9-06): the first payment is recorded at once on
+    // its account, so the account shows the income from the start.
+    received: z.boolean().optional(),
   })
   .strict();

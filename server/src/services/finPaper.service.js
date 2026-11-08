@@ -313,6 +313,8 @@ export function buildPortfolioView({ portfolio, instruments = [], trades = [], n
         quantity,
         markPrice: instrument.markPrice,
         markedAt: instrument.markedAt,
+        // P10-03: since when the position is held (its first purchase).
+        firstBoughtAt: tradesOf(instrument.id).find((trade) => trade.kind === 'buy')?.decidedAt ?? null,
         cost,
         value,
         // F039 — gain or loss on what is still held, fees included.
