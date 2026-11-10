@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useParams } from 'react-router-dom';
-import { Archive, ArchiveRestore, Pencil, TriangleAlert, Wallet } from 'lucide-react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Archive, ArchiveRestore, Pencil, Trash2, TriangleAlert, Wallet } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
+import { formatAmount, formatDate } from '../../lib/format.js';
 import AccountsBalanceChart from './AccountsBalanceChart.jsx';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
@@ -19,34 +20,73 @@ import CounterValue from '../../components/fincludia/CounterValue.jsx';
 // The balance (PB-F001, the server's), the alerts in words, the balance month
 // by month, and what can be done with the account: see its movements, correct
 // it, archive or restore it.
-// With some movement on the account this month, a side with none is zero — an
-// answer — not « non calculé ».
-function MonthFigures({ synthesis, t }) {
-  const { revenus, depenses, fluxNet } = synthesis;
-  if (!revenus || !depenses) return null;
-  const any = revenus.resultat !== null || depenses.resultat !== null;
-  const known = (answer) => (any && answer && answer.resultat === null ? { ...answer, resultat: 0 } : answer);
-  const income = known(revenus);
-  const spent = known(depenses);
-  const flow = any && fluxNet?.resultat === null ? { ...fluxNet, resultat: income.resultat - spent.resultat } : fluxNet;
+// Recette R10-09 / R10-10: what came in and went out of THIS account this
+// month, transfers included (for an account, a transfer moves its balance like
+// any movement), the net flow written as its calculation, and the planned
+// payments apart (not counted until they happen).
+function FlowFigures({ flow, t }) {
+  const answer = (value) => ({ resultat: value, unite: flow.account.currency, formule_id: null });
   return (
     <>
-      <FigureCard label={t('accounts.monthIncome')} answer={income} />
-      <FigureCard label={t('accounts.monthExpenses')} answer={spent} />
-      <FigureCard label={t('accounts.monthFlow')} answer={flow} />
+      <FigureCard label={t('accounts.monthIn')} answer={answer(flow.entrees.total)} />
+      <FigureCard label={t('accounts.monthOut')} answer={answer(flow.sorties.total)} />
+      <FigureCard label={t('accounts.monthFlow')} answer={answer(flow.fluxNet)} />
     </>
   );
 }
 
+function FlowExplained({ flow, t, language }) {
+  const money = (value) => formatAmount(language, value, flow.account.currency);
+  return (
+    <div className="accounts-explain">
+      <p>
+        {t('accounts.flowHow', {
+          inTotal: money(flow.entrees.total),
+          income: money(flow.entrees.revenus),
+          transfersIn: money(flow.entrees.virementsRecus),
+          outTotal: money(flow.sorties.total),
+          spent: money(flow.sorties.depenses),
+          transfersOut: money(flow.sorties.virementsEnvoyes),
+          net: money(flow.fluxNet),
+        })}
+      </p>
+      {flow.sortiesPrevues > 0 && <p className="fin-hint">{t('accounts.flowPlanned', { amount: money(flow.sortiesPrevues) })}</p>}
+    </div>
+  );
+}
+
+function LastMovements({ flow, t, language }) {
+  if (flow.derniers.length === 0) return <p className="fin-hint">{t('accounts.noMovementThisMonth')}</p>;
+  const sign = (kind) => (kind === 'income' || kind === 'transfer_in' ? '+' : '−');
+  return (
+    <ul className="accounts-last">
+      {flow.derniers.map((row) => (
+        <li key={row.id} className={row.planned ? 'accounts-last-planned' : undefined}>
+          <span>{formatDate(language, row.occurredAt)}</span>
+          <span>
+            {t(`accounts.kinds.${row.kind}`)}
+            {row.planned ? ` · ${t('accounts.plannedTag')}` : ''}
+          </span>
+          <span className="accounts-last-note">{row.note ?? ''}</span>
+          <strong>
+            {sign(row.kind)} {formatAmount(language, row.value, flow.account.currency)}
+          </strong>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function AccountDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [message, setMessage] = useState(location.state?.message ? { kind: 'ok', text: location.state.message } : null);
   const data = useApi('/fin/comptes?includeArchived=true');
   const account = data.data?.accounts.find((row) => row.id === id);
-  // Recette R9-06: the income, spending and flow of the month, this account only.
-  const month = useApi(`/fin/argent/synthese?accountId=${id}`);
+  // Recette R10-09: in and out of this account this month, transfers included.
+  const flow = useApi(`/fin/comptes/${id}/flux`);
   useDocumentMeta(account?.label ?? t('accounts.detailTitle'));
 
   if (data.status === 'loading' && !data.data) return <LoadingState />;
@@ -65,6 +105,18 @@ export default function AccountDetailPage() {
     }
   }
 
+  // Recette R10-08: delete for good, then back to the list with a message.
+  async function remove() {
+    if (!window.confirm(t('accounts.deleteConfirm', { label: account.label }))) return;
+    setMessage(null);
+    try {
+      await api.delete(`/fin/comptes/${id}`, { confirm: true });
+      navigate('/app/comptes', { state: { message: 'accounts.deleted' } });
+    } catch (err) {
+      setMessage({ kind: 'error', text: errorKey(err, { 422: 'accounts.errors.refused' }) });
+    }
+  }
+
   return (
     <>
       <PageHeader back={{ to: '/app/comptes', label: t('accounts.backToList') }} icon={Wallet} title={account.label} subtitle={typeLabel} maxWidth={1040} />
@@ -77,8 +129,9 @@ export default function AccountDetailPage() {
 
         <div className="fin-figure-grid">
           <FigureCard label={account.liability ? t('accounts.owed') : t('accounts.balance')} answer={account.solde} />
-          {month.data?.synthese && <MonthFigures synthesis={month.data.synthese} t={t} />}
+          {flow.data && <FlowFigures flow={flow.data} t={t} />}
         </div>
+        {flow.data && <FlowExplained flow={flow.data} t={t} language={i18n.language} />}
         {account.currency !== 'DZD' && account.solde.resultat !== null && <CounterValue value={account.contreValeur} />}
         <p className="accounts-meta">
           {!account.includeInTotal && t('accounts.notInTotal')}
@@ -96,7 +149,10 @@ export default function AccountDetailPage() {
           </ul>
         )}
 
-        {!account.liability && <AccountsBalanceChart accounts={[account]} />}
+        {!account.liability && <AccountsBalanceChart accounts={[account]} days={30} />}
+
+        <h2 className="accounts-section-title">{t('accounts.lastMovements')}</h2>
+        {flow.data && <LastMovements flow={flow.data} t={t} language={i18n.language} />}
 
         <div className="accounts-card-actions">
           <Link to={`/app/mouvements?compte=${account.id}`}>{t('accounts.history')}</Link>
@@ -106,6 +162,9 @@ export default function AccountDetailPage() {
           <button type="button" className="accounts-link-button" onClick={toggleArchive}>
             {account.archivedAt ? <ArchiveRestore size={14} aria-hidden="true" /> : <Archive size={14} aria-hidden="true" />}{' '}
             {t(account.archivedAt ? 'accounts.restore' : 'accounts.archive')}
+          </button>
+          <button type="button" className="accounts-link-button accounts-danger" onClick={remove}>
+            <Trash2 size={14} aria-hidden="true" /> {t('accounts.delete')}
           </button>
         </div>
 

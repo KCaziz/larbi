@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { Archive, ArchiveRestore, ArrowLeftRight, ChevronRight, Pencil, Plus, TriangleAlert, Wallet } from 'lucide-react';
+import { Archive, ArchiveRestore, ArrowLeftRight, ChevronRight, Pencil, Plus, Trash2, TriangleAlert, Wallet } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import AccountsBalanceChart from './AccountsBalanceChart.jsx';
@@ -220,6 +220,16 @@ function AccountCard({ account, types, run }) {
         >
           {account.archivedAt ? <ArchiveRestore size={14} aria-hidden="true" /> : <Archive size={14} aria-hidden="true" />}{' '}
           {t(account.archivedAt ? 'accounts.restore' : 'accounts.archive')}
+        </button>
+        {/* Recette R10-08: delete for good, after saying what goes with it. */}
+        <button
+          type="button"
+          className="accounts-link-button accounts-danger"
+          onClick={() => {
+            if (window.confirm(t('accounts.deleteConfirm', { label: account.label }))) run(() => api.delete(path, { confirm: true }), 'accounts.deleted');
+          }}
+        >
+          <Trash2 size={14} aria-hidden="true" /> {t('accounts.delete')}
         </button>
       </div>
 

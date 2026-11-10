@@ -13,6 +13,7 @@ import {
   Home,
   Landmark,
   PieChart,
+  PlusCircle,
   Receipt,
   Settings,
   ShieldCheck,
@@ -61,6 +62,9 @@ export const APP_NAV = [
   { key: 'budgets', to: '/app/budgets', labelKey: 'appNav.budgets', icon: PiggyBank, section: 'daily' },
   { key: 'calendar', to: '/app/calendrier', labelKey: 'appNav.calendar', icon: CalendarDays, section: 'daily' },
   { key: 'synthesis', to: '/app/synthese', labelKey: 'appNav.synthesis', icon: PieChart, section: 'analyse' },
+  // Recette R10-02: adding a movement, right under « Synthèse » (the « + » of
+  // the top bar stays where it is).
+  { key: 'addMovement', to: '/app/mouvements/nouveau', labelKey: 'appNav.addMovement', icon: PlusCircle, section: 'analyse' },
   { key: 'health', to: '/app/sante', labelKey: 'appNav.health', icon: HeartPulse, section: 'analyse' },
   { key: 'goals', to: '/app/objectifs', labelKey: 'appNav.goals', icon: Target, section: 'build' },
   { key: 'debts', to: '/app/dettes', labelKey: 'appNav.debts', icon: CreditCard, adultsOnly: true, section: 'build' },

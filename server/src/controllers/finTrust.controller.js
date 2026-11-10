@@ -11,6 +11,7 @@ import {
 import { listSessions, revokeOtherSessions, revokeSession } from '../services/session.service.js';
 import { assertCurrentPassword } from '../utils/reauth.js';
 import { HttpError } from '../utils/httpError.js';
+import { resetData, resetPreview } from '../services/finReset.service.js';
 
 // Trust and data centre (P6-19), screen C25.
 
@@ -59,6 +60,16 @@ export async function postDisconnectOthers(req, res) {
 export async function postExport(req, res) {
   await assertCurrentPassword(req);
   res.json(await exportAccountData(prisma, req.user.id));
+}
+
+// P11-01: what each part holds, then the erasure (password and consent).
+export async function getResetPreview(req, res) {
+  res.json(await resetPreview(prisma, req.user.id));
+}
+
+export async function postReset(req, res) {
+  await assertCurrentPassword(req);
+  res.json({ effaces: await resetData(prisma, req.user.id, req.body.parts) });
 }
 
 export async function postDeleteAccount(req, res) {

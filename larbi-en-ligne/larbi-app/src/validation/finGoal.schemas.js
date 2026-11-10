@@ -66,7 +66,8 @@ export const updateGoalSchema = z
 
 // A real contribution (P8-12): a transfer from one of the person's accounts.
 export const goalContributionSchema = z
-  .object({ fromAccountId: z.string().uuid(), value: allocatedAmount.min(1), occurredAt: z.coerce.date(), note: z.string().trim().min(1).max(300).nullable().optional() })
+  // P11-04: `planned` — a contribution for a later day, real once confirmed.
+  .object({ fromAccountId: z.string().uuid(), value: allocatedAmount.min(1), occurredAt: z.coerce.date(), note: z.string().trim().min(1).max(300).nullable().optional(), planned: z.boolean().optional() })
   .strict();
 
 // A scenario (C11): the person's own parameters, all optional, all bounded.

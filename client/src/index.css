@@ -467,3 +467,26 @@ main {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Recette R10-01 — the same spacing between the parts of every form, set once
+   here rather than page by page (zero specificity: a component that sets its
+   own spacing keeps it).
+   - A field (or a grid of fields) and the next one: 14px.
+   - The fields and the button that sends them: 16px above the button.
+   - Two check boxes in a row: one under the other, 10px apart, the box and its
+     words 8px apart (radio buttons are left alone: they are often pills side
+     by side, like the period selector). */
+:where(form) > :where(.fin-field, label, fieldset, [class$='-grid'], [class*='-grid ']) + :where(.fin-field, label, fieldset, [class$='-grid'], [class*='-grid ']) {
+  margin-block-start: 14px;
+}
+:where(form:not([class*='inline']):not([role='search'])) > :where(.fin-field, label, fieldset, p, [class$='-grid'], [class*='-grid ']) + :where(.btn, button[type='submit']) {
+  margin-block-start: 16px;
+}
+:where(label):has(> input[type='checkbox']) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+:where(label):has(> input[type='checkbox']) + :where(label):has(> input[type='checkbox']) {
+  margin-block-start: 10px;
+}

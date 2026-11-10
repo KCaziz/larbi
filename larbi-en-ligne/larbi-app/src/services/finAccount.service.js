@@ -263,9 +263,16 @@ async function accountSuggestions(prisma, userId, accounts) {
  * The balance of one account at the end of each of the last `months` months
  * (PB-F001 at each date): the curve of its detail screen (COM-03).
  */
-export async function accountBalanceHistory(prisma, userId, id, { months = 6, now = new Date() } = {}) {
+export async function accountBalanceHistory(prisma, userId, id, { months = 6, days = null, now = new Date() } = {}) {
   const account = await ownAccount(prisma, userId, id);
-  const ends = Array.from({ length: months }, (_, index) => {
+  // One point a day (the end of each day) when asked: recette R10-10.
+  const ends = days
+    ? Array.from({ length: days }, (_, index) => {
+        const daysAgo = days - 1 - index;
+        const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - daysAgo + 1) - 1);
+        return end > now ? now : end;
+      })
+    : Array.from({ length: months }, (_, index) => {
     const monthsAgo = months - 1 - index;
     const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - monthsAgo + 1, 1) - 1);
     return end > now ? now : end;
@@ -280,7 +287,7 @@ export async function accountBalanceHistory(prisma, userId, id, { months = 6, no
       before.reduce((acc, row) => ({ ...acc, [row.kind]: (acc[row.kind] ?? 0) + row.value }), {}),
     ).map(([kind, value]) => ({ kind, _sum: { value } }));
     // Before the opening date the account did not exist: no point, not 0.
-    return { month: end.toISOString().slice(0, 7), solde: end < account.openingDate ? null : accountBalance(account, groups) };
+    return { month: end.toISOString().slice(0, days ? 10 : 7), solde: end < account.openingDate ? null : accountBalance(account, groups) };
   });
   return { account: { id: account.id, label: account.label, currency: account.currency }, points };
 }
@@ -364,4 +371,71 @@ export async function deleteTransfer(prisma, userId, transferId, { reason } = {}
     await recordChange(tx, { userId, entity: TRANSFER_ENTITY, entityId: transferId, action: 'delete', field: 'deletedAt', after: true, reason: reason ?? null });
   });
   return { transferId };
+}
+
+/**
+ * Recette R10-09 / R10-10 — what came into ONE account and what went out of
+ * it over a period (the current month by default), transfers INCLUDED: for an
+ * account, a transfer moves its balance like any movement. (The global
+ * synthesis leaves transfers out, rightly: between two of one's own accounts
+ * they are neither income nor spending.) The net flow is « entrées − sorties »,
+ * and the planned payments are given apart: not counted until they happen.
+ */
+export async function accountFlow(prisma, userId, id, { from = null, to = null, now = new Date() } = {}) {
+  const account = await ownAccount(prisma, userId, id);
+  const start = from ?? new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const end = to ?? new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1) - 1);
+  const rows = await prisma.finTransaction.findMany({
+    where: { userId, accountId: id, deletedAt: null, occurredAt: { gte: start, lte: end } },
+    select: { id: true, kind: true, value: true, occurredAt: true, note: true, categoryId: true, planned: true, status: true },
+    orderBy: { occurredAt: 'desc' },
+  });
+  const real = rows.filter((row) => !row.planned && row.status === 'real' && row.occurredAt <= now);
+  const sum = (kind) => real.filter((row) => row.kind === kind).reduce((total, row) => total + row.value, 0);
+  const revenus = sum('income');
+  const virementsRecus = sum('transfer_in');
+  const depenses = sum('expense');
+  const virementsEnvoyes = sum('transfer_out');
+  const entrees = revenus + virementsRecus;
+  const sorties = depenses + virementsEnvoyes;
+  // A liability (card, loan) reads the other way round, like its balance.
+  const fluxNet = isLiability(account.type) ? sorties - entrees : entrees - sorties;
+  const plannedOut = rows.filter((row) => row.planned && row.kind !== 'income' && row.kind !== 'transfer_in').reduce((total, row) => total + row.value, 0);
+  return {
+    account: { id: account.id, label: account.label, currency: account.currency },
+    periode: { debut: start, fin: end },
+    entrees: { revenus, virementsRecus, total: entrees },
+    sorties: { depenses, virementsEnvoyes, total: sorties },
+    fluxNet,
+    mouvementsReels: real.length,
+    sortiesPrevues: plannedOut,
+    derniers: rows.slice(0, 10),
+  };
+}
+
+/**
+ * Recette R10-08 — delete an account for good (archiving keeps it). Its
+ * movements go with it, and a transfer with another account is removed on
+ * both sides, as deleting one transfer does: the other account's balance goes
+ * back to what it was without it. Everything is a logical deletion with its
+ * journal line, so the correction stays traceable.
+ */
+export async function deleteAccount(prisma, userId, id, { reason } = {}) {
+  await ownAccount(prisma, userId, id);
+  const now = new Date();
+  return prisma.$transaction(async (tx) => {
+    const rows = await tx.finTransaction.findMany({ where: { userId, accountId: id, deletedAt: null }, select: { id: true, transferId: true } });
+    const transferIds = [...new Set(rows.map((row) => row.transferId).filter(Boolean))];
+    const others = transferIds.length === 0 ? [] : await tx.finTransaction.findMany({ where: { userId, transferId: { in: transferIds }, accountId: { not: id }, deletedAt: null }, select: { id: true } });
+    const all = [...rows, ...others];
+    if (all.length > 0) {
+      await tx.finTransaction.updateMany({ where: { id: { in: all.map((row) => row.id) } }, data: { deletedAt: now } });
+      for (const row of all) {
+        await recordChange(tx, { userId, entity: 'transaction', entityId: row.id, action: 'delete', field: 'deletedAt', after: true, reason: reason ?? 'account deleted' });
+      }
+    }
+    await tx.finAccount.update({ where: { id }, data: { deletedAt: now } });
+    await recordChange(tx, { userId, entity: ACCOUNT_ENTITY, entityId: id, action: 'delete', field: 'deletedAt', after: true, reason: reason ?? null });
+    return { id, movements: rows.length, transfers: transferIds.length };
+  });
 }

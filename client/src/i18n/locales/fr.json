@@ -2557,6 +2557,12 @@
       "status": {
         "draft": "Brouillon",
         "published": "Publiée"
+      },
+      "audience": "Où l’afficher",
+      "audiences": {
+        "site": "Site (FAQ publique)",
+        "app": "Application (aide « Une question ? »)",
+        "both": "Les deux"
       }
     },
     "searchPlaceholder": "Posez votre question…",
@@ -2809,8 +2815,8 @@
     "notComputed": "non calculé",
     "simulationBadge": "SIMULATION",
     "optional": "(facultatif)",
-    "months_one": "{{count}} mois",
-    "months_other": "{{count}} mois",
+    "months_one": "{{count, number(maximumFractionDigits: 2)}} mois",
+    "months_other": "{{count, number(maximumFractionDigits: 2)}} mois",
     "why": "Pourquoi ?",
     "whyGeneric": "Ce chiffre est calculé automatiquement à partir de vos données, jamais estimé.",
     "whyByFormula": {
@@ -2979,7 +2985,8 @@
       "movements": "enregistrez vos dépenses et revenus",
       "health": "voir ce qui manque",
       "assets": "ajoutez ce que vous possédez",
-      "formation": "commencez une formation"
+      "formation": "commencez une formation",
+      "incomeToConfirm": "confirmez votre revenu quand il arrive"
     }
   },
   "finOnboarding": {
@@ -3387,7 +3394,29 @@
       "share": "Part de la cible",
       "reachedWholeYears": "Objectif atteint en {{count}} mois ({{years}} an(s)).",
       "reachedYearsMonths": "Objectif atteint en {{count}} mois ({{years}} an(s) et {{months}} mois)."
-    }
+    },
+    "planner": {
+      "title": "Simuler mon épargne",
+      "byDateTitle": "Combien mettre de côté par mois ?",
+      "byDateLabel": "Je veux l’atteindre le",
+      "byDateResult_one": "Il faut mettre de côté {{amount}} ce mois-ci.",
+      "byDateResult_other": "Il faut mettre de côté {{amount}} par mois pendant {{count}} mois.",
+      "alreadyThere": "Ce que vous avez déjà mis de côté suffit à cette date.",
+      "keepByDate": "Garder ce montant et cette date",
+      "byMonthlyTitle": "En combien de temps ?",
+      "byMonthlyLabel": "Je mets de côté chaque mois",
+      "byMonthlyResult_one": "Objectif atteint en {{count}} mois, vers {{date}}.",
+      "byMonthlyResult_other": "Objectif atteint en {{count}} mois, vers {{date}}.",
+      "byMonthlyNever": "Au bout de {{years}} ans, vous auriez {{capital}} : augmentez le montant pour l’atteindre.",
+      "keepMonthly": "Garder ce montant par mois",
+      "kept": "C’est noté sur l’objectif.",
+      "how": "Calcul : ce qu’il reste à mettre de côté (la cible {{target}} moins les {{capital}} déjà mis de côté), réparti sur les mois jusqu’à la date. Rien n’est enregistré tant que vous ne cliquez pas « Garder ».",
+      "howRate": "Calcul : à partir des {{capital}} déjà mis de côté et du taux de l’objectif (les intérêts s’ajoutent chaque mois), ce qu’il faut verser par mois pour arriver à {{target}}. Rien n’est enregistré tant que vous ne cliquez pas « Garder »."
+    },
+    "plannedContribution": "Planifier pour une date à venir",
+    "plannedContributionHint": "Le versement apparaîtra dans le calendrier et dans « Aujourd’hui » à sa date ; l’argent ne bouge qu’une fois que vous confirmez qu’il est fait.",
+    "planContribution": "Planifier le versement",
+    "contributionPlanned": "Versement planifié : il vous sera proposé à sa date."
   },
   "debts": {
     "title": "Dettes",
@@ -3537,7 +3566,11 @@
         "manage": "Y verser de l’argent",
         "todo": "Créez l’objectif « Fonds d’urgence » : sa cible sera de {{amount}}. Vous y verserez ensuite de l’argent, à votre rythme.",
         "after": "Faites d’abord les deux étapes ci-dessus : elles fixent le montant à atteindre.",
-        "create": "Créer mon fonds d’urgence"
+        "create": "Créer mon fonds d’urgence",
+        "open": "Ouvrir « {{label}} » pour y verser de l’argent",
+        "delete": "Supprimer mon fonds d’urgence",
+        "deleteConfirm": "Supprimer l’objectif « {{label}} » ? Votre réserve ne sera plus mesurée tant qu’un fonds d’urgence n’existe pas. L’argent déjà versé reste sur son compte (vous pouvez aussi supprimer ce compte dans Mes comptes).",
+        "deleted": "Fonds d’urgence supprimé."
       }
     },
     "howTo": {
@@ -3559,7 +3592,8 @@
       "gap": "Reste à mettre de côté = montant visé − argent de votre fonds d’urgence.",
       "date": "Date estimée = aujourd’hui + (reste à mettre de côté ÷ épargne mensuelle prévue pour le fonds).",
       "excluded": "Ne comptent pas : le portefeuille fictif, les biens difficiles à vendre (immobilier, véhicule…) et l’argent réservé à d’autres objectifs."
-    }
+    },
+    "summary": "En bref : votre fonds d’urgence contient {{fund}}. Vos dépenses essentielles sont de {{essential}} par mois, donc il couvre {{months}} mois. Vous visez {{target}} mois, soit {{targetAmount}} : il manque {{gap}}. Pour le remplir, versez-y de l’argent depuis l’objectif « Fonds d’urgence »."
   },
   "calendar": {
     "title": "Calendrier financier",
@@ -4725,6 +4759,31 @@
       "disconnect": "Déconnecter",
       "disconnectOthers": "Déconnecter tous les autres appareils",
       "ended": "Appareil déconnecté."
+    },
+    "reset": {
+      "title": "Repartir de zéro",
+      "intro": "Effacez toutes vos données financières, ou seulement une partie (vos dettes, vos budgets…), pour tout redéfinir. C’est définitif.",
+      "choose": "Ce que vous voulez effacer",
+      "all": "Tout",
+      "parts": {
+        "movements": "Mouvements (dépenses, revenus, virements) — {{count}}",
+        "accounts": "Comptes, avec leurs mouvements — {{count}}",
+        "incomes": "Revenus déclarés et leurs versements réguliers — {{count}}",
+        "calendar": "Paiements réguliers et provisions — {{count}}",
+        "budgets": "Budgets et leurs enveloppes — {{count}}",
+        "goals": "Objectifs, dont le fonds d’urgence — {{count}}",
+        "debts": "Dettes, prêts et emprunts — {{count}}",
+        "wealth": "Patrimoine déclaré — {{count}}",
+        "paper": "Portefeuille fictif (opérations) — {{count}}",
+        "categories": "Vos catégories et personnalisations — {{count}}"
+      },
+      "accountsNote": "Effacer les comptes efface aussi tous leurs mouvements. Objectifs, dettes et paiements réguliers restent, sans leur compte.",
+      "keeps": "Restent : votre profil, vos paramètres, votre formation, vos espaces partagés et votre abonnement.",
+      "consent": "Je comprends que ces données seront effacées définitivement.",
+      "submit": "Effacer définitivement",
+      "done": "C’est fait : les données choisies sont effacées. Vous pouvez tout redéfinir.",
+      "nothingChosen": "Cochez au moins une partie à effacer.",
+      "consentMissing": "Cochez la case de confirmation."
     }
   },
   "search": {
@@ -4922,7 +4981,8 @@
     "settingsPremium": "Accès premium",
     "backTo": "Retour : {{page}}",
     "learnHub": "Apprendre",
-    "mySpaceIntro": "Votre profil, vos préférences, la confidence de vos données et votre abonnement, au même endroit."
+    "mySpaceIntro": "Votre profil, vos préférences, la confidence de vos données et votre abonnement, au même endroit.",
+    "addMovement": "Ajouter un mouvement"
   },
   "accounts": {
     "title": "Mes comptes",
@@ -5000,7 +5060,25 @@
     "explainTotal": "Solde total : l’argent disponible, c’est-à-dire la somme des comptes « comptés dans le total » (les comptes gardés à part n’y sont pas).",
     "explainNet": "Position nette : ce que vous possédez moins ce que vous devez. Ce que vous possédez : les comptes comptés dans le patrimoine (comptes courants, espèces, épargne, sommes prêtées à quelqu’un). Ce que vous devez : les emprunts et crédits suivis sur un compte.",
     "explainNetFigures": "Aujourd’hui : {{assets}} possédés − {{liabilities}} dus = {{net}}.",
-    "foreignHint": "Le compte reste en devise : ses mouvements se saisissent dans cette devise. Il compte dans votre patrimoine pour sa contre-valeur en dinars au cours officiel de la Banque d’Algérie (jamais au cours parallèle), mais pas dans votre solde en dinars."
+    "foreignHint": "Le compte reste en devise : ses mouvements se saisissent dans cette devise. Il compte dans votre patrimoine pour sa contre-valeur en dinars au cours officiel de la Banque d’Algérie (jamais au cours parallèle), mais pas dans votre solde en dinars.",
+    "monthIn": "Entrées du mois",
+    "monthOut": "Sorties du mois",
+    "flowHow": "Flux net du mois = entrées − sorties. Entrées : {{inTotal}} (revenus {{income}} + virements reçus {{transfersIn}}). Sorties : {{outTotal}} (dépenses {{spent}} + virements envoyés {{transfersOut}}). Flux net : {{net}}.",
+    "flowPlanned": "S’y ajouteront {{amount}} de paiements planifiés ce mois-ci, comptés seulement une fois réalisés.",
+    "lastMovements": "Mouvements du mois",
+    "noMovementThisMonth": "Aucun mouvement sur ce compte ce mois-ci.",
+    "plannedTag": "planifié",
+    "kinds": {
+      "income": "Revenu",
+      "expense": "Dépense",
+      "transfer_in": "Virement reçu",
+      "transfer_out": "Virement envoyé"
+    },
+    "chartTitleDays_one": "Évolution du solde (dernier jour)",
+    "chartTitleDays_other": "Évolution du solde, jour par jour ({{count}} derniers jours)",
+    "delete": "Supprimer",
+    "deleted": "Compte supprimé, avec ses mouvements.",
+    "deleteConfirm": "Supprimer définitivement « {{label}} » ? Ses mouvements sont supprimés avec lui, et les virements avec vos autres comptes sont annulés des deux côtés. Pour seulement le ranger, utilisez « Archiver »."
   },
   "health": {
     "title": "Santé financière",
@@ -5102,7 +5180,10 @@
       "to_verify": "Quelque chose cloche (montant, doublon, opération inconnue) : à revoir plus tard."
     },
     "groupFilter": "Catégorie : {{group}}",
-    "groupFilterClear": "Retirer"
+    "groupFilterClear": "Retirer",
+    "openingsTitle": "Soldes de départ",
+    "openingLine": "Solde de départ du compte « {{label}} »",
+    "openingsHint": "L’argent déjà présent sur un compte à son ouverture. Il compte dans le solde du compte, pas dans vos revenus du mois : ce n’est pas une rentrée d’argent. Pour le corriger, modifiez le compte."
   },
   "appHome": {
     "title": "Accueil",
@@ -5145,7 +5226,9 @@
     "quickAddClose": "Fermer l’ajout rapide",
     "quickAddFull": "Ouvrir le formulaire complet",
     "miniFlow": "Flux net des derniers mois",
-    "ringNothing": "Aucun mouvement"
+    "ringNothing": "Aucun mouvement",
+    "incomeExpected": "Encore attendu ce mois : {{amount}}.",
+    "incomeConfirm": "Confirmer à réception"
   },
   "finProfile": {
     "incomeRegularity": "Régularité de mon revenu",
@@ -5539,7 +5622,9 @@
       "confirmHint": "Recommandé : « me demander de confirmer », le jour venu.",
       "dateMissing": "Indiquez le jour où le revenu arrive.",
       "accountMissing": "Choisissez le compte sur lequel le revenu arrive.",
-      "saved": "Le revenu arrive le {{date}} sur « {{account}} » ({{mode}})."
+      "saved": "Le revenu arrive le {{date}} sur « {{account}} » ({{mode}}).",
+      "accountMissingHere": "Votre compte courant n’est pas dans la liste ?",
+      "createAccount": "Le créer, puis revenir ici"
     },
     "plan": {
       "title": "Mon plan du premier revenu",
@@ -5602,7 +5687,12 @@
     "errors": {
       "refused": "Ce revenu n’a pas pu être enregistré."
     },
-    "sourcesChart": "Revenus prévus par mois, selon la source"
+    "sourcesChart": "Revenus prévus par mois, selon la source",
+    "comesIn": "Arrive sur « {{account}} » — prochain versement le {{date}}",
+    "notLinked": "Pas encore relié à un compte : il n’arrive nulle part. Cliquez « Modifier » et choisissez son compte pour qu’il soit proposé à chaque échéance.",
+    "linkHint": "À chaque échéance, ce revenu vous est proposé dans « Aujourd’hui » pour confirmer qu’il est arrivé : il est alors compté dans vos revenus et sur le compte, une seule fois.",
+    "deleted": "Revenu supprimé.",
+    "deleteConfirm": "Supprimer « {{label}} » ? Il ne sera plus proposé. Les versements déjà reçus restent dans vos mouvements."
   },
   "shared": {
     "backToSpaces": "Mes espaces",

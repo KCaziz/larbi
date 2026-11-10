@@ -286,7 +286,7 @@ export function IncomeStep({ currency, run }) {
         </select>
         {own.length === 0 && (
           <p className="fin-hint">
-            {t('firstSteps.income.noAccount')} <Link to="/app/comptes/nouveau">{t('accounts.add')}</Link>
+            {t('firstSteps.income.noAccount')} <Link to="/app/comptes/nouveau?retour=/app/parametres/premiers-pas">{t('accounts.add')}</Link>
           </p>
         )}
       </div>
@@ -387,6 +387,10 @@ function SalaryStep({ salary, currency, run, done }) {
             </option>
           ))}
         </select>
+        {/* Recette R10-03: the current account is created here, then offered. */}
+        <p className="fin-hint">
+          {t('firstSteps.salary.accountMissingHere')} <Link to="/app/comptes/nouveau?retour=/app/parametres/premiers-pas">{t('firstSteps.salary.createAccount')}</Link>
+        </p>
       </div>
       <div className="fin-field">
         <label htmlFor="salary-mode">{t('calendar.fields.creationMode')}</label>

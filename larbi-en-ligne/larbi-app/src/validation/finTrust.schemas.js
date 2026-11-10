@@ -12,3 +12,12 @@ export const sensitiveActionSchema = z.object({ consent: z.literal(true), curren
 export const deleteAccountSchema = z.object({ consent: z.literal(true), currentPassword: z.string().min(1), email: z.string().email() }).strict();
 
 export const withdrawSharingSchema = z.object({ spaceId: z.string().uuid(), kind: z.enum(SHAREABLE_KINDS), currentPassword: z.string().min(1) }).strict();
+
+// P11-01: start again, all or some parts (password and consent, like export).
+export const resetSchema = z
+  .object({
+    consent: z.literal(true),
+    currentPassword: z.string().min(1),
+    parts: z.array(z.enum(['all', 'movements', 'accounts', 'incomes', 'calendar', 'budgets', 'goals', 'debts', 'wealth', 'paper', 'categories'])).min(1).max(11),
+  })
+  .strict();

@@ -96,6 +96,13 @@ export async function getHome(req, res) {
   const calendarData = await loadCalendarData(prisma, req.user.id, { from, to });
   const upcoming = collectEvents({ ...calendarData, from, to, currency, occurrencesOf: occurrencesWithOutcome }).slice(0, 5);
 
+  // Recette R10-05: the regular income of the period not confirmed yet — what
+  // is still expected (never added to « revenus », which is what arrived).
+  const periodData = await loadCalendarData(prisma, req.user.id, { from: period.start, to: period.end });
+  const expected = collectEvents({ ...periodData, from: period.start, to: period.end, currency, occurrencesOf: occurrencesWithOutcome })
+    .filter((event) => event.kind === 'recurrence' && event.inflow && (!req.query.accountId || event.accountId === req.query.accountId));
+  const revenusAttendus = { total: expected.reduce((sum, event) => sum + event.value, 0), count: expected.length };
+
   res.json({
     periode: { debut: period.start, fin: period.end },
     comptes: accounts,
@@ -106,6 +113,7 @@ export async function getHome(req, res) {
       fluxNet: synthesis.fluxNet,
       revenusPrevus: synthesis.revenusPrevus,
       revenusDeclares,
+      revenusAttendus,
       prevuReel,
       tendance: synthesis.tendance,
       depensesParCategorie: synthesis.repartition.map(describe),

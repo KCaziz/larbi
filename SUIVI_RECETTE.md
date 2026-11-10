@@ -26,7 +26,8 @@ Priorités : `🔴 high` (bloque l'utilisation) · `🟡 medium` (gêne réelle)
 | R7 — Graphiques | 5 | 5 |
 | R8 — Deuxième passage (2026-11-05) | 12 | 12 |
 | R9 — Troisième passage (2026-11-08) | 19 | 18 |
-| **Total** | **81** | **80** |
+| R10 — Quatrième passage (2026-11-10) | 12 | 12 |
+| **Total** | **93** | **92** |
 
 R9 : reste R9-18 (fiche de paie), aucun défaut reproduit, à préciser avec le client.
 
@@ -738,3 +739,93 @@ Deux causes trouvées :
 - les actifs déclarés « espèces », « compte » ou « CCP » sont écartés dès qu’il existe un seul compte, alors que le compte « Espèces » est créé automatiquement à la première dépense : un CCP ou un compte bancaire déclaré disparaît sans qu’aucun compte ne le représente.
 
 À faire : un découvert compte comme une dette ; un actif déclaré n’est écarté que si un compte du même type le représente ; la page dit ce qui n’est pas compté et pourquoi.
+
+---
+
+# R10 — Quatrième passage de recette (2026-11-10)
+
+Les remarques de `test.txt` (4e passage) qui sont des défauts ou des réglages de l'existant. Les nouvelles fonctionnalités du même passage sont en Phase 11 de [TASKS.md](TASKS.md) : réinitialiser tout ou une partie (l. 2), deux FAQ site / application (l. 7), simulateurs d'épargne des objectifs (l. 15), versements futurs planifiés vers un objectif (l. 16).
+
+### R10-01 — Espacements uniformes entre champs, cases et boutons
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 1 (4e passage)
+- Réalisé (2026-11-08) : Règle commune (`index.css`), pas page par page : 14 px entre deux champs qui se suivent, 16 px entre les champs et le bouton qui les envoie, et deux cases à cocher qui se suivent l’une sous l’autre, à 10 px, la case et son texte à 8 px. Vérifié : profil de risque du portefeuille (bouton à 16 px des champs), budget (« Reporter le reste » et « Reporter aussi » l’une sous l’autre). Les boutons radio (pastilles de période) ne sont pas touchés.
+
+Exemples : « Profil de risque pédagogique » (`/app/portefeuille`) entre les champs et le bouton ; le budget entre « Reporter le reste » et « Reporter aussi ». Règle commune : même écart entre deux champs, entre un champ et le bouton, et entre deux cases à cocher, partout.
+
+### R10-02 — « + » (ajouter un mouvement) juste sous « Synthèse »
+- Statut : `✅ done`
+- Priorité : `🟢 low`
+- Origine : `test.txt` l. 3 (4e passage)
+- Réalisé (2026-11-08) : « Ajouter un mouvement » est dans le menu, juste sous « Synthèse » ; le « + » de la barre du haut reste où il est, et le bouton « + Dépenses & revenus » de l’Accueil aussi.
+
+Le « + » de la barre du haut reste où il est ; l'ajout d'un mouvement doit aussi être disponible juste sous « Synthèse » (menu latéral).
+
+### R10-03 — Premier revenu : impossible de choisir son compte courant
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 4 (4e passage)
+- Réalisé (2026-11-08) : L’étape « Confirmer mon revenu » des Premiers pas propose tous les comptes ; quand le compte courant n’existe pas encore, un lien « Le créer, puis revenir ici » ouvre la création de compte et ramène aux Premiers pas, où il est alors proposé (même lien à l’étape du premier revenu). La page « Revenus prévus » propose désormais elle aussi le choix du compte (voir R10-05).
+
+Un compte courant créé, puis le salaire renseigné : le choix du compte ne propose pas ce compte.
+
+### R10-04 — Solde d'ouverture d'un compte absent de Mouvements
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 5 (4e passage)
+- Réalisé (2026-11-08) : Mouvements affiche un bloc « Soldes de départ » : le solde d’ouverture de chaque compte, à sa date, qui suit les filtres de compte et de dates, avec la phrase qui dit qu’il compte dans le solde du compte mais pas dans les revenus du mois (ce n’est pas une rentrée d’argent).
+
+Un compte courant créé avec 60 000 DA : rien n'apparaît dans `/mouvements`. Le solde de départ doit être visible (sans être compté comme un revenu du mois, ce qu'il n'est pas).
+
+### R10-05 — Le revenu déclaré (salaire) n'est compté nulle part
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 6, 8 et 18 (4e passage)
+- Réalisé (2026-11-08) : Cause : un revenu déclaré ailleurs que dans les Premiers pas (page « Revenus prévus ») n’avait ni compte ni paiement régulier : il n’arrivait jamais sur un compte et ne comptait que dans « revenus prévus » ; et quand aucun revenu n’était encore reçu, « non calculé — ajoutez vos revenus » renvoyait vers cette page, d’où le salaire ressaisi en double. Désormais un revenu déclaré a toujours son paiement régulier, lié (nouvelle colonne, migration `20261110090000_fin_recurrence_income`, liens existants repris) : compte et prochain versement se choisissent, « Je l’ai déjà reçu » le crédite une fois, il est proposé à chaque échéance dans « Aujourd’hui », et le modifier, l’archiver ou le supprimer (nouveau bouton) agit sur les deux. La page dit où et quand il arrive (prochaine échéance non confirmée) ou qu’il n’est relié à aucun compte. Sur l’Accueil, sous « Revenus » : « Encore attendu ce mois : X — Confirmer à réception » ; et sans revenu reçu mais avec des revenus déclarés, le conseil devient « confirmez votre revenu quand il arrive ». Tests : `finRecette10.test.js`.
+
+« Revenu 0 » malgré le premier revenu renseigné ; un revenu prévu ne s'ajoute nulle part ; le salaire est redemandé alors qu'il a déjà été donné ; un salaire prévu ne peut être ni modifié ni retiré. Le revenu déclaré doit compter partout où il a sa place (sans doublon avec le revenu reçu), se modifier et se retirer.
+
+### R10-06 — Nombres avec trop de décimales
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 9 (4e passage)
+- Réalisé (2026-11-08) : Au plus deux décimales, au format de la langue, partout où un nombre de mois ou un nombre brut s’affiche : textes « N mois » (formatés par la traduction), jauge du fonds d’urgence, cartes chiffrées en points ou en nombre. « 1.2195121951219512 mois » devient « 1,22 mois ».
+
+« Mois de réserve 1.2195121951219512 mois ». Partout dans l'application : au plus 2 décimales, au format de la langue.
+
+### R10-07 — Fonds d'urgence : logique incomprise, suppression impossible
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 10 (4e passage)
+- Réalisé (2026-11-08) : La page du fonds d’urgence commence par « En bref », avec vos chiffres : ce que contient le fonds, les dépenses essentielles d’un mois, combien de mois il couvre, la cible et ce qu’il manque, et comment le remplir. À l’étape 3, « Ouvrir … pour y verser de l’argent » et « Supprimer mon fonds d’urgence » (avec confirmation ; l’argent reste sur son compte). Le fonds n’apparaît pas dans la liste des objectifs, d’où l’impossibilité de le supprimer avant.
+
+### R10-08 — Comptes : « Supprimer » à côté d'« Archiver »
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 11 (4e passage)
+- Réalisé (2026-11-08) : « Supprimer » à côté d’« Archiver », sur la liste et sur la fiche d’un compte, avec confirmation : le compte part avec ses mouvements, et un virement avec un autre compte est annulé des deux côtés (comme la suppression d’un virement), donc le solde de l’autre compte redevient ce qu’il était. Suppression logique, journalisée. Vérifié : virement de 1 000 DA vers un compte supprimé, l’autre compte revient de 81 000 à 82 000 DA. Tests : `finRecette10.test.js`.
+
+### R10-09 — Fiche d'un compte : expliquer le flux net du mois
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 12 (4e passage)
+- Réalisé (2026-11-08) : La fiche d’un compte donne les entrées, les sorties et le flux net du mois de CE compte, virements compris (pour un compte, un virement fait bouger le solde comme un autre mouvement), et la phrase « Flux net du mois = entrées − sorties » avec le détail (revenus + virements reçus, dépenses + virements envoyés) ; les paiements planifiés sont dits à part, comptés une fois réalisés.
+
+### R10-10 — Fiche d'un compte : graphiques et historique ne bougent pas après des mouvements
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 13 (4e passage)
+- Réalisé (2026-11-08) : Cause : la courbe et l’historique étaient par mois, et les chiffres du mois venaient de la synthèse générale, qui laisse les virements de côté : un compte qui ne fait que des virements ne bougeait pas. La fiche montre maintenant l’évolution du solde jour par jour sur 30 jours (nouveau paramètre `jours` de l’historique), ses entrées et sorties virements compris, et la liste des mouvements du mois. Vérifié : salaire, loyer et deux prêts apparaissent, la courbe monte et descend aux bons jours. Tests : `finRecette10.test.js`.
+
+### R10-11 — Sélecteur de catégorie : la recherche ne marche pas toujours
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 14 (4e passage)
+- Réalisé (2026-11-08) : Causes : une espace en fin de recherche (fréquente sur téléphone) et l’apostrophe typographique des noms (« Fonds d’urgence ») face à l’apostrophe droite du clavier faisaient qu’aucun résultat ne sortait. La recherche ignore maintenant les espaces en trop, accents, majuscules et la forme de l’apostrophe, et cherche chaque mot séparément (« courses ali » trouve « Courses alimentaires »).
+
+### R10-12 — Vérifier : flux net = encaissements − décaissements
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 17 (4e passage)
+- Réalisé (2026-11-08) : Vérifié : flux net = revenus encaissés − dépenses décaissées (80 000 − 18 000 = 62 000 sur le compte de test, Accueil et Synthèse identiques). Défaut corrigé : sans aucun revenu reçu, le flux net était « non calculé » ; il vaut désormais −(dépenses), l’autre côté comptant pour zéro. Test : `finRecette10.test.js`.

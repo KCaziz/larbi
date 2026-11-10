@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Circle, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Circle, ShieldCheck, Trash2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
-import { formatAmount } from '../../lib/format.js';
+import { formatAmount, formatNumber } from '../../lib/format.js';
 import { toMinorUnits } from '../../lib/money.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
@@ -95,6 +95,20 @@ export default function ReservePage() {
       <div className="reserve-page">
         <Notice variant="info">{t('reserve.what')}</Notice>
 
+        {/* Recette R10-07: the logic in one paragraph, with the person's own figures. */}
+        {ready && (
+          <p className="reserve-summary">
+            {t('reserve.summary', {
+              fund: money(r.epargneLiquide),
+              essential: money(r.depensesEssentielles),
+              months: formatNumber(i18n.language, r.moisReserve?.resultat ?? 0, { digits: 2 }),
+              target: r.cibleMois,
+              targetAmount: money(r.cibleMontant?.resultat ?? 0),
+              gap: money(r.manque?.resultat ?? 0),
+            })}
+          </p>
+        )}
+
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
             {message.text}
@@ -164,9 +178,27 @@ export default function ReservePage() {
           </ReserveStep>
           <ReserveStep done={hasFund} title={t('reserve.steps.fund.title')}>
             {hasFund ? (
+              <>
               <p>
-                {t('reserve.steps.fund.done', { amount: money(r.epargneLiquide) })} <Link to="/app/objectifs">{t('reserve.steps.fund.manage')}</Link>
+                {t('reserve.steps.fund.done', { amount: money(r.epargneLiquide) })}
               </p>
+              {/* Recette R10-07: open the fund to put money in, or delete it. */}
+              {(r.fonds ?? []).map((fund) => (
+                <p key={fund.id} className="reserve-fund-actions">
+                  <Link to={`/app/objectifs/${fund.id}`}>{t('reserve.steps.fund.open', { label: fund.label })}</Link>
+                  <button
+                    type="button"
+                    className="accounts-link-button accounts-danger"
+                    disabled={busy}
+                    onClick={() => {
+                      if (window.confirm(t('reserve.steps.fund.deleteConfirm', { label: fund.label }))) act(() => api.delete(`/fin/goals/${fund.id}`, {}), 'reserve.steps.fund.deleted');
+                    }}
+                  >
+                    <Trash2 size={14} aria-hidden="true" /> {t('reserve.steps.fund.delete')}
+                  </button>
+                </p>
+              ))}
+              </>
             ) : (
               <>
                 <p>{t(r.cibleMontant?.resultat > 0 ? 'reserve.steps.fund.todo' : 'reserve.steps.fund.after', { amount: r.cibleMontant?.resultat > 0 ? money(r.cibleMontant.resultat) : '' })}</p>

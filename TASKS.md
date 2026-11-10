@@ -3981,6 +3981,54 @@ Règle précisée (2026-11-08) : un compte **non abonné** ne peut **pas inviter
 
 ---
 
+# PHASE 11 — RETOURS DE RECETTE : NOUVELLES FONCTIONNALITÉS (2026-11-10)
+
+## Objectif
+
+Les fonctionnalités nouvelles demandées pendant le quatrième passage de recette (`test.txt`, 2026-11-10). Les défauts relevés au même passage sont suivis dans `SUIVI_RECETTE.md` (section R10).
+
+### P11-01 — Tout réinitialiser, ou une partie seulement
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-02`, `P8-20`
+- Durée cible : 2 jours (estimation)
+- Origine : `test.txt` l. 2 (2026-11-10)
+- Réalisé (2026-11-10) : section « Repartir de zéro » du centre de confiance (Paramètres → Confiance) : « Tout » ou au choix mouvements, comptes (avec leurs mouvements), revenus déclarés (et leurs versements réguliers), paiements réguliers et provisions, budgets, objectifs, dettes et prêts (avec le compte du prêt), patrimoine, portefeuille fictif, catégories personnelles ; chaque partie affiche combien d’éléments elle effacera ; mot de passe et case de confirmation obligatoires. Effacement réel (comme la suppression du compte), journal compris ; un virement touché part des deux côtés pour que les soldes gardés restent justes. Restent : profil, paramètres, formation, espaces partagés, abonnement. Routes `GET|POST /fin/confiance/reinitialiser` (`services/finReset.service.js`). Tests : `finPhase11.test.js`.
+
+Permettre de repartir de zéro : tout réinitialiser, ou seulement une partie (dettes, budgets, objectifs, mouvements, comptes…). Confirmation avec le mot de passe, liste de ce qui sera effacé, et rien d'autre ne bouge (le profil et les paramètres restent).
+
+### P11-02 — Deux FAQ : celle du site et celle de l'application
+- Statut : `✅ done`
+- Priorité : `🟢 low`
+- Dépendances : `P3-14`
+- Durée cible : 1 jour (estimation)
+- Origine : `test.txt` l. 7 (2026-11-10)
+- Réalisé (2026-11-10) : chaque question de l’assistant porte sa destination (site, application, les deux ; colonne `chatbot_entries.audience`, migration `20261110100000_chatbot_audience`, « les deux » par défaut pour l’existant), choisie dans l’administration et affichée dans la liste. L’aide « Une question ? » ne montre que les questions de l’endroit où l’on est (`/app` ou le site), et la page FAQ du site ajoute à ses questions fixes celles du site saisies dans l’administration. Tests : `finPhase11.test.js`.
+
+Les questions d'un visiteur du site et celles d'une personne dans l'application ne sont pas les mêmes. Chaque question porte sa destination (site, application, ou les deux) ; la page FAQ du site et l'aide de l'application n'affichent que les leurs ; l'administration choisit la destination.
+
+### P11-03 — Objectifs : combien épargner par mois, ou en combien de temps
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-08`
+- Durée cible : 1 jour (estimation)
+- Origine : `test.txt` l. 15 (2026-11-10)
+- Réalisé (2026-11-10) : bloc « Simuler mon épargne » sur la fiche d’un objectif : « Combien mettre de côté par mois ? » (une date → le montant mensuel, intérêts compris si l’objectif a un taux) et « En combien de temps ? » (un montant mensuel → le nombre de mois et le mois d’arrivée) ; rien n’est enregistré sauf clic sur « Garder » (montant mensuel, et date pour le premier). Calcul écrit en mots sous les simulateurs (`pages/goals/GoalPlanner.jsx`).
+
+Sur un objectif, deux simulateurs simples : « combien dois-je mettre de côté par mois pour l'atteindre à telle date ? » et « si je mets tant de côté par mois, en combien de temps ? ». Résultats sans rien enregistrer, avec un bouton pour garder le montant choisi.
+
+### P11-04 — Objectifs : versements futurs planifiés
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-08`, `P6-07`
+- Durée cible : 1 jour (estimation)
+- Origine : `test.txt` l. 16 (2026-11-10)
+- Réalisé (2026-11-10) : dans « Mettre de l’argent de côté pour cet objectif », case « Planifier pour une date à venir » : le versement devient un virement planifié (date future acceptée), affiché une seule fois dans le calendrier et « Aujourd’hui » (côté de l’argent qui part), et « Payé » le rend réel sur les deux comptes à la fois. Au passage, le versement du jour n’est plus refusé le matin (même cause que R9-11). Tests : `finPhase11.test.js`.
+
+Dans « Mettre de l’argent de côté pour cet objectif », pouvoir planifier un versement futur (comme une dépense planifiée) : il apparaît dans le calendrier et dans « Aujourd’hui » à sa date, et ne devient réel qu’une fois confirmé.
+
+---
+
 # 4. Fonctionnalités volontairement hors MVP 8 semaines
 
 Ces éléments ne doivent pas être développés avant les fonctionnalités prioritaires :
@@ -4102,7 +4150,7 @@ Le 2026-10-18, plusieurs tâches marquées comme terminées ont été re-vérifi
 - Toute nouvelle route API est contrôlée par l'audit d'autorisation automatique (`tests/security/authorization.test.js`) : la déclarer publique ou la protéger explicitement.
 - En début de session : `npm run reprise` (dans `server/`), qui régénère le client Prisma et applique les migrations en attente. Sur une machine neuve : `npm install` dans `client/` et `server/`, `prisma migrate deploy`, `JWT_SECRET` dans `server/.env`.
 - `npm run deliverables` régénère `LIVRABLES/MATRICE_RECETTE.md` et `INVENTAIRE_COMPOSANTS.md` depuis ce fichier et la suite de tests — à relancer après tout changement de statut d'une tâche.
-- Le paquet de déploiement `larbi-en-ligne/` a été régénéré et mis en ligne le 2026-10-17 (confirmé fonctionnel via `/api/health`), puis **régénéré le 2026-11-05** (recette R1 à R8 comprise) : serveur sans tests ni client Prisma généré, 61 migrations, site compilé dans `public_site/`, `.env` modèle et `app.cjs` inchangés, `base-de-donnees.sql` exporté de `larbi_dev` (vérifié en le rechargeant dans une base temporaire : mêmes nombres de lignes). Sur l'hébergeur : `npm install`, `npx prisma generate`, importer la base, redémarrer l'application. **Régénéré le 2026-11-08** (recette R9, Phase 10) : client Prisma généré inclus, 64 migrations (dont `fin_colors`, `fin_main_categories`, `fin_exchange_rates`), site recompilé, `base-de-donnees.sql` exporté de `larbi_dev` et vérifié en le rechargeant (mêmes nombres de lignes, 90 tables) ; sa dernière ligne ferme les sessions de développement (règle « un seul écran »). **Le zip ne contient plus `.env`** (740 fichiers) : celui de l’hébergeur reste en place. À régénérer de nouveau avant toute nouvelle mise en ligne si le code a changé depuis.
+- Le paquet de déploiement `larbi-en-ligne/` a été régénéré et mis en ligne le 2026-10-17 (confirmé fonctionnel via `/api/health`), puis **régénéré le 2026-11-05** (recette R1 à R8 comprise) : serveur sans tests ni client Prisma généré, 61 migrations, site compilé dans `public_site/`, `.env` modèle et `app.cjs` inchangés, `base-de-donnees.sql` exporté de `larbi_dev` (vérifié en le rechargeant dans une base temporaire : mêmes nombres de lignes). Sur l'hébergeur : `npm install`, `npx prisma generate`, importer la base, redémarrer l'application. **Régénéré le 2026-11-08** (recette R9, Phase 10) : client Prisma généré inclus, 64 migrations (dont `fin_colors`, `fin_main_categories`, `fin_exchange_rates`), site recompilé, `base-de-donnees.sql` exporté de `larbi_dev` et vérifié en le rechargeant (mêmes nombres de lignes, 90 tables) ; sa dernière ligne ferme les sessions de développement (règle « un seul écran »). **Le zip ne contient plus `.env`** (740 fichiers) : celui de l’hébergeur reste en place. **Régénéré le 2026-11-10** (recette R10, Phase 11) : 66 migrations (dont `fin_recurrence_income` et `chatbot_audience`), client Prisma généré, site recompilé, 744 fichiers sans `.env` ; `base-de-donnees.sql` exporté de `larbi_dev`, vérifié en le rechargeant (mêmes nombres de lignes, 90 tables), sessions de développement fermées en fin de fichier. À régénérer de nouveau avant toute nouvelle mise en ligne si le code a changé depuis.
 
 Objectif final :
 Livrer FINCLUDIA, en respectant l'ordre des phases ci-dessus. Le MVP d'origine (e-learning/blog/outils) est entièrement livré. **Corrigé le 2026-10-27** : il ne reste pas seulement des décisions du client — les Phases 8 et 9 sont du vrai développement (environ 105 jours ouvrés estimés), qui commence par la correction des calculs faux (`P8-04`), puis suit l'ordre des lots du client.

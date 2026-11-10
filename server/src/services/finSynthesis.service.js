@@ -142,7 +142,9 @@ export function buildSynthesis({ incomes = [], movements = [], previous = [], fa
     // figures of the synthesis (they supersede F002 to F004, P8-01 point 1).
     revenus: answer('PB-F004', income),
     depenses: answer('PB-F005', expenses),
-    fluxNet: answer('PB-F006', netFlow(income, expenses)),
+    // Recette R10-12: encaissements − décaissements. With only one side known, the
+    // other is zero (spending and no income yet is a negative flow, not unknown).
+    fluxNet: answer('PB-F006', income === null && expenses === null ? null : netFlow(income ?? 0, expenses ?? 0)),
     // What the declared recurring resources add up to over a month (F001).
     // EXPECTED, not received: shown as « prévu », never added to `revenus`.
     revenusPrevus: answer('F001', resources.total),

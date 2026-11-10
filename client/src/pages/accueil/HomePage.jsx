@@ -152,7 +152,14 @@ export default function HomePage() {
         <PeriodSelector value={period} onChange={setPeriod} name="home-period" periods={['jour', 'semaine', 'mois', '90jours', 'annee', 'periode']} custom={custom} onCustomChange={setCustom} />
 
         <div className="fin-figure-grid">
-          <FigureCard label={t('movements.tabs.income')} answer={synthese.revenus} />
+          <FigureCard label={t('movements.tabs.income')} answer={synthese.revenus}>
+            {/* Recette R10-05: what is still expected this period, to confirm on arrival. */}
+            {synthese.revenusAttendus?.count > 0 && (
+              <p className="fin-hint">
+                {t('appHome.incomeExpected', { amount: formatAmount(i18n.language, synthese.revenusAttendus.total, currency) })} <Link to="/app/aujourdhui">{t('appHome.incomeConfirm')}</Link>
+              </p>
+            )}
+          </FigureCard>
           <FigureCard label={t('movements.tabs.expense')} answer={synthese.depenses} />
           <FigureCard label={t('appHome.netFlow')} answer={synthese.fluxNet} />
         </div>

@@ -19,6 +19,7 @@ import AmountField from '../../components/fincludia/AmountField.jsx';
 import { toMinorUnits } from '../../lib/money.js';
 import CategoryIcon from '../../components/fincludia/CategoryIcon.jsx';
 import GoalYears, { yearByYear } from './GoalYears.jsx';
+import GoalPlanner from './GoalPlanner.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Goals.css';
 
@@ -200,6 +201,13 @@ export function GoalDetail({ goal, formulas, statuses, accounts, contributions, 
           <GoalYears rows={yearByYear({ capital: goal.allocated ?? 0, monthly: goal.monthlyContribution ?? 0, rate: goal.rate ?? 0, target: goal.target })} currency={goal.currency} target={goal.target} />
         </section>
       )}
+      {/* P11-03: how much a month for a date, or how long at a monthly amount. */}
+      {goal.vue.reste?.resultat > 0 && goal.status !== 'fictional' && (
+        <section className="goals-action" aria-labelledby={`goal-plan-${goal.id}`}>
+          <h3 id={`goal-plan-${goal.id}`}>{t('goals.planner.title')}</h3>
+          <GoalPlanner goal={goal} run={run} />
+        </section>
+      )}
       {goal.vue.avertissements.map((warning, index) => (
         <p key={index} className="fin-hint">
           {warning}
@@ -282,13 +290,22 @@ function ProgressRing({ value }) {
 function ContributionForm({ goal, accounts, run }) {
   const { t } = useTranslation();
   const sources = accounts.filter((account) => !account.archivedAt && !account.liability && account.currency === goal.currency && account.id !== goal.accountId);
-  const [state, setState] = useState({ from: sources[0]?.id ?? '', amount: '', date: new Date().toISOString().slice(0, 10) });
+  // P11-04: `planned` — a contribution for a later day (like a planned payment).
+  const [state, setState] = useState({ from: sources[0]?.id ?? '', amount: '', date: new Date().toISOString().slice(0, 10), planned: false });
+  const today = new Date().toISOString().slice(0, 10);
   if (sources.length === 0) return <p className="fin-hint">{t('goals.noSourceAccount')}</p>;
   const submit = (event) => {
     event.preventDefault();
     const value = toMinorUnits(state.amount, goal.currency);
     if (value === null) return;
-    run(() => api.post(`/fin/goals/${goal.id}/contributions`, { fromAccountId: state.from, value, occurredAt: new Date(`${state.date}T12:00:00.000Z`).toISOString() }), 'goals.contributed').then(
+    // Today at noon UTC is still ahead in the morning, and a past-dated movement
+    // dated ahead is refused (same cause as recette R9-11): never after now.
+    const noon = new Date(`${state.date}T12:00:00.000Z`);
+    const occurredAt = state.planned || noon <= new Date() ? noon : new Date();
+    run(
+      () => api.post(`/fin/goals/${goal.id}/contributions`, { fromAccountId: state.from, value, occurredAt: occurredAt.toISOString(), ...(state.planned ? { planned: true } : {}) }),
+      state.planned ? 'goals.contributionPlanned' : 'goals.contributed',
+    ).then(
       (res) => res?.ok && setState({ ...state, amount: '' }),
     );
   };
@@ -307,10 +324,26 @@ function ContributionForm({ goal, accounts, run }) {
       <AmountField id={`goal-contribute-${goal.id}`} label={t('goals.contribution')} value={state.amount} currency={goal.currency} onChange={(amount) => setState({ ...state, amount })} required />
       <div className="fin-field">
         <label htmlFor={`goal-date-${goal.id}`}>{t('myMoney.date')}</label>
-        <input id={`goal-date-${goal.id}`} type="date" value={state.date} max={new Date().toISOString().slice(0, 10)} onChange={(event) => setState({ ...state, date: event.target.value })} />
+        <input
+          id={`goal-date-${goal.id}`}
+          type="date"
+          value={state.date}
+          {...(state.planned ? { min: today } : { max: today })}
+          onChange={(event) => setState({ ...state, date: event.target.value })}
+        />
       </div>
+      <label htmlFor={`goal-planned-${goal.id}`}>
+        <input
+          id={`goal-planned-${goal.id}`}
+          type="checkbox"
+          checked={state.planned}
+          onChange={(event) => setState({ ...state, planned: event.target.checked, date: event.target.checked && state.date <= today ? new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10) : today })}
+        />
+        {t('goals.plannedContribution')}
+      </label>
+      {state.planned && <p className="fin-hint">{t('goals.plannedContributionHint')}</p>}
       <Button type="submit" variant="secondary">
-        {t('goals.contribute')}
+        {t(state.planned ? 'goals.planContribution' : 'goals.contribute')}
       </Button>
     </form>
   );

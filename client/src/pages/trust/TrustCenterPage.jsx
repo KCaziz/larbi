@@ -122,6 +122,11 @@ export default function TrustCenterPage() {
         <p className="fin-hint">{t('trust.exportHint')}</p>
         <ExportForm t={t} onDone={(text) => announce('ok', text)} onError={(text) => announce('error', text)} />
 
+        {/* P11-01: start again, all or some parts; the account itself stays. */}
+        <h2 className="trust-danger-title">{t('trust.reset.title')}</h2>
+        <p className="fin-hint">{t('trust.reset.intro')}</p>
+        <ResetForm t={t} onDone={(text) => { announce('ok', text); inventory.reload(); }} onError={(text) => announce('error', text)} />
+
         <h2 className="trust-danger-title">{t('trust.deleteTitle')}</h2>
         <Notice variant="action-needed">{t('trust.deletePolicy')}</Notice>
         <DeleteAccountForm
@@ -242,6 +247,74 @@ function DevicesList({ data, t, language, onDone, onError }) {
         </form>
       )}
     </>
+  );
+}
+
+const RESET_PARTS = ['movements', 'accounts', 'incomes', 'calendar', 'budgets', 'goals', 'debts', 'wealth', 'paper', 'categories'];
+
+// P11-01 — erase all one's financial data, or only the parts ticked. What each
+// part holds is shown first; nothing happens without the password and the
+// confirmation. The profile, the settings, the learning and the shared spaces
+// stay.
+function ResetForm({ t, onDone, onError }) {
+  const preview = useApi('/fin/confiance/reinitialiser');
+  const [parts, setParts] = useState([]);
+  const [password, setPassword] = useState('');
+  const [consent, setConsent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const counts = preview.data?.parts ?? {};
+  const all = parts.length === RESET_PARTS.length;
+  const toggle = (part) => setParts(parts.includes(part) ? parts.filter((p) => p !== part) : [...parts, part]);
+
+  async function submit(event) {
+    event.preventDefault();
+    if (parts.length === 0) return onError(t('trust.reset.nothingChosen'));
+    if (!consent) return onError(t('trust.reset.consentMissing'));
+    setBusy(true);
+    try {
+      await api.post('/fin/confiance/reinitialiser', { consent: true, currentPassword: password, parts: all ? ['all'] : parts });
+      onDone(t('trust.reset.done'));
+      setParts([]);
+      setPassword('');
+      setConsent(false);
+      preview.reload();
+    } catch (err) {
+      onError(t(errorKey(err, { 403: 'trust.errors.wrongPassword' })));
+    } finally {
+      setBusy(false);
+    }
+    return undefined;
+  }
+
+  return (
+    <form className="trust-reset-form" onSubmit={submit} noValidate>
+      <fieldset>
+        <legend>{t('trust.reset.choose')}</legend>
+        <label>
+          <input type="checkbox" checked={all} onChange={() => setParts(all ? [] : [...RESET_PARTS])} />
+          <strong>{t('trust.reset.all')}</strong>
+        </label>
+        {RESET_PARTS.map((part) => (
+          <label key={part}>
+            <input type="checkbox" checked={parts.includes(part)} onChange={() => toggle(part)} />
+            {t(`trust.reset.parts.${part}`, { count: counts[part] ?? 0 })}
+          </label>
+        ))}
+      </fieldset>
+      {parts.includes('accounts') && <p className="fin-hint">{t('trust.reset.accountsNote')}</p>}
+      <p className="fin-hint">{t('trust.reset.keeps')}</p>
+      <div className="fin-field">
+        <label htmlFor="reset-password">{t('trust.currentPassword')}</label>
+        <input id="reset-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+      </div>
+      <label>
+        <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} />
+        {t('trust.reset.consent')}
+      </label>
+      <Button type="submit" variant="danger" disabled={busy || parts.length === 0 || !password}>
+        {t('trust.reset.submit')}
+      </Button>
+    </form>
   );
 }
 

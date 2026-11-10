@@ -33,6 +33,10 @@ const BY_FORMULA = {
 const isMissing = (value) => value === null || value === undefined || value === 0 || (Array.isArray(value) && value.length === 0);
 
 export function howToCompute(answer) {
+  // Recette R10-05: no income received yet, but incomes ARE declared — the
+  // thing to do is to confirm the one that arrived, not to type it again
+  // (which made duplicates).
+  if (answer?.formule_id === 'PB-F004' && answer?.entrees_snapshot?.ressources_recurrentes > 0) return { key: 'incomeToConfirm', to: '/app/aujourdhui' };
   const known = BY_FORMULA[answer?.formule_id];
   if (known) return { key: known[0], to: known[1] };
   const inputs = answer?.entrees_snapshot ?? {};

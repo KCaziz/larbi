@@ -25,6 +25,11 @@ export const createIncomeSchema = z
     frequency: z.enum(FREQUENCIES),
     startDate: isoDate,
     endDate: isoDate.nullable().optional(),
+    // Recette R10-05: where and when it comes in (its recurrence), and whether
+    // the first payment is already received.
+    accountId: z.string().uuid().nullable().optional(),
+    nextDate: isoDate.optional(),
+    received: z.boolean().optional(),
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
     // Only ever used to declare a teaching/fictional row. Everything else is
@@ -43,6 +48,8 @@ export const updateIncomeSchema = z
     frequency: z.enum(FREQUENCIES).optional(),
     startDate: isoDate.optional(),
     endDate: isoDate.nullable().optional(),
+    accountId: z.string().uuid().nullable().optional(),
+    nextDate: isoDate.optional(),
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
     reason: reasonSchema.optional(),

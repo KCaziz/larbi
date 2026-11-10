@@ -44,6 +44,7 @@ const RECURRENCE_SELECT = {
   archivedAt: true,
   // To tell a subscription from another regular charge (recette R9-09).
   category: { select: { key: true, baseKey: true } },
+  incomeId: true,
 };
 
 const PROVISION_SELECT = {
@@ -102,6 +103,8 @@ export async function createRecurrence(prisma, userId, body) {
       data: {
         userId,
         label: body.label,
+        // Recette R10-05: the declared income it brings in, if any.
+        incomeId: body.incomeId ?? null,
         categoryId,
         kind: body.kind,
         value: body.value,
@@ -397,7 +400,7 @@ export async function deleteProvision(prisma, userId, id, { reason } = {}) {
 export async function markPlannedPaid(prisma, userId, id, { occurredAt, value, reason } = {}) {
   const before = await prisma.finTransaction.findFirst({
     where: { id, userId, deletedAt: null },
-    select: { id: true, kind: true, value: true, currency: true, occurredAt: true, planned: true, status: true, categoryId: true, note: true },
+    select: { id: true, kind: true, value: true, currency: true, occurredAt: true, planned: true, status: true, categoryId: true, note: true, transferId: true },
   });
   if (!before) throw new HttpError(404, 'Transaction not found');
   if (!before.planned) throw new HttpError(422, 'This movement is not a planned one', { reason: 'notPlanned' });
@@ -421,7 +424,17 @@ export async function markPlannedPaid(prisma, userId, id, { occurredAt, value, r
       },
       select: { id: true, kind: true, value: true, currency: true, occurredAt: true, planned: true, status: true, categoryId: true, note: true },
     });
-    await recordCorrection(tx, { userId, entity: 'transaction', entityId: id, before, after, reason: reason ?? 'marqué payé' });
+    // P11-04: a planned transfer (a contribution to a goal) becomes real on
+    // both sides at once, or one account would move and not the other.
+    if (before.transferId) {
+      await tx.finTransaction.updateMany({
+        where: { userId, transferId: before.transferId, id: { not: id } },
+        data: { planned: false, status: 'real', occurredAt: paidAt, ...(value === undefined ? {} : { value }), version: { increment: 1 } },
+      });
+    }
+    const { transferId, ...journal } = before;
+    void transferId;
+    await recordCorrection(tx, { userId, entity: 'transaction', entityId: id, before: journal, after, reason: reason ?? 'marqué payé' });
     return after;
   });
 }

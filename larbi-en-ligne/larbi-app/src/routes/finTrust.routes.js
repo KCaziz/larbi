@@ -4,7 +4,7 @@ import {
   getConsents,
   getDevices,
   getInventory,
-  postDeleteAccount,
+  postDeleteAccount, getResetPreview, postReset,
   postDisconnectDevice,
   postDisconnectOthers,
   postExport,
@@ -13,7 +13,7 @@ import {
 import { requireAuth } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
-import { deleteAccountSchema, sensitiveActionSchema, withdrawSharingSchema } from '../validation/finTrust.schemas.js';
+import { deleteAccountSchema, resetSchema, sensitiveActionSchema, withdrawSharingSchema } from '../validation/finTrust.schemas.js';
 
 // Trust and data centre (P6-19), screen C25.
 const router = Router();
@@ -29,5 +29,8 @@ router.post('/confiance/appareils/deconnecter-autres', validateBody(sensitiveAct
 router.post('/confiance/appareils/:id/deconnecter', validateBody(sensitiveActionSchema), asyncRoute(postDisconnectDevice));
 router.post('/confiance/export', validateBody(sensitiveActionSchema), asyncRoute(postExport));
 router.post('/confiance/suppression', validateBody(deleteAccountSchema), asyncRoute(postDeleteAccount));
+// P11-01: start again, all or some parts.
+router.get('/confiance/reinitialiser', asyncRoute(getResetPreview));
+router.post('/confiance/reinitialiser', validateBody(resetSchema), asyncRoute(postReset));
 
 export default router;

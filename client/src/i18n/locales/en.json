@@ -2556,6 +2556,12 @@
       "status": {
         "draft": "Draft",
         "published": "Published"
+      },
+      "audience": "Where to show it",
+      "audiences": {
+        "site": "Website (public FAQ)",
+        "app": "Application (“A question?” help)",
+        "both": "Both"
       }
     },
     "searchPlaceholder": "Type your question…",
@@ -2808,8 +2814,8 @@
     "notComputed": "not computed",
     "simulationBadge": "SIMULATION",
     "optional": "(optional)",
-    "months_one": "{{count}} month",
-    "months_other": "{{count}} months",
+    "months_one": "{{count, number(maximumFractionDigits: 2)}} month",
+    "months_other": "{{count, number(maximumFractionDigits: 2)}} months",
     "why": "Why?",
     "whyGeneric": "This figure is computed automatically from your data, never estimated.",
     "whyByFormula": {
@@ -2978,7 +2984,8 @@
       "movements": "record your spending and income",
       "health": "see what is missing",
       "assets": "add what you own",
-      "formation": "start a course"
+      "formation": "start a course",
+      "incomeToConfirm": "confirm your income when it arrives"
     }
   },
   "finOnboarding": {
@@ -3386,7 +3393,29 @@
       "share": "Share of target",
       "reachedWholeYears": "Goal reached in {{count}} months ({{years}} year(s)).",
       "reachedYearsMonths": "Goal reached in {{count}} months ({{years}} year(s) and {{months}} month(s))."
-    }
+    },
+    "planner": {
+      "title": "Simulate my saving",
+      "byDateTitle": "How much a month?",
+      "byDateLabel": "I want to reach it on",
+      "byDateResult_one": "You need to put aside {{amount}} this month.",
+      "byDateResult_other": "You need to put aside {{amount}} a month for {{count}} months.",
+      "alreadyThere": "What you already put aside is enough by that date.",
+      "keepByDate": "Keep this amount and date",
+      "byMonthlyTitle": "How long?",
+      "byMonthlyLabel": "I put aside each month",
+      "byMonthlyResult_one": "Goal reached in {{count}} month, around {{date}}.",
+      "byMonthlyResult_other": "Goal reached in {{count}} months, around {{date}}.",
+      "byMonthlyNever": "After {{years}} years you would have {{capital}}: raise the amount to reach it.",
+      "keepMonthly": "Keep this monthly amount",
+      "kept": "Saved on the goal.",
+      "how": "Calculation: what is left to put aside (the target {{target}} minus the {{capital}} already put aside), spread over the months until the date. Nothing is saved until you click “Keep”.",
+      "howRate": "Calculation: from the {{capital}} already put aside and the goal’s rate (interest added each month), what to put in each month to reach {{target}}. Nothing is saved until you click “Keep”."
+    },
+    "plannedContribution": "Plan it for a later date",
+    "plannedContributionHint": "The payment will show in the calendar and in “Today” on its date; the money only moves once you confirm it is done.",
+    "planContribution": "Plan the payment",
+    "contributionPlanned": "Payment planned: it will be offered to you on its date."
   },
   "debts": {
     "title": "Debts",
@@ -3536,7 +3565,11 @@
         "manage": "Put money into it",
         "todo": "Create the \"Emergency fund\" goal: its target will be {{amount}}. You will then put money into it, at your own pace.",
         "after": "First do the two steps above: they set the amount to reach.",
-        "create": "Create my emergency fund"
+        "create": "Create my emergency fund",
+        "open": "Open “{{label}}” to put money in",
+        "delete": "Delete my emergency fund",
+        "deleteConfirm": "Delete the goal “{{label}}”? Your reserve will no longer be measured until an emergency fund exists. The money already put in stays on its account (you can also delete that account in My accounts).",
+        "deleted": "Emergency fund deleted."
       }
     },
     "howTo": {
@@ -3558,7 +3591,8 @@
       "gap": "Still to put aside = target amount − money in your emergency fund.",
       "date": "Estimated date = today + (still to put aside ÷ monthly saving planned for the fund).",
       "excluded": "Not counted: the paper portfolio, assets that are hard to sell (property, vehicle…) and money set aside for other goals."
-    }
+    },
+    "summary": "In short: your emergency fund holds {{fund}}. Your essential spending is {{essential}} a month, so it covers {{months}} months. You aim for {{target}} months, that is {{targetAmount}}: {{gap}} is missing. To fill it, put money in from the “Emergency fund” goal."
   },
   "calendar": {
     "title": "Financial calendar",
@@ -4724,6 +4758,31 @@
       "disconnect": "Disconnect",
       "disconnectOthers": "Disconnect all other devices",
       "ended": "Device disconnected."
+    },
+    "reset": {
+      "title": "Start again",
+      "intro": "Erase all your financial data, or only part of it (your debts, your budgets…), to set everything up again. This is final.",
+      "choose": "What you want to erase",
+      "all": "Everything",
+      "parts": {
+        "movements": "Movements (spending, income, transfers) — {{count}}",
+        "accounts": "Accounts, with their movements — {{count}}",
+        "incomes": "Declared income and their regular payments — {{count}}",
+        "calendar": "Regular payments and provisions — {{count}}",
+        "budgets": "Budgets and their envelopes — {{count}}",
+        "goals": "Goals, emergency fund included — {{count}}",
+        "debts": "Debts, loans and borrowings — {{count}}",
+        "wealth": "Declared net worth — {{count}}",
+        "paper": "Paper portfolio (operations) — {{count}}",
+        "categories": "Your categories and customisations — {{count}}"
+      },
+      "accountsNote": "Erasing accounts also erases all their movements. Goals, debts and regular payments stay, without their account.",
+      "keeps": "Kept: your profile, your settings, your learning, your shared spaces and your subscription.",
+      "consent": "I understand this data will be erased for good.",
+      "submit": "Erase for good",
+      "done": "Done: the chosen data is erased. You can set everything up again.",
+      "nothingChosen": "Tick at least one part to erase.",
+      "consentMissing": "Tick the confirmation box."
     }
   },
   "search": {
@@ -4921,7 +4980,8 @@
     "settingsPremium": "Premium access",
     "backTo": "Back: {{page}}",
     "learnHub": "Learn",
-    "mySpaceIntro": "Your profile, your preferences, your data privacy and your subscription, in one place."
+    "mySpaceIntro": "Your profile, your preferences, your data privacy and your subscription, in one place.",
+    "addMovement": "Add a movement"
   },
   "accounts": {
     "title": "My accounts",
@@ -4999,7 +5059,25 @@
     "explainTotal": "Total balance: the money available, i.e. the sum of the accounts “counted in the total” (accounts kept apart are not in it).",
     "explainNet": "Net position: what you own minus what you owe. What you own: the accounts counted in your net worth (current accounts, cash, savings, money lent to someone). What you owe: the loans and credits tracked on an account.",
     "explainNetFigures": "Today: {{assets}} owned − {{liabilities}} owed = {{net}}.",
-    "foreignHint": "The account stays in its currency: its movements are entered in it. It counts in your net worth for its counter-value in dinars at the Bank of Algeria official rate (never the parallel rate), but not in your dinar balance."
+    "foreignHint": "The account stays in its currency: its movements are entered in it. It counts in your net worth for its counter-value in dinars at the Bank of Algeria official rate (never the parallel rate), but not in your dinar balance.",
+    "monthIn": "Money in this month",
+    "monthOut": "Money out this month",
+    "flowHow": "Net flow of the month = money in − money out. In: {{inTotal}} (income {{income}} + transfers received {{transfersIn}}). Out: {{outTotal}} (spending {{spent}} + transfers sent {{transfersOut}}). Net flow: {{net}}.",
+    "flowPlanned": "{{amount}} of planned payments are to come this month, counted only once done.",
+    "lastMovements": "Movements this month",
+    "noMovementThisMonth": "No movement on this account this month.",
+    "plannedTag": "planned",
+    "kinds": {
+      "income": "Income",
+      "expense": "Expense",
+      "transfer_in": "Transfer received",
+      "transfer_out": "Transfer sent"
+    },
+    "chartTitleDays_one": "Balance (last day)",
+    "chartTitleDays_other": "Balance, day by day (last {{count}} days)",
+    "delete": "Delete",
+    "deleted": "Account deleted, with its movements.",
+    "deleteConfirm": "Delete “{{label}}” for good? Its movements are deleted with it, and transfers with your other accounts are cancelled on both sides. To just put it away, use “Archive”."
   },
   "health": {
     "title": "Financial health",
@@ -5101,7 +5179,10 @@
       "to_verify": "Something is wrong (amount, duplicate, unknown operation): to look at again later."
     },
     "groupFilter": "Category: {{group}}",
-    "groupFilterClear": "Remove"
+    "groupFilterClear": "Remove",
+    "openingsTitle": "Starting balances",
+    "openingLine": "Starting balance of “{{label}}”",
+    "openingsHint": "The money already on an account when it was opened. It counts in the account’s balance, not in your income of the month: it is not money coming in. To correct it, edit the account."
   },
   "appHome": {
     "title": "Home",
@@ -5144,7 +5225,9 @@
     "quickAddClose": "Close quick add",
     "quickAddFull": "Open the full form",
     "miniFlow": "Net flow of the last months",
-    "ringNothing": "No movement"
+    "ringNothing": "No movement",
+    "incomeExpected": "Still expected this month: {{amount}}.",
+    "incomeConfirm": "Confirm on arrival"
   },
   "finProfile": {
     "incomeRegularity": "How regular my income is",
@@ -5538,7 +5621,9 @@
       "confirmHint": "Recommended: « ask me to confirm », on the day.",
       "dateMissing": "Give the day the income arrives.",
       "accountMissing": "Choose the account the income arrives on.",
-      "saved": "The income arrives on {{date}} on \"{{account}}\" ({{mode}})."
+      "saved": "The income arrives on {{date}} on \"{{account}}\" ({{mode}}).",
+      "accountMissingHere": "Your current account is not in the list?",
+      "createAccount": "Create it, then come back here"
     },
     "plan": {
       "title": "My first-income plan",
@@ -5601,7 +5686,12 @@
     "errors": {
       "refused": "This income could not be saved."
     },
-    "sourcesChart": "Expected income per month, by source"
+    "sourcesChart": "Expected income per month, by source",
+    "comesIn": "Comes in on “{{account}}” — next payment on {{date}}",
+    "notLinked": "Not linked to an account yet: it arrives nowhere. Click “Edit” and choose its account so it is offered on each due date.",
+    "linkHint": "On each due date, this income is offered in “Today” to confirm it arrived: it then counts in your income and on the account, once.",
+    "deleted": "Income deleted.",
+    "deleteConfirm": "Delete “{{label}}”? It will no longer be offered. Payments already received stay in your movements."
   },
   "shared": {
     "backToSpaces": "My spaces",

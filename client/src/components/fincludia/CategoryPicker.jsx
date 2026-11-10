@@ -13,7 +13,23 @@ import './CategoryPicker.css';
 // categories; a category carries the client's category it belongs to in `group`.
 // `value` is a category id or '' ; `emptyLabel` is the text of the « none » choice
 // (without it, the person cannot clear the choice).
-const normalise = (text) => String(text ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+// Recette R10-11: the search failed « sometimes » — a phone keyboard adds a
+// space after the word, and the labels use the typographic apostrophe (’)
+// where a keyboard types the straight one. Both are now the same, accents
+// and case are ignored, and each word of the search is looked for on its own.
+export const normalise = (text) =>
+  String(text ?? '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[’‘`´ʼ]/g, "'")
+    .replace(/[‐-―−]/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+export const matches = (needle, ...texts) => {
+  const haystack = texts.map(normalise).join(' ');
+  return needle.split(' ').every((word) => haystack.includes(word));
+};
 
 export default function CategoryPicker({ id, value, onChange, groups, emptyLabel = null, label, className = '' }) {
   const { t } = useTranslation();
@@ -67,7 +83,7 @@ export default function CategoryPicker({ id, value, onChange, groups, emptyLabel
   }, [open]);
 
   const needle = normalise(query);
-  const found = needle ? everyCategory.filter((category) => normalise(category.label).includes(needle) || normalise(category.bucketName).includes(needle)) : [];
+  const found = needle ? everyCategory.filter((category) => matches(needle, category.label, category.bucketName, category.reference ?? '')) : [];
   const current = group ? buckets.find((bucket) => bucket.key === group) : null;
 
   return (

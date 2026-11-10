@@ -94,6 +94,7 @@ export async function createFirstIncome(prisma, userId, body) {
     // for the credit to be recorded on its own.
     creationMode: body.autoCredit ? 'auto_real' : 'confirm',
     weekendRule: body.weekendRule ?? 'previous',
+    incomeId: income.id,
   });
   // « Je l'ai déjà reçu » (recette R9-06): the first payment, on or before
   // today, is confirmed at once — the same confirmation as « Reçu » in

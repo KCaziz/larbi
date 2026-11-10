@@ -48,13 +48,13 @@ export default function ChatbotAdminPage() {
 
   const openForm = (entry) => {
     setMessage(null);
-    setForm(entry ? { id: entry.id, question: entry.question, answer: entry.answer, language: entry.language } : { question: '', answer: '', language });
+    setForm(entry ? { id: entry.id, question: entry.question, answer: entry.answer, language: entry.language, audience: entry.audience ?? 'both' } : { question: '', answer: '', language, audience: 'both' });
     setResetKey((k) => k + 1);
   };
 
   const submit = async (event) => {
     event.preventDefault();
-    const body = { question: form.question.trim(), answer: form.answer, language: form.language };
+    const body = { question: form.question.trim(), answer: form.answer, language: form.language, audience: form.audience };
     const saved = await run(
       () => (form.id ? api.patch(`/admin/chatbot/${form.id}`, body) : api.post('/admin/chatbot', body)),
       t('chatbot.admin.saved'),
@@ -144,6 +144,16 @@ export default function ChatbotAdminPage() {
               ))}
             </select>
           </Field>
+          {/* P11-02: the site's FAQ and the application's are separate. */}
+          <Field label={t('chatbot.admin.audience')} htmlFor="cb-audience">
+            <select id="cb-audience" value={form.audience} onChange={(e) => setForm((f) => ({ ...f, audience: e.target.value }))}>
+              {['site', 'app', 'both'].map((code) => (
+                <option key={code} value={code}>
+                  {t(`chatbot.admin.audiences.${code}`)}
+                </option>
+              ))}
+            </select>
+          </Field>
           <p className="form-hint">{t('chatbot.admin.draftHint')}</p>
           <div className="chatbot-admin-form-actions">
             <Button type="submit" disabled={busy || !form.question.trim()}>
@@ -173,6 +183,7 @@ export default function ChatbotAdminPage() {
               <div className="chatbot-admin-text">
                 <strong>{entry.question}</strong>
                 <StatusBadge status={entry.status} labelKey={`chatbot.admin.status.${entry.status}`} />
+                <span className="cms-muted"> · {t(`chatbot.admin.audiences.${entry.audience ?? 'both'}`)}</span>
               </div>
               <div className="cms-row-actions">
                 <button

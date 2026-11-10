@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Archive, ArchiveRestore, Pencil, Plus, Wallet } from 'lucide-react';
+import { Archive, ArchiveRestore, Pencil, Plus, Trash2, Wallet } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
-import { formatAmount } from '../../lib/format.js';
+import { formatAmount, formatDate } from '../../lib/format.js';
 import { fromMinorUnits, toMinorUnits } from '../../lib/money.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
@@ -15,6 +15,7 @@ import Notice from '../../components/ui/Notice.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import BarList from '../../components/fincludia/charts/BarList.jsx';
 import '../../components/fincludia/Fincludia.css';
+import '../comptes/Accounts.css';
 
 // « Revenus prévus » (P8-24): the incomes the person declared, the base of the
 // budget's « reste à allouer » (PB-F009). They were only created by « Premiers
@@ -32,6 +33,9 @@ export default function IncomesPage() {
   const [editing, setEditing] = useState(null); // an income, or 'new'
   const [message, setMessage] = useState(null);
   const list = useApi(`/fin/revenus${showArchived ? '?includeArchived=true' : ''}`);
+  // Recette R10-05: the account each income comes in on.
+  const accounts = useApi('/fin/comptes');
+  const ownAccounts = (accounts.data?.accounts ?? []).filter((account) => !account.archivedAt && !account.liability);
 
   async function run(action, okKey) {
     setMessage(null);
@@ -70,7 +74,7 @@ export default function IncomesPage() {
           </label>
         </div>
 
-        {editing === 'new' && <IncomeForm currency={currency} onSubmit={(body) => run(() => api.post('/fin/revenus', body), 'incomes.added')} />}
+        {editing === 'new' && <IncomeForm currency={currency} accounts={ownAccounts} onSubmit={(body) => run(() => api.post('/fin/revenus', body), 'incomes.added')} />}
 
         {/* The expected income per month by source, one scale for all (F001). */}
         {incomes.filter((income) => !income.archivedAt && income.currency === currency && income.monthlyValue !== null).length >= 2 && (
@@ -95,6 +99,15 @@ export default function IncomesPage() {
                     — {t(`calendar.frequencies.${income.frequency}`, income.frequency)}
                     {income.archivedAt && ` · ${t('accounts.archivedTag')}`}
                   </span>
+                  {/* Recette R10-05: where and when it comes in, or that it is not linked yet. */}
+                  <span className="fin-hint incomes-versement">
+                    {income.versement
+                      ? t('incomes.comesIn', {
+                          account: ownAccounts.find((account) => account.id === income.versement.accountId)?.label ?? t('movements.defaultAccount'),
+                          date: formatDate(i18n.language, income.versement.nextDate),
+                        })
+                      : t('incomes.notLinked')}
+                  </span>
                 </span>
                 <span>
                   <strong>{formatAmount(i18n.language, income.value, income.currency)}</strong>{' '}
@@ -107,10 +120,19 @@ export default function IncomesPage() {
                     onClick={() => run(() => api.put(`/fin/revenus/${income.id}/archive`, { archived: !income.archivedAt }), income.archivedAt ? 'accounts.restored' : 'accounts.archived')}
                   >
                     {income.archivedAt ? <ArchiveRestore size={14} aria-hidden="true" /> : <Archive size={14} aria-hidden="true" />} {t(income.archivedAt ? 'accounts.restore' : 'accounts.archive')}
+                  </button>{' '}
+                  <button
+                    type="button"
+                    className="accounts-link-button accounts-danger"
+                    onClick={() => {
+                      if (window.confirm(t('incomes.deleteConfirm', { label: income.label }))) run(() => api.delete(`/fin/revenus/${income.id}`, {}), 'incomes.deleted');
+                    }}
+                  >
+                    <Trash2 size={14} aria-hidden="true" /> {t('accounts.delete')}
                   </button>
                 </span>
                 {editing?.id === income.id && (
-                  <IncomeForm key={income.id} currency={income.currency} income={income} onSubmit={(body) => run(() => api.patch(`/fin/revenus/${income.id}`, body), 'incomes.saved')} />
+                  <IncomeForm key={income.id} currency={income.currency} income={income} accounts={ownAccounts} onSubmit={(body) => run(() => api.patch(`/fin/revenus/${income.id}`, body), 'incomes.saved')} />
                 )}
               </li>
             ))}
@@ -121,7 +143,7 @@ export default function IncomesPage() {
   );
 }
 
-function IncomeForm({ currency, income = null, onSubmit }) {
+function IncomeForm({ currency, income = null, accounts = [], onSubmit }) {
   const { t } = useTranslation();
   const [state, setState] = useState(() => ({
     label: income?.label ?? '',
@@ -129,6 +151,10 @@ function IncomeForm({ currency, income = null, onSubmit }) {
     frequency: income?.frequency ?? 'mensuel',
     startDate: (income?.startDate ? new Date(income.startDate) : new Date()).toISOString().slice(0, 10),
     endDate: income?.endDate ? new Date(income.endDate).toISOString().slice(0, 10) : '',
+    // Recette R10-05: the account it comes in on, and its next payment.
+    accountId: income?.versement?.accountId ?? '',
+    nextDate: (income?.versement?.nextDate ? new Date(income.versement.nextDate) : new Date()).toISOString().slice(0, 10),
+    received: false,
   }));
   const [error, setError] = useState(null);
   const set = (name) => (event) => setState({ ...state, [name]: event.target.value });
@@ -148,7 +174,8 @@ function IncomeForm({ currency, income = null, onSubmit }) {
       startDate: new Date(`${state.startDate}T00:00:00.000Z`).toISOString(),
       endDate: state.endDate ? new Date(`${state.endDate}T00:00:00.000Z`).toISOString() : null,
     };
-    onSubmit(income ? base : { ...base, currency });
+    const link = { accountId: state.accountId || null, nextDate: new Date(`${state.nextDate}T00:00:00.000Z`).toISOString() };
+    onSubmit(income ? { ...base, ...link } : { ...base, ...link, currency, received: state.received });
   };
 
   return (
@@ -177,6 +204,30 @@ function IncomeForm({ currency, income = null, onSubmit }) {
         <label htmlFor="income-form-end">{t('incomes.endDate')}</label>
         <input id="income-form-end" type="date" value={state.endDate} onChange={set('endDate')} />
       </div>
+      <div className="fin-field">
+        <label htmlFor="income-form-account">{t('firstSteps.income.account')}</label>
+        <select id="income-form-account" value={state.accountId} onChange={set('accountId')}>
+          <option value="">{t('movements.defaultAccount')}</option>
+          {accounts
+            .filter((account) => account.currency === currency)
+            .map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.label}
+              </option>
+            ))}
+        </select>
+      </div>
+      <div className="fin-field">
+        <label htmlFor="income-form-next">{t('firstSteps.income.nextDate')}</label>
+        <input id="income-form-next" type="date" value={state.nextDate} required onChange={set('nextDate')} />
+      </div>
+      {!income && state.nextDate <= new Date().toISOString().slice(0, 10) && (
+        <label className="money-check" htmlFor="income-form-received">
+          <input id="income-form-received" type="checkbox" checked={state.received} onChange={(event) => setState({ ...state, received: event.target.checked })} />
+          {t('firstSteps.income.received')}
+        </label>
+      )}
+      <p className="fin-hint">{t('incomes.linkHint')}</p>
       <Button type="submit">{t('accounts.save')}</Button>
     </form>
   );

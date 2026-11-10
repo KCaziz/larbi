@@ -96,3 +96,18 @@
   padding-inline-start: 1.25rem;
   line-height: 1.6;
 }
+
+/* Recette R10-07 */
+.reserve-summary {
+  margin: 0.75rem 0 1rem;
+  padding: 0.75rem 1rem;
+  border-inline-start: 4px solid var(--accent);
+  background: var(--bg-alt);
+  line-height: 1.55;
+}
+.reserve-fund-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}

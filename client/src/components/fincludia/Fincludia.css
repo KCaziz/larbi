@@ -791,3 +791,8 @@
   font-size: clamp(0.95rem, 10cqi, 1.5rem);
   overflow-wrap: normal;
 }
+
+/* Recette R10-05 */
+.incomes-versement {
+  display: block;
+}

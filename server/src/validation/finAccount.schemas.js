@@ -70,7 +70,13 @@ export const createTransferSchema = z
   })
   .strict();
 
-export const balanceHistoryQuerySchema = z.object({ months: z.coerce.number().int().min(2).max(24).optional() }).strict();
+// Recette R10-10: `jours` asks for one point per day (the last N days), so
+// movements of the current month show on the curve instead of melting into
+// one monthly point.
+export const balanceHistoryQuerySchema = z.object({ months: z.coerce.number().int().min(2).max(24).optional(), jours: z.coerce.number().int().min(7).max(92).optional() }).strict();
+
+// Recette R10-09: the money in and out of ONE account over a period.
+export const accountFlowQuerySchema = z.object({ from: z.coerce.date().optional(), to: z.coerce.date().optional() }).strict();
 
 export const deleteTransferSchema = z.object({ reason: reasonSchema.optional() }).strict();
 
@@ -92,3 +98,6 @@ export const exchangeRateSchema = z
     source: z.string().trim().min(1).max(200),
   })
   .strict();
+
+// Recette R10-08: deleting an account is said out loud (`confirm: true`).
+export const deleteAccountSchema = z.object({ confirm: z.literal(true), reason: reasonSchema.optional() }).strict();

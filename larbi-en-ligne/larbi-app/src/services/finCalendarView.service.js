@@ -89,6 +89,9 @@ export function collectEvents({ planned = [], recurrences = [], provisions = [],
 
   for (const row of planned) {
     if (row.currency !== currency) continue;
+    // P11-04: a planned transfer shows once, by the money leaving: its other
+    // side (arriving on the goal's account) is the same payment.
+    if (row.kind === 'transfer_in') continue;
     events.push({
       kind: row.kind === 'income' ? 'planned_income' : 'planned_expense',
       date: row.occurredAt,

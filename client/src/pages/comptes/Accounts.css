@@ -194,3 +194,41 @@
 .accounts-explain-figures {
   font-weight: 600;
 }
+
+/* Recette R10-10 : les derniers mouvements du compte. */
+.accounts-last {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+}
+.accounts-last li {
+  display: grid;
+  grid-template-columns: 7rem 11rem 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.accounts-last-note {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.accounts-last-planned {
+  opacity: 0.7;
+  font-style: italic;
+}
+@media (max-width: 640px) {
+  .accounts-last li {
+    grid-template-columns: 1fr auto;
+  }
+  .accounts-last-note {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Recette R10-08 */
+.accounts-danger {
+  color: var(--danger);
+}

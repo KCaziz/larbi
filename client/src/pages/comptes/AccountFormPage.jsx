@@ -35,6 +35,10 @@ export default function AccountFormPage() {
   const account = editing ? accounts.find((row) => row.id === id) : null;
   if (editing && !account) return <ErrorState message={t('accounts.notFound')} />;
   const suggestion = suggestions.find((row) => row.assetId === search.get('suggestion')) ?? null;
+  // Recette R10-03: created from the first steps, back to them (only an
+  // address inside the application is followed).
+  const back = search.get('retour');
+  const afterCreate = back && back.startsWith('/app/') ? back : '/app/comptes';
 
   async function save(action, okKey, to) {
     setError(null);
@@ -58,7 +62,7 @@ export default function AccountFormPage() {
         {editing ? (
           <AccountEditForm account={account} onSubmit={(body) => save(() => api.patch(`/fin/comptes/${id}`, body), 'accounts.saved', `/app/comptes/${id}`)} />
         ) : (
-          <AccountForm types={types} currency={user?.finCurrency ?? 'DZD'} initial={suggestion} onSubmit={(body) => save(() => api.post('/fin/comptes', body), 'accounts.created', '/app/comptes')} />
+          <AccountForm types={types} currency={user?.finCurrency ?? 'DZD'} initial={suggestion} onSubmit={(body) => save(() => api.post('/fin/comptes', body), 'accounts.created', afterCreate)} />
         )}
       </div>
     </>

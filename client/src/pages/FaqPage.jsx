@@ -1,4 +1,7 @@
 import { useTranslation } from 'react-i18next';
+import { useApi } from '../lib/useApi.js';
+import { contentLanguage } from '../lib/contentLanguage.js';
+import RichContent from '../components/ui/RichContent.jsx';
 import { ChevronDown, CircleHelp } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader.jsx';
 import Button from '../components/ui/Button.jsx';
@@ -6,8 +9,14 @@ import Section from '../components/ui/Section.jsx';
 import './Pages.css';
 
 export default function FaqPage() {
-  const { t } = useTranslation();
-  const items = t('faq.items', { returnObjects: true });
+  const { t, i18n } = useTranslation();
+  // P11-02: the site's questions written in the administration come after
+  // the fixed ones (the application's have their own help).
+  const written = useApi(`/chatbot/entries?lang=${contentLanguage(i18n.language) ?? 'fr'}&audience=site`);
+  const items = [
+    ...t('faq.items', { returnObjects: true }),
+    ...(written.data?.entries ?? []).map((entry) => ({ question: entry.question, html: entry.answer })),
+  ];
 
   return (
     <>
@@ -22,7 +31,7 @@ export default function FaqPage() {
                 {item.question}
                 <ChevronDown className="faq-chevron" size={20} strokeWidth={1.75} aria-hidden="true" />
               </summary>
-              <p>{item.answer}</p>
+              {item.html ? <RichContent html={item.html} className="faq-answer" /> : <p>{item.answer}</p>}
             </details>
           ))}
         </div>

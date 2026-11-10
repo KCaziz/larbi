@@ -165,6 +165,11 @@ export async function buildReserveView(prisma, userId, { currency, targetMonths,
     }
   }
   const capital = await emergencyFundCapital(prisma, userId, currency);
+  // Recette R10-07: which goal(s) ARE the fund, so the screen can open or delete them.
+  const fundGoals = await prisma.finGoal.findMany({
+    where: { userId, deletedAt: null, archivedAt: null, currency, status: { not: 'fictional' }, ...EMERGENCY_GOAL_WHERE },
+    select: { id: true, label: true, accountId: true },
+  });
   const essential = await essentialMonthlyExpenses(prisma, userId, currency, now);
 
   if (capital === null) warnings.push('Aucun objectif « Fonds d’urgence » n’existe encore : créez-le dans vos objectifs pour mesurer votre réserve.');
@@ -214,6 +219,7 @@ export async function buildReserveView(prisma, userId, { currency, targetMonths,
     manque: answer('PB-F019', gap),
     cibleMois: targetMonths ?? null,
     cibleParDefaut: defaultTarget,
+    fonds: fundGoals,
     epargneMensuelle: monthly > 0 ? monthly : null,
     dateEstimee: estimatedDate,
     avertissements: warnings,

@@ -6,8 +6,10 @@ import { DEFAULT_CONTENT_LANGUAGE } from '../constants/blog.js';
 // who opened which question (no analytics on the MVP, rule 10).
 export async function listPublicChatbotEntries(req, res) {
   const language = req.query.lang ?? DEFAULT_CONTENT_LANGUAGE;
+  // P11-02: the site's FAQ and the application's are not the same questions.
+  const where = req.query.audience ? { audience: { in: [req.query.audience, 'both'] } } : {};
   const read = (lang) =>
-    prisma.chatbotEntry.findMany({ where: { language: lang, status: 'published' }, orderBy: { position: 'asc' }, select: { id: true, question: true, answer: true } });
+    prisma.chatbotEntry.findMany({ where: { language: lang, status: 'published', ...where }, orderBy: { position: 'asc' }, select: { id: true, question: true, answer: true } });
   let entries = await read(language);
   // Nothing written yet in this language: the default language answers rather
   // than an empty panel (SUIVI_RECETTE R5-05), and the reply says so.

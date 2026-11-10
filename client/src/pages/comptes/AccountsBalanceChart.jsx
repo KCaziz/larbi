@@ -10,8 +10,10 @@ import LineChart from '../../components/fincludia/charts/LineChart.jsx';
 // fixed and follow the order of the accounts, never their rank.
 const MAX_SERIES = 4;
 
-export default function AccountsBalanceChart({ accounts }) {
-  const { t } = useTranslation();
+// `days` (recette R10-10): one point a day over the last N days, so this
+// month's movements show on the curve.
+export default function AccountsBalanceChart({ accounts, days = null }) {
+  const { t, i18n } = useTranslation();
   const usable = accounts.filter((account) => !account.archivedAt).slice(0, MAX_SERIES);
   const [filter, setFilter] = useState('all');
   const [histories, setHistories] = useState({});
@@ -21,7 +23,7 @@ export default function AccountsBalanceChart({ accounts }) {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all(wanted.map((account) => api.get(`/fin/comptes/${account.id}/historique?months=12`).then((res) => [account.id, res]).catch(() => [account.id, null]))).then((rows) => {
+    Promise.all(wanted.map((account) => api.get(days ? `/fin/comptes/${account.id}/historique?jours=${days}` : `/fin/comptes/${account.id}/historique?months=12`).then((res) => [account.id, res]).catch(() => [account.id, null]))).then((rows) => {
       if (!cancelled) setHistories(Object.fromEntries(rows));
     });
     return () => {
@@ -41,12 +43,16 @@ export default function AccountsBalanceChart({ accounts }) {
       key: account.id,
       label: account.label,
       tone: index,
-      points: histories[account.id].points.map((point) => ({ month: point.month, value: point.solde })),
+      points: histories[account.id].points.map((point) => ({
+        month: point.month,
+        value: point.solde,
+        ...(days ? { label: new Intl.DateTimeFormat(i18n.language === 'tzm' ? 'fr' : i18n.language, { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(`${point.month}T00:00:00Z`)) } : {}),
+      })),
     }));
 
   return (
     <section aria-labelledby="accounts-chart-title" className="accounts-chart">
-      <h2 id="accounts-chart-title">{t('accounts.chartTitle')}</h2>
+      <h2 id="accounts-chart-title">{t(days ? 'accounts.chartTitleDays' : 'accounts.chartTitle', { count: days })}</h2>
       {usable.length > 1 && (
         <div className="fin-field">
           <label htmlFor="accounts-chart-filter">{t('accounts.chartFilter')}</label>
@@ -60,7 +66,7 @@ export default function AccountsBalanceChart({ accounts }) {
           </select>
         </div>
       )}
-      <LineChart series={series} currency={currency} caption={t('accounts.chartTitle')} />
+      <LineChart series={series} currency={currency} caption={t(days ? 'accounts.chartTitleDays' : 'accounts.chartTitle', { count: days })} />
       {currencies.size > 1 && <p className="fin-hint">{t('accounts.chartCurrencies')}</p>}
     </section>
   );

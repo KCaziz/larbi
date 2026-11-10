@@ -68,3 +68,16 @@
   padding: 13px 26px;
   font-size: 1rem;
 }
+
+/* A destructive action (P11-01: start again). Same look as the administration's. */
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-danger:hover {
+  background: color-mix(in srgb, var(--danger) 85%, #000);
+}
+.btn-danger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

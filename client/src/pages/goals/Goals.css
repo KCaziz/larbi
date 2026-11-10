@@ -310,3 +310,26 @@
 .goals-years-reached {
   background: var(--green-bg);
 }
+
+/* P11-03 : les deux simulateurs d’épargne. */
+.goals-planner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 16px;
+}
+.goals-planner > .fin-hint {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+.goals-planner-box {
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.goals-planner-box h4 {
+  margin: 0 0 8px;
+}
+.goals-planner-result {
+  margin: 12px 0;
+  font-weight: 600;
+}

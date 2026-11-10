@@ -12,6 +12,7 @@ const toRow = (e) => ({
   question: e.question,
   answer: e.answer,
   language: e.language,
+  audience: e.audience,
   status: e.status,
   position: e.position,
   updatedAt: e.updatedAt,
@@ -45,7 +46,7 @@ export async function createChatbotEntry(req, res) {
   if ((await prisma.chatbotEntry.count()) >= CHATBOT_LIMITS.entries) throw new HttpError(409, 'Too many entries');
   const { question, language } = req.body;
   const created = await prisma.chatbotEntry.create({
-    data: { question, answer: cleanAnswer(req.body.answer), language, position: await nextPosition(language) },
+    data: { question, answer: cleanAnswer(req.body.answer), language, audience: req.body.audience ?? 'both', position: await nextPosition(language) },
   });
   res.status(201).json({ entry: toRow(created) });
 }
@@ -55,6 +56,7 @@ export async function updateChatbotEntry(req, res) {
   const data = {};
   if (req.body.question !== undefined) data.question = req.body.question;
   if (req.body.answer !== undefined) data.answer = cleanAnswer(req.body.answer);
+  if (req.body.audience !== undefined) data.audience = req.body.audience;
   // Moving to another language puts the entry at the end of that language's list.
   if (req.body.language !== undefined && req.body.language !== entry.language) {
     data.language = req.body.language;

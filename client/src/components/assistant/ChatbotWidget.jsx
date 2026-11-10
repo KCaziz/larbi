@@ -27,7 +27,9 @@ function Assistant() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const lang = contentLanguage(i18n.language) ?? 'fr';
-  const entries = useApi(`/chatbot/entries?lang=${lang}`);
+  // P11-02: inside the application, the application's questions; elsewhere, the site's.
+  const audience = pathname.startsWith('/app') ? 'app' : 'site';
+  const entries = useApi(`/chatbot/entries?lang=${lang}&audience=${audience}`);
   // The deterministic resolver (P3-19) is content of its own: the panel must
   // be reachable when an administrator published intents but no predefined
   // question yet. Without this, the free-text field could never be used.

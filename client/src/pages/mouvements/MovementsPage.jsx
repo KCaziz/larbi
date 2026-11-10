@@ -127,6 +127,7 @@ export default function MovementsPage() {
                 currency={currency}
                 lookups={lookups}
                 run={run}
+                openings={tab === 'all' || tab === 'income' ? openingsFor(lookups.accounts, applied) : []}
               />
             )}
         </section>
@@ -511,7 +512,19 @@ function Filters({ tab, filters, setFilters, lookups, references, query, onApply
   );
 }
 
-function History({ data, currency, lookups, run }) {
+// Recette R10-04: an account opened with money shows that starting balance
+// here — said to be a starting balance, never counted as income (it is money
+// the person already had). It follows the account and date filters.
+function openingsFor(accounts, filters) {
+  return (accounts ?? [])
+    .filter((account) => !account.archivedAt && account.openingBalance)
+    .filter((account) => !filters.accountId || account.id === filters.accountId)
+    .filter((account) => !filters.from || new Date(account.openingDate) >= new Date(filters.from))
+    .filter((account) => !filters.to || new Date(account.openingDate) <= new Date(`${filters.to}T23:59:59`))
+    .sort((a, b) => new Date(b.openingDate) - new Date(a.openingDate));
+}
+
+function History({ data, currency, lookups, run, openings = [] }) {
   const { t, i18n } = useTranslation();
   const totals = data.totals;
   const money = (value) => (value === null ? t('fincludia.notComputed') : formatAmount(i18n.language, value, totals.currency ?? currency));
@@ -528,6 +541,21 @@ function History({ data, currency, lookups, run }) {
             <Row key={transaction.id} transaction={transaction} lookups={lookups} run={run} />
           ))}
         </ul>
+      )}
+      {openings.length > 0 && (
+        <section className="movements-openings" aria-labelledby="movements-openings-title">
+          <h3 id="movements-openings-title">{t('movements.openingsTitle')}</h3>
+          <ul className="money-list">
+            {openings.map((account) => (
+              <li key={account.id} className="money-row movements-opening-row">
+                <span className="money-row-date">{formatDate(i18n.language, account.openingDate)}</span>
+                <span className="money-row-amount">{formatAmount(i18n.language, account.openingBalance, account.currency)}</span>
+                <span>{t('movements.openingLine', { label: account.label })}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="fin-hint">{t('movements.openingsHint')}</p>
+        </section>
       )}
       {data.pages > 1 && <p className="money-pages">{t('myMoney.pageOf', { page: data.page, pages: data.pages })}</p>}
     </>

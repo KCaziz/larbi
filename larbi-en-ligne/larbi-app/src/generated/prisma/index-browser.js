@@ -557,6 +557,7 @@ exports.Prisma.FinRecurrenceScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   label: 'label',
+  incomeId: 'incomeId',
   categoryId: 'categoryId',
   kind: 'kind',
   value: 'value',
@@ -946,6 +947,7 @@ exports.Prisma.ChatbotEntryScalarFieldEnum = {
   language: 'language',
   status: 'status',
   position: 'position',
+  audience: 'audience',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -1800,6 +1802,7 @@ exports.Prisma.FinRecurrenceOrderByRelevanceFieldEnum = {
   id: 'id',
   userId: 'userId',
   label: 'label',
+  incomeId: 'incomeId',
   categoryId: 'categoryId',
   kind: 'kind',
   currency: 'currency',
@@ -2056,7 +2059,8 @@ exports.Prisma.ChatbotEntryOrderByRelevanceFieldEnum = {
   question: 'question',
   answer: 'answer',
   language: 'language',
-  status: 'status'
+  status: 'status',
+  audience: 'audience'
 };
 
 exports.Prisma.ContactMessageOrderByRelevanceFieldEnum = {

@@ -35672,6 +35672,7 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     label: string | null
+    incomeId: string | null
     categoryId: string | null
     kind: string | null
     value: number | null
@@ -35702,6 +35703,7 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     label: string | null
+    incomeId: string | null
     categoryId: string | null
     kind: string | null
     value: number | null
@@ -35732,6 +35734,7 @@ export namespace Prisma {
     id: number
     userId: number
     label: number
+    incomeId: number
     categoryId: number
     kind: number
     value: number
@@ -35776,6 +35779,7 @@ export namespace Prisma {
     id?: true
     userId?: true
     label?: true
+    incomeId?: true
     categoryId?: true
     kind?: true
     value?: true
@@ -35806,6 +35810,7 @@ export namespace Prisma {
     id?: true
     userId?: true
     label?: true
+    incomeId?: true
     categoryId?: true
     kind?: true
     value?: true
@@ -35836,6 +35841,7 @@ export namespace Prisma {
     id?: true
     userId?: true
     label?: true
+    incomeId?: true
     categoryId?: true
     kind?: true
     value?: true
@@ -35955,6 +35961,7 @@ export namespace Prisma {
     id: string
     userId: string
     label: string
+    incomeId: string | null
     categoryId: string | null
     kind: string
     value: number
@@ -36006,6 +36013,7 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     label?: boolean
+    incomeId?: boolean
     categoryId?: boolean
     kind?: boolean
     value?: boolean
@@ -36045,6 +36053,7 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     label?: boolean
+    incomeId?: boolean
     categoryId?: boolean
     kind?: boolean
     value?: boolean
@@ -36073,7 +36082,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FinRecurrenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "label" | "categoryId" | "kind" | "value" | "currency" | "frequency" | "nextDate" | "endDate" | "reminderDays" | "detected" | "accountId" | "creationMode" | "weekendRule" | "note" | "scope" | "source" | "sourceRef" | "status" | "confidence" | "consentUses" | "effectiveAt" | "collectedAt" | "version" | "archivedAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["finRecurrence"]>
+  export type FinRecurrenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "label" | "incomeId" | "categoryId" | "kind" | "value" | "currency" | "frequency" | "nextDate" | "endDate" | "reminderDays" | "detected" | "accountId" | "creationMode" | "weekendRule" | "note" | "scope" | "source" | "sourceRef" | "status" | "confidence" | "consentUses" | "effectiveAt" | "collectedAt" | "version" | "archivedAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["finRecurrence"]>
   export type FinRecurrenceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     category?: boolean | FinRecurrence$categoryArgs<ExtArgs>
@@ -36094,6 +36103,7 @@ export namespace Prisma {
       id: string
       userId: string
       label: string
+      incomeId: string | null
       categoryId: string | null
       kind: string
       value: number
@@ -36496,6 +36506,7 @@ export namespace Prisma {
     readonly id: FieldRef<"FinRecurrence", 'String'>
     readonly userId: FieldRef<"FinRecurrence", 'String'>
     readonly label: FieldRef<"FinRecurrence", 'String'>
+    readonly incomeId: FieldRef<"FinRecurrence", 'String'>
     readonly categoryId: FieldRef<"FinRecurrence", 'String'>
     readonly kind: FieldRef<"FinRecurrence", 'String'>
     readonly value: FieldRef<"FinRecurrence", 'Float'>
@@ -62624,6 +62635,7 @@ export namespace Prisma {
     language: string | null
     status: string | null
     position: number | null
+    audience: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -62635,6 +62647,7 @@ export namespace Prisma {
     language: string | null
     status: string | null
     position: number | null
+    audience: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -62646,6 +62659,7 @@ export namespace Prisma {
     language: number
     status: number
     position: number
+    audience: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -62667,6 +62681,7 @@ export namespace Prisma {
     language?: true
     status?: true
     position?: true
+    audience?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -62678,6 +62693,7 @@ export namespace Prisma {
     language?: true
     status?: true
     position?: true
+    audience?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -62689,6 +62705,7 @@ export namespace Prisma {
     language?: true
     status?: true
     position?: true
+    audience?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -62787,6 +62804,7 @@ export namespace Prisma {
     language: string
     status: string
     position: number
+    audience: string
     createdAt: Date
     updatedAt: Date
     _count: ChatbotEntryCountAggregateOutputType | null
@@ -62817,6 +62835,7 @@ export namespace Prisma {
     language?: boolean
     status?: boolean
     position?: boolean
+    audience?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["chatbotEntry"]>
@@ -62830,11 +62849,12 @@ export namespace Prisma {
     language?: boolean
     status?: boolean
     position?: boolean
+    audience?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ChatbotEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "question" | "answer" | "language" | "status" | "position" | "createdAt" | "updatedAt", ExtArgs["result"]["chatbotEntry"]>
+  export type ChatbotEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "question" | "answer" | "language" | "status" | "position" | "audience" | "createdAt" | "updatedAt", ExtArgs["result"]["chatbotEntry"]>
 
   export type $ChatbotEntryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ChatbotEntry"
@@ -62846,6 +62866,7 @@ export namespace Prisma {
       language: string
       status: string
       position: number
+      audience: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["chatbotEntry"]>
@@ -63223,6 +63244,7 @@ export namespace Prisma {
     readonly language: FieldRef<"ChatbotEntry", 'String'>
     readonly status: FieldRef<"ChatbotEntry", 'String'>
     readonly position: FieldRef<"ChatbotEntry", 'Int'>
+    readonly audience: FieldRef<"ChatbotEntry", 'String'>
     readonly createdAt: FieldRef<"ChatbotEntry", 'DateTime'>
     readonly updatedAt: FieldRef<"ChatbotEntry", 'DateTime'>
   }
@@ -106610,6 +106632,7 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     label: 'label',
+    incomeId: 'incomeId',
     categoryId: 'categoryId',
     kind: 'kind',
     value: 'value',
@@ -107074,6 +107097,7 @@ export namespace Prisma {
     language: 'language',
     status: 'status',
     position: 'position',
+    audience: 'audience',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -108138,6 +108162,7 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     label: 'label',
+    incomeId: 'incomeId',
     categoryId: 'categoryId',
     kind: 'kind',
     currency: 'currency',
@@ -108469,7 +108494,8 @@ export namespace Prisma {
     question: 'question',
     answer: 'answer',
     language: 'language',
-    status: 'status'
+    status: 'status',
+    audience: 'audience'
   };
 
   export type ChatbotEntryOrderByRelevanceFieldEnum = (typeof ChatbotEntryOrderByRelevanceFieldEnum)[keyof typeof ChatbotEntryOrderByRelevanceFieldEnum]
@@ -111780,6 +111806,7 @@ export namespace Prisma {
     id?: StringFilter<"FinRecurrence"> | string
     userId?: StringFilter<"FinRecurrence"> | string
     label?: StringFilter<"FinRecurrence"> | string
+    incomeId?: StringNullableFilter<"FinRecurrence"> | string | null
     categoryId?: StringNullableFilter<"FinRecurrence"> | string | null
     kind?: StringFilter<"FinRecurrence"> | string
     value?: FloatFilter<"FinRecurrence"> | number
@@ -111816,6 +111843,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     label?: SortOrder
+    incomeId?: SortOrderInput | SortOrder
     categoryId?: SortOrderInput | SortOrder
     kind?: SortOrder
     value?: SortOrder
@@ -111856,6 +111884,7 @@ export namespace Prisma {
     NOT?: FinRecurrenceWhereInput | FinRecurrenceWhereInput[]
     userId?: StringFilter<"FinRecurrence"> | string
     label?: StringFilter<"FinRecurrence"> | string
+    incomeId?: StringNullableFilter<"FinRecurrence"> | string | null
     categoryId?: StringNullableFilter<"FinRecurrence"> | string | null
     kind?: StringFilter<"FinRecurrence"> | string
     value?: FloatFilter<"FinRecurrence"> | number
@@ -111892,6 +111921,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     label?: SortOrder
+    incomeId?: SortOrderInput | SortOrder
     categoryId?: SortOrderInput | SortOrder
     kind?: SortOrder
     value?: SortOrder
@@ -111932,6 +111962,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"FinRecurrence"> | string
     userId?: StringWithAggregatesFilter<"FinRecurrence"> | string
     label?: StringWithAggregatesFilter<"FinRecurrence"> | string
+    incomeId?: StringNullableWithAggregatesFilter<"FinRecurrence"> | string | null
     categoryId?: StringNullableWithAggregatesFilter<"FinRecurrence"> | string | null
     kind?: StringWithAggregatesFilter<"FinRecurrence"> | string
     value?: FloatWithAggregatesFilter<"FinRecurrence"> | number
@@ -114277,6 +114308,7 @@ export namespace Prisma {
     language?: StringFilter<"ChatbotEntry"> | string
     status?: StringFilter<"ChatbotEntry"> | string
     position?: IntFilter<"ChatbotEntry"> | number
+    audience?: StringFilter<"ChatbotEntry"> | string
     createdAt?: DateTimeFilter<"ChatbotEntry"> | Date | string
     updatedAt?: DateTimeFilter<"ChatbotEntry"> | Date | string
   }
@@ -114288,6 +114320,7 @@ export namespace Prisma {
     language?: SortOrder
     status?: SortOrder
     position?: SortOrder
+    audience?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _relevance?: ChatbotEntryOrderByRelevanceInput
@@ -114303,6 +114336,7 @@ export namespace Prisma {
     language?: StringFilter<"ChatbotEntry"> | string
     status?: StringFilter<"ChatbotEntry"> | string
     position?: IntFilter<"ChatbotEntry"> | number
+    audience?: StringFilter<"ChatbotEntry"> | string
     createdAt?: DateTimeFilter<"ChatbotEntry"> | Date | string
     updatedAt?: DateTimeFilter<"ChatbotEntry"> | Date | string
   }, "id">
@@ -114314,6 +114348,7 @@ export namespace Prisma {
     language?: SortOrder
     status?: SortOrder
     position?: SortOrder
+    audience?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ChatbotEntryCountOrderByAggregateInput
@@ -114333,6 +114368,7 @@ export namespace Prisma {
     language?: StringWithAggregatesFilter<"ChatbotEntry"> | string
     status?: StringWithAggregatesFilter<"ChatbotEntry"> | string
     position?: IntWithAggregatesFilter<"ChatbotEntry"> | number
+    audience?: StringWithAggregatesFilter<"ChatbotEntry"> | string
     createdAt?: DateTimeWithAggregatesFilter<"ChatbotEntry"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ChatbotEntry"> | Date | string
   }
@@ -121141,6 +121177,7 @@ export namespace Prisma {
   export type FinRecurrenceCreateInput = {
     id?: string
     label: string
+    incomeId?: string | null
     kind: string
     value: number
     currency: string
@@ -121175,6 +121212,7 @@ export namespace Prisma {
     id?: string
     userId: string
     label: string
+    incomeId?: string | null
     categoryId?: string | null
     kind: string
     value: number
@@ -121207,6 +121245,7 @@ export namespace Prisma {
   export type FinRecurrenceUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -121241,6 +121280,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
@@ -121274,6 +121314,7 @@ export namespace Prisma {
     id?: string
     userId: string
     label: string
+    incomeId?: string | null
     categoryId?: string | null
     kind: string
     value: number
@@ -121305,6 +121346,7 @@ export namespace Prisma {
   export type FinRecurrenceUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -121335,6 +121377,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
@@ -123921,6 +123964,7 @@ export namespace Prisma {
     language?: string
     status?: string
     position?: number
+    audience?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -123932,6 +123976,7 @@ export namespace Prisma {
     language?: string
     status?: string
     position?: number
+    audience?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -123943,6 +123988,7 @@ export namespace Prisma {
     language?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    audience?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -123954,6 +124000,7 @@ export namespace Prisma {
     language?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    audience?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -123965,6 +124012,7 @@ export namespace Prisma {
     language?: string
     status?: string
     position?: number
+    audience?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -123976,6 +124024,7 @@ export namespace Prisma {
     language?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    audience?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -123987,6 +124036,7 @@ export namespace Prisma {
     language?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    audience?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -130258,6 +130308,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     label?: SortOrder
+    incomeId?: SortOrder
     categoryId?: SortOrder
     kind?: SortOrder
     value?: SortOrder
@@ -130295,6 +130346,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     label?: SortOrder
+    incomeId?: SortOrder
     categoryId?: SortOrder
     kind?: SortOrder
     value?: SortOrder
@@ -130325,6 +130377,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     label?: SortOrder
+    incomeId?: SortOrder
     categoryId?: SortOrder
     kind?: SortOrder
     value?: SortOrder
@@ -131937,6 +131990,7 @@ export namespace Prisma {
     language?: SortOrder
     status?: SortOrder
     position?: SortOrder
+    audience?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -131952,6 +132006,7 @@ export namespace Prisma {
     language?: SortOrder
     status?: SortOrder
     position?: SortOrder
+    audience?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -131963,6 +132018,7 @@ export namespace Prisma {
     language?: SortOrder
     status?: SortOrder
     position?: SortOrder
+    audience?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -142329,6 +142385,7 @@ export namespace Prisma {
   export type FinRecurrenceCreateWithoutUserInput = {
     id?: string
     label: string
+    incomeId?: string | null
     kind: string
     value: number
     currency: string
@@ -142361,6 +142418,7 @@ export namespace Prisma {
   export type FinRecurrenceUncheckedCreateWithoutUserInput = {
     id?: string
     label: string
+    incomeId?: string | null
     categoryId?: string | null
     kind: string
     value: number
@@ -144022,6 +144080,7 @@ export namespace Prisma {
     id?: StringFilter<"FinRecurrence"> | string
     userId?: StringFilter<"FinRecurrence"> | string
     label?: StringFilter<"FinRecurrence"> | string
+    incomeId?: StringNullableFilter<"FinRecurrence"> | string | null
     categoryId?: StringNullableFilter<"FinRecurrence"> | string | null
     kind?: StringFilter<"FinRecurrence"> | string
     value?: FloatFilter<"FinRecurrence"> | number
@@ -146970,6 +147029,7 @@ export namespace Prisma {
   export type FinRecurrenceCreateWithoutCategoryInput = {
     id?: string
     label: string
+    incomeId?: string | null
     kind: string
     value: number
     currency: string
@@ -147003,6 +147063,7 @@ export namespace Prisma {
     id?: string
     userId: string
     label: string
+    incomeId?: string | null
     kind: string
     value: number
     currency: string
@@ -148494,6 +148555,7 @@ export namespace Prisma {
   export type FinRecurrenceCreateWithoutAccountInput = {
     id?: string
     label: string
+    incomeId?: string | null
     kind: string
     value: number
     currency: string
@@ -148527,6 +148589,7 @@ export namespace Prisma {
     id?: string
     userId: string
     label: string
+    incomeId?: string | null
     categoryId?: string | null
     kind: string
     value: number
@@ -149052,6 +149115,7 @@ export namespace Prisma {
   export type FinRecurrenceCreateWithoutOccurrencesInput = {
     id?: string
     label: string
+    incomeId?: string | null
     kind: string
     value: number
     currency: string
@@ -149085,6 +149149,7 @@ export namespace Prisma {
     id?: string
     userId: string
     label: string
+    incomeId?: string | null
     categoryId?: string | null
     kind: string
     value: number
@@ -149271,6 +149336,7 @@ export namespace Prisma {
   export type FinRecurrenceUpdateWithoutOccurrencesInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -149304,6 +149370,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
@@ -170288,6 +170355,7 @@ export namespace Prisma {
   export type FinRecurrenceCreateManyUserInput = {
     id?: string
     label: string
+    incomeId?: string | null
     categoryId?: string | null
     kind: string
     value: number
@@ -171552,6 +171620,7 @@ export namespace Prisma {
   export type FinRecurrenceUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -171584,6 +171653,7 @@ export namespace Prisma {
   export type FinRecurrenceUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
@@ -171616,6 +171686,7 @@ export namespace Prisma {
   export type FinRecurrenceUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
@@ -172708,6 +172779,7 @@ export namespace Prisma {
     id?: string
     userId: string
     label: string
+    incomeId?: string | null
     kind: string
     value: number
     currency: string
@@ -173089,6 +173161,7 @@ export namespace Prisma {
   export type FinRecurrenceUpdateWithoutCategoryInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -173122,6 +173195,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -173154,6 +173228,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -173518,6 +173593,7 @@ export namespace Prisma {
     id?: string
     userId: string
     label: string
+    incomeId?: string | null
     categoryId?: string | null
     kind: string
     value: number
@@ -173714,6 +173790,7 @@ export namespace Prisma {
   export type FinRecurrenceUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -173747,6 +173824,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
@@ -173779,6 +173857,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
+    incomeId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number

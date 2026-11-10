@@ -281,6 +281,9 @@ export async function addGoalContribution(prisma, userId, id, body) {
     value: body.value,
     occurredAt: body.occurredAt,
     note: body.note ?? goal.label,
+    // P11-04: planned for a later day — in the calendar and « Aujourd’hui »,
+    // and real only when confirmed.
+    planned: body.planned ?? false,
   });
   return { transfer, accountId };
 }

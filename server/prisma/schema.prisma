@@ -974,6 +974,9 @@ model FinRecurrence {
   userId       String
   user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   label        String          @db.VarChar(80)
+  // Recette R10-05: the declared income this recurrence brings in, when there
+  // is one. Correcting, archiving or deleting the income does the same to it.
+  incomeId     String?         @db.VarChar(191)
   categoryId   String?
   category     FinCategory?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   // "income" | "expense" (TRANSACTION_KINDS): a recurrence is money that comes
@@ -1024,6 +1027,7 @@ model FinRecurrence {
 
   @@index([userId, nextDate])
   @@index([categoryId])
+  @@index([incomeId])
   @@map("fin_recurrences")
 }
 
@@ -1785,6 +1789,9 @@ model ChatbotEntry {
   language  String   @default("fr") @db.VarChar(2)
   status    String   @default("draft") @db.VarChar(20)
   position  Int      @default(0)
+  // P11-02: where the question is shown — "site" (the public FAQ), "app"
+  // (the help inside the application) or "both".
+  audience  String   @default("both") @db.VarChar(10)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

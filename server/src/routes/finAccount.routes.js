@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAccountHistory, getAccounts, patchAccount, postAccount, postTransfer, putAccountArchived, removeTransfer } from '../controllers/finAccount.controller.js';
+import { getAccountFlow, getAccountHistory, getAccounts, removeAccount, patchAccount, postAccount, postTransfer, putAccountArchived, removeTransfer } from '../controllers/finAccount.controller.js';
 import { getHome } from '../controllers/finHome.controller.js';
 import { getCurrencies } from '../controllers/finExchange.controller.js';
 import { exportReport, getComparison, getReport } from '../controllers/finReport.controller.js';
@@ -9,11 +9,13 @@ import { synthesisQuerySchema } from '../validation/finMoney.schemas.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
 import { asyncRoute, uuidParam } from '../utils/asyncRoute.js';
 import {
+  accountFlowQuerySchema,
   accountsQuerySchema,
   archiveAccountSchema,
   balanceHistoryQuerySchema,
   createAccountSchema,
   createTransferSchema,
+  deleteAccountSchema,
   deleteTransferSchema,
   updateAccountSchema,
 } from '../validation/finAccount.schemas.js';
@@ -35,8 +37,11 @@ router.get('/rapport/export', validateQuery(reportExportQuerySchema), asyncRoute
 router.get('/comptes', validateQuery(accountsQuerySchema), asyncRoute(getAccounts));
 router.post('/comptes', validateBody(createAccountSchema), asyncRoute(postAccount));
 router.get('/comptes/:id/historique', validateQuery(balanceHistoryQuerySchema), asyncRoute(getAccountHistory));
+// Recette R10-09: in and out of one account, transfers included.
+router.get('/comptes/:id/flux', validateQuery(accountFlowQuerySchema), asyncRoute(getAccountFlow));
 router.patch('/comptes/:id', validateBody(updateAccountSchema), asyncRoute(patchAccount));
 router.put('/comptes/:id/archive', validateBody(archiveAccountSchema), asyncRoute(putAccountArchived));
+router.delete('/comptes/:id', validateBody(deleteAccountSchema), asyncRoute(removeAccount));
 
 router.post('/transferts', validateBody(createTransferSchema), asyncRoute(postTransfer));
 router.delete('/transferts/:transferId', validateBody(deleteTransferSchema), asyncRoute(removeTransfer));
