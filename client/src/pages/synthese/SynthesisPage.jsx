@@ -98,7 +98,14 @@ export default function SynthesisPage() {
             <FigureCard label={t('movements.tabs.income')} answer={s.R01.revenus} />
             <FigureCard label={t('movements.tabs.expense')} answer={s.R01.depenses} />
             <FigureCard label={t('appHome.netFlow')} answer={s.R01.fluxNet} />
+            {s.R01.soldeDebut?.resultat !== null && s.R01.soldeDebut?.resultat !== undefined && (
+              <>
+                <FigureCard label={t('synthesis.startBalance')} answer={s.R01.soldeDebut} />
+                <FigureCard label={t('synthesis.endBalance')} answer={s.R01.soldeFin} />
+              </>
+            )}
           </div>
+          <p className="fin-hint">{t('synthesis.balanceNote')}</p>
           <p className="fin-hint">
             {t('synthesis.vsPrevious', {
               expenses: s.R01.tendance.depenses.resultat === null ? t('fincludia.notComputed') : formatRatio(i18n.language, s.R01.tendance.depenses.resultat),

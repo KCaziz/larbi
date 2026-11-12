@@ -50,6 +50,55 @@ export function occurrencesWithOutcome(recurrence, outcomes, from, to) {
   return list;
 }
 
+// How far from the expected date a movement still counts as « that payment » (R13-06).
+export const RECURRENCE_MATCH_DAYS = 10;
+
+/**
+ * The payments the person declared that a movement they are entering could be
+ * (R13-06, « le détecteur d'une même opération »): same kind, currency and
+ * amount, same category, and an occurrence still EXPECTED within ten days of
+ * the movement's date. Asked BEFORE the movement is saved: if it is that
+ * payment, it is recorded once, as the payment, not once more beside it.
+ * A recurrence with no category is matched on the amount alone.
+ */
+export async function findRecurrenceMatches(prisma, userId, { kind, value, currency, categoryId, occurredAt }) {
+  const candidates = await prisma.finRecurrence.findMany({
+    where: { userId, deletedAt: null, archivedAt: null, kind, currency, value, OR: [{ categoryId: categoryId ?? null }, { categoryId: null }] },
+  });
+  if (candidates.length === 0) return [];
+  const from = new Date(occurredAt.getTime() - RECURRENCE_MATCH_DAYS * DAY);
+  const to = new Date(occurredAt.getTime() + RECURRENCE_MATCH_DAYS * DAY);
+  const outcomes = await prisma.finOccurrence.findMany({ where: { userId, recurrenceId: { in: candidates.map((row) => row.id) } } });
+  const matches = [];
+  for (const recurrence of candidates) {
+    for (const item of occurrencesWithOutcome(recurrence, outcomes, from, to)) {
+      if (item.outcome === null) matches.push({ recurrenceId: recurrence.id, label: recurrence.label, dueDate: dayKey(item.dueDate), date: item.date });
+    }
+  }
+  return matches.sort((a, b) => Math.abs(new Date(a.date) - occurredAt) - Math.abs(new Date(b.date) - occurredAt)).slice(0, 3);
+}
+
+/**
+ * Says that a movement just written IS an occurrence of a recurrence (R13-06),
+ * inside the caller's transaction: the occurrence is settled with the movement
+ * as its result, so the payment exists once and the calendar stops expecting
+ * it. Refused if the occurrence is not one of the recurrence's, or was already
+ * settled (the unique (recurrence, due date) keeps a payment from being
+ * counted twice).
+ */
+export async function linkMovementToOccurrence(tx, userId, { recurrenceId, dueDate }, transactionId) {
+  const recurrence = await tx.finRecurrence.findFirst({ where: { id: recurrenceId, userId, deletedAt: null } });
+  if (!recurrence) throw new HttpError(404, 'Recurrence not found');
+  const due = new Date(`${dayKey(dueDate)}T00:00:00.000Z`);
+  if (!occurrencesOf(recurrence, due, due).some((date) => dayKey(date) === dayKey(due))) {
+    throw new HttpError(422, 'This is not an occurrence of that recurrence', { reason: 'notAnOccurrence' });
+  }
+  const existing = await tx.finOccurrence.findUnique({ where: { recurrenceId_dueDate: { recurrenceId, dueDate: due } } });
+  if (existing) throw new HttpError(409, 'Occurrence already settled', { reason: 'alreadySettled' });
+  await tx.finOccurrence.create({ data: { userId, recurrenceId, dueDate: due, outcome: 'confirmed', transactionId, source: 'manual', status: 'real' } });
+  await recordChange(tx, { userId, entity: 'recurrence', entityId: recurrenceId, action: 'correct', field: 'occurrence', after: { dueDate: dayKey(due), action: 'linked', transactionId } });
+}
+
 async function ownRecurrence(prisma, userId, id) {
   const row = await prisma.finRecurrence.findFirst({ where: { id, userId, deletedAt: null } });
   if (!row) throw new HttpError(404, 'Recurrence not found');

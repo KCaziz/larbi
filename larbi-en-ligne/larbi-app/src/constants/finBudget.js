@@ -16,7 +16,7 @@ export const ENVELOPE_KINDS = ['fixed', 'variable'];
 // "duplicate for the next period" action to compute the next period, and shown
 // as-is. `none` is a one-off budget (a month someone budgeted once), which must
 // stay possible — a mandatory recurrence would invent a commitment.
-export const BUDGET_RECURRENCES = ['none', 'monthly', 'quarterly', 'yearly'];
+export const BUDGET_RECURRENCES = ['none', 'weekly', 'monthly', 'quarterly', 'yearly'];
 export const DEFAULT_BUDGET_RECURRENCE = 'monthly';
 
 // Alerts: the client asks for « 80 % / 100 % / dépassement, configurables ».

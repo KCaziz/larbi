@@ -224,15 +224,18 @@ export async function detectCandidates(prisma, userId, { currency, options = {},
       currency,
       occurredAt: { gte: from, lte: now },
       // A pattern needs something to match on: ALG-04 groups by label, and the
-      // label of a movement is the note the person typed.
-      note: { not: null },
+      // label of a movement is the note the person typed — or, with no note
+      // (R13-05), the name of its category: two « Loyer » expenses are the same
+      // line even if nobody wrote anything on them.
+      OR: [{ note: { not: null } }, { categoryId: { not: null } }],
     },
-    select: { note: true, value: true, occurredAt: true, categoryId: true, kind: true },
+    select: { note: true, value: true, occurredAt: true, categoryId: true, kind: true, category: { select: { label: true } } },
   });
+  const labelOf = (row) => row.note ?? row.category?.label ?? null;
 
   const candidates =
     detectRecurrences(
-      rows.map((row) => ({ label: row.note, amount: row.value, date: row.occurredAt })),
+      rows.map((row) => ({ label: labelOf(row), amount: row.value, date: row.occurredAt })),
       { ...DETECTION_DEFAULTS, ...options },
     ) ?? [];
 
@@ -251,7 +254,7 @@ export async function detectCandidates(prisma, userId, { currency, options = {},
   // confirming one does not ask the person to retype what we already know.
   const byLabel = new Map();
   for (const row of rows) {
-    const key = String(row.note)
+    const key = String(labelOf(row))
       .toLowerCase()
       .replace(/[^\p{L}\p{N}]+/gu, ' ')
       .trim();
@@ -302,8 +305,49 @@ export function frequencyForInterval(days) {
  * Nothing is created from a detection without this call, which is the client's
  * rule in one place rather than a convention several callers have to remember.
  */
-export function confirmCandidate(prisma, userId, body) {
-  return createRecurrence(prisma, userId, { ...body, detected: true, sourceRef: 'detection:ALG-04' });
+export async function confirmCandidate(prisma, userId, body) {
+  const recurrence = await createRecurrence(prisma, userId, { ...body, detected: true, sourceRef: 'detection:ALG-04' });
+  return { ...recurrence, merged: await mergePastLines(prisma, userId, recurrence) };
+}
+
+const normaliseLabel = (text) =>
+  String(text ?? '')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim();
+
+/**
+ * « Fusionner ces lignes lorsqu'elles sont identiques » (R13-05): the past
+ * movements that ARE this recurrence — same kind, currency and amount, and the
+ * same label (or, with no note, the same category) — become its occurrences,
+ * so the history reads « paiement régulier » instead of a series of loose
+ * lines, and the calendar does not ask for them again. Nothing is deleted and
+ * no movement is created: the lines stay, linked. One per day at most, and none
+ * that already belongs to an occurrence.
+ */
+export async function mergePastLines(prisma, userId, recurrence) {
+  const since = new Date(Date.now() - DETECTION_WINDOW_DAYS * DAY);
+  const rows = await prisma.finTransaction.findMany({
+    where: { userId, deletedAt: null, planned: false, status: 'real', kind: recurrence.kind, currency: recurrence.currency, value: recurrence.value, occurredAt: { gte: since, lte: new Date() } },
+    select: { id: true, note: true, categoryId: true, occurredAt: true },
+    orderBy: { occurredAt: 'asc' },
+  });
+  const label = normaliseLabel(recurrence.label);
+  const same = rows.filter((row) => (row.note ? normaliseLabel(row.note) === label : recurrence.categoryId && row.categoryId === recurrence.categoryId));
+  if (same.length === 0) return 0;
+  const taken = new Set((await prisma.finOccurrence.findMany({ where: { userId, transactionId: { in: same.map((row) => row.id) } }, select: { transactionId: true } })).map((row) => row.transactionId));
+  const days = new Set();
+  let merged = 0;
+  await prisma.$transaction(async (tx) => {
+    for (const row of same) {
+      const dueDate = new Date(Date.UTC(row.occurredAt.getUTCFullYear(), row.occurredAt.getUTCMonth(), row.occurredAt.getUTCDate()));
+      if (taken.has(row.id) || days.has(dueDate.getTime())) continue;
+      days.add(dueDate.getTime());
+      await tx.finOccurrence.create({ data: { userId, recurrenceId: recurrence.id, dueDate, outcome: 'confirmed', transactionId: row.id, source: 'manual', status: 'real' } });
+      merged += 1;
+    }
+  });
+  return merged;
 }
 
 // ---- provisions ------------------------------------------------------------

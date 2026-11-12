@@ -3239,7 +3239,8 @@
       "none": "One-off",
       "monthly": "Monthly",
       "quarterly": "Quarterly",
-      "yearly": "Yearly"
+      "yearly": "Yearly",
+      "weekly": "Weekly"
     },
     "save": "Save",
     "cancel": "Cancel",
@@ -3354,7 +3355,23 @@
     "paceDay": "Day",
     "paceReal": "Cumulative spending",
     "pacePlanned": "Planned pace (spread over the period)",
-    "seeExpenses": "See this envelope's expenses"
+    "seeExpenses": "See this envelope's expenses",
+    "account": "Account to debit",
+    "accountAll": "All the accounts of the overall balance",
+    "accountHelp": "Only expenses paid with this account count in this budget, its curves and its trends. “All” takes the accounts counted in your overall balance.",
+    "countBalance": "Count my accounts’ balance as a resource",
+    "countBalanceHelp": "The money already on the account(s) when the period starts is added to your expected income: it is an income in kind.",
+    "envelopeAccount": "Envelope account",
+    "envelopeAccountBudget": "The budget’s own",
+    "envelopeAccountHelp": "Leave “The budget’s own” to follow the budget’s account, or pick a specific account for this envelope.",
+    "accountLine": "Account: {{account}}",
+    "accountLineAll": "Accounts: all those of the overall balance",
+    "startBalance": "Balance at the start of the period",
+    "totalResources": "Total resources (income + balance)",
+    "shareConsumed": "{{percent}} of its envelope consumed",
+    "shareOfBudget": "{{percent}} of the total budget",
+    "shareOfSpending": "{{percent}} of the budget’s spending",
+    "committed": "Committed: {{amount}} ({{toCome}} planned still to come), that is {{percent}} of the envelope"
   },
   "goals": {
     "title": "Goals",
@@ -5266,7 +5283,11 @@
     "groupFilterClear": "Remove",
     "openingsTitle": "Starting balances",
     "openingLine": "Starting balance of “{{label}}”",
-    "openingsHint": "The money already on an account when it was opened. It counts in the account’s balance, not in your income of the month: it is not money coming in. To correct it, edit the account."
+    "openingsHint": "The money already on an account when it was opened. It counts in the account’s balance, not in your income of the month: it is not money coming in. To correct it, edit the account.",
+    "recurrenceQuestion": "This looks like your regular payment “{{label}}” of {{date}}. Is it that payment? It will then be recorded only once.",
+    "recurrenceYes": "Yes, it is that payment",
+    "recurrenceNo": "No, it is another operation",
+    "addedAsPayment": "Recorded as your regular payment: one operation, the due date is settled."
   },
   "appHome": {
     "title": "Home",
@@ -5311,7 +5332,11 @@
     "miniFlow": "Net flow of the last months",
     "ringNothing": "No movement",
     "incomeExpected": "Still expected this month: {{amount}}.",
-    "incomeConfirm": "Confirm on arrival"
+    "incomeConfirm": "Confirm on arrival",
+    "fluxWithExpected": "With your expected income ({{income}}, not received yet): {{flux}}.",
+    "noBudgetForSpending": "No budget this month: this spending is not spread over any envelope.",
+    "outsideBudget": "{{amount}} spent outside the budget (no envelope covers it).",
+    "seeBudget": "See the budget"
   },
   "finProfile": {
     "incomeRegularity": "How regular my income is",
@@ -5399,7 +5424,10 @@
       "mois": "By month",
       "semaine": "By week",
       "jour": "By day"
-    }
+    },
+    "startBalance": "Balance at the start of the month",
+    "endBalance": "Balance at the end of the month",
+    "balanceNote": "The net flow is what came in minus what went out during the month; the balances say what money you started with and ended with."
   },
   "education": {
     "yourParcours": "Your path: {{name}}",

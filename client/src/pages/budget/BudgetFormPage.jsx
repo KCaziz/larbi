@@ -58,12 +58,19 @@ export default function BudgetFormPage() {
 
 function BudgetForm({ budget, onSubmit }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const currency = budget?.currency ?? user?.finCurrency ?? 'DZD';
+  // R13-01: the account the budget is spent from — « tous » or one of the person's own.
+  const accounts = useApi('/fin/comptes');
+  const spendable = (accounts.data?.accounts ?? []).filter((account) => !account.archivedAt && !account.liability && account.currency === currency);
   const today = new Date();
   const [form, setForm] = useState(() => ({
     label: budget?.label ?? '',
     periodStart: budget ? day(budget.periodStart) : new Date(Date.UTC(today.getFullYear(), today.getMonth(), 1)).toISOString().slice(0, 10),
     periodEnd: budget ? day(budget.periodEnd) : new Date(Date.UTC(today.getFullYear(), today.getMonth() + 1, 0)).toISOString().slice(0, 10),
     recurrence: budget?.recurrence ?? 'monthly',
+    accountId: budget?.accountId ?? '',
+    countBalance: budget?.countBalance ?? true,
     note: budget?.note ?? '',
     color: budget?.color ?? null,
   }));
@@ -87,6 +94,8 @@ function BudgetForm({ budget, onSubmit }) {
         periodStart: new Date(form.periodStart).toISOString(),
         periodEnd: new Date(`${form.periodEnd}T23:59:59`).toISOString(),
         recurrence: form.recurrence,
+        accountId: form.accountId || null,
+        countBalance: form.countBalance,
         // P10-02: a new budget sends a colour only when one was chosen.
         ...(budget || form.color ? { color: form.color } : {}),
         ...(budget ? { note: form.note.trim() || null } : {}),
@@ -131,12 +140,30 @@ function BudgetForm({ budget, onSubmit }) {
         <div className="fin-field">
           <label htmlFor="new-budget-recurrence">{t('budget.recurrence')}</label>
           <select id="new-budget-recurrence" value={form.recurrence} onChange={(event) => setForm({ ...form, recurrence: event.target.value })}>
-            {['none', 'monthly', 'quarterly', 'yearly'].map((option) => (
+            {['none', 'weekly', 'monthly', 'quarterly', 'yearly'].map((option) => (
               <option key={option} value={option}>
                 {t(`budget.recurrences.${option}`)}
               </option>
             ))}
           </select>
+        </div>
+        <div className="fin-field">
+          <label htmlFor="new-budget-account">{t('budget.account')}</label>
+          <select id="new-budget-account" value={form.accountId} onChange={(event) => setForm({ ...form, accountId: event.target.value })}>
+            <option value="">{t('budget.accountAll')}</option>
+            {spendable.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.label}
+              </option>
+            ))}
+          </select>
+          <span className="fin-hint">{t('budget.accountHelp')}</span>
+        </div>
+        <div className="fin-field budget-count-balance">
+          <label htmlFor="new-budget-balance">
+            <input id="new-budget-balance" type="checkbox" checked={form.countBalance} onChange={(event) => setForm({ ...form, countBalance: event.target.checked })} /> {t('budget.countBalance')}
+          </label>
+          <span className="fin-hint">{t('budget.countBalanceHelp')}</span>
         </div>
         {budget && (
           <div className="fin-field">

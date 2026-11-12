@@ -15,6 +15,7 @@ import { automaticTag, usableTag } from './finMovement.service.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
 import { removeStored } from './storage.service.js';
 import { throughEndOfDay } from '../utils/dayEnd.js';
+import { linkMovementToOccurrence } from './finOccurrence.service.js';
 
 export const INCOME_ENTITY = 'income';
 export const TRANSACTION_ENTITY = 'transaction';
@@ -283,6 +284,8 @@ export async function createTransaction(prisma, userId, body) {
       action: 'create',
       after: { kind: created.kind, value: created.value, currency: created.currency, occurredAt: created.occurredAt },
     });
+    // R13-06: the person said this IS a declared payment — it settles that occurrence, once.
+    if (body.occurrence) await linkMovementToOccurrence(tx, userId, body.occurrence, created.id);
     return created;
   });
 

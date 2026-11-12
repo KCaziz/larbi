@@ -20,6 +20,7 @@ import {
   updateIncome,
   updateTransaction,
 } from '../services/finMoney.service.js';
+import { findRecurrenceMatches } from '../services/finOccurrence.service.js';
 import { describeFormula } from '../services/finance/describe.js';
 import { monthlyAmount } from '../services/finance/formulas.js';
 import { buildSynthesis, currentMonth, loadSynthesisData, monthlyMoneyHistory, stepMoneyHistory } from '../services/finSynthesis.service.js';
@@ -121,7 +122,9 @@ export async function postTransaction(req, res) {
 // movement is written, so the person decides; nothing is ever removed for them.
 export async function postDuplicateCheck(req, res) {
   const duplicates = await findDuplicates(prisma, req.user.id, { ...req.body, categoryId: req.body.categoryId ?? null });
-  res.json({ duplicates });
+  // R13-06: and the declared payments this could be — asked in the same breath.
+  const recurrenceMatches = req.body.kind === 'income' || req.body.kind === 'expense' ? await findRecurrenceMatches(prisma, req.user.id, { ...req.body, categoryId: req.body.categoryId ?? null }) : [];
+  res.json({ duplicates, recurrenceMatches });
 }
 
 export async function putClearing(req, res) {

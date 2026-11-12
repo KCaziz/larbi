@@ -160,8 +160,27 @@ export default function HomePage() {
               </p>
             )}
           </FigureCard>
-          <FigureCard label={t('movements.tabs.expense')} answer={synthese.depenses} />
-          <FigureCard label={t('appHome.netFlow')} answer={synthese.fluxNet} />
+          <FigureCard label={t('movements.tabs.expense')} answer={synthese.depenses}>
+            {/* R13: where the spending of the month stands against the budgets. */}
+            {period === 'mois' && !data.budget && synthese.depenses.resultat > 0 && (
+              <p className="fin-hint">
+                {t('appHome.noBudgetForSpending')} <Link to="/app/budgets/nouveau">{t('appHome.createBudget')}</Link>
+              </p>
+            )}
+            {period === 'mois' && data.budget?.horsEnveloppe?.resultat > 0 && (
+              <p className="fin-hint">
+                {t('appHome.outsideBudget', { amount: formatAmount(i18n.language, data.budget.horsEnveloppe.resultat, currency) })} <Link to={`/app/budgets/${data.budget.id}`}>{t('appHome.seeBudget')}</Link>
+              </p>
+            )}
+          </FigureCard>
+          <FigureCard label={t('appHome.netFlow')} answer={synthese.fluxNet}>
+            {/* R13-03: nothing received yet but income declared — the flux is also said WITH what is expected. */}
+            {period === 'mois' && synthese.revenus.resultat === null && synthese.revenusPrevus?.resultat > 0 && (
+              <p className="fin-hint">
+                {t('appHome.fluxWithExpected', { income: formatAmount(i18n.language, synthese.revenusPrevus.resultat, currency), flux: formatAmount(i18n.language, synthese.revenusPrevus.resultat - (synthese.depenses.resultat ?? 0), currency) })}
+              </p>
+            )}
+          </FigureCard>
         </div>
 
         {/* P8-24: the declared resources, the salary first — what is expected, apart

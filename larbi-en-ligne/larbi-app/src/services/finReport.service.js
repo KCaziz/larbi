@@ -157,6 +157,10 @@ export async function buildMonthlyReport(prisma, user, { month, now = new Date()
     revenus: synthesis.revenus,
     depenses: synthesis.depenses,
     fluxNet: synthesis.fluxNet,
+    // R13-03: the balance of the accounts counted in the total, at the start and at the end of
+    // the month: the flux is read WITH the money that was already there.
+    soldeDebut: accountsStart.totals.find((total) => total.currency === currency)?.soldeTotal ?? null,
+    soldeFin: accountsEnd.totals.find((total) => total.currency === currency)?.soldeTotal ?? null,
     tendance: {
       revenus: trend(synthesis.revenus.resultat, before.revenus.resultat, { currency, now }),
       depenses: trend(synthesis.depenses.resultat, before.depenses.resultat, { currency, now }),
@@ -250,6 +254,8 @@ export function reportRows(report) {
   add('R-01', 'Revenus', s.R01.revenus);
   add('R-01', 'Dépenses', s.R01.depenses);
   add('R-01', 'Flux net', s.R01.fluxNet);
+  add('R-01', 'Solde au début', s.R01.soldeDebut);
+  add('R-01', 'Solde à la fin', s.R01.soldeFin);
   add('R-01', 'Tendance des dépenses', s.R01.tendance.depenses);
   for (const account of s.R02) {
     add('R-02', `${account.label} — début`, account.debut);

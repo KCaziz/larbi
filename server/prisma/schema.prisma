@@ -523,6 +523,8 @@ model FinAccount {
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
   transactions      FinTransaction[]
+  budgets           FinBudget[]      @relation("BudgetAccount")
+  envelopes         FinEnvelope[]    @relation("EnvelopeAccount")
   recurrences       FinRecurrence[]
   goals             FinGoal[]
   debts             FinDebt[]
@@ -734,6 +736,13 @@ model FinBudget {
   // budget, which must stay possible: a mandatory recurrence would invent a
   // commitment nobody made.
   recurrence      String        @default("monthly") @db.VarChar(20)
+  // R13-01: the account this budget is spent from. null = « tous »: every account
+  // counted in the total balance. An envelope may name its own (below).
+  accountId       String?
+  account         FinAccount?   @relation("BudgetAccount", fields: [accountId], references: [id], onDelete: SetNull)
+  // R13-03: whether the balance the accounts held when the period began counts as
+  // a resource of the budget (« revenu en nature »), next to the declared incomes.
+  countBalance    Boolean       @default(true)
   // The thresholds this budget alerts at, as RATIOS (0.8 = 80 %). Stored per
   // budget because the client asks for them to be configurable, and visible in
   // every answer because the engine must never hold a hidden coefficient.
@@ -766,6 +775,7 @@ model FinBudget {
   envelopes       FinEnvelope[]
 
   @@index([userId, periodStart])
+  @@index([accountId])
   @@map("fin_budgets")
 }
 
@@ -794,6 +804,9 @@ model FinEnvelope {
   // envelope has a category OR a group, never both (checked in the service:
   // MariaDB refuses a CHECK on a foreign-key column).
   categoryGroup String?      @db.VarChar(60)
+  // R13-01: the account this envelope is spent from; null = the budget's own choice.
+  accountId     String?
+  account       FinAccount?  @relation("EnvelopeAccount", fields: [accountId], references: [id], onDelete: SetNull)
   // One of ENVELOPE_KINDS: the client's own « fixe / variable ».
   kind          String       @db.VarChar(10)
   value         Float
@@ -820,6 +833,7 @@ model FinEnvelope {
 
   @@index([budgetId])
   @@index([userId, deletedAt])
+  @@index([accountId])
   @@index([categoryId])
   @@map("fin_envelopes")
 }

@@ -67,6 +67,8 @@ export async function getHome(req, res) {
       totalPrevu: view.totalPrevu,
       restant: view.ecart,
       budgetJournalier: view.budgetJournalier,
+      // R13: what was spent that no envelope covers, said on the home page too.
+      horsEnveloppe: view.horsEnveloppe,
       enveloppes: view.enveloppes.map((line) => ({ id: line.id, categoryId: line.categoryId, categoryGroup: line.categoryGroup, prevu: line.prevu, reel: line.reel, taux: line.tauxConsommation, alerte: line.alerte.niveau })),
     };
     const lineIds = budgetCard.enveloppes.map((line) => line.categoryId).filter(Boolean);

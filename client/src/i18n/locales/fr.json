@@ -3240,7 +3240,8 @@
       "none": "Ponctuel",
       "monthly": "Mensuel",
       "quarterly": "Trimestriel",
-      "yearly": "Annuel"
+      "yearly": "Annuel",
+      "weekly": "Hebdomadaire"
     },
     "save": "Enregistrer",
     "cancel": "Annuler",
@@ -3355,7 +3356,23 @@
     "paceDay": "Jour",
     "paceReal": "Dépense cumulée",
     "pacePlanned": "Rythme prévu (réparti sur la période)",
-    "seeExpenses": "Voir les dépenses de cette enveloppe"
+    "seeExpenses": "Voir les dépenses de cette enveloppe",
+    "account": "Compte à débiter",
+    "accountAll": "Tous les comptes du solde global",
+    "accountHelp": "Seules les dépenses payées avec ce compte comptent dans ce budget, dans ses courbes et dans ses tendances. « Tous » prend les comptes comptés dans votre solde global.",
+    "countBalance": "Compter le solde de mes comptes comme une ressource",
+    "countBalanceHelp": "L'argent déjà présent sur le(s) compte(s) au début de la période s'ajoute à vos revenus prévus : c'est un revenu en nature.",
+    "envelopeAccount": "Compte de l'enveloppe",
+    "envelopeAccountBudget": "Celui du budget",
+    "envelopeAccountHelp": "Laissez « Celui du budget » pour suivre le compte du budget, ou choisissez un compte précis pour cette enveloppe.",
+    "accountLine": "Compte : {{account}}",
+    "accountLineAll": "Comptes : tous ceux du solde global",
+    "startBalance": "Solde au début de la période",
+    "totalResources": "Ressources totales (revenus + solde)",
+    "shareConsumed": "{{percent}} de son enveloppe consommé",
+    "shareOfBudget": "{{percent}} du budget total",
+    "shareOfSpending": "{{percent}} des dépenses du budget",
+    "committed": "Engagé : {{amount}} (dont {{toCome}} prévu à venir), soit {{percent}} de l'enveloppe"
   },
   "goals": {
     "title": "Objectifs",
@@ -5267,7 +5284,11 @@
     "groupFilterClear": "Retirer",
     "openingsTitle": "Soldes de départ",
     "openingLine": "Solde de départ du compte « {{label}} »",
-    "openingsHint": "L’argent déjà présent sur un compte à son ouverture. Il compte dans le solde du compte, pas dans vos revenus du mois : ce n’est pas une rentrée d’argent. Pour le corriger, modifiez le compte."
+    "openingsHint": "L’argent déjà présent sur un compte à son ouverture. Il compte dans le solde du compte, pas dans vos revenus du mois : ce n’est pas une rentrée d’argent. Pour le corriger, modifiez le compte.",
+    "recurrenceQuestion": "Cette opération ressemble à votre paiement régulier « {{label}} » du {{date}}. Est-ce ce paiement ? Il ne sera alors enregistré qu'une seule fois.",
+    "recurrenceYes": "Oui, c'est ce paiement",
+    "recurrenceNo": "Non, c'est une autre opération",
+    "addedAsPayment": "Enregistré comme votre paiement régulier : une seule opération, l'échéance est réglée."
   },
   "appHome": {
     "title": "Accueil",
@@ -5312,7 +5333,11 @@
     "miniFlow": "Flux net des derniers mois",
     "ringNothing": "Aucun mouvement",
     "incomeExpected": "Encore attendu ce mois : {{amount}}.",
-    "incomeConfirm": "Confirmer à réception"
+    "incomeConfirm": "Confirmer à réception",
+    "fluxWithExpected": "Avec vos revenus prévus ({{income}}, pas encore reçus) : {{flux}}.",
+    "noBudgetForSpending": "Aucun budget ce mois-ci : ces dépenses ne sont réparties sur aucune enveloppe.",
+    "outsideBudget": "{{amount}} dépensés hors budget (aucune enveloppe ne les couvre).",
+    "seeBudget": "Voir le budget"
   },
   "finProfile": {
     "incomeRegularity": "Régularité de mon revenu",
@@ -5400,7 +5425,10 @@
       "mois": "Par mois",
       "semaine": "Par semaine",
       "jour": "Par jour"
-    }
+    },
+    "startBalance": "Solde au début du mois",
+    "endBalance": "Solde à la fin du mois",
+    "balanceNote": "Le flux net est ce qui est entré moins ce qui est sorti pendant le mois ; les soldes disent avec quel argent vous partiez et vous arrivez."
   },
   "education": {
     "yourParcours": "Votre parcours : {{name}}",

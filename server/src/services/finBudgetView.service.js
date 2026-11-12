@@ -87,7 +87,15 @@ export function alertLevel(rate, thresholds = DEFAULT_ALERT_THRESHOLDS) {
  * category group, otherwise none — spending outside every envelope, shown
  * apart. An expense is counted once, in one envelope at most (PB-F026).
  */
-export function assignToEnvelopes(movements, envelopes) {
+// An expense counts for an envelope only if it left the account that envelope is
+// spent from (R13-01): its own, else the budget's, else — « tous » — any account
+// counted in the total balance. `inTotal` is read from the movement's account
+// (absent: counted, as before accounts could be kept apart).
+const fromAccount = (row, accountId) => (accountId ? row.accountId === accountId : row.inTotal !== false);
+
+export function assignToEnvelopes(movements, envelopes, scope = {}) {
+  const budgetAccountId = scope.accountId ?? null;
+  const byId = new Map(envelopes.map((envelope) => [envelope.id, envelope]));
   const byCategory = new Map(envelopes.filter((envelope) => envelope.categoryId).map((envelope) => [envelope.categoryId, envelope.id]));
   const byGroup = new Map(envelopes.filter((envelope) => envelope.categoryGroup).map((envelope) => [envelope.categoryGroup, envelope.id]));
   // An envelope on a main category covers its group (R12-04), unless the group
@@ -99,10 +107,13 @@ export function assignToEnvelopes(movements, envelopes) {
   let outside = 0;
   let outsideCount = 0;
   for (const row of movements) {
-    if (row.kind !== 'expense' || row.planned || !isReal(row)) continue;
+    // `scope.planned`: the expenses still to come (R13-04, « engagé »), instead of the realised ones.
+    if (scope.planned ? row.kind !== 'expense' || !row.planned || row.status === 'fictional' : row.kind !== 'expense' || row.planned || !isReal(row)) continue;
     const target = byCategory.get(row.categoryId ?? null) ?? byGroup.get(row.category?.group ?? null) ?? null;
-    if (target) spent.set(target, spent.get(target) + row.value);
-    else if (!row.category || row.category.family !== 'goal') {
+    if (target) {
+      // Spent from another account than this envelope's: it is not its spending.
+      if (fromAccount(row, byId.get(target).accountId ?? budgetAccountId)) spent.set(target, spent.get(target) + row.value);
+    } else if ((!row.category || row.category.family !== 'goal') && fromAccount(row, budgetAccountId)) {
       outside += row.value;
       outsideCount += 1;
     }
@@ -118,7 +129,7 @@ export function assignToEnvelopes(movements, envelopes) {
  * zero); a period over 62 days is thinned to every seventh day. Empty without
  * envelopes: no plan, no pace.
  */
-export function spendingCurve({ period, envelopes, movements, currency, now }) {
+export function spendingCurve({ period, envelopes, movements, currency, now, accountId = null }) {
   const planned = envelopes.reduce((sum, envelope) => sum + envelope.value, 0);
   if (envelopes.length === 0 || planned <= 0) return [];
   const total = daysInPeriod(period.start, period.end);
@@ -129,7 +140,7 @@ export function spendingCurve({ period, envelopes, movements, currency, now }) {
   for (let day = 1; day <= total; day += 1) {
     if (total > 62 && day % 7 !== 0 && day !== total && day !== elapsed) continue;
     const dayEnd = first + day * DAY;
-    const spent = day > elapsed ? null : [...assignToEnvelopes(own.filter((row) => row.occurredAt?.getTime() < dayEnd), envelopes).spent.values()].reduce((sum, value) => sum + value, 0);
+    const spent = day > elapsed ? null : [...assignToEnvelopes(own.filter((row) => row.occurredAt?.getTime() < dayEnd), envelopes, { accountId }).spent.values()].reduce((sum, value) => sum + value, 0);
     points.push({ jour: new Date(first + (day - 1) * DAY).toISOString().slice(0, 10), reel: spent, rythme: Math.round((planned * day) / total) });
   }
   return points;
@@ -158,7 +169,7 @@ export function consumedByCategory(movements) {
  * `provisions` the active provisions: their monthly amount (F045) is the third
  *             allocation outside the budget (client's answer C2, 2026-10-28)
  */
-export function buildBudgetView({ budget, envelopes = [], movements = [], incomes = [], goals = [], provisions = [], carry = null, now = new Date() }) {
+export function buildBudgetView({ budget, envelopes = [], movements = [], incomes = [], goals = [], provisions = [], carry = null, startBalance = null, now = new Date() }) {
   const currency = budget.currency;
   const warnings = [];
 
@@ -181,7 +192,8 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
   const remaining = daysRemaining(period.start, period.end, now);
   const months = wholeCalendarMonths(period.start, period.end);
 
-  const assigned = assignToEnvelopes(inCurrency(movements), envelopes);
+  const budgetAccountId = budget.accountId ?? null;
+  const assigned = assignToEnvelopes(inCurrency(movements), envelopes, { accountId: budgetAccountId });
   const thresholds = Array.isArray(budget.alertThresholds) ? budget.alertThresholds : DEFAULT_ALERT_THRESHOLDS;
 
   const baseInputs = {
@@ -209,6 +221,7 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
       id: envelope.id,
       categoryId: envelope.categoryId,
       categoryGroup: envelope.categoryGroup ?? null,
+      accountId: envelope.accountId ?? null,
       report: carried,
       kind: envelope.kind,
       recurring: envelope.recurring,
@@ -245,7 +258,11 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
 
   // Real, realised movements of the period, savings excluded: PB-F004 and
   // PB-F005 leave transfers out of income and expenses (diagnostic n°2, C2).
-  const counted = inCurrency(movements).filter((row) => !row.planned && isReal(row) && !isSavingsMovement(row));
+  // R13-01: only what left the budget's account(s) — or an envelope's own account — is its spending.
+  const envelopeAccounts = new Set(envelopes.map((envelope) => envelope.accountId).filter(Boolean));
+  const counted = inCurrency(movements).filter(
+    (row) => !row.planned && isReal(row) && !isSavingsMovement(row) && (fromAccount(row, budgetAccountId) || envelopeAccounts.has(row.accountId)),
+  );
   const realExpenseRows = counted.filter((row) => row.kind === 'expense');
   const realIncomeRows = counted.filter((row) => row.kind === 'income');
   const asEntries = (rows) => rows.map((row) => ({ amount: row.value, currency }));
@@ -256,6 +273,21 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
   // éligibles » of PB-F008. Spending in a category no envelope covers is not
   // taken from any envelope; it is shown apart, in `horsEnveloppe`.
   const consumedByEnvelopes = lines.reduce((sum, line) => sum + line.reel, 0);
+
+  // R13-04: what each envelope weighs — in the budget (its planned amount over the
+  // total planned), in the spending (its real spending over the total spent) — and
+  // how much of it is already COMMITTED: spent, plus the planned expenses still to
+  // come in its category. Ratios, shown × 100; `null` when there is nothing to divide by.
+  const upcoming = assignToEnvelopes(inCurrency(movements), envelopes, { accountId: budgetAccountId, planned: true }).spent;
+  for (const line of lines) {
+    const toCome = upcoming.get(line.id) ?? 0;
+    line.partDuBudget = totalPrevu ? line.prevu / totalPrevu : null;
+    line.partDesDepenses = consumedByEnvelopes > 0 ? line.reel / consumedByEnvelopes : null;
+    line.aVenir = toCome;
+    line.engage = line.reel + toCome;
+    const allocated = line.prevu + line.report;
+    line.tauxEngage = allocated > 0 ? (line.reel + toCome) / allocated : null;
+  }
 
   // The resources EXPECTED over the period, the « revenus prévus » of
   // PB-F009. Normalised to the month first (F001: a yearly grant is a twelfth
@@ -279,10 +311,18 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
     );
   }
 
+  // R13-03 — the money already on the budget's account(s) when the period begins
+  // counts as a resource too (« revenu en nature »), next to the declared incomes,
+  // unless the person switched that off. It is a fact (the accounts' balance), so it is
+  // added only to a period whose declared incomes could be added — a period that is
+  // not a whole number of months compares nothing, as before.
+  const balanceResource = budget.countBalance !== false && startBalance !== null ? startBalance : null;
+  const totalResources = periodResources === null ? (months !== null && balanceResource !== null ? balanceResource : null) : periodResources + (balanceResource ?? 0);
+
   // « Budget supérieur au revenu : autorisé mais signalé » — the client's own
   // rule. Signalled, never refused: somebody who knows they will dip into their
   // savings this month is not making a mistake.
-  const overCommitted = periodResources !== null && totalPrevu !== null && totalPrevu > periodResources;
+  const overCommitted = totalResources !== null && totalPrevu !== null && totalPrevu > totalResources;
   if (overCommitted) {
     warnings.push('Le budget prévu dépasse les ressources de la période. C’est autorisé : il est seulement signalé.');
   }
@@ -301,7 +341,7 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
   const goalsOutside = contributions.reduce((sum, goal) => sum + goal.monthlyContribution, 0);
   const provisionsOutside = provisionMonthly.reduce((sum, amount) => sum + amount, 0);
   const plannedOutside = months === null ? null : (goalsOutside + provisionsOutside) * months;
-  const resteAAffecter = periodResources === null || plannedOutside === null ? null : periodResources - (totalPrevu ?? 0) - plannedOutside;
+  const resteAAffecter = totalResources === null || plannedOutside === null ? null : totalResources - (totalPrevu ?? 0) - plannedOutside;
 
   // PB-F008 summed over the envelopes, then PB-F013: what is left per
   // remaining day, never below zero; an overspend is reported apart instead
@@ -324,7 +364,7 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
     currency,
     periode: { debut: period.start, fin: period.end, jours: totalDays, joursEcoules: elapsed, joursRestants: remaining, mois: months },
     enveloppes: lines,
-    courbe: spendingCurve({ period, envelopes, movements, currency, now }),
+    courbe: spendingCurve({ period, envelopes, movements, currency, now, accountId: budgetAccountId }),
     totalPrevu: answer('PB-F007', totalPrevu),
     totalReel: answer('PB-F005', totalReel),
     // PB-F006 — income really received minus expenses really paid over the
@@ -334,6 +374,9 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
     // The expected resources of the period (F001 × whole months): the base of
     // PB-F009, shown as « prévu », never as received.
     ressources: answer('F001', periodResources),
+    // R13-03: the balance the accounts held at the start, and all the resources (incomes + balance).
+    soldeDebut: answer('PB-F002', startBalance),
+    ressourcesTotales: answer('F001', totalResources, { inputs: { ...baseInputs, revenus_prevus: periodResources, solde_debut: balanceResource } }),
     // PB-F009 — still free to allocate, the « Non affecté » of screens JA03 /
     // JA04, which must always remain possible. Planning, not a bank balance;
     // negative means more is planned than expected: the signalled case above.
@@ -341,6 +384,7 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
       inputs: {
         ...baseInputs,
         revenus_prevus: periodResources,
+        solde_debut_compte: balanceResource,
         budgets_alloues: totalPrevu,
         allocations_hors_budget: plannedOutside,
         contributions_objectifs: months === null ? null : goalsOutside * months,

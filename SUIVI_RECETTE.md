@@ -29,7 +29,8 @@ Priorités : `🔴 high` (bloque l'utilisation) · `🟡 medium` (gêne réelle)
 | R10 — Quatrième passage (2026-11-10) | 13 | 13 |
 | R11 — Cinquième passage (2026-11-11) | 15 | 15 |
 | R12 — Sixième passage (2026-11-12) | 4 | 4 |
-| **Total** | **113** | **112** |
+| R13 — Septième passage (2026-11-12) | 7 | 7 |
+| **Total** | **120** | **119** |
 
 R9 : reste R9-18 (fiche de paie), aucun défaut reproduit, à préciser avec le client.
 
@@ -991,3 +992,61 @@ Les remarques de `test.txt` (6e passage) et une capture du client (page réserve
   2. Les dépenses du dernier jour de la période étaient exclues : la période s'arrêtait le 31 à 00 h 00. Même défaut dans la liste des mouvements filtrée « au 31 ».
 - Correction : l'enveloppe d'une catégorie principale couvre tout son groupe (une enveloppe de sous-catégorie garde ses propres dépenses, une enveloppe de groupe reste prioritaire) ; une date de fin couvre toute la journée (budget, épargne de la méthode de budget, liste des mouvements) ; « Voir les dépenses » d'une enveloppe de catégorie principale ouvre le groupe.
 - Test : `finRecette12.test.js` (R12-04).
+
+---
+
+# R13 — Septième passage de recette (2026-11-12) : ce que le client demande
+
+Les remarques de `test.txt` (7e passage) et « quelques idées du client » ont été **déchiffrées** : chaque phrase est reprise ci-dessous avec ce qu'elle demande réellement, puis rattachée à une tâche. Chaque point a d'abord été rejoué sur un compte neuf (compte 150 000 DA, salaire 80 000 DA, dépense 30 000 DA) avant toute correction.
+
+| Ce que dit le client | Ce qu'il demande vraiment | Tâche |
+|---|---|---|
+| « le flux est toujours mal calculé : on ne prend en compte que les revenus, il faut intégrer le solde, les dépenses » (l. 1) ; « le solde doit être compté comme un revenu en nature et intégré dans tous les calculs » (l. 9) | Aujourd'hui le flux net = revenus − dépenses de la période (juste, sur l'exemple : 80 000 − 30 000 = 50 000). Il veut que **l'argent déjà présent sur les comptes compte comme une ressource** : « disponible = solde de début + revenus − dépenses », dans le budget (reste à affecter), la synthèse et les courbes. | R13-03 |
+| « quand je crée un budget, il faut une sélection : quel compte sera débité » ; « idem pour les enveloppes : déduit du solde total ou de comptes précis » ; « calculé dans les tendances et les graphes » (l. 2, 8) | Un budget a un **compte à débiter** : « tous » (les comptes du solde global) ou **un compte précis** déjà créé ; chaque enveloppe peut avoir le sien. Seules les dépenses de ce(s) compte(s) y comptent, partout (budget, tendances, graphes). | R13-01 |
+| « la récurrence du budget : ponctuel, annuel, mensuel ou hebdomadaire » (l. 8) | Le budget existe déjà en ponctuel / mensuel / trimestriel / annuel : **il manque « hebdomadaire »**. | R13-02 |
+| « ce qui ne s'affiche pas, ce sont les pourcentages de consommation des enveloppes par rapport au budget défini et aux dépenses engagées » (l. 10) | Pour chaque enveloppe : la **part qu'elle pèse dans le budget**, la **part qu'elle pèse dans les dépenses**, et le **pourcentage engagé** (dépensé + déjà prévu à venir), à côté du pourcentage consommé. | R13-04 |
+| « une récurrence est une dépense : reconnaître une récurrence quand elle est reproduite dans une dépense et fusionner les lignes identiques du fait de leurs catégories » (l. 11) ; « quand on fait une récurrence » (l. 3, phrase inachevée) | La détection d'un paiement régulier doit se faire aussi **par la catégorie** (pas seulement par le libellé), et, une fois confirmée, les dépenses passées identiques sont **fusionnées** : reconnues comme les occurrences de la récurrence, pas laissées comme lignes séparées. | R13-05 |
+| « pour éviter cela, un détecteur d'une même opération : demander d'enregistrer une seule opération au lieu du double emploi » (l. 12) | Quand on saisit une dépense qui correspond à un paiement régulier attendu (même catégorie, même montant, date proche), l'application **demande** : « est-ce ce paiement ? » et ne l'enregistre qu'**une fois**, au lieu d'une dépense en plus de l'échéance. | R13-06 |
+| « revenu : ça ne donne rien pour les dépenses, elles ne sont pas réparties sur les budgets et n'ont pas de couleurs de distinction ; rien ne s'affiche entre revenus et dépenses » ; « le camembert est monochrome » (l. 4) | Deux comptes de même type avaient la **même couleur** dans l'anneau de l'Accueil : l'anneau paraissait d'une seule couleur. Il faut des couleurs **toujours distinctes**, et la dépense sans enveloppe doit être dite (« hors budget »). | R13-07 |
+
+### R13-01 — Compte à débiter d'un budget et d'une enveloppe
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 2 et 8
+- Réalisé (2026-11-12) : Un budget a un **compte à débiter** (`accountId`) : « Tous les comptes du solde global » ou un compte précis déjà créé (le sien, ouvert, dans la devise du budget : sinon refus). Chaque enveloppe peut avoir le sien (« Celui du budget » par défaut). Seules les dépenses sorties de ce compte comptent dans l'enveloppe, dans le total du budget, dans la courbe de dépense cumulée et dans les tendances ; copier un budget garde les comptes. Écrans : formulaire du budget (« Compte à débiter »), formulaire d'enveloppe (« Compte de l'enveloppe »), ligne « Compte : … » sur le budget et sur chaque enveloppe. Migration `20261112120000_fin_budget_account`. Tests : `finRecette13` (R13-01), parcours `fin-recette13-journey`.
+
+### R13-02 — Récurrence « hebdomadaire » d'un budget
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 8
+- Réalisé (2026-11-12) : « Hebdomadaire » s'ajoute à ponctuel / mensuel / trimestriel / annuel ; copier un budget hebdomadaire le décale de sept jours. Migration `20261112130000_fin_budget_weekly` (la contrainte de la base accepte la nouvelle valeur). Un budget hebdomadaire n'est pas un nombre entier de mois : comme pour toute période de ce genre, le « reste à affecter » n'est pas calculé (on ne rapporte pas un revenu mensuel à une semaine). Test : `finRecette13` (R13-02).
+
+### R13-03 — Le solde des comptes compte comme une ressource (« revenu en nature »)
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : `test.txt` l. 1 et 9
+- Réalisé (2026-11-12) : Rejoué sur un compte neuf : le flux net était juste (revenus − dépenses), mais le solde n'entrait nulle part. Il y entre maintenant, comme **ressource « en nature »** : le budget affiche « Solde au début de la période » et « Ressources totales (revenus + solde) », et le « reste à affecter » part des ressources totales ; une case « Compter le solde de mes comptes comme une ressource » (cochée par défaut) permet de s'en passer. Le rapport mensuel donne le solde au début et à la fin du mois à côté du flux net (« Solde début + flux net = solde fin »), avec une phrase qui dit ce que mesure chacun. Les comptes comptés sont ceux du budget (le compte choisi, ou tous ceux du solde global). Rejoué ensuite avec un salaire déclaré mais pas encore reçu : l'Accueil affichait « Revenus : non calculé » et un flux de −3 000 DA, comme si le salaire n'existait pas ; il dit maintenant aussi « Avec vos revenus prévus (80 000 DA, pas encore reçus) : 77 000 DA » (période du mois). Tests : `finRecette13` (R13-03, rapport), parcours `fin-recette13-journey`.
+
+### R13-04 — Enveloppes : part du budget, part des dépenses, pourcentage engagé
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Origine : `test.txt` l. 10
+- Réalisé (2026-11-12) : Pour chaque enveloppe : le pourcentage consommé, **la part qu'elle pèse dans le budget** (prévu de l'enveloppe / total prévu), **la part qu'elle pèse dans les dépenses** (réel / total dépensé) et **le montant engagé** (dépensé + dépenses prévues à venir dans sa catégorie) avec son pourcentage de l'enveloppe. Test : `finRecette13` (R13-04), parcours `fin-recette13-journey`.
+
+### R13-05 — Récurrence reconnue par la catégorie, lignes identiques fusionnées
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 3 et 11
+- Réalisé (2026-11-12) : La détection d'un paiement régulier se fait aussi **par la catégorie** : trois dépenses de « Loyer » du même montant, sans aucune note, sont proposées comme une récurrence. En la confirmant, les lignes passées identiques (même nature, devise, montant, même libellé ou, sans note, même catégorie) sont **fusionnées** : elles deviennent ses occurrences (rien n'est supprimé, rien n'est créé), l'historique les montre comme paiement régulier et elles ne sont plus proposées. Test : `finRecette13` (R13-05).
+
+### R13-06 — Détecteur de double emploi avec un paiement régulier
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Origine : `test.txt` l. 12
+- Réalisé (2026-11-12) : Avant d'enregistrer une dépense (ou un revenu), l'application vérifie si elle correspond à un paiement régulier déclaré : même nature, montant, devise et catégorie, et une échéance encore attendue à moins de dix jours. Si oui, elle **demande** « Est-ce ce paiement ? » : « Oui » enregistre **une seule opération** qui règle l'échéance (une seconde confirmation ou un second mouvement sur la même échéance est refusé), « Non » l'enregistre comme une opération à part. Le détecteur de doublon existant (mouvements très proches) est conservé. Tests : `finRecette13` (R13-06), parcours `fin-recette13-journey`.
+
+### R13-07 — Anneau de l'Accueil : des couleurs toujours distinctes
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 4
+- Réalisé (2026-11-12) : Cause : deux comptes du même type avaient la même couleur, donc un anneau d'une seule couleur ; de même pour des dépenses sans catégorie. Une tranche dont la couleur manque ou est déjà prise reçoit désormais la couleur libre suivante d'une palette de huit couleurs distinctes ; une couleur choisie par la personne est gardée. La dépense qui n'est répartie sur aucune enveloppe est dite sur la carte « Dépenses » de l'Accueil (« 900 DZD dépensés hors budget… Voir le budget », ou « Aucun budget ce mois-ci » avec le lien pour en créer un). L'onglet « Flux » de l'anneau a été vérifié avec des revenus et des dépenses : deux tranches de couleurs distinctes. Vérifié par capture d'écran et par le parcours `fin-recette13-journey`.

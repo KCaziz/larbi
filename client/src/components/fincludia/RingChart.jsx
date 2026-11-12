@@ -13,6 +13,8 @@ import '../../pages/accueil/Home.css';
 // the legend, filters the movements below.
 const MAX_SLICES = 5;
 const OTHER_COLOR = 'var(--border-strong)';
+// Distinct on both light and dark surfaces, for the slices that have no colour of their own.
+const DISTINCT_COLORS = ['#2563A6', '#16A34A', '#CA8A04', '#DC2626', '#7C3AED', '#0891B2', '#DB2777', '#EA580C'];
 
 // `center` ({ label, value }) replaces the « Total » written in the middle: the
 // net flow is income MINUS spending, never their sum (recette R9-02);
@@ -41,7 +43,23 @@ export default function RingChart({ rows, currency, selected, onSelect, label, c
   const sorted = [...positive].sort((a, b) => b.total - a.total);
   const shown = sorted.slice(0, MAX_SLICES);
   const rest = sorted.slice(MAX_SLICES);
-  const slices = rest.length > 0 ? [...shown, { key: 'other', label: t('appHome.others'), total: rest.reduce((sum, row) => sum + row.total, 0), color: OTHER_COLOR, other: true }] : shown;
+  const withOthers = rest.length > 0 ? [...shown, { key: 'other', label: t('appHome.others'), total: rest.reduce((sum, row) => sum + row.total, 0), color: OTHER_COLOR, other: true }] : shown;
+  // Two slices of one colour read as one slice (recette R13-07: two accounts of the
+  // same type, or expenses with no category, drew a ring of a single colour): a
+  // slice whose colour is missing or already taken gets the next free one of the
+  // palette. A colour the person chose is kept for the first slice that uses it.
+  const taken = new Set();
+  const slices = withOthers.map((slice) => {
+    if (slice.other) return slice;
+    const own = slice.color ? String(slice.color).toLowerCase() : null;
+    if (own && !taken.has(own)) {
+      taken.add(own);
+      return slice;
+    }
+    const free = DISTINCT_COLORS.find((color) => !taken.has(color.toLowerCase())) ?? DISTINCT_COLORS[taken.size % DISTINCT_COLORS.length];
+    taken.add(free.toLowerCase());
+    return { ...slice, color: free };
+  });
 
   // A ring of radius 40 in a 100 × 100 box; each slice is an arc of the same
   // circle, separated by a 2-unit gap of the surface.

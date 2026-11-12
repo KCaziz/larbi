@@ -56,6 +56,11 @@ export default function BudgetDetailPage() {
     [categories.data],
   );
   const usedCategoryIds = useMemo(() => new Set((view.data?.vue?.enveloppes ?? []).map((line) => line.categoryId).filter(Boolean)), [view.data]);
+  // R13-01: the accounts a budget or an envelope can be spent from, and their names.
+  const accountsApi = useApi('/fin/comptes');
+  const allAccounts = accountsApi.data?.accounts ?? [];
+  const spendableAccounts = allAccounts.filter((account) => !account.archivedAt && !account.liability && account.currency === view.data?.budget?.currency);
+  const accountLabel = (accountId) => allAccounts.find((account) => account.id === accountId)?.label ?? '—';
 
   async function run(action, okKey) {
     setMessage(null);
@@ -103,7 +108,8 @@ export default function BudgetDetailPage() {
 
         <p className="budget-period-line">
           {formatDate(i18n.language, vue.periode.debut)} – {formatDate(i18n.language, vue.periode.fin)} ·{' '}
-          {t('budget.daysRemaining', { count: vue.periode.joursRestants })}
+          {t('budget.daysRemaining', { count: vue.periode.joursRestants })} ·{' '}
+          {budget.accountId ? t('budget.accountLine', { account: accountLabel(budget.accountId) }) : t('budget.accountLineAll')}
         </p>
 
         {vue.avertissements.length > 0 && (
@@ -116,6 +122,12 @@ export default function BudgetDetailPage() {
 
         <div className="fin-figure-grid">
           <FigureCard label={t('budget.resources')} answer={vue.ressources} formula={formulas.get('F002')} />
+          {budget.countBalance !== false && vue.soldeDebut?.resultat !== null && vue.soldeDebut?.resultat !== undefined && (
+            <>
+              <FigureCard label={t('budget.startBalance')} answer={vue.soldeDebut} />
+              <FigureCard label={t('budget.totalResources')} answer={vue.ressourcesTotales} />
+            </>
+          )}
           <FigureCard label={t('budget.totalPlanned')} answer={vue.totalPrevu} formula={formulas.get('F003')} />
           <FigureCard label={t('budget.totalReal')} answer={vue.totalReel} formula={formulas.get('F003')} />
           <FigureCard label={t('budget.netFlow')} answer={vue.fluxNet} formula={formulas.get('F004')} />
@@ -212,6 +224,7 @@ export default function BudgetDetailPage() {
               usedGroups={new Set(vue.enveloppes.map((line) => line.categoryGroup).filter(Boolean))}
               categories={flatCategories}
               usedCategoryIds={usedCategoryIds}
+              accounts={spendableAccounts}
               onDone={() => {
                 setAddingEnvelope(false);
                 view.reload();
@@ -225,7 +238,7 @@ export default function BudgetDetailPage() {
           ) : (
             <ul className="budget-envelope-list">
               {vue.enveloppes.map((line) => (
-                <EnvelopeRow key={line.id} budgetId={id} budget={budget} line={line} category={envelopeCategory(line, flatCategories)} currency={currency} run={run} />
+                <EnvelopeRow key={line.id} budgetId={id} budget={budget} line={line} category={envelopeCategory(line, flatCategories)} currency={currency} run={run} accountLabel={accountLabel} />
               ))}
             </ul>
           )}
@@ -328,7 +341,7 @@ function envelopeCategory(line, categories) {
   return line.categoryGroup ? { label: line.categoryGroup, icon: member?.icon ?? null, color: member?.groupColor ?? member?.color ?? null } : null;
 }
 
-function EnvelopeRow({ budgetId, budget, line, category, currency, run }) {
+function EnvelopeRow({ budgetId, budget, line, category, currency, run, accountLabel }) {
   const { t, i18n } = useTranslation();
   const alertClass = { none: '', warning: 'budget-alert-warning', reached: 'budget-alert-reached', exceeded: 'budget-alert-exceeded' }[line.alerte.niveau];
 
@@ -337,6 +350,7 @@ function EnvelopeRow({ budgetId, budget, line, category, currency, run }) {
       <div className="budget-envelope-head">
         <strong>{category ? <CategoryChip category={category} /> : (line.label ?? t('budget.noCategory'))}</strong>
         <span className="budget-row-tag">{t(`budget.envelopeKinds.${line.kind}`)}</span>
+        {line.accountId && <span className="budget-row-tag">{t('budget.accountLine', { account: accountLabel(line.accountId) })}</span>}
         {line.alerte.niveau !== 'none' && <span className="budget-row-tag budget-alert-tag">{t(`budget.alertLevels.${line.alerte.niveau}`)}</span>}
         <button
           type="button"
@@ -361,6 +375,19 @@ function EnvelopeRow({ budgetId, budget, line, category, currency, run }) {
         {line.report > 0 && <span className="budget-row-tag">{t('budget.carried', { amount: formatAmount(i18n.language, line.report, currency) })}</span>}
       </p>
       <BudgetMeter prevu={line.prevu} reel={line.reel} currency={currency} alertLevel={line.alerte.niveau} />
+      {/* R13-04: what this envelope weighs in the budget and in the spending, and how much is already committed. */}
+      <ul className="budget-envelope-shares">
+        {line.tauxConsommation?.resultat !== null && line.tauxConsommation?.resultat !== undefined && (
+          <li>{t('budget.shareConsumed', { percent: formatRatio(i18n.language, line.tauxConsommation.resultat) })}</li>
+        )}
+        {line.partDuBudget !== null && line.partDuBudget !== undefined && <li>{t('budget.shareOfBudget', { percent: formatRatio(i18n.language, line.partDuBudget) })}</li>}
+        {line.partDesDepenses !== null && line.partDesDepenses !== undefined && <li>{t('budget.shareOfSpending', { percent: formatRatio(i18n.language, line.partDesDepenses) })}</li>}
+        {line.aVenir > 0 && (
+          <li>
+            {t('budget.committed', { amount: formatAmount(i18n.language, line.engage, currency), toCome: formatAmount(i18n.language, line.aVenir, currency), percent: formatRatio(i18n.language, line.tauxEngage ?? 0) })}
+          </li>
+        )}
+      </ul>
       <FigureCard label={t('budget.gap')} answer={line.ecart} />
       {/* Recette R9-04: from the envelope down to the expenses it counts. */}
       {/* Recette R12-04: an envelope on a main category covers its whole group. */}
@@ -374,14 +401,14 @@ function EnvelopeRow({ budgetId, budget, line, category, currency, run }) {
   );
 }
 
-function EnvelopeForm({ budgetId, currency, groups, usedGroups, categories, usedCategoryIds, onDone, onCancel }) {
+function EnvelopeForm({ budgetId, currency, groups, usedGroups, categories, usedCategoryIds, accounts, onDone, onCancel }) {
   const { t } = useTranslation();
   // A main category (P10-01) is budgeted as its whole group, offered above.
   const available = categories.filter((category) => !usedCategoryIds.has(category.id) && !category.main);
   const availableGroups = groups.filter((row) => !usedGroups.has(row.group));
   // `target` is « group:<name> » or « category:<id> »: a whole client category
   // (« Logement ») or one sub-category (P8-09).
-  const [form, setForm] = useState({ target: availableGroups[0] ? `group:${availableGroups[0].group}` : `category:${available[0]?.id ?? ''}`, kind: 'variable', value: '', cap: '', note: '' });
+  const [form, setForm] = useState({ target: availableGroups[0] ? `group:${availableGroups[0].group}` : `category:${available[0]?.id ?? ''}`, kind: 'variable', value: '', cap: '', note: '', accountId: '' });
   const [error, setError] = useState(null);
 
   const submit = async (event) => {
@@ -398,6 +425,7 @@ function EnvelopeForm({ budgetId, currency, groups, usedGroups, categories, used
         value,
         cap,
         note: form.note.trim() || null,
+        accountId: form.accountId || null,
       });
       onDone();
     } catch (err) {
@@ -437,6 +465,18 @@ function EnvelopeForm({ budgetId, currency, groups, usedGroups, categories, used
             <option value="fixed">{t('budget.envelopeKinds.fixed')}</option>
             <option value="variable">{t('budget.envelopeKinds.variable')}</option>
           </select>
+        </div>
+        <div className="fin-field">
+          <label htmlFor="env-account">{t('budget.envelopeAccount')}</label>
+          <select id="env-account" value={form.accountId} onChange={(event) => setForm({ ...form, accountId: event.target.value })}>
+            <option value="">{t('budget.envelopeAccountBudget')}</option>
+            {accounts.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.label}
+              </option>
+            ))}
+          </select>
+          <span className="fin-hint">{t('budget.envelopeAccountHelp')}</span>
         </div>
         <AmountField id="env-value" label={t('budget.plannedAmount')} value={form.value} currency={currency} onChange={(value) => setForm({ ...form, value })} required />
         <AmountField id="env-cap" label={t('budget.capLabel')} value={form.cap} currency={currency} onChange={(cap) => setForm({ ...form, cap })} hint={t('budget.capHint')} />

@@ -8693,6 +8693,8 @@ export namespace Prisma {
 
   export type FinAccountCountOutputType = {
     transactions: number
+    budgets: number
+    envelopes: number
     recurrences: number
     goals: number
     debts: number
@@ -8700,6 +8702,8 @@ export namespace Prisma {
 
   export type FinAccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     transactions?: boolean | FinAccountCountOutputTypeCountTransactionsArgs
+    budgets?: boolean | FinAccountCountOutputTypeCountBudgetsArgs
+    envelopes?: boolean | FinAccountCountOutputTypeCountEnvelopesArgs
     recurrences?: boolean | FinAccountCountOutputTypeCountRecurrencesArgs
     goals?: boolean | FinAccountCountOutputTypeCountGoalsArgs
     debts?: boolean | FinAccountCountOutputTypeCountDebtsArgs
@@ -8721,6 +8725,20 @@ export namespace Prisma {
    */
   export type FinAccountCountOutputTypeCountTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FinTransactionWhereInput
+  }
+
+  /**
+   * FinAccountCountOutputType without action
+   */
+  export type FinAccountCountOutputTypeCountBudgetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FinBudgetWhereInput
+  }
+
+  /**
+   * FinAccountCountOutputType without action
+   */
+  export type FinAccountCountOutputTypeCountEnvelopesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FinEnvelopeWhereInput
   }
 
   /**
@@ -23946,6 +23964,8 @@ export namespace Prisma {
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     transactions?: boolean | FinAccount$transactionsArgs<ExtArgs>
+    budgets?: boolean | FinAccount$budgetsArgs<ExtArgs>
+    envelopes?: boolean | FinAccount$envelopesArgs<ExtArgs>
     recurrences?: boolean | FinAccount$recurrencesArgs<ExtArgs>
     goals?: boolean | FinAccount$goalsArgs<ExtArgs>
     debts?: boolean | FinAccount$debtsArgs<ExtArgs>
@@ -23988,6 +24008,8 @@ export namespace Prisma {
   export type FinAccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     transactions?: boolean | FinAccount$transactionsArgs<ExtArgs>
+    budgets?: boolean | FinAccount$budgetsArgs<ExtArgs>
+    envelopes?: boolean | FinAccount$envelopesArgs<ExtArgs>
     recurrences?: boolean | FinAccount$recurrencesArgs<ExtArgs>
     goals?: boolean | FinAccount$goalsArgs<ExtArgs>
     debts?: boolean | FinAccount$debtsArgs<ExtArgs>
@@ -23999,6 +24021,8 @@ export namespace Prisma {
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
       transactions: Prisma.$FinTransactionPayload<ExtArgs>[]
+      budgets: Prisma.$FinBudgetPayload<ExtArgs>[]
+      envelopes: Prisma.$FinEnvelopePayload<ExtArgs>[]
       recurrences: Prisma.$FinRecurrencePayload<ExtArgs>[]
       goals: Prisma.$FinGoalPayload<ExtArgs>[]
       debts: Prisma.$FinDebtPayload<ExtArgs>[]
@@ -24373,6 +24397,8 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     transactions<T extends FinAccount$transactionsArgs<ExtArgs> = {}>(args?: Subset<T, FinAccount$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    budgets<T extends FinAccount$budgetsArgs<ExtArgs> = {}>(args?: Subset<T, FinAccount$budgetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinBudgetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    envelopes<T extends FinAccount$envelopesArgs<ExtArgs> = {}>(args?: Subset<T, FinAccount$envelopesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinEnvelopePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     recurrences<T extends FinAccount$recurrencesArgs<ExtArgs> = {}>(args?: Subset<T, FinAccount$recurrencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinRecurrencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     goals<T extends FinAccount$goalsArgs<ExtArgs> = {}>(args?: Subset<T, FinAccount$goalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinGoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     debts<T extends FinAccount$debtsArgs<ExtArgs> = {}>(args?: Subset<T, FinAccount$debtsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinDebtPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -24801,6 +24827,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: FinTransactionScalarFieldEnum | FinTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * FinAccount.budgets
+   */
+  export type FinAccount$budgetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinBudget
+     */
+    select?: FinBudgetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinBudget
+     */
+    omit?: FinBudgetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinBudgetInclude<ExtArgs> | null
+    where?: FinBudgetWhereInput
+    orderBy?: FinBudgetOrderByWithRelationInput | FinBudgetOrderByWithRelationInput[]
+    cursor?: FinBudgetWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FinBudgetScalarFieldEnum | FinBudgetScalarFieldEnum[]
+  }
+
+  /**
+   * FinAccount.envelopes
+   */
+  export type FinAccount$envelopesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinEnvelope
+     */
+    select?: FinEnvelopeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinEnvelope
+     */
+    omit?: FinEnvelopeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinEnvelopeInclude<ExtArgs> | null
+    where?: FinEnvelopeWhereInput
+    orderBy?: FinEnvelopeOrderByWithRelationInput | FinEnvelopeOrderByWithRelationInput[]
+    cursor?: FinEnvelopeWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FinEnvelopeScalarFieldEnum | FinEnvelopeScalarFieldEnum[]
   }
 
   /**
@@ -29655,6 +29729,8 @@ export namespace Prisma {
     periodEnd: Date | null
     currency: string | null
     recurrence: string | null
+    accountId: string | null
+    countBalance: boolean | null
     carryOver: boolean | null
     carryOverspend: boolean | null
     note: string | null
@@ -29681,6 +29757,8 @@ export namespace Prisma {
     periodEnd: Date | null
     currency: string | null
     recurrence: string | null
+    accountId: string | null
+    countBalance: boolean | null
     carryOver: boolean | null
     carryOverspend: boolean | null
     note: string | null
@@ -29707,6 +29785,8 @@ export namespace Prisma {
     periodEnd: number
     currency: number
     recurrence: number
+    accountId: number
+    countBalance: number
     alertThresholds: number
     carryOver: number
     carryOverspend: number
@@ -29746,6 +29826,8 @@ export namespace Prisma {
     periodEnd?: true
     currency?: true
     recurrence?: true
+    accountId?: true
+    countBalance?: true
     carryOver?: true
     carryOverspend?: true
     note?: true
@@ -29772,6 +29854,8 @@ export namespace Prisma {
     periodEnd?: true
     currency?: true
     recurrence?: true
+    accountId?: true
+    countBalance?: true
     carryOver?: true
     carryOverspend?: true
     note?: true
@@ -29798,6 +29882,8 @@ export namespace Prisma {
     periodEnd?: true
     currency?: true
     recurrence?: true
+    accountId?: true
+    countBalance?: true
     alertThresholds?: true
     carryOver?: true
     carryOverspend?: true
@@ -29914,6 +30000,8 @@ export namespace Prisma {
     periodEnd: Date
     currency: string
     recurrence: string
+    accountId: string | null
+    countBalance: boolean
     alertThresholds: JsonValue
     carryOver: boolean
     carryOverspend: boolean
@@ -29962,6 +30050,8 @@ export namespace Prisma {
     periodEnd?: boolean
     currency?: boolean
     recurrence?: boolean
+    accountId?: boolean
+    countBalance?: boolean
     alertThresholds?: boolean
     carryOver?: boolean
     carryOverspend?: boolean
@@ -29981,6 +30071,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    account?: boolean | FinBudget$accountArgs<ExtArgs>
     envelopes?: boolean | FinBudget$envelopesArgs<ExtArgs>
     _count?: boolean | FinBudgetCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["finBudget"]>
@@ -29996,6 +30087,8 @@ export namespace Prisma {
     periodEnd?: boolean
     currency?: boolean
     recurrence?: boolean
+    accountId?: boolean
+    countBalance?: boolean
     alertThresholds?: boolean
     carryOver?: boolean
     carryOverspend?: boolean
@@ -30016,9 +30109,10 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FinBudgetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "label" | "color" | "periodStart" | "periodEnd" | "currency" | "recurrence" | "alertThresholds" | "carryOver" | "carryOverspend" | "methodMapping" | "note" | "scope" | "source" | "sourceRef" | "status" | "confidence" | "consentUses" | "effectiveAt" | "collectedAt" | "version" | "archivedAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["finBudget"]>
+  export type FinBudgetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "label" | "color" | "periodStart" | "periodEnd" | "currency" | "recurrence" | "accountId" | "countBalance" | "alertThresholds" | "carryOver" | "carryOverspend" | "methodMapping" | "note" | "scope" | "source" | "sourceRef" | "status" | "confidence" | "consentUses" | "effectiveAt" | "collectedAt" | "version" | "archivedAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["finBudget"]>
   export type FinBudgetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    account?: boolean | FinBudget$accountArgs<ExtArgs>
     envelopes?: boolean | FinBudget$envelopesArgs<ExtArgs>
     _count?: boolean | FinBudgetCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -30027,6 +30121,7 @@ export namespace Prisma {
     name: "FinBudget"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
+      account: Prisma.$FinAccountPayload<ExtArgs> | null
       envelopes: Prisma.$FinEnvelopePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -30038,6 +30133,8 @@ export namespace Prisma {
       periodEnd: Date
       currency: string
       recurrence: string
+      accountId: string | null
+      countBalance: boolean
       alertThresholds: Prisma.JsonValue
       carryOver: boolean
       carryOverspend: boolean
@@ -30397,6 +30494,7 @@ export namespace Prisma {
   export interface Prisma__FinBudgetClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    account<T extends FinBudget$accountArgs<ExtArgs> = {}>(args?: Subset<T, FinBudget$accountArgs<ExtArgs>>): Prisma__FinAccountClient<$Result.GetResult<Prisma.$FinAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     envelopes<T extends FinBudget$envelopesArgs<ExtArgs> = {}>(args?: Subset<T, FinBudget$envelopesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinEnvelopePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -30435,6 +30533,8 @@ export namespace Prisma {
     readonly periodEnd: FieldRef<"FinBudget", 'DateTime'>
     readonly currency: FieldRef<"FinBudget", 'String'>
     readonly recurrence: FieldRef<"FinBudget", 'String'>
+    readonly accountId: FieldRef<"FinBudget", 'String'>
+    readonly countBalance: FieldRef<"FinBudget", 'Boolean'>
     readonly alertThresholds: FieldRef<"FinBudget", 'Json'>
     readonly carryOver: FieldRef<"FinBudget", 'Boolean'>
     readonly carryOverspend: FieldRef<"FinBudget", 'Boolean'>
@@ -30801,6 +30901,25 @@ export namespace Prisma {
   }
 
   /**
+   * FinBudget.account
+   */
+  export type FinBudget$accountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinAccount
+     */
+    select?: FinAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinAccount
+     */
+    omit?: FinAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinAccountInclude<ExtArgs> | null
+    where?: FinAccountWhereInput
+  }
+
+  /**
    * FinBudget.envelopes
    */
   export type FinBudget$envelopesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -30873,6 +30992,7 @@ export namespace Prisma {
     budgetId: string | null
     categoryId: string | null
     categoryGroup: string | null
+    accountId: string | null
     kind: string | null
     value: number | null
     currency: string | null
@@ -30899,6 +31019,7 @@ export namespace Prisma {
     budgetId: string | null
     categoryId: string | null
     categoryGroup: string | null
+    accountId: string | null
     kind: string | null
     value: number | null
     currency: string | null
@@ -30925,6 +31046,7 @@ export namespace Prisma {
     budgetId: number
     categoryId: number
     categoryGroup: number
+    accountId: number
     kind: number
     value: number
     currency: number
@@ -30966,6 +31088,7 @@ export namespace Prisma {
     budgetId?: true
     categoryId?: true
     categoryGroup?: true
+    accountId?: true
     kind?: true
     value?: true
     currency?: true
@@ -30992,6 +31115,7 @@ export namespace Prisma {
     budgetId?: true
     categoryId?: true
     categoryGroup?: true
+    accountId?: true
     kind?: true
     value?: true
     currency?: true
@@ -31018,6 +31142,7 @@ export namespace Prisma {
     budgetId?: true
     categoryId?: true
     categoryGroup?: true
+    accountId?: true
     kind?: true
     value?: true
     currency?: true
@@ -31132,6 +31257,7 @@ export namespace Prisma {
     budgetId: string
     categoryId: string | null
     categoryGroup: string | null
+    accountId: string | null
     kind: string
     value: number
     currency: string
@@ -31178,6 +31304,7 @@ export namespace Prisma {
     budgetId?: boolean
     categoryId?: boolean
     categoryGroup?: boolean
+    accountId?: boolean
     kind?: boolean
     value?: boolean
     currency?: boolean
@@ -31200,6 +31327,7 @@ export namespace Prisma {
     user?: boolean | UserDefaultArgs<ExtArgs>
     budget?: boolean | FinBudgetDefaultArgs<ExtArgs>
     category?: boolean | FinEnvelope$categoryArgs<ExtArgs>
+    account?: boolean | FinEnvelope$accountArgs<ExtArgs>
   }, ExtArgs["result"]["finEnvelope"]>
 
 
@@ -31210,6 +31338,7 @@ export namespace Prisma {
     budgetId?: boolean
     categoryId?: boolean
     categoryGroup?: boolean
+    accountId?: boolean
     kind?: boolean
     value?: boolean
     currency?: boolean
@@ -31231,11 +31360,12 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FinEnvelopeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "budgetId" | "categoryId" | "categoryGroup" | "kind" | "value" | "currency" | "cap" | "recurring" | "note" | "scope" | "source" | "sourceRef" | "status" | "confidence" | "consentUses" | "effectiveAt" | "collectedAt" | "version" | "archivedAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["finEnvelope"]>
+  export type FinEnvelopeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "budgetId" | "categoryId" | "categoryGroup" | "accountId" | "kind" | "value" | "currency" | "cap" | "recurring" | "note" | "scope" | "source" | "sourceRef" | "status" | "confidence" | "consentUses" | "effectiveAt" | "collectedAt" | "version" | "archivedAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["finEnvelope"]>
   export type FinEnvelopeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     budget?: boolean | FinBudgetDefaultArgs<ExtArgs>
     category?: boolean | FinEnvelope$categoryArgs<ExtArgs>
+    account?: boolean | FinEnvelope$accountArgs<ExtArgs>
   }
 
   export type $FinEnvelopePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -31244,6 +31374,7 @@ export namespace Prisma {
       user: Prisma.$UserPayload<ExtArgs>
       budget: Prisma.$FinBudgetPayload<ExtArgs>
       category: Prisma.$FinCategoryPayload<ExtArgs> | null
+      account: Prisma.$FinAccountPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -31251,6 +31382,7 @@ export namespace Prisma {
       budgetId: string
       categoryId: string | null
       categoryGroup: string | null
+      accountId: string | null
       kind: string
       value: number
       currency: string
@@ -31613,6 +31745,7 @@ export namespace Prisma {
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     budget<T extends FinBudgetDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FinBudgetDefaultArgs<ExtArgs>>): Prisma__FinBudgetClient<$Result.GetResult<Prisma.$FinBudgetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     category<T extends FinEnvelope$categoryArgs<ExtArgs> = {}>(args?: Subset<T, FinEnvelope$categoryArgs<ExtArgs>>): Prisma__FinCategoryClient<$Result.GetResult<Prisma.$FinCategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    account<T extends FinEnvelope$accountArgs<ExtArgs> = {}>(args?: Subset<T, FinEnvelope$accountArgs<ExtArgs>>): Prisma__FinAccountClient<$Result.GetResult<Prisma.$FinAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -31647,6 +31780,7 @@ export namespace Prisma {
     readonly budgetId: FieldRef<"FinEnvelope", 'String'>
     readonly categoryId: FieldRef<"FinEnvelope", 'String'>
     readonly categoryGroup: FieldRef<"FinEnvelope", 'String'>
+    readonly accountId: FieldRef<"FinEnvelope", 'String'>
     readonly kind: FieldRef<"FinEnvelope", 'String'>
     readonly value: FieldRef<"FinEnvelope", 'Float'>
     readonly currency: FieldRef<"FinEnvelope", 'String'>
@@ -32030,6 +32164,25 @@ export namespace Prisma {
      */
     include?: FinCategoryInclude<ExtArgs> | null
     where?: FinCategoryWhereInput
+  }
+
+  /**
+   * FinEnvelope.account
+   */
+  export type FinEnvelope$accountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinAccount
+     */
+    select?: FinAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinAccount
+     */
+    omit?: FinAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinAccountInclude<ExtArgs> | null
+    where?: FinAccountWhereInput
   }
 
   /**
@@ -106507,6 +106660,8 @@ export namespace Prisma {
     periodEnd: 'periodEnd',
     currency: 'currency',
     recurrence: 'recurrence',
+    accountId: 'accountId',
+    countBalance: 'countBalance',
     alertThresholds: 'alertThresholds',
     carryOver: 'carryOver',
     carryOverspend: 'carryOverspend',
@@ -106536,6 +106691,7 @@ export namespace Prisma {
     budgetId: 'budgetId',
     categoryId: 'categoryId',
     categoryGroup: 'categoryGroup',
+    accountId: 'accountId',
     kind: 'kind',
     value: 'value',
     currency: 'currency',
@@ -108093,6 +108249,7 @@ export namespace Prisma {
     color: 'color',
     currency: 'currency',
     recurrence: 'recurrence',
+    accountId: 'accountId',
     note: 'note',
     scope: 'scope',
     source: 'source',
@@ -108110,6 +108267,7 @@ export namespace Prisma {
     budgetId: 'budgetId',
     categoryId: 'categoryId',
     categoryGroup: 'categoryGroup',
+    accountId: 'accountId',
     kind: 'kind',
     currency: 'currency',
     note: 'note',
@@ -110320,6 +110478,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"FinAccount"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     transactions?: FinTransactionListRelationFilter
+    budgets?: FinBudgetListRelationFilter
+    envelopes?: FinEnvelopeListRelationFilter
     recurrences?: FinRecurrenceListRelationFilter
     goals?: FinGoalListRelationFilter
     debts?: FinDebtListRelationFilter
@@ -110355,6 +110515,8 @@ export namespace Prisma {
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
     transactions?: FinTransactionOrderByRelationAggregateInput
+    budgets?: FinBudgetOrderByRelationAggregateInput
+    envelopes?: FinEnvelopeOrderByRelationAggregateInput
     recurrences?: FinRecurrenceOrderByRelationAggregateInput
     goals?: FinGoalOrderByRelationAggregateInput
     debts?: FinDebtOrderByRelationAggregateInput
@@ -110394,6 +110556,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"FinAccount"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     transactions?: FinTransactionListRelationFilter
+    budgets?: FinBudgetListRelationFilter
+    envelopes?: FinEnvelopeListRelationFilter
     recurrences?: FinRecurrenceListRelationFilter
     goals?: FinGoalListRelationFilter
     debts?: FinDebtListRelationFilter
@@ -111056,6 +111220,8 @@ export namespace Prisma {
     periodEnd?: DateTimeFilter<"FinBudget"> | Date | string
     currency?: StringFilter<"FinBudget"> | string
     recurrence?: StringFilter<"FinBudget"> | string
+    accountId?: StringNullableFilter<"FinBudget"> | string | null
+    countBalance?: BoolFilter<"FinBudget"> | boolean
     alertThresholds?: JsonFilter<"FinBudget">
     carryOver?: BoolFilter<"FinBudget"> | boolean
     carryOverspend?: BoolFilter<"FinBudget"> | boolean
@@ -111075,6 +111241,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"FinBudget"> | Date | string
     updatedAt?: DateTimeFilter<"FinBudget"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    account?: XOR<FinAccountNullableScalarRelationFilter, FinAccountWhereInput> | null
     envelopes?: FinEnvelopeListRelationFilter
   }
 
@@ -111087,6 +111254,8 @@ export namespace Prisma {
     periodEnd?: SortOrder
     currency?: SortOrder
     recurrence?: SortOrder
+    accountId?: SortOrderInput | SortOrder
+    countBalance?: SortOrder
     alertThresholds?: SortOrder
     carryOver?: SortOrder
     carryOverspend?: SortOrder
@@ -111106,6 +111275,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    account?: FinAccountOrderByWithRelationInput
     envelopes?: FinEnvelopeOrderByRelationAggregateInput
     _relevance?: FinBudgetOrderByRelevanceInput
   }
@@ -111122,6 +111292,8 @@ export namespace Prisma {
     periodEnd?: DateTimeFilter<"FinBudget"> | Date | string
     currency?: StringFilter<"FinBudget"> | string
     recurrence?: StringFilter<"FinBudget"> | string
+    accountId?: StringNullableFilter<"FinBudget"> | string | null
+    countBalance?: BoolFilter<"FinBudget"> | boolean
     alertThresholds?: JsonFilter<"FinBudget">
     carryOver?: BoolFilter<"FinBudget"> | boolean
     carryOverspend?: BoolFilter<"FinBudget"> | boolean
@@ -111141,6 +111313,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"FinBudget"> | Date | string
     updatedAt?: DateTimeFilter<"FinBudget"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    account?: XOR<FinAccountNullableScalarRelationFilter, FinAccountWhereInput> | null
     envelopes?: FinEnvelopeListRelationFilter
   }, "id">
 
@@ -111153,6 +111326,8 @@ export namespace Prisma {
     periodEnd?: SortOrder
     currency?: SortOrder
     recurrence?: SortOrder
+    accountId?: SortOrderInput | SortOrder
+    countBalance?: SortOrder
     alertThresholds?: SortOrder
     carryOver?: SortOrder
     carryOverspend?: SortOrder
@@ -111190,6 +111365,8 @@ export namespace Prisma {
     periodEnd?: DateTimeWithAggregatesFilter<"FinBudget"> | Date | string
     currency?: StringWithAggregatesFilter<"FinBudget"> | string
     recurrence?: StringWithAggregatesFilter<"FinBudget"> | string
+    accountId?: StringNullableWithAggregatesFilter<"FinBudget"> | string | null
+    countBalance?: BoolWithAggregatesFilter<"FinBudget"> | boolean
     alertThresholds?: JsonWithAggregatesFilter<"FinBudget">
     carryOver?: BoolWithAggregatesFilter<"FinBudget"> | boolean
     carryOverspend?: BoolWithAggregatesFilter<"FinBudget"> | boolean
@@ -111219,6 +111396,7 @@ export namespace Prisma {
     budgetId?: StringFilter<"FinEnvelope"> | string
     categoryId?: StringNullableFilter<"FinEnvelope"> | string | null
     categoryGroup?: StringNullableFilter<"FinEnvelope"> | string | null
+    accountId?: StringNullableFilter<"FinEnvelope"> | string | null
     kind?: StringFilter<"FinEnvelope"> | string
     value?: FloatFilter<"FinEnvelope"> | number
     currency?: StringFilter<"FinEnvelope"> | string
@@ -111241,6 +111419,7 @@ export namespace Prisma {
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     budget?: XOR<FinBudgetScalarRelationFilter, FinBudgetWhereInput>
     category?: XOR<FinCategoryNullableScalarRelationFilter, FinCategoryWhereInput> | null
+    account?: XOR<FinAccountNullableScalarRelationFilter, FinAccountWhereInput> | null
   }
 
   export type FinEnvelopeOrderByWithRelationInput = {
@@ -111249,6 +111428,7 @@ export namespace Prisma {
     budgetId?: SortOrder
     categoryId?: SortOrderInput | SortOrder
     categoryGroup?: SortOrderInput | SortOrder
+    accountId?: SortOrderInput | SortOrder
     kind?: SortOrder
     value?: SortOrder
     currency?: SortOrder
@@ -111271,6 +111451,7 @@ export namespace Prisma {
     user?: UserOrderByWithRelationInput
     budget?: FinBudgetOrderByWithRelationInput
     category?: FinCategoryOrderByWithRelationInput
+    account?: FinAccountOrderByWithRelationInput
     _relevance?: FinEnvelopeOrderByRelevanceInput
   }
 
@@ -111283,6 +111464,7 @@ export namespace Prisma {
     budgetId?: StringFilter<"FinEnvelope"> | string
     categoryId?: StringNullableFilter<"FinEnvelope"> | string | null
     categoryGroup?: StringNullableFilter<"FinEnvelope"> | string | null
+    accountId?: StringNullableFilter<"FinEnvelope"> | string | null
     kind?: StringFilter<"FinEnvelope"> | string
     value?: FloatFilter<"FinEnvelope"> | number
     currency?: StringFilter<"FinEnvelope"> | string
@@ -111305,6 +111487,7 @@ export namespace Prisma {
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     budget?: XOR<FinBudgetScalarRelationFilter, FinBudgetWhereInput>
     category?: XOR<FinCategoryNullableScalarRelationFilter, FinCategoryWhereInput> | null
+    account?: XOR<FinAccountNullableScalarRelationFilter, FinAccountWhereInput> | null
   }, "id">
 
   export type FinEnvelopeOrderByWithAggregationInput = {
@@ -111313,6 +111496,7 @@ export namespace Prisma {
     budgetId?: SortOrder
     categoryId?: SortOrderInput | SortOrder
     categoryGroup?: SortOrderInput | SortOrder
+    accountId?: SortOrderInput | SortOrder
     kind?: SortOrder
     value?: SortOrder
     currency?: SortOrder
@@ -111348,6 +111532,7 @@ export namespace Prisma {
     budgetId?: StringWithAggregatesFilter<"FinEnvelope"> | string
     categoryId?: StringNullableWithAggregatesFilter<"FinEnvelope"> | string | null
     categoryGroup?: StringNullableWithAggregatesFilter<"FinEnvelope"> | string | null
+    accountId?: StringNullableWithAggregatesFilter<"FinEnvelope"> | string | null
     kind?: StringWithAggregatesFilter<"FinEnvelope"> | string
     value?: FloatWithAggregatesFilter<"FinEnvelope"> | number
     currency?: StringWithAggregatesFilter<"FinEnvelope"> | string
@@ -119405,6 +119590,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFinAccountsInput
     transactions?: FinTransactionCreateNestedManyWithoutAccountInput
+    budgets?: FinBudgetCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeCreateNestedManyWithoutAccountInput
     recurrences?: FinRecurrenceCreateNestedManyWithoutAccountInput
     goals?: FinGoalCreateNestedManyWithoutAccountInput
     debts?: FinDebtCreateNestedManyWithoutAccountInput
@@ -119439,6 +119626,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: FinTransactionUncheckedCreateNestedManyWithoutAccountInput
+    budgets?: FinBudgetUncheckedCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeUncheckedCreateNestedManyWithoutAccountInput
     recurrences?: FinRecurrenceUncheckedCreateNestedManyWithoutAccountInput
     goals?: FinGoalUncheckedCreateNestedManyWithoutAccountInput
     debts?: FinDebtUncheckedCreateNestedManyWithoutAccountInput
@@ -119473,6 +119662,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFinAccountsNestedInput
     transactions?: FinTransactionUpdateManyWithoutAccountNestedInput
+    budgets?: FinBudgetUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUpdateManyWithoutAccountNestedInput
     recurrences?: FinRecurrenceUpdateManyWithoutAccountNestedInput
     goals?: FinGoalUpdateManyWithoutAccountNestedInput
     debts?: FinDebtUpdateManyWithoutAccountNestedInput
@@ -119507,6 +119698,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: FinTransactionUncheckedUpdateManyWithoutAccountNestedInput
+    budgets?: FinBudgetUncheckedUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUncheckedUpdateManyWithoutAccountNestedInput
     recurrences?: FinRecurrenceUncheckedUpdateManyWithoutAccountNestedInput
     goals?: FinGoalUncheckedUpdateManyWithoutAccountNestedInput
     debts?: FinDebtUncheckedUpdateManyWithoutAccountNestedInput
@@ -120284,6 +120477,7 @@ export namespace Prisma {
     periodEnd: Date | string
     currency: string
     recurrence?: string
+    countBalance?: boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: boolean
     carryOverspend?: boolean
@@ -120303,6 +120497,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFinBudgetsInput
+    account?: FinAccountCreateNestedOneWithoutBudgetsInput
     envelopes?: FinEnvelopeCreateNestedManyWithoutBudgetInput
   }
 
@@ -120315,6 +120510,8 @@ export namespace Prisma {
     periodEnd: Date | string
     currency: string
     recurrence?: string
+    accountId?: string | null
+    countBalance?: boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: boolean
     carryOverspend?: boolean
@@ -120344,6 +120541,7 @@ export namespace Prisma {
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     recurrence?: StringFieldUpdateOperationsInput | string
+    countBalance?: BoolFieldUpdateOperationsInput | boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: BoolFieldUpdateOperationsInput | boolean
     carryOverspend?: BoolFieldUpdateOperationsInput | boolean
@@ -120363,6 +120561,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFinBudgetsNestedInput
+    account?: FinAccountUpdateOneWithoutBudgetsNestedInput
     envelopes?: FinEnvelopeUpdateManyWithoutBudgetNestedInput
   }
 
@@ -120375,6 +120574,8 @@ export namespace Prisma {
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     recurrence?: StringFieldUpdateOperationsInput | string
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
+    countBalance?: BoolFieldUpdateOperationsInput | boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: BoolFieldUpdateOperationsInput | boolean
     carryOverspend?: BoolFieldUpdateOperationsInput | boolean
@@ -120405,6 +120606,8 @@ export namespace Prisma {
     periodEnd: Date | string
     currency: string
     recurrence?: string
+    accountId?: string | null
+    countBalance?: boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: boolean
     carryOverspend?: boolean
@@ -120433,6 +120636,7 @@ export namespace Prisma {
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     recurrence?: StringFieldUpdateOperationsInput | string
+    countBalance?: BoolFieldUpdateOperationsInput | boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: BoolFieldUpdateOperationsInput | boolean
     carryOverspend?: BoolFieldUpdateOperationsInput | boolean
@@ -120462,6 +120666,8 @@ export namespace Prisma {
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     recurrence?: StringFieldUpdateOperationsInput | string
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
+    countBalance?: BoolFieldUpdateOperationsInput | boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: BoolFieldUpdateOperationsInput | boolean
     carryOverspend?: BoolFieldUpdateOperationsInput | boolean
@@ -120507,6 +120713,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutFinEnvelopesInput
     budget: FinBudgetCreateNestedOneWithoutEnvelopesInput
     category?: FinCategoryCreateNestedOneWithoutFinEnvelopesInput
+    account?: FinAccountCreateNestedOneWithoutEnvelopesInput
   }
 
   export type FinEnvelopeUncheckedCreateInput = {
@@ -120515,6 +120722,7 @@ export namespace Prisma {
     budgetId: string
     categoryId?: string | null
     categoryGroup?: string | null
+    accountId?: string | null
     kind: string
     value: number
     currency: string
@@ -120561,6 +120769,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutFinEnvelopesNestedInput
     budget?: FinBudgetUpdateOneRequiredWithoutEnvelopesNestedInput
     category?: FinCategoryUpdateOneWithoutFinEnvelopesNestedInput
+    account?: FinAccountUpdateOneWithoutEnvelopesNestedInput
   }
 
   export type FinEnvelopeUncheckedUpdateInput = {
@@ -120569,6 +120778,7 @@ export namespace Prisma {
     budgetId?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -120596,6 +120806,7 @@ export namespace Prisma {
     budgetId: string
     categoryId?: string | null
     categoryGroup?: string | null
+    accountId?: string | null
     kind: string
     value: number
     currency: string
@@ -120647,6 +120858,7 @@ export namespace Prisma {
     budgetId?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -129869,6 +130081,8 @@ export namespace Prisma {
     periodEnd?: SortOrder
     currency?: SortOrder
     recurrence?: SortOrder
+    accountId?: SortOrder
+    countBalance?: SortOrder
     alertThresholds?: SortOrder
     carryOver?: SortOrder
     carryOverspend?: SortOrder
@@ -129902,6 +130116,8 @@ export namespace Prisma {
     periodEnd?: SortOrder
     currency?: SortOrder
     recurrence?: SortOrder
+    accountId?: SortOrder
+    countBalance?: SortOrder
     carryOver?: SortOrder
     carryOverspend?: SortOrder
     note?: SortOrder
@@ -129928,6 +130144,8 @@ export namespace Prisma {
     periodEnd?: SortOrder
     currency?: SortOrder
     recurrence?: SortOrder
+    accountId?: SortOrder
+    countBalance?: SortOrder
     carryOver?: SortOrder
     carryOverspend?: SortOrder
     note?: SortOrder
@@ -129966,6 +130184,7 @@ export namespace Prisma {
     budgetId?: SortOrder
     categoryId?: SortOrder
     categoryGroup?: SortOrder
+    accountId?: SortOrder
     kind?: SortOrder
     value?: SortOrder
     currency?: SortOrder
@@ -129999,6 +130218,7 @@ export namespace Prisma {
     budgetId?: SortOrder
     categoryId?: SortOrder
     categoryGroup?: SortOrder
+    accountId?: SortOrder
     kind?: SortOrder
     value?: SortOrder
     currency?: SortOrder
@@ -130025,6 +130245,7 @@ export namespace Prisma {
     budgetId?: SortOrder
     categoryId?: SortOrder
     categoryGroup?: SortOrder
+    accountId?: SortOrder
     kind?: SortOrder
     value?: SortOrder
     currency?: SortOrder
@@ -136709,6 +136930,20 @@ export namespace Prisma {
     connect?: FinTransactionWhereUniqueInput | FinTransactionWhereUniqueInput[]
   }
 
+  export type FinBudgetCreateNestedManyWithoutAccountInput = {
+    create?: XOR<FinBudgetCreateWithoutAccountInput, FinBudgetUncheckedCreateWithoutAccountInput> | FinBudgetCreateWithoutAccountInput[] | FinBudgetUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: FinBudgetCreateOrConnectWithoutAccountInput | FinBudgetCreateOrConnectWithoutAccountInput[]
+    createMany?: FinBudgetCreateManyAccountInputEnvelope
+    connect?: FinBudgetWhereUniqueInput | FinBudgetWhereUniqueInput[]
+  }
+
+  export type FinEnvelopeCreateNestedManyWithoutAccountInput = {
+    create?: XOR<FinEnvelopeCreateWithoutAccountInput, FinEnvelopeUncheckedCreateWithoutAccountInput> | FinEnvelopeCreateWithoutAccountInput[] | FinEnvelopeUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: FinEnvelopeCreateOrConnectWithoutAccountInput | FinEnvelopeCreateOrConnectWithoutAccountInput[]
+    createMany?: FinEnvelopeCreateManyAccountInputEnvelope
+    connect?: FinEnvelopeWhereUniqueInput | FinEnvelopeWhereUniqueInput[]
+  }
+
   export type FinRecurrenceCreateNestedManyWithoutAccountInput = {
     create?: XOR<FinRecurrenceCreateWithoutAccountInput, FinRecurrenceUncheckedCreateWithoutAccountInput> | FinRecurrenceCreateWithoutAccountInput[] | FinRecurrenceUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: FinRecurrenceCreateOrConnectWithoutAccountInput | FinRecurrenceCreateOrConnectWithoutAccountInput[]
@@ -136735,6 +136970,20 @@ export namespace Prisma {
     connectOrCreate?: FinTransactionCreateOrConnectWithoutAccountInput | FinTransactionCreateOrConnectWithoutAccountInput[]
     createMany?: FinTransactionCreateManyAccountInputEnvelope
     connect?: FinTransactionWhereUniqueInput | FinTransactionWhereUniqueInput[]
+  }
+
+  export type FinBudgetUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<FinBudgetCreateWithoutAccountInput, FinBudgetUncheckedCreateWithoutAccountInput> | FinBudgetCreateWithoutAccountInput[] | FinBudgetUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: FinBudgetCreateOrConnectWithoutAccountInput | FinBudgetCreateOrConnectWithoutAccountInput[]
+    createMany?: FinBudgetCreateManyAccountInputEnvelope
+    connect?: FinBudgetWhereUniqueInput | FinBudgetWhereUniqueInput[]
+  }
+
+  export type FinEnvelopeUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<FinEnvelopeCreateWithoutAccountInput, FinEnvelopeUncheckedCreateWithoutAccountInput> | FinEnvelopeCreateWithoutAccountInput[] | FinEnvelopeUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: FinEnvelopeCreateOrConnectWithoutAccountInput | FinEnvelopeCreateOrConnectWithoutAccountInput[]
+    createMany?: FinEnvelopeCreateManyAccountInputEnvelope
+    connect?: FinEnvelopeWhereUniqueInput | FinEnvelopeWhereUniqueInput[]
   }
 
   export type FinRecurrenceUncheckedCreateNestedManyWithoutAccountInput = {
@@ -136786,6 +137035,34 @@ export namespace Prisma {
     update?: FinTransactionUpdateWithWhereUniqueWithoutAccountInput | FinTransactionUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: FinTransactionUpdateManyWithWhereWithoutAccountInput | FinTransactionUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: FinTransactionScalarWhereInput | FinTransactionScalarWhereInput[]
+  }
+
+  export type FinBudgetUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<FinBudgetCreateWithoutAccountInput, FinBudgetUncheckedCreateWithoutAccountInput> | FinBudgetCreateWithoutAccountInput[] | FinBudgetUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: FinBudgetCreateOrConnectWithoutAccountInput | FinBudgetCreateOrConnectWithoutAccountInput[]
+    upsert?: FinBudgetUpsertWithWhereUniqueWithoutAccountInput | FinBudgetUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: FinBudgetCreateManyAccountInputEnvelope
+    set?: FinBudgetWhereUniqueInput | FinBudgetWhereUniqueInput[]
+    disconnect?: FinBudgetWhereUniqueInput | FinBudgetWhereUniqueInput[]
+    delete?: FinBudgetWhereUniqueInput | FinBudgetWhereUniqueInput[]
+    connect?: FinBudgetWhereUniqueInput | FinBudgetWhereUniqueInput[]
+    update?: FinBudgetUpdateWithWhereUniqueWithoutAccountInput | FinBudgetUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: FinBudgetUpdateManyWithWhereWithoutAccountInput | FinBudgetUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: FinBudgetScalarWhereInput | FinBudgetScalarWhereInput[]
+  }
+
+  export type FinEnvelopeUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<FinEnvelopeCreateWithoutAccountInput, FinEnvelopeUncheckedCreateWithoutAccountInput> | FinEnvelopeCreateWithoutAccountInput[] | FinEnvelopeUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: FinEnvelopeCreateOrConnectWithoutAccountInput | FinEnvelopeCreateOrConnectWithoutAccountInput[]
+    upsert?: FinEnvelopeUpsertWithWhereUniqueWithoutAccountInput | FinEnvelopeUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: FinEnvelopeCreateManyAccountInputEnvelope
+    set?: FinEnvelopeWhereUniqueInput | FinEnvelopeWhereUniqueInput[]
+    disconnect?: FinEnvelopeWhereUniqueInput | FinEnvelopeWhereUniqueInput[]
+    delete?: FinEnvelopeWhereUniqueInput | FinEnvelopeWhereUniqueInput[]
+    connect?: FinEnvelopeWhereUniqueInput | FinEnvelopeWhereUniqueInput[]
+    update?: FinEnvelopeUpdateWithWhereUniqueWithoutAccountInput | FinEnvelopeUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: FinEnvelopeUpdateManyWithWhereWithoutAccountInput | FinEnvelopeUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: FinEnvelopeScalarWhereInput | FinEnvelopeScalarWhereInput[]
   }
 
   export type FinRecurrenceUpdateManyWithoutAccountNestedInput = {
@@ -136842,6 +137119,34 @@ export namespace Prisma {
     update?: FinTransactionUpdateWithWhereUniqueWithoutAccountInput | FinTransactionUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: FinTransactionUpdateManyWithWhereWithoutAccountInput | FinTransactionUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: FinTransactionScalarWhereInput | FinTransactionScalarWhereInput[]
+  }
+
+  export type FinBudgetUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<FinBudgetCreateWithoutAccountInput, FinBudgetUncheckedCreateWithoutAccountInput> | FinBudgetCreateWithoutAccountInput[] | FinBudgetUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: FinBudgetCreateOrConnectWithoutAccountInput | FinBudgetCreateOrConnectWithoutAccountInput[]
+    upsert?: FinBudgetUpsertWithWhereUniqueWithoutAccountInput | FinBudgetUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: FinBudgetCreateManyAccountInputEnvelope
+    set?: FinBudgetWhereUniqueInput | FinBudgetWhereUniqueInput[]
+    disconnect?: FinBudgetWhereUniqueInput | FinBudgetWhereUniqueInput[]
+    delete?: FinBudgetWhereUniqueInput | FinBudgetWhereUniqueInput[]
+    connect?: FinBudgetWhereUniqueInput | FinBudgetWhereUniqueInput[]
+    update?: FinBudgetUpdateWithWhereUniqueWithoutAccountInput | FinBudgetUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: FinBudgetUpdateManyWithWhereWithoutAccountInput | FinBudgetUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: FinBudgetScalarWhereInput | FinBudgetScalarWhereInput[]
+  }
+
+  export type FinEnvelopeUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<FinEnvelopeCreateWithoutAccountInput, FinEnvelopeUncheckedCreateWithoutAccountInput> | FinEnvelopeCreateWithoutAccountInput[] | FinEnvelopeUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: FinEnvelopeCreateOrConnectWithoutAccountInput | FinEnvelopeCreateOrConnectWithoutAccountInput[]
+    upsert?: FinEnvelopeUpsertWithWhereUniqueWithoutAccountInput | FinEnvelopeUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: FinEnvelopeCreateManyAccountInputEnvelope
+    set?: FinEnvelopeWhereUniqueInput | FinEnvelopeWhereUniqueInput[]
+    disconnect?: FinEnvelopeWhereUniqueInput | FinEnvelopeWhereUniqueInput[]
+    delete?: FinEnvelopeWhereUniqueInput | FinEnvelopeWhereUniqueInput[]
+    connect?: FinEnvelopeWhereUniqueInput | FinEnvelopeWhereUniqueInput[]
+    update?: FinEnvelopeUpdateWithWhereUniqueWithoutAccountInput | FinEnvelopeUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: FinEnvelopeUpdateManyWithWhereWithoutAccountInput | FinEnvelopeUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: FinEnvelopeScalarWhereInput | FinEnvelopeScalarWhereInput[]
   }
 
   export type FinRecurrenceUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -137132,6 +137437,12 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type FinAccountCreateNestedOneWithoutBudgetsInput = {
+    create?: XOR<FinAccountCreateWithoutBudgetsInput, FinAccountUncheckedCreateWithoutBudgetsInput>
+    connectOrCreate?: FinAccountCreateOrConnectWithoutBudgetsInput
+    connect?: FinAccountWhereUniqueInput
+  }
+
   export type FinEnvelopeCreateNestedManyWithoutBudgetInput = {
     create?: XOR<FinEnvelopeCreateWithoutBudgetInput, FinEnvelopeUncheckedCreateWithoutBudgetInput> | FinEnvelopeCreateWithoutBudgetInput[] | FinEnvelopeUncheckedCreateWithoutBudgetInput[]
     connectOrCreate?: FinEnvelopeCreateOrConnectWithoutBudgetInput | FinEnvelopeCreateOrConnectWithoutBudgetInput[]
@@ -137152,6 +137463,16 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutFinBudgetsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutFinBudgetsInput, UserUpdateWithoutFinBudgetsInput>, UserUncheckedUpdateWithoutFinBudgetsInput>
+  }
+
+  export type FinAccountUpdateOneWithoutBudgetsNestedInput = {
+    create?: XOR<FinAccountCreateWithoutBudgetsInput, FinAccountUncheckedCreateWithoutBudgetsInput>
+    connectOrCreate?: FinAccountCreateOrConnectWithoutBudgetsInput
+    upsert?: FinAccountUpsertWithoutBudgetsInput
+    disconnect?: FinAccountWhereInput | boolean
+    delete?: FinAccountWhereInput | boolean
+    connect?: FinAccountWhereUniqueInput
+    update?: XOR<XOR<FinAccountUpdateToOneWithWhereWithoutBudgetsInput, FinAccountUpdateWithoutBudgetsInput>, FinAccountUncheckedUpdateWithoutBudgetsInput>
   }
 
   export type FinEnvelopeUpdateManyWithoutBudgetNestedInput = {
@@ -137200,6 +137521,12 @@ export namespace Prisma {
     connect?: FinCategoryWhereUniqueInput
   }
 
+  export type FinAccountCreateNestedOneWithoutEnvelopesInput = {
+    create?: XOR<FinAccountCreateWithoutEnvelopesInput, FinAccountUncheckedCreateWithoutEnvelopesInput>
+    connectOrCreate?: FinAccountCreateOrConnectWithoutEnvelopesInput
+    connect?: FinAccountWhereUniqueInput
+  }
+
   export type UserUpdateOneRequiredWithoutFinEnvelopesNestedInput = {
     create?: XOR<UserCreateWithoutFinEnvelopesInput, UserUncheckedCreateWithoutFinEnvelopesInput>
     connectOrCreate?: UserCreateOrConnectWithoutFinEnvelopesInput
@@ -137224,6 +137551,16 @@ export namespace Prisma {
     delete?: FinCategoryWhereInput | boolean
     connect?: FinCategoryWhereUniqueInput
     update?: XOR<XOR<FinCategoryUpdateToOneWithWhereWithoutFinEnvelopesInput, FinCategoryUpdateWithoutFinEnvelopesInput>, FinCategoryUncheckedUpdateWithoutFinEnvelopesInput>
+  }
+
+  export type FinAccountUpdateOneWithoutEnvelopesNestedInput = {
+    create?: XOR<FinAccountCreateWithoutEnvelopesInput, FinAccountUncheckedCreateWithoutEnvelopesInput>
+    connectOrCreate?: FinAccountCreateOrConnectWithoutEnvelopesInput
+    upsert?: FinAccountUpsertWithoutEnvelopesInput
+    disconnect?: FinAccountWhereInput | boolean
+    delete?: FinAccountWhereInput | boolean
+    connect?: FinAccountWhereUniqueInput
+    update?: XOR<XOR<FinAccountUpdateToOneWithWhereWithoutEnvelopesInput, FinAccountUpdateWithoutEnvelopesInput>, FinAccountUncheckedUpdateWithoutEnvelopesInput>
   }
 
   export type UserCreateNestedOneWithoutFinGoalsInput = {
@@ -142008,6 +142345,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: FinTransactionCreateNestedManyWithoutAccountInput
+    budgets?: FinBudgetCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeCreateNestedManyWithoutAccountInput
     recurrences?: FinRecurrenceCreateNestedManyWithoutAccountInput
     goals?: FinGoalCreateNestedManyWithoutAccountInput
     debts?: FinDebtCreateNestedManyWithoutAccountInput
@@ -142041,6 +142380,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: FinTransactionUncheckedCreateNestedManyWithoutAccountInput
+    budgets?: FinBudgetUncheckedCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeUncheckedCreateNestedManyWithoutAccountInput
     recurrences?: FinRecurrenceUncheckedCreateNestedManyWithoutAccountInput
     goals?: FinGoalUncheckedCreateNestedManyWithoutAccountInput
     debts?: FinDebtUncheckedCreateNestedManyWithoutAccountInput
@@ -142309,6 +142650,7 @@ export namespace Prisma {
     periodEnd: Date | string
     currency: string
     recurrence?: string
+    countBalance?: boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: boolean
     carryOverspend?: boolean
@@ -142327,6 +142669,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    account?: FinAccountCreateNestedOneWithoutBudgetsInput
     envelopes?: FinEnvelopeCreateNestedManyWithoutBudgetInput
   }
 
@@ -142338,6 +142681,8 @@ export namespace Prisma {
     periodEnd: Date | string
     currency: string
     recurrence?: string
+    accountId?: string | null
+    countBalance?: boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: boolean
     carryOverspend?: boolean
@@ -142393,6 +142738,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     budget: FinBudgetCreateNestedOneWithoutEnvelopesInput
     category?: FinCategoryCreateNestedOneWithoutFinEnvelopesInput
+    account?: FinAccountCreateNestedOneWithoutEnvelopesInput
   }
 
   export type FinEnvelopeUncheckedCreateWithoutUserInput = {
@@ -142400,6 +142746,7 @@ export namespace Prisma {
     budgetId: string
     categoryId?: string | null
     categoryGroup?: string | null
+    accountId?: string | null
     kind: string
     value: number
     currency: string
@@ -144040,6 +144387,8 @@ export namespace Prisma {
     periodEnd?: DateTimeFilter<"FinBudget"> | Date | string
     currency?: StringFilter<"FinBudget"> | string
     recurrence?: StringFilter<"FinBudget"> | string
+    accountId?: StringNullableFilter<"FinBudget"> | string | null
+    countBalance?: BoolFilter<"FinBudget"> | boolean
     alertThresholds?: JsonFilter<"FinBudget">
     carryOver?: BoolFilter<"FinBudget"> | boolean
     carryOverspend?: BoolFilter<"FinBudget"> | boolean
@@ -144085,6 +144434,7 @@ export namespace Prisma {
     budgetId?: StringFilter<"FinEnvelope"> | string
     categoryId?: StringNullableFilter<"FinEnvelope"> | string | null
     categoryGroup?: StringNullableFilter<"FinEnvelope"> | string | null
+    accountId?: StringNullableFilter<"FinEnvelope"> | string | null
     kind?: StringFilter<"FinEnvelope"> | string
     value?: FloatFilter<"FinEnvelope"> | number
     currency?: StringFilter<"FinEnvelope"> | string
@@ -147037,6 +147387,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFinEnvelopesInput
     budget: FinBudgetCreateNestedOneWithoutEnvelopesInput
+    account?: FinAccountCreateNestedOneWithoutEnvelopesInput
   }
 
   export type FinEnvelopeUncheckedCreateWithoutCategoryInput = {
@@ -147044,6 +147395,7 @@ export namespace Prisma {
     userId: string
     budgetId: string
     categoryGroup?: string | null
+    accountId?: string | null
     kind: string
     value: number
     currency: string
@@ -148601,6 +148953,142 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type FinBudgetCreateWithoutAccountInput = {
+    id?: string
+    label: string
+    color?: string | null
+    periodStart: Date | string
+    periodEnd: Date | string
+    currency: string
+    recurrence?: string
+    countBalance?: boolean
+    alertThresholds?: JsonNullValueInput | InputJsonValue
+    carryOver?: boolean
+    carryOverspend?: boolean
+    methodMapping?: JsonNullValueInput | InputJsonValue
+    note?: string | null
+    scope?: string
+    source: string
+    sourceRef?: string | null
+    status: string
+    confidence?: string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: Date | string
+    collectedAt?: Date | string
+    version?: number
+    archivedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutFinBudgetsInput
+    envelopes?: FinEnvelopeCreateNestedManyWithoutBudgetInput
+  }
+
+  export type FinBudgetUncheckedCreateWithoutAccountInput = {
+    id?: string
+    userId: string
+    label: string
+    color?: string | null
+    periodStart: Date | string
+    periodEnd: Date | string
+    currency: string
+    recurrence?: string
+    countBalance?: boolean
+    alertThresholds?: JsonNullValueInput | InputJsonValue
+    carryOver?: boolean
+    carryOverspend?: boolean
+    methodMapping?: JsonNullValueInput | InputJsonValue
+    note?: string | null
+    scope?: string
+    source: string
+    sourceRef?: string | null
+    status: string
+    confidence?: string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: Date | string
+    collectedAt?: Date | string
+    version?: number
+    archivedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    envelopes?: FinEnvelopeUncheckedCreateNestedManyWithoutBudgetInput
+  }
+
+  export type FinBudgetCreateOrConnectWithoutAccountInput = {
+    where: FinBudgetWhereUniqueInput
+    create: XOR<FinBudgetCreateWithoutAccountInput, FinBudgetUncheckedCreateWithoutAccountInput>
+  }
+
+  export type FinBudgetCreateManyAccountInputEnvelope = {
+    data: FinBudgetCreateManyAccountInput | FinBudgetCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FinEnvelopeCreateWithoutAccountInput = {
+    id?: string
+    categoryGroup?: string | null
+    kind: string
+    value: number
+    currency: string
+    cap?: number | null
+    recurring?: boolean
+    note?: string | null
+    scope?: string
+    source: string
+    sourceRef?: string | null
+    status: string
+    confidence?: string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: Date | string
+    collectedAt?: Date | string
+    version?: number
+    archivedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutFinEnvelopesInput
+    budget: FinBudgetCreateNestedOneWithoutEnvelopesInput
+    category?: FinCategoryCreateNestedOneWithoutFinEnvelopesInput
+  }
+
+  export type FinEnvelopeUncheckedCreateWithoutAccountInput = {
+    id?: string
+    userId: string
+    budgetId: string
+    categoryId?: string | null
+    categoryGroup?: string | null
+    kind: string
+    value: number
+    currency: string
+    cap?: number | null
+    recurring?: boolean
+    note?: string | null
+    scope?: string
+    source: string
+    sourceRef?: string | null
+    status: string
+    confidence?: string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: Date | string
+    collectedAt?: Date | string
+    version?: number
+    archivedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FinEnvelopeCreateOrConnectWithoutAccountInput = {
+    where: FinEnvelopeWhereUniqueInput
+    create: XOR<FinEnvelopeCreateWithoutAccountInput, FinEnvelopeUncheckedCreateWithoutAccountInput>
+  }
+
+  export type FinEnvelopeCreateManyAccountInputEnvelope = {
+    data: FinEnvelopeCreateManyAccountInput | FinEnvelopeCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
   export type FinRecurrenceCreateWithoutAccountInput = {
     id?: string
     label: string
@@ -148978,6 +149466,38 @@ export namespace Prisma {
   export type FinTransactionUpdateManyWithWhereWithoutAccountInput = {
     where: FinTransactionScalarWhereInput
     data: XOR<FinTransactionUpdateManyMutationInput, FinTransactionUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type FinBudgetUpsertWithWhereUniqueWithoutAccountInput = {
+    where: FinBudgetWhereUniqueInput
+    update: XOR<FinBudgetUpdateWithoutAccountInput, FinBudgetUncheckedUpdateWithoutAccountInput>
+    create: XOR<FinBudgetCreateWithoutAccountInput, FinBudgetUncheckedCreateWithoutAccountInput>
+  }
+
+  export type FinBudgetUpdateWithWhereUniqueWithoutAccountInput = {
+    where: FinBudgetWhereUniqueInput
+    data: XOR<FinBudgetUpdateWithoutAccountInput, FinBudgetUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type FinBudgetUpdateManyWithWhereWithoutAccountInput = {
+    where: FinBudgetScalarWhereInput
+    data: XOR<FinBudgetUpdateManyMutationInput, FinBudgetUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type FinEnvelopeUpsertWithWhereUniqueWithoutAccountInput = {
+    where: FinEnvelopeWhereUniqueInput
+    update: XOR<FinEnvelopeUpdateWithoutAccountInput, FinEnvelopeUncheckedUpdateWithoutAccountInput>
+    create: XOR<FinEnvelopeCreateWithoutAccountInput, FinEnvelopeUncheckedCreateWithoutAccountInput>
+  }
+
+  export type FinEnvelopeUpdateWithWhereUniqueWithoutAccountInput = {
+    where: FinEnvelopeWhereUniqueInput
+    data: XOR<FinEnvelopeUpdateWithoutAccountInput, FinEnvelopeUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type FinEnvelopeUpdateManyWithWhereWithoutAccountInput = {
+    where: FinEnvelopeScalarWhereInput
+    data: XOR<FinEnvelopeUpdateManyMutationInput, FinEnvelopeUncheckedUpdateManyWithoutAccountInput>
   }
 
   export type FinRecurrenceUpsertWithWhereUniqueWithoutAccountInput = {
@@ -150194,6 +150714,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFinAccountsInput
+    budgets?: FinBudgetCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeCreateNestedManyWithoutAccountInput
     recurrences?: FinRecurrenceCreateNestedManyWithoutAccountInput
     goals?: FinGoalCreateNestedManyWithoutAccountInput
     debts?: FinDebtCreateNestedManyWithoutAccountInput
@@ -150227,6 +150749,8 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    budgets?: FinBudgetUncheckedCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeUncheckedCreateNestedManyWithoutAccountInput
     recurrences?: FinRecurrenceUncheckedCreateNestedManyWithoutAccountInput
     goals?: FinGoalUncheckedCreateNestedManyWithoutAccountInput
     debts?: FinDebtUncheckedCreateNestedManyWithoutAccountInput
@@ -150643,6 +151167,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFinAccountsNestedInput
+    budgets?: FinBudgetUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUpdateManyWithoutAccountNestedInput
     recurrences?: FinRecurrenceUpdateManyWithoutAccountNestedInput
     goals?: FinGoalUpdateManyWithoutAccountNestedInput
     debts?: FinDebtUpdateManyWithoutAccountNestedInput
@@ -150676,6 +151202,8 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    budgets?: FinBudgetUncheckedUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUncheckedUpdateManyWithoutAccountNestedInput
     recurrences?: FinRecurrenceUncheckedUpdateManyWithoutAccountNestedInput
     goals?: FinGoalUncheckedUpdateManyWithoutAccountNestedInput
     debts?: FinDebtUncheckedUpdateManyWithoutAccountNestedInput
@@ -151261,6 +151789,81 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutFinBudgetsInput, UserUncheckedCreateWithoutFinBudgetsInput>
   }
 
+  export type FinAccountCreateWithoutBudgetsInput = {
+    id?: string
+    label: string
+    type: string
+    currency: string
+    openingBalance?: number
+    openingDate?: Date | string
+    includeInTotal: boolean
+    includeInNetWorth: boolean
+    color?: string | null
+    icon?: string | null
+    minBalanceAlert?: number | null
+    maxBalanceInfo?: number | null
+    overdraftAllowed?: number | null
+    note?: string | null
+    scope?: string
+    source: string
+    status: string
+    confidence?: string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: Date | string
+    collectedAt?: Date | string
+    version?: number
+    archivedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutFinAccountsInput
+    transactions?: FinTransactionCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeCreateNestedManyWithoutAccountInput
+    recurrences?: FinRecurrenceCreateNestedManyWithoutAccountInput
+    goals?: FinGoalCreateNestedManyWithoutAccountInput
+    debts?: FinDebtCreateNestedManyWithoutAccountInput
+  }
+
+  export type FinAccountUncheckedCreateWithoutBudgetsInput = {
+    id?: string
+    userId: string
+    label: string
+    type: string
+    currency: string
+    openingBalance?: number
+    openingDate?: Date | string
+    includeInTotal: boolean
+    includeInNetWorth: boolean
+    color?: string | null
+    icon?: string | null
+    minBalanceAlert?: number | null
+    maxBalanceInfo?: number | null
+    overdraftAllowed?: number | null
+    note?: string | null
+    scope?: string
+    source: string
+    status: string
+    confidence?: string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: Date | string
+    collectedAt?: Date | string
+    version?: number
+    archivedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    transactions?: FinTransactionUncheckedCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeUncheckedCreateNestedManyWithoutAccountInput
+    recurrences?: FinRecurrenceUncheckedCreateNestedManyWithoutAccountInput
+    goals?: FinGoalUncheckedCreateNestedManyWithoutAccountInput
+    debts?: FinDebtUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type FinAccountCreateOrConnectWithoutBudgetsInput = {
+    where: FinAccountWhereUniqueInput
+    create: XOR<FinAccountCreateWithoutBudgetsInput, FinAccountUncheckedCreateWithoutBudgetsInput>
+  }
+
   export type FinEnvelopeCreateWithoutBudgetInput = {
     id?: string
     categoryGroup?: string | null
@@ -151285,6 +151888,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFinEnvelopesInput
     category?: FinCategoryCreateNestedOneWithoutFinEnvelopesInput
+    account?: FinAccountCreateNestedOneWithoutEnvelopesInput
   }
 
   export type FinEnvelopeUncheckedCreateWithoutBudgetInput = {
@@ -151292,6 +151896,7 @@ export namespace Prisma {
     userId: string
     categoryId?: string | null
     categoryGroup?: string | null
+    accountId?: string | null
     kind: string
     value: number
     currency: string
@@ -151462,6 +152067,87 @@ export namespace Prisma {
     paymentOrders?: PaymentOrderUncheckedUpdateManyWithoutUserNestedInput
   }
 
+  export type FinAccountUpsertWithoutBudgetsInput = {
+    update: XOR<FinAccountUpdateWithoutBudgetsInput, FinAccountUncheckedUpdateWithoutBudgetsInput>
+    create: XOR<FinAccountCreateWithoutBudgetsInput, FinAccountUncheckedCreateWithoutBudgetsInput>
+    where?: FinAccountWhereInput
+  }
+
+  export type FinAccountUpdateToOneWithWhereWithoutBudgetsInput = {
+    where?: FinAccountWhereInput
+    data: XOR<FinAccountUpdateWithoutBudgetsInput, FinAccountUncheckedUpdateWithoutBudgetsInput>
+  }
+
+  export type FinAccountUpdateWithoutBudgetsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    currency?: StringFieldUpdateOperationsInput | string
+    openingBalance?: FloatFieldUpdateOperationsInput | number
+    openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    includeInTotal?: BoolFieldUpdateOperationsInput | boolean
+    includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    scope?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    confidence?: NullableStringFieldUpdateOperationsInput | string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutFinAccountsNestedInput
+    transactions?: FinTransactionUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUpdateManyWithoutAccountNestedInput
+    recurrences?: FinRecurrenceUpdateManyWithoutAccountNestedInput
+    goals?: FinGoalUpdateManyWithoutAccountNestedInput
+    debts?: FinDebtUpdateManyWithoutAccountNestedInput
+  }
+
+  export type FinAccountUncheckedUpdateWithoutBudgetsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    currency?: StringFieldUpdateOperationsInput | string
+    openingBalance?: FloatFieldUpdateOperationsInput | number
+    openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    includeInTotal?: BoolFieldUpdateOperationsInput | boolean
+    includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    scope?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    confidence?: NullableStringFieldUpdateOperationsInput | string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: FinTransactionUncheckedUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUncheckedUpdateManyWithoutAccountNestedInput
+    recurrences?: FinRecurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    goals?: FinGoalUncheckedUpdateManyWithoutAccountNestedInput
+    debts?: FinDebtUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
   export type FinEnvelopeUpsertWithWhereUniqueWithoutBudgetInput = {
     where: FinEnvelopeWhereUniqueInput
     update: XOR<FinEnvelopeUpdateWithoutBudgetInput, FinEnvelopeUncheckedUpdateWithoutBudgetInput>
@@ -151619,6 +152305,7 @@ export namespace Prisma {
     periodEnd: Date | string
     currency: string
     recurrence?: string
+    countBalance?: boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: boolean
     carryOverspend?: boolean
@@ -151638,6 +152325,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFinBudgetsInput
+    account?: FinAccountCreateNestedOneWithoutBudgetsInput
   }
 
   export type FinBudgetUncheckedCreateWithoutEnvelopesInput = {
@@ -151649,6 +152337,8 @@ export namespace Prisma {
     periodEnd: Date | string
     currency: string
     recurrence?: string
+    accountId?: string | null
+    countBalance?: boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: boolean
     carryOverspend?: boolean
@@ -151745,6 +152435,81 @@ export namespace Prisma {
   export type FinCategoryCreateOrConnectWithoutFinEnvelopesInput = {
     where: FinCategoryWhereUniqueInput
     create: XOR<FinCategoryCreateWithoutFinEnvelopesInput, FinCategoryUncheckedCreateWithoutFinEnvelopesInput>
+  }
+
+  export type FinAccountCreateWithoutEnvelopesInput = {
+    id?: string
+    label: string
+    type: string
+    currency: string
+    openingBalance?: number
+    openingDate?: Date | string
+    includeInTotal: boolean
+    includeInNetWorth: boolean
+    color?: string | null
+    icon?: string | null
+    minBalanceAlert?: number | null
+    maxBalanceInfo?: number | null
+    overdraftAllowed?: number | null
+    note?: string | null
+    scope?: string
+    source: string
+    status: string
+    confidence?: string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: Date | string
+    collectedAt?: Date | string
+    version?: number
+    archivedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutFinAccountsInput
+    transactions?: FinTransactionCreateNestedManyWithoutAccountInput
+    budgets?: FinBudgetCreateNestedManyWithoutAccountInput
+    recurrences?: FinRecurrenceCreateNestedManyWithoutAccountInput
+    goals?: FinGoalCreateNestedManyWithoutAccountInput
+    debts?: FinDebtCreateNestedManyWithoutAccountInput
+  }
+
+  export type FinAccountUncheckedCreateWithoutEnvelopesInput = {
+    id?: string
+    userId: string
+    label: string
+    type: string
+    currency: string
+    openingBalance?: number
+    openingDate?: Date | string
+    includeInTotal: boolean
+    includeInNetWorth: boolean
+    color?: string | null
+    icon?: string | null
+    minBalanceAlert?: number | null
+    maxBalanceInfo?: number | null
+    overdraftAllowed?: number | null
+    note?: string | null
+    scope?: string
+    source: string
+    status: string
+    confidence?: string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: Date | string
+    collectedAt?: Date | string
+    version?: number
+    archivedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    transactions?: FinTransactionUncheckedCreateNestedManyWithoutAccountInput
+    budgets?: FinBudgetUncheckedCreateNestedManyWithoutAccountInput
+    recurrences?: FinRecurrenceUncheckedCreateNestedManyWithoutAccountInput
+    goals?: FinGoalUncheckedCreateNestedManyWithoutAccountInput
+    debts?: FinDebtUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type FinAccountCreateOrConnectWithoutEnvelopesInput = {
+    where: FinAccountWhereUniqueInput
+    create: XOR<FinAccountCreateWithoutEnvelopesInput, FinAccountUncheckedCreateWithoutEnvelopesInput>
   }
 
   export type UserUpsertWithoutFinEnvelopesInput = {
@@ -151905,6 +152670,7 @@ export namespace Prisma {
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     recurrence?: StringFieldUpdateOperationsInput | string
+    countBalance?: BoolFieldUpdateOperationsInput | boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: BoolFieldUpdateOperationsInput | boolean
     carryOverspend?: BoolFieldUpdateOperationsInput | boolean
@@ -151924,6 +152690,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFinBudgetsNestedInput
+    account?: FinAccountUpdateOneWithoutBudgetsNestedInput
   }
 
   export type FinBudgetUncheckedUpdateWithoutEnvelopesInput = {
@@ -151935,6 +152702,8 @@ export namespace Prisma {
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     recurrence?: StringFieldUpdateOperationsInput | string
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
+    countBalance?: BoolFieldUpdateOperationsInput | boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: BoolFieldUpdateOperationsInput | boolean
     carryOverspend?: BoolFieldUpdateOperationsInput | boolean
@@ -152032,6 +152801,87 @@ export namespace Prisma {
     finAssets?: FinAssetUncheckedUpdateManyWithoutCategoryNestedInput
     finSharedExpenses?: FinSharedExpenseUncheckedUpdateManyWithoutCategoryNestedInput
     finTagsAuto?: FinTagUncheckedUpdateManyWithoutAutoCategoryNestedInput
+  }
+
+  export type FinAccountUpsertWithoutEnvelopesInput = {
+    update: XOR<FinAccountUpdateWithoutEnvelopesInput, FinAccountUncheckedUpdateWithoutEnvelopesInput>
+    create: XOR<FinAccountCreateWithoutEnvelopesInput, FinAccountUncheckedCreateWithoutEnvelopesInput>
+    where?: FinAccountWhereInput
+  }
+
+  export type FinAccountUpdateToOneWithWhereWithoutEnvelopesInput = {
+    where?: FinAccountWhereInput
+    data: XOR<FinAccountUpdateWithoutEnvelopesInput, FinAccountUncheckedUpdateWithoutEnvelopesInput>
+  }
+
+  export type FinAccountUpdateWithoutEnvelopesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    currency?: StringFieldUpdateOperationsInput | string
+    openingBalance?: FloatFieldUpdateOperationsInput | number
+    openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    includeInTotal?: BoolFieldUpdateOperationsInput | boolean
+    includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    scope?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    confidence?: NullableStringFieldUpdateOperationsInput | string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutFinAccountsNestedInput
+    transactions?: FinTransactionUpdateManyWithoutAccountNestedInput
+    budgets?: FinBudgetUpdateManyWithoutAccountNestedInput
+    recurrences?: FinRecurrenceUpdateManyWithoutAccountNestedInput
+    goals?: FinGoalUpdateManyWithoutAccountNestedInput
+    debts?: FinDebtUpdateManyWithoutAccountNestedInput
+  }
+
+  export type FinAccountUncheckedUpdateWithoutEnvelopesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    currency?: StringFieldUpdateOperationsInput | string
+    openingBalance?: FloatFieldUpdateOperationsInput | number
+    openingDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    includeInTotal?: BoolFieldUpdateOperationsInput | boolean
+    includeInNetWorth?: BoolFieldUpdateOperationsInput | boolean
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    minBalanceAlert?: NullableFloatFieldUpdateOperationsInput | number | null
+    maxBalanceInfo?: NullableFloatFieldUpdateOperationsInput | number | null
+    overdraftAllowed?: NullableFloatFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    scope?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    confidence?: NullableStringFieldUpdateOperationsInput | string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: FinTransactionUncheckedUpdateManyWithoutAccountNestedInput
+    budgets?: FinBudgetUncheckedUpdateManyWithoutAccountNestedInput
+    recurrences?: FinRecurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    goals?: FinGoalUncheckedUpdateManyWithoutAccountNestedInput
+    debts?: FinDebtUncheckedUpdateManyWithoutAccountNestedInput
   }
 
   export type UserCreateWithoutFinGoalsInput = {
@@ -152196,6 +153046,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFinAccountsInput
     transactions?: FinTransactionCreateNestedManyWithoutAccountInput
+    budgets?: FinBudgetCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeCreateNestedManyWithoutAccountInput
     recurrences?: FinRecurrenceCreateNestedManyWithoutAccountInput
     debts?: FinDebtCreateNestedManyWithoutAccountInput
   }
@@ -152229,6 +153081,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: FinTransactionUncheckedCreateNestedManyWithoutAccountInput
+    budgets?: FinBudgetUncheckedCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeUncheckedCreateNestedManyWithoutAccountInput
     recurrences?: FinRecurrenceUncheckedCreateNestedManyWithoutAccountInput
     debts?: FinDebtUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -152417,6 +153271,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFinAccountsNestedInput
     transactions?: FinTransactionUpdateManyWithoutAccountNestedInput
+    budgets?: FinBudgetUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUpdateManyWithoutAccountNestedInput
     recurrences?: FinRecurrenceUpdateManyWithoutAccountNestedInput
     debts?: FinDebtUpdateManyWithoutAccountNestedInput
   }
@@ -152450,6 +153306,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: FinTransactionUncheckedUpdateManyWithoutAccountNestedInput
+    budgets?: FinBudgetUncheckedUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUncheckedUpdateManyWithoutAccountNestedInput
     recurrences?: FinRecurrenceUncheckedUpdateManyWithoutAccountNestedInput
     debts?: FinDebtUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -152616,6 +153474,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFinAccountsInput
     transactions?: FinTransactionCreateNestedManyWithoutAccountInput
+    budgets?: FinBudgetCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeCreateNestedManyWithoutAccountInput
     recurrences?: FinRecurrenceCreateNestedManyWithoutAccountInput
     goals?: FinGoalCreateNestedManyWithoutAccountInput
   }
@@ -152649,6 +153509,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: FinTransactionUncheckedCreateNestedManyWithoutAccountInput
+    budgets?: FinBudgetUncheckedCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeUncheckedCreateNestedManyWithoutAccountInput
     recurrences?: FinRecurrenceUncheckedCreateNestedManyWithoutAccountInput
     goals?: FinGoalUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -152869,6 +153731,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFinAccountsNestedInput
     transactions?: FinTransactionUpdateManyWithoutAccountNestedInput
+    budgets?: FinBudgetUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUpdateManyWithoutAccountNestedInput
     recurrences?: FinRecurrenceUpdateManyWithoutAccountNestedInput
     goals?: FinGoalUpdateManyWithoutAccountNestedInput
   }
@@ -152902,6 +153766,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: FinTransactionUncheckedUpdateManyWithoutAccountNestedInput
+    budgets?: FinBudgetUncheckedUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUncheckedUpdateManyWithoutAccountNestedInput
     recurrences?: FinRecurrenceUncheckedUpdateManyWithoutAccountNestedInput
     goals?: FinGoalUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -153577,6 +154443,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutFinAccountsInput
     transactions?: FinTransactionCreateNestedManyWithoutAccountInput
+    budgets?: FinBudgetCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeCreateNestedManyWithoutAccountInput
     goals?: FinGoalCreateNestedManyWithoutAccountInput
     debts?: FinDebtCreateNestedManyWithoutAccountInput
   }
@@ -153610,6 +154478,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     transactions?: FinTransactionUncheckedCreateNestedManyWithoutAccountInput
+    budgets?: FinBudgetUncheckedCreateNestedManyWithoutAccountInput
+    envelopes?: FinEnvelopeUncheckedCreateNestedManyWithoutAccountInput
     goals?: FinGoalUncheckedCreateNestedManyWithoutAccountInput
     debts?: FinDebtUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -153925,6 +154795,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFinAccountsNestedInput
     transactions?: FinTransactionUpdateManyWithoutAccountNestedInput
+    budgets?: FinBudgetUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUpdateManyWithoutAccountNestedInput
     goals?: FinGoalUpdateManyWithoutAccountNestedInput
     debts?: FinDebtUpdateManyWithoutAccountNestedInput
   }
@@ -153958,6 +154830,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: FinTransactionUncheckedUpdateManyWithoutAccountNestedInput
+    budgets?: FinBudgetUncheckedUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUncheckedUpdateManyWithoutAccountNestedInput
     goals?: FinGoalUncheckedUpdateManyWithoutAccountNestedInput
     debts?: FinDebtUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -170355,6 +171229,8 @@ export namespace Prisma {
     periodEnd: Date | string
     currency: string
     recurrence?: string
+    accountId?: string | null
+    countBalance?: boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: boolean
     carryOverspend?: boolean
@@ -170380,6 +171256,7 @@ export namespace Prisma {
     budgetId: string
     categoryId?: string | null
     categoryGroup?: string | null
+    accountId?: string | null
     kind: string
     value: number
     currency: string
@@ -171214,6 +172091,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: FinTransactionUpdateManyWithoutAccountNestedInput
+    budgets?: FinBudgetUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUpdateManyWithoutAccountNestedInput
     recurrences?: FinRecurrenceUpdateManyWithoutAccountNestedInput
     goals?: FinGoalUpdateManyWithoutAccountNestedInput
     debts?: FinDebtUpdateManyWithoutAccountNestedInput
@@ -171247,6 +172126,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: FinTransactionUncheckedUpdateManyWithoutAccountNestedInput
+    budgets?: FinBudgetUncheckedUpdateManyWithoutAccountNestedInput
+    envelopes?: FinEnvelopeUncheckedUpdateManyWithoutAccountNestedInput
     recurrences?: FinRecurrenceUncheckedUpdateManyWithoutAccountNestedInput
     goals?: FinGoalUncheckedUpdateManyWithoutAccountNestedInput
     debts?: FinDebtUncheckedUpdateManyWithoutAccountNestedInput
@@ -171510,6 +172391,7 @@ export namespace Prisma {
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     recurrence?: StringFieldUpdateOperationsInput | string
+    countBalance?: BoolFieldUpdateOperationsInput | boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: BoolFieldUpdateOperationsInput | boolean
     carryOverspend?: BoolFieldUpdateOperationsInput | boolean
@@ -171528,6 +172410,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: FinAccountUpdateOneWithoutBudgetsNestedInput
     envelopes?: FinEnvelopeUpdateManyWithoutBudgetNestedInput
   }
 
@@ -171539,6 +172422,8 @@ export namespace Prisma {
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     recurrence?: StringFieldUpdateOperationsInput | string
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
+    countBalance?: BoolFieldUpdateOperationsInput | boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: BoolFieldUpdateOperationsInput | boolean
     carryOverspend?: BoolFieldUpdateOperationsInput | boolean
@@ -171568,6 +172453,8 @@ export namespace Prisma {
     periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     recurrence?: StringFieldUpdateOperationsInput | string
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
+    countBalance?: BoolFieldUpdateOperationsInput | boolean
     alertThresholds?: JsonNullValueInput | InputJsonValue
     carryOver?: BoolFieldUpdateOperationsInput | boolean
     carryOverspend?: BoolFieldUpdateOperationsInput | boolean
@@ -171612,6 +172499,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     budget?: FinBudgetUpdateOneRequiredWithoutEnvelopesNestedInput
     category?: FinCategoryUpdateOneWithoutFinEnvelopesNestedInput
+    account?: FinAccountUpdateOneWithoutEnvelopesNestedInput
   }
 
   export type FinEnvelopeUncheckedUpdateWithoutUserInput = {
@@ -171619,6 +172507,7 @@ export namespace Prisma {
     budgetId?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -171645,6 +172534,7 @@ export namespace Prisma {
     budgetId?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -172803,6 +173693,7 @@ export namespace Prisma {
     userId: string
     budgetId: string
     categoryGroup?: string | null
+    accountId?: string | null
     kind: string
     value: number
     currency: string
@@ -173153,6 +174044,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFinEnvelopesNestedInput
     budget?: FinBudgetUpdateOneRequiredWithoutEnvelopesNestedInput
+    account?: FinAccountUpdateOneWithoutEnvelopesNestedInput
   }
 
   export type FinEnvelopeUncheckedUpdateWithoutCategoryInput = {
@@ -173160,6 +174052,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     budgetId?: StringFieldUpdateOperationsInput | string
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -173186,6 +174079,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     budgetId?: StringFieldUpdateOperationsInput | string
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -173638,6 +174532,63 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type FinBudgetCreateManyAccountInput = {
+    id?: string
+    userId: string
+    label: string
+    color?: string | null
+    periodStart: Date | string
+    periodEnd: Date | string
+    currency: string
+    recurrence?: string
+    countBalance?: boolean
+    alertThresholds?: JsonNullValueInput | InputJsonValue
+    carryOver?: boolean
+    carryOverspend?: boolean
+    methodMapping?: JsonNullValueInput | InputJsonValue
+    note?: string | null
+    scope?: string
+    source: string
+    sourceRef?: string | null
+    status: string
+    confidence?: string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: Date | string
+    collectedAt?: Date | string
+    version?: number
+    archivedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FinEnvelopeCreateManyAccountInput = {
+    id?: string
+    userId: string
+    budgetId: string
+    categoryId?: string | null
+    categoryGroup?: string | null
+    kind: string
+    value: number
+    currency: string
+    cap?: number | null
+    recurring?: boolean
+    note?: string | null
+    scope?: string
+    source: string
+    sourceRef?: string | null
+    status: string
+    confidence?: string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: Date | string
+    collectedAt?: Date | string
+    version?: number
+    archivedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type FinRecurrenceCreateManyAccountInput = {
     id?: string
     userId: string
@@ -173821,6 +174772,179 @@ export namespace Prisma {
     note?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     planned?: BoolFieldUpdateOperationsInput | boolean
+    scope?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    sourceRef?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    confidence?: NullableStringFieldUpdateOperationsInput | string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinBudgetUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: StringFieldUpdateOperationsInput | string
+    recurrence?: StringFieldUpdateOperationsInput | string
+    countBalance?: BoolFieldUpdateOperationsInput | boolean
+    alertThresholds?: JsonNullValueInput | InputJsonValue
+    carryOver?: BoolFieldUpdateOperationsInput | boolean
+    carryOverspend?: BoolFieldUpdateOperationsInput | boolean
+    methodMapping?: JsonNullValueInput | InputJsonValue
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    scope?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    sourceRef?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    confidence?: NullableStringFieldUpdateOperationsInput | string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutFinBudgetsNestedInput
+    envelopes?: FinEnvelopeUpdateManyWithoutBudgetNestedInput
+  }
+
+  export type FinBudgetUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: StringFieldUpdateOperationsInput | string
+    recurrence?: StringFieldUpdateOperationsInput | string
+    countBalance?: BoolFieldUpdateOperationsInput | boolean
+    alertThresholds?: JsonNullValueInput | InputJsonValue
+    carryOver?: BoolFieldUpdateOperationsInput | boolean
+    carryOverspend?: BoolFieldUpdateOperationsInput | boolean
+    methodMapping?: JsonNullValueInput | InputJsonValue
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    scope?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    sourceRef?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    confidence?: NullableStringFieldUpdateOperationsInput | string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    envelopes?: FinEnvelopeUncheckedUpdateManyWithoutBudgetNestedInput
+  }
+
+  export type FinBudgetUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: StringFieldUpdateOperationsInput | string
+    recurrence?: StringFieldUpdateOperationsInput | string
+    countBalance?: BoolFieldUpdateOperationsInput | boolean
+    alertThresholds?: JsonNullValueInput | InputJsonValue
+    carryOver?: BoolFieldUpdateOperationsInput | boolean
+    carryOverspend?: BoolFieldUpdateOperationsInput | boolean
+    methodMapping?: JsonNullValueInput | InputJsonValue
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    scope?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    sourceRef?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    confidence?: NullableStringFieldUpdateOperationsInput | string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinEnvelopeUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    value?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
+    recurring?: BoolFieldUpdateOperationsInput | boolean
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    scope?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    sourceRef?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    confidence?: NullableStringFieldUpdateOperationsInput | string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutFinEnvelopesNestedInput
+    budget?: FinBudgetUpdateOneRequiredWithoutEnvelopesNestedInput
+    category?: FinCategoryUpdateOneWithoutFinEnvelopesNestedInput
+  }
+
+  export type FinEnvelopeUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    budgetId?: StringFieldUpdateOperationsInput | string
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    value?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
+    recurring?: BoolFieldUpdateOperationsInput | boolean
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    scope?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    sourceRef?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    confidence?: NullableStringFieldUpdateOperationsInput | string | null
+    consentUses?: JsonNullValueInput | InputJsonValue
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinEnvelopeUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    budgetId?: StringFieldUpdateOperationsInput | string
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    value?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    cap?: NullableFloatFieldUpdateOperationsInput | number | null
+    recurring?: BoolFieldUpdateOperationsInput | boolean
+    note?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     sourceRef?: NullableStringFieldUpdateOperationsInput | string | null
@@ -174266,6 +175390,7 @@ export namespace Prisma {
     userId: string
     categoryId?: string | null
     categoryGroup?: string | null
+    accountId?: string | null
     kind: string
     value: number
     currency: string
@@ -174311,6 +175436,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutFinEnvelopesNestedInput
     category?: FinCategoryUpdateOneWithoutFinEnvelopesNestedInput
+    account?: FinAccountUpdateOneWithoutEnvelopesNestedInput
   }
 
   export type FinEnvelopeUncheckedUpdateWithoutBudgetInput = {
@@ -174318,6 +175444,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
@@ -174344,6 +175471,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     categoryGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    accountId?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string

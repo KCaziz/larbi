@@ -84,6 +84,8 @@ export const createTransactionSchema = z
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
     status: z.enum(['real', 'declared', 'fictional']).optional(),
+    // R13-06: this movement is the occurrence of a declared payment (recurrence + usual date).
+    occurrence: z.object({ recurrenceId: z.string().uuid(), dueDate: isoDate }).strict().optional(),
   })
   .strict();
 

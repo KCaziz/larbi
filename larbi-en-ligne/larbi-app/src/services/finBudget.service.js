@@ -14,6 +14,7 @@ import { HttpError } from '../utils/httpError.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
 import { isBudgetableFamily } from './finBudgetProposal.service.js';
 import { throughEndOfDay } from '../utils/dayEnd.js';
+import { accountsWithBalances, usableAccount } from './finAccount.service.js';
 
 export const BUDGET_ENTITY = 'budget';
 export const ENVELOPE_ENTITY = 'envelope';
@@ -26,6 +27,8 @@ const BUDGET_SELECT = {
   periodEnd: true,
   currency: true,
   recurrence: true,
+  accountId: true,
+  countBalance: true,
   alertThresholds: true,
   carryOver: true,
   carryOverspend: true,
@@ -45,6 +48,7 @@ const ENVELOPE_SELECT = {
   budgetId: true,
   categoryId: true,
   categoryGroup: true,
+  accountId: true,
   kind: true,
   value: true,
   currency: true,
@@ -84,6 +88,11 @@ function addMonths(date, months) {
 // The period that follows `[start, end]` for a given recurrence. `none` has no
 // next period by definition, and says so instead of guessing one.
 export function nextPeriod(recurrence, start, end) {
+  // R13-02: a weekly budget moves by seven days, whatever the days of its period are.
+  if (recurrence === 'weekly') {
+    const week = 7 * 24 * 3600 * 1000;
+    return { periodStart: new Date(start.getTime() + week), periodEnd: new Date(end.getTime() + week) };
+  }
   const step = { monthly: 1, quarterly: 3, yearly: 12 }[recurrence];
   if (!step) return null;
   // A period that ended on the last day of its month keeps ending on the last
@@ -191,10 +200,13 @@ export async function createBudget(prisma, userId, body) {
   if (!BUDGET_RECURRENCES.includes(body.recurrence ?? 'monthly')) {
     throw new HttpError(422, 'Unknown recurrence', { reason: 'unknownRecurrence' });
   }
+  // R13-01: the account the budget is spent from — one of the person's own, open, in the budget's currency; none = every account of the total.
+  if (body.accountId) await usableAccount(prisma, userId, body.accountId, body.currency);
   const envelopes = [];
   for (const envelope of body.envelopes ?? []) {
     if (!ENVELOPE_KINDS.includes(envelope.kind)) throw new HttpError(422, 'Unknown envelope kind', { reason: 'unknownKind' });
     const target = await envelopeTarget(prisma, userId, envelope);
+    if (envelope.accountId) await usableAccount(prisma, userId, envelope.accountId, body.currency);
     if (envelopes.some((other) => (target.categoryId && other.categoryId === target.categoryId) || (target.categoryGroup && other.categoryGroup === target.categoryGroup))) {
       throw new HttpError(422, 'This category already has an envelope', { reason: 'duplicateEnvelope' });
     }
@@ -211,6 +223,8 @@ export async function createBudget(prisma, userId, body) {
         periodEnd: body.periodEnd,
         currency: body.currency,
         recurrence: body.recurrence ?? 'monthly',
+        accountId: body.accountId ?? null,
+        countBalance: body.countBalance ?? true,
         alertThresholds: body.alertThresholds ?? DEFAULT_ALERT_THRESHOLDS,
         carryOver: body.carryOver ?? false,
         carryOverspend: body.carryOverspend ?? false,
@@ -240,6 +254,7 @@ export async function createBudget(prisma, userId, body) {
           budgetId: budget.id,
           categoryId: envelope.categoryId,
           categoryGroup: envelope.categoryGroup,
+          accountId: envelope.accountId ?? null,
           kind: envelope.kind,
           value: envelope.value,
           // The envelope's currency is the budget's, always: an envelope in
@@ -278,6 +293,7 @@ export async function updateBudget(prisma, userId, id, body) {
   const periodStart = fields.periodStart ?? before.periodStart;
   const periodEnd = fields.periodEnd ?? before.periodEnd;
   if (periodEnd <= periodStart) throw new HttpError(422, 'A period ends after it starts', { reason: 'period' });
+  if (fields.accountId) await usableAccount(prisma, userId, fields.accountId, fields.currency ?? before.currency);
 
   return prisma.$transaction(async (tx) => {
     const after = await tx.finBudget.update({ where: { id }, data: { ...fields, version: { increment: 1 } }, select: BUDGET_SELECT });
@@ -350,7 +366,7 @@ export async function duplicateBudget(prisma, userId, id, { label } = {}) {
 
   const envelopes = await prisma.finEnvelope.findMany({
     where: { budgetId: id, userId, deletedAt: null, archivedAt: null, recurring: true },
-    select: { categoryId: true, kind: true, value: true, cap: true, note: true },
+    select: { categoryId: true, accountId: true, kind: true, value: true, cap: true, note: true },
   });
 
   return createBudget(prisma, userId, {
@@ -360,6 +376,8 @@ export async function duplicateBudget(prisma, userId, id, { label } = {}) {
     periodEnd: period.periodEnd,
     currency: budget.currency,
     recurrence: budget.recurrence,
+    accountId: budget.accountId ?? null,
+    countBalance: budget.countBalance,
     alertThresholds: budget.alertThresholds,
     scope: budget.scope,
     consentUses: budget.consentUses,
@@ -379,6 +397,7 @@ export async function createEnvelope(prisma, userId, budgetId, body) {
   if (!ENVELOPE_KINDS.includes(body.kind)) throw new HttpError(422, 'Unknown envelope kind', { reason: 'unknownKind' });
   const target = await envelopeTarget(prisma, userId, body);
   await assertTargetFree(prisma, budgetId, target);
+  if (body.accountId) await usableAccount(prisma, userId, body.accountId, budget.currency);
 
   return prisma.$transaction(async (tx) => {
     const row = await tx.finEnvelope.create({
@@ -386,6 +405,7 @@ export async function createEnvelope(prisma, userId, budgetId, body) {
         userId,
         budgetId,
         ...target,
+        accountId: body.accountId ?? null,
         kind: body.kind,
         value: body.value,
         currency: budget.currency,
@@ -423,6 +443,7 @@ export async function updateEnvelope(prisma, userId, budgetId, id, body) {
   const before = await ownEnvelope(prisma, userId, budgetId, id);
   const { reason, ...fields } = body;
   if (fields.kind !== undefined && !ENVELOPE_KINDS.includes(fields.kind)) throw new HttpError(422, 'Unknown envelope kind', { reason: 'unknownKind' });
+  if (fields.accountId) await usableAccount(prisma, userId, fields.accountId, before.currency);
   if (fields.categoryId !== undefined || fields.categoryGroup !== undefined) {
     const target = await envelopeTarget(prisma, userId, { categoryId: fields.categoryId ?? null, categoryGroup: fields.categoryGroup ?? null });
     await assertTargetFree(prisma, budgetId, target, id);
@@ -465,17 +486,46 @@ async function withMainCategoryGroups(prisma, envelopes) {
   return envelopes.map((envelope) => (groupOf.has(envelope.categoryId) ? { ...envelope, coversGroup: groupOf.get(envelope.categoryId) } : envelope));
 }
 
+// The balance, in the budget's currency, the account(s) it is spent from held the
+// instant before its period began (R13-03): the chosen account, else every
+// asset account counted in the total balance. `null` when there is no such
+// account — nothing to count, which is not a balance of zero.
+async function balanceAtStart(prisma, userId, budget) {
+  const { accounts } = await accountsWithBalances(prisma, userId, { now: new Date(budget.periodStart.getTime() - 1) });
+  const inScope = accounts.filter(
+    (account) =>
+      !account.archivedAt &&
+      !account.liability &&
+      account.currency === budget.currency &&
+      (budget.accountId ? account.id === budget.accountId : account.includeInTotal) &&
+      // An account opened after the period is over brought nothing to it.
+      (!account.openingDate || account.openingDate <= budget.periodEnd),
+  );
+  if (inScope.length === 0) return null;
+  return inScope.reduce((sum, account) => sum + (account.solde.resultat ?? 0), 0);
+}
+
 // Everything one budget's view needs, in one place so the page and the home
 // screen (P6-06) cannot read it two different ways.
 export async function loadBudgetData(prisma, userId, budget) {
-  const [rawEnvelopes, movements, incomes, goals, provisions] = await Promise.all([
-    listEnvelopes(prisma, userId, budget.id),
+  const envelopeRows = await listEnvelopes(prisma, userId, budget.id);
+  // The accounts the budget and its envelopes are spent from (R13-01).
+  const spendAccountIds = [...new Set([budget.accountId, ...envelopeRows.map((envelope) => envelope.accountId)].filter(Boolean))];
+  const [movementRows, incomes, goals, provisions] = await Promise.all([
     prisma.finTransaction.findMany({
       // Recette R9-06: an account kept apart from the total is not spent from the budget.
       // Recette R12-04: the last day of the period is spent from it too.
-      where: { userId, deletedAt: null, OR: [{ accountId: null }, { account: { includeInTotal: true } }], occurredAt: { gte: budget.periodStart, lte: throughEndOfDay(budget.periodEnd) } },
+      // Recette R13-01: and the account the budget — or one of its envelopes — is spent from, whether or not it is in the total.
+      where: {
+        userId,
+        deletedAt: null,
+        OR: [{ accountId: null }, { account: { includeInTotal: true } }, ...(spendAccountIds.length > 0 ? [{ accountId: { in: spendAccountIds } }] : [])],
+        occurredAt: { gte: budget.periodStart, lte: throughEndOfDay(budget.periodEnd) },
+      },
       select: {
         id: true,
+        accountId: true,
+        account: { select: { includeInTotal: true } },
         kind: true,
         value: true,
         currency: true,
@@ -511,8 +561,12 @@ export async function loadBudgetData(prisma, userId, budget) {
     }),
   ]);
   const carries = budget.carryOver || budget.carryOverspend;
-  const envelopes = await withMainCategoryGroups(prisma, rawEnvelopes);
-  return { envelopes, movements, incomes, goals, provisions, carry: carries ? await carryFromPrevious(prisma, userId, budget) : null };
+  const envelopes = await withMainCategoryGroups(prisma, envelopeRows);
+  // R13-03: what the budget's account(s) held when the period began.
+  const startBalance = await balanceAtStart(prisma, userId, budget);
+  // `inTotal`: whether the account the movement is on is counted in the total balance (R13-01).
+  const movements = movementRows.map(({ account, ...row }) => ({ ...row, inTotal: account ? account.includeInTotal : true }));
+  return { envelopes, movements, startBalance, incomes, goals, provisions, carry: carries ? await carryFromPrevious(prisma, userId, budget) : null };
 }
 
 /**

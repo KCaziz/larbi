@@ -41,6 +41,8 @@ const envelopeFields = {
   // which is different from a ceiling equal to the planned amount.
   cap: plannedAmount.nullable().optional(),
   recurring: z.boolean().optional(),
+  // R13-01: the account this envelope is spent from; null = the budget's own choice.
+  accountId: z.string().uuid().nullable().optional(),
   note,
 };
 
@@ -52,6 +54,10 @@ export const createBudgetSchema = z
     periodEnd: isoDate,
     currency: currencySchema,
     recurrence: z.enum(BUDGET_RECURRENCES).optional(),
+    // R13-01: the account the budget is spent from; absent or null = « tous » (every account of the total).
+    accountId: z.string().uuid().nullable().optional(),
+    // R13-03: whether the starting balance of the accounts counts as a resource.
+    countBalance: z.boolean().optional(),
     alertThresholds: alertThresholdsSchema.optional(),
     carryOver: z.boolean().optional(),
     carryOverspend: z.boolean().optional(),
@@ -80,6 +86,8 @@ export const updateBudgetSchema = z
     periodEnd: isoDate.optional(),
     currency: currencySchema.optional(),
     recurrence: z.enum(BUDGET_RECURRENCES).optional(),
+    accountId: z.string().uuid().nullable().optional(),
+    countBalance: z.boolean().optional(),
     alertThresholds: alertThresholdsSchema.optional(),
     carryOver: z.boolean().optional(),
     carryOverspend: z.boolean().optional(),
@@ -105,6 +113,7 @@ export const updateEnvelopeSchema = z
     value: plannedAmount.optional(),
     cap: plannedAmount.nullable().optional(),
     recurring: z.boolean().optional(),
+    accountId: z.string().uuid().nullable().optional(),
     note,
     reason: reasonSchema.optional(),
   })

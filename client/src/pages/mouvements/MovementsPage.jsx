@@ -191,7 +191,7 @@ export function useMovementLookups() {
 // and never removed for the person (P8-07). The same form corrects a movement
 // (with an optional reason) and starts a copy of one.
 export function Entry({ currency, lookups, draft, onDone, run }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const today = new Date().toISOString().slice(0, 10);
   const source = draft?.transaction ?? null;
   const editing = draft?.mode === 'edit';
@@ -229,6 +229,8 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
       : blank,
   );
   const [pendingDuplicates, setPendingDuplicates] = useState(null);
+  // R13-06: the declared payment this entry could be, asked before it is saved.
+  const [pendingPayment, setPendingPayment] = useState(null);
   const account = lookups.accounts.find((row) => row.id === form.accountId);
   const entryCurrency = editing ? source.currency : (account?.currency ?? currency);
 
@@ -247,7 +249,7 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
     ...(form.accountId ? { accountId: form.accountId } : {}),
   });
 
-  const save = async (keepGoing, { confirmed = false } = {}) => {
+  const save = async (keepGoing, { confirmed = false, occurrence = null } = {}) => {
     const value = toMinorUnits(form.amount, entryCurrency);
     if (value === null) return;
     if (editing) {
@@ -258,6 +260,11 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
     if (!confirmed) {
       try {
         const check = await api.post('/fin/transactions/doublons', { kind: form.kind, value, currency: entryCurrency, occurredAt: new Date(form.occurredAt).toISOString(), categoryId: form.categoryId || null });
+        // One operation, not two: is it a payment already declared (a recurrence)?
+        if (check.recurrenceMatches?.length > 0) {
+          setPendingPayment({ keepGoing, match: check.recurrenceMatches[0] });
+          return;
+        }
         if (check.duplicates?.length > 0) {
           setPendingDuplicates({ keepGoing, count: check.duplicates.length });
           return;
@@ -267,7 +274,8 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
       }
     }
     setPendingDuplicates(null);
-    const res = await run(() => api.post('/fin/transactions', { ...body(value), planned: form.planned }), 'myMoney.added');
+    setPendingPayment(null);
+    const res = await run(() => api.post('/fin/transactions', { ...body(value), planned: form.planned, ...(occurrence ? { occurrence } : {}) }), occurrence ? 'movements.addedAsPayment' : 'myMoney.added');
     if (!res.ok) return;
     setForm(keepGoing ? { ...form, amount: '', note: '', subcategory: '', place: '' } : blank);
     if (!keepGoing) onDone();
@@ -280,6 +288,21 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
       <h2>
         {editing ? <Pencil size={18} aria-hidden="true" /> : <Plus size={18} aria-hidden="true" />} {t(editing ? 'movements.editTitle' : 'myMoney.addTitle')}
       </h2>
+
+      {pendingPayment && (
+        <Notice variant="action-needed">
+          <TriangleAlert size={15} aria-hidden="true" /> {t('movements.recurrenceQuestion', { label: pendingPayment.match.label, date: formatDate(i18n.language, pendingPayment.match.dueDate) })}{' '}
+          <button type="button" className="money-plain" onClick={() => save(pendingPayment.keepGoing, { confirmed: true, occurrence: { recurrenceId: pendingPayment.match.recurrenceId, dueDate: pendingPayment.match.dueDate } })}>
+            {t('movements.recurrenceYes')}
+          </button>{' '}
+          <button type="button" className="money-plain" onClick={() => save(pendingPayment.keepGoing, { confirmed: true })}>
+            {t('movements.recurrenceNo')}
+          </button>{' '}
+          <button type="button" className="money-plain" onClick={() => setPendingPayment(null)}>
+            {t('finCategories.cancel')}
+          </button>
+        </Notice>
+      )}
 
       {pendingDuplicates && (
         <Notice variant="action-needed">
