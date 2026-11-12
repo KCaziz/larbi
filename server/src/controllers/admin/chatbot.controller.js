@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { prisma } from '../../config/prisma.js';
 import { sanitizeRichText } from '../../services/sanitize.service.js';
 import { CHATBOT_LIMITS } from '../../validation/chatbot.schemas.js';
@@ -9,6 +10,7 @@ import { HttpError } from '../../utils/httpError.js';
 
 const toRow = (e) => ({
   id: e.id,
+  groupId: e.groupId ?? e.id,
   question: e.question,
   answer: e.answer,
   language: e.language,
@@ -45,8 +47,20 @@ export async function listChatbotEntries(req, res) {
 export async function createChatbotEntry(req, res) {
   if ((await prisma.chatbotEntry.count()) >= CHATBOT_LIMITS.entries) throw new HttpError(409, 'Too many entries');
   const { question, language } = req.body;
+  // R11-05: a translation joins its question's group, its place and its audience.
+  let groupId = randomUUID();
+  let audience = req.body.audience ?? 'both';
+  let position = await nextPosition(language);
+  if (req.body.groupId) {
+    const group = await prisma.chatbotEntry.findMany({ where: { groupId: req.body.groupId } });
+    if (group.length === 0) throw new HttpError(404, 'Not found');
+    if (group.some((row) => row.language === language)) throw new HttpError(409, 'This language already exists for this question');
+    ({ groupId } = req.body);
+    audience = group[0].audience;
+    position = group[0].position;
+  }
   const created = await prisma.chatbotEntry.create({
-    data: { question, answer: cleanAnswer(req.body.answer), language, audience: req.body.audience ?? 'both', position: await nextPosition(language) },
+    data: { question, answer: cleanAnswer(req.body.answer), language, audience, position, groupId },
   });
   res.status(201).json({ entry: toRow(created) });
 }
@@ -56,12 +70,8 @@ export async function updateChatbotEntry(req, res) {
   const data = {};
   if (req.body.question !== undefined) data.question = req.body.question;
   if (req.body.answer !== undefined) data.answer = cleanAnswer(req.body.answer);
-  if (req.body.audience !== undefined) data.audience = req.body.audience;
-  // Moving to another language puts the entry at the end of that language's list.
-  if (req.body.language !== undefined && req.body.language !== entry.language) {
-    data.language = req.body.language;
-    data.position = await nextPosition(req.body.language);
-  }
+  // Where a question shows is the question's, so every translation follows.
+  if (req.body.audience !== undefined) await prisma.chatbotEntry.updateMany({ where: { groupId: entry.groupId ?? entry.id }, data: { audience: req.body.audience } });
   const updated = await prisma.chatbotEntry.update({ where: { id: entry.id }, data });
   res.json({ entry: toRow(updated) });
 }
@@ -88,6 +98,18 @@ export async function reorderChatbotEntries(req, res) {
     for (const [position, id] of ids.entries()) {
       await tx.chatbotEntry.update({ where: { id }, data: { position } });
     }
+  });
+  res.status(204).end();
+}
+
+// R11-05: the order of the questions, every translation of each at the same place.
+export async function reorderChatbotGroups(req, res) {
+  const { groupIds } = req.body;
+  if (new Set(groupIds).size !== groupIds.length) throw new HttpError(409, 'The list changed, reload it');
+  await prisma.$transaction(async (tx) => {
+    const known = new Set((await tx.chatbotEntry.findMany({ select: { groupId: true } })).map((row) => row.groupId));
+    if (groupIds.length !== known.size || !groupIds.every((id) => known.has(id))) throw new HttpError(409, 'The list changed, reload it');
+    for (const [position, groupId] of groupIds.entries()) await tx.chatbotEntry.updateMany({ where: { groupId }, data: { position } });
   });
   res.status(204).end();
 }

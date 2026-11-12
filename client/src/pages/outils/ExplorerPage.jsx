@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Compass } from 'lucide-react';
 import { api, ApiError, errorKey } from '../../lib/api.js';
@@ -30,6 +30,11 @@ export default function ExplorerPage() {
   const [theme, setTheme] = useState('');
   const [state, setState] = useState({ status: 'idle', data: null, error: null });
   const timer = useRef(null);
+  // R11-02: the rubrics holding offers, shown before anything is typed.
+  const [rubriques, setRubriques] = useState([]);
+  useEffect(() => {
+    api.get('/tools/explorateur').then((data) => setRubriques(data.rubriques ?? []), () => setRubriques([]));
+  }, []);
 
   function run(nextQ, nextTheme) {
     clearTimeout(timer.current);
@@ -145,6 +150,19 @@ export default function ExplorerPage() {
 
             {state.status === 'idle' && (
               <div className="explorer-idle">
+                {rubriques.length > 0 && (
+                  <section className="explorer-rubrics" aria-label={t('explorer.browseTitle')}>
+                    <h2>{t('explorer.browseTitle')}</h2>
+                    <div className="explorer-rubric-grid">
+                      {rubriques.map((row) => (
+                        <button key={row.theme} type="button" className="explorer-rubric" onClick={() => onTheme(row.theme)}>
+                          <strong>{t(`comparator.themes.${row.theme}`)}</strong>
+                          <span>{t('explorer.offerCount', { count: row.count })}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                )}
                 <p className="comparator-disclaimer">{t('explorer.typeToSearch')}</p>
                 <div className="explorer-examples">
                   <span className="explorer-examples-label">{t('explorer.tryExample')}</span>

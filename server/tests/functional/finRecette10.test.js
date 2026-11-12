@@ -10,7 +10,7 @@ let t;
 let user;
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

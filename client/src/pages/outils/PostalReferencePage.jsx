@@ -7,6 +7,7 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
+import Section from '../../components/ui/Section.jsx';
 import './PostalReference.css';
 
 // Algérie Poste / CCP services (P4-17), rebuilt around what a person comes to
@@ -42,6 +43,7 @@ export default function PostalReferencePage() {
   return (
     <>
       <PageHeader icon={Landmark} title={t('postal.title')} subtitle={t('postal.intro')} />
+      <Section>
       <div className="postal-page">
         <Notice variant="info">{t('postal.indicativeNote')}</Notice>
 
@@ -97,6 +99,7 @@ export default function PostalReferencePage() {
           </>
         )}
       </div>
+      </Section>
     </>
   );
 }

@@ -37,6 +37,13 @@ export function howToCompute(answer) {
   // thing to do is to confirm the one that arrived, not to type it again
   // (which made duplicates).
   if (answer?.formule_id === 'PB-F004' && answer?.entrees_snapshot?.ressources_recurrentes > 0) return { key: 'incomeToConfirm', to: '/app/aujourdhui' };
+  // Recette R12-02: the reste à vivre needs an income and the fixed charges; its
+  // instalments at 0 are an answer (no debt), never the thing to do.
+  if (answer?.formule_id === 'F006') {
+    const inputs = answer.entrees_snapshot ?? {};
+    if (inputs.revenus_nets_mensuels === null || inputs.revenus_nets_mensuels === undefined) return { key: 'income', to: '/app/budgets/revenus' };
+    return { key: 'essentialExpenses', to: '/app/objectifs/fonds-urgence' };
+  }
   const known = BY_FORMULA[answer?.formule_id];
   if (known) return { key: known[0], to: known[1] };
   const inputs = answer?.entrees_snapshot ?? {};

@@ -8,15 +8,24 @@ export async function listPublicChatbotEntries(req, res) {
   const language = req.query.lang ?? DEFAULT_CONTENT_LANGUAGE;
   // P11-02: the site's FAQ and the application's are not the same questions.
   const where = req.query.audience ? { audience: { in: [req.query.audience, 'both'] } } : {};
-  const read = (lang) =>
-    prisma.chatbotEntry.findMany({ where: { language: lang, status: 'published', ...where }, orderBy: { position: 'asc' }, select: { id: true, question: true, answer: true } });
-  let entries = await read(language);
-  // Nothing written yet in this language: the default language answers rather
-  // than an empty panel (SUIVI_RECETTE R5-05), and the reply says so.
+  const rows = await prisma.chatbotEntry.findMany({ where: { status: 'published', ...where }, orderBy: [{ position: 'asc' }, { createdAt: 'asc' }] });
+  // R11-05: each question in the reader's language; a question not translated
+  // yet shows in the default language (R5-05) rather than vanishing, and the
+  // reply says so.
+  const groups = new Map();
+  for (const row of rows) {
+    const key = row.groupId ?? row.id;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(row);
+  }
   let fallback = false;
-  if (entries.length === 0 && language !== DEFAULT_CONTENT_LANGUAGE) {
-    entries = await read(DEFAULT_CONTENT_LANGUAGE);
-    fallback = entries.length > 0;
+  const entries = [];
+  for (const versions of groups.values()) {
+    const own = versions.find((row) => row.language === language);
+    const chosen = own ?? versions.find((row) => row.language === DEFAULT_CONTENT_LANGUAGE);
+    if (!chosen) continue;
+    if (!own) fallback = true;
+    entries.push({ id: chosen.id, question: chosen.question, answer: chosen.answer });
   }
   res.json({ entries, fallback });
 }

@@ -72,9 +72,13 @@ function BudgetForm({ budget, onSubmit }) {
   // offer to add the categories to it (one budget per period, its envelopes
   // one per category).
   const [clash, setClash] = useState(null);
+  // R11-08: one save at a time — a double click must not send the budget twice.
+  const [busy, setBusy] = useState(false);
 
   const submit = async (event) => {
     event.preventDefault();
+    if (busy) return;
+    setBusy(true);
     setError(null);
     setClash(null);
     try {
@@ -93,6 +97,8 @@ function BudgetForm({ budget, onSubmit }) {
         return;
       }
       setError(t(errorKey(err, { 422: 'budget.errors.refused' })));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -142,7 +148,7 @@ function BudgetForm({ budget, onSubmit }) {
       {/* P10-02 */}
       <ColorPicker name="budget-color" value={form.color} onChange={(color) => setForm({ ...form, color })} />
       <div className="budget-create-actions">
-        <Button type="submit">{t('budget.save')}</Button>
+        <Button type="submit" disabled={busy}>{t('budget.save')}</Button>
       </div>
     </form>
   );

@@ -15,7 +15,7 @@
 import { alertRule } from '../constants/finAlerts.js';
 import { isAdultAgeRange } from '../constants/finPublics.js';
 import { accountsWithBalances } from './finAccount.service.js';
-import { currentBudget, loadBudgetData } from './finBudget.service.js';
+import { currentBudgets, loadBudgetData } from './finBudget.service.js';
 import { buildBudgetView } from './finBudgetView.service.js';
 import { scanSpaceAlerts } from './finSpaceAlerts.service.js';
 import { loadCalendarData } from './finCalendar.service.js';
@@ -91,9 +91,8 @@ export async function generateAlerts(prisma, user, { now = new Date(), force = f
     await notify('account_alert', { params: { niveau: level, label: account.label }, link: '/app/comptes', referenceId: `account:${account.id}`, dedupeBy: 'level' });
   }
 
-  // ---- AL-P04 / AL-P05: the budget of the period ------------------------------
-  const budget = await currentBudget(prisma, userId, now);
-  if (budget) {
+  // ---- AL-P04 / AL-P05: the budgets of the period (R11-10: each of them) -------
+  for (const budget of await currentBudgets(prisma, userId, now)) {
     const view = buildBudgetView({ budget, ...(await loadBudgetData(prisma, userId, budget)), now });
     const ids = view.enveloppes.map((line) => line.categoryId).filter(Boolean);
     const labels = new Map((await prisma.finCategory.findMany({ where: { id: { in: ids } }, select: { id: true, label: true } })).map((row) => [row.id, row.label]));

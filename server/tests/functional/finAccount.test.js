@@ -13,7 +13,7 @@ const accounts = async (who = user) => (await t.request('GET', '/fin/comptes', {
 const createAccount = async (json) => (await t.request('POST', '/fin/comptes', { user, json: { currency: 'DZD', ...json } })).body.account;
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

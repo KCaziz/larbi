@@ -60,7 +60,7 @@ export default function AccountFormPage() {
           </p>
         )}
         {editing ? (
-          <AccountEditForm account={account} onSubmit={(body) => save(() => api.patch(`/fin/comptes/${id}`, body), 'accounts.saved', `/app/comptes/${id}`)} />
+          <AccountEditForm account={account} types={types} onSubmit={(body) => save(() => api.patch(`/fin/comptes/${id}`, body), 'accounts.saved', `/app/comptes/${id}`)} />
         ) : (
           <AccountForm types={types} currency={user?.finCurrency ?? 'DZD'} initial={suggestion} onSubmit={(body) => save(() => api.post('/fin/comptes', body), 'accounts.created', afterCreate)} />
         )}

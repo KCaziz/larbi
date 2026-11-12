@@ -8,6 +8,8 @@ import {
   deleteAccount,
   deleteTransfer,
   setAccountArchived,
+  assertMayOpenAccount,
+  SYSTEM_ACCOUNT_TYPES,
   updateAccount,
 } from '../services/finAccount.service.js';
 
@@ -28,6 +30,7 @@ export async function getAccountFlow(req, res) {
 }
 
 export async function postAccount(req, res) {
+  await assertMayOpenAccount(prisma, req.user);
   res.status(201).json({ account: await createAccount(prisma, req.user.id, req.body) });
 }
 
@@ -41,6 +44,11 @@ export async function removeAccount(req, res) {
 }
 
 export async function putAccountArchived(req, res) {
+  // P12-03: bringing an archived account back is opening it again.
+  if (req.body.archived === false) {
+    const account = await prisma.finAccount.findFirst({ where: { id: req.params.id, userId: req.user.id, deletedAt: null }, select: { id: true, source: true, type: true, archivedAt: true } });
+    if (account?.archivedAt && account.source === 'manual' && !SYSTEM_ACCOUNT_TYPES.includes(account.type)) await assertMayOpenAccount(prisma, req.user, { exceptId: account.id });
+  }
   res.json({ account: await setAccountArchived(prisma, req.user.id, req.params.id, req.body.archived, { reason: req.body.reason }) });
 }
 

@@ -5,7 +5,7 @@ import { CHATBOT_LIMITS, createChatbotEntrySchema, reorderChatbotSchema, updateC
 // Guided assistant (P3-07): what the API accepts, before any database call.
 describe('guided assistant validation', () => {
   test('creation: question trimmed, French by default, nothing else writable', () => {
-    assert.deepEqual(createChatbotEntrySchema.parse({ question: '  Q ?  ', answer: '<p>R</p>' }), { question: 'Q ?', answer: '<p>R</p>', language: 'fr' });
+    assert.deepEqual(createChatbotEntrySchema.parse({ question: '  Q ?  ', answer: '<p>R</p>' }), { question: 'Q ?', answer: '<p>R</p>', language: 'fr', audience: 'both' });
     assert.equal(createChatbotEntrySchema.safeParse({ question: 'Q', answer: '<p>R</p>', position: 3 }).success, false);
     assert.equal(createChatbotEntrySchema.safeParse({ question: 'Q', answer: 'x'.repeat(CHATBOT_LIMITS.answer + 1) }).success, false);
     assert.equal(createChatbotEntrySchema.safeParse({ question: 'Q' }).success, false, 'an answer is required');
@@ -14,7 +14,7 @@ describe('guided assistant validation', () => {
   test('update: every field optional, still bounded', () => {
     assert.equal(updateChatbotEntrySchema.safeParse({}).success, true);
     assert.equal(updateChatbotEntrySchema.safeParse({ question: '' }).success, false);
-    assert.equal(updateChatbotEntrySchema.safeParse({ language: 'tzm' }).success, false, 'Tamazight has no content of its own');
+    assert.equal(updateChatbotEntrySchema.safeParse({ language: 'en' }).success, false, 'a translation keeps its language (R11-05)');
   });
 
   test('reorder: a non-empty list of ids for one language', () => {

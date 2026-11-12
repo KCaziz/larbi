@@ -7,9 +7,10 @@
 import { defaultEmergencyMonths } from '../constants/finGoal.js';
 import { goalsWithCapital } from './finGoal.service.js';
 import { ONBOARDING_QUESTIONS } from '../constants/finOnboarding.js';
+import { HttpError } from '../utils/httpError.js';
 import { essentialCategoryIds } from './finCategory.service.js';
 import { computed } from './finance/contract.js';
-import { monthlyAmount, safetyFundGap, safetyFundMonths, safetyFundTarget } from './finance/formulas.js';
+import { livingAllowance, monthlyAmount, safetyFundGap, safetyFundMonths, safetyFundTarget } from './finance/formulas.js';
 
 // The essential expenses are averaged over at most this many whole months.
 const ESSENTIAL_WINDOW_MONTHS = 3;
@@ -50,12 +51,43 @@ export function coveredMonths(first, now) {
   return months;
 }
 
+export const RESERVE_ESTIMATE_KEY = 'essentialExpenses';
+
+/**
+ * Saves the monthly estimate of essential expenses typed on the reserve screen
+ * (recette R12-01). The screen used to send it as an onboarding answer, which
+ * the onboarding refuses for every profile that has its own questions instead
+ * (salaried: « charges fixes », student: rent, food…) — « Cette valeur n'est
+ * pas valide » for them. Kept with the sign-up answers, where the reserve reads
+ * the declared estimate, under the common key.
+ */
+export async function saveEssentialEstimate(prisma, userId, { amount, currency }) {
+  const existing = await prisma.finOnboarding.findUnique({ where: { userId }, select: { id: true, answers: true, currency: true } });
+  const estimate = { amount, frequency: 'mensuel', confirmed: true };
+  if (!existing) {
+    await prisma.finOnboarding.create({ data: { userId, currency, answers: { [RESERVE_ESTIMATE_KEY]: estimate }, fictional: false, source: 'manual', status: 'declared' } });
+    return;
+  }
+  // The sign-up answers carry ONE currency; an estimate in another one would be
+  // read as if it were in theirs.
+  if (existing.currency !== currency) throw new HttpError(409, 'The sign-up answers are in another currency', { reason: 'currency' });
+  await prisma.finOnboarding.update({ where: { id: existing.id }, data: { answers: { ...(existing.answers ?? {}), [RESERVE_ESTIMATE_KEY]: estimate }, version: { increment: 1 } } });
+}
+
 // What the person declared at sign-up for the essential expenses, normalised
 // to the month (F001), or null. The bridge for an account whose real history
 // does not yet cover one whole month.
 async function declaredEssentialExpenses(prisma, userId, currency) {
   const onboarding = await prisma.finOnboarding.findUnique({ where: { userId }, select: { answers: true, currency: true } });
   if (!onboarding || onboarding.currency !== currency) return null;
+  // Recette R12-01: the total corrected on the reserve screen is kept under the
+  // common key, whatever the profile; when it is there it IS the estimate, and
+  // replaces the detail given at sign-up (rent, transport… of a student).
+  const corrected = onboarding.answers?.[RESERVE_ESTIMATE_KEY];
+  if (corrected && !corrected.skipped && typeof corrected.amount === 'number') {
+    const monthly = monthlyAmount(corrected.amount, corrected.frequency);
+    if (monthly !== null) return monthly;
+  }
   const essentialKeys = new Set(ONBOARDING_QUESTIONS.filter((q) => q.role === 'essentialExpenses').map((q) => q.key));
   let total = 0;
   let any = false;
@@ -151,6 +183,60 @@ async function emergencyFundCapital(prisma, userId, currency) {
   return goals.reduce((sum, goal) => sum + goal.allocated, 0);
 }
 
+/**
+ * The person's « reste à vivre » (F006, recette R11-15): net income − fixed
+ * charges − mandatory instalments, by the month. Shown beside the reserve —
+ * the reserve's target stays the client's F015 (months × essential spending);
+ * the reste à vivre is what pays for building it. Each part says where it
+ * comes from; an unknown income or fixed charges leave it uncomputed.
+ */
+export async function livingAllowanceOf(prisma, userId, currency, now = new Date()) {
+  const incomes = await prisma.finIncome.findMany({
+    where: { userId, deletedAt: null, archivedAt: null, currency, status: { not: 'fictional' } },
+    select: { value: true, frequency: true },
+  });
+  const netIncome = incomes.length === 0 ? null : incomes.reduce((sum, row) => sum + (monthlyAmount(row.value, row.frequency) ?? 0), 0);
+
+  // Fixed charges: the real spending on the client's « charges fixes »
+  // categories, averaged over the whole months the history covers (1 to 3).
+  const fixedIds = (await prisma.finCategory.findMany({ where: { family: 'fixed', deletedAt: null, OR: [{ userId: null }, { userId }] }, select: { id: true } })).map((row) => row.id);
+  const where = { userId, deletedAt: null, status: 'real', planned: false, kind: 'expense', currency, categoryId: { in: fixedIds } };
+  const first = await prisma.finTransaction.findFirst({ where: { ...where, occurredAt: { lte: now } }, orderBy: { occurredAt: 'asc' }, select: { occurredAt: true } });
+  const months = coveredMonths(first?.occurredAt ?? null, now);
+  let fixedCharges = null;
+  if (months > 0) {
+    const sum = await prisma.finTransaction.aggregate({ where: { ...where, occurredAt: { gte: monthsBefore(now, months), lte: now } }, _sum: { value: true } });
+    fixedCharges = Math.round((sum._sum.value ?? 0) / months);
+  }
+  // Recette R12-02: shorter than a month, the same bridges as the essential
+  // expenses — the declared estimate, then the budget's fixed envelopes — so
+  // a new account is not left with « non calculé ».
+  let fixedSource = months > 0 ? 'history' : null;
+  if (fixedCharges === null) {
+    const declared = await declaredEssentialExpenses(prisma, userId, currency);
+    if (declared !== null) [fixedCharges, fixedSource] = [declared, 'declared'];
+  }
+  if (fixedCharges === null) {
+    const planned = await budgetedEssentialExpenses(prisma, userId, currency, fixedIds, now);
+    if (planned !== null) [fixedCharges, fixedSource] = [planned, 'budget'];
+  }
+
+  const debts = await prisma.finDebt.findMany({
+    where: { userId, deletedAt: null, archivedAt: null, currency, direction: { not: 'lent' } },
+    select: { monthlyInstalment: true },
+  });
+  const instalments = debts.reduce((sum, row) => sum + (row.monthlyInstalment ?? 0), 0);
+
+  const inputs = { revenus_nets_mensuels: netIncome, charges_fixes_mensuelles: fixedCharges, mensualites: instalments, mois_historique: months };
+  const warnings = [];
+  if (netIncome === null) warnings.push('Aucun revenu déclaré : le reste à vivre n’est pas encore calculé.');
+  if (fixedCharges === null) warnings.push('Moins d’un mois de dépenses enregistrées et ni estimation ni budget : les charges fixes ne sont pas encore connues.');
+  if (fixedSource === 'declared') warnings.push('Moins d’un mois de dépenses enregistrées : les charges fixes viennent de votre estimation.');
+  if (fixedSource === 'budget') warnings.push('Moins d’un mois de dépenses enregistrées : les charges fixes viennent des enveloppes de votre budget.');
+  const result = netIncome === null || fixedCharges === null ? null : livingAllowance({ netIncome, fixedCharges, mandatoryInstalments: instalments });
+  return { answer: computed('F006', result, { inputs, currency, warnings, now }), netIncome, fixedCharges, fixedSource, instalments };
+}
+
 export async function buildReserveView(prisma, userId, { currency, targetMonths, now = new Date() } = {}) {
   const warnings = [];
   // GO-01's target by educational profile when the person has not chosen one
@@ -222,6 +308,8 @@ export async function buildReserveView(prisma, userId, { currency, targetMonths,
     fonds: fundGoals,
     epargneMensuelle: monthly > 0 ? monthly : null,
     dateEstimee: estimatedDate,
+    // R11-15: beside the target (dépenses essentielles), the reste à vivre (F006).
+    resteAVivre: await livingAllowanceOf(prisma, userId, currency, now),
     avertissements: warnings,
   };
 }

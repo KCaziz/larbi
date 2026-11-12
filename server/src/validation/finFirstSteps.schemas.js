@@ -21,6 +21,8 @@ export const firstIncomeSchema = z
     autoCredit: z.boolean().optional(),
     // Already received (recette R9-06): the first payment is recorded at once on
     // its account, so the account shows the income from the start.
-    received: z.boolean().optional(),
+    // R11-07: true = received and to add to the account; 'included' = received,
+    // and already counted in the account's starting balance (never added twice).
+    received: z.union([z.boolean(), z.literal('included')]).optional(),
   })
   .strict();

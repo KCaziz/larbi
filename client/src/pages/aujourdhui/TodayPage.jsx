@@ -53,6 +53,8 @@ export default function TodayPage() {
     event.kind === 'recurrence'
       ? run(() => api.post('/fin/calendrier/occurrences', { recurrenceId: event.sourceId, dueDate: new Date(`${event.dueDate}T00:00:00.000Z`).toISOString(), action: 'confirm' }), 'today.confirmed')
       : run(() => api.post(`/fin/transactions/${event.sourceId}/payer`, {}), 'today.confirmed');
+  const alreadyIn = (event) =>
+    run(() => api.post('/fin/calendrier/occurrences', { recurrenceId: event.sourceId, dueDate: new Date(`${event.dueDate}T00:00:00.000Z`).toISOString(), action: 'included' }), 'today.alreadyInDone');
 
   const toConfirm = (id, titleKey, events) =>
     events.length > 0 && (
@@ -69,6 +71,13 @@ export default function TodayPage() {
               <button type="button" className="today-confirm" onClick={() => confirm(event)}>
                 <CheckCircle2 size={16} aria-hidden="true" /> {t(event.inflow ? 'today.confirmIncome' : 'today.confirmPayment')}
               </button>
+              {/* R11-12: an income declared from the start, already in the account's
+                  starting balance — settled, never credited a second time. */}
+              {event.kind === 'recurrence' && event.inflow && (
+                <button type="button" className="today-confirm today-confirm-secondary" onClick={() => alreadyIn(event)}>
+                  {t('today.alreadyInBalance')}
+                </button>
+              )}
             </li>
           ))}
         </ul>

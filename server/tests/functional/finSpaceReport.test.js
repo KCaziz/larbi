@@ -28,7 +28,7 @@ const report = (user = owner) => t.request('GET', `/fin/espaces/${space.id}/rapp
 const exportFile = (json, user = owner) => t.request('POST', `/fin/espaces/${space.id}/export`, { user, json });
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

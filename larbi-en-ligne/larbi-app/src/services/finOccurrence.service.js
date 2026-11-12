@@ -4,6 +4,7 @@
 // recurrence the person set to « créer automatiquement comme réalisé ».
 import { HttpError } from '../utils/httpError.js';
 import { ensureCashAccount, usableAccount } from './finAccount.service.js';
+import { isLiability } from '../constants/finAccounts.js';
 import { dayKey, occurrencesOf } from './finCalendarView.service.js';
 import { recordChange } from './finChange.service.js';
 
@@ -58,7 +59,7 @@ async function ownRecurrence(prisma, userId, id) {
 // The movement one occurrence becomes, written with its outcome in ONE
 // transaction. The unique (recurrence, due date) is what makes a salary
 // impossible to credit twice (QA-P05): a second confirmation is refused.
-async function realise(tx, userId, recurrence, { dueDate, value, occurredAt, source }) {
+async function realise(tx, userId, recurrence, { dueDate, value, occurredAt, source, outcome = 'confirmed' }) {
   const accountId = recurrence.accountId ?? (await ensureCashAccount(tx, userId, recurrence.currency));
   const transaction = await tx.finTransaction.create({
     data: {
@@ -77,9 +78,24 @@ async function realise(tx, userId, recurrence, { dueDate, value, occurredAt, sou
     select: { id: true },
   });
   await tx.finOccurrence.create({
-    data: { userId, recurrenceId: recurrence.id, dueDate, outcome: 'confirmed', transactionId: transaction.id, source, status: 'real' },
+    data: { userId, recurrenceId: recurrence.id, dueDate, outcome, transactionId: transaction.id, source, status: 'real' },
   });
-  return transaction.id;
+  return { transactionId: transaction.id, accountId };
+}
+
+// How a movement of each kind moves the balance of an asset account.
+const SIGNS = { income: 1, expense: -1 };
+
+// Recette R12-03: a movement that was already inside the starting balance is
+// taken back out of it, so recording it leaves the balance as it was. A debt
+// account (card, loan) reads the other way round (PB-F027).
+async function takeOutOfOpeningBalance(tx, userId, accountId, flow) {
+  const account = await tx.finAccount.findFirst({ where: { id: accountId, userId }, select: { id: true, type: true, openingBalance: true } });
+  if (!account || !flow) return;
+  const before = account.openingBalance;
+  const after = isLiability(account.type) ? before + flow : before - flow;
+  await tx.finAccount.update({ where: { id: account.id }, data: { openingBalance: after, version: { increment: 1 } } });
+  await recordChange(tx, { userId, entity: 'account', entityId: account.id, action: 'correct', field: 'openingBalance', before, after, reason: 'already in the starting balance' });
 }
 
 /**
@@ -100,9 +116,24 @@ export async function recordOccurrence(prisma, userId, body) {
     if (body.action === 'confirm' || body.action === 'modify') {
       const occurredAt = body.action === 'modify' && body.occurredAt ? body.occurredAt : shiftForWeekend(dueDate, recurrence.weekendRule);
       if (occurredAt.getTime() > Date.now()) throw new HttpError(422, 'Not yet happened', { reason: 'futureDate' });
-      transactionId = await realise(tx, userId, recurrence, { dueDate, value: body.action === 'modify' && body.value ? body.value : recurrence.value, occurredAt, source: 'manual' });
+      ({ transactionId } = await realise(tx, userId, recurrence, { dueDate, value: body.action === 'modify' && body.value ? body.value : recurrence.value, occurredAt, source: 'manual' }));
+    } else if (body.action === 'included') {
+      // « Déjà compté dans le solde de départ » (R11-12, recette R12-03). It
+      // used to be settled with nothing written: the balance was right, but
+      // the salary was counted in no month (« le revenu n'est jamais pris en
+      // compte »). Now it is a real movement of its month, AND the starting
+      // balance is brought back to what it was before it — the client's own
+      // way: start from the starting balance, add the incomes, recompute. The
+      // balance shown does not move; the money is never counted twice.
+      if (dueDate.getTime() > Date.now()) throw new HttpError(422, 'Not yet happened', { reason: 'futureDate' });
+      const shifted = shiftForWeekend(dueDate, recurrence.weekendRule);
+      const occurredAt = shifted.getTime() > Date.now() ? dueDate : shifted;
+      let accountId;
+      ({ transactionId, accountId } = await realise(tx, userId, recurrence, { dueDate, value: recurrence.value, occurredAt, source: 'manual', outcome: 'included' }));
+      await takeOutOfOpeningBalance(tx, userId, accountId, SIGNS[recurrence.kind] * recurrence.value);
     } else if (body.action === 'missed') {
-      await tx.finOccurrence.create({ data: { userId, recurrenceId: recurrence.id, dueDate, outcome: 'missed', source: 'manual', status: 'declared' } });
+      // « Pas reçu »: settled, nothing credited.
+      await tx.finOccurrence.create({ data: { userId, recurrenceId: recurrence.id, dueDate, outcome: body.action, source: 'manual', status: 'declared' } });
     } else {
       if (!body.postponedTo) throw new HttpError(422, 'A new date is needed', { reason: 'postponedTo' });
       await tx.finOccurrence.create({ data: { userId, recurrenceId: recurrence.id, dueDate, outcome: 'postponed', postponedTo: body.postponedTo, source: 'manual', status: 'declared' } });

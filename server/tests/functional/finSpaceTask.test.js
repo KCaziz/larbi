@@ -27,7 +27,7 @@ const create = (json, user = owner) =>
 const stats = () => t.request('GET', `/fin/espaces/${space.id}/taches-synthese?mois=${month()}`, { user: owner });
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

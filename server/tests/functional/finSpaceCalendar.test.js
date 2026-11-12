@@ -22,7 +22,7 @@ async function memberId(user) {
 const calendar = (query = '', user = owner) => t.request('GET', `/fin/espaces/${space.id}/calendrier?mois=${month()}${query}`, { user });
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

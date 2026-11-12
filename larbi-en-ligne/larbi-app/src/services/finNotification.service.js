@@ -154,7 +154,7 @@ export async function generateReminders(prisma, userId) {
   for (const row of recurrences) {
     const days = Array.isArray(row.reminderDays) ? row.reminderDays : [];
     for (const occurrence of occurrencesWithOutcome(row, outcomes, new Date(now.getTime() - DAY), to)) {
-      if (occurrence.outcome === 'confirmed' || occurrence.outcome === 'missed') continue;
+      if (['confirmed', 'missed', 'included'].includes(occurrence.outcome)) continue;
       const due = Math.floor(occurrence.date.getTime() / DAY);
       if (!days.some((offset) => today === due - offset)) continue;
       await createNotification(prisma, userId, {

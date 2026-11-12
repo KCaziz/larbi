@@ -34,6 +34,7 @@ const PUBLIC = new Set([
   // FINCLUDIA deterministic assistant (P3-19): no AI, published intents only.
   'GET /api/fin-assistant/intents',
   'POST /api/fin-assistant/resolve',
+  'GET /api/fin-assistant/flows',
   'GET /api/fin-assistant/flows/:key',
   // Payment (P3-09): the offers are public; the provider calls the webhook (it is
   // authenticated by its signature, not by a session); the simulated provider page

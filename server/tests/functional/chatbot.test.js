@@ -55,12 +55,28 @@ describe('administration', () => {
     assert.equal((await adm('DELETE', '/not-a-uuid')).status, 404);
   });
 
-  test('moving an entry to another language puts it at the end of that language', async () => {
-    await create('EN 1', { language: 'en' });
-    const fr = await create('FR 1');
-    const moved = await adm('PATCH', `/${fr.id}`, { language: 'en' });
-    assert.equal(moved.body.entry.language, 'en');
-    assert.equal(moved.body.entry.position, 1);
+  test('R11-05: a translation joins its question, never twice in one language', async () => {
+    const fr = await create('FR 1', { audience: 'app' });
+    const en = await adm('POST', '', { question: 'EN 1', answer: '<p>R</p>', language: 'en', groupId: fr.groupId });
+    assert.equal(en.status, 201);
+    assert.equal(en.body.entry.groupId, fr.groupId);
+    assert.equal(en.body.entry.audience, 'app', 'the question’s audience');
+    assert.equal(en.body.entry.position, fr.position, 'the question’s place');
+    assert.equal((await adm('POST', '', { question: 'EN bis', answer: '<p>R</p>', language: 'en', groupId: fr.groupId })).status, 409);
+    assert.equal((await adm('PATCH', `/${fr.id}`, { language: 'en' })).status, 400, 'a translation does not change language');
+    await adm('PATCH', `/${fr.id}`, { audience: 'site' });
+    const rows = (await adm('GET', '')).body.entries.filter((e) => e.groupId === fr.groupId);
+    assert.deepEqual(rows.map((e) => e.audience), ['site', 'site'], 'every translation follows');
+  });
+
+  test('R11-05: reordering the questions moves all their translations', async () => {
+    const a = await create('A');
+    const b = await create('B');
+    await adm('POST', '', { question: 'B en', answer: '<p>R</p>', language: 'en', groupId: b.groupId });
+    assert.equal((await adm('PUT', '/order-groups', { groupIds: [b.groupId, a.groupId] })).status, 204);
+    const rows = (await adm('GET', '')).body.entries;
+    assert.deepEqual(rows.filter((e) => e.groupId === b.groupId).map((e) => e.position), [0, 0]);
+    assert.equal((await adm('PUT', '/order-groups', { groupIds: [b.groupId] })).status, 409, 'a question is missing');
   });
 
   test('reordering takes the complete list of one language, and refuses a partial or stale one', async () => {
@@ -89,11 +105,17 @@ describe('public reading', () => {
     assert.equal(fr.status, 200);
     assert.deepEqual(fr.body.entries.map((e) => e.question), ['Publiée B', 'Publiée A'], 'French by default, drafts hidden');
     assert.deepEqual(Object.keys(fr.body.entries[0]).sort(), ['answer', 'id', 'question']);
-    assert.deepEqual((await pub('en')).body.entries.map((e) => e.question), ['Published EN']);
     const ar = (await pub('ar')).body;
     assert.deepEqual(ar.entries.map((e) => e.question), ['Publiée B', 'Publiée A'], 'nothing in Arabic yet: the French ones answer, never an empty panel');
     assert.equal(ar.fallback, true);
-    assert.equal((await pub('en')).body.fallback, false);
+    // R11-05: a question not translated yet still shows, in French.
+    const english = (await pub('en')).body;
+    assert.deepEqual(english.entries.map((e) => e.question).sort(), ['Published EN', 'Publiée A', 'Publiée B']);
+    assert.equal(english.fallback, true);
+    const bEn = await adm('POST', '', { question: 'Published B', answer: '<p>R</p>', language: 'en', groupId: b.groupId });
+    await adm('POST', `/${bEn.body.entry.id}/publish`);
+    assert.ok((await pub('en')).body.entries.some((e) => e.question === 'Published B'));
+    assert.ok(!(await pub('en')).body.entries.some((e) => e.question === 'Publiée B'), 'its translation replaces it');
     assert.equal((await pub('xx')).status, 400);
   });
 });

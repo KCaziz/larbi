@@ -490,3 +490,27 @@ main {
 :where(label):has(> input[type='checkbox']) + :where(label):has(> input[type='checkbox']) {
   margin-block-start: 10px;
 }
+
+/* A rate and its period (recette R11-14) — global: the debts, goals, credit simulator and simulators all use it. */
+.rate-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.rate-field input {
+  flex: 1 1 5rem;
+  min-inline-size: 5rem;
+}
+.rate-field-unit {
+  align-self: center;
+  color: var(--text);
+}
+.rate-period {
+  flex: 1 1 7.5rem;
+  min-inline-size: 7.5rem;
+}
+.rate-equivalent {
+  display: block;
+  margin-block-start: 4px;
+}

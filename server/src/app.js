@@ -48,6 +48,16 @@ export function createApp() {
   if (env.logRequests) app.use(morgan(env.isProduction ? 'combined' : 'dev'));
 
   app.use(maintenanceGate);
+  // Never kept by a cache (recette R11-16): the host's nginx stored GET answers
+  // of the API and served them again after a change — a movement pointed, an
+  // income added, then the list came back as it was before (304). Every API
+  // answer belongs to one person at one moment: none may be stored or shared.
+  app.use('/api', (req, res, next) => {
+    res.set('Cache-Control', 'no-store, private');
+    res.set('Pragma', 'no-cache');
+    res.vary('Cookie');
+    next();
+  });
   app.use('/api', routes);
 
   // Single-host deployment: the built website is served next to the API. Hashed

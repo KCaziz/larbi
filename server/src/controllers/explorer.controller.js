@@ -1,6 +1,6 @@
 import { COMPARATOR_THEMES } from '../constants/comparator.js';
 import { sortConditions, toPublicCondition } from '../serializers/comparator.js';
-import { exploreOffers } from '../services/explorer.service.js';
+import { exploreOffers, offersPerTheme } from '../services/explorer.service.js';
 import { dataUpdatedAt } from './comparator.controller.js';
 
 // "Explorer" (P4-13, écran C20). Réservé aux 18 ans et plus : la route
@@ -12,9 +12,10 @@ export async function getExplorer(req, res) {
   res.set('Cache-Control', 'no-store');
   const { q, themes, bankId, segment } = req.query;
   const themeList = themes ? themes.split(',').filter(Boolean) : [];
-  const [rows, updatedAt] = await Promise.all([
+  const [rows, updatedAt, rubriques] = await Promise.all([
     exploreOffers({ query: q ?? '', themes: themeList, bankId: bankId ?? null, segment: segment ?? null }),
     dataUpdatedAt(),
+    offersPerTheme(),
   ]);
   res.json({
     // The rubric (theme) is not sensitive — the comparator's own theme pages
@@ -23,5 +24,7 @@ export async function getExplorer(req, res) {
     results: sortConditions(rows).map((row) => ({ theme: row.theme, ...toPublicCondition(row) })),
     updatedAt,
     themes: COMPARATOR_THEMES.map(({ key }) => key),
+    // R11-02: the rubrics that hold offers, to start from one click.
+    rubriques,
   });
 }

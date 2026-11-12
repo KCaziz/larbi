@@ -81,6 +81,7 @@ export async function createFirstIncome(prisma, userId, body) {
     // that date).
     startDate: body.nextDate < new Date() ? body.nextDate : new Date(),
   });
+  const firstDate = body.nextDate;
   const recurrence = await createRecurrence(prisma, userId, {
     label: body.label,
     categoryId: body.categoryId ?? null,
@@ -88,7 +89,7 @@ export async function createFirstIncome(prisma, userId, body) {
     value: body.value,
     currency: body.currency,
     frequency: body.frequency,
-    nextDate: body.nextDate,
+    nextDate: firstDate,
     accountId: body.accountId ?? null,
     // « À confirmer » is the recommended mode for income; the person may ask
     // for the credit to be recorded on its own.
@@ -100,9 +101,11 @@ export async function createFirstIncome(prisma, userId, body) {
   // today, is confirmed at once — the same confirmation as « Reçu » in
   // Aujourd'hui, so it can never be credited twice — and the account shows it.
   let received = null;
-  if (body.received && body.nextDate <= new Date()) {
+  // R12-03: « déjà dans le solde de départ » is a real income of its month too,
+  // taken back out of the starting balance — never credited twice.
+  if ((body.received === true || body.received === 'included') && body.nextDate <= new Date()) {
     try {
-      received = await recordOccurrence(prisma, userId, { recurrenceId: recurrence.id, dueDate: body.nextDate, action: 'confirm' });
+      received = await recordOccurrence(prisma, userId, { recurrenceId: recurrence.id, dueDate: body.nextDate, action: body.received === true ? 'confirm' : 'included' });
     } catch (err) {
       // A payday that a weekend moves to tomorrow is not received yet: the
       // income is saved, and « Reçu » comes on the day.

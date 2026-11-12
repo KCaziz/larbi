@@ -16,6 +16,8 @@ import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import LineChart from '../../components/fincludia/charts/LineChart.jsx';
 import BarList from '../../components/fincludia/charts/BarList.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
+import RateField from '../../components/fincludia/RateField.jsx';
+import { yearlyFraction } from '../../lib/ratePeriods.js';
 import { toMinorUnits } from '../../lib/money.js';
 import CategoryIcon from '../../components/fincludia/CategoryIcon.jsx';
 import GoalYears, { yearByYear } from './GoalYears.jsx';
@@ -464,7 +466,7 @@ function EditGoalForm({ goal, run }) {
 
 export function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel }) {
   const { t } = useTranslation();
-  const [form, setForm] = useState({ label: '', templateKey: '', icon: '', color: '#0F766E', target: '', targetDate: '', rate: '' });
+  const [form, setForm] = useState({ label: '', templateKey: '', icon: '', color: '#0F766E', target: '', targetDate: '', rate: '', ratePeriod: 'annuel' });
   const [error, setError] = useState(null);
 
   const submit = async (event) => {
@@ -482,7 +484,8 @@ export function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel })
         target,
         currency: defaultCurrency,
         targetDate: form.targetDate ? new Date(form.targetDate).toISOString() : null,
-        rate: form.rate ? Number(form.rate) / 100 : null,
+        // R11-14: typed per month, quarter, half-year or year; stored per year.
+        rate: yearlyFraction(form.rate, form.ratePeriod),
       });
       onDone(created.goal);
     } catch (err) {
@@ -543,11 +546,7 @@ export function CreateGoalForm({ templates, defaultCurrency, onDone, onCancel })
               calculé » until one is given. */}
           <input id="new-goal-date" type="date" value={form.targetDate} min={new Date().toISOString().slice(0, 10)} onChange={(event) => setForm({ ...form, targetDate: event.target.value })} />
         </div>
-        <div className="fin-field">
-          <label htmlFor="new-goal-rate">{t('goals.rate')}</label>
-          <input id="new-goal-rate" type="number" step="0.1" min="0" max="100" value={form.rate} onChange={(event) => setForm({ ...form, rate: event.target.value })} />
-          <p className="fin-hint">{t('goals.rateHint')}</p>
-        </div>
+        <RateField id="new-goal-rate" label={t('rate.returnLabel')} value={form.rate} period={form.ratePeriod} onChange={(rate) => setForm({ ...form, rate })} onPeriodChange={(ratePeriod) => setForm({ ...form, ratePeriod })} hint={t('goals.rateHint')} />
       </div>
       <div className="goals-create-actions">
         <Button type="submit">{t('goals.save')}</Button>

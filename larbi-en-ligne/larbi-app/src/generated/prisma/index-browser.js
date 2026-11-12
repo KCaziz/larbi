@@ -904,6 +904,7 @@ exports.Prisma.FinIntentScalarFieldEnum = {
   keywords: 'keywords',
   responseTemplate: 'responseTemplate',
   deepLinkPath: 'deepLinkPath',
+  translations: 'translations',
   status: 'status',
   position: 'position',
   createdAt: 'createdAt',
@@ -948,6 +949,7 @@ exports.Prisma.ChatbotEntryScalarFieldEnum = {
   status: 'status',
   position: 'position',
   audience: 'audience',
+  groupId: 'groupId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -2060,7 +2062,8 @@ exports.Prisma.ChatbotEntryOrderByRelevanceFieldEnum = {
   answer: 'answer',
   language: 'language',
   status: 'status',
-  audience: 'audience'
+  audience: 'audience',
+  groupId: 'groupId'
 };
 
 exports.Prisma.ContactMessageOrderByRelevanceFieldEnum = {

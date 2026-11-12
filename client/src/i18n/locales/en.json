@@ -688,6 +688,7 @@
     "conflict": "This action is not possible in the current state.",
     "refused": "This value or request is not accepted. Check the fields.",
     "oneScreen": "One screen at a time with a free account: your account is already open on another screen. Sign out of the other screen and try again (a screen idle for 30 minutes is freed on its own), or subscribe to use several screens.",
+    "subscriptionAccounts": "Without a subscription you can have one account of your own. Subscribe from “Offers” to add more, or archive the one you no longer use.",
     "subscriptionRequired": "Inviting someone into a shared space is for subscribers. Subscribe from “Offers” to invite other people."
   },
   "state": {
@@ -711,12 +712,13 @@
       "comparator": "Comparator",
       "users": "Users",
       "settings": "Settings",
-      "chatbot": "Assistant",
+      "chatbot": "“A question?” assistant",
       "payments": "Payments",
       "glossary": "Learn",
       "finAssistant": "FINCLUDIA assistant",
       "missions": "Missions",
-      "rates": "Exchange rates"
+      "rates": "Exchange rates",
+      "assistantShort": "Assistant"
     },
     "shell": {
       "title": "Administration",
@@ -1582,29 +1584,29 @@
       "deleteGuideConfirm": "Permanently delete the guide \"{{title}}\"?"
     },
     "finAssistant": {
-      "title": "FINCLUDIA assistant",
-      "subtitle": "The intentions, flows and log of FINCLUDIA's deterministic assistant.",
+      "title": "“A question?” assistant",
+      "subtitle": "One assistant, the same on the site and in the application: only the questions differ.",
       "intents": "Intentions",
       "flows": "Flows",
       "audit": "Log",
-      "intentsNote": "The assistant's 8 intentions are fixed: their name and example cannot be changed here. You can fill in their keywords, their answer and the screen they open.",
+      "intentsNote": "What the assistant answers when someone types a sentence. Each topic is recognised by its keywords: write its answer, then publish it. A topic without an answer cannot be published.",
       "example": "Example question: \"{{example}}\"",
       "keywords": "Keywords (comma-separated)",
       "keywordsHint": "Words visitors might type. Example: expense, add, spend.",
       "response": "Answer",
-      "deepLink": "Screen opened by this intention",
+      "deepLink": "Screen offered by this answer",
       "deepLinkHint": "Only already-built screens are offered: the other FINCLUDIA screens arrive progressively.",
-      "noLink": "None (not available yet)",
+      "noLink": "No screen",
       "save": "Save",
       "cancel": "Cancel",
       "saved": "Saved.",
       "publish": "Publish",
-      "unpublish": "Unpublish",
+      "unpublish": "Withdraw",
       "published": "Published.",
       "unpublished": "Unpublished.",
       "edit": "Edit",
       "needsResponse": "An answer is required before publishing.",
-      "flowsNote": "A flow is a sequence of steps with choices (e.g. a short budget questionnaire). It is currently built from the project spec; this page publishes or withdraws it.",
+      "flowsNote": "A guided path asks questions one after the other, with choices. Create it, add its steps, then publish it: it then appears in the “A question?” panel.",
       "addFlow": "Add a flow",
       "flowName": "Flow name",
       "noFlow": "No flow yet.",
@@ -1614,7 +1616,7 @@
       "delete": "Delete",
       "deleteFlowConfirm": "Permanently delete the flow \"{{name}}\" and its steps?",
       "deleted": "Deleted.",
-      "auditNote": "Log of recognised intentions and of the cases the assistant did not understand. No financial data and no text a visitor typed is ever kept — only codes.",
+      "auditNote": "What people asked the assistant: only the topic recognised or the path followed. No typed sentence and no financial data is kept.",
       "auditDate": "Date",
       "auditAction": "Action",
       "auditTarget": "Intention / flow",
@@ -1631,7 +1633,47 @@
       "referenceTitle": "What the assistant can do",
       "referenceAnswer": "Allowed answer:",
       "referenceSteps": "Questions to ask:",
-      "referenceGuardrail": "Guard-rail:"
+      "referenceGuardrail": "Guard-rail:",
+      "tabs": {
+        "questions": "Questions",
+        "intents": "Automatic answers",
+        "flows": "Guided paths",
+        "audit": "Log"
+      },
+      "questionsNote": "The questions offered in the list of the “A question?” panel. For each one, choose where it appears: on the site, in the application, or in both. A new question stays a draft until you publish it.",
+      "publishedCount": "Published: {{n}} of {{total}}",
+      "answerMissing": "Answer to write",
+      "writeAnswer": "Write the answer",
+      "saveAndPublish": "Save and publish",
+      "responseHint": "The text shown to the person. An answer is needed to publish.",
+      "flowCreated": "Path created: now add its first step.",
+      "steps": "Steps",
+      "noStep": "No step yet: add at least one to be able to publish this path.",
+      "addStepTitle": "Add step {{n}}",
+      "stepPrompt": "Question asked to the person",
+      "stepOptions": "Choices offered",
+      "optionLabel": "Choice text",
+      "optionTarget": "Leads to",
+      "optionsHint": "Each choice leads to another step, to an automatic answer, or ends the path. “The next step” is the one you add right after.",
+      "targetEnd": "End of the path",
+      "targetNext": "The next step",
+      "targetStep": "Step {{n}}",
+      "targetIntent": "Answer: {{label}}",
+      "addOption": "Add a choice",
+      "removeOption": "Remove this choice",
+      "addStep": "Add the step",
+      "deleteStep": "Delete the step",
+      "stepAdded": "Step added.",
+      "stepExists": "This step already exists: reload the page.",
+      "addIntent": "Add an automatic answer",
+      "intentLabel": "Topic name",
+      "newNeeds": "Give the topic a name and at least one keyword.",
+      "keywordsHintAll": "The words that make this topic recognised, separated by commas, in every language (e.g. budget, monthly budget, ميزانية).",
+      "translationHint": "The translation of the answer. Left empty, the French answer shows.",
+      "deepLinkHintAll": "The screen the answer offers to open: every screen of the application and of the site.",
+      "screensApp": "Application",
+      "screensSite": "Site",
+      "deleteIntentConfirm": "Delete the answer “{{name}}”? It leaves the assistant."
     },
     "missions": {
       "title": "Pedagogical missions",
@@ -1700,6 +1742,13 @@
         "EPG": "Beginner saver",
         "AUT": "Other"
       }
+    },
+    "navSections": {
+      "overview": "Overview",
+      "content": "Content",
+      "assistant": "Assistant",
+      "finance": "Finance",
+      "platform": "Platform"
     }
   },
   "learn": {
@@ -2492,7 +2541,10 @@
     "typeToSearch": "Type at least two characters, or choose a rubric, to start the search.",
     "tryExample": "Try for example:",
     "reservedToAdults": "Explorer is reserved to people aged 19 and over — the age of civil majority in Algeria. Your age bracket does not allow access.",
-    "neverEligibility": "A result shown here is never a guarantee of eligibility: always check the exact conditions with the provider."
+    "neverEligibility": "A result shown here is never a guarantee of eligibility: always check the exact conditions with the provider.",
+    "browseTitle": "Start with a rubric",
+    "offerCount_one": "{{count}} offer",
+    "offerCount_other": "{{count}} offers"
   },
   "workshop": {
     "title": "Simulation workshop",
@@ -2548,7 +2600,7 @@
       "published": "Visitors can now see the question.",
       "unpublished": "Visitors can no longer see the question.",
       "publish": "Publish",
-      "unpublish": "Remove from the site",
+      "unpublish": "Withdraw",
       "moveUp": "Move up",
       "moveDown": "Move down",
       "empty": "No question in {{language}} yet. As long as no question is published in a language, the “A question?” button does not appear for visitors browsing the site in that language.",
@@ -2559,17 +2611,27 @@
       },
       "audience": "Where to show it",
       "audiences": {
-        "site": "Website (public FAQ)",
-        "app": "Application (“A question?” help)",
-        "both": "Both"
-      }
+        "site": "Website only",
+        "app": "Application only",
+        "both": "Website and application"
+      },
+      "incomplete": "{{n}} question(s) of {{total}} are not translated into every language: a missing language shows the French text.",
+      "answerMissing": "Also write the answer in {{language}}, or empty that language's question.",
+      "translated": "translated",
+      "toTranslate": "to translate",
+      "missingShort": "missing",
+      "translationHint": "Write the question and its answer in each language (tabs above). A language left empty shows the French text to its readers.",
+      "emptyAll": "No question yet.",
+      "toWrite": "to write"
     },
     "searchPlaceholder": "Type your question…",
     "searchGo": "Search",
     "openScreen": "Open this screen",
     "notUnderstood": "I did not understand. Choose an option…",
     "fallbackNote": "These questions are not translated yet: they are shown in French.",
-    "tipsTitle": "Tips for this page"
+    "tipsTitle": "Tips for this page",
+    "flowsTitle": "Guided paths",
+    "flowEnd": "End of the path. Go back to the list to ask another question."
   },
   "payments": {
     "offersTitle": "Go premium",
@@ -3590,9 +3652,14 @@
       "months": "Months covered = money in your emergency fund ÷ essential spending per month.",
       "gap": "Still to put aside = target amount − money in your emergency fund.",
       "date": "Estimated date = today + (still to put aside ÷ monthly saving planned for the fund).",
-      "excluded": "Not counted: the paper portfolio, assets that are hard to sell (property, vehicle…) and money set aside for other goals."
+      "excluded": "Not counted: the paper portfolio, assets that are hard to sell (property, vehicle…) and money set aside for other goals.",
+      "living": "Money left to live on = net monthly income − fixed charges − debt instalments. It does not set the target: it says how much you can put aside each month to reach it."
     },
-    "summary": "In short: your emergency fund holds {{fund}}. Your essential spending is {{essential}} a month, so it covers {{months}} months. You aim for {{target}} months, that is {{targetAmount}}: {{gap}} is missing. To fill it, put money in from the “Emergency fund” goal."
+    "summary": "In short: your emergency fund holds {{fund}}. Your essential spending is {{essential}} a month, so it covers {{months}} months. You aim for {{target}} months, that is {{targetAmount}}: {{gap}} is missing. To fill it, put money in from the “Emergency fund” goal.",
+    "living": {
+      "label": "Money left to live on per month",
+      "why": "The target amount is based on your essential spending: what you would still have to pay each month if your income stopped. The money left to live on is what remains each month once fixed charges and instalments are paid: it is what you build your reserve with."
+    }
   },
   "calendar": {
     "title": "Financial calendar",
@@ -3711,7 +3778,9 @@
       "confirmDone": "Confirmed: the movement is recorded.",
       "modifyDone": "Recorded with the corrected amount or date.",
       "missedDone": "Noted: nothing was recorded.",
-      "postponeDone": "Postponed."
+      "postponeDone": "Postponed.",
+      "included": "Already in the starting balance",
+      "includedDone": "Noted: this payment was already in the starting balance. It counts in its month's income, and the starting balance is brought back to what it was before it: the account's balance does not move."
     },
     "creationModes": {
       "confirm": "Ask me to confirm",
@@ -3827,7 +3896,9 @@
     "debtToRepay": "Repay: {{label}}",
     "debtToCollect": "To be repaid to you: {{label}}",
     "debtLeft": "({{amount}} left)",
-    "debtRecord": "Record a repayment"
+    "debtRecord": "Record a repayment",
+    "alreadyInBalance": "Already in the starting balance",
+    "alreadyInDone": "Noted: this payment was already in the starting balance. It counts in its month's income, and the starting balance is brought back to what it was before it: the account's balance does not move."
   },
   "wealth": {
     "title": "Patrimony",
@@ -5077,7 +5148,20 @@
     "chartTitleDays_other": "Balance, day by day (last {{count}} days)",
     "delete": "Delete",
     "deleted": "Account deleted, with its movements.",
-    "deleteConfirm": "Delete “{{label}}” for good? Its movements are deleted with it, and transfers with your other accounts are cancelled on both sides. To just put it away, use “Archive”."
+    "deleteConfirm": "Delete “{{label}}” for good? Its movements are deleted with it, and transfers with your other accounts are cancelled on both sides. To just put it away, use “Archive”.",
+    "include": {
+      "title": "Does this account count in the global figures?",
+      "totalYes": "Yes: its balance adds to your total balance, and its spending and income count in Home, the Summary, the budget and the calendar.",
+      "totalNo": "No: it is computed on its own, apart (its page shows its balance, money in and out), without changing your total balance or your global figures.",
+      "netWorthYes": "Yes: it counts in your net worth (what you own minus what you owe).",
+      "netWorthNo": "No: it does not count in your net worth.",
+      "later": "You can change both choices later by editing the account."
+    },
+    "details": {
+      "balanceNow": "Balance today",
+      "fixed": "The type and the currency do not change: they decide how every movement already entered reads.",
+      "openingHint": "What the account held on that date, before the movements entered in the application. Correcting it recomputes the balance; the former value stays in the account's history."
+    }
   },
   "health": {
     "title": "Financial health",
@@ -5675,7 +5759,7 @@
   "incomes": {
     "title": "Expected income",
     "intro": "The incomes you declared: the base of your « left to allocate ».",
-    "expectedNote": "An expected income is what you wait for: it changes no balance. Only an income confirmed on the day, in the calendar, goes into an account.",
+    "expectedNote": "An income declared here comes into the account you choose. For each, you say whether today's payment is already in the balance, to add, or still to come — then whether the next ones are asked in “Today” or added on their own. It is never counted twice.",
     "add": "Add an income",
     "none": "No income declared yet.",
     "added": "Income added.",
@@ -5691,7 +5775,8 @@
     "notLinked": "Not linked to an account yet: it arrives nowhere. Click “Edit” and choose its account so it is offered on each due date.",
     "linkHint": "On each due date, this income is offered in “Today” to confirm it arrived: it then counts in your income and on the account, once.",
     "deleted": "Income deleted.",
-    "deleteConfirm": "Delete “{{label}}”? It will no longer be offered. Payments already received stay in your movements."
+    "deleteConfirm": "Delete “{{label}}”? It will no longer be offered. Payments already received stay in your movements.",
+    "included": {}
   },
   "shared": {
     "backToSpaces": "My spaces",
@@ -6032,5 +6117,53 @@
     "errors": {
       "rate": "Enter a rate above zero."
     }
+  },
+  "incomeForm": {
+    "cash": "Cash",
+    "what": "1. Which income?",
+    "where": "2. Which account does it come into?",
+    "when": "3. When does it come in?",
+    "next": "4. And the next payments?",
+    "date": "Payment date",
+    "dateHint": "The date of the last payment if it already came in this month, otherwise the date of the next one. The following ones come from the frequency.",
+    "opening": "“{{account}}” started with {{amount}} on {{date}}.",
+    "thisPayment": "This payment of {{date}}:",
+    "arrived": {
+      "included": "has come in, and is already included in the starting balance of “{{account}}”",
+      "add": "has come in: add it now to the balance of “{{account}}”",
+      "notYet": "has not come in yet: ask me in “Today”"
+    },
+    "needArrived": "Say what happened to the payment of {{date}} (question 3).",
+    "nextConfirm": "Ask me to confirm each payment in “Today” (recommended)",
+    "nextAuto": "Add it to the account automatically, on the day",
+    "summaryTitle": "What will happen",
+    "summary": {
+      "base": "{{label}}: {{amount}} {{frequency}}, into “{{account}}”.",
+      "included": "The payment of {{date}} is already in the balance of “{{account}}”: it counts in the month's income, and the starting balance is brought back to what it was before it. The account's balance does not change.",
+      "add": "The payment of {{date}} is added now to the balance of “{{account}}”.",
+      "notYet": "The payment of {{date}} will be asked in “Today”: it only counts once confirmed.",
+      "futureConfirm": "The payment of {{date}} will be asked that day in “Today”: it only counts once confirmed.",
+      "futureAuto": "The payment of {{date}} will be added to “{{account}}” on its own that day.",
+      "nextConfirm": "Then each payment is asked on the day, and only ever counted once.",
+      "nextAuto": "Then each payment is added to “{{account}}” on its own, on the day."
+    },
+    "listConfirm": "to confirm on each payment",
+    "listAuto": "added automatically"
+  },
+  "rate": {
+    "periodLabel": "Rate period",
+    "periods": {
+      "annuel": "per year",
+      "semestriel": "per half-year",
+      "trimestriel": "per quarter",
+      "mensuel": "per month"
+    },
+    "equivalent": {
+      "annuel": "That is {{value}} % per year (nominal rate).",
+      "mensuel": "That is {{value}} % per month (nominal rate)."
+    },
+    "interestLabel": "Interest rate",
+    "interestKnown": "Interest rate (if known)",
+    "returnLabel": "Expected return (optional)"
   }
 }

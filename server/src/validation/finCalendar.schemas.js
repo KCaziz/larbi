@@ -135,7 +135,8 @@ export const occurrenceSchema = z
   .object({
     recurrenceId: z.string().uuid(),
     dueDate: isoDate,
-    action: z.enum(['confirm', 'modify', 'missed', 'postpone']),
+    // R11-12: 'included' — already counted in the account's starting balance.
+    action: z.enum(['confirm', 'modify', 'missed', 'postpone', 'included']),
     value: positiveAmount.min(1).optional(),
     occurredAt: isoDate.optional(),
     postponedTo: isoDate.optional(),

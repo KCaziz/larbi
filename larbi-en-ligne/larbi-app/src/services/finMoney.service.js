@@ -14,6 +14,7 @@ import { ensureCashAccount, usableAccount } from './finAccount.service.js';
 import { automaticTag, usableTag } from './finMovement.service.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
 import { removeStored } from './storage.service.js';
+import { throughEndOfDay } from '../utils/dayEnd.js';
 
 export const INCOME_ENTITY = 'income';
 export const TRANSACTION_ENTITY = 'transaction';
@@ -358,7 +359,7 @@ export function historyWhere(userId, query = {}) {
   if (query.from || query.to) {
     where.occurredAt = {};
     if (query.from) where.occurredAt.gte = query.from;
-    if (query.to) where.occurredAt.lte = query.to;
+    if (query.to) where.occurredAt.lte = throughEndOfDay(query.to); // « au 31 » includes the 31st (R12-04)
   }
   if (query.minAmount !== undefined || query.maxAmount !== undefined) {
     where.value = {};

@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Info } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useAuth } from '../../auth/useAuth.js';
+import { RateEquivalent, RatePeriodSelect } from '../fincludia/RateField.jsx';
+import { convertRate } from '../../lib/ratePeriods.js';
 import { formatAmount, formatNumber, formatRatio } from '../../lib/format.js';
 import LineChart from '../fincludia/charts/LineChart.jsx';
 import Button from '../ui/Button.jsx';
@@ -34,6 +36,10 @@ const toServer = (field, raw) => {
   if (field.type === 'rate') return value / 100;
   return Math.round(value);
 };
+
+// The interest rates a person may type per month, quarter, half-year or year
+// (recette R11-14), and the period the engine reads each of them in.
+const RATE_FIELD_PERIOD = { annualRate: 'annuel', monthlyRate: 'mensuel' };
 
 // What a person types in a row of a repeated field (P4-11), before conversion.
 const emptyRow = (item) => Object.fromEntries(item.map((field) => [field.key, '']));
@@ -70,6 +76,9 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
   const { user } = useAuth();
 
   const [values, setValues] = useState({});
+  // R11-14: the period each interest rate was typed in (its own by default).
+  const [ratePeriods, setRatePeriods] = useState({});
+  const periodOf = (key) => ratePeriods[key] ?? RATE_FIELD_PERIOD[key];
   const [answer, setAnswer] = useState(null);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -115,7 +124,9 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
       // An optional field left empty is not sent: the server treats it as
       // "nothing under this heading" and says so in the snapshot.
       if (raw === undefined || raw === '') continue;
-      const converted = toServer(field, raw);
+      // A rate typed per another period is brought to the one the engine reads.
+      const typed = RATE_FIELD_PERIOD[field.key] && periodOf(field.key) !== RATE_FIELD_PERIOD[field.key] ? String(convertRate(Number(raw), periodOf(field.key), RATE_FIELD_PERIOD[field.key])) : raw;
+      const converted = toServer(field, typed);
       if (converted !== null) body[field.key] = converted;
     }
     try {
@@ -309,6 +320,12 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
                   value={shownValue(field)}
                   onChange={(e) => setValues((previous) => ({ ...previous, [field.key]: e.target.value }))}
                 />
+                {RATE_FIELD_PERIOD[field.key] && (
+                  <>
+                    <RatePeriodSelect id={`field-${field.key}-period`} value={periodOf(field.key)} onChange={(period) => setRatePeriods((previous) => ({ ...previous, [field.key]: period }))} />
+                    <RateEquivalent value={values[field.key]} period={periodOf(field.key)} target={RATE_FIELD_PERIOD[field.key]} />
+                  </>
+                )}
               </div>
             ),
           )}

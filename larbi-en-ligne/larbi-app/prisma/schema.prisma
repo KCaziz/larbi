@@ -1721,6 +1721,8 @@ model FinIntent {
   // client's own target screen (C07, C14, P03...) is not built yet — the resolver
   // then shows a "not available yet" message instead of a dead or wrong link.
   deepLinkPath     String?  @db.VarChar(200)
+  // R11-05: { en: { label, responseTemplate }, ar: {...} } — French stays in the columns.
+  translations     Json?
   status           String   @default("draft")
   position         Int      @default(0)
   createdAt        DateTime @default(now())
@@ -1792,10 +1794,13 @@ model ChatbotEntry {
   // P11-02: where the question is shown — "site" (the public FAQ), "app"
   // (the help inside the application) or "both".
   audience  String   @default("both") @db.VarChar(10)
+  // R11-05: the translations of one question share a group (one row per language).
+  groupId   String?  @db.VarChar(36)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([language, status, position])
+  @@index([groupId])
   @@map("chatbot_entries")
 }
 

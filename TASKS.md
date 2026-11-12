@@ -4027,6 +4027,50 @@ Sur un objectif, deux simulateurs simples : « combien dois-je mettre de côté 
 
 Dans « Mettre de l’argent de côté pour cet objectif », pouvoir planifier un versement futur (comme une dépense planifiée) : il apparaît dans le calendrier et dans « Aujourd’hui » à sa date, et ne devient réel qu’une fois confirmé.
 
+
+---
+
+# PHASE 12 — RETOURS DE RECETTE : NOUVELLES FONCTIONNALITÉS (2026-11-11)
+
+## Objectif
+
+Les fonctionnalités nouvelles demandées aux cinquième (2026-11-11) et sixième (2026-11-12) passages de recette. Les défauts des mêmes passages sont suivis dans `SUIVI_RECETTE.md` (sections R11 et R12).
+
+### P12-01 — Assistant : ajouter ses propres réponses automatiques
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P3-19`, `R11-03`
+- Durée cible : 1 jour (estimation)
+- Origine : remarque du 2026-11-11 (« on doit pouvoir ajouter des réponses automatiques »)
+- Réalisé (2026-11-11) : onglet « Réponses automatiques » de l’assistant, bouton « Ajouter une réponse automatique » : nom du sujet, mots-clés (toutes langues), réponse en français, anglais et arabe, écran proposé. Une réponse ajoutée ici (code `PERSO-001`, `002`…) se publie, se retire, se renomme et se supprime ; celles du catalogue du client se publient et se retirent, jamais ne se suppriment. Un choix de parcours guidé peut mener à l’une ou l’autre. Migration `20261111100000_assistant_languages`. Tests : `finRecette11.test.js`.
+
+Jusqu’ici, seules les 32 réponses du catalogue du client existaient. L’administrateur doit pouvoir en écrire de nouvelles, avec leurs mots-clés, leurs traductions et l’écran qu’elles ouvrent.
+
+
+### P12-02 — Taux d’intérêt : par mois, trimestre, semestre ou an
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-10`, `P4-02`
+- Durée cible : 0,5 jour (estimation)
+- Origine : `test.txt` l. 2 (2026-11-11, 3e envoi)
+- Réalisé (2026-11-11) : à côté de chaque taux d’intérêt saisi, une période au choix — par an, par semestre, par trimestre, par mois — et l’équivalent affiché (« Soit 12 % par an (taux nominal) »). Le serveur garde le taux annuel (taux nominal : taux de la période × nombre de périodes dans l’année, comme le cite une banque). Dans : nouvelle dette, nouvel objectif (rendement attendu), simulateur de crédit, et les taux d’intérêt des simulateurs (taux annuel et taux mensuel) ; le simulateur d’épargne avait déjà son propre choix de période. Tests : `unit/ratePeriods.test.js`.
+
+« Ajouter pour les taux d’intérêt la possibilité d’inscrire les taux mensuel, trimestriel, semestriel ou annuel. »
+
+
+### P12-03 — Sans abonnement, un seul compte
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Dépendances : `P10-06`, `P8-03`
+- Durée cible : 0,5 jour (estimation)
+- Origine : `test.txt` l. 3 (2026-11-12) : « en plus d'un seul compte, l'utilisateur doit passer à l'abonnement »
+- Réalisé (2026-11-12) : sans abonnement, une personne ouvre un seul compte à elle ; pour un deuxième, le serveur refuse et l'écran dit « Sans abonnement, vous pouvez avoir un seul compte à vous. Abonnez-vous depuis « Offres »… ». Choix faits par défaut, à confirmer par le client :
+  - les comptes que l'application ouvre d'elle-même ne comptent pas et ne sont jamais bloqués : « Espèces » (mouvement sans compte), le compte d'épargne d'un objectif, le compte d'un prêt ou d'une avance ;
+  - un compte archivé ne compte pas : archiver libère la place, et le ressortir des archives est refusé si la place est prise ;
+  - les comptes ouverts avant la règle sont gardés ;
+  - un administrateur n'est jamais limité.
+  Test : `finRecette12.test.js`.
+
 ---
 
 # 4. Fonctionnalités volontairement hors MVP 8 semaines
@@ -4150,7 +4194,7 @@ Le 2026-10-18, plusieurs tâches marquées comme terminées ont été re-vérifi
 - Toute nouvelle route API est contrôlée par l'audit d'autorisation automatique (`tests/security/authorization.test.js`) : la déclarer publique ou la protéger explicitement.
 - En début de session : `npm run reprise` (dans `server/`), qui régénère le client Prisma et applique les migrations en attente. Sur une machine neuve : `npm install` dans `client/` et `server/`, `prisma migrate deploy`, `JWT_SECRET` dans `server/.env`.
 - `npm run deliverables` régénère `LIVRABLES/MATRICE_RECETTE.md` et `INVENTAIRE_COMPOSANTS.md` depuis ce fichier et la suite de tests — à relancer après tout changement de statut d'une tâche.
-- Le paquet de déploiement `larbi-en-ligne/` a été régénéré et mis en ligne le 2026-10-17 (confirmé fonctionnel via `/api/health`), puis **régénéré le 2026-11-05** (recette R1 à R8 comprise) : serveur sans tests ni client Prisma généré, 61 migrations, site compilé dans `public_site/`, `.env` modèle et `app.cjs` inchangés, `base-de-donnees.sql` exporté de `larbi_dev` (vérifié en le rechargeant dans une base temporaire : mêmes nombres de lignes). Sur l'hébergeur : `npm install`, `npx prisma generate`, importer la base, redémarrer l'application. **Régénéré le 2026-11-08** (recette R9, Phase 10) : client Prisma généré inclus, 64 migrations (dont `fin_colors`, `fin_main_categories`, `fin_exchange_rates`), site recompilé, `base-de-donnees.sql` exporté de `larbi_dev` et vérifié en le rechargeant (mêmes nombres de lignes, 90 tables) ; sa dernière ligne ferme les sessions de développement (règle « un seul écran »). **Le zip ne contient plus `.env`** (740 fichiers) : celui de l’hébergeur reste en place. **Régénéré le 2026-11-10** (recette R10, Phase 11) : 66 migrations (dont `fin_recurrence_income` et `chatbot_audience`), client Prisma généré, site recompilé, 744 fichiers sans `.env` ; `base-de-donnees.sql` exporté de `larbi_dev`, vérifié en le rechargeant (mêmes nombres de lignes, 90 tables), sessions de développement fermées en fin de fichier. À régénérer de nouveau avant toute nouvelle mise en ligne si le code a changé depuis.
+- Le paquet de déploiement `larbi-en-ligne/` a été régénéré et mis en ligne le 2026-10-17 (confirmé fonctionnel via `/api/health`), puis **régénéré le 2026-11-05** (recette R1 à R8 comprise) : serveur sans tests ni client Prisma généré, 61 migrations, site compilé dans `public_site/`, `.env` modèle et `app.cjs` inchangés, `base-de-donnees.sql` exporté de `larbi_dev` (vérifié en le rechargeant dans une base temporaire : mêmes nombres de lignes). Sur l'hébergeur : `npm install`, `npx prisma generate`, importer la base, redémarrer l'application. **Régénéré le 2026-11-08** (recette R9, Phase 10) : client Prisma généré inclus, 64 migrations (dont `fin_colors`, `fin_main_categories`, `fin_exchange_rates`), site recompilé, `base-de-donnees.sql` exporté de `larbi_dev` et vérifié en le rechargeant (mêmes nombres de lignes, 90 tables) ; sa dernière ligne ferme les sessions de développement (règle « un seul écran »). **Le zip ne contient plus `.env`** (740 fichiers) : celui de l’hébergeur reste en place. **Régénéré le 2026-11-10** (recette R10, Phase 11) : 66 migrations (dont `fin_recurrence_income` et `chatbot_audience`), client Prisma généré, site recompilé, 744 fichiers sans `.env` ; `base-de-donnees.sql` exporté de `larbi_dev`, vérifié en le rechargeant (mêmes nombres de lignes, 90 tables), sessions de développement fermées en fin de fichier. **Régénéré le 2026-11-11** (recette R11, Phase 12) : 68 migrations (dont `assistant_languages` et `occurrence_included`), client Prisma généré, site recompilé, 746 fichiers sans `.env` ; `base-de-donnees.sql` exporté de `larbi_dev` (comptes de test de la recette retirés avant l’export), vérifié en le rechargeant (90 tables, 68 migrations, 21 comptes, mêmes nombres de lignes), sessions de développement fermées en fin de fichier. Sur l’hébergeur, comme d’habitude : `npm install`, `npx prisma generate`, importer la base (ou `npx prisma migrate deploy` pour garder la base en ligne), redémarrer. À régénérer de nouveau avant toute nouvelle mise en ligne si le code a changé depuis.
 
 Objectif final :
 Livrer FINCLUDIA, en respectant l'ordre des phases ci-dessus. Le MVP d'origine (e-learning/blog/outils) est entièrement livré. **Corrigé le 2026-10-27** : il ne reste pas seulement des décisions du client — les Phases 8 et 9 sont du vrai développement (environ 105 jours ouvrés estimés), qui commence par la correction des calculs faux (`P8-04`), puis suit l'ordre des lots du client.

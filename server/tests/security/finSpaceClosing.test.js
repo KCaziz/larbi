@@ -27,7 +27,7 @@ async function memberId(user) {
 const api = (method, path, json, user = owner) => t.request(method, `/fin/espaces/${space.id}${path}`, { user, ...(json === undefined ? {} : { json }) });
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

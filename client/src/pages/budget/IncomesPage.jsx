@@ -5,14 +5,13 @@ import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { formatAmount, formatDate } from '../../lib/format.js';
-import { fromMinorUnits, toMinorUnits } from '../../lib/money.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
-import AmountField from '../../components/fincludia/AmountField.jsx';
+import IncomeDeclarationForm from '../../components/fincludia/IncomeDeclarationForm.jsx';
 import BarList from '../../components/fincludia/charts/BarList.jsx';
 import '../../components/fincludia/Fincludia.css';
 import '../comptes/Accounts.css';
@@ -22,7 +21,6 @@ import '../comptes/Accounts.css';
 // pas » and by the payslip, and nothing listed, corrected or archived them.
 // A declared income is what is EXPECTED: it never changes a balance (only a
 // confirmed occurrence does, from the calendar).
-const FREQUENCIES = ['mensuel', 'hebdomadaire', 'trimestriel', 'semestriel', 'annuel'];
 
 export default function IncomesPage() {
   const { t, i18n } = useTranslation();
@@ -36,6 +34,9 @@ export default function IncomesPage() {
   // Recette R10-05: the account each income comes in on.
   const accounts = useApi('/fin/comptes');
   const ownAccounts = (accounts.data?.accounts ?? []).filter((account) => !account.archivedAt && !account.liability);
+  // R11-13: the same declaration as « Premiers pas », category included.
+  const categories = useApi('/fin/categories');
+  const incomeCategories = ((categories.data?.groups ?? []).find((group) => group.code === 'income')?.categories ?? []).map((category) => ({ id: category.id, label: category.label }));
 
   async function run(action, okKey) {
     setMessage(null);
@@ -74,7 +75,7 @@ export default function IncomesPage() {
           </label>
         </div>
 
-        {editing === 'new' && <IncomeForm currency={currency} accounts={ownAccounts} onSubmit={(body) => run(() => api.post('/fin/revenus', body), 'incomes.added')} />}
+        {editing === 'new' && <IncomeDeclarationForm currency={currency} accounts={ownAccounts} categories={incomeCategories} newAccountLink="/app/comptes/nouveau?retour=/app/budgets/revenus" onSubmit={(body) => run(() => api.post('/fin/revenus', body), 'incomes.added')} />}
 
         {/* The expected income per month by source, one scale for all (F001). */}
         {incomes.filter((income) => !income.archivedAt && income.currency === currency && income.monthlyValue !== null).length >= 2 && (
@@ -107,6 +108,8 @@ export default function IncomesPage() {
                           date: formatDate(i18n.language, income.versement.nextDate),
                         })
                       : t('incomes.notLinked')}
+                    {/* R11-13: and what happens on each payment. */}
+                    {income.versement && ` · ${t(income.versement.creationMode === 'auto_real' ? 'incomeForm.listAuto' : 'incomeForm.listConfirm')}`}
                   </span>
                 </span>
                 <span>
@@ -132,7 +135,7 @@ export default function IncomesPage() {
                   </button>
                 </span>
                 {editing?.id === income.id && (
-                  <IncomeForm key={income.id} currency={income.currency} income={income} accounts={ownAccounts} onSubmit={(body) => run(() => api.patch(`/fin/revenus/${income.id}`, body), 'incomes.saved')} />
+                  <IncomeDeclarationForm key={income.id} currency={income.currency} income={income} accounts={ownAccounts} categories={incomeCategories} onSubmit={({ received, ...body }) => run(() => api.patch(`/fin/revenus/${income.id}`, body), 'incomes.saved')} />
                 )}
               </li>
             ))}
@@ -140,95 +143,5 @@ export default function IncomesPage() {
         )}
       </div>
     </>
-  );
-}
-
-function IncomeForm({ currency, income = null, accounts = [], onSubmit }) {
-  const { t } = useTranslation();
-  const [state, setState] = useState(() => ({
-    label: income?.label ?? '',
-    amount: income ? fromMinorUnits(income.value, income.currency) : '',
-    frequency: income?.frequency ?? 'mensuel',
-    startDate: (income?.startDate ? new Date(income.startDate) : new Date()).toISOString().slice(0, 10),
-    endDate: income?.endDate ? new Date(income.endDate).toISOString().slice(0, 10) : '',
-    // Recette R10-05: the account it comes in on, and its next payment.
-    accountId: income?.versement?.accountId ?? '',
-    nextDate: (income?.versement?.nextDate ? new Date(income.versement.nextDate) : new Date()).toISOString().slice(0, 10),
-    received: false,
-  }));
-  const [error, setError] = useState(null);
-  const set = (name) => (event) => setState({ ...state, [name]: event.target.value });
-
-  const submit = (event) => {
-    event.preventDefault();
-    const value = toMinorUnits(state.amount, currency);
-    if (value === null) {
-      setError(t('accounts.errors.amount'));
-      return;
-    }
-    setError(null);
-    const base = {
-      label: state.label.trim(),
-      value,
-      frequency: state.frequency,
-      startDate: new Date(`${state.startDate}T00:00:00.000Z`).toISOString(),
-      endDate: state.endDate ? new Date(`${state.endDate}T00:00:00.000Z`).toISOString() : null,
-    };
-    const link = { accountId: state.accountId || null, nextDate: new Date(`${state.nextDate}T00:00:00.000Z`).toISOString() };
-    onSubmit(income ? { ...base, ...link } : { ...base, ...link, currency, received: state.received });
-  };
-
-  return (
-    <form className="accounts-form" onSubmit={submit}>
-      <div className="fin-field">
-        <label htmlFor="income-form-label">{t('firstSteps.income.label')}</label>
-        <input id="income-form-label" value={state.label} maxLength={80} required onChange={set('label')} />
-      </div>
-      <AmountField id="income-form-amount" label={t('firstSteps.income.amount')} value={state.amount} currency={currency} onChange={(amount) => setState({ ...state, amount })} required />
-      {error && <p className="form-error">{error}</p>}
-      <div className="fin-field">
-        <label htmlFor="income-form-frequency">{t('calendar.fields.frequency')}</label>
-        <select id="income-form-frequency" value={state.frequency} onChange={set('frequency')}>
-          {FREQUENCIES.map((option) => (
-            <option key={option} value={option}>
-              {t(`calendar.frequencies.${option}`, option)}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="fin-field">
-        <label htmlFor="income-form-start">{t('incomes.startDate')}</label>
-        <input id="income-form-start" type="date" value={state.startDate} required onChange={set('startDate')} />
-      </div>
-      <div className="fin-field">
-        <label htmlFor="income-form-end">{t('incomes.endDate')}</label>
-        <input id="income-form-end" type="date" value={state.endDate} onChange={set('endDate')} />
-      </div>
-      <div className="fin-field">
-        <label htmlFor="income-form-account">{t('firstSteps.income.account')}</label>
-        <select id="income-form-account" value={state.accountId} onChange={set('accountId')}>
-          <option value="">{t('movements.defaultAccount')}</option>
-          {accounts
-            .filter((account) => account.currency === currency)
-            .map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.label}
-              </option>
-            ))}
-        </select>
-      </div>
-      <div className="fin-field">
-        <label htmlFor="income-form-next">{t('firstSteps.income.nextDate')}</label>
-        <input id="income-form-next" type="date" value={state.nextDate} required onChange={set('nextDate')} />
-      </div>
-      {!income && state.nextDate <= new Date().toISOString().slice(0, 10) && (
-        <label className="money-check" htmlFor="income-form-received">
-          <input id="income-form-received" type="checkbox" checked={state.received} onChange={(event) => setState({ ...state, received: event.target.checked })} />
-          {t('firstSteps.income.received')}
-        </label>
-      )}
-      <p className="fin-hint">{t('incomes.linkHint')}</p>
-      <Button type="submit">{t('accounts.save')}</Button>
-    </form>
   );
 }

@@ -6,13 +6,24 @@ import { fallbackCategories, isKnownDeepLink, resolveIntent } from '../services/
 // (the public chatbot button works for anonymous visitors too, like P3-07);
 // userId is recorded in the audit log only when a session is present.
 
-const intentView = (i) => ({
-  code: i.code,
-  label: i.label,
-  exampleQuery: i.exampleQuery,
-  responseTemplate: i.responseTemplate,
-  deepLinkPath: isKnownDeepLink(i.deepLinkPath) ? i.deepLinkPath : null,
-});
+// R11-05: in the reader's language when translated, in French otherwise.
+const PUBLIC_LANGUAGES = ['fr', 'en', 'ar'];
+const langOf = (req) => {
+  const asked = req.body?.lang ?? req.query?.lang;
+  return PUBLIC_LANGUAGES.includes(asked) ? asked : 'fr';
+};
+const hasText = (html) => Boolean((html ?? '').replace(/<[^>]*>/g, '').trim());
+
+const intentView = (i, lang = 'fr') => {
+  const own = lang === 'fr' ? null : i.translations?.[lang];
+  return {
+    code: i.code,
+    label: own?.label?.trim() ? own.label : i.label,
+    exampleQuery: i.exampleQuery,
+    responseTemplate: hasText(own?.responseTemplate) ? own.responseTemplate : i.responseTemplate,
+    deepLinkPath: isKnownDeepLink(i.deepLinkPath) ? i.deepLinkPath : null,
+  };
+};
 
 export async function resolve(req, res) {
   const intents = await prisma.finIntent.findMany({ where: { status: 'published' }, orderBy: { position: 'asc' } });
@@ -21,16 +32,22 @@ export async function resolve(req, res) {
 
   if (!match) {
     await prisma.finAuditLog.create({ data: { userId, action: 'fallback' } });
-    return res.json({ type: 'fallback', categories: fallbackCategories(intents).map(intentView) });
+    return res.json({ type: 'fallback', categories: fallbackCategories(intents).map((i) => intentView(i, langOf(req))) });
   }
 
   await prisma.finAuditLog.create({ data: { userId, intentCode: match.code, action: 'resolved' } });
-  res.json({ type: 'intent', intent: intentView(match) });
+  res.json({ type: 'intent', intent: intentView(match, langOf(req)) });
 }
 
 export async function listIntentsPublic(req, res) {
   const intents = await prisma.finIntent.findMany({ where: { status: 'published' }, orderBy: { position: 'asc' } });
-  res.json({ intents: intents.map(intentView) });
+  res.json({ intents: intents.map((i) => intentView(i, langOf(req))) });
+}
+
+// The guided paths an administrator published (R11-03), offered in the panel.
+export async function listFlowsPublic(req, res) {
+  const flows = await prisma.finFlow.findMany({ where: { status: 'published', steps: { some: {} } }, orderBy: { name: 'asc' }, select: { key: true, name: true } });
+  res.json({ flows });
 }
 
 export async function getFlow(req, res) {

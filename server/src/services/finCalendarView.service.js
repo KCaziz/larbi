@@ -114,7 +114,7 @@ export function collectEvents({ planned = [], recurrences = [], provisions = [],
     // happen: neither is expected any more.
     const occurrences = expand ? expand(recurrence, outcomes, from, to) : occurrencesOf(recurrence, from, to).map((date) => ({ dueDate: date, date, outcome: null }));
     for (const occurrence of occurrences) {
-      if (occurrence.outcome === 'confirmed' || occurrence.outcome === 'missed') continue;
+      if (['confirmed', 'missed', 'included'].includes(occurrence.outcome)) continue;
       const date = occurrence.date;
       events.push({
         kind: 'recurrence',

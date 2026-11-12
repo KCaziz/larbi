@@ -337,7 +337,8 @@ describe('the synthesis of screen C05', () => {
     assert.equal(s.revenusPrevus.formule_id, 'F001');
     assert.equal(s.revenusPrevus.resultat, 6000000, 'the declared salary is expected');
     assert.equal(s.revenus.resultat, null, 'but it has not been received (P8-04, C1)');
-    assert.equal(s.fluxNet.resultat, null);
+    // Recette R10-12: money in (none yet) minus money out — a negative flow, not unknown.
+    assert.equal(s.fluxNet.resultat, -250000);
     assert.equal(s.revenusPrevus.unite, 'DZD');
     assert.ok(s.revenus.calcule_le);
   });

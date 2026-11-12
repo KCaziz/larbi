@@ -62,7 +62,7 @@ export async function getIncomes(req, res) {
   // past, whatever the recurrence's first date says.
   const outcomes = await prisma.finOccurrence.findMany({ where: { recurrenceId: { in: recurrences.map((row) => row.id) } }, select: { recurrenceId: true, dueDate: true, outcome: true, postponedTo: true, transactionId: true } });
   const horizon = new Date(Date.now() + 400 * 24 * 3600 * 1000);
-  const nextOf = (row) => occurrencesWithOutcome(row, outcomes, row.nextDate, horizon).find((occurrence) => occurrence.outcome !== 'confirmed' && occurrence.outcome !== 'missed')?.date ?? null;
+  const nextOf = (row) => occurrencesWithOutcome(row, outcomes, row.nextDate, horizon).find((occurrence) => !['confirmed', 'missed', 'included'].includes(occurrence.outcome))?.date ?? null;
   const byIncome = new Map(recurrences.map((row) => [row.incomeId, { accountId: row.accountId, creationMode: row.creationMode, nextDate: nextOf(row) }]));
   // The monthly equivalent (F001) is the engine's; the screen draws the share of each source from it.
   res.json({
@@ -71,17 +71,17 @@ export async function getIncomes(req, res) {
 }
 
 export async function postIncome(req, res) {
-  const { accountId, nextDate, received, ...body } = req.body;
+  const { accountId, nextDate, received, autoCredit, ...body } = req.body;
   const income = await createIncome(prisma, req.user.id, body);
   // Recette R10-05: a declared income always comes with its recurrence.
-  const recurrence = await attachRecurrence(prisma, req.user.id, income, { accountId: accountId ?? null, nextDate: nextDate ?? null, received: received ?? false });
+  const recurrence = await attachRecurrence(prisma, req.user.id, income, { accountId: accountId ?? null, nextDate: nextDate ?? null, received: received ?? false, creationMode: autoCredit ? 'auto_real' : 'confirm' });
   res.status(201).json({ income, recurrence });
 }
 
 export async function patchIncome(req, res) {
-  const { accountId, nextDate, ...body } = req.body;
+  const { accountId, nextDate, autoCredit, ...body } = req.body;
   const income = Object.keys(body).some((key) => key !== 'reason') ? await updateIncome(prisma, req.user.id, req.params.id, body) : await ownIncomeRow(req.user.id, req.params.id);
-  await syncRecurrence(prisma, req.user.id, income, { accountId, nextDate });
+  await syncRecurrence(prisma, req.user.id, income, { accountId, nextDate, creationMode: autoCredit === undefined ? undefined : autoCredit ? 'auto_real' : 'confirm' });
   res.json({ income });
 }
 

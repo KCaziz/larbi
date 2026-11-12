@@ -33,7 +33,7 @@ const setBudget = (json, user = owner) => t.request('PUT', `/fin/espaces/${space
 const view = (user = owner) => t.request('GET', `/fin/espaces/${space.id}/budgets`, { user });
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

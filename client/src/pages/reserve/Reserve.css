@@ -111,3 +111,17 @@
   gap: 1rem;
   align-items: center;
 }
+
+/* R11-15: the reste à vivre beside the target, with why they differ. */
+.reserve-living {
+  display: grid;
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+  gap: var(--space-md);
+  align-items: center;
+  margin-block: var(--space-md);
+}
+@media (max-width: 640px) {
+  .reserve-living {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

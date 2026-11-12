@@ -363,8 +363,9 @@ function EnvelopeRow({ budgetId, budget, line, category, currency, run }) {
       <BudgetMeter prevu={line.prevu} reel={line.reel} currency={currency} alertLevel={line.alerte.niveau} />
       <FigureCard label={t('budget.gap')} answer={line.ecart} />
       {/* Recette R9-04: from the envelope down to the expenses it counts. */}
+      {/* Recette R12-04: an envelope on a main category covers its whole group. */}
       {(line.categoryId || line.categoryGroup) && budget && (
-        <Link className="budget-plain" to={`/app/mouvements?type=depense&${line.categoryId ? `categorie=${line.categoryId}` : `groupe=${encodeURIComponent(line.categoryGroup)}`}&du=${String(budget.periodStart).slice(0, 10)}&au=${String(budget.periodEnd).slice(0, 10)}`}>
+        <Link className="budget-plain" to={`/app/mouvements?type=depense&${line.categoryId && !(category?.main && category.group) ? `categorie=${line.categoryId}` : `groupe=${encodeURIComponent(line.categoryGroup ?? category.group)}`}&du=${String(budget.periodStart).slice(0, 10)}&au=${String(budget.periodEnd).slice(0, 10)}`}>
           {t('budget.seeExpenses')}
         </Link>
       )}

@@ -15,7 +15,7 @@ let otherId;
 const members = async (user) => (await t.request('GET', `/fin/espaces/${space.id}/membres`, { user })).body.membres;
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

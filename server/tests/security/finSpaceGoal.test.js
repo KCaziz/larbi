@@ -22,7 +22,7 @@ async function join(joiner, role = 'member') {
 }
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

@@ -10,9 +10,12 @@ import { FIN_DEEP_LINK_WHITELIST, FIN_FALLBACK_MAX_CATEGORIES } from '../constan
 export function normalise(text) {
   return String(text ?? '')
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    // Every accent and diacritic goes (Latin accents, Arabic harakat); the
+    // letters of every language stay (R11-05: an Arabic question was stripped
+    // to nothing and never recognised).
+    .replace(/\p{M}/gu, '')
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }

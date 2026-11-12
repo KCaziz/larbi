@@ -33,9 +33,11 @@ export async function attachRecurrence(prisma, userId, income, { accountId = nul
   });
   // « Je l'ai déjà reçu »: the first payment, on or before today, confirmed at
   // once — the same confirmation as « Reçu », so never credited twice.
-  if (received && first <= new Date()) {
+  // « Déjà dans le solde de départ » (recette R12-03): the same, as « included » —
+  // a real income of its month, taken back out of the starting balance.
+  if ((received === true || received === 'included') && first <= new Date()) {
     try {
-      await recordOccurrence(prisma, userId, { recurrenceId: recurrence.id, dueDate: first, action: 'confirm' });
+      await recordOccurrence(prisma, userId, { recurrenceId: recurrence.id, dueDate: first, action: received === true ? 'confirm' : 'included' });
     } catch (err) {
       if (err.details?.reason !== 'futureDate') throw err;
     }
@@ -45,11 +47,11 @@ export async function attachRecurrence(prisma, userId, income, { accountId = nul
 
 // After an income is corrected: its recurrence follows. An income that had
 // none gets one when the person now gives an account or a date.
-export async function syncRecurrence(prisma, userId, income, { accountId, nextDate } = {}) {
+export async function syncRecurrence(prisma, userId, income, { accountId, nextDate, creationMode } = {}) {
   const linked = await linkedRecurrences(prisma, userId, income.id);
   if (linked.length === 0) {
     if (accountId === undefined && nextDate === undefined) return null;
-    return attachRecurrence(prisma, userId, income, { accountId: accountId ?? null, nextDate: nextDate ?? null });
+    return attachRecurrence(prisma, userId, income, { accountId: accountId ?? null, nextDate: nextDate ?? null, ...(creationMode ? { creationMode } : {}) });
   }
   const fields = {
     label: income.label,
@@ -58,6 +60,7 @@ export async function syncRecurrence(prisma, userId, income, { accountId, nextDa
     endDate: income.endDate ?? null,
     ...(accountId !== undefined ? { accountId } : {}),
     ...(nextDate ? { nextDate } : {}),
+    ...(creationMode ? { creationMode } : {}),
   };
   for (const row of linked) await updateRecurrence(prisma, userId, row.id, fields);
   return linked[0];

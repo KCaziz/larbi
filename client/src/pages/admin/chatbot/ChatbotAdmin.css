@@ -107,3 +107,59 @@
     flex-wrap: wrap;
   }
 }
+
+.chatbot-admin-add {
+  margin-block-end: 16px;
+}
+
+/* R11-05: a question (or an answer) in every language. */
+.chatbot-admin-warning {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-inline-start: 3px solid var(--warning, #b7791f);
+  background: var(--surface-alt, var(--surface));
+}
+.chatbot-admin-langs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chatbot-admin-lang {
+  display: grid;
+  gap: 2px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.chatbot-admin-lang span {
+  font-size: 0.8rem;
+  color: var(--text);
+}
+.chatbot-admin-lang.missing span {
+  color: var(--danger, #b42318);
+}
+.chatbot-admin-lang.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-bg);
+}
+.chatbot-admin-lang-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-inline-start: 6px;
+}
+.chatbot-admin-chip {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+}
+.chatbot-admin-chip.missing {
+  color: var(--danger, #b42318);
+  border-color: currentColor;
+}

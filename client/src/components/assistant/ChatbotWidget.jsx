@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { tipsKeyFor } from '../../lib/pageTips.js';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ChevronRight, Lightbulb, MessageCircleQuestion, Search, X } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Lightbulb, ListTree, MessageCircleQuestion, Search, X } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { ASSISTANT_OPEN_EVENT } from '../../lib/finControls.js';
 import { useApi } from '../../lib/useApi.js';
@@ -33,7 +33,10 @@ function Assistant() {
   // The deterministic resolver (P3-19) is content of its own: the panel must
   // be reachable when an administrator published intents but no predefined
   // question yet. Without this, the free-text field could never be used.
-  const intents = useApi('/fin-assistant/intents');
+  const intents = useApi(`/fin-assistant/intents?lang=${lang}`);
+  // Guided paths an administrator published (R11-03): a question, then the next.
+  const flows = useApi('/fin-assistant/flows');
+  const [flow, setFlow] = useState(null); // { flow, stepKey } | { flow, ended: true }
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [query, setQuery] = useState('');
@@ -49,13 +52,14 @@ function Assistant() {
   const tipsRaw = tipsKey ? t(`tips.${tipsKey}`, { returnObjects: true }) : [];
   const tips = Array.isArray(tipsRaw) ? tipsRaw : [];
   const hasResolver = intents.status === 'ready' && intents.data.intents.length > 0;
+  const flowList = flows.status === 'ready' ? flows.data.flows : [];
   const selected = list.find((e) => e.id === selectedId) ?? null;
 
   // Focus follows what the panel shows: its heading on open and on every
   // change of view, so a screen reader announces the new content.
   useEffect(() => {
     if (open) headingRef.current?.focus();
-  }, [open, selectedId, resolved]);
+  }, [open, selectedId, resolved, flow]);
 
   // The top bar also opens the assistant (P1-12: « aide / assistant » is one of
   // the four entries the client puts there). The panel is not a route, so the
@@ -84,6 +88,7 @@ function Assistant() {
     setOpen(false);
     setSelectedId(null);
     setResolved(null);
+    setFlow(null);
     setQuery('');
     toggleRef.current?.focus();
   }
@@ -91,6 +96,28 @@ function Assistant() {
   function backToList() {
     setSelectedId(null);
     setResolved(null);
+    setFlow(null);
+  }
+
+  async function startFlow(key) {
+    try {
+      const data = await api.get(`/fin-assistant/flows/${key}`);
+      if (data.flow.steps.length) setFlow({ flow: data.flow, stepKey: data.flow.steps[0].stepKey });
+    } catch {
+      setFlow(null);
+    }
+  }
+
+  // A choice leads to another step, to an automatic answer, or ends the path.
+  function choose(option) {
+    const next = option.nextStepKey && flow.flow.steps.find((step) => step.stepKey === option.nextStepKey);
+    if (next) return setFlow({ flow: flow.flow, stepKey: next.stepKey });
+    const intent = option.intentCode && intents.status === 'ready' ? intents.data.intents.find((i) => i.code === option.intentCode) : null;
+    if (intent) {
+      setFlow(null);
+      return setResolved({ type: 'intent', intent });
+    }
+    return setFlow({ flow: flow.flow, ended: true });
   }
 
   async function submitSearch(event) {
@@ -98,7 +125,7 @@ function Assistant() {
     if (!query.trim() || resolving) return;
     setResolving(true);
     try {
-      const data = await api.post('/fin-assistant/resolve', { query: query.trim() });
+      const data = await api.post('/fin-assistant/resolve', { query: query.trim(), lang });
       setResolved(data);
     } catch {
       // A network or server hiccup is the same as "not understood": the
@@ -122,11 +149,12 @@ function Assistant() {
   // nothing on the days nothing is published. With no content the panel is its
   // own empty state — the footer offers the contact page in every state, which
   // is the way out a person actually needs.
-  const empty = list.length === 0 && !hasResolver;
+  const empty = list.length === 0 && !hasResolver && flowList.length === 0;
   if (empty && !open) return null;
 
   const showingResolvedIntent = resolved?.type === 'intent';
   const showingFallback = resolved?.type === 'fallback';
+  const step = flow && !flow.ended ? flow.flow.steps.find((s) => s.stepKey === flow.stepKey) : null;
 
   return (
     <div className="chatbot" dir={textDirection(lang)}>
@@ -143,7 +171,35 @@ function Assistant() {
           </header>
 
           <div className="chatbot-body">
-            {selected ? (
+            {flow ? (
+              <>
+                <button type="button" className="chatbot-back" onClick={backToList}>
+                  <ArrowLeft className="icon-dir" size={16} strokeWidth={2} aria-hidden="true" />
+                  {t('chatbot.back')}
+                </button>
+                <h3 ref={headingRef} tabIndex={-1} className="chatbot-question">
+                  {flow.flow.name}
+                </h3>
+                {step ? (
+                  <>
+                    <p className="chatbot-answer">{step.prompt}</p>
+                    <ul className="chatbot-list">
+                      {step.options.map((option, index) => (
+                        <li key={index}>
+                          <button type="button" onClick={() => choose(option)}>
+                            <span>{option.label}</span>
+                            <ChevronRight className="icon-dir" size={16} strokeWidth={2} aria-hidden="true" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                    {step.options.length === 0 && <p className="chatbot-intro">{t('chatbot.flowEnd')}</p>}
+                  </>
+                ) : (
+                  <p className="chatbot-intro">{t('chatbot.flowEnd')}</p>
+                )}
+              </>
+            ) : selected ? (
               <>
                 <button type="button" className="chatbot-back" onClick={backToList}>
                   <ArrowLeft className="icon-dir" size={16} strokeWidth={2} aria-hidden="true" />
@@ -218,6 +274,23 @@ function Assistant() {
                 </form>
                 )}
                 {entries.status === 'ready' && entries.data.fallback && <p className="chatbot-intro">{t('chatbot.fallbackNote')}</p>}
+                {flowList.length > 0 && (
+                  <section className="chatbot-flows" aria-label={t('chatbot.flowsTitle')}>
+                    <h3 className="chatbot-faq-title">{t('chatbot.flowsTitle')}</h3>
+                    <ul className="chatbot-list">
+                      {flowList.map((item) => (
+                        <li key={item.key}>
+                          <button type="button" onClick={() => startFlow(item.key)}>
+                            <span>
+                              <ListTree size={15} aria-hidden="true" /> {item.name}
+                            </span>
+                            <ChevronRight className="icon-dir" size={16} strokeWidth={2} aria-hidden="true" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
                 {/* Tips for the page open behind the panel (R4-05): they open in place, they never leave it. */}
                 {tips.length > 0 && (
                   <section className="chatbot-tips" aria-label={t('chatbot.tipsTitle')}>

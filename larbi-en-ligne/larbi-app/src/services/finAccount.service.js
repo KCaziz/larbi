@@ -5,6 +5,7 @@
 // transaction, and it is neither income nor spending (PB-F004, PB-F005).
 import { randomUUID } from 'node:crypto';
 import { ACCOUNT_TYPES, CASH_ACCOUNT_TYPE, accountType, isLiability } from '../constants/finAccounts.js';
+import { isSubscriber } from './subscription.service.js';
 import { TRANSFER_KINDS } from '../constants/finMoney.js';
 import { HttpError } from '../utils/httpError.js';
 import { computed } from './finance/contract.js';
@@ -58,6 +59,23 @@ export async function usableAccount(prisma, userId, id, currency) {
   if (account.archivedAt) throw new HttpError(422, 'Archived account', { reason: 'archivedAccount' });
   if (account.currency !== currency) throw new HttpError(422, 'Currency differs from the account', { reason: 'accountCurrency' });
   return account;
+}
+
+// P12-03 — the client's rule (2026-11-12): without a subscription, ONE account
+// of one's own; a second one needs a subscription. Only the accounts the
+// person opens count: those the application opens by itself (« Espèces » for
+// a movement with no account, a goal's savings, a loan's or an advance's
+// account) never do, and an archived account is not counted. Accounts that
+// existed before the rule are kept.
+export const FREE_OWN_ACCOUNTS = 1;
+export const SYSTEM_ACCOUNT_TYPES = ['AC-08', 'AC-09'];
+
+export async function assertMayOpenAccount(prisma, user, { exceptId = null } = {}) {
+  if (isSubscriber(user)) return;
+  const own = await prisma.finAccount.count({
+    where: { userId: user.id, deletedAt: null, archivedAt: null, source: 'manual', type: { notIn: SYSTEM_ACCOUNT_TYPES }, ...(exceptId ? { id: { not: exceptId } } : {}) },
+  });
+  if (own >= FREE_OWN_ACCOUNTS) throw new HttpError(403, 'Subscription required', { reason: 'subscriptionRequired', feature: 'accounts' });
 }
 
 export async function createAccount(prisma, userId, body) {

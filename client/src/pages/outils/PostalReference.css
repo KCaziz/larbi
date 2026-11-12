@@ -78,6 +78,8 @@
 .postal-search input {
   flex: 1;
   min-inline-size: 0;
+  min-block-size: 42px;
+  padding-block: 10px;
   border: 0;
   background: none;
   box-shadow: none;

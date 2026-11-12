@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getFlow, listIntentsPublic, resolve } from '../controllers/finAssistant.controller.js';
+import { getFlow, listFlowsPublic, listIntentsPublic, resolve } from '../controllers/finAssistant.controller.js';
 import { optionalAuth } from '../middleware/auth.js';
 import { publicReadLimiter } from '../middleware/rateLimit.js';
 import { validateBody } from '../middleware/validate.js';
@@ -16,6 +16,7 @@ router.param('key', (req, res, next, value) => (/^[a-z0-9]+(-[a-z0-9]+)*$/.test(
 
 router.get('/intents', asyncRoute(listIntentsPublic));
 router.post('/resolve', validateBody(resolveQuerySchema), asyncRoute(resolve));
+router.get('/flows', asyncRoute(listFlowsPublic));
 router.get('/flows/:key', asyncRoute(getFlow));
 
 export default router;

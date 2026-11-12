@@ -1299,3 +1299,100 @@
     overflow-x: auto;
   }
 }
+
+/* ---------- Side menu in sections, folding, own scroll (recette R11-09) ---------- */
+.cms-shell {
+  transition: grid-template-columns 0.15s ease;
+}
+.cms-shell-folded {
+  grid-template-columns: 56px minmax(0, 1fr);
+}
+.cms-menu {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - var(--header-height) - 48px);
+}
+.cms-menu-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  padding-inline-end: 4px;
+}
+.cms-menu-section + .cms-menu-section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.cms-menu-section-title {
+  margin: 0 0 4px;
+  padding-inline: 12px;
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+[dir='rtl'] .cms-menu-section-title {
+  letter-spacing: 0;
+}
+.cms-menu .cms-menu-section a {
+  padding: 8px 12px;
+}
+.cms-menu-fold {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin-inline-start: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.cms-menu-fold:hover {
+  color: var(--text-h);
+  background: var(--bg-alt);
+}
+.cms-shell-folded .cms-menu-title-row {
+  justify-content: center;
+}
+.cms-shell-folded .cms-menu-fold {
+  margin-inline-start: 0;
+}
+.cms-shell-folded .cms-menu .cms-menu-section a {
+  justify-content: center;
+  padding: 10px;
+}
+@media (max-width: 860px) {
+  .cms-shell-folded {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cms-menu {
+    max-height: none;
+  }
+  .cms-menu-fold {
+    display: none;
+  }
+  .cms-menu-scroll {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .cms-menu-section + .cms-menu-section {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .cms-menu-section-title {
+    display: none;
+  }
+  .cms-menu-section ul {
+    flex-direction: row;
+  }
+  .cms-menu .cms-menu-section a {
+    white-space: nowrap;
+  }
+}

@@ -12,9 +12,13 @@ const language = z.enum(CONTENT_LANGUAGES);
 export const CHATBOT_AUDIENCES = ['site', 'app', 'both'];
 const audience = z.enum(CHATBOT_AUDIENCES);
 
-export const createChatbotEntrySchema = z.object({ question, answer, language: language.default('fr'), audience: audience.default('both') }).strict();
+// R11-05: `groupId` adds a translation to an existing question.
+export const createChatbotEntrySchema = z.object({ question, answer, language: language.default('fr'), audience: audience.default('both'), groupId: z.string().uuid().optional() }).strict();
 
-export const updateChatbotEntrySchema = z.object({ question, answer, language, audience }).partial().strict();
+export const updateChatbotEntrySchema = z.object({ question, answer, audience }).partial().strict();
+
+// R11-05: the order of the questions, all their translations at once.
+export const reorderChatbotGroupsSchema = z.object({ groupIds: z.array(z.string().uuid()).min(1).max(CHATBOT_LIMITS.entries) }).strict();
 
 // The whole order of ONE language at once: every entry of that language, once.
 export const reorderChatbotSchema = z

@@ -58736,6 +58736,7 @@ export namespace Prisma {
     keywords: number
     responseTemplate: number
     deepLinkPath: number
+    translations: number
     status: number
     position: number
     createdAt: number
@@ -58786,6 +58787,7 @@ export namespace Prisma {
     keywords?: true
     responseTemplate?: true
     deepLinkPath?: true
+    translations?: true
     status?: true
     position?: true
     createdAt?: true
@@ -58887,6 +58889,7 @@ export namespace Prisma {
     keywords: JsonValue
     responseTemplate: string
     deepLinkPath: string | null
+    translations: JsonValue | null
     status: string
     position: number
     createdAt: Date
@@ -58920,6 +58923,7 @@ export namespace Prisma {
     keywords?: boolean
     responseTemplate?: boolean
     deepLinkPath?: boolean
+    translations?: boolean
     status?: boolean
     position?: boolean
     createdAt?: boolean
@@ -58936,13 +58940,14 @@ export namespace Prisma {
     keywords?: boolean
     responseTemplate?: boolean
     deepLinkPath?: boolean
+    translations?: boolean
     status?: boolean
     position?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type FinIntentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "label" | "exampleQuery" | "keywords" | "responseTemplate" | "deepLinkPath" | "status" | "position" | "createdAt" | "updatedAt", ExtArgs["result"]["finIntent"]>
+  export type FinIntentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "label" | "exampleQuery" | "keywords" | "responseTemplate" | "deepLinkPath" | "translations" | "status" | "position" | "createdAt" | "updatedAt", ExtArgs["result"]["finIntent"]>
 
   export type $FinIntentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FinIntent"
@@ -58955,6 +58960,7 @@ export namespace Prisma {
       keywords: Prisma.JsonValue
       responseTemplate: string
       deepLinkPath: string | null
+      translations: Prisma.JsonValue | null
       status: string
       position: number
       createdAt: Date
@@ -59335,6 +59341,7 @@ export namespace Prisma {
     readonly keywords: FieldRef<"FinIntent", 'Json'>
     readonly responseTemplate: FieldRef<"FinIntent", 'String'>
     readonly deepLinkPath: FieldRef<"FinIntent", 'String'>
+    readonly translations: FieldRef<"FinIntent", 'Json'>
     readonly status: FieldRef<"FinIntent", 'String'>
     readonly position: FieldRef<"FinIntent", 'Int'>
     readonly createdAt: FieldRef<"FinIntent", 'DateTime'>
@@ -62636,6 +62643,7 @@ export namespace Prisma {
     status: string | null
     position: number | null
     audience: string | null
+    groupId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -62648,6 +62656,7 @@ export namespace Prisma {
     status: string | null
     position: number | null
     audience: string | null
+    groupId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -62660,6 +62669,7 @@ export namespace Prisma {
     status: number
     position: number
     audience: number
+    groupId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -62682,6 +62692,7 @@ export namespace Prisma {
     status?: true
     position?: true
     audience?: true
+    groupId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -62694,6 +62705,7 @@ export namespace Prisma {
     status?: true
     position?: true
     audience?: true
+    groupId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -62706,6 +62718,7 @@ export namespace Prisma {
     status?: true
     position?: true
     audience?: true
+    groupId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -62805,6 +62818,7 @@ export namespace Prisma {
     status: string
     position: number
     audience: string
+    groupId: string | null
     createdAt: Date
     updatedAt: Date
     _count: ChatbotEntryCountAggregateOutputType | null
@@ -62836,6 +62850,7 @@ export namespace Prisma {
     status?: boolean
     position?: boolean
     audience?: boolean
+    groupId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["chatbotEntry"]>
@@ -62850,11 +62865,12 @@ export namespace Prisma {
     status?: boolean
     position?: boolean
     audience?: boolean
+    groupId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ChatbotEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "question" | "answer" | "language" | "status" | "position" | "audience" | "createdAt" | "updatedAt", ExtArgs["result"]["chatbotEntry"]>
+  export type ChatbotEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "question" | "answer" | "language" | "status" | "position" | "audience" | "groupId" | "createdAt" | "updatedAt", ExtArgs["result"]["chatbotEntry"]>
 
   export type $ChatbotEntryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ChatbotEntry"
@@ -62867,6 +62883,7 @@ export namespace Prisma {
       status: string
       position: number
       audience: string
+      groupId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["chatbotEntry"]>
@@ -63245,6 +63262,7 @@ export namespace Prisma {
     readonly status: FieldRef<"ChatbotEntry", 'String'>
     readonly position: FieldRef<"ChatbotEntry", 'Int'>
     readonly audience: FieldRef<"ChatbotEntry", 'String'>
+    readonly groupId: FieldRef<"ChatbotEntry", 'String'>
     readonly createdAt: FieldRef<"ChatbotEntry", 'DateTime'>
     readonly updatedAt: FieldRef<"ChatbotEntry", 'DateTime'>
   }
@@ -107042,6 +107060,7 @@ export namespace Prisma {
     keywords: 'keywords',
     responseTemplate: 'responseTemplate',
     deepLinkPath: 'deepLinkPath',
+    translations: 'translations',
     status: 'status',
     position: 'position',
     createdAt: 'createdAt',
@@ -107098,6 +107117,7 @@ export namespace Prisma {
     status: 'status',
     position: 'position',
     audience: 'audience',
+    groupId: 'groupId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -108495,7 +108515,8 @@ export namespace Prisma {
     answer: 'answer',
     language: 'language',
     status: 'status',
-    audience: 'audience'
+    audience: 'audience',
+    groupId: 'groupId'
   };
 
   export type ChatbotEntryOrderByRelevanceFieldEnum = (typeof ChatbotEntryOrderByRelevanceFieldEnum)[keyof typeof ChatbotEntryOrderByRelevanceFieldEnum]
@@ -114023,6 +114044,7 @@ export namespace Prisma {
     keywords?: JsonFilter<"FinIntent">
     responseTemplate?: StringFilter<"FinIntent"> | string
     deepLinkPath?: StringNullableFilter<"FinIntent"> | string | null
+    translations?: JsonNullableFilter<"FinIntent">
     status?: StringFilter<"FinIntent"> | string
     position?: IntFilter<"FinIntent"> | number
     createdAt?: DateTimeFilter<"FinIntent"> | Date | string
@@ -114037,6 +114059,7 @@ export namespace Prisma {
     keywords?: SortOrder
     responseTemplate?: SortOrder
     deepLinkPath?: SortOrderInput | SortOrder
+    translations?: SortOrderInput | SortOrder
     status?: SortOrder
     position?: SortOrder
     createdAt?: SortOrder
@@ -114055,6 +114078,7 @@ export namespace Prisma {
     keywords?: JsonFilter<"FinIntent">
     responseTemplate?: StringFilter<"FinIntent"> | string
     deepLinkPath?: StringNullableFilter<"FinIntent"> | string | null
+    translations?: JsonNullableFilter<"FinIntent">
     status?: StringFilter<"FinIntent"> | string
     position?: IntFilter<"FinIntent"> | number
     createdAt?: DateTimeFilter<"FinIntent"> | Date | string
@@ -114069,6 +114093,7 @@ export namespace Prisma {
     keywords?: SortOrder
     responseTemplate?: SortOrder
     deepLinkPath?: SortOrderInput | SortOrder
+    translations?: SortOrderInput | SortOrder
     status?: SortOrder
     position?: SortOrder
     createdAt?: SortOrder
@@ -114091,6 +114116,7 @@ export namespace Prisma {
     keywords?: JsonWithAggregatesFilter<"FinIntent">
     responseTemplate?: StringWithAggregatesFilter<"FinIntent"> | string
     deepLinkPath?: StringNullableWithAggregatesFilter<"FinIntent"> | string | null
+    translations?: JsonNullableWithAggregatesFilter<"FinIntent">
     status?: StringWithAggregatesFilter<"FinIntent"> | string
     position?: IntWithAggregatesFilter<"FinIntent"> | number
     createdAt?: DateTimeWithAggregatesFilter<"FinIntent"> | Date | string
@@ -114309,6 +114335,7 @@ export namespace Prisma {
     status?: StringFilter<"ChatbotEntry"> | string
     position?: IntFilter<"ChatbotEntry"> | number
     audience?: StringFilter<"ChatbotEntry"> | string
+    groupId?: StringNullableFilter<"ChatbotEntry"> | string | null
     createdAt?: DateTimeFilter<"ChatbotEntry"> | Date | string
     updatedAt?: DateTimeFilter<"ChatbotEntry"> | Date | string
   }
@@ -114321,6 +114348,7 @@ export namespace Prisma {
     status?: SortOrder
     position?: SortOrder
     audience?: SortOrder
+    groupId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _relevance?: ChatbotEntryOrderByRelevanceInput
@@ -114337,6 +114365,7 @@ export namespace Prisma {
     status?: StringFilter<"ChatbotEntry"> | string
     position?: IntFilter<"ChatbotEntry"> | number
     audience?: StringFilter<"ChatbotEntry"> | string
+    groupId?: StringNullableFilter<"ChatbotEntry"> | string | null
     createdAt?: DateTimeFilter<"ChatbotEntry"> | Date | string
     updatedAt?: DateTimeFilter<"ChatbotEntry"> | Date | string
   }, "id">
@@ -114349,6 +114378,7 @@ export namespace Prisma {
     status?: SortOrder
     position?: SortOrder
     audience?: SortOrder
+    groupId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ChatbotEntryCountOrderByAggregateInput
@@ -114369,6 +114399,7 @@ export namespace Prisma {
     status?: StringWithAggregatesFilter<"ChatbotEntry"> | string
     position?: IntWithAggregatesFilter<"ChatbotEntry"> | number
     audience?: StringWithAggregatesFilter<"ChatbotEntry"> | string
+    groupId?: StringNullableWithAggregatesFilter<"ChatbotEntry"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ChatbotEntry"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ChatbotEntry"> | Date | string
   }
@@ -123655,6 +123686,7 @@ export namespace Prisma {
     keywords?: JsonNullValueInput | InputJsonValue
     responseTemplate: string
     deepLinkPath?: string | null
+    translations?: NullableJsonNullValueInput | InputJsonValue
     status?: string
     position?: number
     createdAt?: Date | string
@@ -123669,6 +123701,7 @@ export namespace Prisma {
     keywords?: JsonNullValueInput | InputJsonValue
     responseTemplate: string
     deepLinkPath?: string | null
+    translations?: NullableJsonNullValueInput | InputJsonValue
     status?: string
     position?: number
     createdAt?: Date | string
@@ -123683,6 +123716,7 @@ export namespace Prisma {
     keywords?: JsonNullValueInput | InputJsonValue
     responseTemplate?: StringFieldUpdateOperationsInput | string
     deepLinkPath?: NullableStringFieldUpdateOperationsInput | string | null
+    translations?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -123697,6 +123731,7 @@ export namespace Prisma {
     keywords?: JsonNullValueInput | InputJsonValue
     responseTemplate?: StringFieldUpdateOperationsInput | string
     deepLinkPath?: NullableStringFieldUpdateOperationsInput | string | null
+    translations?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -123711,6 +123746,7 @@ export namespace Prisma {
     keywords?: JsonNullValueInput | InputJsonValue
     responseTemplate: string
     deepLinkPath?: string | null
+    translations?: NullableJsonNullValueInput | InputJsonValue
     status?: string
     position?: number
     createdAt?: Date | string
@@ -123725,6 +123761,7 @@ export namespace Prisma {
     keywords?: JsonNullValueInput | InputJsonValue
     responseTemplate?: StringFieldUpdateOperationsInput | string
     deepLinkPath?: NullableStringFieldUpdateOperationsInput | string | null
+    translations?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -123739,6 +123776,7 @@ export namespace Prisma {
     keywords?: JsonNullValueInput | InputJsonValue
     responseTemplate?: StringFieldUpdateOperationsInput | string
     deepLinkPath?: NullableStringFieldUpdateOperationsInput | string | null
+    translations?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -123965,6 +124003,7 @@ export namespace Prisma {
     status?: string
     position?: number
     audience?: string
+    groupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -123977,6 +124016,7 @@ export namespace Prisma {
     status?: string
     position?: number
     audience?: string
+    groupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -123989,6 +124029,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
     audience?: StringFieldUpdateOperationsInput | string
+    groupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -124001,6 +124042,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
     audience?: StringFieldUpdateOperationsInput | string
+    groupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -124013,6 +124055,7 @@ export namespace Prisma {
     status?: string
     position?: number
     audience?: string
+    groupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -124025,6 +124068,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
     audience?: StringFieldUpdateOperationsInput | string
+    groupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -124037,6 +124081,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
     audience?: StringFieldUpdateOperationsInput | string
+    groupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -131803,6 +131848,7 @@ export namespace Prisma {
     keywords?: SortOrder
     responseTemplate?: SortOrder
     deepLinkPath?: SortOrder
+    translations?: SortOrder
     status?: SortOrder
     position?: SortOrder
     createdAt?: SortOrder
@@ -131991,6 +132037,7 @@ export namespace Prisma {
     status?: SortOrder
     position?: SortOrder
     audience?: SortOrder
+    groupId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -132007,6 +132054,7 @@ export namespace Prisma {
     status?: SortOrder
     position?: SortOrder
     audience?: SortOrder
+    groupId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -132019,6 +132067,7 @@ export namespace Prisma {
     status?: SortOrder
     position?: SortOrder
     audience?: SortOrder
+    groupId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }

@@ -11,7 +11,7 @@ let user;
 const ago = (days) => new Date(Date.now() - days * 86_400_000).toISOString();
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

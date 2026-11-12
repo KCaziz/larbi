@@ -52,6 +52,8 @@
   display: grid;
   gap: var(--space-sm);
   max-inline-size: 460px;
+  margin-inline: auto;
+  inline-size: 100%;
 }
 .steps-actions {
   display: flex;

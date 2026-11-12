@@ -57,6 +57,7 @@
 
 .business-create {
   max-width: 540px;
+  margin-inline: auto;
 }
 
 .business-create h2 {

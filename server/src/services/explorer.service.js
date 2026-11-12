@@ -24,3 +24,10 @@ export async function exploreOffers({ query = '', themes = [], bankId = null, se
   }
   return prisma.comparatorCondition.findMany({ where, include: { bank: { select: { id: true, name: true } } }, take });
 }
+
+// How many public offers each rubric holds (recette R11-02): the explorer opens
+// on these rubrics instead of an empty page. Counts only — never the offers.
+export async function offersPerTheme() {
+  const rows = await prisma.comparatorCondition.groupBy({ by: ['theme'], _count: { _all: true } });
+  return rows.map((row) => ({ theme: row.theme, count: row._count._all })).filter((row) => row.count > 0);
+}

@@ -1,18 +1,5 @@
-- il faut absolument continuer a unifromiser les entre element exemple dans /app/portefeuille dans le form de Profil de risque pédagogique entre les input et le bouttons ou bien dans /app/budgets/e34414c7-fb80-4d72-897b-d767ce4a2253 entre les checkbox Reporter le reste et Reporter aussi
-- Il ya aussi un autre problème si quelqu'un veut réinitialiser et redifinir les choses à nouveau, ajoute une options pour touts réinitialiser ou reinitialiser des potions separer exp dettes 
-- Le plus d'en haut à côté de notification tu ne l'a pas fait descendre juste en dessous de synthèse (ici je ne sais pas ou il veut ajouter le bouttons ajout d'un mouvement peut etre dans l'acceuil de toutes les maniéres ne l'enleve pas de la topbar ajoute le juste la ou il veut)
-- j'ai créer un compte courant et en renseignant mon salaire ça ne me donne pas la main pour choisir le compte courant 
--  j'ai créé mon compte courant avec un solde de 60000 c'est un revenu il ne s'affiche pas dans /mouvement
-- Il ya tjr revenu 0 malgré que j'ai créé mon premier revenu. C'est vrai qu'il ne faut pas qu'il yest des doublons mais aussi il faudrait que le revenu renseigné soit compté ainsi dans tous les schémas et calculs
-- il faut crée de faq séparer quand on est sur le site et quand on est sur l'app car les questions y sont differentes 
-- Salaire prévu ne peut pas être retiré ou modifié ici ce que l'on veut dire c'est que les revenus prévus ne s'ajoute pas a nos revenu (enfin j'esseie de comprendre ce que le client veut dire) si je declare un revenus prévus ce dernier n'est ajouter nul part 
-- il faut eviter ce cas Mois de réserve 1.2195121951219512 mois restreint sur toute l'app a 4 digit aprés la virgule ou meme 3
-- Pour le fond d'urgence je ne comprends pas la logique avec laquel il marche et pareil je ne peux pas supprimer
-- dans /comptes Ajouter à côté d'archiver suprimer comme ça on aura la mains sur nos vrais comptes
-- dans /comptes/d624debb-3c83-4386-abbb-e334ebb8cbfa Je ne comprends pas comment le flux net du mois à été calculé (ajoute des explication)
-- dans /comptes/d624debb-3c83-4386-abbb-e334ebb8cbfa je viens de faire plusieurs mouvement dans les comptes mais aucun changement dans les graphs ni dans les historique 
-- le composant Choisir une catégorie bug il n'y a que la recherche qui ne marche pas actuellement aussi et des fois ca marche super bien
-- Nous devons ajouter dans les objectifs des simulateurs de combien nous devons épargner par mois sur la période donnée et un champs que nous nous pouvons renseigner épargne à mettre de côté le simulateur nous ressortira combien de temps nous faudra t'il pour épargner à cette cadence
-- dans /objectifs/50dfe3d8-44c3-4b74-84ad-13af800cc595 section Mettre de l’argent de côté pour cet objectif il faut ajouter l'option des opérations futures (Dépense planifiée)
-- verifie que le flux net c'est le total des encaissements - le total des décaissements
-- J'ai constaté aussi qu'à chaque fois on me demande de faire rentrer mon salaire alors que c'est le premier à renseigner je ne comprends pas pourquoi il n'est pas inclus
+- Le revenu n'est pas déclaré c'est quoi la méthode pour le déclarer sans pour autant créer un doublon. N'est t'il pas plus pratique d'ajouter une case et de déclarer le revenu ou solde restant pour que le compte soit actualisé
+- il y'a plusieurs problémes avec les revenu le clien dit que il n'est jamais pris en compte il propose que touts les calculs se font via le solde initiale du compte puis rajouter les revenu dans un second temps et recalculer 
+- En plus d'un seul compte l'utilisateur doit passer à l'abonnement pour ne pas l'oublier.
+- dans le calculs de budget on ne fait pas le rapporchement entre ce qui est inscrit dans l'enveloppe et ce qui a ete depensé 
+- 

@@ -1,5 +1,6 @@
 import { prisma } from '../../config/prisma.js';
-import { FIN_INTENTS, FIN_INTENT_LINKS } from '../../constants/finAssistant.js';
+import { FIN_DEEP_LINK_WHITELIST, FIN_INTENTS, FIN_INTENT_LINKS } from '../../constants/finAssistant.js';
+import { FIN_TRANSLATION_LANGUAGES } from '../../validation/finAssistant.schemas.js';
 import { FIN_INTENT_CATALOGUE, finIntent } from '../../constants/finIntents.js';
 import { sanitizeRichText, richTextToPlain } from '../../services/sanitize.service.js';
 import { isKnownDeepLink } from '../../services/finAssistant.service.js';
@@ -29,7 +30,23 @@ const intentRow = (i) => ({
   status: i.status,
   updatedAt: i.updatedAt,
   reference: referenceOf(i.code),
+  translations: i.translations ?? {},
+  // R11-05: written by an administrator (may be deleted), not from the client's list.
+  custom: i.code.startsWith('PERSO-'),
 });
+
+// Each translation's answer through the same allow-list as the French one.
+function cleanTranslations(input, previous = {}) {
+  const out = { ...previous };
+  for (const lang of FIN_TRANSLATION_LANGUAGES) {
+    if (!input?.[lang]) continue;
+    const next = { ...(out[lang] ?? {}) };
+    if (input[lang].label !== undefined) next.label = input[lang].label;
+    if (input[lang].responseTemplate !== undefined) next.responseTemplate = sanitizeRichText(input[lang].responseTemplate) ?? '';
+    out[lang] = next;
+  }
+  return out;
+}
 
 // The 8 rows exist once the admin first opens this screen (idempotent): the
 // closed catalogue IS the client's file, not something an admin invents.
@@ -60,7 +77,38 @@ export async function listIntents(req, res) {
     });
   }
   const rows = await prisma.finIntent.findMany({ orderBy: { position: 'asc' } });
-  res.json({ intents: rows.map(intentRow) });
+  // R11-05: every screen an answer may open, for the administrator's list.
+  res.json({ intents: rows.map(intentRow), deepLinks: FIN_DEEP_LINK_WHITELIST });
+}
+
+// R11-05: a new answer of the administrator's own (code PERSO-001, 002...), a draft.
+export async function createIntent(req, res) {
+  const customs = await prisma.finIntent.findMany({ where: { code: { startsWith: 'PERSO-' } }, select: { code: true } });
+  const next = customs.reduce((max, row) => Math.max(max, Number(row.code.slice(6)) || 0), 0) + 1;
+  if (next > 999) throw new HttpError(409, 'Too many answers');
+  const last = await prisma.finIntent.aggregate({ _max: { position: true } });
+  const created = await prisma.finIntent.create({
+    data: {
+      code: `PERSO-${String(next).padStart(3, '0')}`,
+      label: req.body.label,
+      exampleQuery: req.body.keywords[0],
+      keywords: req.body.keywords,
+      responseTemplate: sanitizeRichText(req.body.responseTemplate ?? '') ?? '<p></p>',
+      deepLinkPath: req.body.deepLinkPath ?? null,
+      translations: cleanTranslations(req.body.translations),
+      position: (last._max.position ?? 0) + 1,
+    },
+  });
+  res.status(201).json({ intent: intentRow(created) });
+}
+
+export async function deleteIntent(req, res) {
+  const existing = await prisma.finIntent.findUnique({ where: { id: req.params.id } });
+  if (!existing) throw new HttpError(404, 'Not found');
+  // The client's own answers stay: they can be withdrawn, never deleted.
+  if (!existing.code.startsWith('PERSO-')) throw new HttpError(403, 'Only an answer written here can be deleted');
+  await prisma.finIntent.delete({ where: { id: existing.id } });
+  res.status(204).end();
 }
 
 export async function updateIntent(req, res) {
@@ -68,6 +116,9 @@ export async function updateIntent(req, res) {
   if (!existing) throw new HttpError(404, 'Not found');
   const data = { ...req.body };
   if ('responseTemplate' in data) data.responseTemplate = sanitizeRichText(data.responseTemplate) ?? '<p></p>';
+  if ('translations' in data) data.translations = cleanTranslations(data.translations, existing.translations ?? {});
+  // The client's answers keep their name; only an administrator's own may be renamed.
+  if ('label' in data && !existing.code.startsWith('PERSO-')) delete data.label;
   const updated = await prisma.finIntent.update({ where: { id: existing.id }, data });
   res.json({ intent: intentRow(updated) });
 }
@@ -133,9 +184,18 @@ export async function deleteFlow(req, res) {
   res.status(204).end();
 }
 
+// A choice may lead only to an answer that exists.
+async function checkOptionIntents(options = []) {
+  const codes = [...new Set(options.map((o) => o.intentCode).filter(Boolean))];
+  if (codes.length === 0) return;
+  const found = await prisma.finIntent.count({ where: { code: { in: codes } } });
+  if (found !== codes.length) throw new HttpError(400, 'Validation failed', { intentCode: 'unknown' });
+}
+
 export async function createStep(req, res) {
   const flow = await prisma.finFlow.findUnique({ where: { id: req.params.id } });
   if (!flow) throw new HttpError(404, 'Not found');
+  await checkOptionIntents(req.body.options);
   const dup = await prisma.finFlowStep.findUnique({ where: { flowId_stepKey: { flowId: flow.id, stepKey: req.body.stepKey } } });
   if (dup) throw new HttpError(409, 'A step with this key already exists in this flow');
   const last = await prisma.finFlowStep.aggregate({ where: { flowId: flow.id }, _max: { position: true } });
@@ -146,6 +206,7 @@ export async function createStep(req, res) {
 export async function updateStep(req, res) {
   const existing = await prisma.finFlowStep.findUnique({ where: { id: req.params.stepId } });
   if (!existing || existing.flowId !== req.params.id) throw new HttpError(404, 'Not found');
+  await checkOptionIntents(req.body.options);
   const updated = await prisma.finFlowStep.update({ where: { id: existing.id }, data: req.body });
   res.json({ step: stepRow(updated) });
 }

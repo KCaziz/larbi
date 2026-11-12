@@ -16,6 +16,8 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
+import RateField from '../../components/fincludia/RateField.jsx';
+import { yearlyFraction } from '../../lib/ratePeriods.js';
 import { toMinorUnits } from '../../lib/money.js';
 import '../../components/fincludia/Fincludia.css';
 import './Debts.css';
@@ -399,7 +401,7 @@ export function LoanForm({ direction, accounts, run }) {
 
 export function CreateDebtForm({ defaultCurrency, onDone, onCancel }) {
   const { t } = useTranslation();
-  const [form, setForm] = useState({ label: '', lender: '', outstandingPrincipal: '', monthlyInstalment: '', rate: '', dueDate: '' });
+  const [form, setForm] = useState({ label: '', lender: '', outstandingPrincipal: '', monthlyInstalment: '', rate: '', ratePeriod: 'annuel', dueDate: '' });
   const [error, setError] = useState(null);
 
   const submit = async (event) => {
@@ -415,7 +417,8 @@ export function CreateDebtForm({ defaultCurrency, onDone, onCancel }) {
         outstandingPrincipal,
         monthlyInstalment,
         currency: defaultCurrency,
-        rate: form.rate ? Number(form.rate) / 100 : null,
+        // R11-14: typed per month, quarter, half-year or year; stored per year.
+        rate: yearlyFraction(form.rate, form.ratePeriod),
         dueDate: form.dueDate ? new Date(form.dueDate).toISOString() : null,
       });
       onDone();
@@ -439,11 +442,7 @@ export function CreateDebtForm({ defaultCurrency, onDone, onCancel }) {
         </div>
         <AmountField id="new-debt-principal" label={t('debts.outstandingPrincipal')} value={form.outstandingPrincipal} currency={defaultCurrency} onChange={(v) => setForm({ ...form, outstandingPrincipal: v })} required />
         <AmountField id="new-debt-instalment" label={t('debts.monthlyInstalment')} value={form.monthlyInstalment} currency={defaultCurrency} onChange={(v) => setForm({ ...form, monthlyInstalment: v })} required />
-        <div className="fin-field">
-          <label htmlFor="new-debt-rate">{t('debts.rate')}</label>
-          <input id="new-debt-rate" type="number" step="0.1" min="0" max="100" value={form.rate} onChange={(event) => setForm({ ...form, rate: event.target.value })} />
-          <p className="fin-hint">{t('debts.rateHint')}</p>
-        </div>
+        <RateField id="new-debt-rate" label={t('rate.interestKnown')} value={form.rate} period={form.ratePeriod} onChange={(rate) => setForm({ ...form, rate })} onPeriodChange={(ratePeriod) => setForm({ ...form, ratePeriod })} hint={t('debts.rateHint')} />
         <div className="fin-field">
           <label htmlFor="new-debt-due">{t('debts.dueDate')}</label>
           <input id="new-debt-due" type="date" value={form.dueDate} onChange={(event) => setForm({ ...form, dueDate: event.target.value })} />

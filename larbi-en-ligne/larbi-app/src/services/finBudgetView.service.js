@@ -90,6 +90,11 @@ export function alertLevel(rate, thresholds = DEFAULT_ALERT_THRESHOLDS) {
 export function assignToEnvelopes(movements, envelopes) {
   const byCategory = new Map(envelopes.filter((envelope) => envelope.categoryId).map((envelope) => [envelope.categoryId, envelope.id]));
   const byGroup = new Map(envelopes.filter((envelope) => envelope.categoryGroup).map((envelope) => [envelope.categoryGroup, envelope.id]));
+  // An envelope on a main category covers its group (R12-04), unless the group
+  // has an envelope of its own.
+  for (const envelope of envelopes) {
+    if (envelope.coversGroup && !byGroup.has(envelope.coversGroup)) byGroup.set(envelope.coversGroup, envelope.id);
+  }
   const spent = new Map(envelopes.map((envelope) => [envelope.id, 0]));
   let outside = 0;
   let outsideCount = 0;

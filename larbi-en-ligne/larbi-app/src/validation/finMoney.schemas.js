@@ -29,7 +29,11 @@ export const createIncomeSchema = z
     // the first payment is already received.
     accountId: z.string().uuid().nullable().optional(),
     nextDate: isoDate.optional(),
-    received: z.boolean().optional(),
+    // R11-07: true = received and to add to the account; 'included' = received,
+    // and already counted in the account's starting balance (never added twice).
+    received: z.union([z.boolean(), z.literal('included')]).optional(),
+    // R11-13: the following payments — asked to confirm (default), or credited on their own.
+    autoCredit: z.boolean().optional(),
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
     // Only ever used to declare a teaching/fictional row. Everything else is
@@ -50,6 +54,7 @@ export const updateIncomeSchema = z
     endDate: isoDate.nullable().optional(),
     accountId: z.string().uuid().nullable().optional(),
     nextDate: isoDate.optional(),
+    autoCredit: z.boolean().optional(),
     scope: scopeSchema.optional(),
     consentUses: consentUsesSchema.optional(),
     reason: reasonSchema.optional(),

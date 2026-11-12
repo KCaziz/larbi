@@ -13,6 +13,7 @@ import { BUDGET_RECURRENCES, DEFAULT_ALERT_THRESHOLDS, ENVELOPE_KINDS } from '..
 import { HttpError } from '../utils/httpError.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
 import { isBudgetableFamily } from './finBudgetProposal.service.js';
+import { throughEndOfDay } from '../utils/dayEnd.js';
 
 export const BUDGET_ENTITY = 'budget';
 export const ENVELOPE_ENTITY = 'envelope';
@@ -62,33 +63,10 @@ const ENVELOPE_SELECT = {
 // ---- periods ---------------------------------------------------------------
 
 /**
- * Refuses a period that overlaps another live budget of the same account —
- * the client's « chevauchement de périodes refusé ».
- *
- * A deleted or ARCHIVED budget does not block: archiving is how someone
- * withdraws a budget they no longer use, and it would be absurd for a withdrawn
- * period to forbid planning the same month again.
- *
- * This cannot be a SQL CHECK: it reads `userId`, a FOREIGN KEY column, which
- * MariaDB refuses inside a CHECK (same reason as the media and category rules).
+ * Several budgets may share a period, or overlap (recette R11-10, the client's
+ * decision of 2026-11-11 — it reverses R9-04 and R11-08): a household budget and
+ * a holiday budget for the same month, say. Nothing is refused for its dates.
  */
-export async function assertNoOverlap(prisma, userId, { periodStart, periodEnd, exceptId = null }) {
-  const clash = await prisma.finBudget.findFirst({
-    where: {
-      userId,
-      deletedAt: null,
-      archivedAt: null,
-      ...(exceptId ? { id: { not: exceptId } } : {}),
-      // Two intervals overlap when each starts before the other ends.
-      periodStart: { lte: periodEnd },
-      periodEnd: { gte: periodStart },
-    },
-    select: { id: true, label: true, periodStart: true, periodEnd: true },
-  });
-  if (clash) {
-    throw new HttpError(422, 'Overlapping budget period', { reason: 'overlappingPeriod', budgetId: clash.id, label: clash.label });
-  }
-}
 
 // The last day of the month `months` after `date`'s own month.
 const lastDayOfShiftedMonth = (date, months) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months + 1, 0));
@@ -213,8 +191,6 @@ export async function createBudget(prisma, userId, body) {
   if (!BUDGET_RECURRENCES.includes(body.recurrence ?? 'monthly')) {
     throw new HttpError(422, 'Unknown recurrence', { reason: 'unknownRecurrence' });
   }
-  await assertNoOverlap(prisma, userId, { periodStart: body.periodStart, periodEnd: body.periodEnd });
-
   const envelopes = [];
   for (const envelope of body.envelopes ?? []) {
     if (!ENVELOPE_KINDS.includes(envelope.kind)) throw new HttpError(422, 'Unknown envelope kind', { reason: 'unknownKind' });
@@ -302,9 +278,6 @@ export async function updateBudget(prisma, userId, id, body) {
   const periodStart = fields.periodStart ?? before.periodStart;
   const periodEnd = fields.periodEnd ?? before.periodEnd;
   if (periodEnd <= periodStart) throw new HttpError(422, 'A period ends after it starts', { reason: 'period' });
-  if (fields.periodStart !== undefined || fields.periodEnd !== undefined) {
-    await assertNoOverlap(prisma, userId, { periodStart, periodEnd, exceptId: id });
-  }
 
   return prisma.$transaction(async (tx) => {
     const after = await tx.finBudget.update({ where: { id }, data: { ...fields, version: { increment: 1 } }, select: BUDGET_SELECT });
@@ -320,12 +293,6 @@ export async function updateBudget(prisma, userId, id, body) {
 
 export async function setBudgetArchived(prisma, userId, id, archived, { reason } = {}) {
   const before = await ownBudget(prisma, userId, id);
-  // Restoring a budget puts its period back in the way of the others, so the
-  // overlap rule applies again — otherwise archive/restore would be a way round
-  // it.
-  if (!archived && before.archivedAt) {
-    await assertNoOverlap(prisma, userId, { periodStart: before.periodStart, periodEnd: before.periodEnd, exceptId: id });
-  }
   const archivedAt = archived ? new Date() : null;
   return prisma.$transaction(async (tx) => {
     const after = await tx.finBudget.update({ where: { id }, data: { archivedAt }, select: BUDGET_SELECT });
@@ -380,7 +347,6 @@ export async function duplicateBudget(prisma, userId, id, { label } = {}) {
   const budget = await ownBudget(prisma, userId, id);
   const period = nextPeriod(budget.recurrence, budget.periodStart, budget.periodEnd);
   if (!period) throw new HttpError(422, 'This budget has no next period', { reason: 'noRecurrence' });
-  await assertNoOverlap(prisma, userId, period);
 
   const envelopes = await prisma.finEnvelope.findMany({
     where: { budgetId: id, userId, deletedAt: null, archivedAt: null, recurring: true },
@@ -485,14 +451,29 @@ export async function deleteEnvelope(prisma, userId, budgetId, id, { reason } = 
 
 // ---- reads for the screen --------------------------------------------------
 
+// Recette R12-04: an envelope on a MAIN category (« Alimentation », proposed
+// from past spending tagged with it) covers its whole group, as an envelope on
+// the group does — otherwise « Alimentation & boissons » would be spent outside
+// it. `coversGroup` says so to the computation; a sub-category envelope still
+// takes its own expenses first (« le plus spécifique »).
+async function withMainCategoryGroups(prisma, envelopes) {
+  const ids = [...new Set(envelopes.map((envelope) => envelope.categoryId).filter(Boolean))];
+  if (ids.length === 0) return envelopes;
+  const mains = await prisma.finCategory.findMany({ where: { id: { in: ids }, key: { startsWith: 'main.' }, group: { not: null } }, select: { id: true, group: true } });
+  if (mains.length === 0) return envelopes;
+  const groupOf = new Map(mains.map((category) => [category.id, category.group]));
+  return envelopes.map((envelope) => (groupOf.has(envelope.categoryId) ? { ...envelope, coversGroup: groupOf.get(envelope.categoryId) } : envelope));
+}
+
 // Everything one budget's view needs, in one place so the page and the home
 // screen (P6-06) cannot read it two different ways.
 export async function loadBudgetData(prisma, userId, budget) {
-  const [envelopes, movements, incomes, goals, provisions] = await Promise.all([
+  const [rawEnvelopes, movements, incomes, goals, provisions] = await Promise.all([
     listEnvelopes(prisma, userId, budget.id),
     prisma.finTransaction.findMany({
       // Recette R9-06: an account kept apart from the total is not spent from the budget.
-      where: { userId, deletedAt: null, OR: [{ accountId: null }, { account: { includeInTotal: true } }], occurredAt: { gte: budget.periodStart, lte: budget.periodEnd } },
+      // Recette R12-04: the last day of the period is spent from it too.
+      where: { userId, deletedAt: null, OR: [{ accountId: null }, { account: { includeInTotal: true } }], occurredAt: { gte: budget.periodStart, lte: throughEndOfDay(budget.periodEnd) } },
       select: {
         id: true,
         kind: true,
@@ -530,6 +511,7 @@ export async function loadBudgetData(prisma, userId, budget) {
     }),
   ]);
   const carries = budget.carryOver || budget.carryOverspend;
+  const envelopes = await withMainCategoryGroups(prisma, rawEnvelopes);
   return { envelopes, movements, incomes, goals, provisions, carry: carries ? await carryFromPrevious(prisma, userId, budget) : null };
 }
 
@@ -561,8 +543,19 @@ async function carryFromPrevious(prisma, userId, budget) {
   return { fromBudget: previous.id, amounts: carry };
 }
 
+// Every live budget whose period contains `at` (R11-10: there may be several).
+export function currentBudgets(prisma, userId, at = new Date()) {
+  const today = new Date(Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), at.getUTCDate()));
+  return prisma.finBudget.findMany({
+    where: { userId, deletedAt: null, archivedAt: null, periodStart: { lte: at }, periodEnd: { gte: today } },
+    select: BUDGET_SELECT,
+    orderBy: { periodStart: 'desc' },
+  });
+}
+
 // The budget whose period contains `at` — what "my budget" means on a home
-// screen. `null` when none does, which is a normal state, not an error.
+// screen: with several, the one started last. `null` when none does, which is
+// a normal state, not an error.
 export function currentBudget(prisma, userId, at = new Date()) {
   // A period ends on a DATE (stored at midnight): on its last day, at any hour,
   // the budget is still the current one.

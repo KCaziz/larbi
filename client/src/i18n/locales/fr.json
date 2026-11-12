@@ -688,6 +688,7 @@
     "conflict": "Cette action n’est pas possible dans l’état actuel.",
     "refused": "Cette valeur ou cette demande n’est pas acceptée. Vérifiez les champs.",
     "oneScreen": "Un seul écran à la fois avec un compte gratuit : votre compte est déjà ouvert sur un autre écran. Déconnectez-vous de l’autre écran puis réessayez (un écran inactif depuis 30 minutes se libère tout seul), ou abonnez-vous pour utiliser plusieurs écrans.",
+    "subscriptionAccounts": "Sans abonnement, vous pouvez avoir un seul compte à vous. Abonnez-vous depuis « Offres » pour en ajouter d’autres, ou archivez celui que vous n’utilisez plus.",
     "subscriptionRequired": "Inviter quelqu’un dans un espace partagé est réservé aux abonnés. Abonnez-vous depuis « Offres » pour inviter d’autres personnes."
   },
   "state": {
@@ -711,12 +712,13 @@
       "comparator": "Comparateur",
       "users": "Utilisateurs",
       "settings": "Paramètres",
-      "chatbot": "Assistant",
+      "chatbot": "Assistant « Une question ? »",
       "payments": "Paiements",
       "glossary": "Apprendre",
       "finAssistant": "Assistant FINCLUDIA",
       "missions": "Missions",
-      "rates": "Cours des devises"
+      "rates": "Cours des devises",
+      "assistantShort": "Assistant"
     },
     "shell": {
       "title": "Administration",
@@ -1582,29 +1584,29 @@
       "deleteGuideConfirm": "Supprimer définitivement le guide « {{title}} » ?"
     },
     "finAssistant": {
-      "title": "Assistant FINCLUDIA",
-      "subtitle": "Les intentions, les parcours et le journal de l'assistant déterministe de FINCLUDIA.",
+      "title": "Assistant « Une question ? »",
+      "subtitle": "Un seul assistant, le même sur le site et dans l'application : seules les questions changent.",
       "intents": "Intentions",
       "flows": "Parcours",
       "audit": "Journal",
-      "intentsNote": "Les 8 intentions de l'assistant sont fixes : leur nom et leur exemple ne se modifient pas ici. Vous pouvez compléter leurs mots-clés, leur réponse et l'écran qu'elles ouvrent.",
+      "intentsNote": "Ce que l'assistant répond quand une personne tape une phrase. Chaque sujet se reconnaît à ses mots-clés : écrivez sa réponse, puis publiez-le. Un sujet sans réponse ne peut pas être publié.",
       "example": "Exemple de question : « {{example}} »",
       "keywords": "Mots-clés (séparés par des virgules)",
       "keywordsHint": "Les mots que les visiteurs pourraient taper. Exemple : dépense, ajouter, dépenser.",
       "response": "Réponse",
-      "deepLink": "Écran ouvert par cette intention",
+      "deepLink": "Écran proposé par cette réponse",
       "deepLinkHint": "Seuls les écrans déjà construits sont proposés : les autres écrans FINCLUDIA arrivent progressivement.",
-      "noLink": "Aucun (pas encore disponible)",
+      "noLink": "Aucun écran",
       "save": "Enregistrer",
       "cancel": "Annuler",
       "saved": "Enregistré.",
       "publish": "Publier",
-      "unpublish": "Dépublier",
+      "unpublish": "Retirer",
       "published": "Publiée.",
       "unpublished": "Dépubliée.",
       "edit": "Modifier",
       "needsResponse": "Une réponse est nécessaire avant de publier.",
-      "flowsNote": "Un parcours est une suite d'étapes avec des choix (ex. un petit questionnaire de budget). Il se construit depuis la fiche technique du projet pour l'instant ; cette page permet de le publier ou de le retirer.",
+      "flowsNote": "Un parcours guidé pose des questions l'une après l'autre, avec des choix. Créez-le, ajoutez ses étapes, puis publiez-le : il apparaît alors dans le panneau « Une question ? ».",
       "addFlow": "Ajouter un parcours",
       "flowName": "Nom du parcours",
       "noFlow": "Aucun parcours pour le moment.",
@@ -1614,7 +1616,7 @@
       "delete": "Supprimer",
       "deleteFlowConfirm": "Supprimer définitivement le parcours « {{name}} » et ses étapes ?",
       "deleted": "Supprimé.",
-      "auditNote": "Journal des intentions reconnues et des cas où l'assistant n'a pas compris. Aucune donnée financière ni question tapée par un visiteur n'est conservée — seulement des codes.",
+      "auditNote": "Ce que les personnes ont demandé à l'assistant : seulement le sujet reconnu ou le parcours suivi. Aucune phrase tapée ni aucune donnée financière n'est conservée.",
       "auditDate": "Date",
       "auditAction": "Action",
       "auditTarget": "Intention / parcours",
@@ -1631,7 +1633,47 @@
       "referenceTitle": "Ce que l'assistant peut faire",
       "referenceAnswer": "Réponse autorisée :",
       "referenceSteps": "Questions à poser :",
-      "referenceGuardrail": "Garde-fou :"
+      "referenceGuardrail": "Garde-fou :",
+      "tabs": {
+        "questions": "Questions",
+        "intents": "Réponses automatiques",
+        "flows": "Parcours guidés",
+        "audit": "Journal"
+      },
+      "questionsNote": "Les questions proposées dans la liste du panneau « Une question ? ». Pour chacune, choisissez où elle apparaît : sur le site, dans l'application, ou aux deux endroits. Une nouvelle question reste en brouillon jusqu'à ce que vous la publiiez.",
+      "publishedCount": "Publiés : {{n}} sur {{total}}",
+      "answerMissing": "Réponse à écrire",
+      "writeAnswer": "Écrire la réponse",
+      "saveAndPublish": "Enregistrer et publier",
+      "responseHint": "Le texte affiché à la personne. Une réponse est nécessaire pour publier.",
+      "flowCreated": "Parcours créé : ajoutez maintenant sa première étape.",
+      "steps": "Étapes",
+      "noStep": "Aucune étape pour l'instant : ajoutez-en au moins une pour pouvoir publier ce parcours.",
+      "addStepTitle": "Ajouter l'étape {{n}}",
+      "stepPrompt": "Question posée à la personne",
+      "stepOptions": "Choix proposés",
+      "optionLabel": "Texte du choix",
+      "optionTarget": "Mène à",
+      "optionsHint": "Chaque choix mène à une autre étape, à une réponse automatique, ou termine le parcours. « L'étape suivante » est celle que vous ajouterez juste après.",
+      "targetEnd": "Fin du parcours",
+      "targetNext": "L'étape suivante",
+      "targetStep": "Étape {{n}}",
+      "targetIntent": "Réponse : {{label}}",
+      "addOption": "Ajouter un choix",
+      "removeOption": "Retirer ce choix",
+      "addStep": "Ajouter l'étape",
+      "deleteStep": "Supprimer l'étape",
+      "stepAdded": "Étape ajoutée.",
+      "stepExists": "Cette étape existe déjà : rechargez la page.",
+      "addIntent": "Ajouter une réponse automatique",
+      "intentLabel": "Nom du sujet",
+      "newNeeds": "Donnez un nom au sujet et au moins un mot-clé.",
+      "keywordsHintAll": "Les mots qui font reconnaître ce sujet, séparés par des virgules, dans toutes les langues (ex. : budget, budget mensuel, ميزانية).",
+      "translationHint": "La traduction de la réponse. Laissée vide, la réponse française s'affiche.",
+      "deepLinkHintAll": "L'écran que la réponse propose d'ouvrir : tous les écrans de l'application et du site.",
+      "screensApp": "Application",
+      "screensSite": "Site",
+      "deleteIntentConfirm": "Supprimer la réponse « {{name}} » ? Elle disparaît de l'assistant."
     },
     "missions": {
       "title": "Missions pédagogiques",
@@ -1700,6 +1742,13 @@
         "EPG": "Épargnant débutant",
         "AUT": "Autre"
       }
+    },
+    "navSections": {
+      "overview": "Vue d'ensemble",
+      "content": "Contenus",
+      "assistant": "Assistant",
+      "finance": "Finances",
+      "platform": "Plateforme"
     }
   },
   "learn": {
@@ -2493,7 +2542,10 @@
     "typeToSearch": "Tapez au moins deux caractères, ou choisissez une rubrique, pour lancer la recherche.",
     "tryExample": "Essayez par exemple :",
     "reservedToAdults": "Explorer est réservé aux personnes de 19 ans et plus — l’âge de la majorité civile en Algérie. Votre tranche d’âge ne permet pas d’y accéder.",
-    "neverEligibility": "Un résultat affiché ici n'est jamais une garantie d'éligibilité : vérifiez toujours les conditions exactes auprès de l'établissement."
+    "neverEligibility": "Un résultat affiché ici n'est jamais une garantie d'éligibilité : vérifiez toujours les conditions exactes auprès de l'établissement.",
+    "browseTitle": "Commencer par une rubrique",
+    "offerCount_one": "{{count}} offre",
+    "offerCount_other": "{{count}} offres"
   },
   "workshop": {
     "title": "Atelier de simulation",
@@ -2549,7 +2601,7 @@
       "published": "La question est maintenant visible par les visiteurs.",
       "unpublished": "La question n'est plus visible par les visiteurs.",
       "publish": "Publier",
-      "unpublish": "Retirer du site",
+      "unpublish": "Retirer",
       "moveUp": "Monter",
       "moveDown": "Descendre",
       "empty": "Aucune question en {{language}} pour l'instant. Tant qu'aucune question n'est publiée dans une langue, le bouton « Une question ? » n'apparaît pas pour les visiteurs qui consultent le site dans cette langue.",
@@ -2560,17 +2612,27 @@
       },
       "audience": "Où l’afficher",
       "audiences": {
-        "site": "Site (FAQ publique)",
-        "app": "Application (aide « Une question ? »)",
-        "both": "Les deux"
-      }
+        "site": "Site seulement",
+        "app": "Application seulement",
+        "both": "Site et application"
+      },
+      "incomplete": "{{n}} question(s) sur {{total}} ne sont pas traduites dans toutes les langues : la langue manquante affiche le texte français.",
+      "answerMissing": "Écrivez aussi la réponse en {{language}}, ou videz la question de cette langue.",
+      "translated": "traduite",
+      "toTranslate": "à traduire",
+      "missingShort": "manquante",
+      "translationHint": "Écrivez la question et sa réponse dans chaque langue (onglets ci-dessus). Une langue laissée vide affiche le texte français à ses lecteurs.",
+      "emptyAll": "Aucune question pour l'instant.",
+      "toWrite": "à écrire"
     },
     "searchPlaceholder": "Posez votre question…",
     "searchGo": "Chercher",
     "openScreen": "Ouvrir cet écran",
     "notUnderstood": "Je n'ai pas compris. Choisissez une option…",
     "fallbackNote": "Ces questions ne sont pas encore traduites : elles s’affichent en français.",
-    "tipsTitle": "Astuces pour cette page"
+    "tipsTitle": "Astuces pour cette page",
+    "flowsTitle": "Parcours guidés",
+    "flowEnd": "Fin du parcours. Revenez à la liste pour poser une autre question."
   },
   "payments": {
     "offersTitle": "Devenir premium",
@@ -3591,9 +3653,14 @@
       "months": "Mois couverts = argent de votre fonds d’urgence ÷ dépenses essentielles par mois.",
       "gap": "Reste à mettre de côté = montant visé − argent de votre fonds d’urgence.",
       "date": "Date estimée = aujourd’hui + (reste à mettre de côté ÷ épargne mensuelle prévue pour le fonds).",
-      "excluded": "Ne comptent pas : le portefeuille fictif, les biens difficiles à vendre (immobilier, véhicule…) et l’argent réservé à d’autres objectifs."
+      "excluded": "Ne comptent pas : le portefeuille fictif, les biens difficiles à vendre (immobilier, véhicule…) et l’argent réservé à d’autres objectifs.",
+      "living": "Reste à vivre = revenus nets du mois − charges fixes − mensualités de vos dettes. Il ne fixe pas le montant visé : il dit ce que vous pouvez mettre de côté chaque mois pour l'atteindre."
     },
-    "summary": "En bref : votre fonds d’urgence contient {{fund}}. Vos dépenses essentielles sont de {{essential}} par mois, donc il couvre {{months}} mois. Vous visez {{target}} mois, soit {{targetAmount}} : il manque {{gap}}. Pour le remplir, versez-y de l’argent depuis l’objectif « Fonds d’urgence »."
+    "summary": "En bref : votre fonds d’urgence contient {{fund}}. Vos dépenses essentielles sont de {{essential}} par mois, donc il couvre {{months}} mois. Vous visez {{target}} mois, soit {{targetAmount}} : il manque {{gap}}. Pour le remplir, versez-y de l’argent depuis l’objectif « Fonds d’urgence ».",
+    "living": {
+      "label": "Reste à vivre par mois",
+      "why": "Le montant visé se calcule sur vos dépenses essentielles : ce qu'il faudrait continuer à payer chaque mois si vos revenus s'arrêtaient. Le reste à vivre est ce qui vous reste chaque mois une fois les charges fixes et les mensualités payées : c'est avec lui que vous alimentez votre réserve."
+    }
   },
   "calendar": {
     "title": "Calendrier financier",
@@ -3712,7 +3779,9 @@
       "confirmDone": "Confirmé : le mouvement est enregistré.",
       "modifyDone": "Enregistré avec le montant ou la date corrigés.",
       "missedDone": "Noté : rien n’a été enregistré.",
-      "postponeDone": "Reporté."
+      "postponeDone": "Reporté.",
+      "included": "Déjà dans le solde de départ",
+      "includedDone": "C'est noté : ce versement était déjà dans le solde de départ. Il compte dans les revenus de son mois, et le solde de départ est ramené à ce qu'il était avant lui : le solde du compte ne bouge pas."
     },
     "creationModes": {
       "confirm": "Me demander de confirmer",
@@ -3828,7 +3897,9 @@
     "debtToRepay": "Rembourser : {{label}}",
     "debtToCollect": "À vous rembourser : {{label}}",
     "debtLeft": "(reste {{amount}})",
-    "debtRecord": "Enregistrer un remboursement"
+    "debtRecord": "Enregistrer un remboursement",
+    "alreadyInBalance": "Déjà dans le solde de départ",
+    "alreadyInDone": "C'est noté : ce versement était déjà dans le solde de départ. Il compte dans les revenus de son mois, et le solde de départ est ramené à ce qu'il était avant lui : le solde du compte ne bouge pas."
   },
   "wealth": {
     "title": "Patrimoine",
@@ -5078,7 +5149,20 @@
     "chartTitleDays_other": "Évolution du solde, jour par jour ({{count}} derniers jours)",
     "delete": "Supprimer",
     "deleted": "Compte supprimé, avec ses mouvements.",
-    "deleteConfirm": "Supprimer définitivement « {{label}} » ? Ses mouvements sont supprimés avec lui, et les virements avec vos autres comptes sont annulés des deux côtés. Pour seulement le ranger, utilisez « Archiver »."
+    "deleteConfirm": "Supprimer définitivement « {{label}} » ? Ses mouvements sont supprimés avec lui, et les virements avec vos autres comptes sont annulés des deux côtés. Pour seulement le ranger, utilisez « Archiver ».",
+    "include": {
+      "title": "Ce compte compte-t-il dans le global ?",
+      "totalYes": "Oui : son solde s’ajoute à votre solde total, et ses dépenses et revenus comptent dans l’Accueil, la Synthèse, le budget et le calendrier.",
+      "totalNo": "Non : il est calculé seul, à part (sa fiche montre son solde, ses entrées et ses sorties), sans rien changer à votre solde total ni à vos chiffres globaux.",
+      "netWorthYes": "Oui : il compte dans votre patrimoine (ce que vous possédez moins ce que vous devez).",
+      "netWorthNo": "Non : il ne compte pas dans votre patrimoine.",
+      "later": "Vous pourrez changer ces deux choix plus tard en modifiant le compte."
+    },
+    "details": {
+      "balanceNow": "Solde aujourd'hui",
+      "fixed": "Le type et la devise ne se changent pas : ils décident de la lecture de tous les mouvements déjà saisis.",
+      "openingHint": "Ce que le compte contenait à cette date, avant les mouvements saisis dans l'application. Le corriger recalcule le solde ; l'ancienne valeur reste dans l'historique du compte."
+    }
   },
   "health": {
     "title": "Santé financière",
@@ -5676,7 +5760,7 @@
   "incomes": {
     "title": "Revenus prévus",
     "intro": "Les revenus que vous avez déclarés : la base de votre « reste à allouer ».",
-    "expectedNote": "Un revenu prévu est ce que vous attendez : il ne change aucun solde. Seul un revenu confirmé le jour venu, dans le calendrier, entre dans un compte.",
+    "expectedNote": "Un revenu déclaré ici arrive sur le compte que vous choisissez. Pour chacun, vous dites si le versement du jour est déjà dans le solde, à ajouter, ou à venir — puis si les suivants vous sont demandés dans « Aujourd'hui » ou ajoutés d'eux-mêmes. Il n'est jamais compté deux fois.",
     "add": "Ajouter un revenu",
     "none": "Aucun revenu déclaré pour l’instant.",
     "added": "Revenu ajouté.",
@@ -5692,7 +5776,8 @@
     "notLinked": "Pas encore relié à un compte : il n’arrive nulle part. Cliquez « Modifier » et choisissez son compte pour qu’il soit proposé à chaque échéance.",
     "linkHint": "À chaque échéance, ce revenu vous est proposé dans « Aujourd’hui » pour confirmer qu’il est arrivé : il est alors compté dans vos revenus et sur le compte, une seule fois.",
     "deleted": "Revenu supprimé.",
-    "deleteConfirm": "Supprimer « {{label}} » ? Il ne sera plus proposé. Les versements déjà reçus restent dans vos mouvements."
+    "deleteConfirm": "Supprimer « {{label}} » ? Il ne sera plus proposé. Les versements déjà reçus restent dans vos mouvements.",
+    "included": {}
   },
   "shared": {
     "backToSpaces": "Mes espaces",
@@ -6033,5 +6118,53 @@
     "errors": {
       "rate": "Indiquez un cours supérieur à zéro."
     }
+  },
+  "incomeForm": {
+    "cash": "Espèces",
+    "what": "1. Quel revenu ?",
+    "where": "2. Sur quel compte arrive-t-il ?",
+    "when": "3. Quand arrive-t-il ?",
+    "next": "4. Et les versements suivants ?",
+    "date": "Date du versement",
+    "dateHint": "La date du dernier versement s'il est déjà arrivé ce mois-ci, sinon celle du prochain. Les suivants se déduisent de la fréquence.",
+    "opening": "« {{account}} » a démarré avec {{amount}} le {{date}}.",
+    "thisPayment": "Ce versement du {{date}} :",
+    "arrived": {
+      "included": "est arrivé, et il est déjà compris dans le solde de départ de « {{account}} »",
+      "add": "est arrivé : l'ajouter maintenant au solde de « {{account}} »",
+      "notYet": "n'est pas encore arrivé : me le demander dans « Aujourd'hui »"
+    },
+    "needArrived": "Dites ce qu'il en est du versement du {{date}} (question 3).",
+    "nextConfirm": "Me demander de confirmer chaque versement dans « Aujourd'hui » (recommandé)",
+    "nextAuto": "L'ajouter automatiquement au compte, le jour venu",
+    "summaryTitle": "Ce qui va se passer",
+    "summary": {
+      "base": "{{label}} : {{amount}} {{frequency}}, sur « {{account}} ».",
+      "included": "Le versement du {{date}} est déjà dans le solde de « {{account}} » : il compte dans les revenus du mois, et le solde de départ est ramené à ce qu'il était avant lui. Le solde du compte ne change pas.",
+      "add": "Le versement du {{date}} est ajouté maintenant au solde de « {{account}} ».",
+      "notYet": "Le versement du {{date}} vous sera demandé dans « Aujourd'hui » : il ne compte qu'une fois confirmé.",
+      "futureConfirm": "Le versement du {{date}} vous sera demandé ce jour-là dans « Aujourd'hui » : il ne compte qu'une fois confirmé.",
+      "futureAuto": "Le versement du {{date}} sera ajouté de lui-même à « {{account}} » ce jour-là.",
+      "nextConfirm": "Ensuite, chaque versement vous est demandé le jour venu, et n'est compté qu'une seule fois.",
+      "nextAuto": "Ensuite, chaque versement est ajouté de lui-même à « {{account}} », le jour venu."
+    },
+    "listConfirm": "à confirmer à chaque versement",
+    "listAuto": "ajouté automatiquement"
+  },
+  "rate": {
+    "periodLabel": "Période du taux",
+    "periods": {
+      "annuel": "par an",
+      "semestriel": "par semestre",
+      "trimestriel": "par trimestre",
+      "mensuel": "par mois"
+    },
+    "equivalent": {
+      "annuel": "Soit {{value}} % par an (taux nominal).",
+      "mensuel": "Soit {{value}} % par mois (taux nominal)."
+    },
+    "interestLabel": "Taux d'intérêt",
+    "interestKnown": "Taux d'intérêt (si connu)",
+    "returnLabel": "Rendement attendu (optionnel)"
   }
 }

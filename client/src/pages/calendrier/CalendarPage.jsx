@@ -294,6 +294,12 @@ function OccurrenceActions({ event, day, currency, t, run }) {
           {t('calendar.occurrence.missed')}
         </button>
       )}
+      {/* R11-12: already in the account's starting balance — settled, not credited. */}
+      {due && event.inflow && (
+        <button type="button" className="calendar-pay" onClick={() => send('included')}>
+          {t('calendar.occurrence.included')}
+        </button>
+      )}
       <button type="button" className="calendar-pay" onClick={() => setMode(mode === 'postpone' ? null : 'postpone')}>
         {t('calendar.occurrence.postpone')}
       </button>

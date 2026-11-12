@@ -266,7 +266,7 @@ describe("FINCLUDIA — les dix parcours J01 à J10 du client", { skip: findChro
 
   test('J09 — gérer à plusieurs : espace → inviter → permissions → dépense → soldes → règlements', async () => {
     await t.reset();
-    const owner = await account();
+    const owner = await account({ accessLevel: 'premium' }); // inviting into a space is for subscribers
     const space = await api('POST', '/fin/espaces', { kind: 'flatshare', label: 'Coloc Alger', currency: 'DZD' }, owner);
     assert.equal(space.status, 201, "l'espace est créé");
 

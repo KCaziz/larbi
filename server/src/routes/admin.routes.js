@@ -131,10 +131,11 @@ import {
   listChatbotEntries,
   publishChatbotEntry,
   reorderChatbotEntries,
+  reorderChatbotGroups,
   unpublishChatbotEntry,
   updateChatbotEntry,
 } from '../controllers/admin/chatbot.controller.js';
-import { createChatbotEntrySchema, reorderChatbotSchema, updateChatbotEntrySchema } from '../validation/chatbot.schemas.js';
+import { createChatbotEntrySchema, reorderChatbotGroupsSchema, reorderChatbotSchema, updateChatbotEntrySchema } from '../validation/chatbot.schemas.js';
 import { createOffer, deleteOffer, listOffersAdmin, listOrdersAdmin, updateOffer } from '../controllers/admin/payments.controller.js';
 import { createOfferSchema, ordersQuerySchema, updateOfferSchema } from '../validation/payments.schemas.js';
 import {
@@ -158,8 +159,10 @@ import {
 import { createGuideSchema, createTermSchema, reorderGuidesSchema, updateGuideSchema, updateTermSchema } from '../validation/glossary.schemas.js';
 import {
   createFlow,
+  createIntent,
   createStep,
   deleteFlow,
+  deleteIntent,
   deleteStep,
   getFlow as getFlowAdmin,
   listAuditLog,
@@ -175,7 +178,7 @@ import {
 import { createMission, deleteMission, listMissionsAdmin, setMissionStatus, updateMission } from '../services/finMission.service.js';
 import { createMissionSchema, updateMissionSchema } from '../validation/finMissions.schemas.js';
 import { prisma as missionPrisma } from '../config/prisma.js';
-import { createFlowSchema, createStepSchema, updateIntentSchema, updateStepSchema } from '../validation/finAssistant.schemas.js';
+import { createFlowSchema, createIntentSchema, createStepSchema, updateIntentSchema, updateStepSchema } from '../validation/finAssistant.schemas.js';
 import { bankSchema, conditionsQuerySchema, createConditionSchema, updateConditionSchema } from '../validation/comparator.schemas.js';
 import { getCurrencies, postRate } from '../controllers/finExchange.controller.js';
 import { exchangeRateSchema } from '../validation/finAccount.schemas.js';
@@ -308,6 +311,7 @@ router.delete('/comparator/conditions/:id', asyncRoute(deleteCondition));
 router.get('/chatbot', asyncRoute(listChatbotEntries));
 router.post('/chatbot', validateBody(createChatbotEntrySchema), asyncRoute(createChatbotEntry));
 router.put('/chatbot/order', validateBody(reorderChatbotSchema), asyncRoute(reorderChatbotEntries));
+router.put('/chatbot/order-groups', validateBody(reorderChatbotGroupsSchema), asyncRoute(reorderChatbotGroups));
 router.patch('/chatbot/:id', validateBody(updateChatbotEntrySchema), asyncRoute(updateChatbotEntry));
 router.post('/chatbot/:id/publish', asyncRoute(publishChatbotEntry));
 router.post('/chatbot/:id/unpublish', asyncRoute(unpublishChatbotEntry));
@@ -349,6 +353,8 @@ router.delete('/fin-missions/:id', asyncRoute(async (req, res) => res.json(await
 
 // FINCLUDIA deterministic assistant (P3-19).
 router.get('/fin-assistant/intents', asyncRoute(listIntents));
+router.post('/fin-assistant/intents', validateBody(createIntentSchema), asyncRoute(createIntent));
+router.delete('/fin-assistant/intents/:id', asyncRoute(deleteIntent));
 router.patch('/fin-assistant/intents/:id', validateBody(updateIntentSchema), asyncRoute(updateIntent));
 router.post('/fin-assistant/intents/:id/publish', asyncRoute(publishIntent));
 router.post('/fin-assistant/intents/:id/unpublish', asyncRoute(unpublishIntent));

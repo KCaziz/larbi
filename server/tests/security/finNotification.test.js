@@ -16,7 +16,7 @@ const ago = (days) => new Date(Date.now() - days * 24 * 3600 * 1000);
 const future = (days) => new Date(Date.now() + days * 24 * 3600 * 1000);
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

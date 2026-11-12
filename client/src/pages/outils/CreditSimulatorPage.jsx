@@ -13,6 +13,8 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import Section from '../../components/ui/Section.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
+import { RateEquivalent, RatePeriodSelect } from '../../components/fincludia/RateField.jsx';
+import { yearlyFraction } from '../../lib/ratePeriods.js';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import { toMinorUnits } from '../../lib/money.js';
 import '../../components/fincludia/Fincludia.css';
@@ -32,7 +34,7 @@ import './CreditSimulator.css';
 export default function CreditSimulatorPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const [form, setForm] = useState({ principal: '', annualRate: '', months: '60', income: '', existingInstalments: '', fees: '', insurance: '', kind: 'Consommation' });
+  const [form, setForm] = useState({ principal: '', annualRate: '', ratePeriod: 'annuel', months: '60', income: '', existingInstalments: '', fees: '', insurance: '', kind: 'Consommation' });
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const rules = useApi('/tools/credit/regles');
@@ -51,7 +53,8 @@ export default function CreditSimulatorPage() {
         // Le taux est saisi en pourcentage et envoyé en décimal : le moteur
         // ne manipule que des décimaux, et l'interface ne montre que des
         // pourcentages. La conversion se fait ici, une fois.
-        annualRate: Number(form.annualRate) / 100,
+        // R11-14: typed per month, quarter, half-year or year; the engine reads it per year.
+        annualRate: yearlyFraction(form.annualRate, form.ratePeriod),
         months: Number(form.months),
         kind: form.kind,
         ...(form.income ? { income: toMinorUnits(form.income, currency) } : {}),
@@ -96,8 +99,13 @@ export default function CreditSimulatorPage() {
               required
             />
             <label>
-              {t('creditSim.rate')}
-              <input type="number" step="0.01" min="0" max="100" value={form.annualRate} onChange={set('annualRate')} required />
+              {t('rate.interestLabel')}
+              <span className="rate-field">
+                <input type="number" step="0.001" min="0" max="100" value={form.annualRate} onChange={set('annualRate')} required />
+                <span className="rate-field-unit">%</span>
+                <RatePeriodSelect id="credit-rate-period" value={form.ratePeriod} onChange={(ratePeriod) => setForm((previous) => ({ ...previous, ratePeriod }))} />
+              </span>
+              <RateEquivalent value={form.annualRate} period={form.ratePeriod} />
             </label>
             <label>
               {t('creditSim.months')}

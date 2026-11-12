@@ -217,3 +217,23 @@
   font-size: 0.85rem;
   opacity: 0.9;
 }
+
+/* « Reçu » / « Payé », and (R11-12) « Déjà dans le solde de départ ». */
+.today-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.today-confirm-secondary {
+  background: var(--surface);
+  color: var(--accent);
+}

@@ -81,7 +81,9 @@ export default function ReservePage() {
     event.preventDefault();
     const amount = toMinorUnits(essential, currency);
     if (amount === null) return;
-    act(() => api.put('/fin/onboarding', { answers: { essentialExpenses: { amount, frequency: 'mensuel' } }, currency }), 'reserve.essentialSaved').then((ok) => ok && setEssential(''));
+    // Recette R12-01: its own route — sent as an onboarding answer it was refused
+    // for every profile with its own questions (salaried, student…).
+    act(() => api.put('/fin/reserve/estimation', { amount, currency }), 'reserve.essentialSaved').then((ok) => ok && setEssential(''));
   };
 
   const saveTarget = (event) => {
@@ -122,6 +124,13 @@ export default function ReservePage() {
               <FigureCard label={t('reserve.targetAmount')} answer={r.cibleMontant} formula={formulas.get('F015')} />
               <FigureCard label={t('reserve.gap')} answer={r.manque} formula={formulas.get('F016')} />
             </div>
+            {/* R11-15: the reste à vivre (F006) beside the target, and why the two differ. */}
+            {r.resteAVivre && (
+              <div className="reserve-living">
+                <FigureCard label={t('reserve.living.label')} answer={r.resteAVivre.answer} formula={formulas.get('F006')} />
+                <p className="fin-hint">{t('reserve.living.why')}</p>
+              </div>
+            )}
             {/* G-08: the months covered against the target, in colour and in words. */}
             {/* C12's « date estimée » (recette R9-08). */}
             <p className="reserve-date">
@@ -217,6 +226,7 @@ export default function ReservePage() {
           <ul>
             <li>{t('reserve.method.essential')}</li>
             <li>{t('reserve.method.target')}</li>
+            <li>{t('reserve.method.living')}</li>
             <li>{t('reserve.method.months')}</li>
             <li>{t('reserve.method.gap')}</li>
             <li>{t('reserve.method.date')}</li>

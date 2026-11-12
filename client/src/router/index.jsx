@@ -247,7 +247,7 @@ const adminRoutes = {
                 },
                 {
                   path: 'assistant',
-                  lazy: lazyPage(() => import('../pages/admin/chatbot/ChatbotAdminPage.jsx')),
+                  lazy: lazyPage(() => import('../pages/admin/finAssistant/FinAssistantAdminPage.jsx')),
                 },
                 {
                   path: 'missions-fincludia',

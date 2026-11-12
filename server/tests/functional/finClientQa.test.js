@@ -65,7 +65,7 @@ const budget = async (categoryKey, value) => {
 const envelope = async (budgetId) => (await as('GET', `/fin/budgets/${budgetId}`)).body.vue.enveloppes[0];
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

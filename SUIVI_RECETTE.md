@@ -26,8 +26,10 @@ Priorités : `🔴 high` (bloque l'utilisation) · `🟡 medium` (gêne réelle)
 | R7 — Graphiques | 5 | 5 |
 | R8 — Deuxième passage (2026-11-05) | 12 | 12 |
 | R9 — Troisième passage (2026-11-08) | 19 | 18 |
-| R10 — Quatrième passage (2026-11-10) | 12 | 12 |
-| **Total** | **93** | **92** |
+| R10 — Quatrième passage (2026-11-10) | 13 | 13 |
+| R11 — Cinquième passage (2026-11-11) | 15 | 15 |
+| R12 — Sixième passage (2026-11-12) | 4 | 4 |
+| **Total** | **113** | **112** |
 
 R9 : reste R9-18 (fiche de paie), aucun défaut reproduit, à préciser avec le client.
 
@@ -829,3 +831,163 @@ Un compte courant créé avec 60 000 DA : rien n'apparaît dans `/mouvements`. L
 - Priorité : `🟡 medium`
 - Origine : `test.txt` l. 17 (4e passage)
 - Réalisé (2026-11-08) : Vérifié : flux net = revenus encaissés − dépenses décaissées (80 000 − 18 000 = 62 000 sur le compte de test, Accueil et Synthèse identiques). Défaut corrigé : sans aucun revenu reçu, le flux net était « non calculé » ; il vaut désormais −(dépenses), l’autre côté comptant pour zéro. Test : `finRecette10.test.js`.
+
+### R10-13 — Création d’un compte : dire s’il compte dans le global ou s’il est calculé seul
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : remarque du client transmise en direct (2026-11-11)
+- Réalisé (2026-11-11) : le formulaire de création propose, sous « Ce compte compte-t-il dans le global ? », les deux choix qui n’étaient jusqu’ici réglables qu’en modifiant un compte : « Compter dans le solde total » et « Compter dans le patrimoine », cochés selon le type de compte, chacun avec sa phrase (oui : son solde s’ajoute au total et ses mouvements comptent dans l’Accueil, la Synthèse, le budget et le calendrier ; non : il est calculé seul, sur sa fiche, sans rien changer aux chiffres globaux), et le rappel qu’on peut les changer plus tard.
+
+# R11 — Cinquième passage de recette (2026-11-11)
+
+Les remarques de `test.txt` (5e passage). Les défauts de l'existant ; la seule fonctionnalité nouvelle (ajouter ses propres réponses automatiques à l'assistant) est en Phase 12 de [TASKS.md](TASKS.md), P12-01.
+
+### R11-01 — Formulaires centrés, pas collés à gauche
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 1 (5e passage)
+- Réalisé (2026-11-11) : Les formulaires étroits (compte, prêt, premiers pas, entreprise) sont centrés dans la page ; les formulaires pleine largeur restaient corrects. Vérifié sur `/app/comptes/nouveau`.
+
+Exemple : `/app/comptes/nouveau`. Les formulaires étroits (compte, prêt, premiers pas, entreprise) restent à gauche de la page ; les formulaires pleine largeur (mouvement, budget, objectif, dette) ne sont pas concernés.
+
+### R11-02 — L'explorateur paraît vide
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 2 (5e passage)
+- Réalisé (2026-11-11) : L'explorateur s'ouvre sur « Commencer par une rubrique » : les rubriques qui ont des offres, avec leur nombre ; un clic affiche les offres de la rubrique. Le serveur ne renvoie que des comptes par rubrique sans filtre, jamais la liste des offres. Test `finRecette11`.
+
+`/app/outils/explorateur` n'affiche rien tant qu'on n'a rien tapé : il faut montrer dès l'ouverture les rubriques disponibles, avec leur nombre d'offres, pour commencer d'un clic.
+
+### R11-03 — Administration de l'assistant : peu claire, publication et étapes impossibles
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Origine : `test.txt` l. 3 (5e passage)
+- Réalisé (2026-11-11) : Un seul écran « Assistant « Une question ? » » (une seule entrée de menu) avec 4 onglets : Questions (ajout, choix « Site seulement », « Application seulement », « Site et application », bouton Publier / Retirer), Réponses automatiques (compteur des publiées, « Réponse à écrire », « Écrire la réponse », « Enregistrer et publier »), Parcours guidés (éditeur d'étapes : question, choix menant à une étape, à une réponse automatique ou à la fin ; publication possible dès une étape), Journal. Les parcours publiés sont proposés dans le panneau « Une question ? », sur le site et dans l'application. Test `finRecette11`.
+
+Un seul assistant « Une question ? », identique sur le site et dans l'application, seules les questions changent. Aujourd'hui deux écrans séparés (« Assistant » et « Assistant FINCLUDIA ») ; les intentions restent en brouillon (la publication, une icône d'œil, échoue sans dire qu'il manque la réponse) ; un parcours se crée mais on ne peut pas lui ajouter d'étape, donc jamais le publier.
+
+### R11-04 — Page « Services d'Algérie Poste » cassée sur le site
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Origine : `test.txt` l. 4 (5e passage)
+- Réalisé (2026-11-11) : La page est posée dans le cadre centré du site (marges comme les autres pages) ; champ de recherche à hauteur normale.
+
+`/outils/postal` : sur le site, le contenu touche les bords de l'écran (pas de marges) ; dans l'application la page est correcte.
+
+### R11-05 — Assistant : chaque question et chaque réponse dans toutes les langues
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Origine : remarque du 2026-11-11 (« il faut surveiller que tous aient une traduction »)
+- Réalisé (2026-11-11) : une question de « Une question ? » est désormais une seule question avec ses traductions (français, anglais, arabe), écrites sur un même formulaire à onglets ; la liste montre pour chacune « FR ✓ / EN manquante / AR manquante », et un bandeau compte les questions pas encore traduites partout. Où elle s’affiche, sa place et sa publication valent pour toutes ses traductions. Une langue pas encore écrite affiche la question en français au lieu de la faire disparaître. Les réponses automatiques ont aussi leurs traductions (nom et réponse), et l’assistant répond dans la langue de la personne. Au passage : une phrase tapée en arabe n’était jamais reconnue (les lettres arabes étaient effacées avant la comparaison) ; corrigé. Migration `20261111100000_assistant_languages` (les questions existantes deviennent chacune une question à une langue). Tests : `chatbot.test.js` (mis à jour), `finRecette11.test.js`.
+
+Certaines questions de la FAQ « Une question ? » avaient une traduction, d’autres non, sans moyen de le voir ni de traduire une question existante : chaque question était écrite dans une seule langue.
+
+### R11-06 — Assistant : « Écran ouvert par cette intention » ne proposait que quelques écrans
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : remarque du 2026-11-11
+- Réalisé (2026-11-11) : la liste propose tous les écrans de l’application (57, avec le nom du menu quand il existe) et du site (18), groupés « Application » / « Site » ; elle est fournie par le serveur, qui n’accepte que ces écrans. Libellé devenu « Écran proposé par cette réponse », « Aucun écran ».
+
+La liste ne comptait que 12 adresses, presque toutes du site public.
+
+### R11-07 — Le salaire compté deux fois dans le solde total
+- Statut : `✅ done`
+- Priorité : `🔴 critical`
+- Origine : `test.txt` l. 1 (2026-11-11, 2e envoi)
+- Réalisé (2026-11-11) : reproduit — un compte courant ouvert avec 60 000 DA (le salaire déjà dedans), puis le salaire déclaré « déjà reçu » sur ce compte : solde total 120 000 DA. Dans « Premiers pas », la case « déjà reçu » était même cochée d’office. Désormais, quand on coche « Je l’ai déjà reçu » sur un compte qui a démarré avec un solde, la question est posée : « Le compte « Courant » a démarré avec 60 000 DA le … Ce versement est-il déjà compris dans ce solde de départ ? » — « Oui, il y est déjà : ne pas l’ajouter une deuxième fois » (proposé d’office si le compte a été ouvert le jour du versement ou après) / « Non, l’ajouter au solde ». « Oui » n’ajoute rien et le revenu attend son versement suivant ; rien ne reste « à confirmer ». Même question dans « Revenus » et dans « Premiers pas ». Tests : `finRecette11.test.js` (3 cas).
+
+« J’ai créé un compte courant, je lui ai affecté un salaire net, mais dans le solde total j’ai le double de mon salaire net. »
+
+### R11-08 — Plusieurs budgets pour une même période
+- Statut : `✅ done` — remplacé par R11-10 (décision du client, 2026-11-11 : la règle est retirée)
+- Priorité : `🟠 high`
+- Origine : `test.txt` l. 2 (2026-11-11, 2e envoi)
+- Réalisé (2026-11-11) : la règle « une période, un budget » existait (R9-04), mais deux enregistrements envoyés au même instant (double clic sur « Enregistrer ») passaient tous les deux la vérification avant que l’un soit écrit — reproduit : trois envois simultanés, trois budgets. La vérification se fait maintenant dans l’écriture même, la personne verrouillée le temps de l’écrire : un seul budget est créé, les autres sont refusés avec le message habituel. Même verrou à la modification des dates et à la restauration d’un budget archivé ; le bouton « Enregistrer » est désactivé pendant l’envoi. Tests : `finRecette11.test.js`.
+
+« On peut créer plusieurs budgets pour une même période ou des périodes qui se chevauchent. »
+
+### R11-09 — Barre latérale de l’administration
+- Statut : `✅ done`
+- Priorité : `🟢 low`
+- Origine : `test.txt` l. 3 (2026-11-11, 2e envoi)
+- Réalisé (2026-11-11) : les 14 entrées sont rangées en sections, comme dans l’application — Vue d’ensemble, Contenus (formations, articles, apprendre, missions, médiathèque, certifications, newsletter), Assistant, Finances (paiements, comparateur, cours des devises), Plateforme (utilisateurs, paramètres) ; « Assistant » tient sur une ligne ; le menu défile seul quand il est plus haut que l’écran ; « Réduire le menu » le replie à ses icônes (retenu sur ce navigateur). Sur mobile, il reste une bande horizontale.
+
+« Améliore la side bar de l’admin. »
+
+### R11-10 — Plusieurs budgets peuvent couvrir la même période
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Origine : décision du client (2026-11-11), en réponse à R11-08
+- Réalisé (2026-11-11) : la règle « une période, un budget » (R9-04) est retirée : on peut créer plusieurs budgets pour le même mois ou pour des périodes qui se chevauchent (un budget maison et un budget vacances, par exemple), les modifier et les restaurer sans refus. Les alertes de dépassement portent sur chacun des budgets en cours ; l’Accueil, le tableau de bord et le rapport montrent le budget commencé le plus récemment. Tests : `finBudget.test.js` (mis à jour), `finRecette11.test.js`.
+
+« Non, pour les budgets il faut enlever la règle une période un budget. »
+
+### R11-11 — Modifier un compte : le solde de départ et tous ses détails
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Origine : remarque du 2026-11-11 (« quand je rentre pour modifier, on ne me donne pas la main sur le solde de départ et tous les détails du compte »)
+- Réalisé (2026-11-11) : l’écran « Modifier le compte » montre en tête le type, la devise et le solde d’aujourd’hui (avec la phrase qui dit pourquoi le type et la devise ne se changent pas), puis permet de corriger le **solde de départ** et **sa date** (avec l’explication : ce que le compte contenait ce jour-là ; le corriger recalcule le solde, l’ancienne valeur reste dans l’historique), en plus du nom, de « Ce compte compte-t-il dans le global ? » (avec les mêmes explications qu’à la création), des alertes, de la note et de la couleur. Un solde saisi deux fois se corrige donc là. Tests : `finRecette11.test.js`.
+
+### R11-12 — « Revenu à confirmer » alors qu’il était déjà là dès le départ
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Origine : remarque du 2026-11-11 (« on me dit de confirmer le revenu alors que je l’ai renseigné dès le départ »)
+- Réalisé (2026-11-11) : à côté de « Reçu », un second bouton **« Déjà dans le solde de départ »** dans « Aujourd’hui » (et dans le calendrier) : le versement est réglé sans rien ajouter au compte, et n’est plus demandé. Il sert aux revenus déjà déclarés avant R11-07 ; pour un nouveau revenu, la question est posée dès la saisie (R11-07). Migration `20261111120000_occurrence_included` (nouvelle issue « déjà compté »). Tests : `finRecette11.test.js`.
+
+### R11-13 — Une seule déclaration claire du revenu : le revenu, son compte, sa date, ses versements
+- Statut : `✅ done`
+- Priorité : `🔴 critical`
+- Origine : `test.txt` l. 1 (2026-11-11, 3e envoi)
+- Réalisé (2026-11-11) : « Revenus » et « Premiers pas » utilisent désormais **le même formulaire**, en quatre questions numérotées : 1. Quel revenu ? (nom, catégorie, montant, fréquence) — 2. Sur quel compte arrive-t-il ? (le compte bancaire est proposé d’office ; son solde de départ est rappelé) — 3. Quand arrive-t-il ? (la date du versement ; si elle est passée, une réponse est **exigée** : « est arrivé, déjà compris dans le solde de départ » / « est arrivé : l’ajouter maintenant » / « n’est pas encore arrivé : me le demander dans Aujourd’hui ») — 4. Et les versements suivants ? (« me demander de confirmer » ou « l’ajouter automatiquement le jour venu »). En bas, **« Ce qui va se passer »** dit en clair ce que fera l’enregistrement (ex. : « Le versement du 11 nov. est déjà dans le solde de « Courant » : rien n’est ajouté. Ensuite, chaque versement vous est demandé le jour venu, et n’est compté qu’une seule fois. »). La liste des revenus dit, pour chacun, le compte, le prochain versement et « à confirmer » ou « ajouté automatiquement » ; la modification reprend le même formulaire. La note en tête de « Revenus » est réécrite. Remplace la question ajoutée en R11-07 (même règle, intégrée). Tests : `finRecette11.test.js`.
+
+« Le problème du revenu revient à chaque fois et il est lié à l’ensemble de la gestion : il faudrait que la déclaration du revenu soit claire, ainsi que l’enregistrement du revenu, de sa date et de son inscription dans un compte. »
+
+### R11-15 — Réserve de sécurité et reste à vivre
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : remarque du client (2026-11-11) : « La réserve de sécurité est un objectif, normalement elle est calculée sur le reste à vivre. »
+- Décision (2026-11-11) : le montant visé reste celui du fichier du client, F015 (nombre de mois × dépenses essentielles) ; la réserve reste l’objectif « Fonds d’urgence » relié à sa page, rien à changer de ce côté.
+- Réalisé (2026-11-11) : la page « Fonds d’urgence » montre en plus le **reste à vivre par mois** (F006 du client : revenus nets − charges fixes − mensualités des dettes ; charges fixes = moyenne des dépenses des catégories « charges fixes » sur les mois complets d’historique, 1 à 3), avec la phrase qui explique la différence : le montant visé se calcule sur les dépenses essentielles (ce qu’il faudrait continuer à payer si les revenus s’arrêtaient) ; le reste à vivre est ce qui reste chaque mois et sert à alimenter la réserve. Ligne ajoutée à « Comment c’est calculé ». Sans revenu déclaré ou sans un mois d’historique, il reste « non calculé », jamais deviné. Tests : `finRecette11.test.js`.
+
+### R11-16 — En ligne, la plupart des actions semblent ne rien faire (pointer, ajouter un revenu…)
+- Statut : `✅ done`
+- Priorité : `🔴 critical`
+- Origine : remarque du 2026-11-11 (version en ligne ; en local tout marche)
+- Cause (vérifiée sur https://az-tenders.ay-web.com le 2026-11-11) : le nginx de l’hébergement **garde en cache les réponses GET de l’API** — `/api/health` renvoyait la même réponse (même heure, même durée de fonctionnement) pendant deux minutes, et une réponse neuve dès qu’on ajoutait un paramètre unique. Le serveur ne disait pas de ne pas les garder. Après un pointage (enregistré), la liste des mouvements redemandée revenait du cache, inchangée (304) : l’action paraissait sans effet. Ni l’hébergeur (PUT/PATCH/DELETE bien reçus), ni les migrations, ni l’origine des requêtes n’étaient en cause.
+- Réalisé (2026-11-11) : toutes les réponses de l’API portent `Cache-Control: no-store, private` (plus `Pragma: no-cache` et `Vary: Cookie`) ; le site demande toujours une réponse fraîche (`cache: 'no-store'`). Test : `security/apiNoStore.test.js`. **À faire sur l’hébergeur après la mise en ligne** : vider le cache nginx de cPanel (« NGINX Manager » → vider le cache) pour effacer les réponses déjà gardées.
+
+# R12 — Sixième passage de recette (2026-11-12)
+
+Les remarques de `test.txt` (6e passage) et une capture du client (page réserve, sur téléphone). Chaque remarque a d'abord été rejouée sur un compte neuf avant toute correction : la version actuelle, pas d'anciennes données ni d'anciens doublons. La seule règle nouvelle (un compte sans abonnement) est en Phase 12 de [TASKS.md](TASKS.md), P12-03.
+
+### R12-01 — Réserve : « Cette valeur n'est pas valide » en corrigeant l'estimation
+- Statut : `✅ done`
+- Priorité : `🔴 critical`
+- Origine : capture du client du 2026-11-11 (`/app/objectifs/fonds-urgence`, « Corriger mon estimation par mois »)
+- Cause (reproduite) : l'écran enregistrait l'estimation comme une réponse du questionnaire d'inscription, à la question commune « dépenses essentielles ». Pour un salarié, un jeune actif ou un étudiant, cette question est remplacée par les leurs (« charges fixes », logement, alimentation…), et le serveur refusait une question « non posée pour ce profil ». Seuls les profils sans questions propres pouvaient enregistrer.
+- Réalisé (2026-11-12) : l'estimation a sa propre route (`PUT /fin/reserve/estimation`), acceptée pour tous les profils. Le total corrigé sur la réserve remplace le détail donné à l'inscription (il ne s'y ajoute pas). Test : `finRecette12.test.js`.
+
+### R12-02 — Réserve : « Reste à vivre : non calculé — déclarez vos dettes »
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Origine : même capture
+- Cause (reproduite) : avec moins d'un mois de dépenses enregistrées, les charges fixes étaient inconnues et le reste à vivre restait « non calculé » ; le lien proposait « déclarez vos dettes », lu dans une mensualité à 0, qui est une vraie réponse (pas de dette).
+- Réalisé (2026-11-12) : sans un mois d'historique, les charges fixes viennent, comme les dépenses essentielles de la réserve, de l'estimation déclarée, puis des enveloppes « charges fixes » du budget ; le « Pourquoi ? » dit d'où elles viennent. Le lien indique ce qui manque vraiment : déclarer un revenu, ou donner l'estimation. Test : `finRecette12.test.js`.
+
+### R12-03 — Le revenu « n'est jamais pris en compte »
+- Statut : `✅ done`
+- Priorité : `🔴 critical`
+- Origine : `test.txt` l. 1-2 (6e passage) : « le revenu n'est pas déclaré… sans créer un doublon » ; « tous les calculs se font via le solde initial du compte, puis rajouter les revenus dans un second temps et recalculer »
+- Cause (reproduite sur un compte neuf : compte courant à 150 000 DA, salaire de 80 000 DA « déjà dans le solde de départ ») : le solde était juste, mais le salaire n'était compté dans aucun mois — flux net « non calculé », taux d'épargne « déclarez une ressource ». Le choix « déjà dans le solde de départ » (R11-07, R11-12) n'écrivait rien.
+- Réalisé (2026-11-12) : la méthode proposée par le client. « Déjà dans le solde de départ » enregistre le versement comme un vrai revenu de son mois, et ramène le solde de départ à ce qu'il était avant lui (150 000 → 70 000). Le solde du compte ne bouge pas (70 000 + 80 000), le salaire compte dans le mois, jamais deux fois. Même chose depuis le formulaire de revenu, les premiers pas, « Aujourd'hui » et le calendrier ; la correction du solde de départ est gardée dans l'historique du compte. Le résumé « Ce qui va se passer » le dit. Tests : `finRecette11.test.js`, `finRecette12.test.js`.
+- Limite : un salaire déclaré « déjà dans le solde de départ » AVANT cette correction n'a laissé aucune trace à reprendre automatiquement. Pour qu'il compte dans son mois : supprimer ce revenu et le déclarer à nouveau avec le même choix.
+
+### R12-04 — Budget : pas de rapprochement entre l'enveloppe et ce qui a été dépensé
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : `test.txt` l. 4 (6e passage), précisé le 2026-11-12 : « des fois les enveloppes s'affichent mais les dépenses ne sont pas renseignées »
+- Premier essai non reproduit (enveloppes sur des sous-catégories, dépenses en milieu de mois). Reproduit ensuite (budget d'octobre, 7 000 DA dépensés, 2 000 DA affichés) — deux causes réelles :
+  1. Une enveloppe posée sur une catégorie principale (« Alimentation », p. ex. proposée à partir des dépenses passées) ne recevait que les dépenses de cette catégorie exacte, pas celles de ses sous-catégories (« Alimentation & boissons »).
+  2. Les dépenses du dernier jour de la période étaient exclues : la période s'arrêtait le 31 à 00 h 00. Même défaut dans la liste des mouvements filtrée « au 31 ».
+- Correction : l'enveloppe d'une catégorie principale couvre tout son groupe (une enveloppe de sous-catégorie garde ses propres dépenses, une enveloppe de groupe reste prioritaire) ; une date de fin couvre toute la journée (budget, épargne de la méthode de budget, liste des mouvements) ; « Voir les dépenses » d'une enveloppe de catégorie principale ouvre le groupe.
+- Test : `finRecette12.test.js` (R12-04).

@@ -32,7 +32,7 @@ const spend = (json, user = owner) =>
   });
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

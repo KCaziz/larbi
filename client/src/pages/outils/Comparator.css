@@ -499,3 +499,35 @@
   color: var(--text);
   border: 1px dashed var(--border-strong);
 }
+
+/* Explorer (R11-02): the rubrics to start from, before anything is typed. */
+.explorer-rubrics h2 {
+  margin: 0 0 var(--space-sm);
+  font-size: 1.05rem;
+}
+.explorer-rubric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-sm);
+  margin-block-end: var(--space-md);
+}
+.explorer-rubric {
+  display: grid;
+  gap: 4px;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.explorer-rubric:hover,
+.explorer-rubric:focus-visible {
+  border-color: var(--accent);
+}
+.explorer-rubric span {
+  color: var(--text);
+  font-size: 0.88rem;
+}

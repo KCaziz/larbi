@@ -31,7 +31,7 @@ const spend = (json) =>
 const balances = () => t.request('GET', `/fin/espaces/${space.id}/soldes`, { user: owner });
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

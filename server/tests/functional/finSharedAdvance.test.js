@@ -42,7 +42,7 @@ const reimburse = (json, user = a) =>
   t.request('POST', `/fin/espaces/${space.id}/reglements`, { user, json: { fromId: ids.b, toId: ids.a, value: 300000, settledAt: iso(new Date()), ...json } });
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

@@ -90,6 +90,8 @@ describe('creating a category', () => {
         family: 'variable',
         label: 'Café du matin',
         group: null,
+        // P10-01: one of the person's own, never a main category of the reference.
+        main: false,
         icon: null,
         // P8-27: no colour of its own, so its family's; no group of the client's.
         color: '#2563A6',

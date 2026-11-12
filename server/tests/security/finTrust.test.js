@@ -207,6 +207,8 @@ describe('withdrawing a space-sharing consent', () => {
 
   test('once withdrawn, blocks the dependent use (income-proportional split) and disappears from the consent list', async () => {
     const space = await t.request('POST', '/fin/espaces', { user: owner, json: { kind: 'couple', label: 'Nous', currency: 'DZD' } });
+    // Inviting someone needs a subscription (P10-06).
+    await t.prisma.user.update({ where: { id: owner.id }, data: { accessLevel: 'premium' } });
     const invite = await t.request('POST', `/fin/espaces/${space.body.space.id}/invitations`, { user: owner, json: { role: 'member' } });
     await t.request('POST', '/fin/espaces/rejoindre', { user: other, json: { token: invite.body.token } });
     await t.request('PUT', `/fin/espaces/${space.body.space.id}/mon-partage`, { user: owner, json: { incomes: 'totals' } });

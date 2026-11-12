@@ -47,9 +47,17 @@ export function AccountForm({ types, currency, initial, onSubmit }) {
     // P10-05: the account's currency, chosen once (it decides how every
     // movement on it reads).
     currency: initial?.currency ?? currency,
+    // Recette (2026-11-11): said at creation, not only when editing — does this
+    // account count in the global balance and figures, or is it computed on
+    // its own? The type's default is proposed (a loan or a receivable apart).
+    includeInTotal: null,
+    includeInNetWorth: null,
   }));
   const currencies = useApi('/fin/devises');
   const accountCurrency = state.currency;
+  const chosenType = types.find((type) => type.id === state.type);
+  const inTotal = state.includeInTotal ?? chosenType?.includeInTotal ?? true;
+  const inNetWorth = state.includeInNetWorth ?? chosenType?.includeInNetWorth ?? true;
   const [error, setError] = useState(null);
 
   const submit = (event) => {
@@ -60,7 +68,7 @@ export function AccountForm({ types, currency, initial, onSubmit }) {
       return;
     }
     setError(null);
-    onSubmit({ label: state.label.trim(), type: state.type, currency: accountCurrency, openingBalance, openingDate: new Date(state.openingDate).toISOString(), ...(state.color ? { color: state.color } : {}) });
+    onSubmit({ label: state.label.trim(), type: state.type, currency: accountCurrency, openingBalance, openingDate: new Date(state.openingDate).toISOString(), includeInTotal: inTotal, includeInNetWorth: inNetWorth, ...(state.color ? { color: state.color } : {}) });
   };
 
   return (
@@ -71,7 +79,7 @@ export function AccountForm({ types, currency, initial, onSubmit }) {
       </div>
       <div className="fin-field">
         <label htmlFor="account-type">{t('accounts.fields.type')}</label>
-        <select id="account-type" value={state.type} onChange={(event) => setState({ ...state, type: event.target.value })}>
+        <select id="account-type" value={state.type} onChange={(event) => setState({ ...state, type: event.target.value, includeInTotal: null, includeInNetWorth: null })}>
           {types.map((type) => (
             <option key={type.id} value={type.id}>
               {type.label}
@@ -100,6 +108,20 @@ export function AccountForm({ types, currency, initial, onSubmit }) {
         <label htmlFor="account-opening-date">{t('accounts.fields.openingDate')}</label>
         <input id="account-opening-date" type="date" value={state.openingDate} required onChange={(event) => setState({ ...state, openingDate: event.target.value })} />
       </div>
+      <fieldset className="accounts-include">
+        <legend>{t('accounts.include.title')}</legend>
+        <label>
+          <input type="checkbox" checked={inTotal} onChange={(event) => setState({ ...state, includeInTotal: event.target.checked })} />
+          {t('accounts.fields.includeInTotal')}
+        </label>
+        <p className="fin-hint">{t(inTotal ? 'accounts.include.totalYes' : 'accounts.include.totalNo')}</p>
+        <label>
+          <input type="checkbox" checked={inNetWorth} onChange={(event) => setState({ ...state, includeInNetWorth: event.target.checked })} />
+          {t('accounts.fields.includeInNetWorth')}
+        </label>
+        <p className="fin-hint">{t(inNetWorth ? 'accounts.include.netWorthYes' : 'accounts.include.netWorthNo')}</p>
+        <p className="fin-hint">{t('accounts.include.later')}</p>
+      </fieldset>
       {/* P10-02 */}
       <ColorPicker name="account-color" value={state.color} onChange={(color) => setState({ ...state, color })} />
       <Button type="submit">{t('accounts.save')}</Button>
@@ -108,12 +130,16 @@ export function AccountForm({ types, currency, initial, onSubmit }) {
 }
 
 // Correcting an account: what tab 04B lets the person change. The type and the
-// currency are not here — they decide how every past movement reads.
-export function AccountEditForm({ account, onSubmit }) {
-  const { t } = useTranslation();
+// currency are shown, not changed — they decide how every past movement reads.
+// Recette R11-11: the starting balance and its date are here too, with every
+// detail of the account, so a balance entered twice can be put right.
+export function AccountEditForm({ account, types = [], onSubmit }) {
+  const { t, i18n } = useTranslation();
   const money = (value) => (value === null || value === undefined ? '' : fromMinorUnits(value, account.currency));
   const [state, setState] = useState({
     label: account.label,
+    opening: money(account.openingBalance ?? 0),
+    openingDate: (account.openingDate ? new Date(account.openingDate) : new Date()).toISOString().slice(0, 10),
     includeInTotal: account.includeInTotal,
     includeInNetWorth: account.includeInNetWorth,
     minBalanceAlert: money(account.minBalanceAlert),
@@ -122,19 +148,26 @@ export function AccountEditForm({ account, onSubmit }) {
     color: account.customColor ?? null,
   });
   const [error, setError] = useState(null);
+  const type = types.find((row) => row.id === account.type);
 
   const submit = (event) => {
     event.preventDefault();
     const parse = (text) => (text.trim() === '' ? null : toMinorUnits(text, account.currency, { allowZero: true }));
     const minBalanceAlert = parse(state.minBalanceAlert);
     const overdraftAllowed = parse(state.overdraftAllowed);
-    if ((state.minBalanceAlert.trim() && minBalanceAlert === null) || (state.overdraftAllowed.trim() && overdraftAllowed === null)) {
+    const openingBalance = toMinorUnits(state.opening, account.currency, { allowZero: true });
+    if (openingBalance === null || (state.minBalanceAlert.trim() && minBalanceAlert === null) || (state.overdraftAllowed.trim() && overdraftAllowed === null)) {
       setError(t('accounts.errors.amount'));
       return;
     }
     setError(null);
+    const openingDate = new Date(`${state.openingDate}T00:00:00.000Z`).toISOString();
+    const previousDate = account.openingDate ? new Date(account.openingDate).toISOString().slice(0, 10) : null;
     onSubmit({
       label: state.label.trim(),
+      // Sent only when changed: each change is kept in the account's history.
+      ...(openingBalance !== account.openingBalance ? { openingBalance } : {}),
+      ...(state.openingDate !== previousDate ? { openingDate } : {}),
       includeInTotal: state.includeInTotal,
       includeInNetWorth: state.includeInNetWorth,
       minBalanceAlert,
@@ -147,18 +180,49 @@ export function AccountEditForm({ account, onSubmit }) {
   const id = (name) => `account-${account.id}-${name}`;
   return (
     <form className="accounts-form" onSubmit={submit}>
+      <dl className="accounts-details">
+        <div>
+          <dt>{t('accounts.fields.type')}</dt>
+          <dd>{type?.label ?? account.type}</dd>
+        </div>
+        <div>
+          <dt>{t('accounts.fields.currency')}</dt>
+          <dd>{t(`currencies.${account.currency}`, account.currency)}</dd>
+        </div>
+        {account.solde?.resultat !== undefined && account.solde?.resultat !== null && (
+          <div>
+            <dt>{t('accounts.details.balanceNow')}</dt>
+            <dd>{formatAmount(i18n.language, account.solde.resultat, account.currency)}</dd>
+          </div>
+        )}
+      </dl>
+      <p className="fin-hint">{t('accounts.details.fixed')}</p>
       <div className="fin-field">
         <label htmlFor={id('label')}>{t('accounts.fields.label')}</label>
         <input id={id('label')} value={state.label} maxLength={80} required onChange={(event) => setState({ ...state, label: event.target.value })} />
       </div>
-      <label className="accounts-toggle">
-        <input type="checkbox" checked={state.includeInTotal} onChange={(event) => setState({ ...state, includeInTotal: event.target.checked })} />
-        {t('accounts.fields.includeInTotal')}
-      </label>
-      <label className="accounts-toggle">
-        <input type="checkbox" checked={state.includeInNetWorth} onChange={(event) => setState({ ...state, includeInNetWorth: event.target.checked })} />
-        {t('accounts.fields.includeInNetWorth')}
-      </label>
+      <div className="fin-field">
+        <label htmlFor={id('opening')}>{t('accounts.fields.opening', { currency: account.currency })}</label>
+        <input id={id('opening')} inputMode="decimal" value={state.opening} onChange={(event) => setState({ ...state, opening: event.target.value })} aria-invalid={Boolean(error)} />
+        <p className="fin-hint">{t('accounts.details.openingHint')}</p>
+      </div>
+      <div className="fin-field">
+        <label htmlFor={id('opening-date')}>{t('accounts.fields.openingDate')}</label>
+        <input id={id('opening-date')} type="date" value={state.openingDate} required onChange={(event) => setState({ ...state, openingDate: event.target.value })} />
+      </div>
+      <fieldset className="accounts-include">
+        <legend>{t('accounts.include.title')}</legend>
+        <label>
+          <input type="checkbox" checked={state.includeInTotal} onChange={(event) => setState({ ...state, includeInTotal: event.target.checked })} />
+          {t('accounts.fields.includeInTotal')}
+        </label>
+        <p className="fin-hint">{t(state.includeInTotal ? 'accounts.include.totalYes' : 'accounts.include.totalNo')}</p>
+        <label>
+          <input type="checkbox" checked={state.includeInNetWorth} onChange={(event) => setState({ ...state, includeInNetWorth: event.target.checked })} />
+          {t('accounts.fields.includeInNetWorth')}
+        </label>
+        <p className="fin-hint">{t(state.includeInNetWorth ? 'accounts.include.netWorthYes' : 'accounts.include.netWorthNo')}</p>
+      </fieldset>
       <div className="fin-field">
         <label htmlFor={id('min')}>{t('accounts.fields.minBalanceAlert', { currency: account.currency })}</label>
         <input id={id('min')} inputMode="decimal" value={state.minBalanceAlert} onChange={(event) => setState({ ...state, minBalanceAlert: event.target.value })} />

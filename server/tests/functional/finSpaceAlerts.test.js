@@ -34,7 +34,7 @@ const spend = (json) =>
 const notifications = async (user, type) => (await t.request('GET', '/fin/notifications', { user })).body.notifications.filter((n) => n.type === type);
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();

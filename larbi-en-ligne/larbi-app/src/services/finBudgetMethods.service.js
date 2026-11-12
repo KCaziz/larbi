@@ -8,6 +8,7 @@ import { BUDGET_METHODS, METHOD_MAPPING } from '../constants/finBudgetMethods.js
 import { computed } from './finance/contract.js';
 import { isReal } from './finance/dataModel.js';
 import { markedSavingsInPeriod } from './finSavings.service.js';
+import { throughEndOfDay } from '../utils/dayEnd.js';
 
 // The targets the client gives (tab 12), as ratios.
 const TARGETS = {
@@ -48,7 +49,7 @@ export async function methodAnalysis(prisma, userId, { method, budget, view, mov
   const pockets = { needs: 0, wants: 0, savings: 0, unclassified: 0 };
   for (const row of real.filter((item) => item.kind === 'expense')) pockets[pocketOf(row, mapping)] += row.value;
   // Savings moved by TRANSFER (P8-03) are savings too.
-  const transfers = await markedSavingsInPeriod(prisma, userId, currency, { from: budget.periodStart, to: budget.periodEnd });
+  const transfers = await markedSavingsInPeriod(prisma, userId, currency, { from: budget.periodStart, to: throughEndOfDay(budget.periodEnd) });
   const savings = (transfers.net ?? 0) > 0 ? Math.max(pockets.savings, transfers.net) : pockets.savings;
 
   const share = (amount) => (income > 0 ? amount / income : null);

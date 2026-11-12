@@ -5,14 +5,13 @@ import { Check, Rocket } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
-import { toMinorUnits } from '../../lib/money.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
-import AmountField from '../../components/fincludia/AmountField.jsx';
+import IncomeDeclarationForm from '../../components/fincludia/IncomeDeclarationForm.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './FirstSteps.css';
 
@@ -210,94 +209,23 @@ export function IncomeStep({ currency, run }) {
   const finPublic = profile.data?.profile?.finPublic ?? null;
   const suggested = (category) => (SUGGEST_LABEL[finPublic] ? category.suggestedFor?.includes(SUGGEST_LABEL[finPublic]) : false);
   const ordered = [...incomeCategories].sort((a, b) => Number(suggested(b)) - Number(suggested(a)));
-  const frequencies = ['mensuel', 'hebdomadaire', 'trimestriel', 'semestriel', 'annuel'];
-  const [form, setForm] = useState({ label: '', categoryId: '', amount: '', frequency: 'mensuel', nextDate: new Date().toISOString().slice(0, 10), accountId: '', received: true });
-  const [error, setError] = useState(null);
-  const own = accounts.data?.accounts?.filter((account) => !account.archivedAt && !account.liability && account.currency === currency) ?? [];
-
-  const submit = async (event) => {
-    event.preventDefault();
-    const value = toMinorUnits(form.amount, currency);
-    if (value === null) {
-      setError(t('accounts.errors.amount'));
-      return;
-    }
-    setError(null);
-    await run(() =>
-      api.post('/fin/premiers-pas/revenu', {
-        label: form.label.trim(),
-        categoryId: form.categoryId || null,
-        value,
-        currency,
-        frequency: form.frequency,
-        nextDate: new Date(`${form.nextDate}T00:00:00.000Z`).toISOString(),
-        accountId: form.accountId || null,
-        // On or before today, « déjà reçu » credits the account at once (R9-06).
-        received: form.received && form.nextDate <= new Date().toISOString().slice(0, 10),
-      }),
-    );
-  };
-  const set = (name) => (event) => setForm({ ...form, [name]: event.target.value });
-  void user;
-
+  // R11-13: the same declaration as « Revenus » — what, on which account, when, and the next payments.
+  // Shown once the accounts are known: the form proposes the bank account first.
+  if (accounts.status === 'loading' && !accounts.data) return <LoadingState />;
   return (
-    <form className="steps-form" onSubmit={submit}>
-      <div className="fin-field">
-        <label htmlFor="income-label">{t('firstSteps.income.label')}</label>
-        <input id="income-label" value={form.label} maxLength={80} required onChange={set('label')} />
-      </div>
-      <div className="fin-field">
-        <label htmlFor="income-category">{t('myMoney.category')}</label>
-        <select id="income-category" value={form.categoryId} onChange={set('categoryId')}>
-          <option value="">{t('myMoney.noCategory')}</option>
-          {ordered.map((category) => (
-            <option key={category.id} value={category.id}>
-              {suggested(category) ? '★ ' : ''}
-              {category.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <AmountField id="income-amount" label={t('firstSteps.income.amount')} value={form.amount} currency={currency} onChange={(amount) => setForm({ ...form, amount })} required />
-      {error && <p className="form-error">{error}</p>}
-      <div className="fin-field">
-        <label htmlFor="income-frequency">{t('calendar.fields.frequency')}</label>
-        <select id="income-frequency" value={form.frequency} onChange={set('frequency')}>
-          {frequencies.map((option) => (
-            <option key={option} value={option}>
-              {t(`calendar.frequencies.${option}`, option)}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="fin-field">
-        <label htmlFor="income-date">{t('firstSteps.income.nextDate')}</label>
-        <input id="income-date" type="date" value={form.nextDate} required onChange={set('nextDate')} />
-      </div>
-      <div className="fin-field">
-        <label htmlFor="income-account">{t('firstSteps.income.account')}</label>
-        <select id="income-account" value={form.accountId} onChange={set('accountId')}>
-          <option value="">{t('movements.defaultAccount')}</option>
-          {own.map((account) => (
-            <option key={account.id} value={account.id}>
-              {account.label}
-            </option>
-          ))}
-        </select>
-        {own.length === 0 && (
-          <p className="fin-hint">
-            {t('firstSteps.income.noAccount')} <Link to="/app/comptes/nouveau?retour=/app/parametres/premiers-pas">{t('accounts.add')}</Link>
-          </p>
-        )}
-      </div>
-      {form.nextDate <= new Date().toISOString().slice(0, 10) && (
-        <label className="money-check" htmlFor="income-received">
-          <input id="income-received" type="checkbox" checked={form.received} onChange={(event) => setForm({ ...form, received: event.target.checked })} />
-          {t('firstSteps.income.received')}
-        </label>
-      )}
-      <Button type="submit">{t('firstSteps.save')}</Button>
-    </form>
+    <IncomeDeclarationForm
+      currency={currency}
+      accounts={accounts.data?.accounts ?? []}
+      categories={ordered.map((category) => ({ id: category.id, label: category.label, star: suggested(category) }))}
+      newAccountLink="/app/comptes/nouveau?retour=/app/parametres/premiers-pas"
+      submitLabel={t('firstSteps.save')}
+      onSubmit={({ startDate, endDate, ...body }) => {
+        void user;
+        void startDate;
+        void endDate;
+        return run(() => api.post('/fin/premiers-pas/revenu', body));
+      }}
+    />
   );
 }
 

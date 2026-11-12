@@ -69,30 +69,25 @@ describe('P6-05 — budgets: the period', () => {
     assert.equal(view.body.vue.totalPrevu.resultat, 5000000);
   });
 
-  test('an overlapping period is refused, an adjacent one is accepted', async () => {
+  // R11-10 (the client, 2026-11-11): several budgets may share or overlap a period.
+  test('a budget for the same or an overlapping period is accepted', async () => {
     const first = await createBudget();
     assert.equal(first.status, 201);
-
+    const same = await createBudget({ label: 'Vacances' });
+    assert.equal(same.status, 201);
     const overlap = await createBudget({ label: 'Encore ce mois', periodStart: iso(new Date(monthStart().getTime() + 5 * DAY)) });
-    assert.equal(overlap.status, 422);
-    assert.equal(overlap.body.error.details.reason, 'overlappingPeriod');
-    assert.equal(overlap.body.error.details.budgetId, first.body.budget.id);
-
+    assert.equal(overlap.status, 201);
     const next = await createBudget({ label: 'Mois suivant', periodStart: iso(monthStart(1)), periodEnd: iso(monthEnd(1)) });
     assert.equal(next.status, 201);
   });
 
-  test('an archived budget no longer blocks its period, and restoring it checks again', async () => {
+  test('archiving and restoring a budget, whatever the others cover', async () => {
     const first = await createBudget();
     const archive = await t.request('PUT', `/fin/budgets/${first.body.budget.id}/archive`, { user, json: { archived: true } });
     assert.equal(archive.status, 200);
-
-    const again = await createBudget({ label: 'Nouvelle version' });
-    assert.equal(again.status, 201, 'a withdrawn period must not forbid planning that month again');
-
+    assert.equal((await createBudget({ label: 'Nouvelle version' })).status, 201);
     const restore = await t.request('PUT', `/fin/budgets/${first.body.budget.id}/archive`, { user, json: { archived: false } });
-    assert.equal(restore.status, 422, 'restoring must not be a way round the overlap rule');
-    assert.equal(restore.body.error.details.reason, 'overlappingPeriod');
+    assert.equal(restore.status, 200);
   });
 
   test('a period that ends before it starts is refused', async () => {

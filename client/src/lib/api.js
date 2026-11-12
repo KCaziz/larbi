@@ -24,6 +24,9 @@ async function request(path, { method = 'GET', body, signal } = {}) {
     response = await fetch(`${BASE_URL}${path}`, {
       method,
       credentials: 'include',
+      // R11-16: always the server's answer of now, never one kept by the
+      // browser or by a cache on the way (the host's nginx did keep them).
+      cache: 'no-store',
       // FormData sets its own multipart boundary header.
       headers: body === undefined || isForm ? undefined : { 'Content-Type': 'application/json' },
       body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
@@ -92,7 +95,8 @@ export function errorKey(err, overrides = {}) {
   // P10-06: two refusals that say what to do, wherever they happen.
   const reason = err instanceof ApiError ? err.details?.reason : null;
   if (reason === 'oneScreen') return 'errors.oneScreen';
-  if (reason === 'subscriptionRequired') return 'errors.subscriptionRequired';
+  // P12-03: a second account of one's own needs a subscription too.
+  if (reason === 'subscriptionRequired') return err.details?.feature === 'accounts' ? 'errors.subscriptionAccounts' : 'errors.subscriptionRequired';
   if (overrides[status]) return overrides[status];
   if (status === 0) return 'errors.network';
   if (status === 400) return 'errors.invalid';

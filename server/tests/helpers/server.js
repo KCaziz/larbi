@@ -8,7 +8,10 @@ import { SERVER_DIR, applyTestEnv, assertTestDatabase } from './env.js';
 //   const t = await boot();                       // dev-like mode
 //   const t = await boot({ production: true });   // production behaviour
 //   const t = await boot({ extra: { MEDIA_DENIED_LIMIT: '3' } });
-export async function boot({ production = false, extra = {} } = {}) {
+// `subscribers`: the users this file creates are subscribers by default (P10-06:
+// inviting into a shared space and several screens need a subscription). A
+// test about the free account says so with `accessLevel: 'standard'`.
+export async function boot({ production = false, extra = {}, subscribers = false } = {}) {
   applyTestEnv({ production, extra });
   assertTestDatabase(process.env.DATABASE_URL);
 
@@ -144,6 +147,7 @@ export async function boot({ production = false, extra = {} } = {}) {
         name: 'Test User',
         passwordHash: 'not-a-real-hash',
         accountType: 'pme',
+        ...(subscribers ? { accessLevel: 'premium' } : {}),
         ...data,
       },
     });

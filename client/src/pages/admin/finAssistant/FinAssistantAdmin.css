@@ -159,3 +159,91 @@
   color: var(--text);
   font-weight: 600;
 }
+
+/* R11-03: one assistant screen — counts, missing answers, the steps of a path. */
+.fa-admin-count {
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+.fa-admin-missing {
+  color: var(--text);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+.fa-admin-flow {
+  display: grid;
+  gap: 12px;
+}
+.fa-admin-flow-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.fa-flow-steps {
+  display: grid;
+  gap: 16px;
+  padding-block-start: 12px;
+  border-block-start: 1px solid var(--border);
+}
+.fa-flow-step-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fa-flow-step {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.fa-flow-step p {
+  margin: 6px 0;
+}
+.fa-flow-step-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.fa-flow-options {
+  margin: 0;
+  padding-inline-start: 18px;
+  font-size: 0.9rem;
+}
+.fa-flow-step-form {
+  display: grid;
+  gap: 14px;
+  max-inline-size: 640px;
+}
+.fa-flow-step-form h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.fa-flow-option-fields {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.fa-flow-option-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+@media (max-width: 640px) {
+  .fa-flow-option-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .fa-flow-option-row select {
+    grid-column: 1;
+  }
+}
+
+.fa-admin-section > .btn {
+  margin-block-end: 16px;
+}

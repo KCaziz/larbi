@@ -25,7 +25,7 @@ const api = (method, path, json, user = owner) => t.request(method, `/fin/espace
 const dashboard = (user = owner) => api('GET', `/tableau-de-bord?mois=${month()}`, undefined, user);
 
 before(async () => {
-  t = await boot();
+  t = await boot({ subscribers: true });
 });
 beforeEach(async () => {
   await t.reset();
