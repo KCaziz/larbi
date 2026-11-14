@@ -109,7 +109,7 @@ async function declaredEssentialExpenses(prisma, userId, currency) {
  * Shorter than a month, the sign-up declaration is used instead, and said so;
  * without either, the figure is unknown — never a guess.
  */
-export async function essentialMonthlyExpenses(prisma, userId, currency, now = new Date()) {
+export async function essentialMonthlyExpenses(prisma, userId, currency, now = new Date(), accountId = null) {
   // The categories flagged « Essentielle ? » — by the client's reference, or by
   // the person on their own categories (P8-08).
   const categoryIds = await essentialCategoryIds(prisma, userId);
@@ -121,6 +121,8 @@ export async function essentialMonthlyExpenses(prisma, userId, currency, now = n
     kind: 'expense',
     currency,
     categoryId: { in: categoryIds },
+    // The Accueil on one account: only what that account paid.
+    ...(accountId ? { accountId } : {}),
   };
   const first = await prisma.finTransaction.findFirst({ where: { ...where, occurredAt: { lte: now } }, orderBy: { occurredAt: 'asc' }, select: { occurredAt: true } });
   const months = coveredMonths(first?.occurredAt ?? null, now);
@@ -172,9 +174,9 @@ async function budgetedEssentialExpenses(prisma, userId, currency, categoryIds, 
 // real emergency-fund goal(s), in this currency. Diagnostic n°2, C3: the
 // reserve used to be the cumulative sum of every « épargne » movement, which
 // is neither a balance nor the fund the client measures.
-async function emergencyFundCapital(prisma, userId, currency) {
+async function emergencyFundCapital(prisma, userId, currency, accountId = null) {
   const rows = await prisma.finGoal.findMany({
-    where: { userId, deletedAt: null, archivedAt: null, currency, status: { not: 'fictional' }, ...EMERGENCY_GOAL_WHERE },
+    where: { userId, deletedAt: null, archivedAt: null, currency, status: { not: 'fictional' }, ...(accountId ? { accountId } : {}), ...EMERGENCY_GOAL_WHERE },
     select: { allocated: true, accountId: true },
   });
   if (rows.length === 0) return null;
@@ -237,7 +239,7 @@ export async function livingAllowanceOf(prisma, userId, currency, now = new Date
   return { answer: computed('F006', result, { inputs, currency, warnings, now }), netIncome, fixedCharges, fixedSource, instalments };
 }
 
-export async function buildReserveView(prisma, userId, { currency, targetMonths, now = new Date() } = {}) {
+export async function buildReserveView(prisma, userId, { currency, targetMonths, now = new Date(), accountId = null } = {}) {
   const warnings = [];
   // GO-01's target by educational profile when the person has not chosen one
   // (decision P8-01 point 3) — always changeable.
@@ -250,13 +252,13 @@ export async function buildReserveView(prisma, userId, { currency, targetMonths,
       defaultTarget = true;
     }
   }
-  const capital = await emergencyFundCapital(prisma, userId, currency);
+  const capital = await emergencyFundCapital(prisma, userId, currency, accountId);
   // Recette R10-07: which goal(s) ARE the fund, so the screen can open or delete them.
   const fundGoals = await prisma.finGoal.findMany({
-    where: { userId, deletedAt: null, archivedAt: null, currency, status: { not: 'fictional' }, ...EMERGENCY_GOAL_WHERE },
+    where: { userId, deletedAt: null, archivedAt: null, currency, status: { not: 'fictional' }, ...(accountId ? { accountId } : {}), ...EMERGENCY_GOAL_WHERE },
     select: { id: true, label: true, accountId: true },
   });
-  const essential = await essentialMonthlyExpenses(prisma, userId, currency, now);
+  const essential = await essentialMonthlyExpenses(prisma, userId, currency, now, accountId);
 
   if (capital === null) warnings.push('Aucun objectif « Fonds d’urgence » n’existe encore : créez-le dans vos objectifs pour mesurer votre réserve.');
   if (essential.source === 'declared') {
@@ -281,7 +283,7 @@ export async function buildReserveView(prisma, userId, { currency, targetMonths,
   // C12's « date estimée » (recette R9-08): at the fund's planned monthly
   // saving, the month the gap is closed. Unknown without a monthly saving.
   const contributions = capital === null ? [] : await prisma.finGoal.findMany({
-    where: { userId, deletedAt: null, archivedAt: null, currency, status: { not: 'fictional' }, ...EMERGENCY_GOAL_WHERE },
+    where: { userId, deletedAt: null, archivedAt: null, currency, status: { not: 'fictional' }, ...(accountId ? { accountId } : {}), ...EMERGENCY_GOAL_WHERE },
     select: { monthlyContribution: true },
   });
   const monthly = contributions.reduce((sum, row) => sum + (row.monthlyContribution ?? 0), 0);

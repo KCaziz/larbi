@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CalendarDays, GraduationCap, HeartPulse, Home, PieChart, Plus, Target, Wallet, Wrench } from 'lucide-react';
+import { ArrowRight, CalendarDays, GraduationCap, HeartPulse, Home, PieChart, Plus, ShieldCheck, Target, Wallet, Wrench } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate } from '../../lib/format.js';
 import { periodRange } from '../../lib/finControls.js';
@@ -316,11 +316,12 @@ export default function HomePage() {
             </div>
             {!budget ? (
               <p className="fin-hint">
-                {t('appHome.noBudget')} <Link to="/app/budgets">{t('appHome.createBudget')}</Link>
+                {t(oneAccount ? 'appHome.noBudgetForAccount' : 'appHome.noBudget')} <Link to="/app/budgets">{t('appHome.createBudget')}</Link>
               </p>
             ) : (
               <>
                 <Link to={`/app/budgets/${budget.id}`}>{budget.label}</Link>
+                <span className="fin-hint"> · {budget.accountId ? openAccounts.find((account) => account.id === budget.accountId)?.label ?? '' : t('appHome.budgetOnTotal')}</span>
                 <ul className="home-budget-lines">
                   {budget.enveloppes.slice(0, 5).map((line) => (
                     <li key={line.id}>
@@ -345,6 +346,7 @@ export default function HomePage() {
             </div>
             {objectifs.length === 0 ? (
               <p className="fin-hint">
+                {oneAccount && <>{t('appHome.noGoalForAccount')} </>}
                 <Link to="/app/objectifs">{t('appHome.createGoal')}</Link>
               </p>
             ) : (
@@ -360,11 +362,36 @@ export default function HomePage() {
                 ))}
               </ul>
             )}
-            <p className="home-reserve">
-              <Link to="/app/objectifs/fonds-urgence">{t('appHome.emergencyFund')}</Link> :{' '}
-              {reserve.moisReserve.resultat === null ? t('fincludia.notComputed') : t('fincludia.months', { count: Math.round(reserve.moisReserve.resultat * 10) / 10 })}
-            </p>
-            {reserve.moisReserve.resultat === null && <HowToCompute answer={reserve.moisReserve} />}
+          </section>
+
+          {/* The safety reserve, a card of its own (R14): months covered, target,
+              what is missing, and the way to its screen. */}
+          <section className="home-card" aria-labelledby="home-reserve">
+            <div className="home-card-head">
+              <h2 id="home-reserve">
+                <ShieldCheck size={16} aria-hidden="true" /> {t('appHome.reserve.title')}
+              </h2>
+              <Link to="/app/objectifs/fonds-urgence">{t('appHome.reserve.open')}</Link>
+            </div>
+            {!reserve.hasFund ? (
+              <p className="fin-hint">
+                {t(oneAccount ? 'appHome.reserve.noneForAccount' : 'appHome.reserve.none')} <Link to="/app/objectifs/fonds-urgence">{t('appHome.reserve.create')}</Link>
+              </p>
+            ) : (
+              <>
+                <p className="home-reserve">
+                  <strong>{reserve.moisReserve.resultat === null ? t('fincludia.notComputed') : t('fincludia.months', { count: Math.round(reserve.moisReserve.resultat * 10) / 10 })}</strong>
+                  {reserve.cibleMois ? ` / ${t('fincludia.months', { count: reserve.cibleMois })}` : ''}
+                </p>
+                {reserve.moisReserve.resultat !== null && reserve.cibleMois > 0 && (
+                  <span className="home-meter" aria-hidden="true">
+                    <span style={{ inlineSize: `${Math.min(100, Math.round((reserve.moisReserve.resultat / reserve.cibleMois) * 100))}%` }} />
+                  </span>
+                )}
+                {reserve.manque?.resultat > 0 && <p className="fin-hint">{t('appHome.reserve.missing', { amount: formatAmount(i18n.language, reserve.manque.resultat, reserve.currency ?? currency) })}</p>}
+                {reserve.moisReserve.resultat === null && <HowToCompute answer={reserve.moisReserve} />}
+              </>
+            )}
           </section>
 
           {/* The next due dates, and the way to the calendar. */}

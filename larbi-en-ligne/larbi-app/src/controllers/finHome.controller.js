@@ -1,7 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { accountsWithBalances } from '../services/finAccount.service.js';
 import { buildBudgetView } from '../services/finBudgetView.service.js';
-import { currentBudget, loadBudgetData } from '../services/finBudget.service.js';
+import { currentBudgets, loadBudgetData } from '../services/finBudget.service.js';
 import { loadCalendarData } from '../services/finCalendar.service.js';
 import { collectEvents } from '../services/finCalendarView.service.js';
 import { buildGoalView, listGoals } from '../services/finGoal.service.js';
@@ -22,13 +22,21 @@ export async function getHome(req, res) {
   const currency = req.user.finCurrency;
   const period = req.query.from ? { start: req.query.from, end: req.query.to } : currentMonth(now);
 
-  const [accounts, synthesisData, budget, goalRows, reserve] = await Promise.all([
+  // Recette R14: ONE account chosen → every card of the page is that account's.
+  const oneAccount = req.query.accountId || null;
+  const [accounts, synthesisData, currentBudgetRows, goalRows, reserve] = await Promise.all([
     accountsWithBalances(prisma, req.user.id, { now }),
-    loadSynthesisData(prisma, req.user.id, period, { accountId: req.query.accountId ?? null }),
-    currentBudget(prisma, req.user.id, now),
+    loadSynthesisData(prisma, req.user.id, period, { accountId: oneAccount }),
+    currentBudgets(prisma, req.user.id, now),
     listGoals(prisma, req.user.id),
-    buildReserveView(prisma, req.user.id, { currency, targetMonths: req.user.finReserveTargetMonths ?? null, now }),
+    buildReserveView(prisma, req.user.id, { currency, targetMonths: req.user.finReserveTargetMonths ?? null, now, accountId: oneAccount }),
   ]);
+  // A budget is tied to one account or to the total balance (accountId null).
+  // On one account: that account's budget. On the total: the one tied to the
+  // total balance first, else the most recent.
+  const budget = oneAccount
+    ? currentBudgetRows.find((row) => row.accountId === oneAccount) ?? null
+    : currentBudgetRows.find((row) => !row.accountId) ?? currentBudgetRows[0] ?? null;
 
   const synthesis = buildSynthesis({ ...synthesisData, fallbackCurrency: currency, period, now });
   // The income side of the ring (ACC-04): realised income per category, the
@@ -64,6 +72,7 @@ export async function getHome(req, res) {
     budgetCard = {
       id: budget.id,
       label: budget.label,
+      accountId: budget.accountId ?? null,
       totalPrevu: view.totalPrevu,
       restant: view.ecart,
       budgetJournalier: view.budgetJournalier,
@@ -80,14 +89,14 @@ export async function getHome(req, res) {
   // the budget when there is one (its envelopes are what the person planned to
   // spend); otherwise the payments marked as planned. One account chosen: the
   // budget covers every account, so only the planned payments apply.
-  const budgetPlan = !req.query.accountId && budgetCard?.totalPrevu?.resultat !== null && budgetCard?.totalPrevu?.resultat !== undefined && budget.currency === synthesis.currency;
+  const budgetPlan = (!oneAccount || budget?.accountId === oneAccount) && budgetCard?.totalPrevu?.resultat !== null && budgetCard?.totalPrevu?.resultat !== undefined && budget.currency === synthesis.currency;
   const prevuReel = budgetPlan
     ? { prevu: budgetCard.totalPrevu.resultat, reel: synthesis.prevuReel.reel, source: 'budget' }
     : { ...synthesis.prevuReel, source: synthesis.prevuReel.prevu === null ? null : 'planned' };
 
   // At most three priority goals (tab 04): the highest priority first.
   const goals = goalRows
-    .filter((goal) => goal.status !== 'fictional')
+    .filter((goal) => goal.status !== 'fictional' && (!oneAccount || goal.accountId === oneAccount))
     .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
     .slice(0, 3)
     .map((goal) => ({ id: goal.id, label: goal.label, view: buildGoalView(goal, { now }) }));
@@ -96,7 +105,9 @@ export async function getHome(req, res) {
   const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const to = new Date(from.getTime() + 30 * 24 * 3600 * 1000);
   const calendarData = await loadCalendarData(prisma, req.user.id, { from, to });
-  const upcoming = collectEvents({ ...calendarData, from, to, currency, occurrencesOf: occurrencesWithOutcome }).slice(0, 5);
+  const upcoming = collectEvents({ ...calendarData, from, to, currency, occurrencesOf: occurrencesWithOutcome })
+    .filter((event) => !oneAccount || event.accountId === oneAccount)
+    .slice(0, 5);
 
   // Recette R10-05: the regular income of the period not confirmed yet — what
   // is still expected (never added to « revenus », which is what arrived).
@@ -123,7 +134,18 @@ export async function getHome(req, res) {
     },
     budget: budgetCard,
     objectifs: goals,
-    reserve: { moisReserve: reserve.moisReserve, cibleMois: reserve.cibleMois },
+    // The safety reserve, as a card of its own (R14): the months covered, the
+    // target and what is still missing.
+    reserve: {
+      moisReserve: reserve.moisReserve,
+      cibleMois: reserve.cibleMois,
+      cibleMontant: reserve.cibleMontant,
+      manque: reserve.manque,
+      epargneLiquide: reserve.epargneLiquide,
+      depensesEssentielles: reserve.depensesEssentielles,
+      hasFund: reserve.fonds.length > 0,
+      currency: reserve.currency,
+    },
     echeances: upcoming,
   });
 }

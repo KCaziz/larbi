@@ -67,6 +67,8 @@ export const APP_NAV = [
   { key: 'addMovement', to: '/app/mouvements/nouveau', labelKey: 'appNav.addMovement', icon: PlusCircle, section: 'analyse' },
   { key: 'health', to: '/app/sante', labelKey: 'appNav.health', icon: HeartPulse, section: 'analyse' },
   { key: 'goals', to: '/app/objectifs', labelKey: 'appNav.goals', icon: Target, section: 'build' },
+  // The safety reserve, in the menu (R14): it was only reachable through the goals.
+  { key: 'reserve', to: '/app/objectifs/fonds-urgence', labelKey: 'appNav.reserve', icon: ShieldCheck, section: 'build' },
   { key: 'debts', to: '/app/dettes', labelKey: 'appNav.debts', icon: CreditCard, adultsOnly: true, section: 'build' },
   { key: 'wealth', to: '/app/patrimoine', labelKey: 'appNav.wealth', icon: Landmark, adultsOnly: true, section: 'build' },
   { key: 'paper', to: '/app/portefeuille', labelKey: 'appNav.paper', icon: TrendingUp, section: 'build' },

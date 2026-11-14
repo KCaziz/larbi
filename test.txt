@@ -1,12 +1,3 @@
-- le flux est toujours mal calculer on prend en cosiderations que les revenues il faut integrer le solde les depenses etc etc 
-- quand je cree un budget il faut ajouter une selection pour qu'elle compte sera debiter, meme choses pour les enveloppes soit il sera deduit par rapport au solde total ou via des comptes specifiques aussi il sera calculer dans les tendences et dans les graphes 
-- quand on fait une reccurence 
-- revenu ça ne donne rien pour les dépenses elles ne sont pas repartis sur les budgets et n'ont pas d'autres couleurs de distinction. Pour la situation générale entre revenus et dépenses rien ne s'affiche. ici le client veut dire par la dans l'acceuil le camembert pour lui est monochrome je ne sais pas pourquoi pour moi il marche bien 
-
-
-voici quelques idées du client 
-j'ai dis c'est que chaque dépenses doit être tracé ou pas mais lorsqu'on à une dépense avec une même catégorie qu'une enveloppe d'un budget ce même budget devait être liée à un compte. D'où ma demande d'ajouter une colonne quand on crée un budget le compte à débiter soit tous c'est à dire les comptes liés au solde global ou bien définir un compte qui a déjà été créé et le sélectionner. J'ai aussi voulu qu'on ajoute la récurence du budget est ce que c'est un budget ponctuel annuel mensuel ou hebdomadaire
-Et pour ce qui est du solde il doit être compté comme étant un revenu en nature et l'intégrer dans tous les calculs et pouvoir être intégrer dans tous les calculs
-Ce qui ne s'affiche pas c'est les pourcentages de consommation des enveloppes du budget par rapport au budget défini ainsi qu'aux dépenses engagées
-Une récurence est une dépense donc ce que je voulais qu'on fasse pour faciliter les choses c'est la reconnaissance d'une récurence lorsqu'elle est reproduit dans une dépense et faire fusionner ces lignes lorsqu'elles sont identiques du fait de leurs catégories
-Donc pour éviter cela on met en place un détecteur d'une même opération et on demande à l'utilisateur d'enregistrer qu'une seule opération au lieu du double emploi
+- Les calcul de l'accueil doit suivre le compte sélectionné
+- Un budget doit etre rattaché a un compte ou au solde total 
+- on a completement omis la Réserve de sécurité il faut l'implementer si elle est deja implementer il faudrais la rendre un peut plus clair et accessible 
