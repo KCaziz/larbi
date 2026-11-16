@@ -6,9 +6,12 @@ import AuthAside from '../../components/layout/AuthAside.jsx';
 import Button from '../../components/ui/Button.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import '../Pages.css';
+import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.forgot.title'), t('seo.pages.forgot.description'));
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState(null);
 

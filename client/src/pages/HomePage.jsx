@@ -4,30 +4,56 @@ import {
   BookOpenText,
   Briefcase,
   Calculator,
+  CircleCheck,
   GraduationCap,
   Languages,
   Layers,
-  Newspaper,
+  Scale,
   ShieldCheck,
+  TrendingUp,
   Users,
+  UsersRound,
+  Wallet,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../components/ui/Button.jsx';
 import Section from '../components/ui/Section.jsx';
 import Reveal from '../components/ui/Reveal.jsx';
+import desktopFr from '../assets/showcase/app-desktop-fr.webp';
+import desktopEn from '../assets/showcase/app-desktop-en.webp';
+import desktopAr from '../assets/showcase/app-desktop-ar.webp';
+import phoneFr from '../assets/showcase/app-phone-fr.webp';
+import phoneEn from '../assets/showcase/app-phone-en.webp';
+import phoneAr from '../assets/showcase/app-phone-ar.webp';
 import './Pages.css';
+import { useDocumentMeta } from '../lib/useDocumentMeta.js';
+
+// Screens of the application for the hero, captured on a demonstration account
+// (fictional figures); a language without its own capture shows the French one.
+const SCREENS = {
+  fr: { desktop: desktopFr, phone: phoneFr },
+  en: { desktop: desktopEn, phone: phoneEn },
+  ar: { desktop: desktopAr, phone: phoneAr },
+};
 
 const stats = [
-  { key: 'multilingual', icon: Languages, tone: 'tone-primary' },
-  { key: 'themes', icon: Layers, tone: 'tone-blue' },
-  { key: 'security', icon: ShieldCheck, tone: 'tone-green' },
-  { key: 'certification', icon: GraduationCap, tone: 'tone-brass' },
+  { key: 'multilingual', icon: Languages },
+  { key: 'themes', icon: Layers },
+  { key: 'security', icon: ShieldCheck },
+  { key: 'certification', icon: GraduationCap },
 ];
 
-const features = [
-  { key: 'elearning', icon: BookOpenText, tone: 'tone-primary', to: '/formations' },
-  { key: 'blog', icon: Newspaper, tone: 'tone-blue', to: '/blog' },
-  { key: 'tools', icon: Calculator, tone: 'tone-brass', to: '/outils' },
+// « Nos grands univers » (refonte 2026-11-16, after the client's model): every
+// card leads to something the platform really offers today.
+const universes = [
+  { key: 'budget', icon: Wallet, to: '/fonctionnalites' },
+  { key: 'shared', icon: UsersRound, to: '/fonctionnalites' },
+  { key: 'business', icon: Briefcase, to: '/fonctionnalites' },
+  { key: 'paper', icon: TrendingUp, to: '/fonctionnalites' },
+  { key: 'compare', icon: Scale, to: '/outils/comparateur' },
+  { key: 'simulate', icon: Calculator, to: '/outils/simulateurs' },
+  { key: 'learn', icon: GraduationCap, to: '/formations' },
+  { key: 'glossary', icon: BookOpenText, to: '/apprendre' },
 ];
 
 // Two FINCLUDIA solutions (client positioning, 2026-10): FINCLUDIA Particulier
@@ -38,16 +64,19 @@ const features = [
 const businessTypes = ['autoEntrepreneur', 'pme', 'pmi'];
 
 export default function HomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.home.title'), t('seo.pages.home.description'), { suffix: false });
+  const screens = SCREENS[i18n.language?.slice(0, 2)] ?? SCREENS.fr;
   const steps = t('home.steps.items', { returnObjects: true });
   const publics = t('account.fin.publics', { returnObjects: true });
 
   return (
     <>
-      <section className="hero">
+      <section className="hero hero-band">
         <div className="hero-inner">
           <div className="hero-copy">
-            <span className="eyebrow">{t('home.hero.badge')}</span>
+            <span className="hero-badge">{t('home.hero.badge')}</span>
             {/* Le titre est la signature officielle de la charte (P1-13), et
                 le paragraphe son positionnement, mot pour mot. Ni l'un ni
                 l'autre n'est une formule rédigée ici : ce sont des éléments de
@@ -57,71 +86,86 @@ export default function HomePage() {
             <p className="hero-signature">{t('home.hero.signature')}</p>
             <p>{t('home.hero.body')}</p>
             <div className="hero-actions">
-              <Button to="/formations" variant="primary" className="btn-lg" arrow>
+              <Button to="/formations" variant="mint" className="btn-lg" arrow>
                 {t('home.hero.ctaFormations')}
               </Button>
-              <Button to="/outils" variant="secondary" className="btn-lg">
+              <Button to="/outils" variant="outline-light" className="btn-lg">
                 {t('home.hero.ctaTools')}
               </Button>
             </div>
+            <ul className="hero-trust">
+              {stats.map((stat) => (
+                <li key={stat.key} title={t(`home.stats.${stat.key}.text`)}>
+                  <stat.icon size={18} strokeWidth={1.75} aria-hidden="true" />
+                  {t(`home.stats.${stat.key}.title`)}
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <ul className="hero-index">
-            {features.map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <Reveal as="li" key={feature.key} className={feature.tone} delay={index * 80}>
-                  <Link to={feature.to}>
-                    <span className="icon-badge" aria-hidden="true">
-                      <Icon size={22} strokeWidth={1.6} />
-                    </span>
-                    <span className="hero-index-title">{t(`home.features.${feature.key}.title`)}</span>
-                    <ArrowRight className="arrow icon-dir" size={18} strokeWidth={1.75} aria-hidden="true" />
-                  </Link>
-                </Reveal>
-              );
-            })}
-          </ul>
+          {/* The application itself, on a computer and a phone, as in the
+              client's model: real screens of a demonstration account, in the
+              visitor's language. */}
+          <figure className="hero-devices">
+            <div className="device-laptop">
+              <div className="device-laptop-screen">
+                <img src={screens.desktop} alt={t('home.devices.desktop')} width="1440" height="900" />
+              </div>
+              <div className="device-laptop-base" aria-hidden="true" />
+            </div>
+            <div className="device-phone">
+              <img src={screens.phone} alt={t('home.devices.phone')} width="390" height="844" />
+            </div>
+            <figcaption className="sr-only">{t('home.devices.caption')}</figcaption>
+          </figure>
         </div>
       </section>
 
-      <div className="stats">
-        <div className="stats-grid">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <Reveal as="div" className={`stat ${stat.tone}`} key={stat.key} delay={index * 60}>
-                <Icon className="stat-icon" size={22} strokeWidth={1.6} aria-hidden="true" />
-                <div>
-                  <strong>{t(`home.stats.${stat.key}.title`)}</strong>
-                  <span className="stat-text">{t(`home.stats.${stat.key}.text`)}</span>
-                </div>
-              </Reveal>
-            );
-          })}
+      {/* « Pour qui ? », from the client's own model: the real profiles of the
+          platform, personal and business, and the way in. */}
+      <section className="audience-strip" aria-labelledby="audience-title">
+        <div className="audience-inner">
+          <p id="audience-title" className="audience-title">
+            {t('home.audience.title')}
+          </p>
+          <ul className="audience-list">
+            {publics
+              .filter((p) => p.code !== 'AUT')
+              .map((p) => (
+                <li key={p.code}>
+                  <CircleCheck size={16} aria-hidden="true" />
+                  {p.label.split(' — ')[0]}
+                </li>
+              ))}
+            {businessTypes.map((key) => (
+              <li key={key} className="audience-business">
+                <Briefcase size={16} aria-hidden="true" />
+                {t(`accountTypes.${key}`)}
+              </li>
+            ))}
+          </ul>
+          <Link to="/inscription" className="audience-cta">
+            {t('home.audience.cta')} <ArrowRight size={16} aria-hidden="true" className="icon-dir" />
+          </Link>
         </div>
-      </div>
+      </section>
 
-      <Section
-        title={t('home.featuresSectionTitle')}
-        subtitle={t('home.featuresSectionSubtitle')}
-      >
-        <div className="feature-grid">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <Reveal as="article" className={`feature-card ${feature.tone}`} key={feature.key} delay={index * 80}>
-                <span className="icon-badge" aria-hidden="true">
-                  <Icon size={22} strokeWidth={1.6} />
+      <Section title={t('home.universes.title')} subtitle={t('home.universes.subtitle')}>
+        <div className="universe-grid">
+          {universes.map((universe, index) => (
+            <Reveal as="div" key={universe.key} delay={index * 40}>
+              <Link to={universe.to} className="universe-card">
+                <span className="universe-icon" aria-hidden="true">
+                  <universe.icon size={22} strokeWidth={1.75} />
                 </span>
-                <h3>{t(`home.features.${feature.key}.title`)}</h3>
-                <p>{t(`home.features.${feature.key}.body`)}</p>
-                <Button to={feature.to} variant="ghost" arrow>
-                  {t(`home.features.${feature.key}.cta`)}
-                </Button>
-              </Reveal>
-            );
-          })}
+                <span className="universe-text">
+                  <strong>{t(`home.universes.items.${universe.key}.title`)}</strong>
+                  <span>{t(`home.universes.items.${universe.key}.body`)}</span>
+                </span>
+                <ArrowRight className="universe-arrow icon-dir" size={18} aria-hidden="true" />
+              </Link>
+            </Reveal>
+          ))}
         </div>
       </Section>
 
@@ -180,12 +224,12 @@ export default function HomePage() {
         </Button>
       </Section>
 
-      <section className="cta-band">
+      <section className="cta-band cta-band-gradient">
         <div className="cta-band-inner">
           <h2>{t('home.cta.title')}</h2>
           <p>{t('home.cta.body')}</p>
           <div className="cta-actions">
-            <Button to="/inscription" variant="light" className="btn-lg">
+            <Button to="/inscription" variant="mint" className="btn-lg" arrow>
               {t('nav.register')}
             </Button>
             <Button to="/connexion" variant="outline-light" className="btn-lg">

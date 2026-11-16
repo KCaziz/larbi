@@ -24,7 +24,7 @@ describe('more charts, end to end', { skip: findChrome() ? false : 'no Chrome/Ch
   };
 
   before(async () => {
-    t = await boot();
+    t = await boot({ subscribers: true });
     await t.reset();
     owner = await t.adult({ name: 'Nadia Graphiques', finPublic: 'SAL', finCurrency: 'DZD', finOnboardedAt: new Date() });
     const friend = await t.adult({ name: 'Karim Ami', finPublic: 'SAL', finCurrency: 'DZD', finOnboardedAt: new Date() });

@@ -1,0 +1,1 @@
+var e=[{to:``,key:`dashboard`,end:!0},{to:`depenses`,key:`expenses`},{to:`budgets`,key:`budgets`},{to:`ressources`,key:`pot`},{to:`taches`,key:`tasks`},{to:`calendrier`,key:`calendar`},{to:`objectifs`,key:`goals`},{to:`foyer`,key:`household`,kinds:[`household`]},{to:`rapport`,key:`report`},{to:`membres`,key:`members`}];export{e as t};

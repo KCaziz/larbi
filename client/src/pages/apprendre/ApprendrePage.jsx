@@ -41,7 +41,7 @@ export default function ApprendrePage() {
   const theme = params.get('theme') ?? '';
   const [text, setText] = useState(query);
   const [error, setError] = useState(null);
-  useDocumentMeta(t('apprendre.title'), t('apprendre.intro'));
+  useDocumentMeta(t('seo.pages.apprendre.title'), t('seo.pages.apprendre.description'));
 
   const apiParams = new URLSearchParams();
   if (query) apiParams.set('query', query);

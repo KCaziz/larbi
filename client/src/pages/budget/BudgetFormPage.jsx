@@ -156,6 +156,8 @@ function BudgetForm({ budget, onSubmit }) {
                 {account.label}
               </option>
             ))}
+            {/* R14: cash can have its budget too, even before any cash movement. */}
+            {!spendable.some((account) => account.type === 'AC-01') && <option value="cash">{t('movements.cashAccount')}</option>}
           </select>
           <span className="fin-hint">{t('budget.accountHelp')}</span>
         </div>

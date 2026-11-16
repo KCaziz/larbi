@@ -1,15 +1,18 @@
-/* Gestion commune's own window (P9-02). The top bar is the personal
-   application's one (AppTopBar, AppLayout.css). */
-.shared-shell {
-  min-block-size: 100vh;
-  background: var(--bg);
-  color: var(--text);
-}
+/* Gestion commune's own window (P9-02). The top bar and the sidebar are the
+   personal application's ones (AppTopBar, SideNav, AppLayout.css). */
 .shared-main {
   min-inline-size: 0;
 }
+/* The compartments of a space are in the sidebar from 768 px; the tabs of the
+   page stay for a phone, where there is no sidebar. */
+@media (min-width: 768px) {
+  .shared-main .space-nav {
+    display: none;
+  }
+}
 @media print {
   .app-topbar,
+  .app-sidebar,
   .chatbot,
   .space-nav {
     display: none !important;

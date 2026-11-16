@@ -1,1 +1,0 @@
-import{f as e}from"./jsx-runtime-CpKFzYxY.js";function t(){let{pathname:t}=e();return t===`/app`||t.startsWith(`/app/`)?`/app`:``}function n(){return t()?`/app/formation`:`/catalogue`}export{t as n,n as t};

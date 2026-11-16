@@ -14,7 +14,7 @@ import { HttpError } from '../utils/httpError.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
 import { isBudgetableFamily } from './finBudgetProposal.service.js';
 import { throughEndOfDay } from '../utils/dayEnd.js';
-import { accountsWithBalances, usableAccount } from './finAccount.service.js';
+import { accountsWithBalances, ensureCashAccount, usableAccount } from './finAccount.service.js';
 
 export const BUDGET_ENTITY = 'budget';
 export const ENVELOPE_ENTITY = 'envelope';
@@ -196,17 +196,27 @@ export function listEnvelopes(prisma, userId, budgetId) {
  * which is what screens JA03 / JA04 are: one allocation plan, not a budget and
  * then a list of writes.
  */
+// The account a budget or an envelope is spent from (R13-01): one of the
+// person's own, open, in the budget's currency, or « cash » — their « Espèces »
+// account, opened if there is none yet, so that cash spending can have its own
+// budget like any account (R14, 2026-11-15). undefined = unchanged, null = none.
+async function spendAccount(prisma, userId, accountId, currency) {
+  if (accountId === undefined || accountId === null) return accountId;
+  if (accountId === 'cash') return ensureCashAccount(prisma, userId, currency);
+  return (await usableAccount(prisma, userId, accountId, currency)).id;
+}
+
 export async function createBudget(prisma, userId, body) {
   if (!BUDGET_RECURRENCES.includes(body.recurrence ?? 'monthly')) {
     throw new HttpError(422, 'Unknown recurrence', { reason: 'unknownRecurrence' });
   }
   // R13-01: the account the budget is spent from — one of the person's own, open, in the budget's currency; none = every account of the total.
-  if (body.accountId) await usableAccount(prisma, userId, body.accountId, body.currency);
+  body.accountId = await spendAccount(prisma, userId, body.accountId, body.currency);
   const envelopes = [];
   for (const envelope of body.envelopes ?? []) {
     if (!ENVELOPE_KINDS.includes(envelope.kind)) throw new HttpError(422, 'Unknown envelope kind', { reason: 'unknownKind' });
     const target = await envelopeTarget(prisma, userId, envelope);
-    if (envelope.accountId) await usableAccount(prisma, userId, envelope.accountId, body.currency);
+    envelope.accountId = await spendAccount(prisma, userId, envelope.accountId, body.currency);
     if (envelopes.some((other) => (target.categoryId && other.categoryId === target.categoryId) || (target.categoryGroup && other.categoryGroup === target.categoryGroup))) {
       throw new HttpError(422, 'This category already has an envelope', { reason: 'duplicateEnvelope' });
     }
@@ -293,7 +303,7 @@ export async function updateBudget(prisma, userId, id, body) {
   const periodStart = fields.periodStart ?? before.periodStart;
   const periodEnd = fields.periodEnd ?? before.periodEnd;
   if (periodEnd <= periodStart) throw new HttpError(422, 'A period ends after it starts', { reason: 'period' });
-  if (fields.accountId) await usableAccount(prisma, userId, fields.accountId, fields.currency ?? before.currency);
+  fields.accountId = await spendAccount(prisma, userId, fields.accountId, fields.currency ?? before.currency);
 
   return prisma.$transaction(async (tx) => {
     const after = await tx.finBudget.update({ where: { id }, data: { ...fields, version: { increment: 1 } }, select: BUDGET_SELECT });
@@ -397,7 +407,7 @@ export async function createEnvelope(prisma, userId, budgetId, body) {
   if (!ENVELOPE_KINDS.includes(body.kind)) throw new HttpError(422, 'Unknown envelope kind', { reason: 'unknownKind' });
   const target = await envelopeTarget(prisma, userId, body);
   await assertTargetFree(prisma, budgetId, target);
-  if (body.accountId) await usableAccount(prisma, userId, body.accountId, budget.currency);
+  body.accountId = await spendAccount(prisma, userId, body.accountId, budget.currency);
 
   return prisma.$transaction(async (tx) => {
     const row = await tx.finEnvelope.create({
@@ -443,7 +453,7 @@ export async function updateEnvelope(prisma, userId, budgetId, id, body) {
   const before = await ownEnvelope(prisma, userId, budgetId, id);
   const { reason, ...fields } = body;
   if (fields.kind !== undefined && !ENVELOPE_KINDS.includes(fields.kind)) throw new HttpError(422, 'Unknown envelope kind', { reason: 'unknownKind' });
-  if (fields.accountId) await usableAccount(prisma, userId, fields.accountId, before.currency);
+  fields.accountId = await spendAccount(prisma, userId, fields.accountId, before.currency);
   if (fields.categoryId !== undefined || fields.categoryGroup !== undefined) {
     const target = await envelopeTarget(prisma, userId, { categoryId: fields.categoryId ?? null, categoryGroup: fields.categoryGroup ?? null });
     await assertTargetFree(prisma, budgetId, target, id);

@@ -30,7 +30,8 @@ Priorités : `🔴 high` (bloque l'utilisation) · `🟡 medium` (gêne réelle)
 | R11 — Cinquième passage (2026-11-11) | 15 | 15 |
 | R12 — Sixième passage (2026-11-12) | 4 | 4 |
 | R13 — Septième passage (2026-11-12) | 7 | 7 |
-| **Total** | **120** | **119** |
+| R14 — Huitième passage (2026-11-15) | 1 | 1 |
+| **Total** | **121** | **120** |
 
 R9 : reste R9-18 (fiche de paie), aucun défaut reproduit, à préciser avec le client.
 
@@ -1050,3 +1051,36 @@ Les remarques de `test.txt` (7e passage) et « quelques idées du client » ont 
 - Priorité : `🟡 medium`
 - Origine : `test.txt` l. 4
 - Réalisé (2026-11-12) : Cause : deux comptes du même type avaient la même couleur, donc un anneau d'une seule couleur ; de même pour des dépenses sans catégorie. Une tranche dont la couleur manque ou est déjà prise reçoit désormais la couleur libre suivante d'une palette de huit couleurs distinctes ; une couleur choisie par la personne est gardée. La dépense qui n'est répartie sur aucune enveloppe est dite sur la carte « Dépenses » de l'Accueil (« 900 DZD dépensés hors budget… Voir le budget », ou « Aucun budget ce mois-ci » avec le lien pour en créer un). L'onglet « Flux » de l'anneau a été vérifié avec des revenus et des dépenses : deux tranches de couleurs distinctes. Vérifié par capture d'écran et par le parcours `fin-recette13-journey`.
+
+---
+
+# R14 — Huitième passage de recette (2026-11-15)
+
+### R14-01 — « Les jauges du budget par rapport aux dépenses ne s'affichent pas » (et « le problème du revenu persiste »)
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : retour du client sur la version en ligne (2026-11-15)
+- Rejoué sur la nouvelle version (compte courant 150 000 DA, salaire 80 000 DA reçu, budget de novembre rattaché au compte courant, enveloppes Courses 30 000 DA et Carburant 10 000 DA, deux dépenses) : les jauges s'affichent sur la page du budget (prévu/réel, % consommé, part du budget, part des dépenses, courbe) et sur l'Accueil (« Nos budgets ») ; le salaire est compté (revenus 80 000, flux net, solde). Une charge récurrente confirmée remplit bien la jauge.
+- Cause reproduite : une dépense saisie **sans choisir de compte** partait d'office sur « Espèces (par défaut) ». Un budget rattaché au compte courant (R13-01) ne la comptait pas, **sans rien dire** : la jauge restait vide.
+- Décision (2026-11-15) : « une dépense et une enveloppe doivent être liées soit à un compte, soit aux espèces ».
+- Correction :
+  - Saisie d'une dépense ou d'un revenu : le compte est **obligatoire** (« Choisir : un compte ou les espèces ») ; « Espèces » n'est plus choisi en silence. Avec un seul compte à soi, il est présélectionné.
+  - Budget et enveloppe : « Espèces » peut être choisi comme compte à débiter (le compte Espèces est ouvert s'il n'existe pas encore ; il ne compte pas dans la limite d'un compte sans abonnement).
+  - Page du budget : les dépenses des catégories du budget faites depuis un autre compte sont **signalées** (« 2 dépenses de ces catégories (2 000 DA) ont été faites depuis un autre compte que celui de ce budget : elles ne sont pas comptées dans ses jauges »), avec le lien vers les mouvements pour corriger leur compte.
+- Non modifié : la déclaration d'un revenu et d'une charge récurrente garde le choix visible « Espèces (par défaut) ».
+- Test : `finRecette14.test.js` (R14, 2026-11-15).
+
+### R14-02 — Administration : la recherche recouvre « Administration » dans la barre du haut
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : vérification à l'écran pendant P12-06 (2026-11-16)
+- Reproduit : compte administrateur, écran de 1 280 px, barre latérale ouverte. Les trois espaces du sélecteur (« Gestion budgétaire », « Gestion commune », « Administration »), la recherche et les boutons ne tiennent plus : la zone de droite déborde vers la gauche et la recherche couvre « Administration ».
+- Correction : de 768 à 1 439 px, quand le sélecteur compte trois espaces, ceux où l'on n'est pas gardent leur icône seule (leur nom reste en info-bulle et pour les lecteurs d'écran) ; l'espace courant garde son nom. Vérifié à 1 280, 1 024 et 800 px.
+
+### R14-03 — Administration du comparateur : la page s'élargit d'un pixel en arabe sur téléphone
+- Statut : `✅ done`
+- Priorité : `🟢 low`
+- Origine : balayage du site (`e2e/site-sweep.test.js`, ar / 375 px, 2026-11-16)
+- Reproduit : deuxième étape de `/admin/comparateur` en arabe à 375 px : un intitulé masqué (réservé aux lecteurs d'écran) d'un en-tête de tableau était placé par rapport à la page et non au tableau défilant ; en arabe il finissait 1 px hors de l'écran, et la page défilait de côté.
+- Correction : sur téléphone, un tableau défilant contient aussi ses éléments placés (`.cms-table { position: relative }`). Vérifié : 0 px de débordement sur les deux étapes.
+- Au passage, le balayage confondait deux refus attendus : la réponse « réservé aux majeurs » d'une page (/dettes, /patrimoine) pouvait arriver pendant l'audit de la page suivante sur une machine chargée ; ces refus sont désormais attendus sur toutes les pages de ce compte mineur.

@@ -296,7 +296,10 @@ describe('server code', () => {
   });
 
   test('every public address of the API is under /api and answers JSON for an unknown path', () => {
-    assert.ok(serverRoutes.every((r) => r.path.startsWith('/api/')));
+    // Besides the API, only the two files search engines read at the root of
+    // a site (P12-06).
+    const SITE_FILES = ['/robots.txt', '/sitemap.xml'];
+    assert.ok(serverRoutes.every((r) => r.path.startsWith('/api/') || SITE_FILES.includes(r.path)), serverRoutes.filter((r) => !r.path.startsWith('/api/')).map((r) => r.path).join(', '));
   });
 });
 

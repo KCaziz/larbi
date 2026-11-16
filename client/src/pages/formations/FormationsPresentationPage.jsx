@@ -5,10 +5,13 @@ import Button from '../../components/ui/Button.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import Section from '../../components/ui/Section.jsx';
 import '../Pages.css';
+import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 
 
 export default function FormationsPresentationPage() {
   const { t } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.formations.title'), t('seo.pages.formations.description'));
   const flow = t('formationsPresentation.flow.items', { returnObjects: true });
 
   return (

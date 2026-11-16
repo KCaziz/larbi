@@ -2,37 +2,18 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import RequireRole from '../components/auth/RequireRole.jsx';
 import RequireAuth from '../components/auth/RequireAuth.jsx';
 import MaintenanceGate from '../components/auth/MaintenanceGate.jsx';
-import MainLayout from '../layouts/MainLayout.jsx';
-import AppLayout from '../layouts/AppLayout.jsx';
-import SharedLayout from '../layouts/SharedLayout.jsx';
-import AdminShell from '../layouts/AdminShell.jsx';
+import LocaleScope from '../layouts/LocaleScope.jsx';
+import { PREFIXED_LANGUAGES } from '../i18n/localePath.js';
 import AppRedirectWhenSignedIn from '../components/auth/AppRedirectWhenSignedIn.jsx';
 import LegacyRedirect from '../components/auth/LegacyRedirect.jsx';
 import { LEGACY_REDIRECTS } from '../config/appNavigation.js';
 import HomePage from '../pages/HomePage.jsx';
-import AboutPage from '../pages/AboutPage.jsx';
-import ServicesPage from '../pages/ServicesPage.jsx';
-import ContactPage from '../pages/ContactPage.jsx';
-import FaqPage from '../pages/FaqPage.jsx';
-import FeaturesOverviewPage from '../pages/FeaturesOverviewPage.jsx';
-import FormationsPresentationPage from '../pages/formations/FormationsPresentationPage.jsx';
-import ToolsPresentationPage from '../pages/outils/ToolsPresentationPage.jsx';
-import BlogListPage from '../pages/blog/BlogListPage.jsx';
-import ArticlePage from '../pages/blog/ArticlePage.jsx';
-import NewsletterLinkPage from '../pages/newsletter/NewsletterLinkPage.jsx';
-import LegalNoticePage from '../pages/legal/LegalNoticePage.jsx';
-import PrivacyPolicyPage from '../pages/legal/PrivacyPolicyPage.jsx';
-import LoginPage from '../pages/auth/LoginPage.jsx';
-import RegisterPage from '../pages/auth/RegisterPage.jsx';
-import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage.jsx';
-import ProfilePage from '../pages/account/ProfilePage.jsx';
-import AccountTypePage from '../pages/account/AccountTypePage.jsx';
-import PremiumAccessPage from '../pages/account/PremiumAccessPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import ErrorPage from '../pages/ErrorPage.jsx';
 
-// Heavy or role-specific areas are loaded on demand: public visitors never
-// download the CMS (rich-text editor) or the lesson reader.
+// Every page except the home page is loaded on demand (P12-06): a visitor
+// downloads the page they open, not the whole platform — the applications,
+// the CMS (rich-text editor) or the lesson reader stay out of the first load.
 const lazyPage = (importer) => async () => ({ Component: (await importer()).default });
 // The same page serving several screens of the client, each at its own
 // address (P8-25): the route says which one.
@@ -56,7 +37,7 @@ const appRoutes = {
       element: <MaintenanceGate />,
       children: [
         {
-          element: <AppLayout />,
+          lazy: lazyPage(() => import('../layouts/AppLayout.jsx')),
           children: [
             { index: true, lazy: lazyPage(() => import('../pages/accueil/HomePage.jsx')) },
             // « Aujourd'hui » (tab 03B): what is left to do, from the Synthèse and the menu.
@@ -140,7 +121,7 @@ const appRoutes = {
             { path: 'espaces', element: <Navigate to="/partage" replace /> },
             { path: 'entreprise', lazy: lazyPage(() => import('../pages/entreprise/BusinessPage.jsx')) },
             { path: 'parametres', lazy: lazyPage(() => import('../pages/parametres/SettingsPage.jsx')) },
-            { path: 'parametres/profil', element: <ProfilePage /> },
+            { path: 'parametres/profil', lazy: lazyPage(() => import('../pages/account/ProfilePage.jsx')) },
             { path: 'parametres/fincludia', lazy: lazyPage(() => import('../pages/account/FinProfilePage.jsx')) },
             { path: 'parametres/categories', lazy: lazyPage(() => import('../pages/account/FinCategoriesPage.jsx')) },
             // « Premiers pas » (P8-23): the client's eight steps. The estimate
@@ -152,8 +133,8 @@ const appRoutes = {
             { path: 'parametres/confiance', lazy: lazyPage(() => import('../pages/trust/TrustCenterPage.jsx')) },
             { path: 'parametres/formations', lazy: lazyPage(() => import('../pages/account/MyFormationsPage.jsx')) },
             { path: 'parametres/paiements', lazy: lazyPage(() => import('../pages/account/MyPaymentsPage.jsx')) },
-            { path: 'parametres/premium', element: <PremiumAccessPage /> },
-            { path: 'parametres/type', element: <AccountTypePage /> },
+            { path: 'parametres/premium', lazy: lazyPage(() => import('../pages/account/PremiumAccessPage.jsx')) },
+            { path: 'parametres/type', lazy: lazyPage(() => import('../pages/account/AccountTypePage.jsx')) },
             { path: '*', element: <NotFoundPage /> },
           ],
         },
@@ -173,7 +154,7 @@ const sharedRoutes = {
       element: <MaintenanceGate />,
       children: [
         {
-          element: <SharedLayout />,
+          lazy: lazyPage(() => import('../layouts/SharedLayout.jsx')),
           children: [
             { index: true, lazy: lazyPage(() => import('../pages/espaces/SpacesListPage.jsx')) },
             { path: ':id', lazy: lazyScreen(() => import('../pages/espaces/SpaceSection.jsx'), { section: 'dashboard' }) },
@@ -207,7 +188,7 @@ const adminRoutes = {
       element: <RequireRole role="admin" />,
       children: [
         {
-          element: <AdminShell />,
+          lazy: lazyPage(() => import('../layouts/AdminShell.jsx')),
           children: [
             {
               lazy: lazyPage(() => import('../pages/admin/AdminLayout.jsx')),
@@ -286,6 +267,68 @@ const adminRoutes = {
   ],
 };
 
+// The public site (P12-06): the same pages in French at their historical
+// addresses, and in English and Arabic under /en and /ar. A function, called
+// once per language: each tree must be its own set of route objects.
+const publicPages = () => [
+  // Outside the maintenance gate: an administrator needs a way in even
+  // while the rest of the site is closed.
+  { path: 'connexion', lazy: lazyPage(() => import('../pages/auth/LoginPage.jsx')) },
+  {
+    element: <MaintenanceGate />,
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: 'formations', lazy: lazyPage(() => import('../pages/formations/FormationsPresentationPage.jsx')) },
+      { path: 'outils', lazy: lazyPage(() => import('../pages/outils/ToolsPresentationPage.jsx')) },
+      { path: 'blog', lazy: lazyPage(() => import('../pages/blog/BlogListPage.jsx')) },
+      { path: 'blog/:slug', lazy: lazyPage(() => import('../pages/blog/ArticlePage.jsx')) },
+      { path: 'newsletter/confirmer', lazy: lazyScreen(() => import('../pages/newsletter/NewsletterLinkPage.jsx'), { mode: 'confirm' }) },
+      { path: 'newsletter/desinscription', lazy: lazyScreen(() => import('../pages/newsletter/NewsletterLinkPage.jsx'), { mode: 'unsubscribe' }) },
+      { path: 'a-propos', lazy: lazyPage(() => import('../pages/AboutPage.jsx')) },
+      { path: 'services', lazy: lazyPage(() => import('../pages/ServicesPage.jsx')) },
+      { path: 'faq', lazy: lazyPage(() => import('../pages/FaqPage.jsx')) },
+      { path: 'fonctionnalites', lazy: lazyPage(() => import('../pages/FeaturesOverviewPage.jsx')) },
+      { path: 'contact', lazy: lazyPage(() => import('../pages/ContactPage.jsx')) },
+      { path: 'mentions-legales', lazy: lazyPage(() => import('../pages/legal/LegalNoticePage.jsx')) },
+      { path: 'confidentialite', lazy: lazyPage(() => import('../pages/legal/PrivacyPolicyPage.jsx')) },
+      { path: 'inscription', lazy: lazyPage(() => import('../pages/auth/RegisterPage.jsx')) },
+      { path: 'mot-de-passe-oublie', lazy: lazyPage(() => import('../pages/auth/ForgotPasswordPage.jsx')) },
+      // Public: anyone holding a certificate number can check it.
+      { path: 'verification', lazy: lazyPage(() => import('../pages/certificates/VerifyCertificatePage.jsx')) },
+      { path: 'verification/:number', lazy: lazyPage(() => import('../pages/certificates/VerifyCertificatePage.jsx')) },
+      // Public tools and learning pages (P8-02): a visitor reads them here,
+      // a signed-in person is sent to the same page inside the application.
+      {
+        element: <AppRedirectWhenSignedIn />,
+        children: [
+          { path: 'apprendre', lazy: lazyPage(() => import('../pages/apprendre/ApprendrePage.jsx')) },
+          { path: 'apprendre/termes/:slug', lazy: lazyPage(() => import('../pages/apprendre/TermPage.jsx')) },
+          { path: 'apprendre/guides/:slug', lazy: lazyPage(() => import('../pages/apprendre/GuidePage.jsx')) },
+          { path: 'outils/comparateur', lazy: lazyPage(() => import('../pages/outils/ComparatorPage.jsx')) },
+          { path: 'outils/comparateur/adequation', lazy: lazyPage(() => import('../pages/outils/UsageFitPage.jsx')) },
+          { path: 'outils/comparateur/segments/:segment', lazy: lazyPage(() => import('../pages/outils/ComparatorSegmentPage.jsx')) },
+          { path: 'outils/comparateur/:theme', lazy: lazyPage(() => import('../pages/outils/ComparatorThemePage.jsx')) },
+          { path: 'outils/simulateurs', lazy: lazyPage(() => import('../pages/outils/SimulatorsPage.jsx')) },
+          { path: 'outils/simulateurs/:key', lazy: lazyPage(() => import('../pages/outils/SimulatorPage.jsx')) },
+          { path: 'outils/offres-emploi', lazy: lazyPage(() => import('../pages/outils/JobOffersPage.jsx')) },
+          { path: 'outils/atelier', lazy: lazyPage(() => import('../pages/outils/WorkshopPage.jsx')) },
+          { path: 'outils/postal', lazy: lazyPage(() => import('../pages/outils/PostalReferencePage.jsx')) },
+        ],
+      },
+      {
+        element: <RequireAuth />,
+        children: [{ path: 'paiement/retour', lazy: lazyPage(() => import('../pages/payments/PaymentReturnPage.jsx')) }],
+      },
+      // The former connected space: every address now lives under /app.
+      ...LEGACY_REDIRECTS.map((redirect) => ({
+        path: redirect.prefix ? `${redirect.from}/*` : redirect.from,
+        element: <LegacyRedirect to={redirect.to} prefix={redirect.prefix} />,
+      })),
+      { path: '*', element: <NotFoundPage /> },
+    ],
+  },
+];
+
 export const router = createBrowserRouter([
   appRoutes,
   sharedRoutes,
@@ -293,65 +336,15 @@ export const router = createBrowserRouter([
   { path: '/espaces', element: <Navigate to="/partage" replace /> },
   {
     path: '/',
-    element: <MainLayout />,
+    element: <LocaleScope />,
     errorElement: <ErrorPage />,
-    children: [
-      // Outside the maintenance gate: an administrator needs a way in even
-      // while the rest of the site is closed.
-      { path: 'connexion', element: <LoginPage /> },
-      {
-        element: <MaintenanceGate />,
-        children: [
-          { index: true, element: <HomePage /> },
-          { path: 'formations', element: <FormationsPresentationPage /> },
-          { path: 'outils', element: <ToolsPresentationPage /> },
-          { path: 'blog', element: <BlogListPage /> },
-          { path: 'blog/:slug', element: <ArticlePage /> },
-          { path: 'newsletter/confirmer', element: <NewsletterLinkPage mode="confirm" /> },
-          { path: 'newsletter/desinscription', element: <NewsletterLinkPage mode="unsubscribe" /> },
-          { path: 'a-propos', element: <AboutPage /> },
-          { path: 'services', element: <ServicesPage /> },
-          { path: 'faq', element: <FaqPage /> },
-          { path: 'fonctionnalites', element: <FeaturesOverviewPage /> },
-          { path: 'contact', element: <ContactPage /> },
-          { path: 'mentions-legales', element: <LegalNoticePage /> },
-          { path: 'confidentialite', element: <PrivacyPolicyPage /> },
-          { path: 'inscription', element: <RegisterPage /> },
-          { path: 'mot-de-passe-oublie', element: <ForgotPasswordPage /> },
-          // Public: anyone holding a certificate number can check it.
-          { path: 'verification', lazy: lazyPage(() => import('../pages/certificates/VerifyCertificatePage.jsx')) },
-          { path: 'verification/:number', lazy: lazyPage(() => import('../pages/certificates/VerifyCertificatePage.jsx')) },
-          // Public tools and learning pages (P8-02): a visitor reads them here,
-          // a signed-in person is sent to the same page inside the application.
-          {
-            element: <AppRedirectWhenSignedIn />,
-            children: [
-              { path: 'apprendre', lazy: lazyPage(() => import('../pages/apprendre/ApprendrePage.jsx')) },
-              { path: 'apprendre/termes/:slug', lazy: lazyPage(() => import('../pages/apprendre/TermPage.jsx')) },
-              { path: 'apprendre/guides/:slug', lazy: lazyPage(() => import('../pages/apprendre/GuidePage.jsx')) },
-              { path: 'outils/comparateur', lazy: lazyPage(() => import('../pages/outils/ComparatorPage.jsx')) },
-              { path: 'outils/comparateur/adequation', lazy: lazyPage(() => import('../pages/outils/UsageFitPage.jsx')) },
-              { path: 'outils/comparateur/segments/:segment', lazy: lazyPage(() => import('../pages/outils/ComparatorSegmentPage.jsx')) },
-              { path: 'outils/comparateur/:theme', lazy: lazyPage(() => import('../pages/outils/ComparatorThemePage.jsx')) },
-              { path: 'outils/simulateurs', lazy: lazyPage(() => import('../pages/outils/SimulatorsPage.jsx')) },
-              { path: 'outils/simulateurs/:key', lazy: lazyPage(() => import('../pages/outils/SimulatorPage.jsx')) },
-              { path: 'outils/offres-emploi', lazy: lazyPage(() => import('../pages/outils/JobOffersPage.jsx')) },
-              { path: 'outils/atelier', lazy: lazyPage(() => import('../pages/outils/WorkshopPage.jsx')) },
-              { path: 'outils/postal', lazy: lazyPage(() => import('../pages/outils/PostalReferencePage.jsx')) },
-            ],
-          },
-          {
-            element: <RequireAuth />,
-            children: [{ path: 'paiement/retour', lazy: lazyPage(() => import('../pages/payments/PaymentReturnPage.jsx')) }],
-          },
-          // The former connected space: every address now lives under /app.
-          ...LEGACY_REDIRECTS.map((redirect) => ({
-            path: redirect.prefix ? `${redirect.from}/*` : redirect.from,
-            element: <LegacyRedirect to={redirect.to} prefix={redirect.prefix} />,
-          })),
-          { path: '*', element: <NotFoundPage /> },
-        ],
-      },
-    ],
+    children: publicPages(),
   },
+  ...PREFIXED_LANGUAGES.map((lang) => ({
+    path: `/${lang}`,
+    element: <LocaleScope lang={lang} />,
+    errorElement: <ErrorPage />,
+    children: publicPages(),
+  })),
 ]);
+

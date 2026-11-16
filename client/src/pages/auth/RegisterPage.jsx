@@ -8,11 +8,14 @@ import { accountTypeLabel, useAccountTypes } from '../../lib/accountTypes.js';
 import AuthAside from '../../components/layout/AuthAside.jsx';
 import Button from '../../components/ui/Button.jsx';
 import '../Pages.css';
+import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 
 const initialForm = { name: '', email: '', password: '', accountType: '' };
 
 export default function RegisterPage() {
   const { t } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.register.title'), t('seo.pages.register.description'));
   const { status, register, login } = useAuth();
   const navigate = useNavigate();
   const accountTypes = useAccountTypes();

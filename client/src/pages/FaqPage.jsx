@@ -7,9 +7,12 @@ import PageHeader from '../components/layout/PageHeader.jsx';
 import Button from '../components/ui/Button.jsx';
 import Section from '../components/ui/Section.jsx';
 import './Pages.css';
+import { useDocumentMeta } from '../lib/useDocumentMeta.js';
 
 export default function FaqPage() {
   const { t, i18n } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.faq.title'), t('seo.pages.faq.description'));
   // P11-02: the site's questions written in the administration come after
   // the fixed ones (the application's have their own help).
   const written = useApi(`/chatbot/entries?lang=${contentLanguage(i18n.language) ?? 'fr'}&audience=site`);

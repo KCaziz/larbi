@@ -5,6 +5,7 @@ import Button from '../../components/ui/Button.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import Section from '../../components/ui/Section.jsx';
 import '../Pages.css';
+import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 
 const tools = [
   { key: 'comparator', icon: Landmark, tone: 'tone-green', to: '/outils/comparateur', available: true },
@@ -23,6 +24,8 @@ const tools = [
 // figures.
 export default function ToolsPresentationPage() {
   const { t } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.tools.title'), t('seo.pages.tools.description'));
 
   return (
     <>

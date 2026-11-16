@@ -81,3 +81,13 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* Mint call to action on a dark band (refonte 2026-11-16): ink on mint, 9.4:1. */
+.btn-mint {
+  background: #4fe5d3;
+  color: #102a43;
+  box-shadow: 0 6px 18px rgba(79, 229, 211, 0.28);
+}
+.btn-mint:hover {
+  background: #8ff0e4;
+}

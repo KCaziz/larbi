@@ -19,7 +19,10 @@ export default function SimulatorPage() {
   const detail = useApi(`/tools/simulations/${key}`);
   const simulator = detail.data?.simulator ?? null;
 
-  useDocumentMeta(simulator ? t(`simulators.list.${simulator.key}.title`) : t('simulators.title'));
+  useDocumentMeta(
+    simulator ? t('seo.templates.simulator', { name: t(`simulators.list.${simulator.key}.title`) }) : t('seo.pages.simulators.title'),
+    simulator ? `${t(`simulators.list.${simulator.key}.body`)} ${t('seo.templates.simulatorDescription')}` : t('seo.pages.simulators.description'),
+  );
 
   if (detail.status === 'loading') return <LoadingState />;
   if (detail.status === 'error') {

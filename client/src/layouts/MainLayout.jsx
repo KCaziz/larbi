@@ -5,6 +5,7 @@ import Header from '../components/layout/Header.jsx';
 import Footer from '../components/layout/Footer.jsx';
 import ChatbotWidget from '../components/assistant/ChatbotWidget.jsx';
 import { usePublicSettings } from '../lib/publicSettings.js';
+import AnalyticsConsent from '../components/analytics/Analytics.jsx';
 
 export default function MainLayout() {
   const { t } = useTranslation();
@@ -24,6 +25,7 @@ export default function MainLayout() {
       </main>
       <Footer />
       <ChatbotWidget />
+      <AnalyticsConsent />
     </>
   );
 }

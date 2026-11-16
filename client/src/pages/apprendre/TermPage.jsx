@@ -16,7 +16,7 @@ export default function TermPage() {
   const { t, i18n } = useTranslation();
   const { slug } = useParams();
   const term = useApi(withLang(`/apprendre/termes/${slug}`, i18n.language));
-  useDocumentMeta(term.status === 'ready' ? term.data.term.term : t('apprendre.title'));
+  useDocumentMeta(term.status === 'ready' ? t('seo.templates.term', { term: term.data.term.term }) : t('seo.pages.apprendre.title'));
 
   if (term.status === 'loading') return <LoadingState />;
   if (term.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={term.reload} />;

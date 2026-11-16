@@ -19,7 +19,7 @@ export default function SimulatorsPage() {
   const { t } = useTranslation();
   const list = useApi('/tools/simulations');
 
-  useDocumentMeta(t('simulators.title'), t('simulators.intro'));
+  useDocumentMeta(t('seo.pages.simulators.title'), t('seo.pages.simulators.description'));
 
   if (list.status === 'loading') return <LoadingState />;
   if (list.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={list.reload} />;

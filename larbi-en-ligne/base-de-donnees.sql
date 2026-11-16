@@ -116,7 +116,8 @@ INSERT INTO `_prisma_migrations` VALUES
 ('f0eb1349-af97-4579-bae7-753868b51885','48f8282bcaa0a3a999b18dc6f1d5db83bb726ca4b4ef8f9a4414e45e1fd0104f','2026-10-31 16:17:39.218','20261028120000_fin_goal_models_go12_go17',NULL,NULL,'2026-10-31 16:17:39.182',1),
 ('f360873b-83a0-4e3b-9dc4-b47800e2dc87','82bd82d829199670c04c73d57fa75549b52914215bf2aba391d6f81953d5fc0f','2026-11-02 20:18:09.532','20261102120000_fin_shared_advance',NULL,NULL,'2026-11-02 20:18:09.457',1),
 ('f7448fe2-1b68-426a-a25c-03a9da84b0be','2c7dc316c3791915b40982590cca31d2551f03190e94356d154723e61aa80464',NULL,'20261016120000_fin_business','A migration failed to apply. New migrations cannot be applied before the error is recovered from. Read more about how to resolve migration issues in a production database: https://pris.ly/d/migrate-resolve\n\nMigration name: 20261016120000_fin_business\n\nDatabase error code: 1050\n\nDatabase error:\nTable \'fin_businesses\' already exists\n\nPlease check the query number 1 from the migration file.\n\n   0: sql_schema_connector::apply_migration::apply_script\n           with migration_name=\"20261016120000_fin_business\"\n             at schema-engine\\connectors\\sql-schema-connector\\src\\apply_migration.rs:113\n   1: schema_commands::commands::apply_migrations::Applying migration\n           with migration_name=\"20261016120000_fin_business\"\n             at schema-engine\\commands\\src\\commands\\apply_migrations.rs:95\n   2: schema_core::state::ApplyMigrations\n             at schema-engine\\core\\src\\state.rs:255','2026-10-16 19:42:26.381','2026-10-16 19:42:17.225',0),
-('ffffc7ca-e031-4cf4-9984-9ce703a7106a','ec086ac0fe2c67ab17356fdf0f39c5325c5d774213d05ae8dd6b1654c35e5c8c','2026-11-04 21:11:31.740','20261104120000_fin_money_double',NULL,NULL,'2026-11-04 21:11:29.824',1);
+('ffffc7ca-e031-4cf4-9984-9ce703a7106a','ec086ac0fe2c67ab17356fdf0f39c5325c5d774213d05ae8dd6b1654c35e5c8c','2026-11-04 21:11:31.740','20261104120000_fin_money_double',NULL,NULL,'2026-11-04 21:11:29.824',1),
+('8f1d2c3b-5a6e-4f70-9b81-c2d3e4f5a6b7','a4625281f7342511d1bce7523afed88d1583c046fe0e3e4e5f06a5ebf5d52b01','2026-11-16 15:00:00.100','20261116150000_analytics_setting',NULL,NULL,'2026-11-16 15:00:00.000',1);
 /*!40000 ALTER TABLE `_prisma_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -3840,8 +3841,9 @@ LOCK TABLES `platform_settings` WRITE;
 INSERT INTO `platform_settings` VALUES
 ('aziz','sellal','2026-09-26 19:26:52.769'),
 ('contactAddress','','2026-09-25 13:05:45.643'),
-('contactEmail','','2026-09-25 13:05:45.643'),
+('contactEmail','contact@fincludia.com','2026-09-25 13:05:45.643'),
 ('contactPhone','','2026-09-25 13:05:45.643'),
+('gaMeasurementId','','2026-11-16 15:00:00.000'),
 ('maintenanceMode','false','2026-09-25 13:05:45.643');
 /*!40000 ALTER TABLE `platform_settings` ENABLE KEYS */;
 UNLOCK TABLES;

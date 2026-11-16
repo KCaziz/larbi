@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api, ApiError } from '../../lib/api.js';
 import Button from '../ui/Button.jsx';
 import './Newsletter.css';
+import { track } from '../../lib/analytics.js';
 
 // Newsletter sign-up (double opt-in): the server sends a confirmation link and
 // nothing is subscribed until it is clicked. The page never learns whether the
@@ -18,6 +19,7 @@ export default function NewsletterForm() {
     setState({ status: 'sending', error: null });
     try {
       await api.post('/newsletter/subscribe', { email, locale: i18n.language });
+      track('newsletter_signup');
       setState({ status: 'done', error: null });
     } catch (err) {
       const status = err instanceof ApiError ? err.status : -1;

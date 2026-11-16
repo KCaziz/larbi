@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { CheckCheck, Copy, Download, ListChecks, Paperclip, Pencil, Plus, Search, Tag, Trash2, TriangleAlert } from 'lucide-react';
@@ -185,6 +185,13 @@ export function useMovementLookups() {
 
 // ---- entry -------------------------------------------------------------------
 
+// R14: « Espèces » (cash), the accounts the application opens by itself (a
+// goal's savings, a loan) — not « one's own account » for the default choice —
+// and the value that asks the server to open « Espèces » when there is none.
+const CASH_TYPE = 'AC-01';
+const SYSTEM_ACCOUNT_TYPES = ['AC-08', 'AC-09'];
+const CASH = 'cash';
+
 // The complete entry of TRX-02 (tab 08): amount, description, category and
 // sub-category, account, payment method, date, tag, payer, place. « Enregistrer
 // et nouveau » keeps the context. A suspected duplicate is asked BEFORE saving
@@ -231,6 +238,13 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
   const [pendingDuplicates, setPendingDuplicates] = useState(null);
   // R13-06: the declared payment this entry could be, asked before it is saved.
   const [pendingPayment, setPendingPayment] = useState(null);
+  // R14: with ONE account of one's own, a new movement is on it unless changed.
+  const ownAccounts = lookups.accounts.filter((row) => !row.archivedAt && row.source === 'manual' && !SYSTEM_ACCOUNT_TYPES.includes(row.type));
+  const hasCash = lookups.accounts.some((row) => !row.archivedAt && row.type === CASH_TYPE);
+  const onlyAccount = ownAccounts.length === 1 ? ownAccounts[0].id : null;
+  useEffect(() => {
+    if (!source && onlyAccount) setForm((current) => (current.accountId === '' ? { ...current, accountId: onlyAccount } : current));
+  }, [source, onlyAccount]);
   const account = lookups.accounts.find((row) => row.id === form.accountId);
   const entryCurrency = editing ? source.currency : (account?.currency ?? currency);
 
@@ -246,7 +260,8 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
     tagId: form.tagId || null,
     payer: form.payer.trim() || null,
     place: form.place.trim() || null,
-    ...(form.accountId ? { accountId: form.accountId } : {}),
+    // « Espèces » chosen while there is no such account yet: the server opens it.
+    ...(form.accountId && form.accountId !== CASH ? { accountId: form.accountId } : {}),
   });
 
   const save = async (keepGoing, { confirmed = false, occurrence = null } = {}) => {
@@ -357,8 +372,12 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
             <label htmlFor="entry-accountId">{t('movements.account')}</label>
             {/* The account can change on a correction (recette R9-05): moving an
                 income from « Espèces » to the bank account is a correction. */}
-            <select {...field('accountId')}>
-              <option value="">{t('movements.defaultAccount')}</option>
+            {/* R14 (2026-11-15): a movement is on an account OR in cash, chosen
+                by the person — never put on « Espèces » without being asked. */}
+            <select {...field('accountId')} required>
+              <option value="" disabled>
+                {t('movements.chooseAccount')}
+              </option>
               {lookups.accounts
                 .filter((row) => !row.archivedAt)
                 .map((row) => (
@@ -366,7 +385,9 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
                     {row.label} ({row.currency})
                   </option>
                 ))}
+              {!hasCash && <option value={CASH}>{t('movements.cashAccount')}</option>}
             </select>
+            <span className="fin-hint">{t('movements.accountHelp')}</span>
           </div>
 
           <div className="fin-field">

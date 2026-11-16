@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Menu, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
+import { LifeBuoy, Menu, Settings, X } from 'lucide-react';
 import { useApi } from '../lib/useApi.js';
 import { useRevealOnAction } from '../lib/useRevealOnAction.js';
 import { APP_NAV, NAV_SECTIONS, SETTINGS_LINKS, visibleEntries } from '../config/appNavigation.js';
 import ChatbotWidget from '../components/assistant/ChatbotWidget.jsx';
+import { AnalyticsTracker } from '../components/analytics/Analytics.jsx';
 import QuickAdd from '../components/fincludia/QuickAdd.jsx';
 import AppTopBar from '../components/layout/AppTopBar.jsx';
+import SideNav, { useSidebarFold } from '../components/layout/SideNav.jsx';
+import { ASSISTANT_OPEN_EVENT } from '../lib/finControls.js';
 import './AppLayout.css';
 
 // The application's own window (P8-02): apart from the showcase site, with
@@ -32,21 +35,8 @@ export default function AppLayout() {
   const entries = visibleEntries(APP_NAV, { declaredMinor });
   const settings = visibleEntries(SETTINGS_LINKS, { declaredMinor });
 
-  // The sidebar can be folded to its icons and unfolded (recette R4-01), on
-  // every width: folded is the exception on a computer, the rule on a tablet.
-  // The choice is kept for the next visit.
-  const [toggled, setToggled] = useState(() => readSidebarChoice());
-  const wide = typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1200px)').matches;
-  const folded = wide ? toggled : !toggled;
-  const toggleSidebar = () =>
-    setToggled((value) => {
-      try {
-        localStorage.setItem(SIDEBAR_KEY, value ? '0' : '1');
-      } catch {
-        /* private window: the choice holds for this visit only */
-      }
-      return !value;
-    });
+  // The sidebar can be folded to its icons and unfolded (recette R4-01).
+  const { toggled, folded, toggle } = useSidebarFold('fincludia.sidebar');
   const [moreOpen, setMoreOpen] = useState(false);
   const [lastPath, setLastPath] = useState(pathname);
   // A new page closes the phone sheet (adjusting state during render rather
@@ -57,36 +47,46 @@ export default function AppLayout() {
     today.reload();
   }
 
-  // The five sections of the menu (answer D3 and the improvements retained).
-  const sections = NAV_SECTIONS.map((section) => ({ ...section, entries: entries.filter((entry) => entry.section === section.key) })).filter(
-    (section) => section.entries.length > 0,
-  );
+  const toSide = (entry) => ({
+    key: entry.key,
+    to: entry.to,
+    end: entry.end,
+    label: t(entry.labelKey),
+    icon: entry.icon,
+    badge: badges[entry.key] ?? 0,
+    badgeLabel: badges[entry.key] > 0 ? t('appNav.toDo', { count: badges[entry.key] }) : undefined,
+  });
+  // The six sections of the menu (answer D3 and the improvements retained).
+  const sections = NAV_SECTIONS.map((section) => ({
+    key: section.key,
+    title: t(section.labelKey),
+    entries: entries.filter((entry) => entry.section === section.key).map(toSide),
+  })).filter((section) => section.entries.length > 0);
 
   return (
     <div className="app-shell">
       <a href="#app-main" className="skip-link">
         {t('appNav.skipToContent')}
       </a>
-      <AppTopBar app="budget" />
-
       <div className="app-body">
-        <nav className={`app-sidebar${toggled ? ' app-sidebar-toggled' : ''}`} aria-label={t('appNav.label')}>
-          <button type="button" className="app-sidebar-toggle" aria-expanded={!folded} title={folded ? t('nav.expandMenu') : t('nav.collapseMenu')} onClick={toggleSidebar}>
-            {folded ? <PanelLeftOpen className="icon-dir" size={18} aria-hidden="true" /> : <PanelLeftClose className="icon-dir" size={18} aria-hidden="true" />}
-            <span className="app-nav-text">{folded ? t('nav.expandMenu') : t('nav.collapseMenu')}</span>
-          </button>
-          {sections.map((section) => (
-            <div key={section.key} className="app-nav-section">
-              <p className="app-nav-heading">{t(section.labelKey)}</p>
-              <NavList entries={section.entries} badges={badges} />
-            </div>
-          ))}
-        </nav>
-
-        <main id="app-main" className="app-main">
-          <Outlet />
-          <QuickAdd />
-        </main>
+        <SideNav
+          label={t('appNav.label')}
+          home="/app"
+          sections={sections}
+          promo
+          toggled={toggled}
+          foot={[
+            { key: 'space', to: '/app/parametres', label: t('appNav.mySpace'), icon: Settings },
+            { key: 'help', label: t('appNav.helpSupport'), icon: LifeBuoy, onClick: () => document.dispatchEvent(new CustomEvent(ASSISTANT_OPEN_EVENT)) },
+          ]}
+        />
+        <div className="app-column">
+          <AppTopBar app="budget" menu={{ folded, onToggle: toggle }} />
+          <main id="app-main" className="app-main">
+            <Outlet />
+            <QuickAdd />
+          </main>
+        </div>
       </div>
 
       {/* Phone: the four daily entries and « Plus » for everything else. */}
@@ -113,23 +113,15 @@ export default function AppLayout() {
       )}
 
       <ChatbotWidget />
+      <AnalyticsTracker />
     </div>
   );
 }
 
-const SIDEBAR_KEY = 'fincludia.sidebar';
-function readSidebarChoice() {
-  try {
-    return localStorage.getItem(SIDEBAR_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-function NavList({ entries, badges = {}, className = '' }) {
+function NavList({ entries, badges = {} }) {
   const { t } = useTranslation();
   return (
-    <ul className={`app-nav-list ${className}`}>
+    <ul className="app-nav-list">
       {entries.map((entry) => (
         <li key={entry.to}>
           <NavLink to={entry.to} end={entry.end} className="app-nav-link" title={t(entry.labelKey)}>

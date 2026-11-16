@@ -4,9 +4,12 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import Section from '../../components/ui/Section.jsx';
 import '../Pages.css';
+import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 
 export default function PrivacyPolicyPage() {
   const { t } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.privacy.title'), t('seo.pages.privacy.description'));
 
   return (
     <>
@@ -18,6 +21,10 @@ export default function PrivacyPolicyPage() {
 
           <h2>{t('privacy.dataTitle')}</h2>
           <p>{t('privacy.dataBody')}</p>
+
+          {/* Audience measurement (P12-06): what it is, and that it needs consent. */}
+          <h2>{t('privacy.analyticsTitle')}</h2>
+          <p>{t('privacy.analyticsBody')}</p>
 
           <h2>{t('privacy.securityTitle')}</h2>
           <p>{t('privacy.securityBody')}</p>

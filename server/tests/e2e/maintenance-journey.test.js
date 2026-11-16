@@ -41,7 +41,7 @@ describe('maintenance mode, end to end', { skip: findChrome() ? false : 'no Chro
   };
 
   before(async () => {
-    t = await boot();
+    t = await boot({ subscribers: true });
     await t.reset();
     const passwordHash = await bcrypt.hash(PASSWORD, 10);
     await t.admin({ name: 'Admin', email: 'admin@example.com', passwordHash });

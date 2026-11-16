@@ -1062,3 +1062,286 @@
     color: transparent;
   }
 }
+
+/* ---------- Refonte 2026-11-16: the client's model ---------- */
+/* The hero on a deep blue → teal band, white text (≥ 7:1), mint accents. */
+.hero-band {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 0;
+  background: var(--hero-bg);
+  color: #dcebf3;
+}
+.hero-band .hero-inner {
+  max-width: 1280px;
+  padding-block: 80px 88px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 48px;
+}
+.hero-band h1 {
+  color: #ffffff;
+}
+.hero-band .hero-copy p {
+  color: #dcebf3;
+}
+.hero-band .hero-signature,
+.hero-band .hero-copy p.hero-signature {
+  background: none;
+  color: #4fe5d3;
+  -webkit-text-fill-color: currentColor;
+}
+.hero-badge {
+  display: inline-block;
+  margin-bottom: 22px;
+  padding: 6px 14px;
+  border: 1px solid rgba(79, 229, 211, 0.45);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.hero-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.hero-trust li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.hero-trust svg {
+  color: #4fe5d3;
+}
+
+/* The application on a computer and a phone (client's model): real screens
+   of a demonstration account, in device frames. */
+.hero-devices {
+  position: relative;
+  margin: 0;
+  padding-block-end: 28px;
+  padding-inline-end: 10%;
+}
+.device-laptop-screen {
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border: 10px solid #0b1a28;
+  border-block-end-width: 14px;
+  border-radius: 14px 14px 4px 4px;
+  background: #0b1a28;
+  box-shadow: 0 30px 60px rgba(2, 16, 30, 0.45);
+}
+.device-laptop-screen img,
+.device-phone img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.device-laptop-base {
+  position: relative;
+  block-size: 12px;
+  margin-inline: -7%;
+  border-radius: 0 0 14px 14px;
+  background: linear-gradient(180deg, #c9d6df 0%, #93a7b5 100%);
+  box-shadow: 0 10px 24px rgba(2, 16, 30, 0.35);
+}
+.device-laptop-base::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  inline-size: 16%;
+  block-size: 5px;
+  border-radius: 0 0 6px 6px;
+  background: #7f93a2;
+  transform: translateX(-50%);
+}
+.device-phone {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-end: 0;
+  inline-size: 26%;
+  aspect-ratio: 390 / 844;
+  overflow: hidden;
+  border: 7px solid #0b1a28;
+  border-radius: 26px;
+  background: #0b1a28;
+  box-shadow: 0 24px 50px rgba(2, 16, 30, 0.5);
+}
+@media (max-width: 960px) {
+  .hero-band .hero-inner {
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: 56px 64px;
+  }
+  .hero-devices {
+    max-inline-size: 620px;
+  }
+}
+
+/* « Pour qui ? » under the hero: the real profiles, personal and business. */
+.audience-strip {
+  padding: 0 20px;
+  background: var(--bg);
+}
+.audience-inner {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+  max-width: 1200px;
+  margin: -36px auto 0;
+  padding: 20px 24px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--card-lift);
+}
+.audience-title {
+  margin: 0;
+  color: var(--text-h);
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.audience-list {
+  display: flex;
+  flex: 1 1 520px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.audience-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--bg-alt);
+  color: var(--text-h);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.audience-list svg {
+  color: var(--green);
+}
+.audience-list .audience-business {
+  background: var(--accent-bg);
+}
+.audience-list .audience-business svg {
+  color: var(--accent);
+}
+.audience-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 44px;
+  padding-inline: 18px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.audience-cta:hover,
+.audience-cta:focus-visible {
+  background: var(--accent-hover);
+}
+
+/* « Nos grands univers »: white cards, an icon tile, an arrow. */
+.universe-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.universe-grid > * {
+  display: flex;
+}
+.universe-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  inline-size: 100%;
+  padding: 20px 20px 44px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(16, 42, 67, 0.04), 0 6px 18px rgba(16, 42, 67, 0.05);
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+.universe-card:hover,
+.universe-card:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--accent-border);
+  box-shadow: 0 14px 30px rgba(16, 42, 67, 0.1);
+}
+.universe-icon {
+  display: grid;
+  place-items: center;
+  inline-size: 46px;
+  block-size: 46px;
+  border-radius: 12px;
+  background: var(--icon-tile);
+  color: #ffffff;
+}
+.universe-text {
+  display: grid;
+  gap: 6px;
+}
+.universe-text strong {
+  color: var(--text-h);
+  font-family: var(--display);
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+.universe-text span {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.universe-arrow {
+  position: absolute;
+  inset-inline-end: 16px;
+  inset-block-end: 16px;
+  padding: 4px;
+  border-radius: 50%;
+  background: var(--bg-alt);
+  color: var(--accent);
+  box-sizing: content-box;
+}
+@media (max-width: 1100px) {
+  .universe-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .universe-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The closing band in the brand's deep gradient. */
+.cta-band-gradient {
+  background: var(--cta-bg);
+}
+.cta-band-gradient h2 {
+  color: #ffffff;
+}
+.cta-band-gradient p {
+  color: #dcebf3;
+}

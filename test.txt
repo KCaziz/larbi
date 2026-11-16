@@ -1,3 +1,0 @@
-- Les calcul de l'accueil doit suivre le compte sélectionné
-- Un budget doit etre rattaché a un compte ou au solde total 
-- on a completement omis la Réserve de sécurité il faut l'implementer si elle est deja implementer il faudrais la rendre un peut plus clair et accessible 

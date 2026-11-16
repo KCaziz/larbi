@@ -11,7 +11,7 @@ import PageToolbar from '../../../components/cms/PageToolbar.jsx';
 import Notice from '../../../components/ui/Notice.jsx';
 import './Platform.css';
 
-// The four settings the rest of the application actually reads (P3-16): a fixed
+// The settings the rest of the application actually reads (P3-16): a fixed
 // form, not a free-form key/value store — a setting nothing reads is not worth
 // having, so a new one needs a real field here, not just a row in a table.
 function CoreSettings({ settings, onSaved }) {
@@ -22,6 +22,7 @@ function CoreSettings({ settings, onSaved }) {
     contactEmail: byKey.contactEmail ?? '',
     contactPhone: byKey.contactPhone ?? '',
     contactAddress: byKey.contactAddress ?? '',
+    gaMeasurementId: byKey.gaMeasurementId ?? '',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -32,12 +33,19 @@ function CoreSettings({ settings, onSaved }) {
     setSaving(true);
     setError(null);
     setSaved(false);
+    const gaMeasurementId = form.gaMeasurementId.trim().toUpperCase();
+    if (!/^(G-[A-Z0-9]{4,15})?$/.test(gaMeasurementId)) {
+      setError(t('admin.settings.gaMeasurementIdInvalid'));
+      setSaving(false);
+      return;
+    }
     try {
       await Promise.all([
         api.post('/admin/settings', { key: 'maintenanceMode', value: String(form.maintenanceMode) }),
         api.post('/admin/settings', { key: 'contactEmail', value: form.contactEmail.trim() }),
         api.post('/admin/settings', { key: 'contactPhone', value: form.contactPhone.trim() }),
         api.post('/admin/settings', { key: 'contactAddress', value: form.contactAddress.trim() }),
+        api.post('/admin/settings', { key: 'gaMeasurementId', value: gaMeasurementId }),
       ]);
       setSaved(true);
       onSaved();
@@ -71,6 +79,21 @@ function CoreSettings({ settings, onSaved }) {
       </Field>
       <Field label={t('admin.settings.contactAddress')} htmlFor="s-address">
         <textarea id="s-address" rows={2} maxLength={300} value={form.contactAddress} onChange={(e) => setForm((f) => ({ ...f, contactAddress: e.target.value }))} />
+      </Field>
+      {/* Google Analytics 4 (P12-06): empty = no measurement at all. */}
+      <Field label={t('admin.settings.gaMeasurementId')} htmlFor="s-ga" hint={t('admin.settings.gaMeasurementIdHint')}>
+        <input
+          id="s-ga"
+          aria-describedby="s-ga-hint"
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          spellCheck={false}
+          maxLength={20}
+          placeholder="G-XXXXXXXXXX"
+          value={form.gaMeasurementId}
+          onChange={(e) => setForm((f) => ({ ...f, gaMeasurementId: e.target.value }))}
+        />
       </Field>
 
       {error && (

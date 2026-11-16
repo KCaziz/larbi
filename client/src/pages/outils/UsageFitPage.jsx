@@ -24,7 +24,7 @@ const ANNUALISED = new Set(['accountFee', 'cardFee']);
 
 export default function UsageFitPage() {
   const { t, i18n } = useTranslation();
-  useDocumentMeta(t('bankUsage.title'), t('bankUsage.intro'));
+  useDocumentMeta(t('seo.pages.usageFit.title'), t('seo.pages.usageFit.description'));
   const { status, data, reload } = useApi('/tools/comparator/themes/comptes');
 
   const [selected, setSelected] = useState([]);

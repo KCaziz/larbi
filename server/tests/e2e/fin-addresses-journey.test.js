@@ -23,7 +23,7 @@ describe('each screen at its own address (P8-25)', { skip: findChrome() ? false 
   const at = () => b.ev('location.pathname');
 
   before(async () => {
-    t = await boot();
+    t = await boot({ subscribers: true });
     await t.reset();
     user = await t.adult({ finPublic: 'SAL', finCurrency: 'DZD', finOnboardedAt: new Date() });
     site = await startSite(t.baseUrl);
@@ -94,6 +94,11 @@ describe('each screen at its own address (P8-25)', { skip: findChrome() ? false 
     assert.ok(await b.waitFor("location.pathname === '/app/mouvements/nouveau' && !!document.querySelector('#entry-amount')", 'the entry'));
     await b.type('#entry-amount', '1500');
     await b.type('#entry-note', 'Boulangerie');
+    // R14 (2026-11-15): with two accounts, the account (or cash) is chosen, never implied.
+    const account = await t.prisma.finAccount.findFirst({ where: { userId: user.id, label: 'Compte principal' } });
+    assert.equal(await b.ev("document.querySelector('#entry-accountId').value"), '', 'two accounts: none is chosen for the person');
+    assert.ok(await b.waitFor(`!!document.querySelector('#entry-accountId option[value="${account.id}"]')`, 'the accounts are listed'));
+    await b.ev(`(() => { const s = document.querySelector('#entry-accountId'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(s, '${account.id}'); s.dispatchEvent(new Event('change', { bubbles: true })); })()`);
     assert.ok(await b.click(fr.myMoney.save));
     assert.ok(await b.waitText(fr.myMoney.added));
     assert.equal(await at(), '/app/mouvements');

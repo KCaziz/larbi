@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ApiError, api } from '../lib/api.js';
 import { AuthContext } from './auth-context.js';
+import { track } from '../lib/analytics.js';
 
 // The frontend never decides who the user is: it only mirrors what the server
 // says (GET /auth/me, backed by the httpOnly session cookie). Hiding a page
@@ -40,6 +41,7 @@ export function AuthProvider({ children }) {
       async register(data) {
         const { user } = await api.post('/auth/register', data);
         setState({ status: 'authenticated', user });
+        track('sign_up', { method: 'email' });
       },
       async logout() {
         // Only clear local state once the server confirmed: otherwise the UI

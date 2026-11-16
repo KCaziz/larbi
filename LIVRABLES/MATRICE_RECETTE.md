@@ -1,6 +1,6 @@
 # Matrice des livrables et recette
 
-> Généré le 2026-11-12 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
+> Généré le 2026-11-16 par `node server/scripts/generate-deliverables.js` depuis `TASKS.md` et `server/tests/`. Ne pas modifier à la main.
 
 Livrable de l'**annexe 2** du contrat, dont le tableau est fourni vide (livrable / prévu / livré / test / réserve).
 
@@ -8,7 +8,7 @@ La colonne « Test / résultat » renvoie à la suite automatisée : `npm test` 
 
 **132 livrables sur 147** sont terminés et vérifiés. **7** sont bloqués par une décision ou une donnée du client.
 
-Suite de tests : 204 fichiers (consistency : 4, e2e : 43, functional : 75, security : 43, unit : 39).
+Suite de tests : 209 fichiers (consistency : 5, e2e : 44, functional : 78, security : 43, unit : 39).
 
 | Livrable | Prévu | Livré | Test / résultat | Réserve / correction |
 | --- | --- | --- | --- | --- |

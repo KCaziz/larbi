@@ -7,11 +7,14 @@ import { errorKey } from '../../lib/api.js';
 import AuthAside from '../../components/layout/AuthAside.jsx';
 import Button from '../../components/ui/Button.jsx';
 import '../Pages.css';
+import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 
 const initialForm = { email: '', password: '' };
 
 export default function LoginPage() {
   const { t } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.login.title'), t('seo.pages.login.description'));
   const { status, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

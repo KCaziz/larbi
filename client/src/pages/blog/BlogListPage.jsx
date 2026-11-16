@@ -28,7 +28,7 @@ export default function BlogListPage() {
   const page = toPage(params.get('page'));
   const [text, setText] = useState(query);
 
-  useDocumentMeta(t('blogList.title'), t('blogList.intro'));
+  useDocumentMeta(t('seo.pages.blog.title'), t('seo.pages.blog.description'));
 
   const apiParams = new URLSearchParams({ page: String(page) });
   if (query) apiParams.set('query', query);

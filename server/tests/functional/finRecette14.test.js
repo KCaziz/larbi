@@ -60,3 +60,41 @@ describe('R14 — the Accueil on one account', () => {
     assert.equal(all.reserve.hasFund, true);
   });
 });
+
+describe('R14 (2026-11-15) — an expense and an envelope are on an account or in cash', () => {
+  test('spending from another account than the budget’s is said, not counted; cash can be chosen', async () => {
+    const who = await t.adult({ name: 'Liquide', finCurrency: 'DZD', finPublic: 'SAL' });
+    const post = (path, json) => t.request('POST', `/fin${path}`, { user: who, json });
+    const get = (path) => t.request('GET', `/fin${path}`, { user: who });
+    const food = (await get('/categories')).body.groups.flatMap((g) => g.categories).find((c) => c.key === 'variable.alimentation_boissons');
+    const account = (await post('/comptes', { label: 'Courant', type: 'AC-02', currency: 'DZD', openingBalance: 10000000 })).body.account.id;
+    const budget = (await post('/budgets', { label: 'Mois', periodStart: iso(monthStart()).slice(0, 10), periodEnd: iso(monthEnd()).slice(0, 10), currency: 'DZD', accountId: account, envelopes: [{ categoryId: food.id, kind: 'variable', value: 3000000 }] })).body.budget;
+    const day = iso(new Date(monthStart().getTime() + 12 * 3600000));
+    await post('/transactions', { kind: 'expense', value: 500000, currency: 'DZD', occurredAt: day, categoryId: food.id, accountId: account });
+    // No account chosen: « Espèces », which this budget does not follow.
+    await post('/transactions', { kind: 'expense', value: 200000, currency: 'DZD', occurredAt: day, categoryId: food.id });
+
+    const view = (await get(`/budgets/${budget.id}`)).body.vue;
+    assert.equal(view.enveloppes[0].reel, 500000, 'only the budget’s account');
+    assert.deepEqual(view.autreCompte, { montant: 200000, nombre: 1 }, 'the cash expense is said');
+
+    // « cash » as the account of a budget and of an envelope.
+    const cashBudget = await post('/budgets', { label: 'Liquide', periodStart: iso(monthStart()).slice(0, 10), periodEnd: iso(monthEnd()).slice(0, 10), currency: 'DZD', accountId: 'cash', envelopes: [{ categoryId: food.id, kind: 'variable', value: 1000000, accountId: 'cash' }] });
+    assert.equal(cashBudget.status, 201, JSON.stringify(cashBudget.body));
+    const cash = (await get('/comptes')).body.accounts.find((row) => row.type === 'AC-01');
+    assert.equal(cashBudget.body.budget.accountId, cash.id);
+    const cashView = (await get(`/budgets/${cashBudget.body.budget.id}`)).body.vue;
+    assert.equal(cashView.enveloppes[0].reel, 200000);
+    assert.equal(cashView.autreCompte?.montant, 500000, 'and the other way round');
+  });
+
+  test('« cash » opens the Espèces account when there is none yet', async () => {
+    const who = await t.adult({ name: 'Sans espèces', finCurrency: 'DZD', finPublic: 'SAL' });
+    const res = await t.request('POST', '/fin/budgets', { user: who, json: { label: 'Liquide', periodStart: iso(monthStart()).slice(0, 10), periodEnd: iso(monthEnd()).slice(0, 10), currency: 'DZD', accountId: 'cash' } });
+    assert.equal(res.status, 201, JSON.stringify(res.body));
+    const accounts = (await t.request('GET', '/fin/comptes', { user: who })).body.accounts;
+    assert.equal(accounts.length, 1);
+    assert.equal(accounts[0].type, 'AC-01');
+    assert.equal(res.body.budget.accountId, accounts[0].id);
+  });
+});

@@ -106,6 +106,11 @@ export function assignToEnvelopes(movements, envelopes, scope = {}) {
   const spent = new Map(envelopes.map((envelope) => [envelope.id, 0]));
   let outside = 0;
   let outsideCount = 0;
+  // R14 (2026-11-15): spent in an envelope's category but from ANOTHER account
+  // (typically « Espèces » when no account was chosen): not counted, but said,
+  // so a gauge that does not move is explained.
+  let otherAccount = 0;
+  let otherAccountCount = 0;
   for (const row of movements) {
     // `scope.planned`: the expenses still to come (R13-04, « engagé »), instead of the realised ones.
     if (scope.planned ? row.kind !== 'expense' || !row.planned || row.status === 'fictional' : row.kind !== 'expense' || row.planned || !isReal(row)) continue;
@@ -113,12 +118,16 @@ export function assignToEnvelopes(movements, envelopes, scope = {}) {
     if (target) {
       // Spent from another account than this envelope's: it is not its spending.
       if (fromAccount(row, byId.get(target).accountId ?? budgetAccountId)) spent.set(target, spent.get(target) + row.value);
+      else {
+        otherAccount += row.value;
+        otherAccountCount += 1;
+      }
     } else if ((!row.category || row.category.family !== 'goal') && fromAccount(row, budgetAccountId)) {
       outside += row.value;
       outsideCount += 1;
     }
   }
-  return { spent, outside: outsideCount === 0 ? null : outside };
+  return { spent, outside: outsideCount === 0 ? null : outside, otherAccount: otherAccountCount === 0 ? null : { montant: otherAccount, nombre: otherAccountCount } };
 }
 
 /**
@@ -405,6 +414,8 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
       .sort((a, b) => (b.tauxConsommation.resultat ?? 0) - (a.tauxConsommation.resultat ?? 0))
       .map((line) => ({ enveloppe: line.id, categoryId: line.categoryId, niveau: line.alerte.niveau, taux: line.tauxConsommation.resultat })),
     horsEnveloppe: answer('PB-F005', assigned.outside),
+    // R14: spending in the envelopes' categories from an account this budget is not spent from.
+    autreCompte: assigned.otherAccount,
     moyenneJournaliere: answer('PB-F011', dailyAverage),
     projectionFinPeriode: answer('PB-F012', projected),
     ecartPrevuReel: answer('PB-F022', plannedVsReal),

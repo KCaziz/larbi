@@ -26,7 +26,7 @@ const MAX_COMPARED = 3;
 export default function WorkshopPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  useDocumentMeta(t('workshop.title'));
+  useDocumentMeta(t('seo.pages.workshop.title'), t('seo.pages.workshop.description'));
 
   const catalogue = useApi('/tools/simulations');
   // Scenarios are per account: asked for only when there is a session.

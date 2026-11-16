@@ -30,7 +30,7 @@ describe('formation: from the client to a certified learner', { skip: findChrome
   let certificateNumber;
 
   before(async () => {
-    t = await boot();
+    t = await boot({ subscribers: true });
     await t.reset();
     await t.admin({ name: 'Cliente Formatrice', email: 'formatrice@example.com', passwordHash: await bcrypt.hash(PASSWORD, 10) });
     site = await startSite(t.baseUrl);
@@ -222,6 +222,9 @@ describe('formation: from the client to a certified learner', { skip: findChrome
       assert.ok(await b.waitText('33%'));
       assert.equal((await t.prisma.courseProgress.findFirst({ where: { courseId: lessons[0].id } })).status, 'completed');
       assert.equal(await t.prisma.certification.count(), 0, 'no certificate after 1 of 2 required lessons');
+      // Without a subscription only one session at a time is allowed (P10-06):
+      // the learner signs out first, as she would before changing device.
+      await b.fetch('/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
       await b.clearCookies();
       await b.ev('localStorage.clear(); sessionStorage.clear()');
       assert.ok(await signIn(learnerEmail));

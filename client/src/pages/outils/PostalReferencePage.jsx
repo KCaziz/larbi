@@ -20,7 +20,7 @@ export default function PostalReferencePage() {
   const [family, setFamily] = useState('');
   const [query, setQuery] = useState('');
   const catalogue = useApi('/tools/postal/services');
-  useDocumentMeta(t('postal.title'), t('postal.intro'));
+  useDocumentMeta(t('seo.pages.postal.title'), t('seo.pages.postal.description'));
 
   const services = useMemo(() => catalogue.data?.services ?? [], [catalogue.data]);
   const families = useMemo(() => {

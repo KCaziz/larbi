@@ -8,23 +8,12 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Spaces.css';
+import { SPACE_SECTIONS } from '../../config/spaceSections.js';
 
 // What every page of ONE space shares (P9-02): its title, the way back to the
-// list, and the compartments of that space — a page per compartment, each with
-// its own address (`/partage/:id/...`). The vocabulary follows the kind of
-// space: the household has its extra compartment, a couple does not.
-export const SPACE_SECTIONS = [
-  { to: '', key: 'dashboard', end: true },
-  { to: 'depenses', key: 'expenses' },
-  { to: 'budgets', key: 'budgets' },
-  { to: 'ressources', key: 'pot' },
-  { to: 'taches', key: 'tasks' },
-  { to: 'calendrier', key: 'calendar' },
-  { to: 'objectifs', key: 'goals' },
-  { to: 'foyer', key: 'household', kinds: ['household'] },
-  { to: 'rapport', key: 'report' },
-  { to: 'membres', key: 'members' },
-];
+// list, and the compartments of that space (config/spaceSections.js) — on a
+// phone as tabs here, on a wider screen in the sidebar of Gestion commune.
+export { SPACE_SECTIONS } from '../../config/spaceSections.js';
 
 export default function SpaceFrame({ spaceId, children }) {
   const { t, i18n } = useTranslation();

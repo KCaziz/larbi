@@ -8,6 +8,8 @@ import Button from '../ui/Button.jsx';
 import ThemeToggle from '../ui/ThemeToggle.jsx';
 import LanguageSwitcher from '../ui/LanguageSwitcher.jsx';
 import { mainNavLinks } from '../../config/navigation.js';
+import { stripLanguage } from '../../i18n/localePath.js';
+import { useLocalePath } from '../../i18n/useLocalePath.js';
 import brandMark from '../../assets/brand/fincludia-mark.png';
 import './Header.css';
 
@@ -19,6 +21,7 @@ export default function Header() {
   const { status, user, logout } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const localePath = useLocalePath();
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -27,13 +30,13 @@ export default function Header() {
   // public link, search, notifications, an admin shortcut) has nothing to
   // offer there and only competes with the one thing the page asks for. A
   // minimal bar — the brand, and a way to leave — reads instead of crowding.
-  const isAuthPage = ['/connexion', '/inscription', '/mot-de-passe-oublie'].includes(pathname);
+  const isAuthPage = ['/connexion', '/inscription', '/mot-de-passe-oublie'].includes(stripLanguage(pathname));
 
   if (isAuthPage) {
     return (
       <header className="site-header site-header-auth">
         <div className="site-header-inner">
-          <Link to="/" className="brand">
+          <Link to={localePath('/')} className="brand">
             <img src={brandMark} className="brand-mark" alt="" aria-hidden="true" width="32" height="32" />
             {t('common.brand')}
           </Link>
@@ -64,7 +67,7 @@ export default function Header() {
             « L » héritée de l'ancien nom. L'image est décorative : le nom est
             déjà écrit à côté en texte, donc un `alt` le répéterait pour un
             lecteur d'écran. */}
-        <Link to="/" className="brand" onClick={closeMenu}>
+        <Link to={localePath('/')} className="brand" onClick={closeMenu}>
           <img src={brandMark} className="brand-mark" alt="" aria-hidden="true" width="32" height="32" />
           {t('common.brand')}
         </Link>
@@ -159,10 +162,10 @@ export default function Header() {
             )}
             {(status === 'anonymous' || status === 'error') && (
               <div className="auth-actions">
-                <Button to="/connexion" variant="secondary" onClick={closeMenu}>
+                <Button to={localePath('/connexion')} variant="secondary" onClick={closeMenu}>
                   {t('nav.login')}
                 </Button>
-                <Button to="/inscription" variant="primary" onClick={closeMenu}>
+                <Button to={localePath('/inscription')} variant="primary" onClick={closeMenu}>
                   {t('nav.register')}
                 </Button>
               </div>

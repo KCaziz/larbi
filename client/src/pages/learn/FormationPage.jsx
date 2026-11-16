@@ -13,6 +13,7 @@ import ProgressBar from '../../components/learn/ProgressBar.jsx';
 import QuizCard from '../../components/quiz/QuizCard.jsx';
 import { useCatalogueBase } from '../../lib/useToolsBase.js';
 import './Learn.css';
+import { track } from '../../lib/analytics.js';
 
 export default function FormationPage() {
   const catalogue = useCatalogueBase();
@@ -46,6 +47,7 @@ export default function FormationPage() {
     setEnrollError(null);
     try {
       const res = await api.post(`/learn/formations/${slug}/enroll`);
+      track('formation_enroll', { formation: slug });
       setData(res);
     } catch (err) {
       setEnrollError(t(errorKey(err, { 403: 'learn.detail.premiumBody' })));

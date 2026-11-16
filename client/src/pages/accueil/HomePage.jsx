@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CalendarDays, GraduationCap, HeartPulse, Home, PieChart, Plus, ShieldCheck, Target, Wallet, Wrench } from 'lucide-react';
+import { ArrowRight, Calculator, CalendarDays, GraduationCap, HeartPulse, Home, PiggyBank, PieChart, Plus, Scale, ShieldCheck, Target, Wallet, Wrench } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate } from '../../lib/format.js';
 import { periodRange } from '../../lib/finControls.js';
@@ -30,6 +30,12 @@ import './Home.css';
 // « Nos budgets », the goals and the emergency fund, the due dates, « Aujourd'hui
 // », the financial health and the learning. Nothing is computed here.
 const RING_TABS = ['accounts', 'expenses', 'income', 'flow'];
+const QUICK_ACTIONS = [
+  { key: 'budget', to: '/app/budgets/nouveau', icon: PiggyBank, tone: 'deep' },
+  { key: 'goal', to: '/app/objectifs', icon: Target, tone: 'teal' },
+  { key: 'simulate', to: '/app/outils/simulateurs', icon: Calculator, tone: 'mint' },
+  { key: 'compare', to: '/app/outils/comparateur', icon: Scale, tone: 'light' },
+];
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
@@ -136,6 +142,17 @@ export default function HomePage() {
             </QuickAddLink>
           </div>
         </section>
+
+        {/* Refonte 2026-11-16: the four quick actions of the client's model,
+            each to a screen that exists (adding a movement is the « + » above). */}
+        <nav className="home-quick" aria-label={t('appHome.quick.label')}>
+          {QUICK_ACTIONS.map((action) => (
+            <Link key={action.key} to={action.to} className={`home-quick-tile home-quick-${action.tone}`}>
+              <action.icon size={24} aria-hidden="true" />
+              <span>{t(`appHome.quick.${action.key}`)}</span>
+            </Link>
+          ))}
+        </nav>
 
         {/* ACC-03: the three central shortcuts, always visible. */}
         <nav className="home-shortcuts" aria-label={t('appHome.shortcuts')}>

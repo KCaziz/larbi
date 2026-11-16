@@ -180,6 +180,55 @@
     "cta": {
       "title": "Prêt à commencer ?",
       "body": "Rejoignez la plateforme et accédez à des contenus adaptés à votre profil."
+    },
+    "universes": {
+      "title": "Nos grands univers",
+      "subtitle": "Toute votre finance au même endroit : piloter, partager, comparer, simuler et apprendre.",
+      "items": {
+        "budget": {
+          "title": "Gestion budgétaire",
+          "body": "Revenus, dépenses, budgets et objectifs : votre argent au clair."
+        },
+        "shared": {
+          "title": "Gestion commune",
+          "body": "Un budget partagé en famille ou entre colocataires, chacun choisit ce qu’il montre."
+        },
+        "business": {
+          "title": "Espace entreprise",
+          "body": "Factures, tiers et suivi d’activité pour les indépendants et les petites entreprises."
+        },
+        "paper": {
+          "title": "Portefeuille fictif",
+          "body": "Apprenez à investir sans risque, avec un portefeuille d’entraînement."
+        },
+        "compare": {
+          "title": "Comparateurs bancaires",
+          "body": "Comptes, cartes, crédits : comparez les offres selon votre profil."
+        },
+        "simulate": {
+          "title": "Simulateurs",
+          "body": "Crédit, épargne, inflation… simulez avant de décider."
+        },
+        "learn": {
+          "title": "Formations certifiantes",
+          "body": "Des parcours en ligne, votre progression suivie et un certificat à la clé."
+        },
+        "glossary": {
+          "title": "Apprendre",
+          "body": "Lexique et guides pratiques pour comprendre chaque notion."
+        }
+      }
+    },
+    "audience": {
+      "title": "Pour qui ?",
+      "individuals": "Particuliers",
+      "businesses": "Entreprises",
+      "cta": "Créer mon compte gratuit"
+    },
+    "devices": {
+      "desktop": "L’accueil de l’application FINCLUDIA sur un ordinateur (compte de démonstration)",
+      "phone": "La même page sur un téléphone",
+      "caption": "L’application FINCLUDIA, sur ordinateur et sur téléphone. Les montants sont ceux d’un compte de démonstration."
     }
   },
   "about": {
@@ -442,7 +491,9 @@
     "rightsTitle": "Vos droits",
     "rightsContact": "Contact pour l'exercice de vos droits",
     "toComplete": "[à compléter]",
-    "subtitle": "Comment la plateforme traite et protège vos données personnelles."
+    "subtitle": "Comment la plateforme traite et protège vos données personnelles.",
+    "analyticsTitle": "Mesure d’audience",
+    "analyticsBody": "Si vous l’acceptez, FINCLUDIA utilise Google Analytics pour compter les pages vues et quelques actions (inscription, message de contact, abonnement à la newsletter, utilisation d’un simulateur). Ces mesures ne contiennent ni votre nom, ni votre adresse e-mail, ni vos données financières. Sans votre accord, Google Analytics n’est pas chargé. Vous pouvez retirer votre accord à tout moment avec le lien « Cookies et mesure d’audience » en bas de page : la mesure s’arrête et ses cookies sont supprimés."
   },
   "auth": {
     "login": {
@@ -1525,7 +1576,10 @@
       "contactAddress": "Adresse de contact publique",
       "saved": "Paramètres enregistrés.",
       "save": "Enregistrer",
-      "loadError": "Impossible de charger les paramètres."
+      "loadError": "Impossible de charger les paramètres.",
+      "gaMeasurementId": "Identifiant Google Analytics 4",
+      "gaMeasurementIdHint": "De la forme G-XXXXXXXXXX (Google Analytics → Administration → Flux de données). Laissez vide pour ne rien mesurer. Les visiteurs doivent accepter la mesure avant que quoi que ce soit ne soit chargé.",
+      "gaMeasurementIdInvalid": "L’identifiant doit avoir la forme G-XXXXXXXXXX."
     },
     "tour": {
       "reopen": "Revoir le tutoriel",
@@ -3274,6 +3328,9 @@
     "dailyBudget": "Budget journalier",
     "overResources": "Le budget prévu dépasse les ressources de la période. C’est autorisé : c’est seulement signalé.",
     "outsideEnvelopes": "Dépenses hors enveloppe : {{amount}}",
+    "otherAccount_one": "{{count}} dépense de ces catégories ({{amount}}) a été faite depuis un autre compte que celui de ce budget : elle n’est pas comptée dans ses jauges.",
+    "otherAccount_other": "{{count}} dépenses de ces catégories ({{amount}}) ont été faites depuis un autre compte que celui de ce budget : elles ne sont pas comptées dans ses jauges.",
+    "otherAccountLink": "Voir les mouvements et corriger leur compte",
     "envelopes": "Enveloppes",
     "proposalToggle": "Proposer une répartition",
     "addEnvelope": "Ajouter une enveloppe",
@@ -5055,6 +5112,14 @@
     "certificates": "Certificats",
     "more": "Plus",
     "mySpace": "Mon espace",
+    "helpSupport": "Aide & support",
+    "promo": {
+      "title": "Optimisez votre finance avec FINCLUDIA",
+      "budget": "Pilotez votre budget",
+      "simulate": "Simulez vos projets",
+      "compare": "Comparez les offres",
+      "cta": "Voir les outils"
+    },
     "switcher": "Changer d’application",
     "budgetApp": "Gestion budgétaire",
     "sharedApp": "Gestion commune",
@@ -5223,6 +5288,9 @@
     "description": "Description",
     "account": "Compte",
     "defaultAccount": "Espèces (par défaut)",
+    "chooseAccount": "Choisir : un compte ou les espèces",
+    "cashAccount": "Espèces (argent liquide)",
+    "accountHelp": "Un budget ne compte que les dépenses de son compte.",
     "allAccounts": "Tous les comptes",
     "tag": "Étiquette",
     "noTag": "Aucune",
@@ -5349,7 +5417,14 @@
     "fluxWithExpected": "Avec vos revenus prévus ({{income}}, pas encore reçus) : {{flux}}.",
     "noBudgetForSpending": "Aucun budget ce mois-ci : ces dépenses ne sont réparties sur aucune enveloppe.",
     "outsideBudget": "{{amount}} dépensés hors budget (aucune enveloppe ne les couvre).",
-    "seeBudget": "Voir le budget"
+    "seeBudget": "Voir le budget",
+    "quick": {
+      "label": "Actions rapides",
+      "budget": "Créer un budget",
+      "goal": "Fixer un objectif",
+      "simulate": "Lancer un simulateur",
+      "compare": "Comparer une offre"
+    }
   },
   "finProfile": {
     "incomeRegularity": "Régularité de mon revenu",
@@ -5837,7 +5912,12 @@
     "closedBanner": "Espace clôturé le {{date}} : l’historique, les soldes et les rapports restent lisibles, plus rien ne s’écrit.",
     "close": "Clôturer cet espace",
     "closeConfirm": "Clôturer cet espace ? Plus rien ne pourra y être ajouté ni modifié. Cette action est définitive.",
-    "closed": "Espace clôturé."
+    "closed": "Espace clôturé.",
+    "nav": {
+      "title": "Gestion commune",
+      "all": "Tous mes espaces",
+      "mySpaces": "Mes espaces"
+    }
   },
   "charts": {
     "legend": "Légende",
@@ -6206,5 +6286,131 @@
     "interestLabel": "Taux d'intérêt",
     "interestKnown": "Taux d'intérêt (si connu)",
     "returnLabel": "Rendement attendu (optionnel)"
+  },
+  "seo": {
+    "languageName": "Français",
+    "pages": {
+      "home": {
+        "title": "FINCLUDIA — Budget, banque et éducation financière en Algérie",
+        "description": "Gérez votre budget en dinars, comparez les frais des banques algériennes, simulez épargne et crédit, et formez-vous à la finance, avec FINCLUDIA."
+      },
+      "features": {
+        "title": "Fonctionnalités : budget, objectifs, dettes et partage",
+        "description": "Comptes, budget, objectifs d’épargne, dettes, patrimoine et espaces partagés en famille : tout ce que FINCLUDIA vous permet de suivre, en dinars."
+      },
+      "formations": {
+        "title": "Formations en finance avec certificat",
+        "description": "Des formations en ligne pour mieux gérer son argent ou son entreprise, organisées en cours et quiz, avec un certificat vérifiable à la clé."
+      },
+      "tools": {
+        "title": "Outils financiers en ligne",
+        "description": "Comparateur des frais bancaires, simulateurs de budget, d’épargne et de crédit, services d’Algérie Poste : des outils clairs, en dinars."
+      },
+      "comparator": {
+        "title": "Comparateur des frais bancaires en Algérie",
+        "description": "Comparez les tarifs des banques algériennes : tenue de compte, carte CIB, carte internationale, virements, épargne, crédits, chèques."
+      },
+      "usageFit": {
+        "title": "Quel compte bancaire pour mon usage ?",
+        "description": "Comparez deux ou trois comptes bancaires algériens sur ce que vous utilisez vraiment : carte, retraits, virements et frais de tenue."
+      },
+      "simulators": {
+        "title": "Simulateurs financiers : budget, épargne, crédit",
+        "description": "Budget mensuel, capacité d’épargne, intérêts composés, inflation, mensualité de financement, retraite : des calculs simples et expliqués, en dinars."
+      },
+      "jobOffers": {
+        "title": "Comparer des offres d’emploi",
+        "description": "Comparez deux ou trois offres d’emploi sur ce qu’elles vous laissent vraiment : salaire, avantages chiffrables et coûts liés à l’emploi."
+      },
+      "workshop": {
+        "title": "Atelier de simulation financière",
+        "description": "Tous les calculateurs au même endroit : lancez une simulation, gardez le scénario et comparez-en deux ou trois côte à côte."
+      },
+      "postal": {
+        "title": "CCP, Edahabia, BaridiMob : guide d’Algérie Poste",
+        "description": "Les services CCP, Edahabia, BaridiMob et TPE d’Algérie Poste : à quoi ils servent, ce qu’il faut pour y accéder et comment les utiliser."
+      },
+      "apprendre": {
+        "title": "Glossaire et guides de la finance",
+        "description": "Les mots de la banque, du budget et de l’investissement expliqués simplement, avec des exemples et des mini-guides pratiques."
+      },
+      "blog": {
+        "title": "Blog : conseils budget, banque et entreprise",
+        "description": "Des articles clairs pour mieux gérer son budget, choisir sa banque, épargner, emprunter et développer son activité en Algérie."
+      },
+      "services": {
+        "title": "Services pour particuliers et entreprises",
+        "description": "Formations, blog et outils pour les particuliers, les auto-entrepreneurs, les PME et les PMI : ce que FINCLUDIA propose, selon votre compte."
+      },
+      "about": {
+        "title": "À propos : éducation et inclusion financières",
+        "description": "FINCLUDIA est une plateforme d’éducation, d’inclusion et d’intelligence financières pour comprendre, simuler et mieux décider."
+      },
+      "faq": {
+        "title": "Questions fréquentes",
+        "description": "Types de comptes, accès standard et premium, formations, certificats, données personnelles : les réponses aux questions les plus posées."
+      },
+      "contact": {
+        "title": "Contact",
+        "description": "Une question sur FINCLUDIA, une formation ou un partenariat ? Écrivez-nous, nous vous répondons rapidement."
+      },
+      "register": {
+        "title": "Créer un compte",
+        "description": "Créez votre compte FINCLUDIA pour suivre votre budget, vos objectifs et vos formations, en français, en arabe ou en anglais."
+      },
+      "verify": {
+        "title": "Vérifier un certificat",
+        "description": "Vérifiez qu’un certificat FINCLUDIA est authentique à partir de son numéro, sans créer de compte."
+      },
+      "legal": {
+        "title": "Mentions légales",
+        "description": "Éditeur, hébergement et conditions d’utilisation de la plateforme FINCLUDIA."
+      },
+      "privacy": {
+        "title": "Politique de confidentialité",
+        "description": "Quelles données FINCLUDIA conserve, pourquoi, combien de temps, et comment exercer vos droits."
+      },
+      "login": {
+        "title": "Connexion",
+        "description": "Connectez-vous à votre espace FINCLUDIA."
+      },
+      "forgot": {
+        "title": "Mot de passe oublié",
+        "description": "Recevez un lien pour choisir un nouveau mot de passe."
+      },
+      "newsletter": {
+        "title": "Newsletter",
+        "description": "Votre abonnement à la newsletter FINCLUDIA."
+      },
+      "payment": {
+        "title": "Paiement",
+        "description": "Le résultat de votre paiement."
+      },
+      "private": {
+        "title": "Mon espace",
+        "description": "Votre espace personnel FINCLUDIA."
+      },
+      "notFound": {
+        "title": "Page introuvable",
+        "description": "La page que vous cherchez n’existe pas ou a été déplacée."
+      }
+    },
+    "templates": {
+      "term": "{{term}} : définition simple",
+      "comparatorTheme": "{{theme}} : comparatif des banques en Algérie",
+      "comparatorThemeDescription": "Comparez les tarifs « {{theme}} » des banques algériennes, banque par banque, avec le coût annuel estimé quand il peut être calculé.",
+      "comparatorSegment": "Offre {{segment}} : comparatif des banques",
+      "comparatorSegmentDescription": "Les tarifs que les banques algériennes publient pour le profil « {{segment}} », comparés thème par thème.",
+      "simulator": "{{name}} : simulateur en ligne",
+      "simulatorDescription": "Calcul expliqué, en dinars, sans inscription."
+    }
+  },
+  "analytics": {
+    "title": "Mesure d’audience",
+    "body": "Nous aimerions compter les visites avec Google Analytics pour savoir quelles pages vous sont utiles. Rien n’est chargé sans votre accord, et vous pouvez changer d’avis à tout moment depuis le bas de page.",
+    "more": "En savoir plus",
+    "accept": "Accepter",
+    "refuse": "Refuser",
+    "manage": "Cookies et mesure d’audience"
   }
 }

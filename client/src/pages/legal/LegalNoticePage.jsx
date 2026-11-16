@@ -4,9 +4,12 @@ import PageHeader from '../../components/layout/PageHeader.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import Section from '../../components/ui/Section.jsx';
 import '../Pages.css';
+import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 
 export default function LegalNoticePage() {
   const { t } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.legal.title'), t('seo.pages.legal.description'));
 
   return (
     <>

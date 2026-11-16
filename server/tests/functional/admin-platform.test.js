@@ -146,13 +146,13 @@ describe('platform settings (P3-16)', () => {
     await t.prisma.platformSetting.updateMany({ where: { key: 'contactEmail' }, data: { value: '' } });
   });
 
-  test('a standard account is refused; an administrator sees the four core settings', async () => {
+  test('a standard account is refused; an administrator sees the core settings', async () => {
     assert.equal((await t.request('GET', '/admin/settings', { user: learner })).status, 403);
     const list = await t.request('GET', '/admin/settings', { user: admin });
     assert.equal(list.status, 200);
     assert.deepEqual(
       list.body.settings.map((s) => s.key).sort(),
-      ['contactAddress', 'contactEmail', 'contactPhone', 'maintenanceMode'],
+      ['contactAddress', 'contactEmail', 'contactPhone', 'gaMeasurementId', 'maintenanceMode'],
     );
   });
 
@@ -162,13 +162,18 @@ describe('platform settings (P3-16)', () => {
     assert.equal(upd.body.setting.value, 'contact@example.com');
     assert.equal((await t.request('POST', '/admin/settings', { user: admin, json: { key: 'not-a-real-setting', value: 'x' } })).status, 400);
     assert.equal((await t.request('DELETE', '/admin/settings/contactEmail', { user: admin })).status, 404, 'no delete route exists any more');
-    assert.equal(await t.prisma.platformSetting.count(), 4, 'still exactly the four known settings');
+    assert.equal(await t.prisma.platformSetting.count(), 5, 'still exactly the known settings');
+    // The Analytics identifier has one shape (P12-06); empty turns Analytics off.
+    assert.equal((await t.request('POST', '/admin/settings', { user: admin, json: { key: 'gaMeasurementId', value: 'UA-1234' } })).status, 400);
+    assert.equal((await t.request('POST', '/admin/settings', { user: admin, json: { key: 'gaMeasurementId', value: 'G-ABC123XYZ' } })).status, 200);
+    assert.equal((await t.request('GET', '/settings/public')).body.gaMeasurementId, 'G-ABC123XYZ');
+    assert.equal((await t.request('POST', '/admin/settings', { user: admin, json: { key: 'gaMeasurementId', value: '' } })).status, 200);
   });
 
-  test('the public endpoint only ever exposes the four safe keys', async () => {
+  test('the public endpoint only ever exposes the safe keys', async () => {
     const pub = await t.request('GET', '/settings/public');
     assert.equal(pub.status, 200);
-    assert.deepEqual(Object.keys(pub.body).sort(), ['contactAddress', 'contactEmail', 'contactPhone', 'maintenanceMode']);
+    assert.deepEqual(Object.keys(pub.body).sort(), ['contactAddress', 'contactEmail', 'contactPhone', 'gaMeasurementId', 'maintenanceMode']);
   });
 
   test('maintenance mode blocks the public API but not health, auth identity, settings, or the admin panel — and lets an administrator through everywhere', async () => {

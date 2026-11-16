@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../auth/useAuth.js';
+import { stripLanguage } from '../../i18n/localePath.js';
 
 // The tools and the learning pages are public: a visitor reads them in the
 // showcase site. A signed-in person is sent to the same page INSIDE the
@@ -7,6 +8,7 @@ import { useAuth } from '../../auth/useAuth.js';
 export default function AppRedirectWhenSignedIn() {
   const { status } = useAuth();
   const { pathname, search, hash } = useLocation();
-  if (status === 'authenticated') return <Navigate to={`/app${pathname}${search}${hash}`} replace />;
+  // The application has no language in its address (/ar/outils → /app/outils).
+  if (status === 'authenticated') return <Navigate to={`/app${stripLanguage(pathname)}${search}${hash}`} replace />;
   return <Outlet />;
 }

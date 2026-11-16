@@ -383,3 +383,112 @@
     inline-size: 100%;
   }
 }
+
+/* ---- refonte 2026-11-16: the client's model ------------------------- */
+/* The balance on a deep blue card (white text: 5.7:1 at its lightest). */
+.home-balance {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-lg) var(--space-lg) var(--space-md);
+  border: 1px solid var(--feature-edge);
+  border-radius: 20px;
+  background: var(--feature-bg);
+  color: #ffffff;
+  box-shadow: var(--feature-shadow);
+}
+.home-balance :is(.home-balance-label, .home-balance-value, .home-synthesis-link, a) {
+  color: #ffffff;
+}
+.home-balance .home-balance-label {
+  font-size: 0.95rem;
+  opacity: 0.95;
+}
+.home-balance .home-balance-value {
+  font-size: clamp(1.5rem, 6.5vw, 3rem);
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.home-balance .home-account-select {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+.home-balance .home-account-select option {
+  background: #ffffff;
+  color: #102a43;
+}
+.home-balance .home-add-link {
+  background: #ffffff;
+  color: #055686;
+  box-shadow: 0 4px 12px rgba(16, 42, 67, 0.18);
+}
+.home-balance .home-add-link:hover,
+.home-balance .home-add-link:focus-visible {
+  background: #e3f6f7;
+}
+.home-balance :is(a, select, button):focus-visible {
+  outline: 2px solid #4fe5d3;
+  outline-offset: 2px;
+}
+.home-balance .fin-howto {
+  color: #dff3f7;
+}
+
+/* Four quick actions, coloured tiles as in the model. */
+.home-quick {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+.home-quick-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 96px;
+  padding: var(--space-sm);
+  border-radius: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.home-quick-tile:hover,
+.home-quick-tile:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(16, 42, 67, 0.16);
+}
+.home-quick-tile:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.home-quick-deep {
+  background: var(--tile-deep);
+  color: #ffffff;
+}
+.home-quick-teal {
+  background: var(--tile-teal);
+  color: #ffffff;
+}
+.home-quick-mint {
+  background: var(--tile-mint);
+  color: var(--tile-mint-text);
+}
+.home-quick-light {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-h);
+}
+@media (max-width: 760px) {
+  .home-quick {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* The shortcuts and the figures as white cards on the canvas. */
+.app-main .home-shortcuts :is(a, button) {
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(16, 42, 67, 0.04);
+}

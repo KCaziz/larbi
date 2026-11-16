@@ -6,6 +6,11 @@ import { POCKET_RULES } from '../constants/finBudgetMethods.js';
 // Budgets and envelopes (P6-05). The vocabularies come from the constants, so
 // what the database refuses and what validation refuses are the same lists.
 
+// R13-01 / R14: what a budget or an envelope is spent from — one of the person's
+// accounts, or « cash » (their « Espèces » account, opened if there is none yet);
+// null = every account of the total (budget) or the budget's choice (envelope).
+const spendAccountRef = z.union([z.string().uuid(), z.literal('cash')]).nullable().optional();
+
 const label = z.string().trim().min(1).max(80);
 const note = z.string().trim().min(1).max(300).nullable().optional();
 // P10-02: the person's own colour (#RRGGBB); null goes back to the default.
@@ -42,7 +47,7 @@ const envelopeFields = {
   cap: plannedAmount.nullable().optional(),
   recurring: z.boolean().optional(),
   // R13-01: the account this envelope is spent from; null = the budget's own choice.
-  accountId: z.string().uuid().nullable().optional(),
+  accountId: spendAccountRef,
   note,
 };
 
@@ -55,7 +60,7 @@ export const createBudgetSchema = z
     currency: currencySchema,
     recurrence: z.enum(BUDGET_RECURRENCES).optional(),
     // R13-01: the account the budget is spent from; absent or null = « tous » (every account of the total).
-    accountId: z.string().uuid().nullable().optional(),
+    accountId: spendAccountRef,
     // R13-03: whether the starting balance of the accounts counts as a resource.
     countBalance: z.boolean().optional(),
     alertThresholds: alertThresholdsSchema.optional(),
@@ -86,7 +91,7 @@ export const updateBudgetSchema = z
     periodEnd: isoDate.optional(),
     currency: currencySchema.optional(),
     recurrence: z.enum(BUDGET_RECURRENCES).optional(),
-    accountId: z.string().uuid().nullable().optional(),
+    accountId: spendAccountRef,
     countBalance: z.boolean().optional(),
     alertThresholds: alertThresholdsSchema.optional(),
     carryOver: z.boolean().optional(),
@@ -113,7 +118,7 @@ export const updateEnvelopeSchema = z
     value: plannedAmount.optional(),
     cap: plannedAmount.nullable().optional(),
     recurring: z.boolean().optional(),
-    accountId: z.string().uuid().nullable().optional(),
+    accountId: spendAccountRef,
     note,
     reason: reasonSchema.optional(),
   })

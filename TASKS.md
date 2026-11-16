@@ -4071,6 +4071,47 @@ Jusqu’ici, seules les 32 réponses du catalogue du client existaient. L’admi
   - un administrateur n'est jamais limité.
   Test : `finRecette12.test.js`.
 
+### P12-04 — Domaine fincludia.com et envoi des e-mails depuis contact@fincludia.com
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Dépendances : `P3-05`
+- Durée cible : 0,5 jour (estimation)
+- Origine : demande du 2026-11-16 (nouvel hébergement dédié, domaine fincludia.com, boîte contact@fincludia.com)
+- Réalisé (2026-11-16) : pilote d'envoi `MAIL_DRIVER=smtp` (nodemailer) avec `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` ; les messages du formulaire de contact sont toujours enregistrés et, si `CONTACT_INBOX` est renseigné, transmis à cette boîte avec le visiteur en « répondre à ». Commande `npm run mail:check` pour vérifier la connexion. Le `.env` du paquet en ligne pointe sur fincludia.com (avec et sans www) ; l'adresse de contact du site vaut contact@fincludia.com (`base-de-donnees.sql`, `mise-a-jour-base.sql`). Tests : `functional/contactMail.test.js`, et envoi réel vérifié contre un serveur SMTP local.
+
+Le site doit répondre sur fincludia.com et envoyer ses e-mails (newsletter, contact) depuis contact@fincludia.com.
+
+
+### P12-05 — Refonte graphique d'après les maquettes du client
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-02`, `P8-06`
+- Durée cible : 1 jour (estimation)
+- Origine : images WhatsApp du client (2026-11-16) : « s'inspirer pour l'aménagement des sections, copier la sidebar, les couleurs ; les interfaces sont surchargées »
+- Réalisé (2026-11-16) : barre latérale foncée sur toute la hauteur (logo, sections, page courante en pastille menthe, « Mon espace » et « Aide & support » en bas, encart vers les outils), bouton du menu et recherche centrée dans la barre du haut, avatar à initiales, fond bleu pâle sous des cartes blanches. Accueil de l'application : solde sur carte bleu profond et quatre actions rapides (budget, objectif, simulateur, comparateur). Accueil du site : bandeau bleu profond → sarcelle avec aperçu illustratif (sans chiffres), « Nos grands univers » (8 cartes vers des écrans existants), bande d'appel en dégradé. Second passage (2026-11-16, retours) : la même barre latérale pour l'administration (son menu y passe, avec le « ? » de la visite guidée) et pour la Gestion commune (« Tous mes espaces », la liste de ses espaces et, dans un espace, ses compartiments ; les onglets de la page restent sur téléphone) ; slogan retiré de la barre latérale ; en thème sombre, la barre latérale, le bandeau du site, la carte du solde, les tuiles et la bande d'appel prennent leurs propres teintes (jetons `--side-*`, `--hero-bg`, `--feature-bg`, `--tile-*`, `--cta-bg`) ; sur l'accueil du site, l'aperçu « Mon tableau de bord » est remplacé par un ordinateur et un téléphone qui montrent les vrais écrans de l'application (captures d'un compte de démonstration, en français, anglais et arabe, `client/src/assets/showcase/`), et l'encart « Pour qui ? » des maquettes devient une bande sous le bandeau (les vrais profils particuliers et entreprises, et l'inscription). Au passage : un grand solde ne déborde plus de sa carte sur téléphone, et les noms de la barre du bas tiennent sur une ligne. Trois tests de navigateur antérieurs à la règle « un seul écran sans abonnement » (P10-06) l'ont été adaptés : `maintenance-journey`, `site-sweep` (comptes abonnés) et `formation-journey` (l'apprenante se déconnecte avant de changer d'appareil). Contrastes ≥ 4,5:1, arabe (RTL), thème sombre, tablette et téléphone vérifiés à l'écran. Tests : `e2e/app-shell.test.js`, `e2e/fin-navigation-journey.test.js`, `e2e/fin-shared-journey.test.js`, `e2e/admin-tour-journey.test.js`, `e2e/cms-structure-journey.test.js`.
+
+Reprendre l'aménagement et les couleurs des maquettes du client sans leur surcharge.
+
+### P12-06 — Référencement (SEO), vitesse et mesure d'audience
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Dépendances : `P12-04`
+- Durée cible : 1,5 jour (estimation)
+- Origine : demande du 2026-11-16 (« une stratégie complète SEO », comme pour un autre projet)
+- Réalisé (2026-11-16) :
+  - **La langue dans l'adresse** du site public : français sans préfixe (adresses inchangées), anglais sous `/en/…`, arabe sous `/ar/…`. Le menu des langues ouvre la même page dans l'autre langue ; un visiteur qui a choisi l'anglais ou l'arabe est conduit à l'adresse de sa langue. Sans choix, le site public s'ouvre en français, même dans un navigateur en anglais (un moteur de recherche tourne en anglais). Le tamazight n'est pas proposé aux moteurs tant que ses textes ne sont pas traduits et relus. Les applications (`/app`, `/partage`, `/admin`) gardent leurs adresses.
+  - **Chaque page envoyée par le serveur** (`server/src/seo`) avec son titre, sa description, son adresse de référence, ses versions de langue (hreflang + x-default), son aperçu de partage (Open Graph, Twitter, image `og-image.png` 1200×630), ses données structurées (Organisation, Site, Application, FAQ, Article de blog, Terme du glossaire, fil d'Ariane, liste des formations) et une version lisible de son contenu (remplacée par le site au démarrage). Les textes viennent des mêmes fichiers de langue que le site (`seo.*`) : le titre vu par Google est celui que voit le visiteur.
+  - **`sitemap.xml`** généré à la demande (pages, thèmes du comparateur, simulateurs, articles et leurs traductions publiées, termes, guides) et **`robots.txt`** (applications et pages à usage unique fermées ; l'API reste lisible, le site en a besoin pour s'afficher, ses réponses sont marquées `noindex`).
+  - **Vrais statuts** : 404 pour une adresse inexistante ou un brouillon, `noindex` pour les espaces privés et la connexion, 301 pour `/fr/…`, les barres obliques finales et `www.`, 503 + `Retry-After` pendant la maintenance.
+  - **Vitesse** : textes d'une seule langue chargés (les autres à la demande), pages et applications chargées à la demande, compression des réponses, cache des fichiers statiques. JavaScript principal : 1,25 Mo → 324 Ko (≈ 240 Ko compressés pour tout l'accueil).
+  - **Google Analytics 4** : identifiant à coller dans Administration → Paramètres ; rien n'est chargé sans identifiant ni sans l'accord du visiteur (bandeau, refus aussi simple que l'acceptation, choix modifiable par « Cookies et mesure d'audience » en bas de page, cookies supprimés au retrait). Événements : `sign_up`, `generate_lead`, `newsletter_signup`, `simulator_run`, `formation_enroll`. Section ajoutée à la politique de confidentialité.
+  - Mise en ligne : `mise-a-jour-base.sql` ajoute le réglage ; `npm install` (nouvelle dépendance `compression`).
+- Tests : `functional/seo.test.js`, `consistency/seo.test.js`, `functional/admin-platform.test.js`, `e2e/seo-languages-journey.test.js`.
+- Reste côté client : déclarer le site dans Google Search Console et Bing Webmaster Tools, envoyer le sitemap, créer le compte Google Analytics, et faire relire les titres arabes et anglais.
+
+Faire trouver le site par les moteurs de recherche, dans ses trois langues, et mesurer ce qui marche.
+
+
 ---
 
 # 4. Fonctionnalités volontairement hors MVP 8 semaines

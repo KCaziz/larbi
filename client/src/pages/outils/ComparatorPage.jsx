@@ -17,7 +17,7 @@ export default function ComparatorPage() {
   const { t, i18n } = useTranslation();
   const summary = useApi('/tools/comparator');
 
-  useDocumentMeta(t('comparator.title'), t('comparator.subtitle', { count: summary.data?.bankCount ?? '' }));
+  useDocumentMeta(t('seo.pages.comparator.title'), t('seo.pages.comparator.description'));
 
   if (summary.status === 'loading') return <LoadingState />;
   if (summary.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={summary.reload} />;

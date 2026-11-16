@@ -77,3 +77,14 @@ INSERT INTO `_prisma_migrations` (`id`, `checksum`, `finished_at`, `migration_na
 
 -- Vérification : doit afficher les trois migrations.
 SELECT `migration_name`, `finished_at` FROM `_prisma_migrations` WHERE `migration_name` IN ('20261104120000_fin_money_double', '20261112120000_fin_budget_account', '20261112130000_fin_budget_weekly');
+
+-- Adresse de contact du site (pied de page, page Contact) : contact@fincludia.com,
+-- seulement si aucune adresse n'a encore été saisie dans l'administration.
+INSERT INTO `platform_settings` (`key`, `value`, `updatedAt`) VALUES ('contactEmail', 'contact@fincludia.com', NOW(3))
+  ON DUPLICATE KEY UPDATE `value` = IF(`value` = '', VALUES(`value`), `value`), `updatedAt` = IF(`value` = 'contact@fincludia.com', NOW(3), `updatedAt`);
+
+-- 2026-11-16 (P12-06) — Référencement : identifiant Google Analytics 4, modifiable
+-- dans Administration → Paramètres. Vide = aucune mesure. Sans effet s'il existe déjà.
+INSERT INTO `platform_settings` (`key`, `value`, `updatedAt`) VALUES ('gaMeasurementId', '', NOW(3))
+  ON DUPLICATE KEY UPDATE `key` = `key`;
+INSERT INTO `_prisma_migrations` (`id`, `checksum`, `finished_at`, `migration_name`, `logs`, `rolled_back_at`, `started_at`, `applied_steps_count`) SELECT UUID(), 'a4625281f7342511d1bce7523afed88d1583c046fe0e3e4e5f06a5ebf5d52b01', NOW(3), '20261116150000_analytics_setting', NULL, NULL, NOW(3), 1 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `_prisma_migrations` WHERE `migration_name` = '20261116150000_analytics_setting' AND `rolled_back_at` IS NULL AND `finished_at` IS NOT NULL);

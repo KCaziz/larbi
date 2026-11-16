@@ -180,6 +180,55 @@
     "cta": {
       "title": "Ready to get started?",
       "body": "Join the platform and access content tailored to your profile."
+    },
+    "universes": {
+      "title": "Our main areas",
+      "subtitle": "All your finances in one place: manage, share, compare, simulate and learn.",
+      "items": {
+        "budget": {
+          "title": "Budget management",
+          "body": "Income, spending, budgets and goals: your money made clear."
+        },
+        "shared": {
+          "title": "Shared management",
+          "body": "A budget shared with family or flatmates, everyone chooses what they show."
+        },
+        "business": {
+          "title": "Business space",
+          "body": "Invoices, contacts and activity tracking for freelancers and small businesses."
+        },
+        "paper": {
+          "title": "Practice portfolio",
+          "body": "Learn to invest without risk, with a practice portfolio."
+        },
+        "compare": {
+          "title": "Bank comparators",
+          "body": "Accounts, cards, loans: compare the offers for your profile."
+        },
+        "simulate": {
+          "title": "Simulators",
+          "body": "Loans, savings, inflation… simulate before you decide."
+        },
+        "learn": {
+          "title": "Certified courses",
+          "body": "Online courses, your progress tracked and a certificate at the end."
+        },
+        "glossary": {
+          "title": "Learn",
+          "body": "Glossary and practical guides to understand every notion."
+        }
+      }
+    },
+    "audience": {
+      "title": "Who is it for?",
+      "individuals": "Individuals",
+      "businesses": "Businesses",
+      "cta": "Create my free account"
+    },
+    "devices": {
+      "desktop": "The FINCLUDIA app home on a computer (demonstration account)",
+      "phone": "The same page on a phone",
+      "caption": "The FINCLUDIA app, on a computer and on a phone. The amounts are those of a demonstration account."
     }
   },
   "about": {
@@ -442,7 +491,9 @@
     "rightsTitle": "Your rights",
     "rightsContact": "Contact to exercise your rights",
     "toComplete": "[to be completed]",
-    "subtitle": "How the platform processes and protects your personal data."
+    "subtitle": "How the platform processes and protects your personal data.",
+    "analyticsTitle": "Audience measurement",
+    "analyticsBody": "If you accept it, FINCLUDIA uses Google Analytics to count page views and a few actions (sign-up, contact message, newsletter subscription, use of a simulator). These measurements contain neither your name, nor your email address, nor your financial data. Without your consent, Google Analytics is not loaded. You can withdraw your consent at any time with the “Cookies and audience measurement” link in the footer: measurement stops and its cookies are deleted."
   },
   "auth": {
     "login": {
@@ -1525,7 +1576,10 @@
       "contactAddress": "Public contact address",
       "saved": "Settings saved.",
       "save": "Save",
-      "loadError": "Could not load the settings."
+      "loadError": "Could not load the settings.",
+      "gaMeasurementId": "Google Analytics 4 identifier",
+      "gaMeasurementIdHint": "In the form G-XXXXXXXXXX (Google Analytics → Admin → Data streams). Leave empty to measure nothing. Visitors must accept measurement before anything is loaded.",
+      "gaMeasurementIdInvalid": "The identifier must look like G-XXXXXXXXXX."
     },
     "tour": {
       "reopen": "Replay the tour",
@@ -3273,6 +3327,9 @@
     "dailyBudget": "Daily budget",
     "overResources": "The planned budget exceeds the resources of the period. This is allowed: it is only signalled.",
     "outsideEnvelopes": "Spending outside any envelope: {{amount}}",
+    "otherAccount_one": "{{count}} expense in these categories ({{amount}}) was paid from another account than this budget's: it is not counted in its gauges.",
+    "otherAccount_other": "{{count}} expenses in these categories ({{amount}}) were paid from another account than this budget's: they are not counted in its gauges.",
+    "otherAccountLink": "See the movements and correct their account",
     "envelopes": "Envelopes",
     "proposalToggle": "Propose a distribution",
     "addEnvelope": "Add an envelope",
@@ -5054,6 +5111,14 @@
     "certificates": "Certificates",
     "more": "More",
     "mySpace": "My space",
+    "helpSupport": "Help & support",
+    "promo": {
+      "title": "Make the most of your money with FINCLUDIA",
+      "budget": "Steer your budget",
+      "simulate": "Simulate your projects",
+      "compare": "Compare the offers",
+      "cta": "See the tools"
+    },
     "switcher": "Switch application",
     "budgetApp": "Budget management",
     "sharedApp": "Shared management",
@@ -5222,6 +5287,9 @@
     "description": "Description",
     "account": "Account",
     "defaultAccount": "Cash (default)",
+    "chooseAccount": "Choose: an account or cash",
+    "cashAccount": "Cash",
+    "accountHelp": "A budget only counts the spending of its account.",
     "allAccounts": "All accounts",
     "tag": "Tag",
     "noTag": "None",
@@ -5348,7 +5416,14 @@
     "fluxWithExpected": "With your expected income ({{income}}, not received yet): {{flux}}.",
     "noBudgetForSpending": "No budget this month: this spending is not spread over any envelope.",
     "outsideBudget": "{{amount}} spent outside the budget (no envelope covers it).",
-    "seeBudget": "See the budget"
+    "seeBudget": "See the budget",
+    "quick": {
+      "label": "Quick actions",
+      "budget": "Create a budget",
+      "goal": "Set a goal",
+      "simulate": "Run a simulator",
+      "compare": "Compare an offer"
+    }
   },
   "finProfile": {
     "incomeRegularity": "How regular my income is",
@@ -5836,7 +5911,12 @@
     "closedBanner": "Space closed on {{date}}: history, balances and reports stay readable, nothing can be written any more.",
     "close": "Close this space",
     "closeConfirm": "Close this space? Nothing will be added or changed in it any more. This cannot be undone.",
-    "closed": "Space closed."
+    "closed": "Space closed.",
+    "nav": {
+      "title": "Shared management",
+      "all": "All my spaces",
+      "mySpaces": "My spaces"
+    }
   },
   "charts": {
     "legend": "Legend",
@@ -6205,5 +6285,131 @@
     "interestLabel": "Interest rate",
     "interestKnown": "Interest rate (if known)",
     "returnLabel": "Expected return (optional)"
+  },
+  "seo": {
+    "languageName": "English",
+    "pages": {
+      "home": {
+        "title": "FINCLUDIA — Budgeting, banking and financial education in Algeria",
+        "description": "Manage your budget in dinars, compare Algerian bank fees, simulate savings and loans, and learn about money with FINCLUDIA."
+      },
+      "features": {
+        "title": "Features: budget, goals, debts and sharing",
+        "description": "Accounts, budget, savings goals, debts, assets and family shared spaces: everything FINCLUDIA lets you track, in dinars."
+      },
+      "formations": {
+        "title": "Finance courses with a certificate",
+        "description": "Online courses to manage your money or your business better, organised in lessons and quizzes, with a verifiable certificate."
+      },
+      "tools": {
+        "title": "Online financial tools",
+        "description": "Bank fee comparator, budget, savings and loan simulators, Algérie Poste services: clear tools, in dinars."
+      },
+      "comparator": {
+        "title": "Algerian bank fee comparator",
+        "description": "Compare the fees of Algerian banks: account keeping, CIB card, international card, transfers, savings, loans and cheques."
+      },
+      "usageFit": {
+        "title": "Which bank account fits my use?",
+        "description": "Compare two or three Algerian bank accounts on what you really use: card, withdrawals, transfers and account fees."
+      },
+      "simulators": {
+        "title": "Financial simulators: budget, savings, loans",
+        "description": "Monthly budget, savings capacity, compound interest, inflation, loan instalments, retirement: simple, explained calculations in dinars."
+      },
+      "jobOffers": {
+        "title": "Compare job offers",
+        "description": "Compare two or three job offers on what they really leave you: salary, benefits that can be valued and the costs of the job."
+      },
+      "workshop": {
+        "title": "Financial simulation workshop",
+        "description": "Every calculator in one place: run a simulation, keep the scenario and compare two or three side by side."
+      },
+      "postal": {
+        "title": "CCP, Edahabia, BaridiMob: Algérie Poste guide",
+        "description": "Algérie Poste's CCP, Edahabia, BaridiMob and card terminal services: what they are for, what you need and how to use them."
+      },
+      "apprendre": {
+        "title": "Finance glossary and guides",
+        "description": "Banking, budgeting and investment words explained simply, with examples and short practical guides."
+      },
+      "blog": {
+        "title": "Blog: budgeting, banking and business tips",
+        "description": "Clear articles to manage your budget, choose your bank, save, borrow and grow your business in Algeria."
+      },
+      "services": {
+        "title": "Services for individuals and businesses",
+        "description": "Courses, blog and tools for individuals, self-employed people, SMEs and SMIs: what FINCLUDIA offers, depending on your account."
+      },
+      "about": {
+        "title": "About: financial education and inclusion",
+        "description": "FINCLUDIA is a financial education, inclusion and intelligence platform to understand, simulate and decide better."
+      },
+      "faq": {
+        "title": "Frequently asked questions",
+        "description": "Account types, standard and premium access, courses, certificates, personal data: answers to the most common questions."
+      },
+      "contact": {
+        "title": "Contact",
+        "description": "A question about FINCLUDIA, a course or a partnership? Write to us, we answer quickly."
+      },
+      "register": {
+        "title": "Create an account",
+        "description": "Create your FINCLUDIA account to follow your budget, goals and courses, in French, Arabic or English."
+      },
+      "verify": {
+        "title": "Verify a certificate",
+        "description": "Check that a FINCLUDIA certificate is genuine from its number, without an account."
+      },
+      "legal": {
+        "title": "Legal notice",
+        "description": "Publisher, hosting and terms of use of the FINCLUDIA platform."
+      },
+      "privacy": {
+        "title": "Privacy policy",
+        "description": "Which data FINCLUDIA keeps, why, for how long, and how to exercise your rights."
+      },
+      "login": {
+        "title": "Sign in",
+        "description": "Sign in to your FINCLUDIA space."
+      },
+      "forgot": {
+        "title": "Forgotten password",
+        "description": "Receive a link to choose a new password."
+      },
+      "newsletter": {
+        "title": "Newsletter",
+        "description": "Your subscription to the FINCLUDIA newsletter."
+      },
+      "payment": {
+        "title": "Payment",
+        "description": "The result of your payment."
+      },
+      "private": {
+        "title": "My space",
+        "description": "Your personal FINCLUDIA space."
+      },
+      "notFound": {
+        "title": "Page not found",
+        "description": "The page you are looking for does not exist or has moved."
+      }
+    },
+    "templates": {
+      "term": "{{term}}: simple definition",
+      "comparatorTheme": "{{theme}}: Algerian banks compared",
+      "comparatorThemeDescription": "Compare the “{{theme}}” fees of Algerian banks, bank by bank, with the estimated yearly cost when it can be calculated.",
+      "comparatorSegment": "{{segment}} offer: banks compared",
+      "comparatorSegmentDescription": "The fees Algerian banks publish for the “{{segment}}” profile, compared theme by theme.",
+      "simulator": "{{name}}: online simulator",
+      "simulatorDescription": "Explained calculation, in dinars, no sign-up needed."
+    }
+  },
+  "analytics": {
+    "title": "Audience measurement",
+    "body": "We would like to count visits with Google Analytics to learn which pages are useful to you. Nothing is loaded without your consent, and you can change your mind at any time from the footer.",
+    "more": "Learn more",
+    "accept": "Accept",
+    "refuse": "Refuse",
+    "manage": "Cookies and audience measurement"
   }
 }

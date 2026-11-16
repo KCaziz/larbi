@@ -10,6 +10,7 @@ import LineChart from '../fincludia/charts/LineChart.jsx';
 import Button from '../ui/Button.jsx';
 import Notice from '../ui/Notice.jsx';
 import '../../pages/outils/Simulators.css';
+import { track } from '../../lib/analytics.js';
 
 // One FINCLUDIA simulator: its form, its results and its "Pourquoi ?" (P4-10,
 // P4-11). Extracted from the simulator page when the workshop (P4-16) needed the
@@ -131,6 +132,7 @@ export default function SimulatorRunner({ simulator, onSaved = null }) {
     }
     try {
       setAnswer(await api.post(`/tools/simulations/${simulator.key}`, body));
+      track('simulator_run', { simulator: simulator.key });
       // Kept so a scenario is saved from exactly what produced the figures on
       // screen, not from whatever the form holds a few edits later.
       setSent(body);

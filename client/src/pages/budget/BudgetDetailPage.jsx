@@ -176,6 +176,13 @@ export default function BudgetDetailPage() {
             {t('budget.outsideEnvelopes', { amount: formatAmount(i18n.language, vue.horsEnveloppe.resultat, currency) })}
           </p>
         )}
+        {/* R14: spending in these categories from an account the budget does not follow. */}
+        {vue.autreCompte && (
+          <Notice variant="info">
+            {t('budget.otherAccount', { count: vue.autreCompte.nombre, amount: formatAmount(i18n.language, vue.autreCompte.montant, currency) })}{' '}
+            <Link to={`/app/mouvements?type=depense&du=${String(budget.periodStart).slice(0, 10)}&au=${String(budget.periodEnd).slice(0, 10)}`}>{t('budget.otherAccountLink')}</Link>
+          </Notice>
+        )}
 
         <section>
           <div className="budget-section-head">
@@ -475,6 +482,8 @@ function EnvelopeForm({ budgetId, currency, groups, usedGroups, categories, used
                 {account.label}
               </option>
             ))}
+            {/* R14: an envelope spent in cash. */}
+            {!accounts.some((account) => account.type === 'AC-01') && <option value="cash">{t('movements.cashAccount')}</option>}
           </select>
           <span className="fin-hint">{t('budget.envelopeAccountHelp')}</span>
         </div>

@@ -110,3 +110,30 @@ docker-compose.yml   MariaDB de développement
 - Les secrets (chaîne de connexion, etc.) vivent uniquement dans les fichiers `.env` (non versionnés). Voir `.env.example` dans `client/` et `server/`.
 - Langues : français, anglais et arabe (RTL) sont réellement traduits. Le tamazight (`tzm`) est enregistré comme langue sélectionnable mais sans traduction — tout retombe sur le français (`fallbackLng`). Toute nouvelle page doit utiliser `useTranslation()`/`t()`, jamais de texte en dur (voir TASKS.md, section 6).
 - Thème clair/sombre : bascule manuelle mémorisée (`localStorage`), en plus de la préférence système. Toute nouvelle couleur doit utiliser les tokens CSS de `client/src/index.css`, pas de couleur codée en dur.
+
+## Référencement (SEO) et mesure d'audience — après la mise en ligne
+
+Le site envoie lui-même aux moteurs de recherche le titre, la description, les versions de langue (`/`, `/en/…`, `/ar/…`) et les données structurées de chaque page (`server/src/seo`). Il publie aussi `https://fincludia.com/sitemap.xml` et `https://fincludia.com/robots.txt`. Trois démarches restent à faire une fois, par le titulaire du domaine.
+
+1. **Google Search Console** (https://search.google.com/search-console)
+   - Ajouter une propriété de type **Domaine** : `fincludia.com`.
+   - Valider avec l'enregistrement TXT que Google donne, à ajouter dans la zone DNS de l'hébergeur (cPanel → Zone Editor). La validation prend de quelques minutes à quelques heures.
+   - Menu **Sitemaps** : envoyer `sitemap.xml`.
+   - Menu **Inspection de l'URL** : demander l'indexation de l'accueil, puis de `/ar` et `/en`.
+2. **Bing Webmaster Tools** (https://www.bing.com/webmasters) : choisir « Importer depuis Google Search Console ». Bing alimente aussi DuckDuckGo et Ecosia.
+3. **Google Analytics 4** (https://analytics.google.com), facultatif :
+   - Créer un compte, puis une propriété « FINCLUDIA » (fuseau Algérie, devise DZD).
+   - Créer un flux de données **Web** pour `https://fincludia.com`.
+   - Copier l'identifiant de mesure `G-XXXXXXXXXX` dans **Administration → Paramètres → Identifiant Google Analytics 4**.
+
+   Les visiteurs voient alors un bandeau, et rien n'est mesuré sans leur accord. Les inscriptions, les messages de contact, la newsletter, les simulateurs et les inscriptions aux formations sont comptés comme des événements. Pour les traiter comme des objectifs, les marquer « événements clés » dans Analytics (Administration → Événements).
+
+**Vérifier après chaque mise en ligne**
+- `https://fincludia.com/sitemap.xml` s'affiche.
+- `https://www.fincludia.com` redirige vers `https://fincludia.com`.
+- Un lien partagé sur WhatsApp montre l'image FINCLUDIA et le titre de la page.
+- **PageSpeed Insights** (https://pagespeed.web.dev) donne le score de vitesse et d'accessibilité sur mobile.
+
+**Délais à prévoir**
+- Les termes du glossaire et les pages très précises apparaissent en quelques semaines.
+- Les recherches disputées (« comparatif banques Algérie », « simulateur crédit ») demandent 3 à 6 mois et un contenu publié régulièrement.

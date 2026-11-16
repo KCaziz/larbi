@@ -4,6 +4,7 @@ import PageHeader from '../components/layout/PageHeader.jsx';
 import Notice from '../components/ui/Notice.jsx';
 import Section from '../components/ui/Section.jsx';
 import './Pages.css';
+import { useDocumentMeta } from '../lib/useDocumentMeta.js';
 
 const rows = [
   { domainKey: 'features.domains.blog', visitor: 'open', standard: 'open', premium: 'open' },
@@ -16,6 +17,8 @@ const stateIcon = { open: Check, locked: Lock };
 
 export default function FeaturesOverviewPage() {
   const { t } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.features.title'), t('seo.pages.features.description'));
   const stateLabel = { open: t('features.table.open'), locked: t('features.table.locked') };
 
   const renderState = (state) => {

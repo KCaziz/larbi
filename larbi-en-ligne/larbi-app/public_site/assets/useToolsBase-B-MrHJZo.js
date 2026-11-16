@@ -1,0 +1,1 @@
+import{d as e}from"./jsx-runtime-DoMpqfwM.js";function t(){let{pathname:t}=e();return t===`/app`||t.startsWith(`/app/`)?`/app`:``}function n(){return t()?`/app/formation`:`/catalogue`}export{t as n,n as t};

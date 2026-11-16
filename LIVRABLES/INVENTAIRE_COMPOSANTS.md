@@ -1,10 +1,10 @@
 # Inventaire des composants tiers et de leurs licences
 
-> Généré le 2026-11-12 par `node server/scripts/generate-deliverables.js`. Ne pas modifier à la main.
+> Généré le 2026-11-16 par `node server/scripts/generate-deliverables.js`. Ne pas modifier à la main.
 
 Livrable de l'**article 14** du contrat : « Le Prestataire communique au Client la liste des bibliothèques, frameworks, plugins, API et composants tiers intégrés […]. Les composants tiers restent soumis à leurs licences respectives. »
 
-**43 composants**, 9 licences distinctes.
+**45 composants**, 10 licences distinctes.
 
 Les versions indiquées sont celles **réellement installées**, pas les intervalles demandés : c'est le code installé qui est livré.
 
@@ -28,7 +28,8 @@ L'article 14 demande que les obligations significatives soient portées à la co
 | BSD-3-Clause | 1 |
 | ISC | 1 |
 | LGPL-2.1-or-later | 1 |
-| MIT | 29 |
+| MIT | 30 |
+| MIT-0 | 1 |
 | MPL-2.0 | 1 |
 | OFL-1.1 | 3 |
 
@@ -39,6 +40,7 @@ L'article 14 demande que les obligations significatives soient portées à la co
 | serveur | production | `@prisma/adapter-mariadb` | 7.10.0 | `7.10.0` | Apache-2.0 |
 | serveur | production | `@prisma/client` | 7.10.0 | `^7.10.0` | Apache-2.0 |
 | serveur | production | `bcryptjs` | 3.0.3 | `^3.0.3` | BSD-3-Clause |
+| serveur | production | `compression` | 1.8.1 | `1.8.1` | MIT |
 | serveur | production | `cookie-parser` | 1.4.7 | `^1.4.7` | MIT |
 | serveur | production | `cors` | 2.8.6 | `^2.8.5` | MIT |
 | serveur | production | `dotenv` | 16.6.1 | `^16.4.5` | BSD-2-Clause |
@@ -51,6 +53,7 @@ L'article 14 demande que les obligations significatives soient portées à la co
 | serveur | développement | `mariadb` | 3.5.4 | `^3.5.4` | LGPL-2.1-or-later |
 | serveur | production | `morgan` | 1.12.1 | `^1.10.0` | MIT |
 | serveur | production | `multer` | 2.4.0 | `^2.4.0` | MIT |
+| serveur | production | `nodemailer` | 10.6.0 | `10.6.0` | MIT-0 |
 | serveur | développement | `prisma` | 7.10.0 | `^7.10.0` | Apache-2.0 |
 | serveur | production | `sanitize-html` | 2.17.7 | `^2.17.7` | MIT |
 | serveur | production | `web-push` | 3.6.7 | `^3.6.7` | MPL-2.0 |

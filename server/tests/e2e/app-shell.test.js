@@ -13,7 +13,7 @@ import { SERVER_DIR } from '../helpers/env.js';
 const fr = JSON.parse(readFileSync(path.resolve(SERVER_DIR, '../client/src/i18n/locales/fr.json'), 'utf8'));
 // The order retained on 2026-10-28 (answer D3 and its improvements).
 // « Premiers pas » heads the menu since the recette (R4-04).
-const FINANCIAL_ENTRIES = ['settingsOnboarding', 'home', 'today', 'accounts', 'movements', 'budgets', 'calendar', 'synthesis', 'health', 'goals', 'debts', 'wealth', 'paper', 'tools'].map((key) => fr.appNav[key]);
+const FINANCIAL_ENTRIES = ['settingsOnboarding', 'home', 'today', 'accounts', 'movements', 'budgets', 'calendar', 'synthesis', 'addMovement', 'health', 'goals', 'reserve', 'debts', 'wealth', 'paper', 'tools'].map((key) => fr.appNav[key]);
 
 describe('the application shell, end to end', { skip: findChrome() ? false : 'no Chrome/Chromium found (set CHROME_PATH)' }, () => {
   let t;
@@ -27,7 +27,7 @@ describe('the application shell, end to end', { skip: findChrome() ? false : 'no
   const sidebarLabels = () => b.ev("[...document.querySelectorAll('.app-sidebar .app-nav-link .app-nav-text')].map((e) => e.textContent.trim())");
 
   before(async () => {
-    t = await boot();
+    t = await boot({ subscribers: true });
     await t.reset();
     site = await startSite(t.baseUrl);
     b = await Browser.launch({ width: 1280 });

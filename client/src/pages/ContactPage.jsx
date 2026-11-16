@@ -8,11 +8,15 @@ import Button from '../components/ui/Button.jsx';
 import Notice from '../components/ui/Notice.jsx';
 import Section from '../components/ui/Section.jsx';
 import './Pages.css';
+import { useDocumentMeta } from '../lib/useDocumentMeta.js';
+import { track } from '../lib/analytics.js';
 
 const initialForm = { name: '', email: '', message: '' };
 
 export default function ContactPage() {
   const { t } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.contact.title'), t('seo.pages.contact.description'));
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -39,6 +43,7 @@ export default function ContactPage() {
     setSubmitting(true);
     try {
       await api.post('/contact', form);
+      track('generate_lead', { form: 'contact' });
       setForm(initialForm);
       setStatus({ type: 'success', text: t('contact.status.sent') });
     } catch (err) {

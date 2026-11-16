@@ -44,10 +44,21 @@ export const env = {
   storageDir: path.resolve(
     process.env.STORAGE_DIR || path.join(path.dirname(fileURLToPath(import.meta.url)), '../../storage'),
   ),
-  // E-mail (newsletter confirmation, later password reset). No provider is chosen
-  // yet: "console" keeps mails in memory / prints them (development and tests only),
-  // "none" refuses to send (the default in production, so nothing is ever faked).
+  // E-mail (newsletter confirmation, contact form). "smtp" sends for real through the
+  // mailbox of the domain (contact@fincludia.com); "console" keeps mails in memory /
+  // prints them (development and tests only); "none" refuses to send (the default in
+  // production when no mailbox is configured, so nothing is ever faked).
   mailDriver: process.env.MAIL_DRIVER || (process.env.NODE_ENV === 'production' ? 'none' : 'console'),
+  smtpHost: process.env.SMTP_HOST || null,
+  smtpPort: Number(process.env.SMTP_PORT) || 465,
+  // 465 = TLS from the first byte; 587 = STARTTLS. Deduced from the port unless said.
+  smtpSecure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : (Number(process.env.SMTP_PORT) || 465) === 465,
+  smtpUser: process.env.SMTP_USER || null,
+  smtpPassword: process.env.SMTP_PASSWORD || null,
+  // Sender shown to the recipient; defaults to the mailbox itself.
+  mailFrom: process.env.MAIL_FROM || (process.env.SMTP_USER ? `FINCLUDIA <${process.env.SMTP_USER}>` : null),
+  // Mailbox that receives the messages of the contact form (unset = stored only).
+  contactInbox: process.env.CONTACT_INBOX || null,
   // Public address of the website, used to build the links written in e-mails.
   publicUrl: (process.env.PUBLIC_URL || (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',')[0]).trim().replace(/\/+$/, ''),
   maxImageBytes: Number(process.env.MAX_IMAGE_BYTES) || 5 * 1024 * 1024,
@@ -70,8 +81,11 @@ export const env = {
     : null,
 };
 
-if (!['console', 'none'].includes(env.mailDriver)) {
-  throw new Error('MAIL_DRIVER must be "console" or "none" (no real provider is wired yet)');
+if (!['console', 'none', 'smtp'].includes(env.mailDriver)) {
+  throw new Error('MAIL_DRIVER must be "smtp", "console" or "none"');
+}
+if (env.mailDriver === 'smtp' && !(env.smtpHost && env.smtpUser && env.smtpPassword)) {
+  throw new Error('MAIL_DRIVER=smtp needs SMTP_HOST, SMTP_USER and SMTP_PASSWORD');
 }
 
 if (!['none', 'fake'].includes(env.paymentProvider)) {

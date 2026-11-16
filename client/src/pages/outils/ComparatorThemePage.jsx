@@ -41,7 +41,7 @@ export default function ComparatorThemePage() {
   const theme = data?.theme ?? null;
   const conditions = data?.conditions ?? NO_ROWS;
   const themeLabel = t(`comparator.themes.${themeKey}`, { defaultValue: t('comparator.title') });
-  useDocumentMeta(`${themeLabel} - ${t('comparator.title')}`, t('comparator.subtitle', { count: '' }));
+  useDocumentMeta(t('seo.templates.comparatorTheme', { theme: themeLabel }), t('seo.templates.comparatorThemeDescription', { theme: themeLabel }));
 
   // Hooks stay above the early returns below (same order on every render).
   const banks = useMemo(() => [...new Set(conditions.map((c) => c.bank.name))].sort(byName), [conditions]);

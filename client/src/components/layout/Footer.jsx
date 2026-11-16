@@ -5,6 +5,8 @@ import { footerColumns } from '../../config/navigation.js';
 import { contactInfo, socialLinks } from '../../config/contact.js';
 import { usePublicSettings } from '../../lib/publicSettings.js';
 import brandMark from '../../assets/brand/fincludia-mark.png';
+import { useLocalePath } from '../../i18n/useLocalePath.js';
+import { AnalyticsSettingsLink } from '../analytics/Analytics.jsx';
 import './Footer.css';
 
 // lucide-react ships no brand logos: the icon is picked by type of contact, the
@@ -18,6 +20,7 @@ function socialIcon(platform) {
 
 export default function Footer() {
   const { t } = useTranslation();
+  const localePath = useLocalePath();
   const year = new Date().getFullYear();
   // The admin panel (P3-16) is now the source of truth for these three; the
   // static file (config/contact.js) is only the fallback while settings load
@@ -35,7 +38,7 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="site-footer-inner">
         <div className="footer-brand">
-          <Link to="/" className="footer-logo">
+          <Link to={localePath('/')} className="footer-logo">
             {/* The FINCLUDIA mark, as in the header — not the placeholder letter of
                 the first branding (P8-28, seen by the client on 2026-10-28). */}
             <img src={brandMark} className="brand-mark" alt="" aria-hidden="true" width="32" height="32" />
@@ -89,7 +92,7 @@ export default function Footer() {
             <ul>
               {column.links.map((link) => (
                 <li key={link.to}>
-                  <Link to={link.to}>{t(link.labelKey)}</Link>
+                  <Link to={localePath(link.to)}>{t(link.labelKey)}</Link>
                 </li>
               ))}
             </ul>
@@ -99,6 +102,7 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <p>{t('footer.copyright', { year, brand: t('common.brand') })}</p>
+        <AnalyticsSettingsLink className="footer-cookies" />
       </div>
     </footer>
   );

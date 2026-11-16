@@ -12,6 +12,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Section from '../../components/ui/Section.jsx';
 import '../Pages.css';
 import '../learn/Certificate.css';
+import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 
 // Same format as the server (services/certificate.service.js); the server stays
 // the authority, this only saves a request for an obvious typo.
@@ -23,6 +24,8 @@ export default function VerifyCertificatePage() {
   const { number } = useParams();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.verify.title'), t('seo.pages.verify.description'));
   const [input, setInput] = useState(number ?? '');
   const [formError, setFormError] = useState('');
   const result = useApi(number ? `/certificates/${encodeURIComponent(number)}` : null);

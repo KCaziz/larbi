@@ -123,6 +123,23 @@
   font-size: 0.85rem;
 }
 
+/* "Cookies": reopens the audience-measurement choice (P12-06). */
+.footer-cookies {
+  display: block;
+  width: 100%;
+  max-width: 1200px;
+  margin: -12px auto 0;
+  padding: 0 20px 20px;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: start;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 @media (max-width: 860px) {
   .site-footer-inner {
     grid-template-columns: 1fr 1fr;

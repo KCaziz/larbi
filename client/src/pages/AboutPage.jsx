@@ -3,6 +3,7 @@ import { Award, Landmark, LockKeyhole, ShieldCheck, Target, TrendingUp } from 'l
 import PageHeader from '../components/layout/PageHeader.jsx';
 import Section from '../components/ui/Section.jsx';
 import './Pages.css';
+import { useDocumentMeta } from '../lib/useDocumentMeta.js';
 
 const valueVisuals = [
   { icon: ShieldCheck, tone: 'tone-primary' },
@@ -13,6 +14,8 @@ const valueVisuals = [
 
 export default function AboutPage() {
   const { t } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.about.title'), t('seo.pages.about.description'));
   const values = t('about.values.items', { returnObjects: true });
 
   return (

@@ -1,0 +1,1 @@
+import{a as e,t}from"./jsx-runtime-DoMpqfwM.js";var n=t();function r(){return(0,n.jsx)(`div`,{className:`cms-shell cms-shell-bare`,children:(0,n.jsx)(`div`,{className:`cms-content`,children:(0,n.jsx)(e,{})})})}function i(){return(0,n.jsx)(r,{})}export{i as default};

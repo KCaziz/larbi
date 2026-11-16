@@ -26,7 +26,7 @@ const CRITERIA = ['netValue', 'cost', 'commuteMinutes'];
 
 export default function JobOffersPage() {
   const { t, i18n } = useTranslation();
-  useDocumentMeta(t('jobOffers.title'));
+  useDocumentMeta(t('seo.pages.jobOffers.title'), t('seo.pages.jobOffers.description'));
 
   const [offers, setOffers] = useState([emptyOffer(), emptyOffer()]);
   // A score exists only if the person asks for one AND can see the weights:

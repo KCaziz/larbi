@@ -24,7 +24,7 @@ export default function ComparatorSegmentPage() {
 
   const segmentLabel = t(`comparator.segments.${segment}`, { defaultValue: t('comparator.segmentComparison') });
   const subtitle = t('comparator.segmentSubtitle', { segment: segmentLabel });
-  useDocumentMeta(`${segmentLabel} - ${t('comparator.segmentComparison')}`, subtitle);
+  useDocumentMeta(t('seo.templates.comparatorSegment', { segment: segmentLabel }), t('seo.templates.comparatorSegmentDescription', { segment: segmentLabel }));
 
   if (status === 'loading') return <LoadingState />;
   if (status === 'error') {

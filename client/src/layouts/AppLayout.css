@@ -160,36 +160,168 @@
   display: flex;
 }
 
+/* The client's sidebar (refonte 2026-11-16): a dark column the whole height
+   of the window, the brand at its head, a mint pill for the current page.
+   Its own tokens, so both themes keep it dark. Every text/background pair is
+   at least 4.5:1 (#dcebf3 and #b3d2e1 on the gradient, ink on mint). */
 .app-sidebar {
+  --side-hover: rgba(255, 255, 255, 0.08);
+  --side-line: rgba(255, 255, 255, 0.12);
   position: sticky;
-  inset-block-start: var(--app-topbar);
+  inset-block-start: 0;
+  z-index: 31;
+  display: flex;
+  flex-direction: column;
   flex: 0 0 auto;
-  block-size: calc(100vh - var(--app-topbar));
+  block-size: 100vh;
   inline-size: var(--app-sidebar);
-  overflow-y: auto;
-  padding: var(--space-sm);
-  background: var(--surface);
-  border-inline-end: 1px solid var(--border);
+  padding: var(--space-sm) var(--space-sm) var(--space-xs);
+  background: var(--side-bg);
+  border-inline-end: 1px solid var(--side-edge);
+  color: var(--side-text);
 }
-/* Fold / unfold (recette R4-01), at the head of the menu on every width. */
-.app-sidebar-toggle {
+.app-side-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.app-side-head .app-side-brand {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+/* The « ? » of the administration's guided tour, beside the brand. */
+.app-sidebar .cms-tour-reopen {
+  flex: 0 0 auto;
+  inline-size: 26px;
+  block-size: 26px;
+  border-color: rgba(255, 255, 255, 0.35);
+  background: transparent;
+  color: var(--side-text);
+}
+.app-sidebar .cms-tour-reopen:hover,
+.app-sidebar .cms-tour-reopen:focus-visible {
+  border-color: #4fe5d3;
+  color: #4fe5d3;
+}
+.app-side-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-block-size: 48px;
+  padding: 2px var(--space-xs) var(--space-sm);
+  color: #ffffff;
+  text-decoration: none;
+}
+.app-side-brand img {
+  flex: 0 0 auto;
+}
+.app-side-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.app-side-brand-text strong {
+  font-family: var(--display);
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+.app-side-scroll {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  margin-inline: calc(-1 * var(--space-xs));
+  padding-inline: var(--space-xs);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+.app-side-foot {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-block-start: var(--space-xs);
+  border-block-start: 1px solid var(--side-line);
+}
+.app-side-foot-link {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   inline-size: 100%;
   min-block-size: 40px;
-  margin-block-end: var(--space-xs);
   padding-inline: var(--space-sm);
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   background: transparent;
-  color: var(--text);
-  font-size: 0.85rem;
+  color: var(--side-text);
+  font: inherit;
+  font-size: 0.92rem;
+  text-align: start;
+  text-decoration: none;
   cursor: pointer;
 }
-.app-sidebar-toggle:hover,
-.app-sidebar-toggle:focus-visible {
-  background: var(--bg-alt);
+.app-side-foot-link:hover,
+.app-side-foot-link:focus-visible {
+  background: var(--side-hover);
+  color: #ffffff;
+}
+.app-side-foot-link.active {
+  background: var(--side-active-bg);
+  color: var(--side-active-text);
+  font-weight: 700;
+}
+/* The invitation at the foot of the menu, as in the client's model — short,
+   and gone on low windows so it never pushes the menu away. */
+.app-side-promo {
+  margin-block: var(--space-sm) var(--space-xs);
+  padding: var(--space-sm);
+  border: 1px solid rgba(79, 229, 211, 0.35);
+  border-radius: 14px;
+  background:
+    radial-gradient(120% 80% at 100% 100%, rgba(79, 229, 211, 0.28) 0%, transparent 60%),
+    var(--side-promo-bg);
+}
+.app-side-promo-title {
+  margin: 0 0 6px;
+  color: #ffffff;
+  font-family: var(--display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.app-side-promo ul {
+  margin: 0 0 var(--space-xs);
+  padding: 0;
+  list-style: none;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.app-side-promo li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.app-side-promo li svg {
+  flex: 0 0 auto;
+  color: #4fe5d3;
+}
+.app-side-promo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #4fe5d3;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.app-side-promo-link:hover,
+.app-side-promo-link:focus-visible {
+  text-decoration: underline;
+}
+
+/* The button that folds the menu, at the head of the top bar (recette R4-01). */
+.app-menu-toggle {
+  flex-shrink: 0;
 }
 
 /* Folded on a computer: the icons only, their names as tooltips. */
@@ -198,12 +330,10 @@
     inline-size: var(--app-rail);
     padding-inline: var(--space-xs);
   }
-  .app-sidebar-toggled .app-nav-text,
-  .app-sidebar-toggled .app-nav-heading,
-  .app-sidebar-toggled .app-nav-badge {
+  .app-sidebar-toggled :is(.app-nav-text, .app-nav-heading, .app-nav-badge, .app-side-brand-text, .app-side-foot-text, .app-side-promo, .cms-tour-reopen) {
     display: none;
   }
-  .app-sidebar-toggled :is(.app-nav-link, .app-sidebar-toggle) {
+  .app-sidebar-toggled :is(.app-nav-link, .app-side-foot-link, .app-side-brand) {
     justify-content: center;
     padding-inline: 0;
   }
@@ -241,40 +371,49 @@
   padding: 0;
   list-style: none;
 }
-.app-nav-section + .app-nav-section {
-  margin-block-start: var(--space-xs);
-  padding-block-start: var(--space-xs);
-  border-block-start: 1px solid var(--border);
+.app-sidebar .app-nav-section + .app-nav-section {
+  margin-block-start: 4px;
+  padding-block-start: 4px;
 }
 .app-nav-badge {
   margin-inline-start: auto;
   min-inline-size: 20px;
   padding: 0 6px;
   border-radius: 10px;
-  background: var(--brand, #0f766e);
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
   font-size: 0.72rem;
   font-weight: 700;
   line-height: 20px;
   text-align: center;
 }
+.app-sidebar .app-nav-badge {
+  background: #4fe5d3;
+  color: #102a43;
+}
 .app-nav-heading {
   margin: 0;
   padding: var(--space-xs) var(--space-sm) 2px;
-  color: var(--text-muted, var(--text));
-  font-size: 0.72rem;
+  color: var(--text);
+  font-size: 0.68rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+.app-sidebar .app-nav-heading {
+  color: var(--side-muted);
 }
 .app-nav-link {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  min-block-size: 44px;
+  min-block-size: 40px;
+  margin-block: 1px;
   padding-inline: var(--space-sm);
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.3;
   text-decoration: none;
 }
 .app-nav-link:hover,
@@ -290,6 +429,36 @@
 }
 [dir='rtl'] .app-nav-link.active {
   box-shadow: inset -3px 0 0 var(--accent);
+}
+/* In the dark sidebar: light text, a mint pill for the current page, and a
+   visible ring for the keyboard. */
+.app-sidebar .app-nav-link {
+  color: var(--side-text);
+}
+.app-sidebar .app-nav-link svg {
+  flex: 0 0 auto;
+  opacity: 0.9;
+}
+.app-sidebar .app-nav-link:hover {
+  background: var(--side-hover);
+  color: #ffffff;
+}
+.app-sidebar :is(.app-nav-link, .app-side-foot-link, .app-side-brand, .app-side-promo-link):focus-visible {
+  outline: 2px solid #4fe5d3;
+  outline-offset: 1px;
+  background: var(--side-hover);
+}
+.app-sidebar .app-nav-link.active,
+[dir='rtl'] .app-sidebar .app-nav-link.active {
+  background: var(--side-active-bg);
+  color: var(--side-active-text);
+  box-shadow: inset 3px 0 0 #4fe5d3, 0 4px 14px rgba(79, 229, 211, 0.18);
+}
+[dir='rtl'] .app-sidebar .app-nav-link.active {
+  box-shadow: inset -3px 0 0 #4fe5d3, 0 4px 14px rgba(79, 229, 211, 0.18);
+}
+.app-sidebar .app-nav-link.active svg {
+  opacity: 1;
 }
 
 .app-main {
@@ -356,11 +525,10 @@
     inline-size: var(--app-rail);
     padding-inline: var(--space-xs);
   }
-  .app-sidebar .app-nav-text,
-  .app-sidebar .app-nav-heading {
+  .app-sidebar :is(.app-nav-text, .app-nav-heading, .app-nav-badge, .app-side-brand-text, .app-side-foot-text, .app-side-promo, .cms-tour-reopen) {
     display: none;
   }
-  .app-sidebar :is(.app-nav-link, .app-sidebar-toggle) {
+  .app-sidebar :is(.app-nav-link, .app-side-foot-link, .app-side-brand) {
     justify-content: center;
     padding-inline: 0;
   }
@@ -369,13 +537,16 @@
     inline-size: var(--app-sidebar);
     padding-inline: var(--space-sm);
   }
-  .app-sidebar-toggled .app-nav-text {
+  .app-sidebar-toggled :is(.app-nav-text, .app-side-foot-text, .app-nav-badge) {
     display: inline;
   }
-  .app-sidebar-toggled .app-nav-heading {
+  .app-sidebar-toggled :is(.app-nav-heading, .app-side-promo) {
     display: block;
   }
-  .app-sidebar-toggled :is(.app-nav-link, .app-sidebar-toggle) {
+  .app-sidebar-toggled .app-side-brand-text {
+    display: flex;
+  }
+  .app-sidebar-toggled :is(.app-nav-link, .app-side-foot-link, .app-side-brand) {
     justify-content: flex-start;
     padding-inline: var(--space-sm);
   }
@@ -442,7 +613,8 @@
   .app-icon-button {
     min-inline-size: 40px;
   }
-  .app-sidebar {
+  .app-sidebar,
+  .app-menu-toggle {
     display: none;
   }
   .app-main {
@@ -540,5 +712,132 @@
 @media (min-width: 768px) and (max-width: 1199px) {
   .app-topbar .app-brand span {
     display: none;
+  }
+}
+
+/* ---- refonte 2026-11-16: the client's model ------------------------- */
+/* The sidebar takes the whole height; the bar and the page share the column
+   beside it, on a pale canvas where the white cards stand out. */
+.app-column {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100vh;
+  background: var(--canvas);
+}
+.app-column .app-topbar {
+  --app-topbar: 64px;
+  gap: var(--space-sm);
+  padding-inline: var(--space-md);
+  background: var(--surface);
+  box-shadow: 0 1px 0 var(--border), 0 4px 14px rgba(16, 42, 67, 0.04);
+  border-block-end: 0;
+}
+/* The brand is at the head of the sidebar: the bar does not repeat it while
+   the sidebar shows (it comes back on a phone). */
+@media (min-width: 768px) {
+  .app-topbar-with-menu .app-brand {
+    display: none;
+  }
+}
+/* The search, wide and centred as in the model. */
+.app-column .app-topbar .global-search {
+  flex: 1 1 440px;
+  max-inline-size: 480px;
+  margin-inline: auto;
+}
+.app-column .app-topbar .app-topbar-actions {
+  margin-inline-start: 0;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+.app-topbar .global-search-box {
+  border-color: var(--border);
+  border-radius: 999px;
+  background: var(--canvas);
+  padding-inline: 14px;
+}
+.app-topbar .global-search-box:focus-within {
+  border-color: var(--accent-border);
+  background: var(--surface);
+}
+.app-avatar {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: 50%;
+  background: var(--icon-tile);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.app-profile-name {
+  font-weight: 600;
+}
+
+/* Pages of the application: their title sits on the canvas, without the
+   band of the public site, and their cards are white, rounded, lightly lifted. */
+:is(.app-main, .shared-main, .admin-main) .page-header {
+  padding-block-end: 0;
+  border-block-end: 0;
+  background: none;
+}
+:is(.app-main, .shared-main, .admin-main) :is(.home-card, .fin-figure, .fin-card, .card):not(.fin-figure-simulation) {
+  border-color: var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--card-lift);
+}
+
+/* The administration's content, now that its menu is the sidebar. */
+.cms-shell.cms-shell-bare {
+  display: block;
+  max-width: 1280px;
+  padding: var(--space-lg) clamp(16px, 3vw, 32px) var(--space-xl);
+}
+/* The count of « Aujourd'hui » sits on its icon in the phone's bottom bar. */
+.app-bottom-link {
+  position: relative;
+}
+.app-bottom-link .app-nav-badge {
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-start: calc(50% + 6px);
+  margin: 0;
+}
+@media (max-width: 1199px) {
+  .app-sidebar-toggled .cms-tour-reopen {
+    display: grid;
+  }
+}
+
+/* The names of the bottom bar on one line, whatever the language. */
+.app-bottom-link > span:not(.app-nav-badge) {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* An administrator has three windows in the switcher. Up to 1439 px, beside
+   the sidebar, the three names, the search and the buttons no longer fit:
+   the actions overflowed to the left and the search covered « Administration ».
+   The windows one is not in keep their icon only (the name stays in the
+   tooltip and for screen readers); the current one keeps its name. */
+@media (min-width: 768px) and (max-width: 1439px) {
+  .app-topbar:has(.app-switcher > :nth-child(3)) .app-switcher-text {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .app-topbar:has(.app-switcher > :nth-child(3)) .app-switcher-link:not(.app-switcher-current) {
+    min-inline-size: 36px;
+    justify-content: center;
   }
 }

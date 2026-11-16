@@ -19,6 +19,9 @@
      couleurs réservées aux accents, jamais aux aplats de fond. */
   --bg: #ffffff;
   --bg-alt: #effbfa;
+  /* Behind the cards of the application (refonte 2026-11-16): a pale blue-grey,
+     so white cards stand out as in the client's model. */
+  --canvas: #f2f7fa;
   --surface: #ffffff;
   --border: #d5e3ea;
   --border-strong: #b7cdd8;
@@ -118,6 +121,7 @@
     --text-h: #f2fbfc;
     --bg: #0a1e30;
     --bg-alt: #0d2438;
+    --canvas: #081a2b;
     --surface: #102A43;
     --border: #1f4160;
     --border-strong: #2d5680;
@@ -158,6 +162,7 @@
   --text-h: #f2fbfc;
   --bg: #0a1e30;
   --bg-alt: #0d2438;
+  --canvas: #081a2b;
   --surface: #102A43;
   --border: #1f4160;
   --border-strong: #2d5680;
@@ -513,4 +518,150 @@ main {
 .rate-equivalent {
   display: block;
   margin-block-start: 4px;
+}
+
+/* ---- Brand surfaces (refonte 2026-11-16) ----------------------------------
+   The deep-blue pieces of the client's model — the sidebar, the hero, the
+   balance card, the quick tiles, the closing band. Each one has its own dark
+   version: in « Abysses » they sink into the night blue instead of staying the
+   same as in daylight. White text stays ≥ 4.5:1 on every one of them. */
+:root {
+  --side-bg: linear-gradient(180deg, #0b3352 0%, #0a4a6b 100%);
+  --side-edge: transparent;
+  --side-text: #dcebf3;
+  --side-muted: #b3d2e1;
+  --side-active-bg: #4fe5d3;
+  --side-active-text: #102a43;
+  --side-promo-bg: rgba(255, 255, 255, 0.06);
+  --hero-bg:
+    radial-gradient(50% 70% at 85% 20%, rgba(79, 229, 211, 0.28) 0%, transparent 70%),
+    radial-gradient(40% 60% at 0% 100%, rgba(16, 169, 182, 0.22) 0%, transparent 70%),
+    linear-gradient(120deg, #0b3352 0%, #055686 55%, #0a6f8f 100%);
+  --feature-bg:
+    radial-gradient(60% 120% at 100% 0%, rgba(79, 229, 211, 0.22) 0%, transparent 60%),
+    linear-gradient(120deg, #055686 0%, #0a6f8f 100%);
+  --feature-edge: transparent;
+  --feature-shadow: 0 12px 30px rgba(5, 86, 134, 0.22);
+  --tile-deep: #055686;
+  --tile-teal: #08707b;
+  --tile-mint: #8ff0e4;
+  --tile-mint-text: #102a43;
+  --icon-tile: linear-gradient(135deg, #055686 0%, #0a6f8f 100%);
+  --cta-bg:
+    radial-gradient(40% 80% at 100% 50%, rgba(79, 229, 211, 0.25) 0%, transparent 70%),
+    linear-gradient(120deg, #0b3352 0%, #055686 100%);
+  --card-lift: 0 1px 2px rgba(16, 42, 67, 0.04), 0 6px 18px rgba(16, 42, 67, 0.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --side-bg: linear-gradient(180deg, #050f1a 0%, #0a2133 100%);
+    --side-edge: rgba(79, 229, 211, 0.14);
+    --side-text: #c9dbe8;
+    --side-muted: #8fb0c4;
+    --side-active-bg: rgba(79, 229, 211, 0.16);
+    --side-active-text: #4fe5d3;
+    --side-promo-bg: rgba(79, 229, 211, 0.05);
+    --hero-bg:
+      radial-gradient(50% 70% at 85% 20%, rgba(79, 229, 211, 0.14) 0%, transparent 70%),
+      radial-gradient(40% 60% at 0% 100%, rgba(16, 169, 182, 0.12) 0%, transparent 70%),
+      linear-gradient(120deg, #040d17 0%, #0a2338 55%, #0c3346 100%);
+    --feature-bg:
+      radial-gradient(60% 120% at 100% 0%, rgba(79, 229, 211, 0.16) 0%, transparent 60%),
+      linear-gradient(120deg, #0c2f4a 0%, #0d4352 100%);
+    --feature-edge: rgba(79, 229, 211, 0.22);
+    --feature-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    --tile-deep: #123f63;
+    --tile-teal: #0d5058;
+    --tile-mint: #1b4f52;
+    --tile-mint-text: #a5f3e9;
+    --icon-tile: linear-gradient(135deg, #12406a 0%, #0d5c66 100%);
+    --cta-bg:
+      radial-gradient(40% 80% at 100% 50%, rgba(79, 229, 211, 0.14) 0%, transparent 70%),
+      linear-gradient(120deg, #040d17 0%, #0c3346 100%);
+    --card-lift: 0 1px 2px rgba(0, 0, 0, 0.25), 0 6px 18px rgba(0, 0, 0, 0.2);
+  }
+}
+:root[data-theme='dark'] {
+  --side-bg: linear-gradient(180deg, #050f1a 0%, #0a2133 100%);
+  --side-edge: rgba(79, 229, 211, 0.14);
+  --side-text: #c9dbe8;
+  --side-muted: #8fb0c4;
+  --side-active-bg: rgba(79, 229, 211, 0.16);
+  --side-active-text: #4fe5d3;
+  --side-promo-bg: rgba(79, 229, 211, 0.05);
+  --hero-bg:
+    radial-gradient(50% 70% at 85% 20%, rgba(79, 229, 211, 0.14) 0%, transparent 70%),
+    radial-gradient(40% 60% at 0% 100%, rgba(16, 169, 182, 0.12) 0%, transparent 70%),
+    linear-gradient(120deg, #040d17 0%, #0a2338 55%, #0c3346 100%);
+  --feature-bg:
+    radial-gradient(60% 120% at 100% 0%, rgba(79, 229, 211, 0.16) 0%, transparent 60%),
+    linear-gradient(120deg, #0c2f4a 0%, #0d4352 100%);
+  --feature-edge: rgba(79, 229, 211, 0.22);
+  --feature-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  --tile-deep: #123f63;
+  --tile-teal: #0d5058;
+  --tile-mint: #1b4f52;
+  --tile-mint-text: #a5f3e9;
+  --icon-tile: linear-gradient(135deg, #12406a 0%, #0d5c66 100%);
+  --cta-bg:
+    radial-gradient(40% 80% at 100% 50%, rgba(79, 229, 211, 0.14) 0%, transparent 70%),
+    linear-gradient(120deg, #040d17 0%, #0c3346 100%);
+  --card-lift: 0 1px 2px rgba(0, 0, 0, 0.25), 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* Readable version of a public page sent by the server (P12-06): what a search
+   engine, a link preview or a visitor on a slow connection sees before the
+   website starts. Replaced as soon as the JavaScript runs. */
+.seo-shell {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1rem;
+  color: var(--text);
+  line-height: 1.6;
+}
+.seo-shell a {
+  color: var(--text-h);
+}
+.seo-shell ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+.seo-shell-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  padding-block: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.seo-shell-brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.seo-shell-main {
+  padding-block: 2rem;
+  max-width: 48rem;
+}
+.seo-shell-main h1 {
+  color: var(--text-h);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  line-height: 1.2;
+}
+.seo-shell-main h2 {
+  color: var(--text-h);
+  font-size: 1.25rem;
+}
+.seo-shell-main ul {
+  flex-direction: column;
+  margin-top: 1.5rem;
+}
+.seo-shell-footer {
+  border-top: 1px solid var(--border);
+  padding-block: 1rem;
 }

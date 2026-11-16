@@ -4,6 +4,7 @@ import PageHeader from '../components/layout/PageHeader.jsx';
 import Button from '../components/ui/Button.jsx';
 import Section from '../components/ui/Section.jsx';
 import './Pages.css';
+import { useDocumentMeta } from '../lib/useDocumentMeta.js';
 
 const services = [
   { key: 'formations', icon: BookOpenText, tone: 'tone-primary', to: '/formations' },
@@ -13,6 +14,8 @@ const services = [
 
 export default function ServicesPage() {
   const { t } = useTranslation();
+  // Same title and description as the server sends (P12-06).
+  useDocumentMeta(t('seo.pages.services.title'), t('seo.pages.services.description'));
 
   return (
     <>

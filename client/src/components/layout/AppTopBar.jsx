@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeftRight, LayoutDashboard, LifeBuoy, LogOut, Plus, UserRound } from 'lucide-react';
+import { ArrowLeftRight, LayoutDashboard, LifeBuoy, LogOut, Menu, Plus } from 'lucide-react';
 import { useAuth } from '../../auth/useAuth.js';
 import { useApi } from '../../lib/useApi.js';
 import { ASSISTANT_OPEN_EVENT } from '../../lib/finControls.js';
@@ -17,8 +17,10 @@ import '../../layouts/AppLayout.css';
 // The top bar of BOTH applications (tab 03B; recette R2-03): the same bar,
 // the same buttons at the same place, whether one is in Gestion budgétaire
 // or in Gestion commune — only the highlighted half of the switcher changes.
-// `app` is 'budget', 'shared' or 'admin'.
-export default function AppTopBar({ app = 'budget' }) {
+// `app` is 'budget', 'shared' or 'admin'. `menu` ({ folded, onToggle }) puts
+// the button that folds the sidebar at the head of the bar, where the
+// client's model has it.
+export default function AppTopBar({ app = 'budget', menu = null }) {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -48,7 +50,13 @@ export default function AppTopBar({ app = 'budget' }) {
   const home = apps.find((entry) => entry.key === app)?.to ?? '/app';
 
   return (
-    <header className="app-topbar">
+    <header className={`app-topbar${menu ? ' app-topbar-with-menu' : ''}`}>
+      {menu && (
+        <button type="button" className="app-icon-button app-menu-toggle" aria-expanded={!menu.folded} title={menu.folded ? t('nav.expandMenu') : t('nav.collapseMenu')} onClick={menu.onToggle}>
+          <Menu size={20} aria-hidden="true" />
+          <span className="sr-only">{menu.folded ? t('nav.expandMenu') : t('nav.collapseMenu')}</span>
+        </button>
+      )}
       <Link to={home} className="app-brand">
         <img src={brandMark} alt="" aria-hidden="true" width="28" height="28" />
         <span>{t('common.brand')}</span>
@@ -91,7 +99,9 @@ export default function AppTopBar({ app = 'budget' }) {
           }}
         >
           <button type="button" className="app-icon-button" title={user?.name ?? t('appNav.mySpace')} aria-expanded={profileOpen} aria-controls="app-profile-menu" onClick={() => setProfileOpen((value) => !value)}>
-            <UserRound size={18} aria-hidden="true" />
+            <span className="app-avatar" aria-hidden="true">
+              {initials(user?.name)}
+            </span>
             <span className="app-profile-name">{user?.name ?? t('appNav.mySpace')}</span>
           </button>
           {profileOpen && (
@@ -124,4 +134,11 @@ export default function AppTopBar({ app = 'budget' }) {
       </div>
     </header>
   );
+}
+
+// « Ahmed Kaci » → « AK »: the avatar of the bar, as in the client's model.
+function initials(name) {
+  const parts = String(name ?? '').trim().split(/s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  return parts.slice(0, 2).map((part) => part[0].toLocaleUpperCase()).join('');
 }
