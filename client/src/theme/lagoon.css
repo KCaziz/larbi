@@ -1,0 +1,170 @@
+/* Mode clair « Lagon », second passage (2026-11-17).
+   Le client trouve le mode clair trop proche de l'ancien : il le veut comme
+   ses maquettes (images WhatsApp du 2026-11-16) — un blanc teinté de menthe,
+   des tuiles d'icônes sarcelle pleines, des cartes aux bords et aux ombres
+   légèrement sarcelle, un bandeau d'accueil clair (blanc → menthe, vague),
+   des titres bleu profond. Le mode sombre, qui lui plaît, n'est pas touché :
+   tout est limité à [data-theme='light'] (posé avant le premier affichage par
+   public/theme-init.js). Contrastes du texte ≥ 4,5:1, icônes ≥ 3:1. */
+
+:root[data-theme='light'] {
+  --bg-alt: #e9f8f6;
+  --canvas: #eef8f7;
+  --border: #d2e7e7;
+  --border-strong: #a7d1d2;
+  --accent-bg: rgba(16, 169, 182, 0.12);
+  --accent-border: rgba(8, 118, 130, 0.38);
+  --grid-line: rgba(16, 169, 182, 0.08);
+  --shadow-md: 0 8px 24px rgba(8, 118, 130, 0.12);
+  --card-lift: 0 1px 2px rgba(8, 118, 130, 0.06), 0 8px 24px rgba(16, 169, 182, 0.1);
+  /* Sarcelle → bleu profond : une icône blanche y garde plus de 3:1. */
+  --icon-tile: linear-gradient(135deg, #0b8f9b 0%, #055686 100%);
+  --lagoon-wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 160' preserveAspectRatio='none'%3E%3Cpath d='M0 96c180 40 360 56 540 32S900 32 1080 40s270 48 360 64v56H0z' fill='%2310a9b6' fill-opacity='.16'/%3E%3Cpath d='M0 128c240 24 420 8 640-16s420-24 560 0 200 32 240 40v28H0z' fill='%234fe5d3' fill-opacity='.35'/%3E%3C/svg%3E");
+}
+
+/* ---- Site public ------------------------------------------------------- */
+
+/* Le bandeau d'accueil devient clair, comme la maquette « ordinateur et
+   téléphone » : blanc → menthe, halo sarcelle, vague en bas. */
+[data-theme='light'] .hero-band {
+  background:
+    radial-gradient(55% 75% at 92% 8%, rgba(79, 229, 211, 0.5) 0%, transparent 62%),
+    radial-gradient(45% 65% at 0% 100%, rgba(16, 169, 182, 0.16) 0%, transparent 70%),
+    linear-gradient(120deg, #ffffff 0%, #f0fbf9 48%, #d5f5f0 100%);
+  color: var(--text);
+}
+[data-theme='light'] .hero-band::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  block-size: 110px;
+  background: var(--lagoon-wave) bottom / 100% 100% no-repeat;
+  pointer-events: none;
+}
+[data-theme='light'] .hero-band .hero-inner {
+  position: relative;
+  z-index: 1;
+}
+[data-theme='light'] .hero-band h1 {
+  color: #055686;
+}
+[data-theme='light'] .hero-band .hero-copy p {
+  color: #2f4a5f;
+}
+[data-theme='light'] .hero-band .hero-signature,
+[data-theme='light'] .hero-band .hero-copy p.hero-signature {
+  color: #087682;
+}
+[data-theme='light'] .hero-badge {
+  border-color: rgba(16, 169, 182, 0.45);
+  background: #ffffff;
+  color: #087682;
+  box-shadow: 0 2px 8px rgba(16, 169, 182, 0.12);
+}
+[data-theme='light'] .hero-trust {
+  color: #102a43;
+}
+[data-theme='light'] .hero-trust svg {
+  color: #087682;
+}
+/* Boutons du bandeau : bleu profond plein et contour bleu, comme la maquette. */
+[data-theme='light'] .hero-band .btn-mint {
+  background: #055686;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(5, 86, 134, 0.25);
+}
+[data-theme='light'] .hero-band .btn-mint:hover {
+  background: #044269;
+}
+[data-theme='light'] .hero-band .btn-outline-light {
+  border-color: #055686;
+  background: #ffffff;
+  color: #055686;
+}
+[data-theme='light'] .hero-band .btn-outline-light:hover {
+  background: #e9f8f6;
+}
+
+/* « Inscription » en sarcelle dans l'en-tête, comme la maquette. */
+[data-theme='light'] .site-header .btn-primary {
+  background: #087682;
+  border-color: #087682;
+}
+[data-theme='light'] .site-header .btn-primary:hover {
+  background: #065f69;
+  border-color: #065f69;
+}
+
+/* Bandes alternées et en-têtes de page : menthe pâle, pas gris. */
+[data-theme='light'] .section-alt {
+  background: linear-gradient(180deg, #e9f8f6 0%, #f4fcfb 100%);
+}
+[data-theme='light'] .page-header {
+  background-color: #eaf8f6;
+}
+
+/* Tuiles d'icônes : sarcelle pleine, icône blanche (toutes les maquettes). */
+[data-theme='light'] .icon-badge,
+[data-theme='light'] .page-header-icon {
+  border-color: transparent;
+  background: var(--icon-tile);
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(8, 118, 130, 0.2);
+}
+
+/* Cartes : bord et ombre sarcelle, un liseré menthe au survol. */
+[data-theme='light'] :is(.universe-card, .offer-card, .feature-card, .tool-card, .article-card, .formation-card) {
+  border-color: var(--border);
+  box-shadow: var(--card-lift);
+}
+[data-theme='light'] :is(.universe-card, .offer-card, .feature-card, .tool-card, .article-card, .formation-card):hover {
+  border-color: rgba(16, 169, 182, 0.55);
+}
+[data-theme='light'] .audience-inner {
+  border-color: var(--border);
+  box-shadow: 0 12px 30px rgba(16, 169, 182, 0.12);
+}
+
+/* ---- Applications (gestion budgétaire, commune, administration) -------- */
+
+/* Le fond derrière les cartes : menthe pâle avec un halo, comme la maquette
+   du tableau de bord. */
+[data-theme='light'] .app-column {
+  background:
+    radial-gradient(1100px 420px at 100% 0%, rgba(79, 229, 211, 0.16) 0%, transparent 60%),
+    var(--canvas);
+}
+[data-theme='light'] .app-column .app-topbar {
+  box-shadow: 0 1px 0 var(--border), 0 4px 16px rgba(16, 169, 182, 0.06);
+}
+[data-theme='light'] .app-topbar .global-search-box {
+  background: #f1fafa;
+}
+
+/* Le pictogramme du titre de chaque écran : tuile sarcelle pleine. */
+[data-theme='light'] :is(.app-main, .shared-main, .admin-main) :is(.page-header-icon, .app-page-icon) {
+  border-color: transparent;
+  background: var(--icon-tile);
+  color: #ffffff;
+}
+
+/* Cartes de chiffres : un liseré sarcelle en tête, comme les cartes
+   « Chiffre d'affaires / Dépenses / Résultat » de la maquette. */
+[data-theme='light'] :is(.app-main, .shared-main) .fin-figure:not(.fin-figure-simulation) {
+  border-color: var(--border);
+  border-block-start: 3px solid #10a9b6;
+  box-shadow: var(--card-lift);
+}
+
+/* En-têtes de tableaux : menthe pâle, texte bleu nuit. */
+[data-theme='light'] :is(.app-main, .shared-main, .admin-main) table th {
+  background: #eaf7f6;
+  color: #102a43;
+}
+
+/* Boutons et onglets choisis (périodes, filtres) : menthe. */
+[data-theme='light'] :is(.app-main, .shared-main, .admin-main) :is([aria-pressed='true'], [aria-selected='true'], [aria-current='page']):is(button, a):not(.app-nav-link):not(.app-switcher-link) {
+  border-color: rgba(8, 118, 130, 0.45);
+  background: #d4f6f1;
+  color: #064e57;
+}

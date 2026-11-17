@@ -14,6 +14,8 @@ import '@fontsource/ibm-plex-sans-arabic/500.css'
 import '@fontsource/ibm-plex-sans-arabic/600.css'
 import i18n, { loadLanguage } from './i18n/index.js'
 import './index.css'
+// Mode clair « Lagon » d’après les maquettes du client (2026-11-17), après index.css.
+import './theme/lagoon.css'
 import App from './App.jsx'
 import { AuthProvider } from './auth/AuthContext.jsx'
 import { ThemeProvider } from './theme/ThemeContext.jsx'

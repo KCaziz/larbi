@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LifeBuoy, Menu, Settings, X } from 'lucide-react';
 import { useApi } from '../lib/useApi.js';
+import { WRITE_DONE_EVENT } from '../lib/api.js';
 import { useRevealOnAction } from '../lib/useRevealOnAction.js';
 import { APP_NAV, NAV_SECTIONS, SETTINGS_LINKS, visibleEntries } from '../config/appNavigation.js';
 import ChatbotWidget from '../components/assistant/ChatbotWidget.jsx';
@@ -29,8 +30,19 @@ export default function AppLayout() {
   const journey = useApi('/fin/parcours');
   const declaredMinor = journey.data?.mineurDeclare === true;
   // The count beside « Aujourd'hui »: what is left to do (answer D3). Read
-  // again on each page, so a confirmation elsewhere updates it.
+  // again when data changes (any write says so), when « Aujourd'hui » is
+  // opened, and otherwise at most once a minute while moving from page to
+  // page: it is a full computation (about half a second), and recomputing it
+  // on every page only for this number slowed every page down (navigation
+  // test, 2026-11-17).
   const today = useApi('/fin/aujourdhui');
+  const [todayReadAt, setTodayReadAt] = useState(() => Date.now());
+  // A save anywhere makes the count stale: the next page reads it again.
+  useEffect(() => {
+    const stale = () => setTodayReadAt(0);
+    window.addEventListener(WRITE_DONE_EVENT, stale);
+    return () => window.removeEventListener(WRITE_DONE_EVENT, stale);
+  }, []);
   const badges = { today: today.data?.aujourdhui?.aFaire?.total ?? 0 };
   const entries = visibleEntries(APP_NAV, { declaredMinor });
   const settings = visibleEntries(SETTINGS_LINKS, { declaredMinor });
@@ -44,7 +56,10 @@ export default function AppLayout() {
   if (lastPath !== pathname) {
     setLastPath(pathname);
     setMoreOpen(false);
-    today.reload();
+    if (pathname === '/app/aujourdhui' || Date.now() - todayReadAt > 60_000) {
+      setTodayReadAt(Date.now());
+      today.reload();
+    }
   }
 
   const toSide = (entry) => ({

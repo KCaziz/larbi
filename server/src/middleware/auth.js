@@ -11,6 +11,13 @@ export async function requireAuth(req, res, next) {
   try {
     const token = req.cookies?.[SESSION_COOKIE];
     if (!token) throw new HttpError(401, 'Authentication required');
+    // Already checked for THIS request with THIS token (2026-11-17): some thirty
+    // routers are mounted on /fin, each with `router.use(requireAuth)`, and a
+    // request walks through them until one answers — the account and the
+    // session were read up to sixty times for a single call (230 ms for an
+    // unread count). Once per request is enough: nothing can change between
+    // two routers of the same request.
+    if (req.user && req.authenticatedToken === token) return next();
 
     let payload;
     try {
@@ -31,6 +38,7 @@ export async function requireAuth(req, res, next) {
     }
 
     req.user = user;
+    req.authenticatedToken = token;
     next();
   } catch (err) {
     next(err);

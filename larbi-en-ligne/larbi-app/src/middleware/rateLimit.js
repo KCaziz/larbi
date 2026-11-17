@@ -93,11 +93,14 @@ export const mediaDeniedLimiter = rateLimit({
   },
 });
 
-// Public read-only API (blog): generous, per IP. Protects the database from scripts,
-// never gets in the way of a person reading.
+// Public read-only API (blog, tools, assistant, settings): generous, per IP.
+// Protects the database from scripts, never gets in the way of a person
+// reading. 600 rather than 240 (2026-11-17): in Algeria many visitors share
+// one address (mobile operators, universities, offices), and the navigation
+// test reached 240 with a single visitor reading quickly.
 export const publicReadLimiter = rateLimit({
   windowMs: 60 * 1000,
-  limit: Number(process.env.PUBLIC_READ_LIMIT) || 240,
+  limit: Number(process.env.PUBLIC_READ_LIMIT) || 600,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: { message: 'Too many requests, please try again later' } },

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Save } from 'lucide-react';
 import { api, errorKey } from '../../../lib/api.js';
 import { useApi } from '../../../lib/useApi.js';
+import { invalidatePublicSettings } from '../../../lib/publicSettings.js';
 import Button from '../../../components/ui/Button.jsx';
 import ErrorState from '../../../components/ui/ErrorState.jsx';
 import LoadingState from '../../../components/ui/LoadingState.jsx';
@@ -48,6 +49,7 @@ function CoreSettings({ settings, onSaved }) {
         api.post('/admin/settings', { key: 'gaMeasurementId', value: gaMeasurementId }),
       ]);
       setSaved(true);
+      invalidatePublicSettings();
       onSaved();
     } catch (err) {
       setError(t(errorKey(err)));

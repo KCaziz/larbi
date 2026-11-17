@@ -17,6 +17,11 @@ export class ApiError extends Error {
   }
 }
 
+// Said after every successful write, for what only needs to know that
+// something changed (the count beside « Aujourd'hui », 2026-11-17). Unlike
+// `fin:data-changed`, nobody reloads on it straight away.
+export const WRITE_DONE_EVENT = 'fincludia:write-done';
+
 async function request(path, { method = 'GET', body, signal } = {}) {
   const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
   let response;
@@ -37,6 +42,7 @@ async function request(path, { method = 'GET', body, signal } = {}) {
     throw new ApiError(0, 'Network error');
   }
 
+  if (method !== 'GET' && response.ok && typeof window !== 'undefined') window.dispatchEvent(new Event(WRITE_DONE_EVENT));
   if (response.status === 204) return null;
 
   let data = null;

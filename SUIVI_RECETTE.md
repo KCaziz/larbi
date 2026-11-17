@@ -1084,3 +1084,25 @@ Les remarques de `test.txt` (7e passage) et « quelques idées du client » ont 
 - Reproduit : deuxième étape de `/admin/comparateur` en arabe à 375 px : un intitulé masqué (réservé aux lecteurs d'écran) d'un en-tête de tableau était placé par rapport à la page et non au tableau défilant ; en arabe il finissait 1 px hors de l'écran, et la page défilait de côté.
 - Correction : sur téléphone, un tableau défilant contient aussi ses éléments placés (`.cms-table { position: relative }`). Vérifié : 0 px de débordement sur les deux étapes.
 - Au passage, le balayage confondait deux refus attendus : la réponse « réservé aux majeurs » d'une page (/dettes, /patrimoine) pouvait arriver pendant l'audit de la page suivante sur une machine chargée ; ces refus sont désormais attendus sur toutes les pages de ce compte mineur.
+
+### R15-01 — Mode clair « pas assez changé » (retour du client)
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Origine : retour du client (2026-11-17) : le mode sombre lui plaît, le mode clair doit ressembler davantage à ses maquettes.
+- Correction (mode clair seulement, le sombre est intact) : bandeau d'accueil du site clair, du blanc à la menthe avec une vague et un titre bleu profond ; boutons du bandeau bleu profond. « Inscription » en sarcelle. Tuiles d'icônes sarcelle pleines (titres des écrans, cartes). Fond des applications menthe pâle avec un halo. Cartes de chiffres à liseré sarcelle. En-têtes de tableaux menthe. Périodes, onglets et filtres choisis en menthe. Bandes alternées et bords teintés. Captures de l'accueil (ordinateur, téléphone) refaites. Fichier `client/src/theme/lagoon.css`.
+
+### R15-02 — Navigation : « Trop de requêtes » après une vingtaine de pages
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : test de navigation de la version web (2026-11-17).
+- Reproduit : un visiteur qui parcourt une trentaine de pages publiques se voit refuser les requêtes (429). Le blog en arabe ne charge plus ses articles. Une seule page faisait dix appels : six fois les réglages publics (pied de page, bandeau, maintenance, mesure d'audience…) et les trois listes de l'assistant.
+- Correction : réglages publics et listes de l'assistant chargés une fois et partagés (cinq appels par page au lieu de dix). Limite des lectures publiques portée de 240 à 600 par minute et par adresse : en Algérie, beaucoup de visiteurs partagent la même adresse (opérateurs mobiles, universités).
+
+### R15-03 — Application : chaque écran attendait 0,5 à 2,3 s
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : test de navigation de la version web (2026-11-17), 41 écrans de l'application.
+- Cause 1 : une trentaine de groupes de routes sont montés sur `/fin`, chacun avec sa vérification de session. Une requête relisait donc le compte et la session jusqu'à soixante fois (230 ms pour compter les notifications non lues). La vérification est désormais faite une fois par requête : notifications non lues 230 → 19 ms, parcours 115 → 20 ms, données personnelles 330 → 105 ms.
+- Cause 2 : le nombre affiché à côté d'« Aujourd'hui » recalculait toute la page « Aujourd'hui » (≈ 0,5 s) à chaque changement d'écran. Il est maintenant relu après chaque enregistrement, à l'ouverture d'« Aujourd'hui » et au plus une fois par minute.
+- Résultat : 0,3 à 0,5 s pour la plupart des écrans, 1 à 1,2 s pour ceux qui affichent la synthèse du jour (Accueil, Aujourd'hui, Synthèse, Santé), contre 0,5 à 2,3 s avant. L'administration est entre 0,3 et 0,4 s.
+- Reste signalé : `/app/entreprise`, pour un compte qui n'a pas encore d'entreprise, provoque deux réponses 404 (tableau de bord et documents) ; l'écran s'affiche correctement.

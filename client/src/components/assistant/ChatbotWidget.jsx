@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ChevronRight, Lightbulb, ListTree, MessageCircleQuestion, Search, X } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { ASSISTANT_OPEN_EVENT } from '../../lib/finControls.js';
-import { useApi } from '../../lib/useApi.js';
+import { useSharedApi } from '../../lib/useSharedApi.js';
 import { contentLanguage, textDirection } from '../../lib/contentLanguage.js';
 import RichContent from '../ui/RichContent.jsx';
 import './ChatbotWidget.css';
@@ -29,13 +29,15 @@ function Assistant() {
   const lang = contentLanguage(i18n.language) ?? 'fr';
   // P11-02: inside the application, the application's questions; elsewhere, the site's.
   const audience = pathname.startsWith('/app') ? 'app' : 'site';
-  const entries = useApi(`/chatbot/entries?lang=${lang}&audience=${audience}`);
+  // Fetched once per visit and shared by every page (useSharedApi): they only
+  // change when an administrator publishes.
+  const entries = useSharedApi(`/chatbot/entries?lang=${lang}&audience=${audience}`, { ttl: 300_000 });
   // The deterministic resolver (P3-19) is content of its own: the panel must
   // be reachable when an administrator published intents but no predefined
   // question yet. Without this, the free-text field could never be used.
-  const intents = useApi(`/fin-assistant/intents?lang=${lang}`);
+  const intents = useSharedApi(`/fin-assistant/intents?lang=${lang}`, { ttl: 300_000 });
   // Guided paths an administrator published (R11-03): a question, then the next.
-  const flows = useApi('/fin-assistant/flows');
+  const flows = useSharedApi('/fin-assistant/flows', { ttl: 300_000 });
   const [flow, setFlow] = useState(null); // { flow, stepKey } | { flow, ended: true }
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
