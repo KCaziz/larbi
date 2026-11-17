@@ -32,6 +32,15 @@ export async function checkConsistency(prisma, { privateDir }) {
   const problems = [];
   const add = (rule, rows, describe) => rows.forEach((row) => problems.push(violation(rule, describe(row))));
 
+  // ---- the database itself ---------------------------------------------------
+  // Recette 2026-11-16 (fincludia.com): 74 tables created in latin1 by the host's
+  // default made MariaDB refuse a search with an Arabic word (« Illegal mix of
+  // collations ») — the Accueil and « Aujourd'hui » answered 500.
+  const latin = await prisma.$queryRaw`
+    SELECT TABLE_NAME AS name, TABLE_COLLATION AS collation FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE' AND TABLE_COLLATION NOT LIKE 'utf8mb4%'`;
+  add('every table is in utf8mb4 (Arabic, emoji)', latin, (r) => `table ${r.name} is in ${r.collation}`);
+
   // ---- files <-> rows ------------------------------------------------------
   const media = await prisma.media.findMany({
     select: {
