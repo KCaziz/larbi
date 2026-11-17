@@ -32,9 +32,10 @@ describe('R10-09 / R10-10 — one account, money in and out', () => {
     assert.equal((await post('/fin/transferts', { fromAccountId: main, toAccountId: other, value: 200000, occurredAt: ago(10) })).status, 201);
 
     const flow = (await t.request('GET', `/fin/comptes/${main}/flux`, { user })).body;
-    assert.deepEqual(flow.entrees, { revenus: 800000, virementsRecus: 0, total: 800000 });
+    // R16: opened this month, the account's 50 000 DA are its « revenu initial ».
+    assert.deepEqual(flow.entrees, { soldeInitial: 5000000, revenus: 800000, virementsRecus: 0, total: 5800000 });
     assert.deepEqual(flow.sorties, { depenses: 150000, virementsEnvoyes: 200000, total: 350000 });
-    assert.equal(flow.fluxNet, 450000);
+    assert.equal(flow.fluxNet, 5450000);
     assert.equal(flow.derniers.length, 3);
 
     const history = (await t.request('GET', `/fin/comptes/${main}/historique?jours=10`, { user })).body.points;

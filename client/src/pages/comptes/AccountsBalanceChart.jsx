@@ -46,7 +46,12 @@ export default function AccountsBalanceChart({ accounts, days = null }) {
       points: histories[account.id].points.map((point) => ({
         month: point.month,
         value: point.solde,
-        ...(days ? { label: new Intl.DateTimeFormat(i18n.language === 'tzm' ? 'fr' : i18n.language, { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(`${point.month}T00:00:00Z`)) } : {}),
+        // R16: the point before the account existed is its starting balance.
+        ...(point.depart
+          ? { label: t('accounts.startPoint') }
+          : days
+            ? { label: new Intl.DateTimeFormat(i18n.language === 'tzm' ? 'fr' : i18n.language, { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(`${point.month}T00:00:00Z`)) }
+            : {}),
       })),
     }));
 

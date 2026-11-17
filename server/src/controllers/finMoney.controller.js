@@ -278,9 +278,9 @@ export async function removeReceipt(req, res) {
 
 export async function getSynthesis(req, res) {
   const period = req.query.from ? { start: req.query.from, end: req.query.to } : currentMonth();
-  const { incomes, movements, previous } = await loadSynthesisData(prisma, req.user.id, period, { accountId: req.query.accountId ?? null });
+  const { incomes, movements, previous, openings } = await loadSynthesisData(prisma, req.user.id, period, { accountId: req.query.accountId ?? null });
 
-  const synthesis = buildSynthesis({ incomes, movements, previous, fallbackCurrency: req.user.finCurrency, period });
+  const synthesis = buildSynthesis({ incomes, movements, previous, openings, fallbackCurrency: req.user.finCurrency, period });
 
   // The breakdown carries category ids; the labels are joined here so the
   // interface never has to guess what a category is called.

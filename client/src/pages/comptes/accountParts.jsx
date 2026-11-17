@@ -25,7 +25,7 @@ export function BalanceHistory({ account }) {
     <ul className="accounts-curve" aria-label={t('accounts.balanceCurve')}>
       {points.map((point) => (
         <li key={point.month}>
-          <span className="accounts-curve-month">{point.month}</span>
+          <span className="accounts-curve-month">{point.depart ? t('accounts.startPoint') : point.month}</span>
           <span className="accounts-curve-bar" aria-hidden="true">
             <span style={{ inlineSize: `${(Math.abs(point.solde ?? 0) / max) * 100}%` }} className={point.solde < 0 ? 'negative' : ''} />
           </span>

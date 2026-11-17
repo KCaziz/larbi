@@ -11,6 +11,36 @@ import { computed } from './finance/contract.js';
 import { monthlyAmount, netFlow, savingsRate, totalExpenses, totalIncome } from './finance/formulas.js';
 import { isFictional, isReal } from './finance/dataModel.js';
 import { markedSavingsInPeriod } from './finSavings.service.js';
+import { isLiability } from '../constants/finAccounts.js';
+
+/**
+ * Recette R16 (2026-11-17), the client's rule repeated since the 6th pass:
+ * « tous les calculs se font via le solde initial du compte, puis on rajoute
+ * les revenus et on recalcule ». The money an account holds when it is
+ * created is its « revenu initial »: an income of the period of its opening
+ * date — counted in revenus, the net flow, the savings rate — so a new account
+ * is never « solde 150 000, revenus non calculé ». Later incomes add to it in
+ * their own period. A salary declared « déjà dans le solde de départ » has
+ * already been taken out of the opening balance (R12-03): never twice.
+ * Only real asset accounts counted in the total (or THE account chosen); a
+ * negative opening balance (an overdraft) is a negative revenu initial.
+ */
+export async function openingIncomes(prisma, userId, { from, to, accountId = null, currency = null } = {}) {
+  const rows = await prisma.finAccount.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+      status: { not: 'fictional' },
+      // R16 (2026-11-17, client): a negative starting balance is a negative revenu initial.
+      openingBalance: { not: 0 },
+      ...(from || to ? { openingDate: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } } : {}),
+      ...(accountId ? { id: accountId } : { includeInTotal: true }),
+      ...(currency ? { currency } : {}),
+    },
+    select: { id: true, label: true, type: true, openingBalance: true, openingDate: true, currency: true },
+  });
+  return rows.filter((row) => !isLiability(row.type)).map((row) => ({ accountId: row.id, label: row.label, value: row.openingBalance, currency: row.currency, openingDate: row.openingDate }));
+}
 
 // First and last instant of a month, and of the month before it (the trend).
 const monthRange = (reference) => {
@@ -81,8 +111,8 @@ const totalOrNull = (rows, total, { currency }) => (rows.length === 0 ? null : t
  * rule, and the reason the fictional block is a separate object carrying its
  * own badge rather than a line in the same total.
  */
-export function buildSynthesis({ incomes = [], movements = [], previous = [], fallbackCurrency = 'DZD', period, now = new Date() }) {
-  const resolved = resolveCurrency([...incomes, ...movements], fallbackCurrency);
+export function buildSynthesis({ incomes = [], movements = [], previous = [], openings = [], fallbackCurrency = 'DZD', period, now = new Date() }) {
+  const resolved = resolveCurrency([...incomes, ...movements, ...openings], fallbackCurrency);
   const currency = resolved.currency;
   const warnings = [];
   if (resolved.mixed) {
@@ -120,10 +150,13 @@ export function buildSynthesis({ incomes = [], movements = [], previous = [], fa
   // client's rule is « Σ transactions type=Revenu et statut=Réalisé »: a
   // declared resource is what is EXPECTED, shown beside as `revenusPrevus`,
   // never added to the real.
-  const income = resolved.mixed ? null : totalOrNull(realIncome, totalIncome, { currency });
+  // R16: the « revenu initial » of the accounts opened in the period is income too.
+  const income = resolved.mixed ? null : totalOrNull([...realIncome, ...openings], totalIncome, { currency });
+  const initial = resolved.mixed || openings.length === 0 ? null : totalIncome(asEntries(openings), { currency });
 
   const inputs = {
     periode: period ? { debut: period.start.toISOString(), fin: period.end.toISOString() } : null,
+    revenu_initial: initial,
     ressources_recurrentes: incomes.length,
     mouvements_reels: realised.length,
     mouvements_planifies: planned.length,
@@ -141,6 +174,9 @@ export function buildSynthesis({ incomes = [], movements = [], previous = [], fa
     // PB-F004, PB-F005, PB-F006 — the client's final rules for the three
     // figures of the synthesis (they supersede F002 to F004, P8-01 point 1).
     revenus: answer('PB-F004', income),
+    // R16: the part of `revenus` that is the opening balance of the accounts
+    // opened in the period (null when none was), and which accounts.
+    revenuInitial: initial === null ? null : { montant: initial, comptes: openings.map((row) => ({ id: row.accountId, label: row.label, montant: row.value })) },
     depenses: answer('PB-F005', expenses),
     // Recette R10-12: encaissements − décaissements. With only one side known, the
     // other is zero (spending and no income yet is a negative flow, not unknown).
@@ -191,7 +227,7 @@ export function buildSynthesis({ incomes = [], movements = [], previous = [], fa
 export async function loadSynthesisData(prisma, userId, period, { accountId = null } = {}) {
   const before = previousMonth(period.start);
   const scope = accountId ? { accountId } : { OR: [{ accountId: null }, { account: { includeInTotal: true } }] };
-  const [incomes, movements, previous] = await Promise.all([
+  const [incomes, movements, previous, openings] = await Promise.all([
     // Resources active during the period: one that ended before it started, or
     // starts after it ended, is not part of it.
     accountId ? [] : prisma.finIncome.findMany({
@@ -212,8 +248,9 @@ export async function loadSynthesisData(prisma, userId, period, { accountId = nu
       where: { userId, deletedAt: null, ...scope, occurredAt: { gte: before.start, lte: before.end } },
       select: { kind: true, value: true, currency: true, planned: true, status: true, category: { select: { family: true, group: true, essential: true } } },
     }),
+    openingIncomes(prisma, userId, { from: period.start, to: period.end, accountId }),
   ]);
-  return { incomes, movements, previous };
+  return { incomes, movements, previous, openings };
 }
 
 // Expenses per category, biggest first. Returns the category id; the caller
@@ -274,8 +311,8 @@ export async function stepMoneyHistory(prisma, userId, { step, count = HISTORY_S
 function historyOf(prisma, userId, periods, currency, name) {
   return Promise.all(
     periods.map(async (period) => {
-      const { incomes, movements } = await loadSynthesisData(prisma, userId, period);
-      const synthesis = buildSynthesis({ incomes, movements, previous: [], fallbackCurrency: currency, period });
+      const { incomes, movements, openings } = await loadSynthesisData(prisma, userId, period);
+      const synthesis = buildSynthesis({ incomes, movements, openings, previous: [], fallbackCurrency: currency, period });
       const inCurrency = !synthesis.mixedCurrencies && synthesis.currency === currency;
       // F008 — the net savings of the month over its income, as on the
       // Accueil: nothing set aside on record is « not computed », never 0 %.

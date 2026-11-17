@@ -12,6 +12,7 @@ import {
   SYSTEM_ACCOUNT_TYPES,
   updateAccount,
 } from '../services/finAccount.service.js';
+import { budgetsOfAccount } from '../services/finBudget.service.js';
 
 // Accounts and transfers (P8-03). Every read and write goes through the
 // service with the session's own id: an account is only ever this person's.
@@ -26,7 +27,11 @@ export async function getAccountHistory(req, res) {
 
 // Recette R10-09: in and out of one account, transfers included.
 export async function getAccountFlow(req, res) {
-  res.json(await accountFlow(prisma, req.user.id, req.params.id, { from: req.query.from ?? null, to: req.query.to ?? null }));
+  const flow = await accountFlow(prisma, req.user.id, req.params.id, { from: req.query.from ?? null, to: req.query.to ?? null });
+  // R16: the budgets this account pays, and the envelope each of its expenses is counted in.
+  const account = await prisma.finAccount.findFirst({ where: { id: req.params.id, userId: req.user.id }, select: { id: true, currency: true, includeInTotal: true } });
+  const { budgets, rapprochement } = await budgetsOfAccount(prisma, req.user.id, account);
+  res.json({ ...flow, budgets, derniers: flow.derniers.map((row) => ({ ...row, rapprochement: rapprochement[row.id] ?? null })) });
 }
 
 export async function postAccount(req, res) {

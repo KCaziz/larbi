@@ -85,8 +85,8 @@ export async function getToday(req, res) {
   await generateAlerts(prisma, req.user, { now });
 
   // ---- the money of the month (P6-04) -------------------------------------
-  const { incomes, movements, previous } = await loadSynthesisData(prisma, req.user.id, period);
-  const synthesis = buildSynthesis({ incomes, movements, previous, fallbackCurrency: currency, period, now });
+  const { incomes, movements, previous, openings } = await loadSynthesisData(prisma, req.user.id, period);
+  const synthesis = buildSynthesis({ incomes, movements, previous, openings, fallbackCurrency: currency, period, now });
 
   // ---- the budget of the period (P6-05) -----------------------------------
   const budget = await currentBudget(prisma, req.user.id, now);

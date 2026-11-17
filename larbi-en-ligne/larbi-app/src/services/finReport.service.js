@@ -153,13 +153,20 @@ export async function buildMonthlyReport(prisma, user, { month, now = new Date()
   // R-01 — the summary of the month, and its comparison with the previous one.
   const synthesis = buildSynthesis({ ...data, fallbackCurrency: currency, period, now });
   const before = buildSynthesis({ ...previousData, fallbackCurrency: currency, period: previous, now });
+  // R16: an account opened DURING the month brings its opening balance as
+  // « revenu initial » (in the flux), so it was not there at the start: taken
+  // out of the start balance, solde début + flux net = solde fin still holds.
+  const startTotal = accountsStart.totals.find((total) => total.currency === currency)?.soldeTotal ?? null;
+  const openedInMonth = data.openings.filter((row) => row.currency === currency).reduce((sum, row) => sum + row.value, 0);
+  const soldeDebut = startTotal && startTotal.resultat !== null && openedInMonth !== 0 ? { ...startTotal, resultat: startTotal.resultat - openedInMonth } : startTotal;
   const r01 = {
     revenus: synthesis.revenus,
+    revenuInitial: synthesis.revenuInitial,
     depenses: synthesis.depenses,
     fluxNet: synthesis.fluxNet,
     // R13-03: the balance of the accounts counted in the total, at the start and at the end of
     // the month: the flux is read WITH the money that was already there.
-    soldeDebut: accountsStart.totals.find((total) => total.currency === currency)?.soldeTotal ?? null,
+    soldeDebut,
     soldeFin: accountsEnd.totals.find((total) => total.currency === currency)?.soldeTotal ?? null,
     tendance: {
       revenus: trend(synthesis.revenus.resultat, before.revenus.resultat, { currency, now }),

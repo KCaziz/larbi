@@ -12,9 +12,31 @@ import '../../pages/accueil/Home.css';
 // doubles as the table view and the keyboard path: a click, on the ring or on
 // the legend, filters the movements below.
 const MAX_SLICES = 5;
-const OTHER_COLOR = 'var(--border-strong)';
-// Distinct on both light and dark surfaces, for the slices that have no colour of their own.
-const DISTINCT_COLORS = ['#2563A6', '#16A34A', '#CA8A04', '#DC2626', '#7C3AED', '#0891B2', '#DB2777', '#EA580C'];
+// R16 (2026-11-17): « des couleurs plus marquées, elles ressemblent trop au fond ».
+// The chart colours of index.css (contrast ≥ 3:1 on every surface, light and
+// dark), in their fixed order; « Autres » in a marked grey too.
+const OTHER_COLOR = 'var(--chart-other)';
+const DISTINCT_COLORS = Array.from({ length: 8 }, (_, index) => `var(--chart-${index + 1})`);
+
+// WCAG contrast of a #rrggbb colour against another.
+function luminance(hex) {
+  const [r, g, b] = [1, 3, 5].map((at) => parseInt(hex.slice(at, at + 2), 16) / 255).map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+const contrast = (a, b) => {
+  const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (high + 0.05) / (low + 0.05);
+};
+// A slice's own colour is kept only when it stands out from the page's surface
+// (≥ 3:1): a pale or mint category colour reads as background, and is replaced.
+function marked(color) {
+  if (!color) return false;
+  const value = String(color);
+  if (value.startsWith('var(--chart-')) return true;
+  if (!/^#[0-9a-f]{6}$/i.test(value) || typeof window === 'undefined') return false;
+  const surface = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim();
+  return /^#[0-9a-f]{6}$/i.test(surface) ? contrast(value, surface) >= 3 : true;
+}
 
 // `center` ({ label, value }) replaces the « Total » written in the middle: the
 // net flow is income MINUS spending, never their sum (recette R9-02);
@@ -51,7 +73,7 @@ export default function RingChart({ rows, currency, selected, onSelect, label, c
   const taken = new Set();
   const slices = withOthers.map((slice) => {
     if (slice.other) return slice;
-    const own = slice.color ? String(slice.color).toLowerCase() : null;
+    const own = marked(slice.color) ? String(slice.color).toLowerCase() : null;
     if (own && !taken.has(own)) {
       taken.add(own);
       return slice;
@@ -63,7 +85,7 @@ export default function RingChart({ rows, currency, selected, onSelect, label, c
 
   // A ring of radius 40 in a 100 × 100 box; each slice is an arc of the same
   // circle, separated by a 2-unit gap of the surface.
-  const radius = 40;
+  const radius = 37;
   const circumference = 2 * Math.PI * radius;
   const gap = slices.length > 1 ? 2 : 0;
   let offset = 0;
@@ -78,36 +100,7 @@ export default function RingChart({ rows, currency, selected, onSelect, label, c
 
   return (
     <div className="home-ring">
-      <svg viewBox="0 0 100 100" className="home-ring-svg" role="img" aria-label={label}>
-        <circle cx="50" cy="50" r={radius} fill="none" stroke="var(--bg-alt)" strokeWidth="14" />
-        {arcs.map((arc) => (
-          <circle
-            key={arc.key}
-            cx="50"
-            cy="50"
-            r={radius}
-            fill="none"
-            stroke={arc.color ?? OTHER_COLOR}
-            strokeWidth={selected === arc.key || hover?.key === arc.key ? 16 : 12}
-            strokeDasharray={`${arc.dash} ${circumference - arc.dash}`}
-            strokeDashoffset={-arc.offset}
-            transform="rotate(-90 50 50)"
-            className="home-ring-arc"
-            onMouseEnter={() => setHover(arc)}
-            onMouseLeave={() => setHover(null)}
-            onClick={() => !arc.other && onSelect?.(selected === arc.key ? null : arc.key)}
-          >
-            <title>{`${arc.label} : ${formatAmount(i18n.language, arc.total, currency)} (${share(arc.total)})`}</title>
-          </circle>
-        ))}
-        <text x="50" y="47" textAnchor="middle" className="home-ring-center-label">
-          {focus ? focus.label : (center?.label ?? t('appHome.total'))}
-        </text>
-        <text x="50" y="58" textAnchor="middle" className="home-ring-center-value">
-          {formatAmount(i18n.language, focus ? focus.total : (center ? center.value : total), currency)}
-        </text>
-      </svg>
-
+      {/* R16: the description on the left, the ring, bigger, on the right. */}
       <ul className="home-ring-legend">
         {arcs.map((arc) => (
           <li key={arc.key}>
@@ -130,6 +123,36 @@ export default function RingChart({ rows, currency, selected, onSelect, label, c
           </li>
         ))}
       </ul>
+
+      <svg viewBox="0 0 100 100" className="home-ring-svg" role="img" aria-label={label}>
+        <circle cx="50" cy="50" r={radius} fill="none" stroke="var(--bg-alt)" strokeWidth="18" />
+        {arcs.map((arc) => (
+          <circle
+            key={arc.key}
+            cx="50"
+            cy="50"
+            r={radius}
+            fill="none"
+            stroke={arc.color ?? OTHER_COLOR}
+            strokeWidth={selected === arc.key || hover?.key === arc.key ? 21 : 17}
+            strokeDasharray={`${arc.dash} ${circumference - arc.dash}`}
+            strokeDashoffset={-arc.offset}
+            transform="rotate(-90 50 50)"
+            className="home-ring-arc"
+            onMouseEnter={() => setHover(arc)}
+            onMouseLeave={() => setHover(null)}
+            onClick={() => !arc.other && onSelect?.(selected === arc.key ? null : arc.key)}
+          >
+            <title>{`${arc.label} : ${formatAmount(i18n.language, arc.total, currency)} (${share(arc.total)})`}</title>
+          </circle>
+        ))}
+        <text x="50" y="47" textAnchor="middle" className="home-ring-center-label">
+          {focus ? focus.label : (center?.label ?? t('appHome.total'))}
+        </text>
+        <text x="50" y="58" textAnchor="middle" className="home-ring-center-value">
+          {formatAmount(i18n.language, focus ? focus.total : (center ? center.value : total), currency)}
+        </text>
+      </svg>
     </div>
   );
 }

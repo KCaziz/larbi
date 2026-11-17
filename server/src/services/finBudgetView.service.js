@@ -95,7 +95,6 @@ const fromAccount = (row, accountId) => (accountId ? row.accountId === accountId
 
 export function assignToEnvelopes(movements, envelopes, scope = {}) {
   const budgetAccountId = scope.accountId ?? null;
-  const byId = new Map(envelopes.map((envelope) => [envelope.id, envelope]));
   const byCategory = new Map(envelopes.filter((envelope) => envelope.categoryId).map((envelope) => [envelope.categoryId, envelope.id]));
   const byGroup = new Map(envelopes.filter((envelope) => envelope.categoryGroup).map((envelope) => [envelope.categoryGroup, envelope.id]));
   // An envelope on a main category covers its group (R12-04), unless the group
@@ -103,31 +102,45 @@ export function assignToEnvelopes(movements, envelopes, scope = {}) {
   for (const envelope of envelopes) {
     if (envelope.coversGroup && !byGroup.has(envelope.coversGroup)) byGroup.set(envelope.coversGroup, envelope.id);
   }
+  // R16 (2026-11-17, client): « une même catégorie de dépenses est directement
+  // liée à son enveloppe ». An expense on a category of a group in which the
+  // budget has exactly ONE envelope (typically the main category « Alimentation »
+  // against an envelope « Courses alimentaires ») goes to that envelope.
+  const perGroup = new Map();
+  for (const envelope of envelopes) {
+    if (!envelope.inGroup) continue;
+    perGroup.set(envelope.inGroup, [...(perGroup.get(envelope.inGroup) ?? []), envelope.id]);
+  }
   const spent = new Map(envelopes.map((envelope) => [envelope.id, 0]));
   let outside = 0;
   let outsideCount = 0;
   // R14 (2026-11-15): spent in an envelope's category but from ANOTHER account
   // (typically « Espèces » when no account was chosen): not counted, but said,
   // so a gauge that does not move is explained.
-  let otherAccount = 0;
-  let otherAccountCount = 0;
+  // R16: an envelope takes its category's spending from every account: nothing is left « on another account » any more.
+  const otherAccount = 0;
+  const otherAccountCount = 0;
+  // R16: where each expense went — an envelope's id, 'outside' (no envelope) or
+  // 'otherAccount' — so a movement can say which envelope it is counted in.
+  const byMovement = new Map();
   for (const row of movements) {
     // `scope.planned`: the expenses still to come (R13-04, « engagé »), instead of the realised ones.
     if (scope.planned ? row.kind !== 'expense' || !row.planned || row.status === 'fictional' : row.kind !== 'expense' || row.planned || !isReal(row)) continue;
-    const target = byCategory.get(row.categoryId ?? null) ?? byGroup.get(row.category?.group ?? null) ?? null;
+    const single = perGroup.get(row.category?.group ?? null);
+    const target = byCategory.get(row.categoryId ?? null) ?? byGroup.get(row.category?.group ?? null) ?? (single?.length === 1 ? single[0] : null);
     if (target) {
-      // Spent from another account than this envelope's: it is not its spending.
-      if (fromAccount(row, byId.get(target).accountId ?? budgetAccountId)) spent.set(target, spent.get(target) + row.value);
-      else {
-        otherAccount += row.value;
-        otherAccountCount += 1;
-      }
+      // R16 (2026-11-17, client): the category decides — an expense of the
+      // envelope's category is deducted from it whatever account paid it
+      // (R14 used to leave it out when it came from another account).
+      spent.set(target, spent.get(target) + row.value);
+      byMovement.set(row.id, target);
     } else if ((!row.category || row.category.family !== 'goal') && fromAccount(row, budgetAccountId)) {
       outside += row.value;
       outsideCount += 1;
+      byMovement.set(row.id, 'outside');
     }
   }
-  return { spent, outside: outsideCount === 0 ? null : outside, otherAccount: otherAccountCount === 0 ? null : { montant: otherAccount, nombre: otherAccountCount } };
+  return { spent, byMovement, outside: outsideCount === 0 ? null : outside, otherAccount: otherAccountCount === 0 ? null : { montant: otherAccount, nombre: otherAccountCount } };
 }
 
 /**
@@ -270,7 +283,8 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
   // R13-01: only what left the budget's account(s) — or an envelope's own account — is its spending.
   const envelopeAccounts = new Set(envelopes.map((envelope) => envelope.accountId).filter(Boolean));
   const counted = inCurrency(movements).filter(
-    (row) => !row.planned && isReal(row) && !isSavingsMovement(row) && (fromAccount(row, budgetAccountId) || envelopeAccounts.has(row.accountId)),
+    // R16: an expense deducted from an envelope is the budget's spending too, whatever its account.
+    (row) => !row.planned && isReal(row) && !isSavingsMovement(row) && (fromAccount(row, budgetAccountId) || envelopeAccounts.has(row.accountId) || (row.kind === 'expense' && assigned.byMovement.has(row.id) && assigned.byMovement.get(row.id) !== 'outside')),
   );
   const realExpenseRows = counted.filter((row) => row.kind === 'expense');
   const realIncomeRows = counted.filter((row) => row.kind === 'income');

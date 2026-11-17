@@ -67,7 +67,9 @@ describe('R12-03 — a payment already in the starting balance counts in its mon
     assert.equal(row.solde.resultat, 15000000, 'the balance does not move');
     assert.equal(row.openingBalance, 7000000, 'the starting balance is what it was before the salary');
     const kpis = (await t.request('GET', '/fin/aujourdhui', { user: who })).body.aujourdhui.kpis;
-    assert.equal(kpis.find((k) => k.key === 'netFlow').answer.resultat, 8000000, 'the salary counts in the month');
+    // R16: revenu initial (70 000, the opening balance before the salary) + the salary
+    // (80 000): the 150 000 the account holds, each counted once.
+    assert.equal(kpis.find((k) => k.key === 'netFlow').answer.resultat, 15000000, 'the salary counts in the month, never twice');
     const again = await t.request('POST', '/fin/calendrier/occurrences', { user: who, json: { recurrenceId: recurrence.id, dueDate: new Date(`${event.dueDate}T00:00:00.000Z`).toISOString(), action: 'included' } });
     assert.equal(again.status, 409, 'never twice');
   });

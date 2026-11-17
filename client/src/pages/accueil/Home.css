@@ -109,21 +109,30 @@
   gap: var(--space-md);
   min-inline-size: 0;
 }
+/* R16 (2026-11-17): the ring bigger, on the right; the description on its left
+   (mirrored in Arabic). On a phone, the ring above its description. */
 .home-ring-svg {
-  inline-size: min(220px, 70vw);
+  inline-size: min(320px, 80vw);
   block-size: auto;
   flex: none;
+  margin-inline-start: auto;
+}
+@media (max-width: 640px) {
+  .home-ring-svg {
+    order: -1;
+    margin-inline: auto;
+  }
 }
 .home-ring-arc {
   cursor: pointer;
   transition: stroke-width 120ms ease;
 }
 .home-ring-center-label {
-  font-size: 6px;
+  font-size: 5.5px;
   fill: var(--text);
 }
 .home-ring-center-value {
-  font-size: 7px;
+  font-size: 6px;
   font-weight: 700;
   fill: var(--text-h);
 }

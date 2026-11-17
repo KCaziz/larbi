@@ -43,6 +43,8 @@ export async function getHome(req, res) {
   // same rule as PB-F004 (money taken back from savings is not income).
   const incomeRows = synthesisData.movements.filter((row) => row.kind === 'income' && !row.planned && isReal(row) && !isSavingsMovement(row) && row.currency === synthesis.currency);
   const incomeBreakdown = synthesis.mixedCurrencies ? [] : breakdown(incomeRows);
+  // R16: the « revenu initial » (opening balance of the accounts opened in the period) is a slice of its own.
+  if (synthesis.revenuInitial?.montant > 0) incomeBreakdown.unshift({ categoryId: null, total: synthesis.revenuInitial.montant, initial: true });
 
   // Category labels, icons and colours, joined once for both breakdowns.
   const declared = synthesisData.incomes.filter((row) => !row.archivedAt && row.currency === synthesis.currency);
@@ -122,6 +124,7 @@ export async function getHome(req, res) {
     synthese: {
       currency: synthesis.currency,
       revenus: synthesis.revenus,
+      revenuInitial: synthesis.revenuInitial,
       depenses: synthesis.depenses,
       fluxNet: synthesis.fluxNet,
       revenusPrevus: synthesis.revenusPrevus,

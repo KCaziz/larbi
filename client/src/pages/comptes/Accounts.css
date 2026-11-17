@@ -230,6 +230,48 @@
   }
 }
 
+/* R16 : revenu initial, budgets du compte, rapprochement des dépenses. */
+.accounts-initial {
+  font-weight: 600;
+}
+.accounts-budget {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+.accounts-budget-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  margin: 0 0 0.5rem;
+}
+.accounts-budget-total {
+  margin-inline-start: auto;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.accounts-match {
+  display: inline-block;
+  margin-inline-start: 0.5rem;
+  padding: 0 0.5rem;
+  border-radius: 999px;
+  font-size: 0.8em;
+  font-style: normal;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.accounts-match-envelope {
+  border-color: var(--brass);
+  background: var(--brass-bg);
+}
+.accounts-match-outside,
+.accounts-match-otherAccount {
+  border-style: dashed;
+}
+
 /* Recette R10-08 */
 .accounts-danger {
   color: var(--danger);

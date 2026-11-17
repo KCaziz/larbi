@@ -38,10 +38,10 @@
   stroke: none;
   opacity: 0.12;
 }
-.chart-series.chart-tone-0 { color: var(--accent); }
-.chart-series.chart-tone-1 { color: var(--green); }
-.chart-series.chart-tone-2 { color: var(--clay); }
-.chart-series.chart-tone-3 { color: var(--warn); }
+.chart-series.chart-tone-0 { color: var(--chart-1); }
+.chart-series.chart-tone-1 { color: var(--chart-4); }
+.chart-series.chart-tone-2 { color: var(--chart-2); }
+.chart-series.chart-tone-3 { color: var(--chart-8); }
 .chart-svg .chart-series {
   background: none;
   fill: currentColor;
@@ -117,26 +117,26 @@
   block-size: 4px;
   border-radius: 2px;
 }
-/* Series tones, in order: blue, green, clay, amber. */
+/* Series tones, in order (R16, marked colours of index.css): blue, green, orange, raspberry. */
 .chart-tone-0 {
-  stroke: var(--accent);
-  background: var(--accent);
-  fill: var(--accent);
+  stroke: var(--chart-1);
+  background: var(--chart-1);
+  fill: var(--chart-1);
 }
 .chart-tone-1 {
-  stroke: var(--green);
-  background: var(--green);
-  fill: var(--green);
+  stroke: var(--chart-4);
+  background: var(--chart-4);
+  fill: var(--chart-4);
 }
 .chart-tone-2 {
-  stroke: var(--clay);
-  background: var(--clay);
-  fill: var(--clay);
+  stroke: var(--chart-2);
+  background: var(--chart-2);
+  fill: var(--chart-2);
 }
 .chart-tone-3 {
-  stroke: var(--warn);
-  background: var(--warn);
-  fill: var(--warn);
+  stroke: var(--chart-8);
+  background: var(--chart-8);
+  fill: var(--chart-8);
 }
 .chart-details {
   margin-block-start: 8px;
@@ -196,10 +196,10 @@
   border-end-end-radius: 5px;
 }
 .chart-bar-tone-0 {
-  background: var(--accent);
+  background: var(--chart-1);
 }
 .chart-bar-tone-1 {
-  background: var(--green);
+  background: var(--chart-4);
 }
 .chart-bar-value {
   font-size: 0.85rem;
@@ -255,9 +255,9 @@
 }
 .chart-bar-pos {
   inset-inline-start: 50%;
-  background: var(--green);
+  background: var(--chart-4);
 }
 .chart-bar-neg {
   inset-inline-end: 50%;
-  background: var(--clay);
+  background: var(--chart-2);
 }

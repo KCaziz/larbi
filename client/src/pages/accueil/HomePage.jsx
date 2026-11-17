@@ -67,7 +67,8 @@ export default function HomePage() {
     }
     if (ringTab === 'expenses') params.set('kind', 'expense');
     if (ringTab === 'income') params.set('kind', 'income');
-    if (slice && (ringTab === 'expenses' || ringTab === 'income')) params.set(slice === 'none' ? 'uncategorised' : 'categoryId', slice === 'none' ? 'true' : slice);
+    // R16: the « revenu initial » slice is no movement: nothing to filter.
+    if (slice && slice !== 'initial' && (ringTab === 'expenses' || ringTab === 'income')) params.set(slice === 'none' ? 'uncategorised' : 'categoryId', slice === 'none' ? 'true' : slice);
     if (slice && ringTab === 'accounts') params.set('accountId', slice);
     if (oneAccount) params.set('accountId', oneAccount);
     else if (!params.has('accountId')) params.set('inTotal', 'true');
@@ -97,10 +98,14 @@ export default function HomePage() {
       .filter((account) => !account.liability && account.solde.resultat > 0 && (oneAccount ? account.id === oneAccount : account.includeInTotal))
       .map((account) => ({ key: account.id, label: account.label, icon: account.icon, color: account.color, total: account.solde.resultat })),
     expenses: synthese.depensesParCategorie.map((row) => ({ key: row.categoryId ?? 'none', label: row.label ?? t('myMoney.noCategory'), icon: row.icon, color: row.color, total: row.total })),
-    income: synthese.revenusParCategorie.map((row) => ({ key: row.categoryId ?? 'none', label: row.label ?? t('myMoney.noCategory'), icon: row.icon, color: row.color, total: row.total })),
+    income: synthese.revenusParCategorie.map((row) =>
+      row.initial
+        ? { key: 'initial', label: t('appHome.initialIncome'), icon: null, color: null, total: row.total }
+        : { key: row.categoryId ?? 'none', label: row.label ?? t('myMoney.noCategory'), icon: row.icon, color: row.color, total: row.total },
+    ),
     flow: [
-      { key: 'in', label: t('appHome.receivedIncome'), color: 'var(--green)', total: synthese.revenus.resultat ?? 0 },
-      { key: 'out', label: t('appHome.paidExpenses'), color: 'var(--clay)', total: synthese.depenses.resultat ?? 0 },
+      { key: 'in', label: t('appHome.receivedIncome'), color: 'var(--chart-4)', total: synthese.revenus.resultat ?? 0 },
+      { key: 'out', label: t('appHome.paidExpenses'), color: 'var(--chart-2)', total: synthese.depenses.resultat ?? 0 },
     ],
   }[ringTab];
 
@@ -170,6 +175,8 @@ export default function HomePage() {
 
         <div className="fin-figure-grid">
           <FigureCard label={t('movements.tabs.income')} answer={synthese.revenus}>
+            {/* R16: the part of the income that is the starting balance of an account opened in the period. */}
+            {!!synthese.revenuInitial?.montant && <p className="fin-hint">{t('appHome.initialIncomeHint', { amount: formatAmount(i18n.language, synthese.revenuInitial.montant, currency) })}</p>}
             {/* Recette R10-05: what is still expected this period, to confirm on arrival. */}
             {synthese.revenusAttendus?.count > 0 && (
               <p className="fin-hint">

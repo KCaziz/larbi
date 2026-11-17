@@ -50,6 +50,18 @@
   --flow-expense: #2f5d8c;
   --flow-transfer: #6b4fa0;
   --flow-savings: #9a6700;
+  /* R16 (2026-11-17): chart colours, marked enough to stand out from the mint
+     backgrounds (contrast ≥ 3:1 on every surface), in a fixed order chosen so
+     two neighbouring slices stay distinct for colour-blind readers too. */
+  --chart-1: #0B63CE;
+  --chart-2: #E8590C;
+  --chart-3: #0E7490;
+  --chart-4: #0E9F6E;
+  --chart-5: #57606A;
+  --chart-6: #B7791F;
+  --chart-7: #7048E8;
+  --chart-8: #C2255C;
+  --chart-other: #8593A3;
 
   /* Dark band (footer, CTA, auth panel) */
   --band-bg: #102A43;
@@ -146,6 +158,15 @@
     --flow-expense: #8db8e8;
     --flow-transfer: #b9a3e8;
     --flow-savings: #f0c060;
+    --chart-1: #5AA2FF;
+    --chart-2: #FF8A3D;
+    --chart-3: #22D3EE;
+    --chart-4: #34D399;
+    --chart-5: #A0AEC0;
+    --chart-6: #FBBF24;
+    --chart-7: #A78BFA;
+    --chart-8: #F472B6;
+    --chart-other: #7A8CA0;
     --band-bg: #071726;
     --band-text: #8ea6bb;
     --band-heading: #f2fbfc;
@@ -187,6 +208,15 @@
   --flow-expense: #8db8e8;
   --flow-transfer: #b9a3e8;
   --flow-savings: #f0c060;
+  --chart-1: #5AA2FF;
+  --chart-2: #FF8A3D;
+  --chart-3: #22D3EE;
+  --chart-4: #34D399;
+  --chart-5: #A0AEC0;
+  --chart-6: #FBBF24;
+  --chart-7: #A78BFA;
+  --chart-8: #F472B6;
+  --chart-other: #7A8CA0;
   --band-bg: #071726;
   --band-text: #8ea6bb;
   --band-heading: #f2fbfc;

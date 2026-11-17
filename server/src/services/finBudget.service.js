@@ -8,7 +8,7 @@
 // found".
 
 import { REFERENCE_CATEGORIES } from '../constants/finCategoryReference.js';
-import { buildBudgetView } from './finBudgetView.service.js';
+import { assignToEnvelopes, buildBudgetView } from './finBudgetView.service.js';
 import { BUDGET_RECURRENCES, DEFAULT_ALERT_THRESHOLDS, ENVELOPE_KINDS } from '../constants/finBudget.js';
 import { HttpError } from '../utils/httpError.js';
 import { recordChange, recordCorrection } from './finChange.service.js';
@@ -490,10 +490,16 @@ export async function deleteEnvelope(prisma, userId, budgetId, id, { reason } = 
 async function withMainCategoryGroups(prisma, envelopes) {
   const ids = [...new Set(envelopes.map((envelope) => envelope.categoryId).filter(Boolean))];
   if (ids.length === 0) return envelopes;
-  const mains = await prisma.finCategory.findMany({ where: { id: { in: ids }, key: { startsWith: 'main.' }, group: { not: null } }, select: { id: true, group: true } });
-  if (mains.length === 0) return envelopes;
-  const groupOf = new Map(mains.map((category) => [category.id, category.group]));
-  return envelopes.map((envelope) => (groupOf.has(envelope.categoryId) ? { ...envelope, coversGroup: groupOf.get(envelope.categoryId) } : envelope));
+  const categories = await prisma.finCategory.findMany({ where: { id: { in: ids }, group: { not: null } }, select: { id: true, key: true, group: true } });
+  if (categories.length === 0) return envelopes;
+  const byId = new Map(categories.map((category) => [category.id, category]));
+  return envelopes.map((envelope) => {
+    const category = byId.get(envelope.categoryId);
+    if (!category) return envelope;
+    // `inGroup` (R16): the group of the envelope's category, so an expense on another
+    // category of that group can reach it when it is the group's only envelope.
+    return { ...envelope, inGroup: category.group, ...(category.key?.startsWith('main.') ? { coversGroup: category.group } : {}) };
+  });
 }
 
 // The balance, in the budget's currency, the account(s) it is spent from held the
@@ -608,6 +614,62 @@ async function carryFromPrevious(prisma, userId, budget) {
 }
 
 // Every live budget whose period contains `at` (R11-10: there may be several).
+/**
+ * Recette R16 (2026-11-17): « les budgets liés à ce compte ne s'affichent même
+ * pas et les dépenses rattachées aux budgets ne sont pas rapprochées ». The
+ * current budgets that follow ONE account — tied to it, with an envelope tied
+ * to it, or on the total balance when the account is in it — each with its
+ * envelopes (planned, spent, rate), and for each expense of the account which
+ * envelope it is counted in (`rapprochement`: movement id → { budgetId,
+ * envelopeId | null, statut: 'envelope' | 'outside' | 'otherAccount' }).
+ */
+export async function budgetsOfAccount(prisma, userId, account, now = new Date()) {
+  const rows = await currentBudgets(prisma, userId, now);
+  const budgets = [];
+  const rapprochement = {};
+  for (const budget of rows) {
+    if (budget.currency !== account.currency) continue;
+    const data = await loadBudgetData(prisma, userId, budget);
+    const tied = budget.accountId === account.id || data.envelopes.some((envelope) => envelope.accountId === account.id);
+    const onTotal = !budget.accountId && account.includeInTotal;
+    if (!tied && !onTotal) continue;
+    const view = buildBudgetView({ budget, ...data, now });
+    const ids = view.enveloppes.map((line) => line.categoryId).filter(Boolean);
+    const labels = new Map((await prisma.finCategory.findMany({ where: { id: { in: ids } }, select: { id: true, label: true } })).map((row) => [row.id, row.label]));
+    // The envelopes this account pays: its own, or the budget's when they follow it.
+    const lines = view.enveloppes.filter((line) => {
+      const from = line.accountId ?? budget.accountId ?? null;
+      return from === account.id || (from === null && account.includeInTotal);
+    });
+    budgets.push({
+      id: budget.id,
+      label: budget.label,
+      accountId: budget.accountId ?? null,
+      totalPrevu: view.totalPrevu,
+      totalReel: view.totalReel,
+      enveloppes: lines.map((line) => ({ id: line.id, label: line.categoryGroup ?? labels.get(line.categoryId) ?? null, prevu: line.prevu, reel: line.reel, taux: line.tauxConsommation, alerte: line.alerte.niveau })),
+    });
+    const { byMovement } = assignToEnvelopes(
+      data.movements.filter((row) => row.currency === budget.currency && row.accountId === account.id),
+      data.envelopes,
+      { accountId: budget.accountId ?? null },
+    );
+    for (const [movementId, target] of byMovement) {
+      // A movement counted in an envelope of one budget is not overwritten by another budget's « outside ».
+      if (rapprochement[movementId]?.statut === 'envelope') continue;
+      const envelope = target === 'outside' || target === 'otherAccount' ? null : lines.find((line) => line.id === target) ?? view.enveloppes.find((line) => line.id === target);
+      rapprochement[movementId] = {
+        budgetId: budget.id,
+        budget: budget.label,
+        envelopeId: envelope?.id ?? null,
+        enveloppe: envelope ? envelope.categoryGroup ?? labels.get(envelope.categoryId) ?? null : null,
+        statut: envelope ? 'envelope' : target,
+      };
+    }
+  }
+  return { budgets, rapprochement };
+}
+
 export function currentBudgets(prisma, userId, at = new Date()) {
   const today = new Date(Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), at.getUTCDate()));
   return prisma.finBudget.findMany({

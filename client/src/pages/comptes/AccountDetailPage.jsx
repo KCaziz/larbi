@@ -14,6 +14,7 @@ import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import { BalanceHistory } from './accountParts.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Accounts.css';
+import '../accueil/Home.css';
 import CounterValue from '../../components/fincludia/CounterValue.jsx';
 
 // COM-03, « Détail compte », at its own address (P8-25): `/app/comptes/:id`.
@@ -39,9 +40,12 @@ function FlowExplained({ flow, t, language }) {
   const money = (value) => formatAmount(language, value, flow.account.currency);
   return (
     <div className="accounts-explain">
+      {/* R16: the opening balance is the « revenu initial » of the account's first month. */}
+      {flow.entrees.soldeInitial !== 0 && <p className="accounts-initial">{t('accounts.initialIncome', { amount: money(flow.entrees.soldeInitial) })}</p>}
       <p>
         {t('accounts.flowHow', {
           inTotal: money(flow.entrees.total),
+          initial: money(flow.entrees.soldeInitial ?? 0),
           income: money(flow.entrees.revenus),
           transfersIn: money(flow.entrees.virementsRecus),
           outTotal: money(flow.sorties.total),
@@ -67,13 +71,73 @@ function LastMovements({ flow, t, language }) {
             {t(`accounts.kinds.${row.kind}`)}
             {row.planned ? ` · ${t('accounts.plannedTag')}` : ''}
           </span>
-          <span className="accounts-last-note">{row.note ?? ''}</span>
+          <span className="accounts-last-note">
+            {row.note ?? ''}
+            {/* R16: the envelope the expense is counted in, or « hors budget ». */}
+            {row.rapprochement && (
+              <span className={`accounts-match accounts-match-${row.rapprochement.statut}`}>
+                {row.rapprochement.statut === 'envelope'
+                  ? t('accounts.matchEnvelope', { budget: row.rapprochement.budget, envelope: row.rapprochement.enveloppe ?? t('budget.noCategory') })
+                  : t(`accounts.match.${row.rapprochement.statut}`, { budget: row.rapprochement.budget })}
+              </span>
+            )}
+          </span>
           <strong>
             {sign(row.kind)} {formatAmount(language, row.value, flow.account.currency)}
           </strong>
         </li>
       ))}
     </ul>
+  );
+}
+
+// R16 (2026-11-17): « les budgets liés à ce compte ne s'affichent même pas ».
+// The current budgets that follow this account — tied to it, or on the total
+// balance it is part of — with each envelope it pays: planned, spent, rate.
+function AccountBudgets({ flow, t, language, accountId }) {
+  const money = (value) => formatAmount(language, value, flow.account.currency);
+  return (
+    <section aria-labelledby="account-budgets">
+      <h2 id="account-budgets" className="accounts-section-title">
+        {t('accounts.budgetsTitle')}
+      </h2>
+      {flow.budgets.length === 0 ? (
+        <p className="fin-hint">
+          {t('accounts.noBudget')} <Link to="/app/budgets/nouveau">{t('accounts.createBudget')}</Link>
+        </p>
+      ) : (
+        flow.budgets.map((budget) => (
+          <div key={budget.id} className="accounts-budget">
+            <p className="accounts-budget-head">
+              <Link to={`/app/budgets/${budget.id}`}>{budget.label}</Link>
+              <span className="fin-hint">{budget.accountId === accountId ? t('accounts.budgetTied') : t('accounts.budgetOnTotal')}</span>
+              {budget.totalPrevu.resultat !== null && (
+                <span className="accounts-budget-total">
+                  {money(budget.totalReel.resultat ?? 0)} / {money(budget.totalPrevu.resultat)}
+                </span>
+              )}
+            </p>
+            {budget.enveloppes.length === 0 ? (
+              <p className="fin-hint">{t('accounts.noEnvelope')}</p>
+            ) : (
+              <ul className="home-budget-lines">
+                {budget.enveloppes.map((line) => (
+                  <li key={line.id}>
+                    <span>{line.label ?? t('budget.noCategory')}</span>
+                    <span className="home-meter" aria-hidden="true">
+                      <span style={{ inlineSize: `${Math.min(100, Math.round((line.taux.resultat ?? 0) * 100))}%` }} className={line.alerte === 'exceeded' ? 'over' : ''} />
+                    </span>
+                    <span className="home-budget-rate">
+                      {money(line.reel ?? 0)} / {money(line.prevu)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))
+      )}
+    </section>
   );
 }
 
@@ -150,6 +214,9 @@ export default function AccountDetailPage() {
         )}
 
         {!account.liability && <AccountsBalanceChart accounts={[account]} days={30} />}
+
+        {/* R16: the budgets this account pays, with their envelopes. */}
+        {flow.data && <AccountBudgets flow={flow.data} t={t} language={i18n.language} accountId={account.id} />}
 
         <h2 className="accounts-section-title">{t('accounts.lastMovements')}</h2>
         {flow.data && <LastMovements flow={flow.data} t={t} language={i18n.language} />}

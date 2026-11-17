@@ -9,6 +9,7 @@ import { goalsWithCapital } from './finGoal.service.js';
 import { ONBOARDING_QUESTIONS } from '../constants/finOnboarding.js';
 import { HttpError } from '../utils/httpError.js';
 import { essentialCategoryIds } from './finCategory.service.js';
+import { openingIncomes } from './finSynthesis.service.js';
 import { computed } from './finance/contract.js';
 import { livingAllowance, monthlyAmount, safetyFundGap, safetyFundMonths, safetyFundTarget } from './finance/formulas.js';
 
@@ -197,7 +198,15 @@ export async function livingAllowanceOf(prisma, userId, currency, now = new Date
     where: { userId, deletedAt: null, archivedAt: null, currency, status: { not: 'fictional' } },
     select: { value: true, frequency: true },
   });
-  const netIncome = incomes.length === 0 ? null : incomes.reduce((sum, row) => sum + (monthlyAmount(row.value, row.frequency) ?? 0), 0);
+  let netIncome = incomes.length === 0 ? null : incomes.reduce((sum, row) => sum + (monthlyAmount(row.value, row.frequency) ?? 0), 0);
+  // R16 (the client's rule): no income declared yet → computed from the
+  // « revenu initial », the opening balance of the accounts counted in the
+  // total; the declared incomes replace it as soon as there is one.
+  let incomeSource = netIncome === null ? null : 'declared';
+  if (netIncome === null) {
+    const initial = (await openingIncomes(prisma, userId, { currency })).reduce((sum, row) => sum + row.value, 0);
+    if (initial !== 0) [netIncome, incomeSource] = [initial, 'initial'];
+  }
 
   // Fixed charges: the real spending on the client's « charges fixes »
   // categories, averaged over the whole months the history covers (1 to 3).
@@ -232,11 +241,12 @@ export async function livingAllowanceOf(prisma, userId, currency, now = new Date
   const inputs = { revenus_nets_mensuels: netIncome, charges_fixes_mensuelles: fixedCharges, mensualites: instalments, mois_historique: months };
   const warnings = [];
   if (netIncome === null) warnings.push('Aucun revenu déclaré : le reste à vivre n’est pas encore calculé.');
+  if (incomeSource === 'initial') warnings.push('Aucun revenu déclaré : le reste à vivre part de votre revenu initial (le solde de départ de vos comptes). Il sera recalculé dès que vous déclarez vos revenus.');
   if (fixedCharges === null) warnings.push('Moins d’un mois de dépenses enregistrées et ni estimation ni budget : les charges fixes ne sont pas encore connues.');
   if (fixedSource === 'declared') warnings.push('Moins d’un mois de dépenses enregistrées : les charges fixes viennent de votre estimation.');
   if (fixedSource === 'budget') warnings.push('Moins d’un mois de dépenses enregistrées : les charges fixes viennent des enveloppes de votre budget.');
   const result = netIncome === null || fixedCharges === null ? null : livingAllowance({ netIncome, fixedCharges, mandatoryInstalments: instalments });
-  return { answer: computed('F006', result, { inputs, currency, warnings, now }), netIncome, fixedCharges, fixedSource, instalments };
+  return { answer: computed('F006', result, { inputs, currency, warnings, now }), netIncome, incomeSource, fixedCharges, fixedSource, instalments };
 }
 
 export async function buildReserveView(prisma, userId, { currency, targetMonths, now = new Date(), accountId = null } = {}) {

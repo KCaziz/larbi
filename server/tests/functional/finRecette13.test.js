@@ -49,8 +49,10 @@ describe('R13-01 — the account a budget is spent from', () => {
     await s.post('/transactions', { kind: 'expense', value: 300000, currency: 'DZD', occurredAt: spendDate(), accountId: s.courant.id, categoryId: s.food });
     await s.post('/transactions', { kind: 'expense', value: 100000, currency: 'DZD', occurredAt: spendDate(), accountId: s.second.id, categoryId: s.food });
     const view = (await s.get(`/budgets/${budget.id}`)).body.vue;
-    assert.equal(view.enveloppes[0].reel, 100000, 'only the card’s spending is in the envelope');
-    assert.equal(view.totalReel.resultat, 100000, 'and in the budget’s total');
+    // R16 (2026-11-17, the client): « une même catégorie de dépenses est directement liée à
+    // son enveloppe » — the category decides, whatever account paid (was: only the card's 1 000 DA).
+    assert.equal(view.enveloppes[0].reel, 400000, 'every expense of the category is in the envelope');
+    assert.equal(view.totalReel.resultat, 400000, 'and in the budget’s total');
   });
 
   test('« tous » (no account) counts the accounts of the total balance, as before', async () => {
@@ -83,7 +85,8 @@ describe('R13-01 — the account a budget is spent from', () => {
     const lines = (await s.get(`/budgets/${budget.id}`)).body.vue.enveloppes;
     const byCategory = (id) => lines.find((line) => line.categoryId === id);
     assert.equal(byCategory(s.food).reel, 300000);
-    assert.equal(byCategory(s.transport).reel, 90000, 'the transport envelope reads its own account, not the budget’s');
+    // R16: the category decides — both transport expenses, whatever account paid them.
+    assert.equal(byCategory(s.transport).reel, 160000, 'the transport envelope takes its category’s spending');
     assert.equal(byCategory(s.transport).accountId, s.second.id);
   });
 

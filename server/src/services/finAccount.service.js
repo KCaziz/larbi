@@ -299,13 +299,26 @@ export async function accountBalanceHistory(prisma, userId, id, { months = 6, da
     where: { userId, accountId: id, deletedAt: null, status: 'real', planned: false, occurredAt: { lte: now } },
     select: { kind: true, value: true, occurredAt: true },
   });
-  const points = ends.map((end) => {
+  // R16 (2026-11-17, « l'évolution des soldes ne marche pas »): the curve starts
+  // when the account's money starts — its opening date, or an earlier movement
+  // entered on it (an account created today for a month already under way).
+  const firstMovement = rows.reduce((first, row) => (first === null || row.occurredAt < first ? row.occurredAt : first), null);
+  const start = firstMovement && firstMovement < account.openingDate ? firstMovement : account.openingDate;
+  const balanceAt = (end) => {
     const before = rows.filter((row) => row.occurredAt <= end);
     const groups = Object.entries(
       before.reduce((acc, row) => ({ ...acc, [row.kind]: (acc[row.kind] ?? 0) + row.value }), {}),
     ).map(([kind, value]) => ({ kind, _sum: { value } }));
-    // Before the opening date the account did not exist: no point, not 0.
-    return { month: end.toISOString().slice(0, days ? 10 : 7), solde: end < account.openingDate ? null : accountBalance(account, groups) };
+    return accountBalance(account, groups);
+  };
+  const lastBefore = ends.reduce((found, end, index) => (end < start ? index : found), -1);
+  const points = ends.map((end, index) => {
+    const month = end.toISOString().slice(0, days ? 10 : 7);
+    // The point just before the account existed is its starting balance (`depart`),
+    // so even an account opened today draws a line from where it started; earlier
+    // points stay empty (the account did not exist: no point, not 0).
+    if (end < start) return index === lastBefore ? { month, solde: account.openingBalance, depart: true } : { month, solde: null };
+    return { month, solde: balanceAt(end) };
   });
   return { account: { id: account.id, label: account.label, currency: account.currency }, points };
 }
@@ -414,7 +427,11 @@ export async function accountFlow(prisma, userId, id, { from = null, to = null, 
   const virementsRecus = sum('transfer_in');
   const depenses = sum('expense');
   const virementsEnvoyes = sum('transfer_out');
-  const entrees = revenus + virementsRecus;
+  // R16: opened in this period, the account's opening balance is its « revenu
+  // initial » — what it brought in, so its first month is never « 0 entrée ».
+  const soldeInitial =
+    !isLiability(account.type) && account.openingBalance !== 0 && account.openingDate >= start && account.openingDate <= end && account.openingDate <= now ? account.openingBalance : 0;
+  const entrees = soldeInitial + revenus + virementsRecus;
   const sorties = depenses + virementsEnvoyes;
   // A liability (card, loan) reads the other way round, like its balance.
   const fluxNet = isLiability(account.type) ? sorties - entrees : entrees - sorties;
@@ -422,7 +439,7 @@ export async function accountFlow(prisma, userId, id, { from = null, to = null, 
   return {
     account: { id: account.id, label: account.label, currency: account.currency },
     periode: { debut: start, fin: end },
-    entrees: { revenus, virementsRecus, total: entrees },
+    entrees: { soldeInitial, revenus, virementsRecus, total: entrees },
     sorties: { depenses, virementsEnvoyes, total: sorties },
     fluxNet,
     mouvementsReels: real.length,

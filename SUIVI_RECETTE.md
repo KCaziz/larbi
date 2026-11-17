@@ -31,7 +31,8 @@ Priorités : `🔴 high` (bloque l'utilisation) · `🟡 medium` (gêne réelle)
 | R12 — Sixième passage (2026-11-12) | 4 | 4 |
 | R13 — Septième passage (2026-11-12) | 7 | 7 |
 | R14 — Huitième passage (2026-11-15) | 1 | 1 |
-| **Total** | **121** | **120** |
+| R16 — Neuvième passage (2026-11-17) | 6 | 6 |
+| **Total** | **127** | **126** |
 
 R9 : reste R9-18 (fiche de paie), aucun défaut reproduit, à préciser avec le client.
 
@@ -1106,3 +1107,60 @@ Les remarques de `test.txt` (7e passage) et « quelques idées du client » ont 
 - Cause 2 : le nombre affiché à côté d'« Aujourd'hui » recalculait toute la page « Aujourd'hui » (≈ 0,5 s) à chaque changement d'écran. Il est maintenant relu après chaque enregistrement, à l'ouverture d'« Aujourd'hui » et au plus une fois par minute.
 - Résultat : 0,3 à 0,5 s pour la plupart des écrans, 1 à 1,2 s pour ceux qui affichent la synthèse du jour (Accueil, Aujourd'hui, Synthèse, Santé), contre 0,5 à 2,3 s avant. L'administration est entre 0,3 et 0,4 s.
 - Reste signalé : `/app/entreprise`, pour un compte qui n'a pas encore d'entreprise, provoque deux réponses 404 (tableau de bord et documents) ; l'écran s'affiche correctement.
+
+---
+
+# R16 — Neuvième passage de recette (2026-11-17)
+
+Retour du client sur la version en ligne. Vérification préalable des corrections déjà livrées sur le revenu : R12-03 (« déjà dans le solde de départ » enregistre le salaire comme un revenu de son mois, sans doublon) et R13-03 (le solde compte comme ressource dans le budget et le rapport) sont bien dans le code et leurs tests passent (`finRecette11`, `finRecette12`, `finRecette13`). Ce qui manquait : un compte avec un solde mais **aucun revenu déclaré** n'avait ni revenus ni flux.
+
+| Ce que dit le client | Ce qu'il demande vraiment | Tâche |
+|---|---|---|
+| « Le compte affiche un solde alors qu'il n'affiche aucun revenu ni même de flux, du fait que le revenu n'est pas déclaré » ; « le problème du revenu n'est pas réglé » | Le solde de départ d'un compte doit compter comme un revenu. | R16-01 |
+| « Quand on crée un profil, le revenu déclaré est le solde initial ; à partir de lui tout est calculé (taux d'épargne, reste à vivre…), puis réajusté avec les nouveaux revenus » (répété depuis le 6e passage) | Le « revenu initial » est la base de tous les calculs tant qu'aucun revenu n'est déclaré ; les revenus suivants s'y ajoutent ou le remplacent. | R16-01, R16-02 |
+| « Les budgets liés à ce compte ne s'affichent même pas et les dépenses rattachées aux budgets ne sont pas rapprochées » | La page du compte doit montrer ses budgets, et chaque dépense doit dire dans quelle enveloppe elle compte. | R16-03 |
+| « Pour les camemberts et les graphes, des couleurs plus marquées : elles ressemblent trop aux couleurs de fond » ; « le camembert plus grand, à droite, les descriptions à gauche » | Couleurs de séries contrastées sur le fond menthe ; anneau agrandi et déplacé. | R16-04 |
+
+### R16-01 — Le solde de départ est le « revenu initial »
+- Statut : `✅ done`
+- Priorité : `🔴 critical`
+- Réalisé (2026-11-17) : le solde de départ d'un compte (compte réel, d'actif, compté dans le total ou choisi seul, solde positif) est un **revenu de la période de sa date d'ouverture**. Il est compté dans les revenus, le flux net et le taux d'épargne, partout où ces chiffres sont calculés : Accueil, Aujourd'hui, Synthèse, rapport, historique et alertes. Exemple d'un compte neuf à 150 000 DA avec 15 000 DA dépensés : revenus 150 000, flux net 135 000 (avant : revenus « non calculé »). L'Accueil le dit (« Dont 150 000 DA de revenu initial »), l'anneau « Revenus » en fait une tranche, et la page du compte l'ajoute aux entrées du mois. Un revenu reçu ensuite s'y ajoute dans son propre mois. Un salaire déclaré « déjà dans le solde de départ » a déjà été retiré du solde de départ (R12-03) : il n'est jamais compté deux fois. Dans le rapport mensuel, un compte ouvert pendant le mois est retiré du solde de début, pour que « solde début + flux net = solde fin » reste vrai.
+- Réponse du client (2026-11-17) : un solde de départ **négatif** compte comme un revenu initial négatif — fait. Les comptes tenus à part du total ne comptent que lorsqu'on les choisit seuls.
+- Tests : `finRecette16.test.js`. `finRecette10` et `finRecette12` ont été adaptés à la règle (le flux du mois d'ouverture contient le revenu initial).
+
+### R16-02 — Reste à vivre calculé sur le revenu initial, puis sur les revenus déclarés
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Réalisé (2026-11-17) : sans aucun revenu déclaré, le reste à vivre part du revenu initial (le solde de départ des comptes comptés dans le total) et le dit (« Il sera recalculé dès que vous déclarez vos revenus »). Dès qu'un revenu est déclaré, il remplace le revenu initial.
+- Confirmé par le client (2026-11-17) : « tous les calculs à partir du solde de départ », y compris le reste à vivre, même s'il est mensuel.
+- Test : `finRecette16.test.js`.
+
+### R16-03 — La page d'un compte montre ses budgets et rapproche ses dépenses
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Réalisé (2026-11-17) : la section « Budgets de ce compte » liste les budgets en cours rattachés au compte, ou portés sur le solde total dont il fait partie. Pour chacun, elle affiche le réel par rapport au prévu, puis chaque enveloppe que ce compte paie, avec sa jauge. Dans « Mouvements du mois », chaque dépense porte son rapprochement : « Budget › Enveloppe », « Hors budget » ou « Autre compte que celui de l'enveloppe ».
+- Tests : `finRecette16.test.js`, parcours `fin-recette16-journey`.
+
+### R16-04 — Graphiques : couleurs marquées, anneau plus grand à droite
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Réalisé (2026-11-17) : huit couleurs de graphique dédiées (`--chart-1` à `--chart-8` dans `index.css`), en clair comme en sombre. Chacune contraste au moins à 3:1 avec le fond menthe et les surfaces, et leur ordre est choisi pour que deux tranches voisines restent distinctes, y compris pour un lecteur daltonien. Elles remplacent les tons bleu-vert proches du fond, dans les courbes, les barres et l'anneau. L'anneau ne garde la couleur propre d'une catégorie ou d'un compte que si elle se détache du fond (sinon, il prend la couleur suivante de la palette) ; « Autres » passe d'un gris pâle à un gris marqué. L'anneau est agrandi (320 px au lieu de 220) et ses tranches sont plus épaisses ; il est à droite, la description à gauche (inversé en arabe, l'anneau au-dessus sur téléphone).
+- Vérifié par captures d'écran (parcours `fin-recette16-journey`).
+
+### R16-05 — Une catégorie de dépense va directement dans son enveloppe
+- Statut : `✅ done`
+- Priorité : `🔴 critical`
+- Origine : retour du client (2026-11-17) : « sur le budget, les enveloppes : les dépenses n'ont pas été rapprochées ou déduites » ; « une même catégorie de dépenses est directement liée à son enveloppe ».
+- Cause : depuis R13-01 et R14, une dépense de la catégorie d'une enveloppe ne lui était pas déduite si elle venait d'un autre compte que celui du budget, par exemple « Espèces ». Elle était seulement signalée. Autre cas : une dépense saisie sur la catégorie principale (« Alimentation ») n'allait pas dans une enveloppe posée sur une sous-catégorie (« Courses alimentaires »).
+- Correction (décision du client, qui remplace R13-01 et R14 sur ce point) : c'est la catégorie qui décide. Une dépense de la catégorie d'une enveloppe en est déduite, quel que soit le compte (ou les espèces) qui l'a payée, et elle compte dans le total réel du budget. Une dépense d'une autre catégorie du même groupe va dans l'enveloppe du groupe quand le budget n'en a qu'une pour ce groupe. Le compte du budget garde son rôle de ressource : son solde de départ. Le message « dépenses faites depuis un autre compte » ne s'affiche donc plus. Les textes d'aide du formulaire de budget et de la saisie ont été corrigés.
+- Limite connue : avec deux budgets en cours (un par compte) qui ont chacun une enveloppe de la même catégorie, une dépense de cette catégorie compte dans les deux.
+- Tests : `finRecette16.test.js`. `finRecette13` et `finRecette14` ont été adaptés à la nouvelle règle.
+
+### R16-06 — L'évolution des soldes « ne marche pas »
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Origine : retour du client (2026-11-17).
+- Cause reproduite : la courbe ne montrait rien avant la date d'ouverture du compte. Un compte créé aujourd'hui, ou dont les mouvements du mois sont datés avant sa création, n'avait donc qu'un point : aucune ligne, et des « — » dans l'évolution mois par mois.
+- Correction : la courbe commence à la date d'ouverture, ou au premier mouvement s'il est plus ancien. Le point juste avant est le solde de départ, étiqueté « Départ », si bien qu'un compte ouvert aujourd'hui trace une ligne entre son solde de départ et son solde actuel. Les points plus anciens restent vides : le compte n'existait pas, ce n'est pas un zéro.
+- Tests : `finRecette16.test.js`, parcours `fin-recette16-journey` (capture de la courbe).
+

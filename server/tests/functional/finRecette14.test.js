@@ -62,7 +62,9 @@ describe('R14 — the Accueil on one account', () => {
 });
 
 describe('R14 (2026-11-15) — an expense and an envelope are on an account or in cash', () => {
-  test('spending from another account than the budget’s is said, not counted; cash can be chosen', async () => {
+  // R16 (2026-11-17, the client): the category decides — an expense of the envelope's
+  // category is deducted from it whatever account (or cash) paid it.
+  test('spending from another account than the budget’s is deducted from its envelope; cash can be chosen', async () => {
     const who = await t.adult({ name: 'Liquide', finCurrency: 'DZD', finPublic: 'SAL' });
     const post = (path, json) => t.request('POST', `/fin${path}`, { user: who, json });
     const get = (path) => t.request('GET', `/fin${path}`, { user: who });
@@ -75,8 +77,8 @@ describe('R14 (2026-11-15) — an expense and an envelope are on an account or i
     await post('/transactions', { kind: 'expense', value: 200000, currency: 'DZD', occurredAt: day, categoryId: food.id });
 
     const view = (await get(`/budgets/${budget.id}`)).body.vue;
-    assert.equal(view.enveloppes[0].reel, 500000, 'only the budget’s account');
-    assert.deepEqual(view.autreCompte, { montant: 200000, nombre: 1 }, 'the cash expense is said');
+    assert.equal(view.enveloppes[0].reel, 700000, 'the cash expense too');
+    assert.equal(view.autreCompte, null);
 
     // « cash » as the account of a budget and of an envelope.
     const cashBudget = await post('/budgets', { label: 'Liquide', periodStart: iso(monthStart()).slice(0, 10), periodEnd: iso(monthEnd()).slice(0, 10), currency: 'DZD', accountId: 'cash', envelopes: [{ categoryId: food.id, kind: 'variable', value: 1000000, accountId: 'cash' }] });
@@ -84,8 +86,7 @@ describe('R14 (2026-11-15) — an expense and an envelope are on an account or i
     const cash = (await get('/comptes')).body.accounts.find((row) => row.type === 'AC-01');
     assert.equal(cashBudget.body.budget.accountId, cash.id);
     const cashView = (await get(`/budgets/${cashBudget.body.budget.id}`)).body.vue;
-    assert.equal(cashView.enveloppes[0].reel, 200000);
-    assert.equal(cashView.autreCompte?.montant, 500000, 'and the other way round');
+    assert.equal(cashView.enveloppes[0].reel, 700000, 'and the other way round');
   });
 
   test('« cash » opens the Espèces account when there is none yet', async () => {
