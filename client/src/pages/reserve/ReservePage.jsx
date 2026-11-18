@@ -18,6 +18,7 @@ import AmountField from '../../components/fincludia/AmountField.jsx';
 import Gauge from '../../components/fincludia/charts/Gauge.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Reserve.css';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 
 // Safety reserve (P6-09), screen C12. Rebuilt as three steps (recette R6-01):
 // the page said « non calculé » without saying what was missing nor where to
@@ -199,8 +200,8 @@ export default function ReservePage() {
                     type="button"
                     className="accounts-link-button accounts-danger"
                     disabled={busy}
-                    onClick={() => {
-                      if (window.confirm(t('reserve.steps.fund.deleteConfirm', { label: fund.label }))) act(() => api.delete(`/fin/goals/${fund.id}`, {}), 'reserve.steps.fund.deleted');
+                    onClick={async () => {
+                      if (await askConfirm(t('reserve.steps.fund.deleteConfirm', { label: fund.label }))) act(() => api.delete(`/fin/goals/${fund.id}`, {}), 'reserve.steps.fund.deleted');
                     }}
                   >
                     <Trash2 size={14} aria-hidden="true" /> {t('reserve.steps.fund.delete')}

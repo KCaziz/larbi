@@ -250,3 +250,158 @@
     grid-template-columns: 1fr auto;
   }
 }
+
+/* Recette R18: the account viewed, above everything — the page is a view of
+   one account (or of all of them): one card per account with its balance;
+   the chosen one filled and ticked; a choice applies at once. */
+.movements-account-bar {
+  display: grid;
+  gap: 14px;
+  padding: 18px 20px 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 6px 20px rgba(16, 42, 67, 0.08);
+}
+.movements-account-head {
+  display: grid;
+  gap: 2px;
+}
+.movements-account-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-h);
+}
+.movements-account-head h2 svg {
+  color: var(--accent);
+}
+.movements-account-head p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.movements-account-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+}
+.movements-account-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-inline-size: 0;
+  padding: 12px 34px 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+.movements-account-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 6px 16px rgba(16, 42, 67, 0.12);
+  transform: translateY(-1px);
+}
+.movements-account-card:focus-visible {
+  outline: 3px solid var(--accent-border);
+  outline-offset: 2px;
+}
+.movements-account-card.active {
+  border-color: transparent;
+  background: linear-gradient(135deg, #055686 0%, #0a7f95 100%);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(5, 86, 134, 0.3);
+}
+.movements-account-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 38px;
+  block-size: 38px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+}
+.movements-account-card.active .movements-account-icon {
+  background: rgba(255, 255, 255, 0.22);
+}
+.movements-account-body {
+  display: grid;
+  gap: 1px;
+  min-inline-size: 0;
+}
+.movements-account-name {
+  overflow: hidden;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.movements-account-amount {
+  overflow: hidden;
+  font-size: 1.02rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.movements-account-meta {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+.movements-account-check {
+  position: absolute;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
+}
+@media (max-width: 640px) {
+  .movements-account-cards {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-block-end: 4px;
+  }
+  .movements-account-card {
+    flex: 0 0 72%;
+    scroll-snap-align: start;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .movements-account-card {
+    transition: none;
+  }
+}
+
+/* Recette R18: the parts of the page breathe apart. */
+.movements-page {
+  display: grid;
+  gap: 26px;
+}
+.movements-page > section {
+  margin-block-start: 0;
+}
+.movements-page .money-filters {
+  margin-block-end: 18px;
+}
+.movements-page .money-totals {
+  margin-block: 18px 12px;
+}
+.movements-page .movements-tabs {
+  margin-block-end: -8px;
+}
+
+/* The list stays while the next one loads, dimmed. */
+.movements-results {
+  transition: opacity 150ms ease;
+}
+.movements-results-busy {
+  opacity: 0.55;
+  pointer-events: none;
+}

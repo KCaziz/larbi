@@ -54,18 +54,13 @@ describe('the ninth pass, end to end', { skip: findChrome() ? false : 'no Chrome
     await t.close();
   });
 
-  test('the Accueil counts the opening balance as income, and draws a bigger ring on the right', async () => {
+  test('the Accueil counts the opening balance as income, with its own slice in the ring', async () => {
     await b.goto(`${site.url}/app`);
     assert.ok(await b.waitText('de revenu initial', 20_000), 'the part of the income that is the starting balance');
     await b.ev("[...document.querySelectorAll('.movements-tab')].find((e) => e.textContent.includes('Revenus'))?.click()");
     await b.waitFor("[...document.querySelectorAll('.home-ring-legend-label')].some((e) => e.textContent.includes('Revenu initial'))", 'the revenu initial slice', 10_000);
-    const box = await b.ev(`(() => {
-      const legend = document.querySelector('.home-ring .home-ring-legend').getBoundingClientRect();
-      const ring = document.querySelector('.home-ring .home-ring-svg').getBoundingClientRect();
-      return { legendRight: legend.right, ringLeft: ring.left, ringWidth: ring.width };
-    })()`);
-    assert.ok(box.ringLeft >= box.legendRight - 1, `the ring right of its description: ${JSON.stringify(box)}`);
-    assert.ok(box.ringWidth >= 280, `bigger: ${box.ringWidth}px`);
+    // R17 (2026-11-18): the client prefers the former ring (left, legend on its
+    // right, 220 px) to the R16 one: it is back, the revenu initial slice stays.
     await b.ev("document.querySelector('.home-ring-section').scrollIntoView({ block: 'start' })");
     await b.shot('recette16-home');
   });

@@ -695,3 +695,57 @@ main {
   border-top: 1px solid var(--border);
   padding-block: 1rem;
 }
+
+/* Recette R18 (2026-11-18): « beaucoup de formulaires sont cassés à cause des
+   petits textes de description des champs ; mets-les dans un survol avec un
+   point d'interrogation à côté de chaque champ ». The explanation under a
+   field's input now waits behind a « ? » beside its label: it shows in a
+   bubble when the label is hovered or the field is being filled (a tap on a
+   phone). It stays in the page for screen readers, and the fields line up. */
+:is(.fin-field, .form-field):has(> label:first-child):has(> :is(.fin-hint, .form-hint)) {
+  position: relative;
+}
+:is(.fin-field, .form-field):has(> label:first-child):has(> :is(.fin-hint, .form-hint)) > label:first-child::after {
+  content: '?';
+  display: inline-grid;
+  place-items: center;
+  inline-size: 15px;
+  block-size: 15px;
+  margin-inline-start: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: 1px;
+  cursor: help;
+}
+:is(.fin-field, .form-field):has(> label:first-child) > :is(.fin-hint, .form-hint) {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: calc(100% + 6px);
+  z-index: 30;
+  inline-size: max-content;
+  max-inline-size: min(340px, 90vw);
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #102a43;
+  color: #fff;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  opacity: 1;
+  box-shadow: 0 10px 24px rgba(16, 42, 67, 0.25);
+  /* Hidden, but still read aloud with the field. */
+  clip-path: inset(50%);
+  pointer-events: none;
+}
+:is(.fin-field, .form-field):has(> label:first-child:hover) > :is(.fin-hint, .form-hint),
+:is(.fin-field, .form-field):has(> label:first-child):focus-within > :is(.fin-hint, .form-hint) {
+  clip-path: none;
+}
+:is(.fin-field, .form-field):has(> label:first-child) > :is(.fin-hint, .form-hint) a {
+  color: inherit;
+  pointer-events: auto;
+}

@@ -19,6 +19,7 @@ import './theme/lagoon.css'
 import App from './App.jsx'
 import { AuthProvider } from './auth/AuthContext.jsx'
 import { ThemeProvider } from './theme/ThemeContext.jsx'
+import ConfirmHost from './components/ui/ConfirmDialog.jsx'
 
 // The texts of the visitor's language are downloaded before the first render
 // (P12-06): French is in the main bundle, the others are fetched on demand.
@@ -32,6 +33,7 @@ loadLanguage(i18n.language)
         <ThemeProvider>
           <AuthProvider>
             <App />
+            <ConfirmHost />
           </AuthProvider>
         </ThemeProvider>
       </StrictMode>,

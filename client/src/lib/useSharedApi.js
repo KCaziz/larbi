@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api } from './api.js';
+import { getWithRetry } from './useApi.js';
 
 // GET data that is the same for the whole visit (public settings, the
 // assistant's published questions): fetched ONCE and shared by every component
@@ -14,7 +14,7 @@ function load(path, ttl) {
   const entry = cache.get(path);
   if (entry && Date.now() - entry.at < ttl) return entry.promise;
   const fresh = { at: Date.now(), value: undefined, error: undefined };
-  fresh.promise = api.get(path).then(
+  fresh.promise = getWithRetry(path).then(
     (data) => {
       fresh.value = data;
       return data;

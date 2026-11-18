@@ -465,11 +465,22 @@ export async function deleteAccount(prisma, userId, id, { reason } = {}) {
     const all = [...rows, ...others];
     if (all.length > 0) {
       await tx.finTransaction.updateMany({ where: { id: { in: all.map((row) => row.id) } }, data: { deletedAt: now } });
-      for (const row of all) {
-        await recordChange(tx, { userId, entity: 'transaction', entityId: row.id, action: 'delete', field: 'deletedAt', after: true, reason: reason ?? 'account deleted' });
-      }
+      // One write for the whole trail (recette R18, C1: « une erreur, au
+      // deuxième essai ça a marché »). One insert per movement, one after the
+      // other, made an account with many movements outlast the transaction's
+      // time on a distant database.
+      await tx.finChange.createMany({ data: all.map((row) => ({ userId, entity: 'transaction', entityId: row.id, action: 'delete', field: 'deletedAt', after: true, reason: reason ?? 'account deleted' })) });
     }
     await tx.finAccount.update({ where: { id }, data: { deletedAt: now } });
+    // R17-03: what was tied to the account is not left pointing at nothing. A
+    // budget or an envelope spent from it goes back to the total balance; a
+    // regular income or payment, a goal or a debt simply loses its account.
+    const detach = { where: { userId, accountId: id }, data: { accountId: null } };
+    await tx.finBudget.updateMany(detach);
+    await tx.finEnvelope.updateMany(detach);
+    await tx.finRecurrence.updateMany(detach);
+    await tx.finGoal.updateMany(detach);
+    await tx.finDebt.updateMany(detach);
     await recordChange(tx, { userId, entity: ACCOUNT_ENTITY, entityId: id, action: 'delete', field: 'deletedAt', after: true, reason: reason ?? null });
     return { id, movements: rows.length, transfers: transferIds.length };
   });

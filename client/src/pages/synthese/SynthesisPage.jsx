@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Download, FileText, ListChecks, PieChart, Printer } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
+import { useAccountScope } from '../../lib/accountScope.js';
 import { formatAmount, formatDate, formatRatio } from '../../lib/format.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
@@ -38,10 +39,18 @@ export default function SynthesisPage() {
   const [reduction, setReduction] = useState('10');
   // `?instantane=1`: the report AS IT WAS kept (P8-24), not recomputed.
   const asKept = new URLSearchParams(location.search).get('instantane') === '1';
-  const report = useApi(asKept ? `/fin/rapport/instantane/${month}` : `/fin/rapport?mois=${month}&reduction=${Math.min(100, Math.max(0, Number(reduction) || 0))}`);
+  // R17-05: the account chosen on any screen — its own income, spending and
+  // flux (an account kept apart from the total included) — or the total.
+  const [scope, setScope] = useAccountScope();
+  const accountsApi = useApi('/fin/comptes');
+  const openAccounts = (accountsApi.data?.accounts ?? []).filter((account) => !account.archivedAt);
+  const oneAccount = scope !== 'total' && openAccounts.some((account) => account.id === scope) ? scope : null;
+  const accountParam = oneAccount ? `&accountId=${oneAccount}` : '';
+  const report = useApi(asKept ? `/fin/rapport/instantane/${month}` : `/fin/rapport?mois=${month}&reduction=${Math.min(100, Math.max(0, Number(reduction) || 0))}${accountParam}`);
   // G-05: the step of the history charts — month (the default), week or day.
   const [step, setStep] = useState('mois');
-  const history = useApi(`/fin/argent/synthese/historique${step === 'mois' ? '' : `?pas=${step}`}`);
+  const historyParams = [step === 'mois' ? '' : `pas=${step}`, oneAccount ? `accountId=${oneAccount}` : ''].filter(Boolean).join('&');
+  const history = useApi(`/fin/argent/synthese/historique?${historyParams}`);
   const [kept, setKept] = useState(null);
   if (report.data && report.data !== kept) setKept(report.data);
   const data = report.data ?? kept;
@@ -67,6 +76,19 @@ export default function SynthesisPage() {
             {t('synthesis.month')}
             <input id="synthesis-month" type="month" value={month} max={thisMonth()} onChange={(event) => event.target.value && setMonth(event.target.value)} />
           </label>
+          {!asKept && openAccounts.length > 0 && (
+            <label htmlFor="synthesis-account">
+              {t('synthesis.account')}
+              <select id="synthesis-account" value={oneAccount ?? 'total'} onChange={(event) => setScope(event.target.value)}>
+                <option value="total">{t('appHome.allAccounts')}</option>
+                {openAccounts.map((account) => (
+                  <option key={account.id} value={account.id}>
+                    {account.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           {/* SYN-02 and REP-01, each at its own address (P8-25). */}
           {!isReport && (
             <Link to={`/app/synthese/rapport/${month}`} className="synthesis-report-link">
@@ -94,7 +116,7 @@ export default function SynthesisPage() {
 
         <section aria-labelledby="r01">
           <h2 id="r01">{t('synthesis.sections.R01')}</h2>
-          <div className="fin-figure-grid">
+          <div className="fin-figure-grid synthesis-figures">
             <FigureCard label={t('movements.tabs.income')} answer={s.R01.revenus} />
             <FigureCard label={t('movements.tabs.expense')} answer={s.R01.depenses} />
             <FigureCard label={t('appHome.netFlow')} answer={s.R01.fluxNet} />

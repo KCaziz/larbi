@@ -13,6 +13,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Budget.css';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 
 // Budgets and envelopes (P6-05), screen C06 « Budget du mois ». This page is
 // the list (create, duplicate, archive, delete); one budget's own figures
@@ -113,8 +114,8 @@ export default function BudgetsPage() {
                     type="button"
                     className="budget-icon"
                     title={t('budget.delete')}
-                    onClick={() => {
-                      if (window.confirm(t('budget.deleteConfirm', { label: budget.label }))) {
+                    onClick={async () => {
+                      if (await askConfirm(t('budget.deleteConfirm', { label: budget.label }))) {
                         run(() => api.delete(`/fin/budgets/${budget.id}`), 'budget.deleted');
                       }
                     }}

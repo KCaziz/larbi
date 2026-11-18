@@ -333,3 +333,58 @@
   margin: 12px 0;
   font-weight: 600;
 }
+
+/* Recette R18: archive and delete, named and easy to find. */
+.goals-row:has(.goals-actions-compact) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-inline-end: 10px;
+}
+.goals-row:has(.goals-actions-compact) > .goals-row-head {
+  flex: 1;
+  min-inline-size: 0;
+}
+.goals-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.goals-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-block-size: 38px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.goals-action:hover {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+.goals-action-delete {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.goals-action-delete:hover {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+@media (max-width: 760px) {
+  .goals-actions-compact .goals-action-text {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

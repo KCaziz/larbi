@@ -130,7 +130,7 @@ export function savingsScenarioAndCascade(movements, { currency, reduction = 0.1
   };
 }
 
-export async function buildMonthlyReport(prisma, user, { month, now = new Date(), wealthFromAccounts, reduction = 0.1 }) {
+export async function buildMonthlyReport(prisma, user, { month, now = new Date(), wealthFromAccounts, reduction = 0.1, accountId = null }) {
   const userId = user.id;
   const currency = user.finCurrency;
   const period = monthBounds(month);
@@ -139,8 +139,10 @@ export async function buildMonthlyReport(prisma, user, { month, now = new Date()
   const until = period.end > now ? now : period.end;
 
   const [data, previousData, accountsEnd, accountsStart, budget, goalRows, debtRows, assets, quality] = await Promise.all([
-    loadSynthesisData(prisma, userId, period),
-    loadSynthesisData(prisma, userId, previous),
+    // R17-05: one account chosen — its own income, spending and flux (an
+    // account kept apart from the total included); otherwise the total.
+    loadSynthesisData(prisma, userId, period, { accountId }),
+    loadSynthesisData(prisma, userId, previous, { accountId }),
     accountsWithBalances(prisma, userId, { now: until }),
     accountsWithBalances(prisma, userId, { now: new Date(period.start.getTime() - 1) }),
     currentBudget(prisma, userId, new Date(Math.min(until.getTime(), period.start.getTime() + 14 * DAY))),
@@ -156,7 +158,9 @@ export async function buildMonthlyReport(prisma, user, { month, now = new Date()
   // R16: an account opened DURING the month brings its opening balance as
   // « revenu initial » (in the flux), so it was not there at the start: taken
   // out of the start balance, solde début + flux net = solde fin still holds.
-  const startTotal = accountsStart.totals.find((total) => total.currency === currency)?.soldeTotal ?? null;
+  const oneStart = accountId ? accountsStart.accounts.find((account) => account.id === accountId) : null;
+  const oneEnd = accountId ? accountsEnd.accounts.find((account) => account.id === accountId) : null;
+  const startTotal = accountId ? (oneStart?.solde ?? null) : (accountsStart.totals.find((total) => total.currency === currency)?.soldeTotal ?? null);
   const openedInMonth = data.openings.filter((row) => row.currency === currency).reduce((sum, row) => sum + row.value, 0);
   const soldeDebut = startTotal && startTotal.resultat !== null && openedInMonth !== 0 ? { ...startTotal, resultat: startTotal.resultat - openedInMonth } : startTotal;
   const r01 = {
@@ -167,7 +171,7 @@ export async function buildMonthlyReport(prisma, user, { month, now = new Date()
     // R13-03: the balance of the accounts counted in the total, at the start and at the end of
     // the month: the flux is read WITH the money that was already there.
     soldeDebut,
-    soldeFin: accountsEnd.totals.find((total) => total.currency === currency)?.soldeTotal ?? null,
+    soldeFin: accountId ? (oneEnd?.solde ?? null) : (accountsEnd.totals.find((total) => total.currency === currency)?.soldeTotal ?? null),
     tendance: {
       revenus: trend(synthesis.revenus.resultat, before.revenus.resultat, { currency, now }),
       depenses: trend(synthesis.depenses.resultat, before.depenses.resultat, { currency, now }),

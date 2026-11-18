@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { bestNavMatch, navLinkProps } from '../../lib/navMatch.js';
 import { ArrowRight, CircleCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import brandMark from '../../assets/brand/fincludia-mark.png';
@@ -13,6 +14,8 @@ import brandMark from '../../assets/brand/fincludia-mark.png';
 // foot:     [{ key, label, icon, to } | { key, label, icon, onClick }]
 export default function SideNav({ label, home, sections, foot = [], promo = false, headExtra = null, toggled = false }) {
   const { t } = useTranslation();
+  const { pathname } = useLocation();
+  const best = bestNavMatch(pathname, sections.flatMap((section) => section.entries));
   return (
     <nav className={`app-sidebar${toggled ? ' app-sidebar-toggled' : ''}`} aria-label={label}>
       <div className="app-side-head">
@@ -31,7 +34,7 @@ export default function SideNav({ label, home, sections, foot = [], promo = fals
             <ul className="app-nav-list">
               {section.entries.map((entry) => (
                 <li key={entry.key ?? entry.to}>
-                  <NavLink to={entry.to} end={entry.end} className="app-nav-link" title={entry.label}>
+                  <NavLink to={entry.to} end={entry.end} {...navLinkProps(entry, best, 'app-nav-link')} title={entry.label}>
                     <entry.icon size={18} aria-hidden="true" />
                     <span className="app-nav-text">{entry.label}</span>
                     {entry.badge > 0 && (

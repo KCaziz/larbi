@@ -191,7 +191,7 @@ export function consumedByCategory(movements) {
  * `provisions` the active provisions: their monthly amount (F045) is the third
  *             allocation outside the budget (client's answer C2, 2026-10-28)
  */
-export function buildBudgetView({ budget, envelopes = [], movements = [], incomes = [], goals = [], provisions = [], carry = null, startBalance = null, now = new Date() }) {
+export function buildBudgetView({ budget, envelopes = [], movements = [], incomes = [], goals = [], provisions = [], carry = null, startBalance = null, expectedIncome, now = new Date() }) {
   const currency = budget.currency;
   const warnings = [];
 
@@ -340,7 +340,15 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
   // added only to a period whose declared incomes could be added — a period that is
   // not a whole number of months compares nothing, as before.
   const balanceResource = budget.countBalance !== false && startBalance !== null ? startBalance : null;
-  const totalResources = periodResources === null ? (months !== null && balanceResource !== null ? balanceResource : null) : periodResources + (balanceResource ?? 0);
+  // R17-01 — the income of the period is what has been RECEIVED plus what is
+  // still EXPECTED (declared, not received yet), as on the Accueil. Before, it
+  // was the declared incomes only: an income received without being declared
+  // changed nothing, and the budget looked frozen (client, 2026-11-18). Given
+  // when the caller knows what is expected (`expectedIncome`, loadBudgetData);
+  // otherwise the declared incomes, as before.
+  const liveIncome = expectedIncome === undefined || expectedIncome === null ? undefined : realIncome === null && expectedIncome === 0 ? null : (realIncome ?? 0) + expectedIncome;
+  const incomeOfPeriod = liveIncome === undefined ? periodResources : liveIncome;
+  const totalResources = incomeOfPeriod === null ? (months !== null && balanceResource !== null ? balanceResource : null) : incomeOfPeriod + (balanceResource ?? 0);
 
   // « Budget supérieur au revenu : autorisé mais signalé » — the client's own
   // rule. Signalled, never refused: somebody who knows they will dip into their
@@ -365,6 +373,10 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
   const provisionsOutside = provisionMonthly.reduce((sum, amount) => sum + amount, 0);
   const plannedOutside = months === null ? null : (goalsOutside + provisionsOutside) * months;
   const resteAAffecter = totalResources === null || plannedOutside === null ? null : totalResources - (totalPrevu ?? 0) - plannedOutside;
+  // R17-01 — the client's rule, the same on every screen: « le flux, ce sont les
+  // ressources moins les dépenses ». Resources = the balance at the start (when
+  // counted) + the income of the period (received + still expected).
+  const budgetFlow = liveIncome === undefined ? netFlow(realIncome, totalReel) : totalResources === null ? null : totalResources - (totalReel ?? 0);
 
   // PB-F008 summed over the envelopes, then PB-F013: what is left per
   // remaining day, never below zero; an overspend is reported apart instead
@@ -393,20 +405,23 @@ export function buildBudgetView({ budget, envelopes = [], movements = [], income
     // PB-F006 — income really received minus expenses really paid over the
     // period. It used to be EXPECTED resources minus real expenses, which is
     // neither the client's net flow nor a remaining budget (diagnostic n°2, C1).
-    fluxNet: answer('PB-F006', netFlow(realIncome, totalReel)),
+    fluxNet: answer('PB-F006', budgetFlow, { inputs: { ...baseInputs, ressources_totales: totalResources, depenses_reelles: totalReel } }),
+    // R17-01: what the resources are made of, to show the sum on the page.
+    revenusRecus: answer('PB-F004', realIncome),
+    revenusAttendus: answer('F001', liveIncome === undefined ? null : expectedIncome),
     // The expected resources of the period (F001 × whole months): the base of
     // PB-F009, shown as « prévu », never as received.
-    ressources: answer('F001', periodResources),
+    ressources: answer('F001', incomeOfPeriod),
     // R13-03: the balance the accounts held at the start, and all the resources (incomes + balance).
     soldeDebut: answer('PB-F002', startBalance),
-    ressourcesTotales: answer('F001', totalResources, { inputs: { ...baseInputs, revenus_prevus: periodResources, solde_debut: balanceResource } }),
+    ressourcesTotales: answer('F001', totalResources, { inputs: { ...baseInputs, revenus_prevus: incomeOfPeriod, solde_debut: balanceResource } }),
     // PB-F009 — still free to allocate, the « Non affecté » of screens JA03 /
     // JA04, which must always remain possible. Planning, not a bank balance;
     // negative means more is planned than expected: the signalled case above.
     resteAAffecter: answer('PB-F009', resteAAffecter, {
       inputs: {
         ...baseInputs,
-        revenus_prevus: periodResources,
+        revenus_prevus: incomeOfPeriod,
         solde_debut_compte: balanceResource,
         budgets_alloues: totalPrevu,
         allocations_hors_budget: plannedOutside,

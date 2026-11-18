@@ -13,7 +13,7 @@ export default function IncomeExpenseChart({ points, currency }) {
       caption={t('myMoney.monthlyTrendTitle')}
       series={[
         { key: 'income', label: t('myMoney.income'), tone: 1, points: points.map((point) => ({ month: point.month, value: point.revenus ?? null })) },
-        { key: 'expense', label: t('myMoney.expenses'), tone: 2, points: points.map((point) => ({ month: point.month, value: point.depenses ?? null })) },
+        { key: 'expense', label: t('myMoney.expenses'), tone: 0, points: points.map((point) => ({ month: point.month, value: point.depenses ?? null })) },
       ]}
     />
   );

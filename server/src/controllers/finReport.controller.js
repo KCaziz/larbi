@@ -9,7 +9,7 @@ import { wealthFromAccounts } from './finWealth.controller.js';
 const currentMonthKey = (now = new Date()) => now.toISOString().slice(0, 7);
 
 export async function getReport(req, res) {
-  res.json({ rapport: await buildMonthlyReport(prisma, req.user, { month: req.query.mois ?? currentMonthKey(), wealthFromAccounts, reduction: (req.query.reduction ?? 10) / 100 }) });
+  res.json({ rapport: await buildMonthlyReport(prisma, req.user, { month: req.query.mois ?? currentMonthKey(), wealthFromAccounts, reduction: (req.query.reduction ?? 10) / 100, accountId: req.query.accountId ?? null }) });
 }
 
 export async function getComparison(req, res) {

@@ -16,6 +16,7 @@ import AmountField from '../../components/fincludia/AmountField.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './PaperPortfolio.css';
 import CompoundInterest, { COMPOUND_CLASSES } from './CompoundInterest.jsx';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 
 // Paper portfolio and investment workshop (P6-12), screens C17 and EP03-EP07.
 //
@@ -149,8 +150,8 @@ export default function PaperPortfolioPage() {
           <Button
             type="button"
             variant="secondary"
-            onClick={() => {
-              if (window.confirm(t('paper.resetConfirm'))) run(() => api.post('/fin/portefeuille/reinitialiser', {}), 'paper.reset');
+            onClick={async () => {
+              if (await askConfirm(t('paper.resetConfirm'))) run(() => api.post('/fin/portefeuille/reinitialiser', {}), 'paper.reset');
             }}
           >
             <RotateCcw size={16} aria-hidden="true" /> {t('paper.reset')}

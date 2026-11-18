@@ -18,6 +18,8 @@ import AmountField from '../../components/fincludia/AmountField.jsx';
 import { fromMinorUnits, toMinorUnits } from '../../lib/money.js';
 import '../../components/fincludia/Fincludia.css';
 import './Spaces.css';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
+import MessageWithOffers from '../../components/payments/OffersLink.jsx';
 
 // The building blocks of Gestion commune (P9-02): the components that used to
 // be the accordions of one page `/espaces`, now exported and placed on pages of
@@ -280,7 +282,7 @@ export function SharedExpenses({ t, language, spaceId, space, members }) {
       </h3>
       {message && (
         <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
-          {message.text}
+          <MessageWithOffers text={message.text} />
         </p>
       )}
 
@@ -364,8 +366,8 @@ export function SharedExpenses({ t, language, spaceId, space, members }) {
                   <button
                     type="button"
                     className="spaces-icon"
-                    onClick={() => {
-                      if (window.confirm(t('spaces.shared.cancelConfirm'))) run(() => api.post(`/fin/espaces/${spaceId}/depenses/${expense.id}/annuler`, {}), 'spaces.shared.cancelled');
+                    onClick={async () => {
+                      if (await askConfirm(t('spaces.shared.cancelConfirm'))) run(() => api.post(`/fin/espaces/${spaceId}/depenses/${expense.id}/annuler`, {}), 'spaces.shared.cancelled');
                     }}
                     aria-label={t('spaces.shared.cancel')}
                   >
@@ -375,8 +377,8 @@ export function SharedExpenses({ t, language, spaceId, space, members }) {
                 <button
                   type="button"
                   className="spaces-icon"
-                  onClick={() => {
-                    if (window.confirm(t('spaces.shared.deleteExpenseConfirm'))) run(() => api.delete(`/fin/espaces/${spaceId}/depenses/${expense.id}`), 'spaces.shared.deleted');
+                  onClick={async () => {
+                    if (await askConfirm(t('spaces.shared.deleteExpenseConfirm'))) run(() => api.delete(`/fin/espaces/${spaceId}/depenses/${expense.id}`), 'spaces.shared.deleted');
                   }}
                   aria-label={t('spaces.shared.delete')}
                 >
@@ -402,8 +404,8 @@ export function SharedExpenses({ t, language, spaceId, space, members }) {
                 <button
                   type="button"
                   className="spaces-icon"
-                  onClick={() => {
-                    if (window.confirm(t('spaces.shared.deleteSettlementConfirm'))) run(() => api.delete(`/fin/espaces/${spaceId}/reglements/${settlement.id}`), 'spaces.shared.deleted');
+                  onClick={async () => {
+                    if (await askConfirm(t('spaces.shared.deleteSettlementConfirm'))) run(() => api.delete(`/fin/espaces/${spaceId}/reglements/${settlement.id}`), 'spaces.shared.deleted');
                   }}
                   aria-label={t('spaces.shared.delete')}
                 >
@@ -862,7 +864,7 @@ export function CommonGoals({ t, language, spaceId, currency }) {
       <h3>{t('spaces.common.title')}</h3>
       {message && (
         <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
-          {message.text}
+          <MessageWithOffers text={message.text} />
         </p>
       )}
 
@@ -887,8 +889,8 @@ export function CommonGoals({ t, language, spaceId, currency }) {
                   <button
                     type="button"
                     className="spaces-icon"
-                    onClick={() => {
-                      if (window.confirm(t('spaces.common.deleteConfirm'))) run(() => api.delete(`/fin/espaces/${spaceId}/objectifs-communs/${goal.id}`), 'spaces.common.deleted');
+                    onClick={async () => {
+                      if (await askConfirm(t('spaces.common.deleteConfirm'))) run(() => api.delete(`/fin/espaces/${spaceId}/objectifs-communs/${goal.id}`), 'spaces.common.deleted');
                     }}
                     aria-label={t('spaces.common.delete')}
                   >
@@ -1113,7 +1115,7 @@ export function HouseholdExtras({ t, language, spaceId, currency }) {
       <h3>{t('spaces.household.childrenTitle')}</h3>
       {message && (
         <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
-          {message.text}
+          <MessageWithOffers text={message.text} />
         </p>
       )}
       {children.data && (
@@ -1125,8 +1127,8 @@ export function HouseholdExtras({ t, language, spaceId, currency }) {
               <button
                 type="button"
                 className="spaces-icon"
-                onClick={() => {
-                  if (window.confirm(t('spaces.household.deleteChildConfirm'))) run(() => api.delete(`/fin/espaces/${spaceId}/enfants/${child.id}`), 'spaces.household.deleted');
+                onClick={async () => {
+                  if (await askConfirm(t('spaces.household.deleteChildConfirm'))) run(() => api.delete(`/fin/espaces/${spaceId}/enfants/${child.id}`), 'spaces.household.deleted');
                 }}
                 aria-label={t('spaces.household.delete')}
               >
@@ -1161,8 +1163,8 @@ export function HouseholdExtras({ t, language, spaceId, currency }) {
                 <button
                   type="button"
                   className="spaces-icon"
-                  onClick={() => {
-                    if (window.confirm(t('spaces.household.deleteProvisionConfirm'))) run(() => api.delete(`/fin/espaces/${spaceId}/provisions/${provision.id}`), 'spaces.household.deleted');
+                  onClick={async () => {
+                    if (await askConfirm(t('spaces.household.deleteProvisionConfirm'))) run(() => api.delete(`/fin/espaces/${spaceId}/provisions/${provision.id}`), 'spaces.household.deleted');
                   }}
                   aria-label={t('spaces.household.delete')}
                 >

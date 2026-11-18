@@ -740,7 +740,8 @@
     "refused": "Cette valeur ou cette demande n’est pas acceptée. Vérifiez les champs.",
     "oneScreen": "Un seul écran à la fois avec un compte gratuit : votre compte est déjà ouvert sur un autre écran. Déconnectez-vous de l’autre écran puis réessayez (un écran inactif depuis 30 minutes se libère tout seul), ou abonnez-vous pour utiliser plusieurs écrans.",
     "subscriptionAccounts": "Sans abonnement, vous pouvez avoir un seul compte à vous. Abonnez-vous depuis « Offres » pour en ajouter d’autres, ou archivez celui que vous n’utilisez plus.",
-    "subscriptionRequired": "Inviter quelqu’un dans un espace partagé est réservé aux abonnés. Abonnez-vous depuis « Offres » pour inviter d’autres personnes."
+    "subscriptionRequired": "Inviter quelqu’un dans un espace partagé est réservé aux abonnés. Abonnez-vous depuis « Offres » pour inviter d’autres personnes.",
+    "seeOffers": "Voir les offres"
   },
   "state": {
     "loading": "Chargement…",
@@ -2507,7 +2508,9 @@
       "start": "Début de période",
       "years": "Années",
       "quarters": "Trimestres",
-      "months": "Mois"
+      "months": "Mois",
+      "semiannual": "Semestriel",
+      "semesters": "Semestres"
     }
   },
   "comparison": {
@@ -3019,7 +3022,7 @@
       "CR10": "L'apport personnel minimal à prévoir pour ce financement.",
       "PB-F004": "La somme des revenus réellement reçus sur la période. Les revenus seulement prévus ne sont pas comptés, ni l’argent déplacé vers l’épargne.",
       "PB-F005": "La somme des dépenses réellement payées sur la période. L’argent mis de côté pour un objectif n’est pas une dépense.",
-      "PB-F006": "Ce qui est réellement entré moins ce qui est réellement sorti sur la période.",
+      "PB-F006": "Les ressources (solde de départ et revenus) moins les dépenses de la période.",
       "PB-F007": "Le total des montants que vous avez prévus dans vos enveloppes pour cette période.",
       "PB-F008": "Ce qui reste dans l’enveloppe : le montant prévu moins ce qui a été réellement dépensé. Négatif s’il y a dépassement.",
       "PB-F009": "Vos revenus prévus, moins ce que vous avez déjà réparti dans vos enveloppes et dans vos apports prévus aux objectifs.",
@@ -3320,7 +3323,7 @@
     "backToList": "Retour aux budgets",
     "daysRemaining_one": "{{count}} jour restant",
     "daysRemaining_other": "{{count}} jours restants",
-    "resources": "Ressources de la période",
+    "resources": "Revenus de la période (reçus + attendus)",
     "totalPlanned": "Total prévu",
     "totalReal": "Total réel",
     "netFlow": "Flux net",
@@ -3429,7 +3432,10 @@
     "shareConsumed": "{{percent}} de son enveloppe consommé",
     "shareOfBudget": "{{percent}} du budget total",
     "shareOfSpending": "{{percent}} des dépenses du budget",
-    "committed": "Engagé : {{amount}} (dont {{toCome}} prévu à venir), soit {{percent}} de l'enveloppe"
+    "committed": "Engagé : {{amount}} (dont {{toCome}} prévu à venir), soit {{percent}} de l'enveloppe",
+    "resourcesDetail": "Reçus : {{received}} · encore attendus : {{expected}}",
+    "netFlowDetail": "Ressources totales {{resources}} − dépenses {{spent}}",
+    "alreadyCovered": "Ce budget a déjà une enveloppe pour cette catégorie."
   },
   "goals": {
     "title": "Objectifs",
@@ -5370,7 +5376,13 @@
     "recurrenceQuestion": "Cette opération ressemble à votre paiement régulier « {{label}} » du {{date}}. Est-ce ce paiement ? Il ne sera alors enregistré qu'une seule fois.",
     "recurrenceYes": "Oui, c'est ce paiement",
     "recurrenceNo": "Non, c'est une autre opération",
-    "addedAsPayment": "Enregistré comme votre paiement régulier : une seule opération, l'échéance est réglée."
+    "addedAsPayment": "Enregistré comme votre paiement régulier : une seule opération, l'échéance est réglée.",
+    "accountView": "Compte affiché",
+    "accountViewOne": "Vous voyez les mouvements du compte « {{label}} ».",
+    "accountViewAll": "Vous voyez les mouvements de tous vos comptes. Choisissez un compte pour ne voir que les siens.",
+    "accountCount_one": "{{count}} compte dans le total",
+    "accountCount_other": "{{count}} comptes dans le total",
+    "accountApart": "Hors du solde total"
   },
   "appHome": {
     "title": "Accueil",
@@ -5439,7 +5451,9 @@
       "goal": "Fixer un objectif",
       "simulate": "Lancer un simulateur",
       "compare": "Comparer une offre"
-    }
+    },
+    "plannedFlow": "Flux prévu (avec les revenus attendus)",
+    "plannedFlowDetail": "Reçu {{received}} + encore attendu {{expected}} − dépenses {{expenses}}."
   },
   "finProfile": {
     "incomeRegularity": "Régularité de mon revenu",
@@ -5530,7 +5544,8 @@
     },
     "startBalance": "Solde au début du mois",
     "endBalance": "Solde à la fin du mois",
-    "balanceNote": "Le flux net est ce qui est entré moins ce qui est sorti pendant le mois ; les soldes disent avec quel argent vous partiez et vous arrivez."
+    "balanceNote": "Le flux net est ce qui est entré moins ce qui est sorti pendant le mois ; les soldes disent avec quel argent vous partiez et vous arrivez.",
+    "account": "Compte"
   },
   "education": {
     "yourParcours": "Votre parcours : {{name}}",
@@ -6427,5 +6442,10 @@
     "accept": "Accepter",
     "refuse": "Refuser",
     "manage": "Cookies et mesure d’audience"
+  },
+  "confirm": {
+    "title": "Confirmer",
+    "cancel": "Annuler",
+    "yes": "Confirmer"
   }
 }

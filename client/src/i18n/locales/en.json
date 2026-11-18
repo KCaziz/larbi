@@ -740,7 +740,8 @@
     "refused": "This value or request is not accepted. Check the fields.",
     "oneScreen": "One screen at a time with a free account: your account is already open on another screen. Sign out of the other screen and try again (a screen idle for 30 minutes is freed on its own), or subscribe to use several screens.",
     "subscriptionAccounts": "Without a subscription you can have one account of your own. Subscribe from “Offers” to add more, or archive the one you no longer use.",
-    "subscriptionRequired": "Inviting someone into a shared space is for subscribers. Subscribe from “Offers” to invite other people."
+    "subscriptionRequired": "Inviting someone into a shared space is for subscribers. Subscribe from “Offers” to invite other people.",
+    "seeOffers": "See the offers"
   },
   "state": {
     "loading": "Loading…",
@@ -2506,7 +2507,9 @@
       "start": "Start of period",
       "years": "Years",
       "quarters": "Quarters",
-      "months": "Months"
+      "months": "Months",
+      "semiannual": "Half-yearly",
+      "semesters": "Half-years"
     }
   },
   "comparison": {
@@ -3018,7 +3021,7 @@
       "CR10": "The minimum down payment to plan for this financing.",
       "PB-F004": "The total income actually received over the period. Income that is only expected is not counted, nor is money moved to savings.",
       "PB-F005": "The total spending actually paid over the period. Money set aside for a goal is not spending.",
-      "PB-F006": "What actually came in minus what actually went out over the period.",
+      "PB-F006": "The resources (starting balance and income) minus the expenses of the period.",
       "PB-F007": "The total amount you planned in your envelopes for this period.",
       "PB-F008": "What is left in the envelope: the planned amount minus what was actually spent. Negative when overspent.",
       "PB-F009": "Your expected income, minus what you already allocated to your envelopes and to your planned goal contributions.",
@@ -3319,7 +3322,7 @@
     "backToList": "Back to budgets",
     "daysRemaining_one": "{{count}} day left",
     "daysRemaining_other": "{{count}} days left",
-    "resources": "Resources of the period",
+    "resources": "Income of the period (received + expected)",
     "totalPlanned": "Total planned",
     "totalReal": "Total real",
     "netFlow": "Net flow",
@@ -3428,7 +3431,10 @@
     "shareConsumed": "{{percent}} of its envelope consumed",
     "shareOfBudget": "{{percent}} of the total budget",
     "shareOfSpending": "{{percent}} of the budget’s spending",
-    "committed": "Committed: {{amount}} ({{toCome}} planned still to come), that is {{percent}} of the envelope"
+    "committed": "Committed: {{amount}} ({{toCome}} planned still to come), that is {{percent}} of the envelope",
+    "resourcesDetail": "Received: {{received}} · still expected: {{expected}}",
+    "netFlowDetail": "Total resources {{resources}} − expenses {{spent}}",
+    "alreadyCovered": "This budget already has an envelope for this category."
   },
   "goals": {
     "title": "Goals",
@@ -5369,7 +5375,13 @@
     "recurrenceQuestion": "This looks like your regular payment “{{label}}” of {{date}}. Is it that payment? It will then be recorded only once.",
     "recurrenceYes": "Yes, it is that payment",
     "recurrenceNo": "No, it is another operation",
-    "addedAsPayment": "Recorded as your regular payment: one operation, the due date is settled."
+    "addedAsPayment": "Recorded as your regular payment: one operation, the due date is settled.",
+    "accountView": "Account shown",
+    "accountViewOne": "You are seeing the movements of the account “{{label}}”.",
+    "accountViewAll": "You are seeing the movements of all your accounts. Choose an account to see only its own.",
+    "accountCount_one": "{{count}} account in the total",
+    "accountCount_other": "{{count}} accounts in the total",
+    "accountApart": "Kept apart from the total"
   },
   "appHome": {
     "title": "Home",
@@ -5438,7 +5450,9 @@
       "goal": "Set a goal",
       "simulate": "Run a simulator",
       "compare": "Compare an offer"
-    }
+    },
+    "plannedFlow": "Expected flow (with the income still expected)",
+    "plannedFlowDetail": "Received {{received}} + still expected {{expected}} − spending {{expenses}}."
   },
   "finProfile": {
     "incomeRegularity": "How regular my income is",
@@ -5529,7 +5543,8 @@
     },
     "startBalance": "Balance at the start of the month",
     "endBalance": "Balance at the end of the month",
-    "balanceNote": "The net flow is what came in minus what went out during the month; the balances say what money you started with and ended with."
+    "balanceNote": "The net flow is what came in minus what went out during the month; the balances say what money you started with and ended with.",
+    "account": "Account"
   },
   "education": {
     "yourParcours": "Your path: {{name}}",
@@ -6426,5 +6441,10 @@
     "accept": "Accept",
     "refuse": "Refuse",
     "manage": "Cookies and audience measurement"
+  },
+  "confirm": {
+    "title": "Please confirm",
+    "cancel": "Cancel",
+    "yes": "Confirm"
   }
 }

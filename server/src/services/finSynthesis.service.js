@@ -278,13 +278,13 @@ export function breakdown(rows) {
  * `null` for both figures rather than converted or silently summed with the
  * rest — the same rule `buildSynthesis` itself applies within one month.
  */
-export async function monthlyMoneyHistory(prisma, userId, { months = 6, currency } = {}) {
+export async function monthlyMoneyHistory(prisma, userId, { months = 6, currency, accountId = null } = {}) {
   const now = new Date();
   const periods = Array.from({ length: months }, (_, index) => {
     const monthsAgo = months - 1 - index;
     return currentMonth(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - monthsAgo, 1)));
   });
-  return historyOf(prisma, userId, periods, currency, (period) => period.start.toISOString().slice(0, 7));
+  return historyOf(prisma, userId, periods, currency, (period) => period.start.toISOString().slice(0, 7), accountId);
 }
 
 /**
@@ -294,7 +294,7 @@ export async function monthlyMoneyHistory(prisma, userId, { months = 6, currency
  * Each point is named by its first day (`YYYY-MM-DD`).
  */
 export const HISTORY_STEPS = { jour: 31, semaine: 12 };
-export async function stepMoneyHistory(prisma, userId, { step, count = HISTORY_STEPS[step], currency } = {}) {
+export async function stepMoneyHistory(prisma, userId, { step, count = HISTORY_STEPS[step], currency, accountId = null } = {}) {
   const now = new Date();
   const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
   const DAY = 86_400_000;
@@ -305,13 +305,15 @@ export async function stepMoneyHistory(prisma, userId, { step, count = HISTORY_S
     const start = current - (count - 1 - index) * length * DAY;
     return { start: new Date(start), end: new Date(start + length * DAY - 1) };
   });
-  return historyOf(prisma, userId, periods, currency, (period) => period.start.toISOString().slice(0, 10));
+  return historyOf(prisma, userId, periods, currency, (period) => period.start.toISOString().slice(0, 10), accountId);
 }
 
-function historyOf(prisma, userId, periods, currency, name) {
+// R17-05: `accountId` — the history of one account, as the Accueil and the
+// Synthèse show it when an account is chosen; without it, the total.
+function historyOf(prisma, userId, periods, currency, name, accountId = null) {
   return Promise.all(
     periods.map(async (period) => {
-      const { incomes, movements, openings } = await loadSynthesisData(prisma, userId, period);
+      const { incomes, movements, openings } = await loadSynthesisData(prisma, userId, period, { accountId });
       const synthesis = buildSynthesis({ incomes, movements, openings, previous: [], fallbackCurrency: currency, period });
       const inCurrency = !synthesis.mixedCurrencies && synthesis.currency === currency;
       // F008 — the net savings of the month over its income, as on the

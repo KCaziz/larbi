@@ -117,7 +117,7 @@ describe('the answer', () => {
     assert.equal(total(flat), da(1000) + da(10) * 3);
     const sim = (await t.request('GET', '/tools/simulations')).body.simulators.find((row) => row.key === 'interet-compose');
     assert.equal(sim.calculator, 'CAL-IC');
-    assert.deepEqual(sim.fields.find((field) => field.key === 'ratePeriod').options, ['monthly', 'quarterly', 'annual']);
+    assert.deepEqual(sim.fields.find((field) => field.key === 'ratePeriod').options, ['monthly', 'quarterly', 'semiannual', 'annual']);
     assert.deepEqual(sim.formulas.map((formula) => formula.id), ['INT-F01', 'INT-F02', 'INT-F03', 'INT-F04', 'INT-F05']);
   });
 });

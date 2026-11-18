@@ -9,6 +9,10 @@ import { boot } from '../helpers/server.js';
 // Public ON PURPOSE. Anything else must answer 401 to an anonymous request.
 const PUBLIC = new Set([
   'GET /api/health',
+  // Read by search engines at the root of the site (P12-06), outside the API;
+  // tested in functional/seo.test.js.
+  'GET /robots.txt',
+  'GET /sitemap.xml',
   'POST /api/auth/register',
   'POST /api/auth/login',
   'POST /api/auth/logout',

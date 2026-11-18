@@ -58,7 +58,7 @@ export default function TodayPage() {
 
   const toConfirm = (id, titleKey, events) =>
     events.length > 0 && (
-      <section aria-labelledby={id}>
+      <section aria-labelledby={id} className={`today-to-confirm ${id}`}>
         <h2 id={id}>
           <Wallet size={18} aria-hidden="true" /> {t(titleKey)} <span className="today-count">{events.length}</span>
         </h2>

@@ -407,3 +407,89 @@
   align-items: center;
   gap: var(--space-xs);
 }
+
+/* Recette R18: deleting the budget, from the top of its page. */
+.budget-plain-danger {
+  color: var(--danger);
+}
+.budget-plain-danger:hover {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+/* Recette R18: « Compter le solde de mes comptes comme une ressource », an
+   option on the whole width of the form — a switch, its title, its reason. */
+.budget-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-block: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.budget-option:hover {
+  border-color: var(--accent);
+}
+.budget-option-on {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+.budget-option-text {
+  display: grid;
+  gap: 4px;
+  min-inline-size: 0;
+}
+.budget-option-text strong {
+  color: var(--text-h);
+  font-size: 0.98rem;
+}
+.budget-option-text span {
+  color: var(--text);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+/* The switch: a track and its knob, drawn on the checkbox itself. */
+.budget-switch {
+  appearance: none;
+  flex: none;
+  position: relative;
+  inline-size: 44px;
+  block-size: 24px;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--border-strong);
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+.budget-switch::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 3px;
+  inset-inline-start: 3px;
+  inline-size: 18px;
+  block-size: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: inset-inline-start 150ms ease;
+}
+.budget-switch:checked {
+  background: var(--accent);
+}
+.budget-switch:checked::after {
+  inset-inline-start: 23px;
+}
+.budget-switch:focus-visible {
+  outline: 3px solid var(--accent-border);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .budget-switch,
+  .budget-switch::after {
+    transition: none;
+  }
+}

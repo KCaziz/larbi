@@ -16,6 +16,8 @@ import SpacePot from './SpacePot.jsx';
 import SpaceReport from './SpaceReport.jsx';
 import SpaceOverview from './SpaceOverview.jsx';
 import { CommonGoals, CoupleReview, FinancialAgreement, HouseholdExtras, HouseholdReview, SharedExpenses, SharedFigures, useSpaceRun } from './parts.jsx';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
+import MessageWithOffers from '../../components/payments/OffersLink.jsx';
 
 // One page per compartment of a space (P9-02). The components are those of the
 // former single page, unchanged; what changes is that each lives at its own
@@ -35,7 +37,7 @@ function Section({ section, spaceId, data, reload }) {
   const canAdmin = ['owner', 'admin'].includes(data.monRole);
   const feedback = message && (
     <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
-      {message.text}
+      <MessageWithOffers text={message.text} />
     </p>
   );
 
@@ -178,8 +180,8 @@ function MembersSection({ t, language, spaceId, data, canAdmin, run, feedback })
               <button
                 type="button"
                 className="spaces-plain spaces-transfer"
-                onClick={() => {
-                  if (window.confirm(t('spaces.transferConfirm', { name: member.name }))) run(() => api.post(`/fin/espaces/${spaceId}/membres/${member.id}/proprietaire`, {}), 'spaces.transferred');
+                onClick={async () => {
+                  if (await askConfirm(t('spaces.transferConfirm', { name: member.name }))) run(() => api.post(`/fin/espaces/${spaceId}/membres/${member.id}/proprietaire`, {}), 'spaces.transferred');
                 }}
               >
                 <Crown size={14} aria-hidden="true" /> {t('spaces.transfer')}
@@ -189,8 +191,8 @@ function MembersSection({ t, language, spaceId, data, canAdmin, run, feedback })
               <button
                 type="button"
                 className="spaces-icon"
-                onClick={() => {
-                  if (window.confirm(t('spaces.removeConfirm', { name: member.name }))) run(() => api.delete(`/fin/espaces/${spaceId}/membres/${member.id}`), 'spaces.removed');
+                onClick={async () => {
+                  if (await askConfirm(t('spaces.removeConfirm', { name: member.name }))) run(() => api.delete(`/fin/espaces/${spaceId}/membres/${member.id}`), 'spaces.removed');
                 }}
                 aria-label={t('spaces.remove', { name: member.name })}
               >
@@ -249,7 +251,7 @@ function MembersSection({ t, language, spaceId, data, canAdmin, run, feedback })
             type="button"
             variant="secondary"
             onClick={async () => {
-              if (!window.confirm(t('shared.closeConfirm'))) return;
+              if (!await askConfirm(t('shared.closeConfirm'))) return;
               const outcome = await run(() => api.post(`/fin/espaces/${spaceId}/cloturer`, {}), 'shared.closed');
               if (outcome.ok) navigate(`/partage/${spaceId}`);
             }}
@@ -262,7 +264,7 @@ function MembersSection({ t, language, spaceId, data, canAdmin, run, feedback })
             type="button"
             variant="secondary"
             onClick={async () => {
-              if (!window.confirm(t('spaces.deleteConfirm'))) return;
+              if (!await askConfirm(t('spaces.deleteConfirm'))) return;
               const outcome = await run(() => api.delete(`/fin/espaces/${spaceId}`), 'spaces.deleted');
               if (outcome.ok) navigate('/partage');
             }}
@@ -274,7 +276,7 @@ function MembersSection({ t, language, spaceId, data, canAdmin, run, feedback })
             type="button"
             variant="secondary"
             onClick={async () => {
-              if (!window.confirm(t('spaces.leaveConfirm'))) return;
+              if (!await askConfirm(t('spaces.leaveConfirm'))) return;
               const outcome = await run(() => api.post(`/fin/espaces/${spaceId}/quitter`, {}), 'spaces.left');
               if (outcome.ok) navigate('/partage');
             }}

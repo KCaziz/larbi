@@ -12,6 +12,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Spaces.css';
 import { JoinForm, SpaceForm, useSpaceRun } from './parts.jsx';
+import MessageWithOffers from '../../components/payments/OffersLink.jsx';
 
 // Gestion commune, home (P9-02): the list of the person's spaces, and the two
 // ways to get one — create it, or join with an invitation. Joining shares
@@ -41,7 +42,7 @@ export default function SpacesListPage() {
         </p>
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
-            {message.text}
+            <MessageWithOffers text={message.text} />
           </p>
         )}
         <section aria-labelledby="spaces-mine">

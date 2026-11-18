@@ -12,6 +12,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import { AccountEditForm, AccountForm } from './accountParts.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Accounts.css';
+import MessageWithOffers from '../../components/payments/OffersLink.jsx';
 
 // COM-02, « Créer / modifier un compte », at its own address (P8-25):
 // `/app/comptes/nouveau` (and `?suggestion=<asset>` to start from what the
@@ -56,7 +57,7 @@ export default function AccountFormPage() {
       <div className="accounts-page accounts-screen">
         {error && (
           <p className="form-error" role="alert">
-            {error}
+            <MessageWithOffers text={error} />
           </p>
         )}
         {editing ? (

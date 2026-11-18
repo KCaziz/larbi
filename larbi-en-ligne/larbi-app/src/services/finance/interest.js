@@ -16,7 +16,8 @@
 
 import { roundAmount } from './money.js';
 
-export const RATE_PERIOD_MONTHS = { monthly: 1, quarterly: 3, annual: 12 };
+// R17-06: the half-year too (« mensuel, trimestriel, semestriel ou annuel »).
+export const RATE_PERIOD_MONTHS = { monthly: 1, quarterly: 3, semiannual: 6, annual: 12 };
 
 /** The rate of one calculation period, from the rate as typed. */
 export function periodRate({ rate, ratePeriod, rateKind, periodMonths }) {

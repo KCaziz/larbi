@@ -261,3 +261,14 @@
   inset-inline-end: 50%;
   background: var(--chart-2);
 }
+
+/* Recette R18 (2026-11-18): « je veux que les graphiques soient sur un fond
+   blanc pour contraster avec le fond ». Every chart is its own white card (the
+   dark theme's card colour in dark mode), wherever it is placed. */
+.chart:not(.chart-gauge) {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 2px 10px rgba(16, 42, 67, 0.06);
+}

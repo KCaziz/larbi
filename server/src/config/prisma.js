@@ -18,6 +18,17 @@ const adapter = new PrismaMariaDb({
   password: decodeURIComponent(dbUrl.password),
   database: dbUrl.pathname.replace(/^\//, ''),
   sessionVariables: { sql_mode: 'ANSI_QUOTES' },
+  // Recette R18 (2026-11-18): pages that failed now and then online, then
+  // worked on « Réessayer ». A shared host limits the connections of one
+  // database user (often 10 to 25) and may run several copies of the
+  // application; the driver opens up to 10 each by default, so a busy minute
+  // asked for more than the host allows and some requests were refused. Five
+  // per copy are plenty (a page makes a handful of short queries); DB_POOL_SIZE
+  // changes it. A request waits up to 15 s for a free connection rather than
+  // failing at once.
+  connectionLimit: Number(process.env.DB_POOL_SIZE) || 5,
+  acquireTimeout: 15_000,
+  idleTimeout: 60,
 });
 
 // Several writes are deliberately queued one after the other with a row lock

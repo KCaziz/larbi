@@ -35,8 +35,11 @@ export default function BusinessPage() {
   const { user } = useAuth();
   const [message, setMessage] = useState(null);
   const business = useApi('/fin/entreprise');
-  const dashboard = useApi('/fin/entreprise/tableau-de-bord');
-  const documents = useApi('/fin/entreprise/documents');
+  // Only once the business exists (navigation test, 2026-11-17): before, both
+  // were asked for anyway and answered « not found ».
+  const hasBusiness = Boolean(business.data?.entreprise);
+  const dashboard = useApi(hasBusiness ? '/fin/entreprise/tableau-de-bord' : null);
+  const documents = useApi(hasBusiness ? '/fin/entreprise/documents' : null);
   useDocumentMeta(t('business.title'), t('business.intro'));
 
   if (isAdultRefusal(business.error)) {

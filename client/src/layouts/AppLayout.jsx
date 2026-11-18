@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { bestNavMatch, navLinkProps } from '../lib/navMatch.js';
 import { useTranslation } from 'react-i18next';
 import { LifeBuoy, Menu, Settings, X } from 'lucide-react';
 import { useApi } from '../lib/useApi.js';
@@ -135,11 +136,13 @@ export default function AppLayout() {
 
 function NavList({ entries, badges = {} }) {
   const { t } = useTranslation();
+  const { pathname } = useLocation();
+  const best = bestNavMatch(pathname, entries);
   return (
     <ul className="app-nav-list">
       {entries.map((entry) => (
         <li key={entry.to}>
-          <NavLink to={entry.to} end={entry.end} className="app-nav-link" title={t(entry.labelKey)}>
+          <NavLink to={entry.to} end={entry.end} {...navLinkProps(entry, best, 'app-nav-link')} title={t(entry.labelKey)}>
             <entry.icon size={18} aria-hidden="true" />
             <span className="app-nav-text">{t(entry.labelKey)}</span>
             {badges[entry.key] > 0 && (

@@ -201,7 +201,11 @@
   opacity: 0.8;
 }
 
-.fin-figure-grid {
+/* `.fin-cards` (Calendrier, Patrimoine, Portefeuille, espaces) was used but
+   never defined: the cards stood one under the other, full width, touching
+   (recette R18, « les sections Sorties prévues… sont collées »). Same grid. */
+.fin-figure-grid,
+.fin-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 12px;
@@ -784,10 +788,12 @@
    cette largeur, pour que « 79 000,00 DZD » tienne sur une ligne au lieu de se
    couper en « DZ / D ». Hors grille (une ligne qui s’ajuste au contenu), la
    carte garde sa largeur naturelle. */
-.fin-figure-grid > .fin-figure {
+.fin-figure-grid > .fin-figure,
+.fin-cards > .fin-figure {
   container-type: inline-size;
 }
-.fin-figure-grid > .fin-figure .fin-figure-value {
+.fin-figure-grid > .fin-figure .fin-figure-value,
+.fin-cards > .fin-figure .fin-figure-value {
   font-size: clamp(0.95rem, 10cqi, 1.5rem);
   overflow-wrap: normal;
 }

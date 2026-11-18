@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { CheckCheck, Copy, Download, ListChecks, Paperclip, Pencil, Plus, Search, Tag, Trash2, TriangleAlert } from 'lucide-react';
+import { CheckCheck, CircleCheck, Copy, Download, Eye, Landmark, Layers, ListChecks, Paperclip, Pencil, Plus, Search, Tag, Trash2, TriangleAlert, Wallet } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
+import { setAccountScope, useAccountScope } from '../../lib/accountScope.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { formatAmount, formatDate } from '../../lib/format.js';
 import { fromMinorUnits, toMinorUnits } from '../../lib/money.js';
@@ -52,9 +53,13 @@ export default function MovementsPage() {
   const { user } = useAuth();
   const currency = user?.finCurrency ?? 'DZD';
   const [searchParams] = useSearchParams();
+  // R17-05: without an account in the address, the account chosen on the
+  // other screens (or all of them).
+  const [scope] = useAccountScope();
+  const scopeAccount = scope !== 'total' ? scope : '';
   const startFilters = {
     ...EMPTY_FILTERS,
-    accountId: searchParams.get('compte') ?? '',
+    accountId: searchParams.get('compte') ?? scopeAccount,
     categoryId: searchParams.get('categorie') ?? '',
     // From a budget envelope (recette R9-04): its group, its period.
     categoryGroup: searchParams.get('groupe') ?? '',
@@ -69,9 +74,28 @@ export default function MovementsPage() {
   const [message, setMessage] = useState(location.state?.message ? { kind: 'ok', text: t(location.state.message) } : null);
   useDocumentMeta(t('movements.title'), t('movements.intro'));
 
+  // Recette R18 (2026-11-18): « on ne comprend pas que c'est une vue par
+  // compte ; dès que l'on change de compte, la vue doit changer » - unlike the
+  // other filters, the account applies AT ONCE, and follows the account chosen
+  // on the other screens (Accueil, Synthèse).
+  const [seenScope, setSeenScope] = useState(scopeAccount);
+  if (seenScope !== scopeAccount) {
+    setSeenScope(scopeAccount);
+    if (applied.accountId !== scopeAccount) {
+      setFilters({ ...filters, accountId: scopeAccount });
+      setApplied({ ...applied, accountId: scopeAccount });
+    }
+  }
+  const chooseAccount = (accountId) => {
+    setFilters({ ...filters, accountId });
+    setApplied({ ...applied, accountId });
+    setAccountScope(accountId || 'total');
+  };
+
   const query = useMemo(() => buildQuery(applied, tab, currency), [applied, tab, currency]);
-  const history = useApi(`/fin/transactions?${query}`);
-  const { lookups, accounts, tags, references } = useMovementLookups();
+  // The list on screen stays (dimmed) while the next one loads: no blink.
+  const history = useApi(`/fin/transactions?${query}`, { keep: true });
+  const { lookups, accounts, tags, references, failed: lookupsFailed, retry: retryLookups } = useMovementLookups();
 
   async function run(action, okKey) {
     setMessage(null);
@@ -90,7 +114,7 @@ export default function MovementsPage() {
   return (
     <>
       <PageHeader icon={ListChecks} title={t('movements.title')} subtitle={t('movements.intro')} maxWidth={1040} />
-      <div className="money-page">
+      <div className="money-page movements-page">
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
             {message.text}
@@ -106,6 +130,10 @@ export default function MovementsPage() {
           </Button>
         </div>
 
+        <AccountBar accounts={lookups.accounts} totals={accounts.data?.totals} value={applied.accountId} onChange={chooseAccount} />
+
+        {lookupsFailed && <ErrorState message={t('state.loadError')} onRetry={retryLookups} />}
+
         <div className="movements-tabs" role="tablist" aria-label={t('movements.tabsLabel')}>
           {TABS.map((key) => (
             <button key={key} type="button" role="tab" aria-selected={tab === key} className={tab === key ? 'movements-tab active' : 'movements-tab'} onClick={() => setTab(key)}>
@@ -115,13 +143,16 @@ export default function MovementsPage() {
         </div>
 
         <section>
+            {/* « Tout effacer » clears the filters, never the account viewed. */}
             <Filters tab={tab} filters={filters} setFilters={setFilters} lookups={lookups} references={references.data} query={query} onApply={() => setApplied(filters)} onClear={() => {
-              setFilters(EMPTY_FILTERS);
-              setApplied(EMPTY_FILTERS);
+              const kept = { ...EMPTY_FILTERS, accountId: applied.accountId };
+              setFilters(kept);
+              setApplied(kept);
             }} />
             {history.status === 'error' && <ErrorState message={t('state.loadError')} onRetry={history.reload} />}
             {!history.data && history.status === 'loading' && <LoadingState />}
             {history.data && (
+              <div className={history.status === 'loading' ? 'movements-results movements-results-busy' : 'movements-results'} aria-busy={history.status === 'loading'}>
               <History
                 data={history.data}
                 currency={currency}
@@ -129,6 +160,7 @@ export default function MovementsPage() {
                 run={run}
                 openings={tab === 'all' || tab === 'income' ? openingsFor(lookups.accounts, applied) : []}
               />
+              </div>
             )}
         </section>
 
@@ -170,6 +202,10 @@ export function useMovementLookups() {
   const references = useApi('/fin/argent/references');
   const accounts = useApi('/fin/comptes');
   const tags = useApi('/fin/etiquettes');
+  // Recette R18: categories that stayed empty until the page was reloaded -
+  // a failed list is now said, with « Réessayer », never shown as empty.
+  const failed = [categories, references, accounts, tags].some((call) => call.status === 'error');
+  const retry = () => [categories, references, accounts, tags].forEach((call) => call.status === 'error' && call.reload());
   const lookups = useMemo(
     () => ({
       categories: (categories.data?.groups ?? []).flatMap((group) => group.categories),
@@ -180,7 +216,7 @@ export function useMovementLookups() {
     }),
     [categories.data, accounts.data, tags.data, references.data],
   );
-  return { lookups, accounts, tags, references };
+  return { lookups, accounts, tags, references, failed, retry };
 }
 
 // ---- entry -------------------------------------------------------------------
@@ -461,6 +497,79 @@ export function Entry({ currency, lookups, draft, onDone, run }) {
 
 // ---- list --------------------------------------------------------------------
 
+// The account viewed, above everything else on the page (recette R18): one
+// button per account, the chosen one marked. A choice applies at once and
+// becomes the account of every screen.
+function AccountBar({ accounts, totals, value, onChange }) {
+  const { t, i18n } = useTranslation();
+  const shown = (accounts ?? []).filter((account) => !account.archivedAt);
+  const current = shown.find((account) => account.id === value) ?? null;
+  const money = (amount, currency) => (amount === null || amount === undefined ? t('fincludia.notComputed') : formatAmount(i18n.language, amount, currency));
+  const total = (totals ?? [])[0] ?? null;
+  const inTotal = shown.filter((account) => account.includeInTotal !== false).length;
+  // Recette R18 (2026-11-18): a card per account — its name, its balance,
+  // whether it is kept apart from the total — so the page reads as « the
+  // movements of THIS account ». The chosen card is filled and ticked.
+  const card = ({ key, chosen, icon: Icon, color, title, amount, meta, onClick }) => (
+    <button key={key} type="button" aria-pressed={chosen} className={chosen ? 'movements-account-card active' : 'movements-account-card'} onClick={onClick}>
+      <span className="movements-account-icon" style={color && !chosen ? { background: color } : undefined} aria-hidden="true">
+        <Icon size={18} />
+      </span>
+      <span className="movements-account-body">
+        <span className="movements-account-name">{title}</span>
+        <span className="movements-account-amount">{amount}</span>
+        {meta && <span className="movements-account-meta">{meta}</span>}
+      </span>
+      {chosen && <CircleCheck className="movements-account-check" size={18} aria-hidden="true" />}
+    </button>
+  );
+  return (
+    <section className="movements-account-bar" aria-labelledby="movements-account-title">
+      <div className="movements-account-head">
+        <h2 id="movements-account-title">
+          <Eye size={18} aria-hidden="true" /> {t('movements.accountView')}
+        </h2>
+        <p>{current ? t('movements.accountViewOne', { label: current.label }) : t('movements.accountViewAll')}</p>
+      </div>
+      <div className="movements-account-cards">
+        {card({
+          key: 'all',
+          chosen: !current,
+          icon: Layers,
+          title: t('movements.allAccounts'),
+          amount: total ? money(total.soldeTotal?.resultat, total.currency) : '',
+          meta: t('movements.accountCount', { count: inTotal }),
+          onClick: () => onChange(''),
+        })}
+        {shown.map((account) =>
+          card({
+            key: account.id,
+            chosen: current?.id === account.id,
+            icon: account.type === 'AC-01' ? Wallet : Landmark,
+            color: account.color,
+            title: account.label,
+            amount: money(account.solde?.resultat, account.currency),
+            meta: account.includeInTotal === false ? t('movements.accountApart') : null,
+            onClick: () => onChange(account.id),
+          }),
+        )}
+      </div>
+      {/* The same choice as a list, for the tests and the keyboard. */}
+      <label className="sr-only" htmlFor="filter-account">
+        {t('movements.account')}
+      </label>
+      <select id="filter-account" className="sr-only" tabIndex={-1} value={current?.id ?? ''} onChange={(event) => onChange(event.target.value)}>
+        <option value="">{t('movements.allAccounts')}</option>
+        {shown.map((row) => (
+          <option key={row.id} value={row.id}>
+            {row.label}
+          </option>
+        ))}
+      </select>
+    </section>
+  );
+}
+
 function Filters({ tab, filters, setFilters, lookups, references, query, onApply, onClear }) {
   const { t } = useTranslation();
   const set = (name) => (event) => setFilters({ ...filters, [name]: event.target.value });
@@ -480,17 +589,6 @@ function Filters({ tab, filters, setFilters, lookups, references, query, onApply
         </label>
         <input id="filter-text" type="search" value={filters.text} onChange={set('text')} />
       </div>
-      <label className="sr-only" htmlFor="filter-account">
-        {t('movements.account')}
-      </label>
-      <select id="filter-account" value={filters.accountId} onChange={set('accountId')}>
-        <option value="">{t('movements.allAccounts')}</option>
-        {lookups.accounts.map((row) => (
-          <option key={row.id} value={row.id}>
-            {row.label}
-          </option>
-        ))}
-      </select>
       <label className="sr-only" htmlFor="filter-category">
         {t('myMoney.category')}
       </label>

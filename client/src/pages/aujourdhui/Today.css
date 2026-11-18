@@ -180,8 +180,51 @@
   font-size: 0.9rem;
 }
 
-.today-upcoming-row:nth-child(odd) {
-  background: var(--bg-alt);
+.today-upcoming-row {
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+/* Recette R18 (2026-11-18): « je ne veux pas de couleurs qui se confondent
+   avec le fond ». Rows were mint on a mint page; they are now white cards, and
+   what waits for a confirmation is a block with a strong edge: green for the
+   income to confirm, blue for the payments. */
+.today-to-confirm {
+  padding: 14px 16px 16px;
+  border: 1px solid var(--border-strong);
+  border-inline-start: 6px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 4px 14px rgba(16, 42, 67, 0.08);
+}
+.today-to-confirm h2 {
+  margin-block-start: 0;
+}
+.today-to-confirm.today-income {
+  border-inline-start-color: var(--flow-income);
+  background: linear-gradient(90deg, var(--green-bg), var(--surface) 55%);
+}
+.today-to-confirm.today-payments {
+  border-inline-start-color: var(--flow-expense);
+  background: linear-gradient(90deg, var(--blue-bg), var(--surface) 55%);
+}
+.today-to-confirm .today-upcoming-row {
+  border-color: var(--border-strong);
+}
+.today-count {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 26px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.today-income .today-count {
+  background: var(--flow-income);
+  color: #fff;
 }
 
 .today-upcoming-date {

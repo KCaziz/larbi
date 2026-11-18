@@ -1164,3 +1164,186 @@ Retour du client sur la version en ligne. Vérification préalable des correctio
 - Correction : la courbe commence à la date d'ouverture, ou au premier mouvement s'il est plus ancien. Le point juste avant est le solde de départ, étiqueté « Départ », si bien qu'un compte ouvert aujourd'hui trace une ligne entre son solde de départ et son solde actuel. Les points plus anciens restent vides : le compte n'existait pas, ce n'est pas un zéro.
 - Tests : `finRecette16.test.js`, parcours `fin-recette16-journey` (capture de la courbe).
 
+---
+
+# R17 — Dixième passage de recette (2026-11-18)
+
+Retour du client : « les parcours sont un peu déréglés, surtout les relations comptes > revenus > budget > enveloppes > flux ». Rejoué sur un compte neuf : un CCP à 150 000 DA et un livret à 50 000 DA, un salaire de 80 000 DA déclaré sur le CCP, un budget de novembre sur le CCP (enveloppes Alimentation 30 000, Transport 10 000) et 7 000 DA de dépenses ; puis un revenu reçu de 20 000 DA.
+
+| Ce que dit le client | Ce qui a été reproduit | Tâche |
+|---|---|---|
+| « Le flux, ce sont les ressources moins les dépenses, et là nous avons le même problème » | Sur le budget, le flux était « non calculé » (aucun revenu reçu), puis 13 000 DA (revenus reçus − dépenses, sans le solde ni le salaire attendu), alors que l'Accueil disait 163 000 DA pour le même compte. | R17-01 |
+| « Page compte : bon affichage ; page budget : rien ne change, c'est figé » | Les « ressources » du budget n'étaient que les revenus déclarés : un revenu reçu ne les faisait pas bouger, ni le reste à affecter. | R17-01 |
+| « Quand je sélectionne un compte, que je change de chapitre et reviens à l'Accueil, il affiche le total des comptes » | Reproduit. | R17-02 |
+| « On ne peut pas supprimer un compte » | Reproduit : le serveur refusait chaque suppression. | R17-03 |
+| « Le même choix des catégories dans les enveloppes que dans dépense / revenu » | L'enveloppe proposait une longue liste ; la saisie, le sélecteur avec recherche. | R17-04 |
+
+### R17-01 — Budget : ressources = solde + revenus reçus + revenus attendus ; flux = ressources − dépenses
+- Statut : `✅ done`
+- Priorité : `🔴 critical`
+- Correction : les revenus de la période du budget sont ceux **reçus** plus les revenus déclarés **encore attendus**. Ce sont les mêmes « encore attendus » que sur l'Accueil : un salaire compte une fois, attendu puis reçu, jamais deux. Ressources totales = solde au début + revenus de la période. Flux net = ressources totales − dépenses réelles. Le reste à affecter part de ces ressources. La page du budget affiche la somme : « Reçus : 20 000 · encore attendus : 80 000 » et « Ressources totales 250 000 − dépenses 7 000 ».
+- Exemple rejoué : ressources 100 000 (20 000 reçus + 80 000 attendus), ressources totales 250 000, flux net 243 000, reste à affecter 210 000. Avant : ressources 80 000, flux 13 000.
+- Accueil : le flux du compte reste ce qui est entré (revenu initial + revenus reçus) moins les dépenses, soit 163 000. La ligne « Avec vos revenus prévus » y ajoute le salaire attendu et donne le même 243 000 que le budget.
+- Test : `finRecette17.test.js`.
+
+### R17-02 — L'Accueil garde le compte et la période choisis
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Correction : le compte choisi et la période sont gardés dans le navigateur. Un compte qui n'existe plus (supprimé, archivé) ramène au total. Vérifié dans le navigateur : CCP choisi, passage par Budgets, retour à l'Accueil, toujours sur CCP.
+
+### R17-03 — Supprimer un compte
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Cause : la confirmation de suppression n'était pas envoyée au serveur (passée comme option de la requête et non dans son contenu), qui refusait donc toujours. Elle l'est depuis la fiche du compte et depuis la liste des comptes.
+- Au passage : ce qui était rattaché au compte supprimé n'y reste plus accroché. Ses budgets et enveloppes repassent sur le solde total ; ses revenus et paiements réguliers, objectifs et dettes perdent leur compte.
+- Vérifié dans le navigateur (« supprimé, avec ses mouvements ») ; test : `finRecette17.test.js`.
+
+### R17-04 — Enveloppes : le même choix de catégorie que pour une dépense
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Correction : le formulaire d'enveloppe utilise le sélecteur de la saisie : recherche, puis catégorie → sous-catégorie. Une catégorie principale vaut toujours tout son groupe (« Logement »). Une catégorie qui a déjà son enveloppe dans ce budget est signalée avant l'envoi.
+
+### R17-05 — Un seul compte choisi pour tous les écrans ; la Synthèse par compte
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Origine : retour du client (2026-11-18) : « dans la synthèse, le revenu pris par défaut c'est le cash, les autres ne sont pas pris » ; « il suffit que je clique sur une autre tâche pour que le compte revienne à tous les comptes, alors que chaque tâche doit être paramétrée selon le compte choisi, ou inclure l'ensemble des comptes comptés dans un seul solde ».
+- Cause : la Synthèse n'avait pas de choix de compte et ne lisait que les comptes comptés dans le total. Un compte tenu à part n'y apparaissait jamais, et le choix fait sur l'Accueil n'était connu que de l'Accueil.
+- Correction : le compte choisi est le même sur tous les écrans et reste gardé dans le navigateur. « Tous les comptes » = les comptes du solde total ; sinon, un compte, y compris un compte tenu à part. On le choisit sur l'Accueil, sur la Synthèse (nouveau choix « Compte ») ou dans le filtre des Mouvements, et on le retrouve sur les autres. La Synthèse (revenus, dépenses, flux, solde début et fin, courbes) et son historique se calculent alors sur ce compte.
+- Vérifié dans le navigateur : compte « tenu à part » choisi sur l'Accueil, puis Synthèse (ses revenus) → Mouvements (filtré sur lui) → Accueil (toujours lui).
+
+### R17-06 — Intérêts : la période semestrielle
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Origine : retour du client (2026-11-18) : « l'intérêt composé n'a pas été rectifié ».
+- Vérifié d'abord sur ses propres exemples, le calcul est juste : 100 000 DA à 1 % par mois sur 12 mois = 112 682,50 (composé) et 112 000 (simple) ; 12 % nominal capitalisé chaque mois = 112 682,50 ; 10 % par an sur trois ans = 133 100.
+- Ce qui manquait : le semestre, demandé le 2026-11-11 (« mensuel, trimestriel, semestriel ou annuel »). Le simulateur d'intérêts le propose maintenant pour le taux, la capitalisation, la durée et les versements. 6 % par semestre sur deux ans = 126 247,70 (100 000 × 1,06⁴), taux annuel effectif 12,36 %.
+- À confirmer avec le client : s'il reste un écart, lequel (écran, chiffres saisis, résultat attendu).
+
+### R17-07 — Les anneaux d'avant
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Origine : retour du client (2026-11-18) : « pour les camemberts, je préfère les anciens aux nouveaux ».
+- Correction : l'anneau reprend sa forme d'avant R16-04 : à gauche, 220 px, la description à sa droite, ses couleurs d'origine. La tranche « Revenu initial » est gardée. Les courbes et les barres gardent leurs couleurs marquées, car le retour ne portait que sur les camemberts.
+
+---
+
+# R18 — Onzième passage de recette (2026-11-18, `test.txt`)
+
+Remarques notées par l'équipe en déroulant `SCENARIO_TEST_COMPLET.md` sur le site.
+
+| Remarque | Ce qui a été constaté | Tâche |
+|---|---|---|
+| « Des fois, dans une page : Impossible de charger les données ; il faut cliquer sur Réessayer » · « aucune page ne s'est chargée pendant quelques secondes » · « Mouvements : les catégories sont souvent vides » | Non reproduit en local (40 écrans parcourus sans erreur) : une défaillance passagère de l'hébergeur (redémarrage, connexions refusées par la base). Les listes de la saisie restaient vides sans rien dire. | R18-01 |
+| « C1 : une erreur, au deuxième essai ça a marché » (suppression d'un compte) | Une écriture par mouvement dans la même transaction : long sur un compte chargé, sur une base distante. | R18-02 |
+| « Mouvements pas fluide ; on ne comprend pas que c'est une vue par compte ; le compte doit changer la vue tout de suite » · « B5 : le compte n'est pas choisi en arrivant » | Le compte était un filtre parmi d'autres, appliqué au clic sur « Filtrer » ; la liste clignotait à chaque changement. | R18-03 |
+| « Objectifs › Réserve : deux éléments du menu s'allument » | Reproduit sur `/app/objectifs/fonds-urgence`. | R18-04 |
+| « Les alertes de confirmation sont celles par défaut » | 23 confirmations du navigateur. | R18-05 |
+| « Revenus à confirmer : couleur plus marquée ; pas de couleurs qui se confondent avec le fond (camembert vide) » · « camembert : le nom au survol est effacé par la couleur » | Lignes menthe sur fond menthe ; anneau vide de la couleur du fond ; nom long écrit sous l'anneau. | R18-06 |
+| « Calendrier : les sections Sorties prévues… sont collées » | La grille `.fin-cards` n'était définie nulle part (Calendrier, Patrimoine, Portefeuille, espaces). | R18-07 |
+| « Boutons retour trop discrets » · « graphiques sur fond blanc » · « Synthèse terne » | — | R18-08 |
+| « Formulaires cassés par les petits textes de description » | Les aides sous les champs décalaient les champs voisins. | R18-09 |
+| « Ajouter une enveloppe : la page doit défiler jusqu'au formulaire » | Fonctionne en local ; rendu plus sûr. | R18-10 |
+| « Le choix de catégorie de /budgets/revenus est simple » | Liste déroulante simple. | R18-11 |
+| « Pour supprimer un objectif, il faut aller au détail, descendre, trouver deux petites icônes » | Reproduit. | R18-12 |
+| « Compte gratuit, deuxième compte : « Abonnez-vous depuis Offres » doit être un lien » | Reproduit. | R18-13 |
+| « Revenu prévu déclaré : il n'apparaît pas à l'Accueil dans les calculs » · « Budgets → Revenus → Déclarer n'existe pas » | Le revenu attendu n'était qu'une mention ; le chemin s'appelle « Revenus prévus → Ajouter un revenu » (erreur du scénario). | R18-14 |
+
+### R18-01 — Chargements : reprise automatique des échecs passagers
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Correction : une lecture qui échoue pour une raison passagère (serveur injoignable, erreur 5xx, trop de demandes) est refaite seule deux fois (après 0,4 s puis 1,2 s) avant d'afficher « Impossible de charger » ; un refus (4xx) n'est jamais refait. Côté serveur, l'application garde au plus 5 connexions à la base (réglable avec `DB_POOL_SIZE`) au lieu de 10, et attend jusqu'à 15 s une connexion libre au lieu d'échouer. Un hébergeur mutualisé limite les connexions par utilisateur de base, et peut lancer plusieurs copies de l'application. Dans les Mouvements, une liste (catégories, comptes, étiquettes) qui n'a pas pu être lue l'écrit, avec « Réessayer », au lieu de rester vide.
+
+### R18-02 — Supprimer un compte chargé
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Correction : la trace de suppression des mouvements est écrite en une fois au lieu d'une écriture par mouvement.
+
+### R18-03 — Mouvements : une vue par compte
+- Statut : `✅ done`
+- Priorité : `🔴 high`
+- Correction : en haut de la page, un cadre « Compte affiché » avec un bouton par compte et « Tous les comptes ». Il dit ce qu'on voit (« Vous voyez les mouvements du compte « CCP » »). Un clic change la liste tout de suite et devient le compte de tous les écrans. Le compte choisi ailleurs (Accueil, Synthèse) y est repris, même page ouverte. La liste affichée reste, grisée, pendant que la suivante arrive (plus de clignotement). « Tout effacer » vide les autres filtres sans changer de compte.
+
+### R18-04 — Un seul élément du menu allumé
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Correction : dans les menus (barre latérale, menu « Plus » du téléphone), seule l'entrée dont l'adresse correspond le mieux à la page s'allume.
+
+### R18-05 — Fenêtre de confirmation de l'application
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Correction : les 23 confirmations passent par une fenêtre aux couleurs du site, en clair et en sombre, en arabe de droite à gauche. Elle porte une icône, le message, « Annuler » (choisi par défaut) et « Confirmer » en rouge pour une suppression. Échap ou un clic à côté annule. Elle est faite avec l'élément `<dialog>` du navigateur, sans bibliothèque externe : rien à télécharger en plus, et la politique de sécurité du site n'a pas à changer.
+
+### R18-06 — Couleurs qui se détachent du fond
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Correction :
+  - « Aujourd'hui » : « Revenus à confirmer » est un bloc blanc à bord vert épais, avec un fond dégradé vert et un compteur vert ; « Paiements à confirmer » a la même forme en bleu. Les lignes sont des cartes blanches bordées.
+  - Anneau vide : tracé en pointillés foncés.
+  - Anneau : le centre est un disque de la couleur de la carte. Le nom survolé y est écrit en foncé, coupé en deux lignes au plus (« … » au-delà), plus petit s'il est long.
+
+### R18-07 — Calendrier : les cartes séparées
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Correction :
+  - La grille `.fin-cards` est définie comme celle des autres pages : cartes côte à côte, espacées. Cela vaut aussi pour Patrimoine, Portefeuille et les espaces.
+  - Les grandes parties du Calendrier sont espacées et séparées par une ligne.
+
+### R18-08 — Retour, graphiques, Synthèse
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Correction :
+  - Le lien « Retour » devient un bouton encadré avec sa flèche, plein au survol.
+  - Chaque graphique (courbes, barres) est une carte blanche (la couleur des cartes en mode sombre).
+  - Synthèse : chaque chiffre du mois porte la couleur de ce qu'il est. Revenus en vert, dépenses en orange comme sur les courbes, flux net plein dans le dégradé de la marque, soldes en ardoise.
+  - Synthèse : chaque carte de section a un bord de couleur, et les titres une barre de couleur.
+
+### R18-09 — Aides des champs dans une bulle « ? »
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Correction : dans tous les formulaires de l'application, le texte d'aide sous un champ est remplacé par un « ? » à côté de son libellé. L'aide s'affiche dans une bulle au survol du libellé, et pendant qu'on remplit le champ (au toucher sur téléphone). Les champs restent alignés. L'aide reste lue par les lecteurs d'écran.
+
+### R18-10 — Défiler jusqu'à ce qu'un bouton fait apparaître
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Correction :
+  - L'application surveille 2 s au lieu de 0,7 s ce qu'un bouton fait apparaître, et compte aussi une partie ouverte par un attribut.
+  - Elle tient compte de la barre fixée en haut de l'écran.
+  - Un formulaire plus haut que l'écran s'affiche depuis son début.
+
+### R18-11 — Revenus prévus : le sélecteur de catégories
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Correction : la déclaration d'un revenu (Budgets › Revenus prévus) utilise le sélecteur de la saisie : recherche, puis catégorie → sous-catégorie, limité aux revenus.
+
+### R18-12 — Archiver ou supprimer un objectif, simplement
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Correction : « Archiver » et « Supprimer » (en rouge) sont des boutons nommés. On les trouve dans la liste des objectifs, sur chaque ligne (icônes seules sur téléphone), et en tête du détail de l'objectif.
+
+### R18-13 — « Voir les offres »
+- Statut : `✅ done`
+- Priorité : `🟢 low`
+- Correction : quand un compte gratuit est refusé (deuxième compte, invitation, deuxième écran), le message est suivi d'un lien « Voir les offres ». Le lien mène à la page des offres (Mon espace › Accès premium). Il apparaît dans les comptes et dans les espaces partagés.
+
+### R18-14 — Le revenu attendu dans les chiffres de l'Accueil
+- Statut : `✅ done`
+- Priorité : `🟠 high`
+- Correction : quand un revenu déclaré est encore attendu sur la période, l'Accueil ajoute une carte « Flux prévu (avec les revenus attendus) ». Elle vaut reçu + encore attendu − dépenses, la même règle que le flux du budget (R17-01), et donne le détail en dessous. Le « Flux net » reste ce qui est réellement entré et sorti, égal au solde. La mention « Encore attendu ce mois » est mise en avant (fond vert).
+- Le scénario de test est corrigé : « Budgets → bouton Revenus prévus → Ajouter un revenu ».
+
+### R18-15 — Retouches après relecture
+- Statut : `✅ done`
+- Priorité : `🟢 low`
+- Correction :
+  - Le « ? » des champs est un peu plus petit (15 px au lieu de 18).
+  - Un seul bouton Retour par page. Le détail d'un budget, un guide et un terme du lexique (« Apprendre ») affichaient en plus leur propre lien ; seul celui de l'en-tête reste, avec le même libellé et la même destination.
+  - Détail d'un budget : « Archiver » et « Supprimer » (en rouge) sont en haut, à côté de « Modifier ». Après une suppression, on revient à la liste des budgets avec le message.
+
+### R18-16 — Mouvements, formulaire de budget, couleurs de la Synthèse
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Correction :
+  - Mouvements : le cadre « Compte affiché » montre une carte par compte (nom, solde, « Hors du solde total » s'il y a lieu), plus « Tous les comptes » avec le solde total. La carte choisie est pleine, en bleu de la marque, et cochée. Sur téléphone, les cartes défilent de côté.
+  - Mouvements : les parties de la page (actions, compte, onglets, filtres, liste) sont espacées.
+  - Nouveau budget : « Compter le solde de mes comptes comme une ressource » sort de la grille des champs. C'est maintenant un interrupteur sur toute la largeur, avec son titre et son explication lisibles d'un coup d'œil.
+  - Synthèse : plus d'orange. Les dépenses sont en bleu, la couleur des dépenses dans l'application, sur la carte comme sur la courbe. Les bords des sections n'utilisent plus l'orange ni l'ocre.

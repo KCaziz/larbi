@@ -16,6 +16,7 @@ import '../../components/fincludia/Fincludia.css';
 import './Accounts.css';
 import '../accueil/Home.css';
 import CounterValue from '../../components/fincludia/CounterValue.jsx';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 
 // COM-03, « Détail compte », at its own address (P8-25): `/app/comptes/:id`.
 // The balance (PB-F001, the server's), the alerts in words, the balance month
@@ -171,10 +172,12 @@ export default function AccountDetailPage() {
 
   // Recette R10-08: delete for good, then back to the list with a message.
   async function remove() {
-    if (!window.confirm(t('accounts.deleteConfirm', { label: account.label }))) return;
+    if (!await askConfirm(t('accounts.deleteConfirm', { label: account.label }))) return;
     setMessage(null);
     try {
-      await api.delete(`/fin/comptes/${id}`, { confirm: true });
+      // R17-03: the confirmation goes in the BODY (`{ body }`); passed as a bare
+      // option it was never sent, and the server refused every deletion.
+      await api.delete(`/fin/comptes/${id}`, { body: { confirm: true } });
       navigate('/app/comptes', { state: { message: 'accounts.deleted' } });
     } catch (err) {
       setMessage({ kind: 'error', text: errorKey(err, { 422: 'accounts.errors.refused' }) });

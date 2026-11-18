@@ -15,6 +15,7 @@ import IncomeDeclarationForm from '../../components/fincludia/IncomeDeclarationF
 import BarList from '../../components/fincludia/charts/BarList.jsx';
 import '../../components/fincludia/Fincludia.css';
 import '../comptes/Accounts.css';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 
 // « Revenus prévus » (P8-24): the incomes the person declared, the base of the
 // budget's « reste à allouer » (PB-F009). They were only created by « Premiers
@@ -37,6 +38,8 @@ export default function IncomesPage() {
   // R11-13: the same declaration as « Premiers pas », category included.
   const categories = useApi('/fin/categories');
   const incomeCategories = ((categories.data?.groups ?? []).find((group) => group.code === 'income')?.categories ?? []).map((category) => ({ id: category.id, label: category.label }));
+  // Recette R18: the same picker as for a movement (search, then category → sub-category).
+  const incomeGroups = (categories.data?.groups ?? []).filter((group) => group.code === 'income');
 
   async function run(action, okKey) {
     setMessage(null);
@@ -75,7 +78,7 @@ export default function IncomesPage() {
           </label>
         </div>
 
-        {editing === 'new' && <IncomeDeclarationForm currency={currency} accounts={ownAccounts} categories={incomeCategories} newAccountLink="/app/comptes/nouveau?retour=/app/budgets/revenus" onSubmit={(body) => run(() => api.post('/fin/revenus', body), 'incomes.added')} />}
+        {editing === 'new' && <IncomeDeclarationForm currency={currency} accounts={ownAccounts} categories={incomeCategories} categoryGroups={incomeGroups} newAccountLink="/app/comptes/nouveau?retour=/app/budgets/revenus" onSubmit={(body) => run(() => api.post('/fin/revenus', body), 'incomes.added')} />}
 
         {/* The expected income per month by source, one scale for all (F001). */}
         {incomes.filter((income) => !income.archivedAt && income.currency === currency && income.monthlyValue !== null).length >= 2 && (
@@ -127,15 +130,15 @@ export default function IncomesPage() {
                   <button
                     type="button"
                     className="accounts-link-button accounts-danger"
-                    onClick={() => {
-                      if (window.confirm(t('incomes.deleteConfirm', { label: income.label }))) run(() => api.delete(`/fin/revenus/${income.id}`, {}), 'incomes.deleted');
+                    onClick={async () => {
+                      if (await askConfirm(t('incomes.deleteConfirm', { label: income.label }))) run(() => api.delete(`/fin/revenus/${income.id}`, {}), 'incomes.deleted');
                     }}
                   >
                     <Trash2 size={14} aria-hidden="true" /> {t('accounts.delete')}
                   </button>
                 </span>
                 {editing?.id === income.id && (
-                  <IncomeDeclarationForm key={income.id} currency={income.currency} income={income} accounts={ownAccounts} categories={incomeCategories} onSubmit={({ received, ...body }) => run(() => api.patch(`/fin/revenus/${income.id}`, body), 'incomes.saved')} />
+                  <IncomeDeclarationForm key={income.id} currency={income.currency} income={income} accounts={ownAccounts} categories={incomeCategories} categoryGroups={incomeGroups} onSubmit={({ received, ...body }) => run(() => api.patch(`/fin/revenus/${income.id}`, body), 'incomes.saved')} />
                 )}
               </li>
             ))}

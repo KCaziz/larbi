@@ -21,6 +21,7 @@ import { yearlyFraction } from '../../lib/ratePeriods.js';
 import { toMinorUnits } from '../../lib/money.js';
 import '../../components/fincludia/Fincludia.css';
 import './Debts.css';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 
 // Debts (P6-10), screens C13-C14. The "qualification productive / neutre /
 // sous pression" the client asks for is deliberately absent: its thresholds
@@ -323,8 +324,8 @@ function DebtRow({ debt, accounts, budgetCategories, run }) {
               type="button"
               className="debts-icon"
               title={t('debts.delete')}
-              onClick={() => {
-                if (window.confirm(t('debts.deleteConfirm', { label: debt.label }))) run(() => api.delete(`/fin/debts/${debt.id}`), 'debts.deleted');
+              onClick={async () => {
+                if (await askConfirm(t('debts.deleteConfirm', { label: debt.label }))) run(() => api.delete(`/fin/debts/${debt.id}`), 'debts.deleted');
               }}
             >
               <Trash2 size={15} aria-hidden="true" />

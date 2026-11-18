@@ -5,6 +5,7 @@ import { ArrowRight, Calculator, CalendarDays, GraduationCap, HeartPulse, Home, 
 import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate } from '../../lib/format.js';
 import { periodRange } from '../../lib/finControls.js';
+import { useAccountScope } from '../../lib/accountScope.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
@@ -37,15 +38,40 @@ const QUICK_ACTIONS = [
   { key: 'compare', to: '/app/outils/comparateur', icon: Scale, tone: 'light' },
 ];
 
+// R17-02: the period chosen on the Accueil is kept when the person goes to
+// another screen and comes back; the account is shared by every screen
+// (lib/accountScope). Kept in this browser; nothing personal in the value.
+const HOME_VIEW_KEY = 'fincludia.home.view';
+function readHomeView() {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(HOME_VIEW_KEY) ?? 'null');
+    return saved && typeof saved === 'object' ? saved : {};
+  } catch {
+    return {};
+  }
+}
+function saveHomeView(view) {
+  try {
+    window.localStorage.setItem(HOME_VIEW_KEY, JSON.stringify({ ...readHomeView(), ...view }));
+  } catch {
+    // Private browsing: the choice lasts as long as the page.
+  }
+}
+
 export default function HomePage() {
   const { t, i18n } = useTranslation();
   useDocumentMeta(t('appHome.title'), t('appHome.intro'));
-  const [period, setPeriod] = useState('mois');
+  const [period, setPeriodState] = useState(() => (typeof readHomeView().period === 'string' && readHomeView().period !== 'periode' ? readHomeView().period : 'mois'));
+  const setPeriod = (value) => {
+    setPeriodState(value);
+    saveHomeView({ period: value });
+  };
   const [custom, setCustom] = useState({ from: '', to: '' });
   const [ringTab, setRingTab] = useState('expenses');
   const [tabChosen, setTabChosen] = useState(false);
   const [slice, setSlice] = useState(null);
-  const [accountView, setAccountView] = useState('total');
+  // R17-05: the account chosen is the one of every screen (lib/accountScope).
+  const [accountView, setAccountView] = useAccountScope();
 
   const range = periodRange(period, new Date(), custom);
   // One account chosen (recette R9-06): the ring, the flow, the figures and the
@@ -87,6 +113,10 @@ export default function HomePage() {
   const total = comptes.totals.find((row) => row.currency === currency) ?? comptes.totals[0] ?? null;
   const openAccounts = comptes.accounts.filter((account) => !account.archivedAt);
   const shownAccount = openAccounts.find((account) => account.id === accountView) ?? null;
+  // An account kept from before that no longer exists (deleted, archived): back to the total.
+  // (After this render: the choice is shared with other screens, which must not
+  // be updated while this one renders.)
+  if (accountView !== 'total' && !shownAccount) queueMicrotask(() => setAccountView('total'));
   const view = today.data?.aujourdhui ?? null;
 
   // The category of a movement, from the breakdowns the server already named.
@@ -179,7 +209,7 @@ export default function HomePage() {
             {!!synthese.revenuInitial?.montant && <p className="fin-hint">{t('appHome.initialIncomeHint', { amount: formatAmount(i18n.language, synthese.revenuInitial.montant, currency) })}</p>}
             {/* Recette R10-05: what is still expected this period, to confirm on arrival. */}
             {synthese.revenusAttendus?.count > 0 && (
-              <p className="fin-hint">
+              <p className="fin-hint home-expected">
                 {t('appHome.incomeExpected', { amount: formatAmount(i18n.language, synthese.revenusAttendus.total, currency) })} <Link to="/app/aujourdhui">{t('appHome.incomeConfirm')}</Link>
               </p>
             )}
@@ -197,14 +227,26 @@ export default function HomePage() {
               </p>
             )}
           </FigureCard>
-          <FigureCard label={t('appHome.netFlow')} answer={synthese.fluxNet}>
-            {/* R13-03: nothing received yet but income declared — the flux is also said WITH what is expected. */}
-            {period === 'mois' && synthese.revenus.resultat === null && synthese.revenusPrevus?.resultat > 0 && (
+          <FigureCard label={t('appHome.netFlow')} answer={synthese.fluxNet} />
+          {/* Recette R18 (2026-11-18): « j'ai déclaré un revenu prévu mais il ne
+              s'affiche pas à l'accueil dans les calculs ». What arrived stays
+              apart (the flux above equals the balance); what is still expected
+              this period is now a figure of its own, the same rule as the
+              budget's: resources (received + expected) − expenses. */}
+          {synthese.revenusAttendus?.count > 0 && (
+            <FigureCard
+              label={t('appHome.plannedFlow')}
+              answer={{ resultat: (synthese.revenus.resultat ?? 0) + synthese.revenusAttendus.total - (synthese.depenses.resultat ?? 0), unite: currency, formule_id: 'PB-F006' }}
+            >
               <p className="fin-hint">
-                {t('appHome.fluxWithExpected', { income: formatAmount(i18n.language, synthese.revenusPrevus.resultat, currency), flux: formatAmount(i18n.language, synthese.revenusPrevus.resultat - (synthese.depenses.resultat ?? 0), currency) })}
+                {t('appHome.plannedFlowDetail', {
+                  received: formatAmount(i18n.language, synthese.revenus.resultat ?? 0, currency),
+                  expected: formatAmount(i18n.language, synthese.revenusAttendus.total, currency),
+                  expenses: formatAmount(i18n.language, synthese.depenses.resultat ?? 0, currency),
+                })}
               </p>
-            )}
-          </FigureCard>
+            </FigureCard>
+          )}
         </div>
 
         {/* P8-24: the declared resources, the salary first — what is expected, apart

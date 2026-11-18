@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 
 // The common pot of a space (P9-09, the client's rule A1): what came in, what
 // went out, what is left — and, as a PROPOSAL, what a collective need would ask
@@ -110,7 +111,7 @@ export default function SpacePot({ t, language, spaceId, space, members, canAdmi
                   type="button"
                   className="spaces-icon"
                   onClick={async () => {
-                    if (!window.confirm(t('spaces.pot.deleteConfirm'))) return;
+                    if (!await askConfirm(t('spaces.pot.deleteConfirm'))) return;
                     const outcome = await run(() => api.delete(`/fin/espaces/${spaceId}/ressources/${row.id}`), 'spaces.pot.deleted');
                     if (outcome.ok) pot.reload();
                   }}

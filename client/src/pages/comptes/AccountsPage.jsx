@@ -16,6 +16,8 @@ import CategoryIcon from '../../components/fincludia/CategoryIcon.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Accounts.css';
 import CounterValue from '../../components/fincludia/CounterValue.jsx';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
+import MessageWithOffers from '../../components/payments/OffersLink.jsx';
 
 // « Mes comptes » (P8-05, screens COM-01 to COM-04): every account with its
 // balance (PB-F001, computed by the server), the total available (PB-F002)
@@ -63,7 +65,7 @@ export default function AccountsPage() {
       <div className="accounts-page">
         {message && (
           <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
-            {message.text}
+            <MessageWithOffers text={message.text} />
           </p>
         )}
 
@@ -225,8 +227,8 @@ function AccountCard({ account, types, run }) {
         <button
           type="button"
           className="accounts-link-button accounts-danger"
-          onClick={() => {
-            if (window.confirm(t('accounts.deleteConfirm', { label: account.label }))) run(() => api.delete(path, { confirm: true }), 'accounts.deleted');
+          onClick={async () => {
+            if (await askConfirm(t('accounts.deleteConfirm', { label: account.label }))) run(() => api.delete(path, { body: { confirm: true } }), 'accounts.deleted');
           }}
         >
           <Trash2 size={14} aria-hidden="true" /> {t('accounts.delete')}

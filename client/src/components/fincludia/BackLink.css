@@ -1,16 +1,31 @@
-/* P8-25: the way back from a screen to the page of its menu. */
+/* P8-25: the way back from a screen to the page of its menu.
+   Recette R18 (2026-11-18): « les boutons retour sont trop discrets » — a real
+   button now: a framed pill with its arrow, that reads at a glance. */
 .fin-back {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-block-size: 44px;
+  gap: 8px;
+  min-block-size: 40px;
   margin-block-end: var(--space-sm);
+  padding: 6px 16px 6px 12px;
+  border: 1.5px solid var(--accent);
+  border-radius: 999px;
+  background: var(--surface);
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
+  box-shadow: 0 2px 8px rgba(16, 42, 67, 0.08);
+  transition: background 120ms ease, color 120ms ease;
 }
 
 .fin-back:hover,
 .fin-back:focus-visible {
-  text-decoration: underline;
+  background: var(--accent);
+  color: var(--on-accent);
+  text-decoration: none;
+}
+
+.fin-back:focus-visible {
+  outline: 3px solid var(--accent-border);
+  outline-offset: 2px;
 }

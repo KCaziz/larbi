@@ -460,3 +460,15 @@
   background: var(--blue-bg);
   color: var(--blue);
 }
+
+/* Recette R18 (2026-11-18): the big parts of the page (the period, what is
+   planned, the regular charges, the provisions) breathe apart, each one
+   opened by a line. */
+.calendar-page > section + section {
+  margin-block-start: 44px;
+  padding-block-start: 24px;
+  border-block-start: 1px solid var(--border);
+}
+.calendar-page .movements-tabs {
+  margin-block-start: 22px;
+}

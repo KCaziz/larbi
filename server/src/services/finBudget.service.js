@@ -15,6 +15,9 @@ import { recordChange, recordCorrection } from './finChange.service.js';
 import { isBudgetableFamily } from './finBudgetProposal.service.js';
 import { throughEndOfDay } from '../utils/dayEnd.js';
 import { accountsWithBalances, ensureCashAccount, usableAccount } from './finAccount.service.js';
+import { loadCalendarData } from './finCalendar.service.js';
+import { collectEvents } from './finCalendarView.service.js';
+import { occurrencesWithOutcome } from './finOccurrence.service.js';
 
 export const BUDGET_ENTITY = 'budget';
 export const ENVELOPE_ENTITY = 'envelope';
@@ -582,7 +585,15 @@ export async function loadBudgetData(prisma, userId, budget) {
   const startBalance = await balanceAtStart(prisma, userId, budget);
   // `inTotal`: whether the account the movement is on is counted in the total balance (R13-01).
   const movements = movementRows.map(({ account, ...row }) => ({ ...row, inTotal: account ? account.includeInTotal : true }));
-  return { envelopes, movements, startBalance, incomes, goals, provisions, carry: carries ? await carryFromPrevious(prisma, userId, budget) : null };
+  // R17-01: the declared income of the period NOT received yet — the same « encore
+  // attendu » as the Accueil (R10-05). With what has been received, it makes the
+  // budget's resources: a salary counts once, expected then received, never twice.
+  const to = throughEndOfDay(budget.periodEnd);
+  const periodData = await loadCalendarData(prisma, userId, { from: budget.periodStart, to });
+  const expectedIncome = collectEvents({ ...periodData, from: budget.periodStart, to, currency: budget.currency, occurrencesOf: occurrencesWithOutcome })
+    .filter((event) => event.kind === 'recurrence' && event.inflow && event.currency === budget.currency && (!budget.accountId || !event.accountId || event.accountId === budget.accountId))
+    .reduce((sum, event) => sum + event.value, 0);
+  return { envelopes, movements, startBalance, incomes, goals, provisions, expectedIncome, carry: carries ? await carryFromPrevious(prisma, userId, budget) : null };
 }
 
 /**

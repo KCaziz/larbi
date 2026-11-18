@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useParams } from 'react-router-dom';
-import { ChevronLeft, Lightbulb, Pencil, PiggyBank, Plus, Scale, Trash2 } from 'lucide-react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Archive, ArchiveRestore, Lightbulb, Pencil, PiggyBank, Plus, Scale, Trash2 } from 'lucide-react';
 import { api, errorKey } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate, formatRatio } from '../../lib/format.js';
+import CategoryPicker from '../../components/fincludia/CategoryPicker.jsx';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import Button from '../../components/ui/Button.jsx';
@@ -21,6 +22,7 @@ import LineChart from '../../components/fincludia/charts/LineChart.jsx';
 import { toMinorUnits } from '../../lib/money.js';
 import '../../components/fincludia/Fincludia.css';
 import './Budget.css';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 
 // One budget, computed (P6-05, screen C06): planned vs real per envelope, the
 // alerts at the declared thresholds, and what is still "non affecté". Nothing
@@ -34,6 +36,7 @@ export default function BudgetDetailPage() {
   const { t, i18n } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [message, setMessage] = useState(location.state?.message ? { kind: 'ok', text: t(location.state.message) } : null);
   const [addingEnvelope, setAddingEnvelope] = useState(false);
   const [showProposal, setShowProposal] = useState(false);
@@ -83,14 +86,9 @@ export default function BudgetDetailPage() {
 
   return (
     <>
-      <PageHeader icon={PiggyBank} title={budget.label} subtitle={t('budget.detailSubtitle')} maxWidth={1040} />
+      <PageHeader back={{ to: '/app/budgets', label: t('budget.backToList') }} icon={PiggyBank} title={budget.label} subtitle={t('budget.detailSubtitle')} maxWidth={1040} />
       {/* P10-02: the budget's own colour, as a band under its title. */}
       <div className="budget-page" style={budget.color ? { borderBlockStart: `5px solid ${budget.color}`, paddingBlockStart: 12 } : undefined}>
-        <p>
-          <Link to="/app/budgets" className="budget-plain">
-            <ChevronLeft size={15} aria-hidden="true" /> {t('budget.backToList')}
-          </Link>
-        </p>
         <div className="budget-section-actions budget-screen-links">
           <Link className="budget-plain" to={`/app/budgets/${id}/modifier`}>
             <Pencil size={15} aria-hidden="true" /> {t('budget.edit')}
@@ -98,6 +96,30 @@ export default function BudgetDetailPage() {
           <Link className="budget-plain" to={`/app/budgets/${id}/methode`}>
             <Scale size={15} aria-hidden="true" /> {t('budget.methods.title')}
           </Link>
+          {/* Recette R18 (2026-11-18): archive and delete at the top of the
+              budget too, beside « Modifier ». */}
+          <button
+            type="button"
+            className="budget-plain"
+            onClick={() => run(() => api.put(`/fin/budgets/${id}/archive`, { archived: !budget.archivedAt }), budget.archivedAt ? 'budget.restored' : 'budget.archived')}
+          >
+            {budget.archivedAt ? <ArchiveRestore size={15} aria-hidden="true" /> : <Archive size={15} aria-hidden="true" />} {budget.archivedAt ? t('budget.restore') : t('budget.archive')}
+          </button>
+          <button
+            type="button"
+            className="budget-plain budget-plain-danger"
+            onClick={async () => {
+              if (!(await askConfirm(t('budget.deleteConfirm', { label: budget.label })))) return;
+              try {
+                await api.delete(`/fin/budgets/${id}`);
+                navigate('/app/budgets', { state: { message: 'budget.deleted' } });
+              } catch (err) {
+                setMessage({ kind: 'error', text: t(errorKey(err, { 422: 'budget.errors.refused' })) });
+              }
+            }}
+          >
+            <Trash2 size={15} aria-hidden="true" /> {t('budget.delete')}
+          </button>
         </div>
 
         {message && (
@@ -121,7 +143,17 @@ export default function BudgetDetailPage() {
         )}
 
         <div className="fin-figure-grid">
-          <FigureCard label={t('budget.resources')} answer={vue.ressources} formula={formulas.get('F002')} />
+          {/* R17-01: received + still expected, said under the figure. */}
+          <FigureCard label={t('budget.resources')} answer={vue.ressources} formula={formulas.get('F002')}>
+            {(vue.revenusRecus?.resultat != null || vue.revenusAttendus?.resultat != null) && (
+              <p className="fin-hint">
+                {t('budget.resourcesDetail', {
+                  received: formatAmount(i18n.language, vue.revenusRecus?.resultat ?? 0, currency),
+                  expected: formatAmount(i18n.language, vue.revenusAttendus?.resultat ?? 0, currency),
+                })}
+              </p>
+            )}
+          </FigureCard>
           {budget.countBalance !== false && vue.soldeDebut?.resultat !== null && vue.soldeDebut?.resultat !== undefined && (
             <>
               <FigureCard label={t('budget.startBalance')} answer={vue.soldeDebut} />
@@ -130,7 +162,17 @@ export default function BudgetDetailPage() {
           )}
           <FigureCard label={t('budget.totalPlanned')} answer={vue.totalPrevu} formula={formulas.get('F003')} />
           <FigureCard label={t('budget.totalReal')} answer={vue.totalReel} formula={formulas.get('F003')} />
-          <FigureCard label={t('budget.netFlow')} answer={vue.fluxNet} formula={formulas.get('F004')} />
+          {/* R17-01: « les ressources moins les dépenses », with its numbers. */}
+          <FigureCard label={t('budget.netFlow')} answer={vue.fluxNet} formula={formulas.get('F004')}>
+            {vue.fluxNet?.resultat != null && vue.ressourcesTotales?.resultat != null && (
+              <p className="fin-hint">
+                {t('budget.netFlowDetail', {
+                  resources: formatAmount(i18n.language, vue.ressourcesTotales.resultat, currency),
+                  spent: formatAmount(i18n.language, vue.totalReel?.resultat ?? 0, currency),
+                })}
+              </p>
+            )}
+          </FigureCard>
           <FigureCard label={t('budget.remainingToAllocate')} answer={vue.resteAAffecter} formula={formulas.get('F009')} />
           <FigureCard label={t('budget.dailyBudget')} answer={vue.budgetJournalier} formula={formulas.get('F012')} />
           {/* PB-F011 / PB-F012 / PB-F022 (tab 10B): the pace of the period. */}
@@ -227,9 +269,9 @@ export default function BudgetDetailPage() {
             <EnvelopeForm
               budgetId={id}
               currency={currency}
-              groups={references.data?.categoryGroups ?? []}
               usedGroups={new Set(vue.enveloppes.map((line) => line.categoryGroup).filter(Boolean))}
               categories={flatCategories}
+              pickerGroups={(categories.data?.groups ?? []).filter((group) => group.code !== 'income')}
               usedCategoryIds={usedCategoryIds}
               accounts={spendableAccounts}
               onDone={() => {
@@ -363,8 +405,8 @@ function EnvelopeRow({ budgetId, budget, line, category, currency, run, accountL
           type="button"
           className="budget-icon"
           title={t('budget.delete')}
-          onClick={() => {
-            if (window.confirm(t('budget.deleteEnvelopeConfirm'))) {
+          onClick={async () => {
+            if (await askConfirm(t('budget.deleteEnvelopeConfirm'))) {
               run(() => api.delete(`/fin/budgets/${budgetId}/enveloppes/${line.id}`), 'budget.envelopeDeleted');
             }
           }}
@@ -408,21 +450,31 @@ function EnvelopeRow({ budgetId, budget, line, category, currency, run, accountL
   );
 }
 
-function EnvelopeForm({ budgetId, currency, groups, usedGroups, categories, usedCategoryIds, accounts, onDone, onCancel }) {
+function EnvelopeForm({ budgetId, currency, usedGroups, categories, pickerGroups, usedCategoryIds, accounts, onDone, onCancel }) {
   const { t } = useTranslation();
-  // A main category (P10-01) is budgeted as its whole group, offered above.
-  const available = categories.filter((category) => !usedCategoryIds.has(category.id) && !category.main);
-  const availableGroups = groups.filter((row) => !usedGroups.has(row.group));
-  // `target` is « group:<name> » or « category:<id> »: a whole client category
-  // (« Logement ») or one sub-category (P8-09).
-  const [form, setForm] = useState({ target: availableGroups[0] ? `group:${availableGroups[0].group}` : `category:${available[0]?.id ?? ''}`, kind: 'variable', value: '', cap: '', note: '', accountId: '' });
+  // R17-04: the category is chosen with the SAME picker as an expense or an
+  // income (search, then category → sub-category), not a long list. A main
+  // category (P10-01) still means its whole group (« Logement »), a
+  // sub-category just itself (P8-09).
+  const [form, setForm] = useState({ categoryId: '', kind: 'variable', value: '', cap: '', note: '', accountId: '' });
+  const picked = categories.find((category) => category.id === form.categoryId) ?? null;
+  const target = !picked ? '' : picked.main && picked.group ? `group:${picked.group}` : `category:${picked.id}`;
+  const alreadyCovered = picked ? (picked.main && picked.group ? usedGroups.has(picked.group) : usedCategoryIds.has(picked.id)) : false;
   const [error, setError] = useState(null);
 
   const submit = async (event) => {
     event.preventDefault();
     setError(null);
     const value = toMinorUnits(form.value, currency);
-    const [targetKind, targetValue] = [form.target.slice(0, form.target.indexOf(':')), form.target.slice(form.target.indexOf(':') + 1)];
+    if (!target) {
+      setError(t('budget.chooseCategory'));
+      return;
+    }
+    if (alreadyCovered) {
+      setError(t('budget.alreadyCovered'));
+      return;
+    }
+    const [targetKind, targetValue] = [target.slice(0, target.indexOf(':')), target.slice(target.indexOf(':') + 1)];
     if (value === null || !targetValue) return;
     const cap = form.cap ? toMinorUnits(form.cap, currency) : null;
     try {
@@ -446,24 +498,8 @@ function EnvelopeForm({ budgetId, currency, groups, usedGroups, categories, used
       <div className="budget-create-grid">
         <div className="fin-field">
           <label htmlFor="env-category">{t('budget.category')}</label>
-          <select id="env-category" value={form.target} required onChange={(event) => setForm({ ...form, target: event.target.value })}>
-            <option value="">{t('budget.chooseCategory')}</option>
-            <optgroup label={t('budget.wholeGroups')}>
-              {availableGroups.map((row) => (
-                <option key={row.group} value={`group:${row.group}`}>
-                  {row.group}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label={t('budget.subCategories')}>
-              {available.map((category) => (
-                <option key={category.id} value={`category:${category.id}`}>
-                  {category.group ? `${category.group} · ` : ''}
-                  {category.label}
-                </option>
-              ))}
-            </optgroup>
-          </select>
+          <CategoryPicker id="env-category" value={form.categoryId} groups={pickerGroups} emptyLabel={t('budget.chooseCategory')} onChange={(categoryId) => setForm({ ...form, categoryId })} />
+          {alreadyCovered && <p className="form-error" role="alert">{t('budget.alreadyCovered')}</p>}
           <p className="fin-hint">{t('budget.mostSpecificHint')}</p>
         </div>
         <div className="fin-field">

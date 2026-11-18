@@ -50,9 +50,10 @@ export const SIMULATOR_FIELD_TYPES = ['money', 'rate', 'count', 'text', 'list', 
 const MONTHLY_PERIODS = 12;
 
 // Simple and compound interest (client's message of 2026-11-02).
-const INTEREST_PERIODS = ['monthly', 'quarterly', 'annual'];
-const DURATION_MONTHS = { months: 1, quarters: 3, years: 12 };
-const CONTRIBUTION_MONTHS = { monthly: 1, quarterly: 3, annual: 12 };
+// R17-06: the half-year, as asked (« mensuel, trimestriel, semestriel ou annuel »).
+const INTEREST_PERIODS = ['monthly', 'quarterly', 'semiannual', 'annual'];
+const DURATION_MONTHS = { months: 1, quarters: 3, semesters: 6, years: 12 };
+const CONTRIBUTION_MONTHS = { monthly: 1, quarterly: 3, semiannual: 6, annual: 12 };
 // The calculation period, in months: the rate's own when it is monthly or
 // quarterly, the capitalisation chosen when the rate is yearly.
 export const interestPeriodMonths = (v) => CONTRIBUTION_MONTHS[v.ratePeriod === 'annual' ? v.compounding : v.ratePeriod];
@@ -178,7 +179,7 @@ export const SIMULATORS = [
       choice('annualRateKind', ['nominal', 'effective'], { showWhen: { ratePeriod: 'annual' } }),
       choice('interestKind', ['compound', 'simple']),
       count('duration', { required: true, min: 1, max: 720 }),
-      choice('durationUnit', ['years', 'quarters', 'months']),
+      choice('durationUnit', ['years', 'semesters', 'quarters', 'months']),
       choice('compounding', INTEREST_PERIODS, { showWhen: { ratePeriod: 'annual' } }),
       money('periodicContribution'),
       choice('contributionFrequency', INTEREST_PERIODS),

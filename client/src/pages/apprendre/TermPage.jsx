@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, BookOpen, Calculator } from 'lucide-react';
+import { BookOpen, Calculator } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import { withLang } from '../../lib/contentLanguage.js';
@@ -24,12 +24,8 @@ export default function TermPage() {
   const { term: t1 } = term.data;
   return (
     <>
-      <PageHeader icon={BookOpen} title={t1.term} />
+      <PageHeader icon={BookOpen} title={t1.term} back={{ to: `${toolsBase}/apprendre`, label: t('apprendre.back') }} />
       <div className="apprendre-page apprendre-term-page">
-        <Link to="/apprendre" className="apprendre-back">
-          <ArrowLeft className="icon-dir" size={16} aria-hidden="true" />
-          {t('apprendre.back')}
-        </Link>
         <RichContent html={t1.definition} />
         {/* "Simuler" (C21): shown only when an administrator attached a
             calculator to this entry. */}

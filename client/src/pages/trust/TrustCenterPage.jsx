@@ -13,6 +13,7 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import './Trust.css';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 
 // Trust and data centre (P6-19), screen C25. Lifts the "droit à l'effacement"
 // point: account deletion is complete and immediate (decided 2026-10-11,
@@ -377,7 +378,7 @@ function DeleteAccountForm({ t, userEmail, onDone, onError }) {
 
   async function submit(event) {
     event.preventDefault();
-    if (!window.confirm(t('trust.deleteConfirm'))) return;
+    if (!await askConfirm(t('trust.deleteConfirm'))) return;
     setBusy(true);
     try {
       await api.post('/fin/confiance/suppression', { consent: true, currentPassword: password, email });

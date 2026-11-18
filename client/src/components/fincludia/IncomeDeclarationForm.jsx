@@ -5,6 +5,7 @@ import { formatAmount, formatDate } from '../../lib/format.js';
 import { fromMinorUnits, toMinorUnits } from '../../lib/money.js';
 import Button from '../ui/Button.jsx';
 import AmountField from './AmountField.jsx';
+import CategoryPicker from './CategoryPicker.jsx';
 
 const FREQUENCIES = ['mensuel', 'hebdomadaire', 'trimestriel', 'semestriel', 'annuel'];
 const CASH_TYPE = 'AC-01';
@@ -19,7 +20,9 @@ const todayKey = () => new Date().toISOString().slice(0, 10);
 //
 // onSubmit receives { label, categoryId, value, currency, frequency, accountId,
 // nextDate, received (false | true | 'included'), autoCredit, startDate }.
-export default function IncomeDeclarationForm({ currency, accounts = [], income = null, categories = null, onSubmit, submitLabel, newAccountLink = null }) {
+// `categoryGroups` (the income family of GET /fin/categories) gives the same
+// category picker as a movement's (recette R18); `categories` alone, a list.
+export default function IncomeDeclarationForm({ currency, accounts = [], income = null, categories = null, categoryGroups = null, onSubmit, submitLabel, newAccountLink = null }) {
   const { t, i18n } = useTranslation();
   const own = accounts.filter((account) => !account.archivedAt && !account.liability && account.currency === currency);
   const firstBank = own.find((account) => account.type !== CASH_TYPE) ?? null;
@@ -93,7 +96,13 @@ export default function IncomeDeclarationForm({ currency, accounts = [], income 
           <label htmlFor={id('label')}>{t('firstSteps.income.label')}</label>
           <input id={id('label')} value={state.label} maxLength={80} required onChange={(event) => set({ label: event.target.value })} />
         </div>
-        {categories && (
+        {categoryGroups && (
+          <div className="fin-field">
+            <label htmlFor={id('category')}>{t('myMoney.category')}</label>
+            <CategoryPicker id={id('category')} value={state.categoryId} groups={categoryGroups} emptyLabel={t('myMoney.noCategory')} onChange={(categoryId) => set({ categoryId })} />
+          </div>
+        )}
+        {categories && !categoryGroups && (
           <div className="fin-field">
             <label htmlFor={id('category')}>{t('myMoney.category')}</label>
             <select id={id('category')} value={state.categoryId} onChange={(event) => set({ categoryId: event.target.value })}>

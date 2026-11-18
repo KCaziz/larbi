@@ -161,12 +161,6 @@ function BudgetForm({ budget, onSubmit }) {
           </select>
           <span className="fin-hint">{t('budget.accountHelp')}</span>
         </div>
-        <div className="fin-field budget-count-balance">
-          <label htmlFor="new-budget-balance">
-            <input id="new-budget-balance" type="checkbox" checked={form.countBalance} onChange={(event) => setForm({ ...form, countBalance: event.target.checked })} /> {t('budget.countBalance')}
-          </label>
-          <span className="fin-hint">{t('budget.countBalanceHelp')}</span>
-        </div>
         {budget && (
           <div className="fin-field">
             <label htmlFor="new-budget-note">{t('budget.note')}</label>
@@ -174,6 +168,16 @@ function BudgetForm({ budget, onSubmit }) {
           </div>
         )}
       </div>
+      {/* Recette R18 (2026-11-18): « le formulaire est cassé à cause de la case
+          Compter le solde… ; repense-le ». Out of the grid of fields, on the
+          whole width: a switch, what it does, and why, all readable at once. */}
+      <label className={form.countBalance ? 'budget-option budget-option-on' : 'budget-option'} htmlFor="new-budget-balance">
+        <input id="new-budget-balance" type="checkbox" role="switch" className="budget-switch" checked={form.countBalance} onChange={(event) => setForm({ ...form, countBalance: event.target.checked })} />
+        <span className="budget-option-text">
+          <strong>{t('budget.countBalance')}</strong>
+          <span>{t('budget.countBalanceHelp')}</span>
+        </span>
+      </label>
       {/* P10-02 */}
       <ColorPicker name="budget-color" value={form.color} onChange={(color) => setForm({ ...form, color })} />
       <div className="budget-create-actions">

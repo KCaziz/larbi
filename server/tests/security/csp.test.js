@@ -19,6 +19,11 @@ describe('the content-security policy', () => {
     assert.match(policy, /script-src 'self' 'wasm-unsafe-eval'/);
     assert.match(policy, /worker-src 'self' blob:/);
     assert.ok(!/(?<!wasm-)unsafe-(eval|inline)/.test(policy.split('script-src')[1].split(';')[0]), 'no general eval, no inline script');
-    assert.ok(!/https?:\/\//.test(policy), 'no third-party address');
+    // The only third party is Google Analytics (P12-06), and only its own
+    // addresses: the website loads it only when an administrator set an
+    // identifier AND the visitor accepted.
+    const ANALYTICS = ['https://www.googletagmanager.com', 'https://*.google-analytics.com', 'https://*.analytics.google.com'];
+    const thirdParty = [...new Set(policy.match(/https?:\/\/[^\s;]+/g) ?? [])].filter((address) => !ANALYTICS.includes(address));
+    assert.deepEqual(thirdParty, [], 'no third-party address besides Google Analytics');
   });
 });

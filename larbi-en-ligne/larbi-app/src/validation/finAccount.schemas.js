@@ -83,7 +83,7 @@ export const deleteTransferSchema = z.object({ reason: reasonSchema.optional() }
 // The monthly report (P8-10): a month as `YYYY-MM`, and the download format.
 const monthKey = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 // `reduction`: the share of flexible spending the person imagines cutting (R-06), 0 to 100.
-export const reportQuerySchema = z.object({ mois: monthKey.optional(), reduction: z.coerce.number().min(0).max(100).optional() }).strict();
+export const reportQuerySchema = z.object({ mois: monthKey.optional(), reduction: z.coerce.number().min(0).max(100).optional(), accountId: z.string().uuid().optional() }).strict();
 // « comparer deux mois »: both are required, and they must differ.
 export const reportCompareQuerySchema = z.object({ mois: monthKey, avec: monthKey }).strict().refine((q) => q.mois !== q.avec, { message: 'Two different months' });
 export const reportExportQuerySchema = z.object({ mois: monthKey.optional(), format: z.enum(['csv', 'xlsx']).optional() }).strict();

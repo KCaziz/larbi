@@ -7,6 +7,7 @@ import Button from '../../components/ui/Button.jsx';
 import BarList from '../../components/fincludia/charts/BarList.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 
 // The tasks of one space (P9-06): a module apart from the finances. Nothing here
 // creates a movement, and the two figures (COL-F11, COL-F12) are read from the
@@ -78,7 +79,7 @@ export default function SpaceTasks({ t, language, spaceId, members, run, feedbac
           type="button"
           className="spaces-icon"
           onClick={async () => {
-            if (!window.confirm(t('spaces.tasks.deleteConfirm'))) return;
+            if (!await askConfirm(t('spaces.tasks.deleteConfirm'))) return;
             const outcome = await run(() => api.delete(`/fin/espaces/${spaceId}/taches/${task.id}`), 'spaces.tasks.deleted');
             if (outcome.ok) reload();
           }}

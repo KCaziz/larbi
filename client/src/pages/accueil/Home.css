@@ -109,30 +109,29 @@
   gap: var(--space-md);
   min-inline-size: 0;
 }
-/* R16 (2026-11-17): the ring bigger, on the right; the description on its left
-   (mirrored in Arabic). On a phone, the ring above its description. */
 .home-ring-svg {
-  inline-size: min(320px, 80vw);
+  inline-size: min(220px, 70vw);
   block-size: auto;
   flex: none;
-  margin-inline-start: auto;
-}
-@media (max-width: 640px) {
-  .home-ring-svg {
-    order: -1;
-    margin-inline: auto;
-  }
 }
 .home-ring-arc {
   cursor: pointer;
   transition: stroke-width 120ms ease;
 }
 .home-ring-center-label {
-  font-size: 5.5px;
-  fill: var(--text);
+  font-size: 6px;
+  font-weight: 600;
+  fill: var(--text-h);
+  pointer-events: none;
+}
+.home-ring-center-label-small {
+  font-size: 5px;
 }
 .home-ring-center-value {
-  font-size: 6px;
+  pointer-events: none;
+}
+.home-ring-center-value {
+  font-size: 7px;
   font-weight: 700;
   fill: var(--text-h);
 }
@@ -500,4 +499,15 @@
 .app-main .home-shortcuts :is(a, button) {
   border-radius: 14px;
   box-shadow: 0 1px 2px rgba(16, 42, 67, 0.04);
+}
+
+/* Recette R18: the income still expected, said so it is seen. */
+.home-expected {
+  padding: 6px 10px;
+  border-inline-start: 4px solid var(--flow-income);
+  border-radius: 6px;
+  background: var(--green-bg);
+  color: var(--text-h);
+  font-weight: 600;
+  opacity: 1;
 }

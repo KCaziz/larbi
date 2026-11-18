@@ -121,7 +121,7 @@ describe('the seventh pass, end to end', { skip: findChrome() ? false : 'no Chro
     const declared = await as('POST', '/revenus', { label: 'Salaire', value: 8000000, currency: 'DZD', frequency: 'mensuel', startDate: new Date(monthStart().getTime() - 60 * DAY).toISOString(), accountId: courant.id });
     assert.equal(declared.status, 201, JSON.stringify(declared.body).slice(0, 200));
     await b.goto(`${site.url}/app`);
-    assert.ok(await b.waitText('Avec vos revenus prévus', 20_000), 'the expected income enters the reading of the flux');
+    assert.ok(await b.waitText('Flux prévu', 20_000), 'the expected income enters the reading of the flux (R18: a figure of its own)');
     await b.shot('recette13-flux-expected');
   });
   test('the home page says what was spent outside every envelope, and the Flux tab draws income against spending', async () => {

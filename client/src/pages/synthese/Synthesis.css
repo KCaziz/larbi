@@ -248,3 +248,77 @@
   border-color: var(--border-strong);
   font-weight: 600;
 }
+
+/* Recette R18 (2026-11-18): « la page Synthèse est terne, la couleur est
+   uniforme, mets des reliefs ». Each figure of the month wears the colour of
+   what it is — income green, spending blue, the flux
+   filled in the brand gradient, the balances slate — and each section card
+   its own coloured edge. Colour is never alone: every label is written. */
+.synthesis-page .synthesis-figures > .fin-figure.fin-figure {
+  position: relative;
+  border-block-start-width: 5px;
+  box-shadow: 0 6px 18px rgba(16, 42, 67, 0.1);
+}
+.synthesis-page .synthesis-figures > .fin-figure.fin-figure:nth-child(1) {
+  border-block-start-color: var(--flow-income);
+  background: linear-gradient(180deg, rgba(11, 122, 108, 0.12), var(--surface) 75%);
+}
+.synthesis-page .synthesis-figures > .fin-figure.fin-figure:nth-child(1) .fin-figure-value {
+  color: var(--flow-income);
+}
+.synthesis-page .synthesis-figures > .fin-figure.fin-figure:nth-child(2) {
+  border-block-start-color: var(--flow-expense);
+  background: linear-gradient(180deg, rgba(47, 93, 140, 0.12), var(--surface) 75%);
+}
+.synthesis-page .synthesis-figures > .fin-figure.fin-figure:nth-child(2) .fin-figure-value {
+  color: var(--flow-expense);
+}
+.synthesis-page .synthesis-figures > .fin-figure.fin-figure:nth-child(3) {
+  border-color: transparent;
+  background: linear-gradient(135deg, #055686 0%, #0b8a97 60%, #10a9b6 100%);
+  color: #fff;
+}
+.synthesis-page .synthesis-figures > .fin-figure.fin-figure:nth-child(3) :is(.fin-figure-label, .fin-figure-value, .fin-hint, button, a, svg) {
+  color: #fff;
+}
+.synthesis-page .synthesis-figures > .fin-figure.fin-figure:nth-child(n + 4) {
+  border-block-start-color: #57606a;
+  background: linear-gradient(180deg, rgba(87, 96, 106, 0.1), var(--surface) 75%);
+}
+.synthesis-figures .fin-figure-value {
+  font-weight: 700;
+}
+
+.synthesis-block {
+  border-block-start: 4px solid var(--chart-1);
+  box-shadow: 0 4px 14px rgba(16, 42, 67, 0.08);
+}
+.synthesis-grid > .synthesis-block:nth-child(6n + 2) {
+  border-block-start-color: var(--chart-4);
+}
+.synthesis-grid > .synthesis-block:nth-child(6n + 3) {
+  border-block-start-color: var(--flow-expense);
+}
+.synthesis-grid > .synthesis-block:nth-child(6n + 4) {
+  border-block-start-color: var(--chart-7);
+}
+.synthesis-grid > .synthesis-block:nth-child(6n + 5) {
+  border-block-start-color: var(--chart-3);
+}
+.synthesis-grid > .synthesis-block:nth-child(6n + 6) {
+  border-block-start-color: var(--chart-5);
+}
+.synthesis-page > section > h2,
+.synthesis-cascade > h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.synthesis-page > section > h2::before,
+.synthesis-cascade > h2::before {
+  content: '';
+  inline-size: 6px;
+  block-size: 1.1em;
+  border-radius: 3px;
+  background: var(--brand-gradient);
+}

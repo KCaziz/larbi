@@ -24,6 +24,7 @@ import GoalYears, { yearByYear } from './GoalYears.jsx';
 import GoalPlanner from './GoalPlanner.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Goals.css';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 
 // Financial goals (P6-08), screens C09-C11. The client's catalogue of
 // templates only ever supplies a label — never a suggested amount, which the
@@ -117,7 +118,7 @@ export default function GoalsPage() {
         ) : (
           <ul className="goals-list">
             {list.map((goal) => (
-              <GoalRow key={goal.id} goal={goal} model={templates.find((tpl) => tpl.key === goal.templateKey)} />
+              <GoalRow key={goal.id} goal={goal} model={templates.find((tpl) => tpl.key === goal.templateKey)} run={run} />
             ))}
           </ul>
         )}
@@ -127,7 +128,7 @@ export default function GoalsPage() {
 }
 
 // One goal in the list: it leads to its own screen (OBJ-03, P8-25).
-function GoalRow({ goal, model }) {
+function GoalRow({ goal, model, run }) {
   const { t, i18n } = useTranslation();
   const progress = Math.min(1, goal.vue.progres.resultat ?? 0);
 
@@ -151,6 +152,8 @@ function GoalRow({ goal, model }) {
         </span>
         <ChevronRight className="icon-dir" size={16} aria-hidden="true" />
       </Link>
+      {/* Recette R18: archive or delete straight from the list. */}
+      <GoalActions goal={goal} run={run} compact />
     </li>
   );
 }
@@ -161,6 +164,10 @@ export function GoalDetail({ goal, formulas, statuses, accounts, contributions, 
   const { t, i18n } = useTranslation();
   return (
     <div className="goals-row-body goals-detail">
+      {/* Recette R18 (2026-11-18): « pour supprimer un objectif il faut aller
+          au détail, descendre et trouver deux petites icônes » — the two
+          actions are now named buttons, at the top of the goal. */}
+      <GoalActions goal={goal} run={run} />
       {/* Tab 10B: the progress ring, % at the centre, capital over target. */}
       <div className="goals-detail-head">
         <ProgressRing value={goal.vue.progres.resultat} />
@@ -245,29 +252,36 @@ export function GoalDetail({ goal, formulas, statuses, accounts, contributions, 
         </section>
       )}
       <ScenarioForm goal={goal} />
+    </div>
+  );
+}
 
-      <div className="goals-row-actions">
-        <button
-          type="button"
-          className="goals-icon"
-          title={goal.archivedAt ? t('goals.restore') : t('goals.archive')}
-          onClick={() => run(() => api.put(`/fin/goals/${goal.id}/archive`, { archived: !goal.archivedAt }), goal.archivedAt ? 'goals.restored' : 'goals.archived')}
-        >
-          {goal.archivedAt ? <ArchiveRestore size={15} aria-hidden="true" /> : <Archive size={15} aria-hidden="true" />}
-          <span className="sr-only">{goal.archivedAt ? t('goals.restore') : t('goals.archive')}</span>
-        </button>
-        <button
-          type="button"
-          className="goals-icon"
-          title={t('goals.delete')}
-          onClick={() => {
-            if (window.confirm(t('goals.deleteConfirm', { label: goal.label }))) run(() => api.delete(`/fin/goals/${goal.id}`), 'goals.deleted');
-          }}
-        >
-          <Trash2 size={15} aria-hidden="true" />
-          <span className="sr-only">{t('goals.delete')}</span>
-        </button>
-      </div>
+// Archive (or restore) and delete a goal: named buttons, the delete one red.
+// `compact` (the list) keeps the words for screen readers and wide screens.
+function GoalActions({ goal, run, compact = false }) {
+  const { t } = useTranslation();
+  return (
+    <div className={compact ? 'goals-actions goals-actions-compact' : 'goals-actions'}>
+      <button
+        type="button"
+        className="goals-action"
+        title={goal.archivedAt ? t('goals.restore') : t('goals.archive')}
+        onClick={() => run(() => api.put(`/fin/goals/${goal.id}/archive`, { archived: !goal.archivedAt }), goal.archivedAt ? 'goals.restored' : 'goals.archived')}
+      >
+        {goal.archivedAt ? <ArchiveRestore size={16} aria-hidden="true" /> : <Archive size={16} aria-hidden="true" />}
+        <span className="goals-action-text">{goal.archivedAt ? t('goals.restore') : t('goals.archive')}</span>
+      </button>
+      <button
+        type="button"
+        className="goals-action goals-action-delete"
+        title={t('goals.delete')}
+        onClick={async () => {
+          if (await askConfirm(t('goals.deleteConfirm', { label: goal.label }))) run(() => api.delete(`/fin/goals/${goal.id}`), 'goals.deleted');
+        }}
+      >
+        <Trash2 size={16} aria-hidden="true" />
+        <span className="goals-action-text">{t('goals.delete')}</span>
+      </button>
     </div>
   );
 }
