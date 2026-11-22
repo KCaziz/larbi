@@ -3953,7 +3953,7 @@ Un support à rendement (livret, dépôt, obligation, sukuk) capitalise ses int�
 - Durée cible : 3 jours (estimation), une fois la source choisie
 - Origine : `test.txt` l. 17 (2026-11-08)
 
-Les différents marchés (Bourse d'Alger et grandes places étrangères) avec la tendance de leur évolution depuis leur première cotation. **Bloqué** : il faut une source de données réelle et autorisée (historiques d'indices ou de valeurs, droits de réutilisation, fréquence de mise à jour). Le marché pédagogique de `R8-12` reste fictif et ne peut pas tenir ce rôle.
+Les différents marchés (Bourse d'Alger et grandes places étrangères) avec la tendance de leur évolution depuis leur première cotation. **Bloqué** : il faut une source de données réelle et autorisée (historiques d'indices ou de valeurs, droits de réutilisation, fréquence de mise à jour). Le marché pédagogique de `R8-12` reste fictif et ne peut pas tenir ce rôle. **Mise à jour du 2026-11-22** : le client a fourni les données de la Bourse d'Alger 2020–2026 (`P13-01`) ; seules les places étrangères restent sans source.
 
 ### P10-05 — Autres devises
 - Statut : `✅ done`
@@ -4110,6 +4110,49 @@ Reprendre l'aménagement et les couleurs des maquettes du client sans leur surch
 - Reste côté client : déclarer le site dans Google Search Console et Bing Webmaster Tools, envoyer le sitemap, créer le compte Google Analytics, et faire relire les titres arabes et anglais.
 
 Faire trouver le site par les moteurs de recherche, dans ses trois langues, et mesurer ce qui marche.
+
+---
+
+# PHASE 13 — DOCUMENTATION DU CLIENT : PORTEFEUILLE ET FORMATION (2026-11-22)
+## Durée : hors des 8 semaines (à estimer)
+## Objectif
+
+Le client a envoyé, le 2026-11-21, deux documents « qui complètent la gestion du budget » : le référentiel du portefeuille fictif (`FINCLUDIA_Portefeuille.docx`) et celui des mini-formations par parcours (`FINCLUDIA Referentiel Pedagogique.docx`), tous deux à la racine du projet. **Rien n'est encore développé** : cette phase les enregistre, dit ce qu'ils contiennent et ce qu'ils débloquent. Les tâches seront découpées plus finement au moment de les commencer.
+
+### P13-01 — Portefeuille fictif : données de marché réelles 2020–2026 (« InvestLab »)
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P6-12`, `P10-03`
+- Durée cible : à estimer (gros volume de données à saisir et vérifier)
+- Origine : `FINCLUDIA_Portefeuille.docx` (client, 2026-11-21)
+
+Ce que contient le document :
+- **Règles de vérité** : hiérarchie des sources (A : SGBV, COSOB, Banque d'Algérie, ONS, Trésor ; B : banques émettrices ; C : calcul FINCLUDIA avec formule et entrées stockées ; D : donnée utilisateur), « une valeur non publiée n'est jamais inventée », NC n'est jamais 0, 2026 est un cumul de l'année (YTD).
+- **Actions de la Bourse d'Alger** (10 valeurs, compartiments principal et croissance) : cours annuels 2020–2026, dividendes par exercice, rendement dividende de l'exercice et rendement courant, opérations sur titres (attributions gratuites d'Alliance Assurances 3 pour 5 en 2020 et 1 pour 2 en 2025, à appliquer aux quantités).
+- **DZAIRINDEX** 2020–2026, indice de prix (jamais présenté comme rendement total).
+- **Dette souveraine** : BTC, BTA, OAT expliqués, courbe de taux 2024, inventaire de 45 OAT (chaque ISIN est un actif distinct), état du marché au 17/11/2026 ; obligations d'entreprise cotées (AL30, ML30, TS30, RX33) ; sukuk IJARA SK32.
+- **Épargne et dépôts à terme** BNA, BEA, CPA, BDL, AGB ; **comptes devises** (10 devises, règles et grilles de la Banque d'Algérie 2020–2026) ; **finance islamique** banque par banque (clé de partage, profit cible et profit distribué séparés, jamais garanti).
+- **Inflation** (rendement réel), **or, argent, platine** convertis en DZD (performance métal × effet de change).
+- **Backtest** : 10 000 DZD placés le 31/12/2020 jusqu'au 17/11/2026, brut, hypothèses écrites (annexe B).
+- **Architecture demandée** (section 13) : modèle d'observation universel, tables spécialisées, règles de calcul (rendement total, rendement réel, TWR, XIRR, actif en devise), statuts des données manquantes (`NOT_LISTED`, `NO_TRADE`, `NOT_PUBLISHED`, `NOT_ISSUED`, `USER_VALUED`, `ESTIMATED`) et 8 écrans « InvestLab » (marché Algérie, fiche action, dette souveraine, épargne et DAT, devises, finance islamique, métaux, backtest).
+
+Ce que cela change : le portefeuille fictif reste séparé du patrimoine réel, de la santé financière et de toute décision de crédit (règle reprise du document). **Débloque en partie `P10-04`** (marchés et leur évolution) pour la Bourse d'Alger : la source manquante est désormais fournie, datée et sourcée ; les places étrangères restent sans source. Le marché pédagogique fictif de `R8-12` sera à remplacer ou à doubler par ces données réelles — à décider avec le client.
+
+### P13-02 — Formation : référentiel pédagogique et mini-formations par parcours (« FINCLUDIA Academy »)
+- Statut : `❌ todo`
+- Priorité : `🟡 medium`
+- Dépendances : `P8-17`, `P8-29`
+- Durée cible : à estimer (130 modules)
+- Origine : `FINCLUDIA Referentiel Pedagogique.docx` (client, 2026-11-21)
+
+Ce que contient le document :
+- **Modèle pédagogique** : niveaux de maîtrise N0 (découverte) à N5 (expertise appliquée), progression par compétences ; comment le site valide réellement les tests ; « Skills Passport » (preuve de compétence).
+- **Parcours personnalisés par public cible** ; **Budget Lab** (méthodes de répartition, mini-cours budgétaires par public).
+- **Dictionnaire maître des notions** et référentiel des sources.
+- **130 modules**, chacun avec définitions, cas et exercices corrigés, QCM, et un cas intégrateur corrigé par parcours : Fondamentaux, budget et résilience (BUD-01 à 12), Banque et inclusion (BNK-01 à 08), Finance collective et familiale (COL-01 à 07), Investissement et marchés (INV-01 à 12), Professionnels indépendants (PRO-01 à 11, LIB-01 à 06, AE-01 à 08), Entrepreneuriat et startup (START-01 à 10), Finance d'entreprise PME/PMI (BUS-01 à 14), Économie (ECO-01 à 10), Diaspora (DIA-01 à 08), Micro-importation (MI-01 à 08), Commerce international (TR-01 à 12), Rémunération, fiscalité, Zakat et finance responsable (SAL-01, TAX-01, ETH-01, ESG-01).
+- **Règles du site** : moteur de QCM et anti-mémorisation, algorithme de progression, statuts visibles dans l'interface, conditions de certification, schéma technique du module, gouvernance et contrôle qualité, guide du formateur.
+
+Ce que cela change : ce sont les contenus de formation par profil que le client avait dit fournir (réponse E, `P8-17`) et une partie de ce qu'attend **`P8-29`** (parcours de formation). Reste à confirmer avec lui si la vitrine et les compartiments de `P8-29` viennent aussi, ou si l'on construit la formation d'abord. Les montants, taux et seuils réglementaires cités dans les modules restent datés et versionnés (règle 17).
 
 
 ---

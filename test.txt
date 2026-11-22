@@ -1,1 +1,10 @@
-- 
+- les graphes ne bouges pas meme quand on fait des mouvement (epargnes par mois, revenue et depense etc) test les graphs et vois si réellement il y'a des mouvement 
+
+bon plusieurs choses 
+- les graphes ne bouges pas meme quand on fait des mouvement (epargnes par mois, revenue et depense etc) test les graphs et vois si réellement il y'a des mouvement 
+
+aussi le client demande a ce que l'on s'inspire des vagues dans la card de la sidbar @"WhatsApp Image 2026-11-21 at 10.58.23 AM.jpeg"  pour  l'acceuil (deux vagues l'une en haut l'une en bas et il y'aura un effet au scrolle soit croisement soit autre chose) il veut aussi que tu travail mieux l'effet vague afin que ca y resemble vraiment a une vague aussi il veut tu t'inspire de ceci afin d'ameliorer les graphe pour tracer entre les point avec un petit effet vague mais simple (il faut que l'on retrouve l'effet vague mais aussi garder la lisibiliter des graphes)
+
+derniere chose il m'a envoyer deux fichier @FINCLUDIA_Portefeuille.docx et @"FINCLUDIA Referentiel Pedagogique.docx"  il represent la documentation qui complète la gestion du budget.
+tu trouveras le document du portefeuille fictif ainsi que celui des mini formations par parcours.
+pour le moment ne corrige rien juste place les dans @TASKS.md
