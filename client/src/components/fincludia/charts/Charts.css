@@ -36,7 +36,32 @@
 }
 .chart-svg .chart-area {
   stroke: none;
-  opacity: 0.12;
+}
+/* P13-04: the curve draws itself once, like a wave coming in (not when the
+   visitor asked for less motion). */
+.chart-svg .chart-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: chart-wave-in 900ms ease-out both;
+}
+.chart-svg .chart-area {
+  animation: chart-water-in 900ms ease-out both;
+}
+@keyframes chart-wave-in {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes chart-water-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chart-svg .chart-line,
+  .chart-svg .chart-area {
+    animation: none;
+  }
 }
 .chart-series.chart-tone-0 { color: var(--chart-1); }
 .chart-series.chart-tone-1 { color: var(--chart-4); }

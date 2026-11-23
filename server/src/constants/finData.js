@@ -109,7 +109,7 @@ export const FINANCIAL_TABLES = [
   // une donnée que la promesse de transparence ne couvre pas.
   { model: 'finBusiness', table: 'fin_businesses', label: 'business', amounts: false, currency: true },
   { model: 'finBusinessContact', table: 'fin_business_contacts', label: 'businessContact', amounts: false, currency: false, ownerWhere: (userId) => ({ business: { userId } }) },
-  { model: 'finBusinessDocument', table: 'fin_business_documents', label: 'businessDocument', amounts: false, currency: true, ownerWhere: (userId) => ({ business: { userId } }) },
+  { model: 'finBusinessDocument', table: 'fin_business_documents', label: 'businessDocument', amounts: false, currency: true, ownerWhere: (userId) => ({ business: { userId } }), exportInclude: { lines: true, reminders: true } },
   { model: 'finBusinessPayment', table: 'fin_business_payments', label: 'businessPayment', amounts: true, currency: true, ownerWhere: (userId) => ({ business: { userId } }) },
 ];
 

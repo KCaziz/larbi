@@ -1,4 +1,4 @@
-import { CASH_BASIS_NOTICE, DOCUMENT_DIRECTION } from '../constants/finBusiness.js';
+import { AGING_BUCKETS, CASH_BASIS_NOTICE, DOCUMENT_DIRECTION } from '../constants/finBusiness.js';
 import { computed } from './finance/contract.js';
 
 /**
@@ -19,6 +19,20 @@ import { computed } from './finance/contract.js';
 
 const active = (row) => !row.archivedAt && !row.deletedAt;
 
+// P13-05, lot B : seule une facture ÉMISE crée une créance ou une dette
+// (CNV-01, FAC-003). Un devis est un engagement commercial, un brouillon n'est
+// rien encore, un avoir corrige sa facture et ne compte pas pour lui-même.
+// Une ligne de P7-02 sans type est une facture émise : c'est ce qu'elle était.
+export const isIssuedInvoice = (document) =>
+  (document.docType ?? 'invoice') === 'invoice' && (document.state ?? 'issued') === 'issued' && active(document);
+
+/** Les avoirs émis sur un document, dans sa devise. */
+export function creditNotesOf(document, documents = []) {
+  return documents.filter(
+    (d) => d.docType === 'credit_note' && d.relatedId === document.id && active(d) && d.currency === document.currency,
+  );
+}
+
 /** Le total d'un document : hors taxe + taxe, tels qu'ils ont été déclarés. */
 export function documentTotal(document) {
   return document.amountExcl + document.taxAmount;
@@ -31,22 +45,29 @@ export function documentTotal(document) {
  * le moteur ne convertit jamais sans un taux daté, et un total mêlant deux
  * devises serait un nombre sans unité. Ils sont comptés comme un avertissement.
  */
-export function documentSettlement(document, payments) {
+export function documentSettlement(document, payments, documents = []) {
   const mine = payments.filter((p) => p.documentId === document.id && active(p));
   const sameCurrency = mine.filter((p) => p.currency === document.currency);
   const foreign = mine.filter((p) => p.currency !== document.currency);
   const settled = sameCurrency.reduce((sum, p) => sum + p.value, 0);
   const total = documentTotal(document);
-  const outstanding = total - settled;
+  // Lot B (FAC-007, CNV-02) : un avoir réduit ce qui est dû sans toucher à la
+  // facture. « Solde après règlement partiel » = facture - règlements - avoirs.
+  const credited = creditNotesOf(document, documents).reduce((sum, c) => sum + documentTotal(c), 0);
+  const net = total - credited;
+  const outstanding = net - settled;
 
   let state = 'unpaid';
-  if (settled > 0 && outstanding > 0) state = 'partial';
+  if (credited > 0 && net <= 0 && settled === 0) state = 'cancelled';
+  else if (settled > 0 && outstanding > 0) state = 'partial';
   else if (outstanding === 0 && total > 0) state = 'paid';
   else if (outstanding < 0) state = 'overpaid';
   else if (total === 0) state = 'paid';
 
   return {
     total,
+    credited,
+    net,
     settled,
     outstanding,
     state,
@@ -76,9 +97,12 @@ export function isOverdue(document, settlement, now) {
  * l'entreprise par l'appelant ; cette fonction ne décide pas de ce qu'elle
  * voit, elle en rend compte.
  */
-export function buildBusinessDashboard({ business, documents = [], payments = [], now = new Date() }) {
+export function buildBusinessDashboard({ business, documents = [], payments = [], now = new Date(), from = null, to = null }) {
   const currency = business.currency;
-  const liveDocuments = documents.filter(active);
+  const allDocuments = documents.filter(active);
+  // Seules les factures émises portent des créances, des dettes et des
+  // règlements ; devis et avoirs ont leurs propres chiffres plus bas.
+  const liveDocuments = allDocuments.filter(isIssuedInvoice);
   const livePayments = payments.filter(active);
 
   // Les règlements se rattachent au sens de LEUR document : un règlement n'est
@@ -102,7 +126,7 @@ export function buildBusinessDashboard({ business, documents = [], payments = []
 
   const settlements = liveDocuments.map((document) => ({
     document,
-    settlement: documentSettlement(document, livePayments),
+    settlement: documentSettlement(document, livePayments, allDocuments),
   }));
 
   const openSales = settlements.filter((row) => row.document.kind === 'sale' && row.settlement.outstanding > 0);
@@ -134,6 +158,7 @@ export function buildBusinessDashboard({ business, documents = [], payments = []
       currency,
       now,
     }),
+    ...invoicingFigures({ allDocuments, settlements, currency, now, from, to, inputs }),
     // Les documents en retard, nommés : un montant échu sans la liste de ce
     // qui le compose n'est pas actionnable.
     enRetard: overdue.map((row) => ({
@@ -144,6 +169,79 @@ export function buildBusinessDashboard({ business, documents = [], payments = []
       echeance: row.document.dueAt,
       resteDu: row.settlement.outstanding,
     })),
+  };
+}
+
+const inPeriod = (date, from, to) => (!from || new Date(date) >= new Date(from)) && (!to || new Date(date) <= new Date(to));
+const startOfDay = (date) => new Date(new Date(date).toISOString().slice(0, 10));
+const sumOf = (rows, pick) => (rows.length === 0 ? null : rows.reduce((total, row) => total + pick(row), 0));
+
+/**
+ * Les chiffres de la facturation (P13-05, lot B, 19_CYCLE_FACTURE). En hors
+ * taxe quand ils parlent d'activité (CA, marge, devis), en total quand ils
+ * parlent d'argent dû (balance âgée, à rembourser).
+ */
+export function invoicingFigures({ allDocuments, settlements, currency, now, from = null, to = null, inputs = {} }) {
+  const sales = settlements.filter((row) => row.document.kind === 'sale' && row.document.currency === currency);
+  const creditsExcl = (document) => creditNotesOf(document, allDocuments).reduce((sum, c) => sum + c.amountExcl, 0);
+
+  // E011 : CA facturé net des avoirs, chacun à sa date.
+  const periodSales = sales.filter((row) => inPeriod(row.document.issuedAt, from, to));
+  const saleIds = new Set(sales.map((row) => row.document.id));
+  const periodCredits = allDocuments.filter(
+    (d) => d.docType === 'credit_note' && saleIds.has(d.relatedId) && d.currency === currency && inPeriod(d.issuedAt, from, to),
+  );
+  const invoiced =
+    periodSales.length === 0 && periodCredits.length === 0
+      ? null
+      : periodSales.reduce((t, row) => t + row.document.amountExcl, 0) - periodCredits.reduce((t, d) => t + d.amountExcl, 0);
+
+  // E012 : marge indicative, seulement là où le coût est déclaré (CNV-04 :
+  // un coût absent n'est pas un coût nul).
+  const costed = periodSales.filter((row) => row.document.costExcl !== null && row.document.costExcl !== undefined);
+  const margin = sumOf(costed, (row) => row.document.amountExcl - creditsExcl(row.document) - row.document.costExcl);
+
+  // E013 : devis envoyés ou acceptés, pas encore facturés ni expirés.
+  const today = startOfDay(now);
+  const openQuotes = allDocuments.filter(
+    (d) =>
+      d.docType === 'quote' &&
+      d.currency === currency &&
+      (d.state === 'sent' || d.state === 'accepted') &&
+      (!d.validUntil || new Date(d.validUntil) >= today),
+  );
+
+  // E014 : ce qu'un avoir a rendu dû au client.
+  const refunds = sales.filter((row) => row.settlement.outstanding < 0);
+
+  // Balance âgée (FAC-006) : le reste dû des ventes, par jours de retard. Une
+  // échéance absente a sa propre ligne : elle n'est ni « à jour » ni « en
+  // retard ».
+  const open = sales.filter((row) => row.settlement.outstanding > 0);
+  let aging = null;
+  if (open.length > 0) {
+    aging = Object.fromEntries([...AGING_BUCKETS.map((b) => [b.key, 0]), ['noDueDate', 0]]);
+    for (const row of open) {
+      if (!row.document.dueAt) {
+        aging.noDueDate += row.settlement.outstanding;
+        continue;
+      }
+      const late = Math.floor((today - startOfDay(row.document.dueAt)) / 86400000);
+      const bucket = AGING_BUCKETS.find((b) => late <= b.max);
+      aging[bucket.key] += row.settlement.outstanding;
+    }
+  }
+
+  return {
+    caFacture: computed('E011', invoiced, { inputs: { ...inputs, factures: periodSales.length, avoirs: periodCredits.length }, currency, now }),
+    marge: computed('E012', margin, {
+      inputs: { ...inputs, factures_avec_cout: costed.length, factures_sans_cout: periodSales.length - costed.length },
+      currency,
+      now,
+    }),
+    devisEnCours: computed('E013', sumOf(openQuotes, (d) => d.amountExcl), { inputs: { ...inputs, devis: openQuotes.length }, currency, now }),
+    aRembourser: computed('E014', sumOf(refunds, (row) => -row.settlement.outstanding), { inputs: { ...inputs, factures: refunds.length }, currency, now }),
+    balanceAgee: aging,
   };
 }
 

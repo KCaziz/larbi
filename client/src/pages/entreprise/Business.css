@@ -195,3 +195,527 @@
   color: var(--text);
   font-size: 0.92rem;
 }
+
+/* P13-05, lot A: the organisation bar, invitations, members, mandates, journal. */
+.org-bar {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 12px);
+  background: var(--surface);
+}
+.org-bar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.org-bar-label {
+  font-weight: 600;
+  color: var(--text-h);
+}
+.org-bar select,
+.org-member-actions select,
+.org-invite select,
+.org-mandate-form select {
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+.org-role {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.org-invitations h2 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+.org-invitations ul,
+.org-member-list,
+.org-mandates ul,
+.org-journal-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.org-invitations li,
+.org-mandates li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+.org-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.org-member {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.org-member-revoked {
+  opacity: 0.65;
+}
+.org-member-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+}
+.org-member-head strong {
+  color: var(--text-h);
+}
+.org-member-email,
+.org-member-until {
+  font-size: 0.85rem;
+}
+.org-status {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--bg-alt, var(--canvas));
+}
+.org-status-active {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+.org-member-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.org-mandates {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border-inline-start: 3px solid var(--accent-border);
+  background: var(--bg-alt, var(--canvas));
+  border-radius: 8px;
+}
+.org-mandates h4 {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0;
+  font-size: 0.92rem;
+}
+.org-mandate-none {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.88rem;
+}
+.org-invite h3 {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+.org-journal-list li {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 10px;
+  padding-block: 6px;
+  border-block-end: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.org-journal-list time {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 640px) {
+  .org-journal-list li {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+
+/* P13-05, lot B: the sales cycle — contacts, quotes, invoices, credit notes,
+   reminders. Logical properties throughout (RTL). */
+.inv-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.inv-heading h2 {
+  margin-block-end: 0;
+}
+.inv-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 4px 14px;
+}
+.inv-filter {
+  padding: 5px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.inv-filter.is-on {
+  border-color: var(--accent, var(--blue));
+  background: var(--accent-bg, var(--bg-alt));
+  font-weight: 600;
+}
+.inv-badge {
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: var(--bg-alt);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.inv-muted {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.inv-note {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+}
+.inv-contacts {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+.inv-contacts li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface);
+}
+.inv-lines {
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface);
+}
+.inv-lines legend {
+  padding-inline: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.inv-line {
+  display: grid;
+  grid-template-columns: minmax(160px, 2fr) minmax(80px, 0.6fr) minmax(140px, 1fr) minmax(90px, auto) auto;
+  align-items: end;
+  gap: 10px;
+  margin-block-end: 10px;
+}
+.inv-line .fin-field {
+  margin: 0;
+}
+.inv-line-amount {
+  padding-block-end: 10px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: end;
+}
+.inv-icon {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 34px;
+  block-size: 34px;
+  margin-block-end: 2px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface);
+  color: var(--text-h);
+  cursor: pointer;
+}
+.inv-total {
+  margin: 4px 0 12px;
+  font-variant-numeric: tabular-nums;
+}
+.inv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 10px;
+}
+.inv-line-list {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.88rem;
+}
+.inv-line-list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  padding: 4px 0;
+  border-block-end: 1px dashed var(--border);
+  font-variant-numeric: tabular-nums;
+}
+.business-document-draft {
+  border-inline-start-style: dashed;
+}
+.business-document-cancelled {
+  border-inline-start-color: var(--text);
+  opacity: 0.85;
+}
+.inv-credit,
+.inv-reminder {
+  margin-block-start: 12px;
+  background: var(--surface);
+}
+.inv-preview {
+  inline-size: 100%;
+  box-sizing: border-box;
+  margin-block-start: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--bg-alt);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+.inv-link {
+  font-size: 0.9rem;
+}
+.inv-aging-d60 .business-late-amount,
+.inv-aging-d90 .business-late-amount,
+.inv-aging-over90 .business-late-amount {
+  color: var(--danger);
+}
+@media (max-width: 720px) {
+  .inv-line {
+    grid-template-columns: 1fr 1fr;
+  }
+  .inv-line label:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* P13-05, lot C: tabs of the organisation, steering, budget, 13 weeks, stock. */
+.business-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-block: 18px 4px;
+  border-block-end: 1px solid var(--border);
+}
+.business-tab {
+  padding: 9px 14px;
+  border: 0;
+  border-block-end: 3px solid transparent;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+.business-tab:hover {
+  color: var(--text-h);
+}
+.business-tab.is-on {
+  border-block-end-color: var(--accent, var(--blue));
+  color: var(--text-h);
+  font-weight: 600;
+}
+.pilot-subtitle {
+  margin: 20px 0 6px;
+  font-size: 1rem;
+}
+.pilot-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-block-end: 12px;
+  font-size: 0.9rem;
+}
+.pilot-inline input,
+.pilot-inline select {
+  padding: 6px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+}
+.pilot-check {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+}
+.pilot-table-wrap {
+  overflow-x: auto;
+}
+.pilot-table {
+  inline-size: 100%;
+  margin-block: 8px 14px;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+.pilot-table th,
+.pilot-table td {
+  padding: 8px 10px;
+  border-block-end: 1px solid var(--border);
+  text-align: end;
+  white-space: nowrap;
+}
+.pilot-table th:first-child {
+  text-align: start;
+  font-weight: 500;
+}
+.pilot-table thead th {
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.pilot-table tr.is-over td:last-child {
+  color: var(--danger);
+  font-weight: 600;
+}
+.pilot-flag {
+  font-size: 0.75rem;
+}
+.pilot-plan-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pilot-verdict {
+  margin: 10px 0 0;
+  font-weight: 500;
+}
+.pilot-notes {
+  margin: 0;
+  padding-inline-start: 18px;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.pilot-move {
+  margin-block-start: 12px;
+}
+
+/* P13-05, lot B: the printable quote or invoice. Hidden on screen; when it is
+   printed, it is the only thing on the page. */
+.print-sheet-root {
+  display: none;
+}
+@media print {
+  body.printing-document > *:not(.print-sheet-root) {
+    display: none !important;
+  }
+  body.printing-document .print-sheet-root {
+    display: block;
+  }
+  .print-sheet {
+    color: #000;
+    background: #fff;
+    font-size: 11pt;
+  }
+  .print-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    margin-block-end: 18px;
+  }
+  .print-org {
+    font-size: 14pt;
+  }
+  .print-title {
+    text-align: end;
+  }
+  .print-title h1 {
+    margin: 0 0 4px;
+    font-size: 20pt;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .print-small {
+    font-size: 9pt;
+    color: #333;
+  }
+  .print-draft {
+    padding: 6px 10px;
+    border: 2px solid #000;
+    font-weight: 700;
+    text-align: center;
+  }
+  .print-to {
+    margin-block: 10px 16px;
+    margin-inline-start: auto;
+    inline-size: 45%;
+    padding: 10px 12px;
+    border: 1px solid #999;
+  }
+  .print-object {
+    font-weight: 600;
+  }
+  .print-lines,
+  .print-totals {
+    border-collapse: collapse;
+  }
+  .print-lines {
+    inline-size: 100%;
+    margin-block-end: 14px;
+  }
+  .print-lines th,
+  .print-lines td {
+    padding: 6px 8px;
+    border: 1px solid #999;
+    text-align: end;
+  }
+  .print-lines th:first-child,
+  .print-lines td:first-child {
+    text-align: start;
+  }
+  .print-totals {
+    margin-inline-start: auto;
+    min-inline-size: 45%;
+  }
+  .print-totals th,
+  .print-totals td {
+    padding: 4px 8px;
+    text-align: end;
+  }
+  .print-totals th {
+    font-weight: 500;
+  }
+  .print-grand th,
+  .print-grand td {
+    border-block-start: 1px solid #000;
+    font-weight: 700;
+  }
+}

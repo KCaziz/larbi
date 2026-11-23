@@ -56,18 +56,18 @@ model User {
   // list as finPublic, never containing finPublic itself. Free-form JSON
   // array of codes (small, bounded, validated at the application layer) —
   // not a join table: there is no extra data attached to a secondary role.
-  finSecondaryPublics     Json                   @default("[]")
+  finSecondaryPublics     Json                     @default("[]")
   // Age bracket, not a birth date: the server only ever needs to know whether
   // someone is "under18" (the 18+ gate, already settled project-wide) — a
   // precise date of birth would be more personal data than that requires
   // (rule 10, minimisation). The exact minimum age to register, and parental
   // consent, remain open (P6-01 point 7) — this column is ready for both.
   finAgeRange             String?
-  finCountry              String?                @db.VarChar(2)
+  finCountry              String?                  @db.VarChar(2)
   // ISO 4217, defaults to DZD (the only currency used anywhere in the
   // platform today): a placeholder until multi-currency is decided (P6-01
   // point 4), never shown as a final decision.
-  finCurrency             String                 @default("DZD") @db.VarChar(3)
+  finCurrency             String                   @default("DZD") @db.VarChar(3)
   finSituation            String?
   finMainIntention        String?
   finHorizon              String?
@@ -81,15 +81,15 @@ model User {
   // answer C3, 2026-10-28): declared by the person, never changed by the
   // system. Irregular or seasonal raises the emergency fund's default target
   // to 6 months. `stable` | `irregular` | `seasonal` (FIN_INCOME_REGULARITIES).
-  finIncomeRegularity     String                 @default("stable") @db.VarChar(10)
+  finIncomeRegularity     String                   @default("stable") @db.VarChar(10)
   // « Premiers pas » (P8-23, tab 02_Premier_Demarrage): the steps the person
   // chose to skip for now, { "P4": true }. A step is done when its data exists;
   // nothing here is ever a gate.
-  finFirstSteps           Json                   @default("{}")
+  finFirstSteps           Json                     @default("{}")
   // Per-type enable/opt-in (P6-18): { [type]: { enabled, optedIn } }. Absent
   // keys fall back to the catalogue's own default (constants/finNotification.js)
   // — this column only ever holds what someone actually changed.
-  finNotificationSettings Json                   @default("{}")
+  finNotificationSettings Json                     @default("{}")
   finProfileTransitions   FinProfileTransition[]
   finConsents             FinConsent[]
   finAuditLogs            FinAuditLog[]
@@ -112,13 +112,19 @@ model User {
   finAssets               FinAsset[]
   finSpaceMemberships     FinSpaceMember[]
   finPaperPortfolio       FinPaperPortfolio?
-  finSpaceInvitesSent     FinSpaceInvite[]       @relation("SpaceInviteSender")
-  finSpaceInvitesTaken    FinSpaceInvite[]       @relation("SpaceInviteAcceptor")
+  finSpaceInvitesSent     FinSpaceInvite[]         @relation("SpaceInviteSender")
+  finSpaceInvitesTaken    FinSpaceInvite[]         @relation("SpaceInviteAcceptor")
   finGoals                FinGoal[]
   finDebts                FinDebt[]
   finDebtPayments         FinDebtPayment[]
   finNotifications        FinNotification[]
-  finBusiness             FinBusiness?
+  // P13-05: the organisations this person created, and the ones they belong to.
+  finBusinesses           FinBusiness[]
+  finOrgMemberships       FinOrganizationMember[]  @relation("OrgMemberUser")
+  finOrgInvitationsSent   FinOrganizationMember[]  @relation("OrgMemberInviter")
+  finOrgMandatesGranted   FinOrganizationMandate[]
+  finOrgJournal           FinOrganizationJournal[]
+  finIdempotencyKeys      FinIdempotencyKey[]
 
   // E-Learning (P2-01)
   formationsCreated Formation[]
@@ -2546,43 +2552,142 @@ model ComparatorMeta {
 // montant : scope, source, sourceRef, status, confidence, consentUses,
 // effectiveAt, collectedAt, version, archivedAt, deletedAt.
 
+// P13-05 lot A (2026-11-23): an ORGANISATION of the client's référentiel.
+// `userId` is the person who created it; who may do what is in its members
+// (roles), mandates and journal below — never in the public it declares.
 model FinBusiness {
-  id                   String                @id @default(uuid())
-  userId               String                @unique
-  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name                 String                @db.VarChar(160)
+  id                   String                    @id @default(uuid())
+  userId               String
+  user                 User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                 String                    @db.VarChar(160)
+  tradeName            String?                   @db.VarChar(160)
+  // PUB-01 to PUB-10 (tab 01_PUBLICS): which home, path and indicators fit.
+  publicKey            String?                   @db.VarChar(10)
+  sector               String?                   @db.VarChar(160)
+  wilaya               String?                   @db.VarChar(60)
+  timezone             String                    @default("Africa/Algiers") @db.VarChar(40)
   // Forme juridique DÉCLARÉE par le compte, pas déduite : les obligations
   // attachées à chaque forme relèvent du droit algérien, que nous ne
   // modélisons pas (P7-01).
-  legalForm            String?               @db.VarChar(40)
+  legalForm            String?                   @db.VarChar(40)
   // Identifiants fiscaux et commerciaux : saisis tels quels, jamais validés
   // contre un format inventé. Un NIF refusé à tort empêche d'enregistrer une
   // entreprise réelle.
-  taxId                String?               @db.VarChar(40)
-  tradeRegister        String?               @db.VarChar(40)
-  statisticalId        String?               @db.VarChar(40)
-  activity             String?               @db.VarChar(160)
-  currency             String                @db.VarChar(3)
+  taxId                String?                   @db.VarChar(40)
+  tradeRegister        String?                   @db.VarChar(40)
+  statisticalId        String?                   @db.VarChar(40)
+  activity             String?                   @db.VarChar(160)
+  currency             String                    @db.VarChar(3)
   // Début de l'exercice : un mois (1-12). Le client n'a fourni aucune règle
   // d'exercice, donc il est déclaré et non supposé janvier.
-  fiscalYearStartMonth Int                   @default(1)
-  scope                String                @default("business") @db.VarChar(20)
-  source               String                @db.VarChar(20)
-  sourceRef            String?               @db.VarChar(200)
-  status               String                @db.VarChar(20)
-  consentUses          Json                  @default("[]")
-  effectiveAt          DateTime              @default(now())
-  collectedAt          DateTime              @default(now())
-  version              Int                   @default(1)
+  fiscalYearStartMonth Int                       @default(1)
+  scope                String                    @default("business") @db.VarChar(20)
+  source               String                    @db.VarChar(20)
+  sourceRef            String?                   @db.VarChar(200)
+  status               String                    @db.VarChar(20)
+  consentUses          Json                      @default("[]")
+  effectiveAt          DateTime                  @default(now())
+  collectedAt          DateTime                  @default(now())
+  version              Int                       @default(1)
   archivedAt           DateTime?
   deletedAt            DateTime?
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
   contacts             FinBusinessContact[]
   documents            FinBusinessDocument[]
   payments             FinBusinessPayment[]
+  reminders            FinBusinessReminder[]
+  items                FinBusinessItem[]
+  stockMoves           FinBusinessStockMove[]
+  budgets              FinBusinessBudget[]
+  cashPositions        FinBusinessCashPosition[]
+  members              FinOrganizationMember[]
+  mandates             FinOrganizationMandate[]
+  journal              FinOrganizationJournal[]
 
+  @@index([userId])
   @@map("fin_businesses")
+}
+
+// A person in an organisation, with one role (tab 22_AUTORISATIONS). An
+// invitation is a member « invited » by e-mail; « revoked » is kept.
+model FinOrganizationMember {
+  id          String                   @id @default(uuid())
+  businessId  String
+  business    FinBusiness              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?                    @relation("OrgMemberUser", fields: [userId], references: [id], onDelete: Cascade)
+  email       String                   @db.VarChar(254)
+  role        String                   @db.VarChar(40)
+  status      String                   @db.VarChar(12)
+  invitedById String?
+  invitedBy   User?                    @relation("OrgMemberInviter", fields: [invitedById], references: [id], onDelete: SetNull)
+  expiresAt   DateTime?
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  version     Int                      @default(1)
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  mandates    FinOrganizationMandate[]
+
+  @@unique([businessId, email])
+  @@index([userId, status])
+  @@index([email, status])
+  @@map("fin_organization_members")
+}
+
+// What a member may reach, for what purpose, from when to when (DEC-008).
+model FinOrganizationMandate {
+  id          String                @id @default(uuid())
+  businessId  String
+  business    FinBusiness           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  memberId    String
+  member      FinOrganizationMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  scope       String                @db.VarChar(20)
+  purpose     String                @db.VarChar(200)
+  startsAt    DateTime
+  endsAt      DateTime?
+  revokedAt   DateTime?
+  grantedById String?
+  grantedBy   User?                 @relation(fields: [grantedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime              @default(now())
+
+  @@index([memberId])
+  @@index([businessId])
+  @@map("fin_organization_mandates")
+}
+
+// The journal of an organisation (ECR-0008): append only.
+model FinOrganizationJournal {
+  id         String      @id @default(uuid())
+  businessId String
+  business   FinBusiness @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  actorId    String?
+  actor      User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String      @db.VarChar(60)
+  objectType String      @db.VarChar(40)
+  objectId   String?     @db.VarChar(191)
+  details    Json?
+  createdAt  DateTime    @default(now())
+
+  @@index([businessId, createdAt])
+  @@map("fin_organization_journal")
+}
+
+// Idempotency-Key (DEC-005): the first answer to a creation, replayed.
+model FinIdempotencyKey {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key        String   @db.VarChar(120)
+  route      String   @db.VarChar(200)
+  statusCode Int
+  body       String   @db.LongText
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, key])
+  @@index([createdAt])
+  @@map("fin_idempotency_keys")
 }
 
 model FinBusinessContact {
@@ -2619,46 +2724,175 @@ model FinBusinessContact {
 }
 
 model FinBusinessDocument {
-  id          String               @id @default(uuid())
+  id          String                    @id @default(uuid())
   businessId  String
-  business    FinBusiness          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business    FinBusiness               @relation(fields: [businessId], references: [id], onDelete: Cascade)
   contactId   String?
-  contact     FinBusinessContact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contact     FinBusinessContact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
   // "sale" | "purchase" (BUSINESS_DOCUMENT_KINDS) : ce que l'entreprise émet
   // et ce qu'elle reçoit. Le sens du montant en dépend entièrement.
-  kind        String               @db.VarChar(10)
-  number      String               @db.VarChar(40)
-  label       String               @db.VarChar(200)
+  kind        String                    @db.VarChar(10)
+  // P13-05, lot B: "quote" | "invoice" | "credit_note", and where it stands
+  // in its cycle (19_CYCLE_FACTURE). Payment state stays deduced.
+  docType     String                    @default("invoice") @db.VarChar(12)
+  state       String                    @default("issued") @db.VarChar(12)
+  // The quote an invoice comes from; the invoice a credit note corrects.
+  relatedId   String?
+  related     FinBusinessDocument?      @relation("DocumentRelated", fields: [relatedId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  derived     FinBusinessDocument[]     @relation("DocumentRelated")
+  validUntil  DateTime?
+  // Direct costs excluding tax, declared: what the indicative margin needs.
+  costExcl    Float?
+  // Lot C: what a purchase pays for (our families), and fixed or variable.
+  category    String?                   @db.VarChar(30)
+  costNature  String?                   @db.VarChar(10)
+  // Null only for a draft invoice, numbered when issued.
+  number      String?                   @db.VarChar(40)
+  label       String                    @db.VarChar(200)
   issuedAt    DateTime
   dueAt       DateTime?
   // Montants en centimes, comme partout dans le moteur. Hors taxe et taxe sont
   // DÉCLARÉS tous les deux : le taux de TVA appliqué appartient au document
   // réel, et aucun taux n'est supposé ici (voir P7-01).
   amountExcl  Float
-  taxAmount   Float                @default(0)
-  currency    String               @db.VarChar(3)
-  note        String?              @db.VarChar(300)
-  scope       String               @default("business") @db.VarChar(20)
-  source      String               @db.VarChar(20)
-  sourceRef   String?              @db.VarChar(200)
-  status      String               @db.VarChar(20)
-  confidence  String?              @db.VarChar(20)
-  consentUses Json                 @default("[]")
-  effectiveAt DateTime             @default(now())
-  collectedAt DateTime             @default(now())
-  version     Int                  @default(1)
+  taxAmount   Float                     @default(0)
+  currency    String                    @db.VarChar(3)
+  note        String?                   @db.VarChar(300)
+  scope       String                    @default("business") @db.VarChar(20)
+  source      String                    @db.VarChar(20)
+  sourceRef   String?                   @db.VarChar(200)
+  status      String                    @db.VarChar(20)
+  confidence  String?                   @db.VarChar(20)
+  consentUses Json                      @default("[]")
+  effectiveAt DateTime                  @default(now())
+  collectedAt DateTime                  @default(now())
+  version     Int                       @default(1)
   archivedAt  DateTime?
   deletedAt   DateTime?
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
   payments    FinBusinessPayment[]
+  lines       FinBusinessDocumentLine[]
+  reminders   FinBusinessReminder[]
+  stockMoves  FinBusinessStockMove[]
 
   // Un numéro de document est unique dans l'entreprise qui l'émet : deux
   // factures portant le même numéro sont une erreur de saisie, pas deux
-  // factures.
-  @@unique([businessId, kind, number])
+  // factures. Devis, factures et avoirs ont chacun leur numérotation.
+  @@unique([businessId, kind, docType, number])
   @@index([businessId, issuedAt])
+  @@index([relatedId])
   @@map("fin_business_documents")
+}
+
+// P13-05, lot B: what a quote or an invoice sells. Σ amount = amountExcl.
+model FinBusinessDocumentLine {
+  id         String              @id @default(uuid())
+  documentId String
+  document   FinBusinessDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  position   Int
+  label      String              @db.VarChar(200)
+  quantity   Float
+  unitPrice  Float
+  amount     Float
+  createdAt  DateTime            @default(now())
+
+  @@index([documentId])
+  @@map("fin_business_document_lines")
+}
+
+// P13-05, lot C: what the organisation keeps in stock.
+model FinBusinessItem {
+  id         String                 @id @default(uuid())
+  businessId String
+  business   FinBusiness            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name       String                 @db.VarChar(160)
+  unit       String                 @db.VarChar(20)
+  reference  String?                @db.VarChar(60)
+  archivedAt DateTime?
+  version    Int                    @default(1)
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+  moves      FinBusinessStockMove[]
+
+  @@unique([businessId, name])
+  @@map("fin_business_items")
+}
+
+// P13-05, lot C (CNV-16): an entry is a lot; losses and exits name their lot.
+model FinBusinessStockMove {
+  id         String                 @id @default(uuid())
+  businessId String
+  business   FinBusiness            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  itemId     String
+  item       FinBusinessItem        @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  lotId      String?
+  lot        FinBusinessStockMove?  @relation("StockLot", fields: [lotId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  drawn      FinBusinessStockMove[] @relation("StockLot")
+  kind       String                 @db.VarChar(10)
+  lotRef     String?                @db.VarChar(60)
+  quantity   Float
+  totalCost  Float?
+  movedAt    DateTime
+  documentId String?
+  document   FinBusinessDocument?   @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  note       String?                @db.VarChar(300)
+  createdAt  DateTime               @default(now())
+
+  @@index([businessId])
+  @@index([itemId])
+  @@index([lotId])
+  @@index([documentId])
+  @@map("fin_business_stock_moves")
+}
+
+// P13-05, lot C: a budget, one family and one month, excluding tax.
+model FinBusinessBudget {
+  id         String      @id @default(uuid())
+  businessId String
+  business   FinBusiness @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  category   String      @db.VarChar(30)
+  month      String      @db.Char(7)
+  amount     Float
+  version    Int         @default(1)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@unique([businessId, category, month])
+  @@map("fin_business_budgets")
+}
+
+// P13-05, lot C: the cash really held at a date (« solde initial rapproché »).
+model FinBusinessCashPosition {
+  id         String      @id @default(uuid())
+  businessId String
+  business   FinBusiness @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  observedAt DateTime
+  amount     Float
+  note       String?     @db.VarChar(300)
+  createdAt  DateTime    @default(now())
+
+  @@index([businessId, observedAt])
+  @@map("fin_business_cash_positions")
+}
+
+// P13-05, lot B (FAC-008): a reminder sent for an unpaid invoice. It changes
+// no balance.
+model FinBusinessReminder {
+  id           String              @id @default(uuid())
+  businessId   String
+  business     FinBusiness         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  documentId   String
+  document     FinBusinessDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  channel      String              @db.VarChar(12)
+  sentAt       DateTime
+  note         String?             @db.VarChar(300)
+  nextActionAt DateTime?
+  createdAt    DateTime            @default(now())
+
+  @@index([businessId])
+  @@index([documentId])
+  @@map("fin_business_reminders")
 }
 
 model FinBusinessPayment {

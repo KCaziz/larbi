@@ -162,7 +162,8 @@ describe('platform settings (P3-16)', () => {
     assert.equal(upd.body.setting.value, 'contact@example.com');
     assert.equal((await t.request('POST', '/admin/settings', { user: admin, json: { key: 'not-a-real-setting', value: 'x' } })).status, 400);
     assert.equal((await t.request('DELETE', '/admin/settings/contactEmail', { user: admin })).status, 404, 'no delete route exists any more');
-    assert.equal(await t.prisma.platformSetting.count(), 5, 'still exactly the known settings');
+    // The regulatory answers (P13-05) are one more row, with their own route.
+    assert.equal(await t.prisma.platformSetting.count({ where: { key: { not: 'regulatoryParams' } } }), 5, 'still exactly the known settings');
     // The Analytics identifier has one shape (P12-06); empty turns Analytics off.
     assert.equal((await t.request('POST', '/admin/settings', { user: admin, json: { key: 'gaMeasurementId', value: 'UA-1234' } })).status, 400);
     assert.equal((await t.request('POST', '/admin/settings', { user: admin, json: { key: 'gaMeasurementId', value: 'G-ABC123XYZ' } })).status, 200);

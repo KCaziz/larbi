@@ -2650,6 +2650,8 @@ Tant que ce point n'est pas tranché, **aucune ligne de code ne doit être écri
 
 **Éclaté en tâches suivies séparément le 2026-10-18**, pour que chaque blocage reste traçable individuellement plutôt que noyé dans une seule tâche : `P7-03` (déclinaison par segment : PME/PMI, start-up, micro-entreprise, auto-entrepreneur, micro-importateur, profession libérale), `P7-04` (états financiers réglementaires), `P7-05` (diaspora et commerce international). Cette tâche (`P7-01`) reste l'alerte de périmètre globale ; `P7-02` reste le seul lot livré.
 
+**Mise à jour du 2026-11-23 — cahier des charges reçu.** Le client a fourni `FINCLUDIA Referentiel Unique Professionnels Commerce Diaspora.xlsx` (10 publics, 381 écrans, 739 formules, 757 routes d'API ; détail et découpage dans `P13-05`). La question de périmètre posée ici devient : par quels publics et quels modules commencer, et avec quel avenant au contrat (article 4). C'est le point 3 des écarts de `P13-05`.
+
 ### P7-02 — Espace entreprise : socle de trésorerie (tiers, ventes, achats, règlements)
 - Statut : `✅ done`
 - Priorité : `🔴 high`
@@ -2671,7 +2673,7 @@ Le premier lot de l'ERP : **tout ce qui se calcule sans référentiel comptable*
 - **Tests** : 26 unitaires, 18 de sécurité. Verts du premier coup.
 
 ### P7-03 — Espace entreprise : déclinaison par segment (PME/PMI, start-up, micro-entreprise, auto-entrepreneur, micro-importateur, profession libérale)
-- Statut : `⛔ blocked`
+- Statut : `❌ todo` (débloquée le 2026-11-23 : cahier des charges reçu, réalisation par `P13-05`)
 - Priorité : `🔴 high`
 - Dépendances : `P7-01`, `P7-02`
 - Durée cible : non estimable tant que le périmètre n'est pas défini
@@ -2685,6 +2687,8 @@ Ce qui bloque, concrètement :
 - Le **statut juridique de chaque segment** (seuils de chiffre d'affaires, régime fiscal applicable) doit être confirmé avant de décider si un compte déclare un segment librement ou si des règles de seuil s'appliquent.
 
 **Ce qu'il faut obtenir pour débloquer :** le cahier des charges détaillé par segment (écrans, champs, calculs attendus pour chacun des six profils cités), et la liste des statuts/seuils qui les distinguent légalement.
+
+**Mise à jour du 2026-11-23 — cahier des charges reçu.** Le client a fourni `FINCLUDIA Referentiel Unique Professionnels Commerce Diaspora.xlsx` (10 publics, 381 écrans, 739 formules, 757 routes d'API ; détail et découpage dans `P13-05`). Il couvre chaque segment (onglets `01_PUBLICS`, `02_ECRANS`, `09_PARCOURS`, `12_INDICATEURS`). Les seuils légaux y sont des valeurs candidates non activées (`25_PARAMETRES`) : ils attendent une validation datée, sans bloquer le reste.
 
 ### P7-04 — Espace entreprise : états financiers réglementaires (bilan, compte de résultat, TVA, amortissements, stocks)
 - Statut : `⛔ blocked`
@@ -2703,8 +2707,10 @@ Ce qui bloque, concrètement, et c'est resté identique depuis le 2026-10-16 :
 
 **Ce qu'il faut obtenir pour débloquer :** ces quatre référentiels, fournis ou validés par le client — jamais composés ici, pour la même raison que les barèmes de paie (`P4-14`) ou les offres de financement (`P4-15`) ne le sont pas.
 
+**Mise à jour du 2026-11-23 — cahier des charges reçu.** Le client a fourni `FINCLUDIA Referentiel Unique Professionnels Commerce Diaspora.xlsx` (10 publics, 381 écrans, 739 formules, 757 routes d'API ; détail et découpage dans `P13-05`). **Reste bloquée** : le classeur décrit comment importer et rapprocher une comptabilité tenue ailleurs (`DEC-002`, import selon le SCF). Il dit aussi qu'aucun état n'est présenté comme certifié et qu'aucun taux de TVA, CASNOS ou CNAS n'est activé sans signature (`DEC-001`, `25_PARAMETRES`). Les valeurs réglementaires datées et validées manquent donc toujours ; seule la mécanique d'import peut être construite.
+
 ### P7-05 — Diaspora et commerce international
-- Statut : `⛔ blocked`
+- Statut : `❌ todo` (débloquée le 2026-11-23 : cahier des charges reçu, réalisation par `P13-05`, lots D et E)
 - Priorité : `🟡 medium`
 - Dépendances : `P7-01`
 - Durée cible : non estimable tant que le périmètre n'est pas défini
@@ -2718,6 +2724,11 @@ Ce qui bloque, concrètement :
 - **Ce que « commerce international » doit couvrir n'est pas défini** : import/export documentaire, douane, lettres de crédit — chacun est un domaine réglementé qui suppose ses propres règles, datées et officielles.
 
 **Ce qu'il faut obtenir pour débloquer :** une définition écrite du périmètre attendu pour chacun des deux volets, puis le cahier des charges produit par produit comme pour le reste de la Phase 7.
+
+**Mise à jour du 2026-11-23 — cahier des charges reçu.** Le client a fourni `FINCLUDIA Referentiel Unique Professionnels Commerce Diaspora.xlsx` (10 publics, 381 écrans, 739 formules, 757 routes d'API ; détail et découpage dans `P13-05`). Le périmètre est défini :
+- **diaspora (PUB-10)** : projets en Algérie, budget, jalons, décaissements, justificatifs à double validation, mandats par projet, patrimoine multidevise ; FINCLUDIA prépare un transfert mais ne transmet aucun fonds (`DEC-016`) ;
+- **commerce international (PUB-09)** : opérations, partenaires, Incoterms versionnés avec lieu nommé (`DEC-017`), paiement, expédition, douane, change daté (`DEC-015`), coût rendu ; les droits et taxes d'import restent non calculés sans barème homologué (`DEC-014`) ;
+- **micro-importation (PUB-08)** : activée seulement si le statut, l'activité et les droits sont validés (`DEC-013`).
 
 **Les règles qui ne pouvaient pas être des contraintes SQL**, et où elles vivent :
 - « un règlement est dans la devise de son document » référence une colonne de clé étrangère — MariaDB refuse (erreur 1901) : service + test de sécurité ;
@@ -4117,7 +4128,7 @@ Faire trouver le site par les moteurs de recherche, dans ses trois langues, et m
 ## Durée : hors des 8 semaines (à estimer)
 ## Objectif
 
-Le client a envoyé, le 2026-11-21, deux documents « qui complètent la gestion du budget » : le référentiel du portefeuille fictif (`FINCLUDIA_Portefeuille.docx`) et celui des mini-formations par parcours (`FINCLUDIA Referentiel Pedagogique.docx`), tous deux à la racine du projet. **Rien n'est encore développé** : cette phase les enregistre, dit ce qu'ils contiennent et ce qu'ils débloquent. Les tâches seront découpées plus finement au moment de les commencer.
+Le client a envoyé, le 2026-11-21, deux documents « qui complètent la gestion du budget » : le référentiel du portefeuille fictif (`FINCLUDIA_Portefeuille.docx`) et celui des mini-formations par parcours (`FINCLUDIA Referentiel Pedagogique.docx`). Le 2026-11-23, il a ajouté le référentiel unique des publics professionnels, du commerce international et de la diaspora (`FINCLUDIA Referentiel Unique Professionnels Commerce Diaspora.xlsx`, `P13-05`). Les trois sont à la racine du projet. **Rien n'est encore développé** : cette phase les enregistre, dit ce qu'ils contiennent et ce qu'ils débloquent. Les tâches seront découpées plus finement au moment de les commencer.
 
 ### P13-01 — Portefeuille fictif : données de marché réelles 2020–2026 (« InvestLab »)
 - Statut : `❌ todo`
@@ -4153,6 +4164,277 @@ Ce que contient le document :
 - **Règles du site** : moteur de QCM et anti-mémorisation, algorithme de progression, statuts visibles dans l'interface, conditions de certification, schéma technique du module, gouvernance et contrôle qualité, guide du formateur.
 
 Ce que cela change : ce sont les contenus de formation par profil que le client avait dit fournir (réponse E, `P8-17`) et une partie de ce qu'attend **`P8-29`** (parcours de formation). Reste à confirmer avec lui si la vitrine et les compartiments de `P8-29` viennent aussi, ou si l'on construit la formation d'abord. Les montants, taux et seuils réglementaires cités dans les modules restent datés et versionnés (règle 17).
+
+### P13-03 — Vagues : accueil de l'application et accueil du site
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P12-05`
+- Durée cible : 1 jour (estimation)
+- Origine : demande du client du 2026-11-22, avec une photo de la carte « Optimisez votre finance avec FINCLUDIA » de la barre latérale (`WhatsApp Image 2026-11-21 at 10.58.23 AM.jpeg`)
+
+- S'inspirer des vagues de cette carte pour **les deux accueils** : l'accueil de l'application (`/app`) **et** la page d'accueil publique du site (choix confirmé le 2026-11-22).
+- **Deux vagues** : une en haut de la page, une en bas.
+- **Un effet au défilement** : les vagues se croisent, ou un effet du même ordre.
+- **Une forme plus fidèle à une vraie vague**, y compris dans la carte de la barre latérale : plusieurs couches, des crêtes irrégulières, des dégradés vert d'eau et bleu.
+- À respecter : le contenu reste lisible, rien de gênant au défilement, un mouvement coupé si le visiteur a demandé moins d'animations (`prefers-reduced-motion`), et un rendu correct en thème sombre et sur téléphone.
+- Réalisé (2026-11-23) : composant `components/ui/Waves.jsx`. Trois couches de mer, chacune faite de deux houles de longueurs différentes, ce qui donne une crête irrégulière. Les couleurs vont du sarcelle au bleu profond et à la menthe, en dégradé. Au défilement de la page, les couches glissent en sens opposés et se croisent, sans fin visible ; le mouvement est coupé si le visiteur a demandé moins d'animations. Placement :
+  - accueil de l'application : une vague en haut, derrière le titre, et une en bas ;
+  - accueil du site : une vague au pied du bandeau d'ouverture (elle remplace la vague dessinée du thème clair) et une au pied du dernier bandeau ;
+  - carte de la barre latérale : variante `calm`, aux houles plus longues pour une carte étroite.
+  - Vérifié en thème clair et sombre, sur ordinateur et sur téléphone.
+
+### P13-04 — Graphiques : un tracé en vague entre les points
+- Statut : `✅ done`
+- Priorité : `🟡 medium`
+- Dépendances : `P13-03`, `R19-01`
+- Durée cible : 0,5 jour (estimation)
+- Origine : demande du client du 2026-11-22
+
+- Dans le même esprit que les vagues de `P13-03`, relier les points des courbes par un tracé arrondi, avec un léger effet de vague, au lieu de segments droits. Le remplissage sous la courbe peut reprendre le dégradé des vagues.
+- **La lisibilité passe avant l'effet** : le tracé passe exactement par chaque point, sans dépasser les vraies valeurs (pas de creux ni de pic inventés entre deux mois). Les points, les axes, la légende, la phrase de lecture et le tableau restent.
+- Un seul composant à modifier (`LineChart`), donc toutes les courbes de l'application en profitent.
+- Réalisé (2026-11-23) : `LineChart` trace une courbe arrondie par interpolation cubique monotone (Fritsch–Carlson). Elle passe exactement par chaque point et ne dépasse jamais les valeurs voisines : aucun pic ni creux inventé. Sous une courbe seule, un remplissage en dégradé de la couleur de la série. La courbe se dessine une fois à l'affichage, sauf si le visiteur a demandé moins d'animations. Les points, l'axe (désormais sur des chiffres ronds), la légende, la phrase de lecture et le tableau restent.
+
+### P13-05 — Référentiel unique : professionnels, commerce international et diaspora
+- Statut : `🚧 in-progress` (lots A, B et C faits le 2026-11-23 ; lots D à G à faire)
+- Priorité : `🔴 high`
+- Dépendances : `P7-02` (socle livré), `P13-02` (les parcours de formation PRO, AE, LIB, START, BUS, DIA, MI et TR en sont le pendant pédagogique)
+- Durée cible : non estimée. C'est un produit entier, plusieurs fois la taille du budget personnel ; à chiffrer lot par lot.
+- Origine : `FINCLUDIA Referentiel Unique Professionnels Commerce Diaspora.xlsx` (client, 2026-11-23), à la racine du projet
+
+**C'est le cahier des charges « produit par produit » que la Phase 7 attendait depuis le 2026-10-16.** Il lève le blocage de `P7-03` (segments) et de `P7-05` (diaspora et commerce international). `P7-04` (états réglementaires) reste bloquée : voir plus bas.
+
+**Ce que contient le classeur (33 onglets).** Le client le présente lui-même comme une « conception avancée » : méthodes et contrats précis, rien de développé, règles réglementaires non homologuées.
+- **10 publics** (`01_PUBLICS`), chacun avec son accueil, son parcours, ses indicateurs prioritaires et ses options :
+  - PUB-01 profession libérale ;
+  - PUB-02 auto-entrepreneur ;
+  - PUB-03 start-uppeur ;
+  - PUB-04 startup ;
+  - PUB-05 micro-entreprise ;
+  - PUB-06 PME ;
+  - PUB-07 PMI ;
+  - PUB-08 micro-importateur ;
+  - PUB-09 importateur / exportateur ;
+  - PUB-10 diaspora entrepreneuriale.
+  - Règle répétée partout : **un public n'accorde aucun droit**. Les droits viennent de l'organisation, du rôle, du mandat et de la finalité, contrôlés côté serveur.
+- **Volume** :
+  - 381 écrans ;
+  - 339 liens de navigation ;
+  - 3 567 champs (type, validation, unité, confidentialité) ;
+  - 1 531 boutons ;
+  - 1 986 flux ;
+  - 3 269 états d'écran ;
+  - 1 360 alertes ;
+  - 199 étapes de parcours ;
+  - 136 tableaux ;
+  - 739 formules ;
+  - 968 indicateurs ;
+  - 699 calculs d'écran ;
+  - 180 simulateurs ;
+  - 89 comparateurs ;
+  - 224 recherches ;
+  - 111 entrées du copilote ;
+  - 156 règles ;
+  - 757 routes d'API ;
+  - 199 événements ;
+  - 167 lignes de schéma de données ;
+  - 272 cas de recette ;
+  - 48 tests de calcul.
+- **Écrans par domaine** (`02_ECRANS`) :
+  - accueils spécialisés ;
+  - honoraires ;
+  - ventes, achats, facturation (cycle devis → facture → paiement → avoir, `19_CYCLE_FACTURE`) ;
+  - trésorerie et pilotage ;
+  - coûts, stocks, production, qualité, maintenance (PMI) ;
+  - financement (21 écrans) ;
+  - comptabilité (10) ;
+  - paie (7) et RH (7) ;
+  - ERP (8) ;
+  - partenaires et institutions ;
+  - veille et conformité ;
+  - financement participatif ;
+  - micro-importation (10), commerce international (12), diaspora (10) ;
+  - forum, cabinet, programmes, cohortes, formation.
+- **18 décisions arrêtées** (`28_DECISIONS`) et **16 conventions** (`29_CONVENTIONS`) :
+  - une facture n'est pas un encaissement ;
+  - NULL n'est pas zéro ;
+  - aucune somme de devises sans cours daté ;
+  - une simulation ne crée ni facture, ni paiement, ni transfert ;
+  - une pièce émise se corrige par un avoir, jamais en l'écrasant ;
+  - FINCLUDIA prépare un transfert diaspora mais ne transmet aucun fonds ;
+  - Incoterms avec version et lieu nommé ;
+  - une dépense de projet diaspora déclarée n'est pas une dépense payée, et une pièce soumise n'est pas une pièce acceptée ;
+  - un copilote sans IA générative (menus, arbre de questions, gabarits) ;
+  - la confidentialité régie par la loi 18-07 modifiée.
+- **Paramètres réglementaires** (`25_PARAMETRES`, 50) et **références officielles** (`31_REFERENCES` : DGI/IFU, ANAE, JORADP facturation et micro-importation, ANPDP, Banque d'Algérie, Douanes, ICC Incoterms).
+  - Des valeurs candidates sont données, par exemple IFU 0,5 % et plafond de 5 000 000 DZD par an pour l'auto-entrepreneur.
+  - Elles sont toutes marquées **« non activée sans signature »**. TVA, CASNOS et CNAS n'ont aucune valeur.
+  - Conformément à `DEC-001` et `CNV-05`, l'application répondra « règle non publiée » tant qu'un fiscaliste ou le client n'aura pas validé chaque valeur, datée.
+- **Production** (`26_PRODUCTION`, `DEC-007`) : trois environnements (développement, recette, production), CI, surveillance, plan de retour arrière. Cela recoupe `P5-04` à `P5-06`.
+
+**Décisions de l'utilisateur (2026-11-23), qui priment sur les questions ci-dessous :**
+1. **Organisations, rôles et mandats : la structure du client remplace la nôtre.** L'espace entreprise passe de « une entreprise par compte » (`P7-02`) au modèle du classeur : plusieurs organisations, des membres, des rôles, des mandats, et des droits contrôlés côté serveur. Les données de `P7-02` sont migrées sans perte.
+2. **API : les adresses ne changent pas.** On garde `/api/fin/…` et les conventions existantes. On y applique les exigences du classeur :
+   - idempotence des créations (`Idempotency-Key`) ;
+   - contrôle de version à la modification (`If-Match`) ;
+   - codes d'erreur 401, 403, 404, 409, 412, 422, 429 et 503 ;
+   - aucun état financier modifié en cas d'échec ;
+   - 403 ou 404 sans révéler l'existence des données d'une autre organisation.
+3. **Pas de négociation de périmètre** : on construit pour la satisfaction du client, lot après lot, dans l'ordre A à G ci-dessous. La question de l'avenant (`P7-01`) n'est plus un préalable.
+4. **Valeurs réglementaires** : elles sont dans l'onglet `25_PARAMETRES`, colonne « Statut ». Il y en a deux groupes :
+   - **PARM-002 à PARM-007** (IFU, plafond de CA, TVA, CASNOS, CNAS, calendrier des obligations) : « valeur réglementaire candidate NON ACTIVÉE sans signature » ;
+   - **PARM-026 à PARM-031** (activités, conditions, limites de micro-importation, nomenclature et tarifs douaniers) : « publication réglementaire soumise à homologation ».
+   La règle elle-même est dans `28_DECISIONS` (`DEC-001`, `DEC-013`, `DEC-014`) : sans valeur validée et datée, l'application affiche « règle non publiée », jamais un montant.
+   - **Réalisé (2026-11-23), sur décision de l'utilisateur (« juste une pop-up pour que le client confirme ses valeurs »)** :
+     - une fenêtre « Valeurs réglementaires à confirmer » s'ouvre dans l'administration tant qu'une valeur reste à confirmer ;
+     - pour chacune des 12 valeurs : son nom, la valeur proposée par le référentiel (s'il y en a une), un lien vers le texte officiel, un champ pour la valeur et un champ pour la date d'application, puis « Je confirme » ;
+     - un taux se saisit en pourcentage (0,5 pour 0,5 %) ; une règle sans chiffre unique (TVA, CASNOS…) s'écrit en mots ;
+     - « Plus tard » la ferme pour la visite ; elle revient à la suivante tant qu'il reste une valeur ; une nouvelle réponse remplace la précédente à partir de sa date ;
+     - stockage dans les réglages de la plateforme, sans migration ; routes `GET /api/admin/regulatory-params` et `PUT /api/admin/regulatory-params/:key`, réservées aux administrateurs ;
+     - `confirmedValue(clé, date)` servira aux futurs écrans réglementaires : il renvoie `null` tant que rien n'est confirmé à cette date, jamais la valeur proposée ;
+     - tests : `functional/admin-regulatory.test.js` (5), `e2e/regulatory-confirm-journey.test.js` (3). `reset()` des tests marque les 12 valeurs comme répondues, pour que la fenêtre ne recouvre pas les autres parcours de l'administration.
+
+**Écarts avec l'existant relevés à la lecture (avant les décisions ci-dessus) :**
+1. **Organisations, rôles et mandats.**
+   - Le classeur suppose plusieurs organisations par personne, des rôles (comptable, RH, financeur mandaté, institution, invité diaspora) et des mandats par projet, révocables et datés.
+   - `P7-02` a livré une seule entreprise par compte, sans rôle.
+   - C'est le premier lot à construire, car tout le reste en dépend.
+2. **Forme de l'API.**
+   - Le classeur décrit `/v1/espaces/{espace_id}/…`, avec les erreurs au format RFC 7807, `If-Match` et `Idempotency-Key`.
+   - L'application actuelle suit `/api/fin/…`.
+   - À confirmer avec le client : reprendre les conventions de l'existant en gardant les garanties (idempotence, version, codes d'erreur), plutôt que deux styles d'API dans le même produit.
+3. **Périmètre de la première livraison.** Paie, RH, comptabilité (import et rapprochement selon le SCF, `DEC-002`), financement participatif, forum et partenaires sont chacun un module entier. Le client doit dire par quels publics et quels modules commencer.
+4. **Validation réglementaire.** Qui signe les valeurs fiscales et sociales (`DEC-001`, `DEC-013`, `DEC-014`) ? Sans signature, ces écrans restent en « à vérifier », comme le prévoit le classeur lui-même.
+
+**Découpage proposé (à valider avec le client) :**
+- **Lot A, socle commun** — `✅ fait le 2026-11-23` (sauf l'accueil spécialisé, reporté au lot C) :
+  - organisations, membres, rôles, mandats ;
+  - profil professionnel et choix du public ;
+  - ~~accueil spécialisé~~ → lot C : ses cartes (honoraires, CA, stock, marge…) n'existent qu'avec les lots B et C ;
+  - droits côté serveur et journal.
+  - **Réalisé** :
+    - **Données** : migration `20261123120000_fin_organizations`.
+      - `fin_businesses` devient une organisation. Une personne peut en avoir plusieurs (fin de l'unicité par compte). Nouvelles colonnes : enseigne, public `PUB-01` à `PUB-10`, secteur, wilaya, fuseau horaire.
+      - Nouvelles tables :
+        - `fin_organization_members` : membres, invitations et accès retirés, conservés ;
+        - `fin_organization_mandates` : portée, objet, début, fin, révocation ;
+        - `fin_organization_journal` : en ajout seulement ;
+        - `fin_idempotency_keys`.
+      - Chaque entreprise existante a son créateur comme titulaire : rien n'est perdu.
+    - **Rôles** (onglet `22_AUTORISATIONS`) :
+      - titulaire, responsable financier, comptable interne, comptable externe sous mandat, collaborateur, chef de projet, magasinier, responsable RH, lecteur ;
+      - droits par action (lire les chiffres, saisir tiers, documents, règlements, gérer les membres et les mandats, lire le journal) ;
+      - le magasinier saisit des fournisseurs mais aucun document ; le responsable RH ne voit aucun montant ;
+      - le comptable externe ne voit rien sans mandat en cours, vérifié à chaque requête ;
+      - l'organisation garde toujours un titulaire.
+    - **API, mêmes adresses** (décision du 2026-11-23) :
+      - l'organisation est indiquée par l'en-tête `X-Organisation` ; sans en-tête, c'est la sienne, comme avant ;
+      - un non-membre reçoit 404, sans révéler que l'organisation existe ; un rôle insuffisant reçoit 403 avec son motif ;
+      - nouvelles routes sous `/api/fin/entreprise` : `organisations`, `invitations/:id/accepter|refuser`, `membres`, `mandats`, `journal` ;
+      - `Idempotency-Key` sur toutes les créations, et `If-Match` (412) sur les modifications de l'organisation et des membres ;
+      - chaque écriture laisse une ligne au journal.
+    - **Écran Mon entreprise** :
+      - choix de l'organisation, rôle affiché, « Nouvelle organisation » avec le profil professionnel ;
+      - invitations reçues à accepter ou refuser ;
+      - section « Membres et droits » : inviter, changer le rôle, retirer l'accès, mandats du comptable externe ;
+      - « Journal des opérations » ;
+      - chaque section ne s'affiche que si le rôle y donne accès.
+    - **Tests** : `security/finOrganization.test.js` (11), `e2e/fin-organisation-journey.test.js` (4). `security/finBusiness.test.js` est adapté : plusieurs organisations par personne, sans mélange des données.
+    - **Mise en ligne** : la migration modifie la base (nouvelles tables, index de `fin_businesses`). Elle est à ajouter à `mise-a-jour-base.sql` au prochain paquet.
+- **Lot B, vendre et encaisser** — `✅ fait le 2026-11-23` : clients, devis, factures, avoirs, paiements, créances (`19_CYCLE_FACTURE`). On étend `P7-02` sans dupliquer ses tables.
+  - **Réalisé** (`FAC-001` à `FAC-009` et `FAC-012`) :
+    - **Données** : migration `20261124120000_fin_invoicing`.
+      - `fin_business_documents` reçoit le type (devis, facture, avoir), l'étape du cycle, le lien vers la pièce d'origine (devis → facture → avoir), la date de validité d'un devis et le coût direct déclaré. Le numéro devient facultatif pour une facture en brouillon seulement, et l'unicité passe à (organisation, sens, type, numéro).
+      - Nouvelles tables : `fin_business_document_lines` (désignation, quantité, prix unitaire hors taxe) et `fin_business_reminders` (relances).
+      - Chaque document existant devient une facture émise : c'est ce qu'il était. Rien n'est perdu.
+    - **Cycle** :
+      - devis : brouillon → envoyé → accepté ou refusé → facturé. Il lui faut un client et des lignes ; un devis expiré ne s'accepte plus ;
+      - « Transformer en facture » crée une facture en brouillon avec les lignes du devis ; un devis ne se facture qu'une fois ;
+      - une facture en brouillon ne crée aucune créance. À l'émission, elle reçoit le numéro suivant (`FAC-2026-0001`, et `DEV-…`, `AV-…`) ;
+      - un achat garde le numéro de son fournisseur et s'enregistre directement ;
+      - une pièce émise ne se modifie plus et ne se supprime plus (`CNV-02`). Seul son coût direct se complète ;
+      - chaque étape est conditionnelle en base (état attendu) : deux clics ne facturent pas deux fois ;
+      - chaque étape laisse une ligne au journal.
+    - **Avoir** (`FAC-007`) : toujours sur une facture émise, jamais au-delà de ce qu'elle vaut encore. S'il dépasse le reste dû d'une facture déjà payée, l'excédent s'affiche « à rembourser au client ». Un avoir total sur une facture impayée l'annule.
+    - **Paiement** : seule une facture émise se règle ; le trop-perçu reste refusé, comme en `P7-02`.
+    - **Relance** (`FAC-008`) : FINCLUDIA prépare le message (copier, ou ouvrir dans la messagerie de la personne) ; la personne l'envoie elle-même puis enregistre la relance (canal, note, prochaine action). Aucun solde ne change.
+    - **Export pour le comptable** (`FAC-009`) : fichier CSV des factures et avoirs émis, avec leurs identifiants, avoirs, réglé et reste dû. Ce sont des lignes de gestion, pas des écritures SCF (`CNV-06`).
+    - **Nouveaux chiffres** (préfixe `E`, de notre fait) :
+      - `E011` chiffre d'affaires facturé hors taxe, net des avoirs ;
+      - `E012` marge indicative, seulement sur les factures dont le coût est déclaré (`CNV-04`) ;
+      - `E013` devis en cours ;
+      - `E014` à rembourser aux clients ;
+      - balance âgée des créances (pas encore échu, 1-30, 31-60, 61-90, plus de 90 jours, sans échéance).
+    - **Écran Mon entreprise** : clients et fournisseurs ; formulaire devis / facture de vente / facture d'achat avec lignes ; filtres (devis, brouillons, ventes, achats) ; actions selon l'étape ; avoir ; relance ; export ; cartes « Ventes » et balance âgée.
+    - **Correction au passage** : sur une carte d'entreprise « non calculé », le conseil renvoyait vers les mouvements personnels. Il dit maintenant quoi faire dans l'espace entreprise.
+    - **Tests** : `functional/finInvoicing.test.js` (15) reprend les cas chiffrés du classeur (`TST-00001`, `TST-00003`, `TST-00028`, `TST-00035`, « Solde après règlement partiel », « CA facturé net avoir », « Marge facture HT ») ; `e2e/fin-invoicing-journey.test.js` (6) déroule `TST-00028` dans le navigateur.
+    - **Pas fait dans ce lot** :
+      - `FAC-010` (passeport financier) et `FAC-011` (créances à financer) : lot F, avec les dossiers de financement ;
+      - `FAC-013` à `FAC-016` (factures en devise, import et export) : lot D ;
+      - `FAC-017` (dépense de projet diaspora) : lot E ;
+      - ~~le devis ou la facture en PDF à envoyer au client~~ : fait avec le lot C (voir plus bas).
+    - **Mise en ligne** : cette migration modifie la base. Elle est à ajouter à `mise-a-jour-base.sql` au prochain paquet, après celle du lot A.
+- **Lot C, dépenser, stocker, piloter** — `✅ fait le 2026-11-23` :
+  - dépenses déclarées ou confirmées ;
+  - stocks et lots ;
+  - coûts et marges ;
+  - budgets ;
+  - trésorerie à 13 semaines ;
+  - indicateurs par public.
+  - **Réalisé** :
+    - **Données** : migration `20261125120000_fin_business_pilot`.
+      - Un achat reçoit une famille de dépense (liste de FINCLUDIA, pas un plan comptable) et une nature, fixe ou variable. Si la personne ne la précise pas, la nature vient de la famille.
+      - Nouvelles tables :
+        - `fin_business_items` : articles ;
+        - `fin_business_stock_moves` : une réception est un lot ; pertes et sorties nomment leur lot ;
+        - `fin_business_budgets` : une famille, un mois, un montant ;
+        - `fin_business_cash_positions` : solde réellement constaté à une date, découvert compris.
+    - **Dépenses** :
+      - un achat se classe par famille ;
+      - « payée comptant » enregistre la pièce et son règlement complet en un geste (dépense de caisse, vente au comptant) ;
+      - une vente n'a pas de famille de dépense.
+    - **Stock par lot** (`CNV-16`) :
+      - quantité nette = reçue − pertes, coût unitaire = coût total du lot / quantité nette, reste = nette − sorties ;
+      - une sortie ne prend jamais plus que ce qui reste du lot ;
+      - aucune méthode de valorisation n'est supposée (`P7-04`) : chaque lot garde son coût ;
+      - le magasinier (`DRT-007`) saisit articles, réceptions et sorties et voit les quantités, jamais les valeurs ni les chiffres.
+    - **Nouveaux chiffres** (`E015` à `E024`, de notre fait) :
+      - valeur du stock ;
+      - besoin en fonds de roulement simplifié (stock + clients − fournisseurs) ;
+      - délais de paiement clients et fournisseurs ;
+      - seuil de rentabilité (charges fixes / part de marge sur coûts variables) ;
+      - part du premier client ;
+      - écart au budget du mois ;
+      - trésorerie disponible (dernier solde constaté + entrées − sorties depuis) ;
+      - autonomie en mois ;
+      - besoin de trésorerie sur 13 semaines ;
+      - dépenses par famille.
+    - **Trésorerie à 13 semaines** :
+      - part du solde réellement constaté. Sans lui, rien n'est projeté et l'écran demande de le saisir (`TST-00030`) ;
+      - factures à leur échéance ;
+      - factures déjà échues placées en première semaine et signalées ;
+      - factures sans échéance comptées à part, jamais placées au hasard ;
+      - reste des budgets réparti jour par jour, sans compter deux fois une dépense déjà saisie ;
+      - affiche la première semaine de tension, le point le plus bas et le besoin ;
+      - scénario « clients en retard de 15, 30 ou 60 jours » : il ne crée ni ne modifie rien (`CNV-12`).
+    - **Accueil spécialisé** (`01_PUBLICS`) : chaque profil voit d'abord ses indicateurs prioritaires (PUB-01 à PUB-07). PUB-08 à PUB-10 ont un accueil générique en attendant les lots D et E.
+    - **Écran Mon entreprise, en onglets** : Accueil, Ventes et achats, Stock, Budget et trésorerie, Équipe et journal. Chaque onglet n'apparaît que si le rôle y donne accès.
+    - **Devis et facture imprimables** : « Imprimer ou enregistrer en PDF » produit une feuille propre, avec l'organisation (NIF, RC, NIS s'ils sont renseignés), le client, les lignes, les totaux, les avoirs, le déjà réglé et le reste à payer. Un brouillon est marqué comme tel.
+    - **Corrections au passage** :
+      - les cartes en jours (délais) s'affichaient comme des montants ;
+      - le contrôle « chaque appel vise une route existante » ne comprenait pas les routes à valeurs imposées (`:step(envoyer|…)`) ;
+      - les textes « le client » ont été reformulés en « votre client ».
+    - **Tests** :
+      - `unit/finBusinessPilot.test.js` (15) reprend les cas de `30_TESTS_CALCUL` : coût rendu unitaire 3 200, stock 384 000, avaries 2 %, quantité nette nulle, BFR 1 000 000, délais 6 et 10 jours, seuil 3 000 000, concentration 0,18, écart 20 000, trésorerie 900 000, autonomie 7,5 mois ;
+      - `functional/finPilot.test.js` (8) ;
+      - `e2e/fin-pilot-journey.test.js` (4) ;
+      - `e2e/fin-invoicing-journey.test.js` vérifie aussi la feuille imprimée.
+    - **Mise en ligne** : cette migration modifie la base. Elle est à ajouter à `mise-a-jour-base.sql` au prochain paquet, après celles des lots A et B.
+- **Lot D, micro-importation et commerce international** : opérations, coût rendu, Incoterms, change daté, documents.
+- **Lot E, diaspora** : projets en Algérie, budget, jalons, justificatifs à double validation, mandats, patrimoine multidevise.
+- **Lot F, simulateurs, comparateurs, recherches et copilote** du classeur, en réutilisant le moteur et l'assistant existants.
+- **Lot G, modules lourds** selon le choix du client : comptabilité et import SCF, paie, RH, financement participatif, forum, partenaires.
+- À chaque lot : ses cas de `27_RECETTES` et `30_TESTS_CALCUL` deviennent des tests automatisés.
 
 
 ---
@@ -4245,7 +4527,7 @@ Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau
 - **Phase 4 (outils, calculateurs, comparateurs)** — `✅ done` en totalité, `P4-02` (simulateur de crédit) et `P4-04` (fiscalité) compris. `P4-04` reste `❌ todo` mais **volontairement hors MVP** (le client doit encore fournir les règles fiscales).
 - **Phase 5 (sécurité, disponibilité, livraison)** — la sécurité est faite (`P5-01`, `P5-02`, `P5-03` `✅ done`, audités sur preuve le 2026-10-18 : 38 fichiers de tests de sécurité, 364 cas). `P5-04` (sauvegardes) `🚧 in-progress` : les scripts existent et ont été testés réellement (`npm run backup`, `npm run backup:verify`), mais où les conserver dépend encore de l'hébergement définitif. `P5-05`/`P5-06` restent `❌ todo`, en attente de `P5-04`. `P5-07` (livrables contractuels) `🚧 in-progress`.
 - **Phase 6 (FINCLUDIA, gestion financière personnelle)** — **`✅ done` sur 23 des 24 tâches** (`P6-24` fermée le 2026-10-28). Les deux modules financiers de P6-02 à P6-20, P6-22 et P6-23 sont faits et testés (onboarding, « Mon argent », budgets, objectifs, réserve, dettes, patrimoine, portefeuille fictif, espaces partagés, notifications, centre de confiance, recherche globale, personnalisation des 8 parcours, graphiques de tableaux de bord). `P6-21` (validation de fin de phase) est close depuis le 2026-10-18 : les 10 parcours J01-J10 **et** les 8 scénarios par public passent en navigateur. Reste `⛔ blocked` : `P6-01` (cadrage, voir plus bas). `P6-24` (comptes financiers coordonnés) est **débloquée** depuis le 2026-10-27 : le client a choisi des comptes qui portent chaque opération ; réalisation par `P8-03` et `P8-05`. **Plusieurs tâches `✅ done` portent désormais un avertissement daté** (`P6-04`, `P6-05`, `P6-06`, `P6-08`, `P6-09`) : leurs erreurs ou écarts sont nommés sous la tâche, et corrigés en Phase 8.
-- **Phase 7 (périmètre contractuel ERP)** — alerte de périmètre, pas un planning. `P7-02` (socle de trésorerie) est fait. `P7-01`, `P7-03`, `P7-04`, `P7-05` sont `⛔ blocked`, chacun en attente d'un cahier des charges ou d'un référentiel que le client n'a pas encore fourni pour cette partie.
+- **Phase 7 (périmètre contractuel ERP)** — alerte de périmètre, pas un planning. `P7-02` (socle de trésorerie) est fait. **Mise à jour du 2026-11-23 : le cahier des charges est reçu** (`P13-05`). `P7-03` et `P7-05` passent en `❌ todo`. `P7-04` (états réglementaires) reste `⛔ blocked` sur les valeurs fiscales et sociales à faire valider. `P7-01` attend le choix des premiers publics et modules, et l'avenant au contrat.
 - **Phase 8 (Gestion budgétaire, moteur budgétaire unique)** — **en cours depuis le 2026-10-27 : 29 tâches sur 32 terminées (2026-11-02).** `P8-01` à `P8-21`, `P8-23` à `P8-28`, `P8-30` et `P8-31` sont faites : application sous `/app` avec la navigation finale, comptes et transferts, calculs faux corrigés, Mes comptes, Accueil (avec l'ajout rapide en feuille glissante et la mini-courbe), Mouvements, catégories, budgets, Synthèse et rapport (avec R-06, la cascade, la comparaison de deux mois et les instantanés), Calendrier, Objectifs & sécurité, Dettes, Patrimoine, Santé financière (avec son historique), le catalogue unique des Outils, la fiche de paie et son import, les alertes et la notification du navigateur, la Formation, les Premiers pas, les deux lots de graphiques, les seize contrôles du client. Restent `P8-32` (graphiques complémentaires), `P8-29` (refonte de la vitrine, bloquée en attente des éléments du client) et la validation `P8-22`, qui reprend aussi les deux questions encore ouvertes (H et I). `P6-24` (comptes multiples) est fermée avec `P8-03` et `P8-05`.
 - **Phase 9 (Gestion commune, gestion collective)** — ouverte le 2026-10-27 ; rien de commencé. Les décisions de cadrage sont prises (`P9-01` `✅ done`, 2026-10-27). Elle reprend `P6-13` à `P6-15` dans une solution séparée et y ajoute les tâches collectives, les budgets communs et le calendrier unifié.
 
@@ -4257,7 +4539,9 @@ Règle ajoutée le 2026-09-18 (voir P1-10) : toute nouvelle page ou tout nouveau
   - point 12 : le périmètre ERP de l'annexe 1 (voir `P7-01`) ;
   - point 13 : date de livraison cible, absente du contrat ;
   - point 14 : annexe 1 du contrat, laissée vide par le client.
-- **`P7-01`/`P7-03`/`P7-04`/`P7-05` (espace entreprise)** — cahier des charges par segment, référentiel comptable algérien (plan comptable, TVA, amortissements), et définition du volet diaspora/commerce international : aucun des trois n'est fourni. Une demande précise à envoyer au client a déjà été rédigée (voir l'échange du 2026-10-18) — à relancer si pas encore envoyée.
+- **`P7-01`/`P7-04` (espace entreprise)** — **mis à jour le 2026-11-23** : le cahier des charges par segment, diaspora et commerce international est reçu (`P13-05`), donc `P7-03` et `P7-05` ne sont plus bloquées. Ce qui bloque encore :
+  - le choix, par le client, des premiers publics et modules, avec l'avenant au contrat qui va avec (`P7-01`) ;
+  - la validation datée des valeurs fiscales et sociales (IFU, TVA, CASNOS, CNAS, seuils), que le classeur lui-même laisse « non activées sans signature » (`P7-04`).
 - **Paiement, email, newsletter** : fournisseurs non choisis (`P3-08`), ce qui bloque `P3-10` et laisse « mot de passe oublié » inactif.
 
 ## Ce qui a été vérifié récemment, pas seulement relu

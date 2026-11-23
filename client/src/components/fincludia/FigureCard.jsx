@@ -27,6 +27,7 @@ export default function FigureCard({ label, answer, simulation = false, children
     // a money result carries the currency it was computed in.
     if (answer.unite === 'ratio') return formatRatio(i18n.language, answer.resultat);
     if (answer.unite === 'mois') return t('fincludia.months', { count: answer.resultat });
+    if (answer.unite === 'jours') return t('fincludia.days', { count: answer.resultat });
     // Recette R10-06: at most two decimals, in the person's language.
     if (answer.unite === 'points' || answer.unite === 'nombre') return formatNumber(i18n.language, answer.resultat, { digits: 2 });
     return formatAmount(i18n.language, answer.resultat, answer.unite);

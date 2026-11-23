@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../lib/api.js';
+import { api, WRITE_DONE_EVENT } from '../../lib/api.js';
 import LineChart from '../../components/fincludia/charts/LineChart.jsx';
 
 // G-06, the balance of the accounts over the last twelve months, from each
@@ -20,6 +20,16 @@ export default function AccountsBalanceChart({ accounts, days = null }) {
 
   const wanted = filter === 'all' ? usable : usable.filter((account) => account.id === filter);
   const key = wanted.map((account) => account.id).join(',');
+  // R19-01 (« les graphes ne bougent pas »): read again after every save — the
+  // quick-add sheet of the top bar, an edit, a deletion — and whenever a
+  // balance shown on the page changed.
+  const [version, setVersion] = useState(0);
+  useEffect(() => {
+    const again = () => setVersion((n) => n + 1);
+    window.addEventListener(WRITE_DONE_EVENT, again);
+    return () => window.removeEventListener(WRITE_DONE_EVENT, again);
+  }, []);
+  const balances = wanted.map((account) => account.solde?.resultat ?? '').join(',');
 
   useEffect(() => {
     let cancelled = false;
@@ -31,7 +41,7 @@ export default function AccountsBalanceChart({ accounts, days = null }) {
     };
     // `key` is the list of accounts asked for.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, version, balances]);
 
   if (usable.length === 0) return null;
   const currencies = new Set(wanted.map((account) => account.currency));

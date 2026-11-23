@@ -30,6 +30,23 @@ const BY_FORMULA = {
   F003: ['movements', '/app/mouvements/nouveau'],
 };
 
+const BUSINESS = {
+  ...Object.fromEntries(['E001', 'E002', 'E003', 'E004', 'E005', 'E006', 'E007', 'E008', 'E009', 'E010', 'E011', 'E014'].map((id) => [id, 'businessDocuments'])),
+  E012: 'businessCost',
+  E013: 'businessQuote',
+  // Lot C.
+  E015: 'businessStock',
+  E016: 'businessDocuments',
+  E017: 'businessDocuments',
+  E018: 'businessDocuments',
+  E019: 'businessNature',
+  E020: 'businessDocuments',
+  E021: 'businessBudget',
+  E022: 'businessBalance',
+  E023: 'businessBalance',
+  E024: 'businessBalance',
+};
+
 const isMissing = (value) => value === null || value === undefined || value === 0 || (Array.isArray(value) && value.length === 0);
 
 export function howToCompute(answer) {
@@ -44,6 +61,10 @@ export function howToCompute(answer) {
     if (inputs.revenus_nets_mensuels === null || inputs.revenus_nets_mensuels === undefined) return { key: 'income', to: '/app/budgets/revenus' };
     return { key: 'essentialExpenses', to: '/app/objectifs/fonds-urgence' };
   }
+  // P13-05, lot B: a business figure is computed from the business's own
+  // documents, never from personal movements.
+  const business = BUSINESS[answer?.formule_id];
+  if (business) return { key: business, to: '/app/entreprise' };
   const known = BY_FORMULA[answer?.formule_id];
   if (known) return { key: known[0], to: known[1] };
   const inputs = answer?.entrees_snapshot ?? {};

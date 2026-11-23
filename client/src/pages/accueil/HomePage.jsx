@@ -6,6 +6,7 @@ import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate } from '../../lib/format.js';
 import { periodRange } from '../../lib/finControls.js';
 import { useAccountScope } from '../../lib/accountScope.js';
+import Waves from '../../components/ui/Waves.jsx';
 import { useDocumentMeta } from '../../lib/useDocumentMeta.js';
 import PageHeader from '../../components/layout/PageHeader.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
@@ -140,7 +141,9 @@ export default function HomePage() {
   }[ringTab];
 
   return (
-    <>
+    // P13-03: a wave at the head of the page and one at its foot; they cross as the page scrolls.
+    <div className="waves-page home-waves">
+      <Waves position="top" height={150} />
       <PageHeader icon={Home} title={t('appHome.title')} subtitle={t('appHome.intro')} maxWidth={1100} />
       <div className="home-page">
         {/* ACC-01 / ACC-02: the balance, total or one account, and the
@@ -532,7 +535,8 @@ export default function HomePage() {
           </dd>
         </dl>
       </div>
-    </>
+      <Waves position="bottom" height={130} />
+    </div>
   );
 }
 

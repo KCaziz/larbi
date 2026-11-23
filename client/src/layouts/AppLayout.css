@@ -318,6 +318,15 @@
 .app-side-promo-link:focus-visible {
   text-decoration: underline;
 }
+/* P13-03: the waves at the foot of the card, edge to edge. */
+.app-side-promo {
+  overflow: hidden;
+}
+.waves.app-side-promo-waves {
+  margin-block: 8px calc(-1 * var(--space-sm));
+  margin-inline: calc(-1 * var(--space-sm));
+  inline-size: auto;
+}
 
 /* The button that folds the menu, at the head of the top bar (recette R4-01). */
 .app-menu-toggle {

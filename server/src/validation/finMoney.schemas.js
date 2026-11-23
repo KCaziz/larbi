@@ -201,4 +201,12 @@ export const synthesisQuerySchema = z
 // (2 à 12) : ici pour que la requête soit refusée avant d'atteindre le service,
 // pas seulement écrêtée en silence.
 // `pas` (G-05): by month (the default, `months` of them), by day or by week.
-export const moneyHistoryQuerySchema = z.object({ months: z.coerce.number().int().min(2).max(12).optional(), pas: z.enum(['jour', 'semaine', 'mois']).optional(), accountId: z.string().uuid().optional() }).strict();
+export const moneyHistoryQuerySchema = z
+  .object({
+    months: z.coerce.number().int().min(2).max(12).optional(),
+    pas: z.enum(['jour', 'semaine', 'mois']).optional(),
+    accountId: z.string().uuid().optional(),
+    // R19: the last month of the window (the month the Synthèse shows).
+    fin: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional(),
+  })
+  .strict();

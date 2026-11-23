@@ -19,7 +19,8 @@ describe('the charts, end to end', { skip: findChrome() ? false : 'no Chrome/Chr
   const month = (shift) => new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + shift, 10, 12)).toISOString();
 
   before(async () => {
-    t = await boot();
+    // Two accounts (current + savings): a subscriber (P12-03, one account without).
+    t = await boot({ subscribers: true });
     await t.reset();
     user = await t.adult({ name: 'Salima Graphiques', finPublic: 'SAL', finCurrency: 'DZD', finOnboardedAt: new Date() });
     const account = (await as('POST', '/comptes', { label: 'Courant', type: 'AC-02', currency: 'DZD', openingBalance: 5000000, openingDate: month(-8) })).body.account;

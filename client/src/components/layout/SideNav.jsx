@@ -4,6 +4,7 @@ import { bestNavMatch, navLinkProps } from '../../lib/navMatch.js';
 import { ArrowRight, CircleCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import brandMark from '../../assets/brand/fincludia-mark.png';
+import Waves from '../ui/Waves.jsx';
 
 // The client's sidebar (refonte 2026-11-16), shared by the three windows:
 // Gestion budgétaire, Gestion commune and the administration. Dark, the whole
@@ -64,6 +65,8 @@ export default function SideNav({ label, home, sections, foot = [], promo = fals
             <Link to="/app/outils" className="app-side-promo-link">
               {t('appNav.promo.cta')} <ArrowRight size={14} aria-hidden="true" className="icon-dir" />
             </Link>
+            {/* P13-03: the card's sea, as in the client's model. */}
+            <Waves height={58} calm className="app-side-promo-waves" />
           </aside>
         )}
       </div>

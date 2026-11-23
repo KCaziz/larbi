@@ -118,6 +118,17 @@ export async function boot({ production = false, extra = {}, subscribers = false
     await replayMigrationInserts('_fin_main_categories', 'fin_categories');
     // And the official exchange rates of reference (P10-05).
     await replayMigrationInserts('_fin_exchange_rates', 'fin_exchange_rates');
+    // P13-05: the regulatory values of the référentiel, answered, so the window
+    // that asks the client to confirm them does not cover every admin page of
+    // the journeys (platform_settings is kept between tests). The tests of that
+    // window remove this row first.
+    const answered = Object.fromEntries(
+      ['PARM-002', 'PARM-003', 'PARM-004', 'PARM-005', 'PARM-006', 'PARM-007', 'PARM-026', 'PARM-027', 'PARM-028', 'PARM-029', 'PARM-030', 'PARM-031'].map((key) => [
+        key,
+        { value: 'test', effectiveFrom: '2000-01-01', confirmedAt: '2000-01-01T00:00:00.000Z', confirmedBy: null },
+      ]),
+    );
+    await prisma.platformSetting.upsert({ where: { key: 'regulatoryParams' }, update: { value: JSON.stringify(answered) }, create: { key: 'regulatoryParams', value: JSON.stringify(answered) } });
   }
 
   // Replays the INSERT statements a migration carries for ONE table. Used for

@@ -49,7 +49,9 @@ export default function SynthesisPage() {
   const report = useApi(asKept ? `/fin/rapport/instantane/${month}` : `/fin/rapport?mois=${month}&reduction=${Math.min(100, Math.max(0, Number(reduction) || 0))}${accountParam}`);
   // G-05: the step of the history charts — month (the default), week or day.
   const [step, setStep] = useState('mois');
-  const historyParams = [step === 'mois' ? '' : `pas=${step}`, oneAccount ? `accountId=${oneAccount}` : ''].filter(Boolean).join('&');
+  // R19-01: by month, the window ends on the month shown, so choosing another
+  // month moves the curves with the figures.
+  const historyParams = [step === 'mois' ? `fin=${month}` : `pas=${step}`, oneAccount ? `accountId=${oneAccount}` : ''].filter(Boolean).join('&');
   const history = useApi(`/fin/argent/synthese/historique?${historyParams}`);
   const [kept, setKept] = useState(null);
   if (report.data && report.data !== kept) setKept(report.data);
@@ -157,6 +159,8 @@ export default function SynthesisPage() {
               caption={t('synthesis.savingsRateChart')}
             />
           )}
+          {/* R19-01: say why the savings-rate curve is missing, rather than leave a blank. */}
+          {history.data?.points && !history.data.points.some((point) => typeof point.tauxEpargne === 'number') && <p className="fin-hint">{t('synthesis.savingsRateNone')}</p>}
         </section>
 
         {/* G-10: the month in one line — income, then what took it, then what is left. */}

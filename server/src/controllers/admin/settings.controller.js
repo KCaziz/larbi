@@ -1,7 +1,8 @@
-import { getAllSettings, upsertSetting } from '../../services/settings.service.js';
+import { CORE_KEYS, getAllSettings, upsertSetting } from '../../services/settings.service.js';
 
 export async function listSettings(req, res) {
-  const rows = await getAllSettings();
+  // Only the settings of the form (P13-05: the regulatory answers have their own route).
+  const rows = (await getAllSettings()).filter((r) => CORE_KEYS.includes(r.key));
   res.json({ settings: rows.map((r) => ({ key: r.key, value: r.value, updatedAt: r.updatedAt })) });
 }
 

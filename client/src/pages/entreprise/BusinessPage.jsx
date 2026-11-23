@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, FileText, Plus, Receipt } from 'lucide-react';
-import { api, errorKey } from '../../lib/api.js';
+import { Building2, TrendingUp } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { formatAmount, formatDate } from '../../lib/format.js';
@@ -12,10 +11,12 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import AdultOnly from '../../components/fincludia/AdultOnly.jsx';
-import AmountField from '../../components/fincludia/AmountField.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import { adultRefusalReason, isAdultRefusal } from '../../lib/adultRefusal.js';
-import { toMinorUnits } from '../../lib/money.js';
+import { useOrganisation } from '../../lib/organisation.js';
+import { CreateOrganisation, JournalSection, MembersSection, OrganisationBar } from './Organisation.jsx';
+import { AgingSection, InvoicingSection, invoicingError } from './Invoicing.jsx';
+import { BudgetSection, CashPlanSection, SpecialisedHome, SteeringSection, StockSection } from './Pilot.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Business.css';
 
@@ -30,28 +31,82 @@ import './Business.css';
 //
 // Chaque chiffre arrive enveloppé dans le contrat du moteur : rien n'est
 // recalculé ici, et « non calculé » reste visiblement différent de zéro.
+//
+// P13-05, lot A (2026-11-23): the organisations of the client's référentiel.
+// The bar on top chooses the organisation (and shows the invitations
+// received); everything under it is that organisation, read again from
+// scratch when the choice changes, and shown according to the person's role.
 export default function BusinessPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user } = useAuth();
-  const [message, setMessage] = useState(null);
-  const business = useApi('/fin/entreprise');
-  // Only once the business exists (navigation test, 2026-11-17): before, both
-  // were asked for anyway and answered « not found ».
-  const hasBusiness = Boolean(business.data?.entreprise);
-  const dashboard = useApi(hasBusiness ? '/fin/entreprise/tableau-de-bord' : null);
-  const documents = useApi(hasBusiness ? '/fin/entreprise/documents' : null);
+  const [organisationId, setOrganisationId] = useOrganisation();
+  const [creating, setCreating] = useState(false);
+  const mine = useApi('/fin/entreprise/organisations');
+  const organisations = mine.data?.organisations ?? [];
+  const invitations = mine.data?.invitations ?? [];
+  // A choice kept from another session that is no longer one of mine: the
+  // server would answer « not found »; fall back to my own organisation.
+  const known = organisations.some((org) => org.id === organisationId);
+  if (mine.data && organisationId && !known) setOrganisationId(null);
+  const current = known ? organisationId : (organisations.find((org) => org.role === 'owner') ?? organisations[0])?.id ?? null;
+  const currentRole = organisations.find((org) => org.id === current)?.role ?? null;
   useDocumentMeta(t('business.title'), t('business.intro'));
 
-  if (isAdultRefusal(business.error)) {
+  if (isAdultRefusal(mine.error)) {
     return (
       <>
         <PageHeader icon={Building2} title={t('business.title')} subtitle={t('business.intro')} maxWidth={1100} />
         <div className="business-page">
-          <AdultOnly reason={adultRefusalReason(business.error)} />
+          <AdultOnly reason={adultRefusalReason(mine.error)} />
         </div>
       </>
     );
   }
+  if (mine.status === 'loading' && !mine.data) return <LoadingState />;
+  if (mine.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={mine.reload} />;
+
+  const chosen = (id) => {
+    setOrganisationId(id);
+    setCreating(false);
+    mine.reload();
+  };
+
+  return (
+    <>
+      <PageHeader icon={Building2} title={t('business.title')} subtitle={t('business.intro')} maxWidth={1100} />
+      <div className="business-page">
+        <OrganisationBar
+          organisations={organisations}
+          invitations={invitations}
+          current={current}
+          role={currentRole}
+          onSwitch={chosen}
+          onNew={() => setCreating(true)}
+          onAnswered={(id) => (id ? chosen(id) : mine.reload())}
+        />
+        {creating || organisations.length === 0 ? (
+          <CreateOrganisation currency={user?.finCurrency ?? 'DZD'} onCreated={chosen} onCancel={organisations.length > 0 ? () => setCreating(false) : null} />
+        ) : (
+          <BusinessSpace key={current} />
+        )}
+      </div>
+    </>
+  );
+}
+
+// One organisation: what the person's role lets them see and do.
+function BusinessSpace() {
+  const { t, i18n } = useTranslation();
+  const [message, setMessage] = useState(null);
+  const [tab, setTab] = useState(null);
+  const business = useApi('/fin/entreprise');
+  const can = (action) => (business.data?.permissions ?? []).includes(action);
+  // Only once the organisation is known, and only what the role may read
+  // (P13-05): a refused request would only show an error.
+  const hasBusiness = Boolean(business.data?.entreprise);
+  const readsFinance = hasBusiness && can('finance.read');
+  const dashboard = useApi(readsFinance ? '/fin/entreprise/tableau-de-bord' : null);
+  const documents = useApi(readsFinance ? '/fin/entreprise/documents' : null);
 
   if (business.status === 'loading' && !business.data) return <LoadingState />;
   if (business.status === 'error') return <ErrorState message={t('state.loadError')} onRetry={business.reload} />;
@@ -64,266 +119,158 @@ export default function BusinessPage() {
       await action();
       setMessage({ kind: 'ok', text: t(okKey) });
       business.reload();
-      dashboard.reload();
-      documents.reload();
+      if (readsFinance) {
+        dashboard.reload();
+        documents.reload();
+      }
+      return true;
     } catch (err) {
-      setMessage({ kind: 'error', text: t(errorKey(err, { 422: 'business.errors.refused', 409: 'business.errors.conflict' })) });
+      setMessage({ kind: 'error', text: invoicingError(t, err) });
+      return false;
     }
   }
 
+  // P13-05, lot C: one tab per part of the organisation, each shown only when
+  // the role reaches it (the server checks again on every request).
+  const tabs = [
+    readsFinance && 'home',
+    readsFinance && 'sales',
+    can('stock.read') && 'stock',
+    readsFinance && 'steer',
+    (can('members.manage') || can('journal.read')) && 'team',
+  ].filter(Boolean);
+  const current = tabs.includes(tab) ? tab : tabs[0];
+
   return (
     <>
-      <PageHeader icon={Building2} title={t('business.title')} subtitle={t('business.intro')} maxWidth={1100} />
-      <div className="business-page">
-        {message && (
-          <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
-            {message.text}
-          </p>
-        )}
+      {message && (
+        <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
+          {message.text}
+        </p>
+      )}
 
-        {!entreprise ? (
-          <CreateBusiness currency={user?.finCurrency ?? 'DZD'} onCreate={(body) => run(() => api.post('/fin/entreprise', body), 'business.created')} />
-        ) : (
-          <>
-            {/* La phrase qui cadre tout le reste, au-dessus des chiffres et
-                non en dessous. */}
-            {dashboard.data && <Notice variant="info">{dashboard.data.avertissement}</Notice>}
+      {entreprise && (
+        <>
+          {!readsFinance && <Notice variant="info">{t('business.org.noFigures')}</Notice>}
+          {tabs.length > 1 && (
+            <div className="business-tabs" role="tablist" aria-label={t('business.pilot.tabsLabel')}>
+              {tabs.map((key) => (
+                <button
+                  key={key}
+                  id={`business-tab-${key}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={current === key}
+                  className={current === key ? 'business-tab is-on' : 'business-tab'}
+                  onClick={() => setTab(key)}
+                >
+                  {t(`business.pilot.tabs.${key}`)}
+                </button>
+              ))}
+            </div>
+          )}
 
-            <section aria-labelledby="business-cash">
-              <h2 id="business-cash">{t('business.cashTitle')}</h2>
+          {current === 'home' && (
+            <>
+              {/* La phrase qui cadre tout le reste, au-dessus des chiffres et
+                  non en dessous. */}
+              {dashboard.data && <Notice variant="info">{dashboard.data.avertissement}</Notice>}
               {dashboard.status === 'loading' && !dashboard.data ? (
                 <LoadingState />
               ) : (
-                <div className="fin-figure-grid">
-                  <FigureCard label={t('business.cashIn')} answer={dashboard.data?.encaissements} />
-                  <FigureCard label={t('business.cashOut')} answer={dashboard.data?.decaissements} />
-                  <FigureCard label={t('business.balance')} answer={dashboard.data?.tresorerie} />
-                  <FigureCard label={t('business.receivables')} answer={dashboard.data?.creances} />
-                  <FigureCard label={t('business.payables')} answer={dashboard.data?.dettes} />
-                  <FigureCard label={t('business.overdue')} answer={dashboard.data?.echu} />
-                </div>
-              )}
-            </section>
+                <>
+                  <SpecialisedHome publicKey={entreprise.publicKey} dashboard={dashboard.data} />
 
-            {dashboard.data?.enRetard?.length > 0 && (
-              <section aria-labelledby="business-late">
-                <h2 id="business-late">{t('business.lateTitle')}</h2>
-                <ul className="business-late">
-                  {dashboard.data.enRetard.map((row) => (
-                    <li key={row.id}>
-                      <span className="business-late-label">
-                        {row.numero} · {row.libelle}
-                      </span>
-                      <span className="business-late-due">{formatDate(i18n.language, row.echeance)}</span>
-                      <span className="business-late-amount">
-                        {formatAmount(i18n.language, row.resteDu, entreprise.currency)}
-                      </span>
+                  <section aria-labelledby="business-cash">
+                    <h2 id="business-cash">{t('business.cashTitle')}</h2>
+                    <div className="fin-figure-grid">
+                      <FigureCard label={t('business.cashIn')} answer={dashboard.data?.encaissements} />
+                      <FigureCard label={t('business.cashOut')} answer={dashboard.data?.decaissements} />
+                      <FigureCard label={t('business.balance')} answer={dashboard.data?.tresorerie} />
+                      <FigureCard label={t('business.receivables')} answer={dashboard.data?.creances} />
+                      <FigureCard label={t('business.payables')} answer={dashboard.data?.dettes} />
+                      <FigureCard label={t('business.overdue')} answer={dashboard.data?.echu} />
+                    </div>
+                  </section>
+
+                  {/* P13-05, lot B: what was sold and what is promised, excluding tax. */}
+                  {dashboard.data && (
+                    <section aria-labelledby="business-sales">
+                      <h2 id="business-sales">
+                        <TrendingUp size={18} aria-hidden="true" /> {t('business.inv.salesTitle')}
+                      </h2>
+                      <div className="fin-figure-grid">
+                        <FigureCard label={t('business.inv.invoiced')} answer={dashboard.data.caFacture} />
+                        <FigureCard label={t('business.inv.margin')} answer={dashboard.data.marge} />
+                        <FigureCard label={t('business.inv.openQuotes')} answer={dashboard.data.devisEnCours} />
+                        {dashboard.data.aRembourser?.resultat > 0 && <FigureCard label={t('business.inv.refundDue')} answer={dashboard.data.aRembourser} />}
+                      </div>
+                    </section>
+                  )}
+
+                  <AgingSection aging={dashboard.data?.balanceAgee} currency={entreprise.currency} />
+
+                  {dashboard.data?.enRetard?.length > 0 && (
+                    <section aria-labelledby="business-late">
+                      <h2 id="business-late">{t('business.lateTitle')}</h2>
+                      <ul className="business-late">
+                        {dashboard.data.enRetard.map((row) => (
+                          <li key={row.id}>
+                            <span className="business-late-label">
+                              {row.numero} · {row.libelle}
+                            </span>
+                            <span className="business-late-due">{formatDate(i18n.language, row.echeance)}</span>
+                            <span className="business-late-amount">{formatAmount(i18n.language, row.resteDu, entreprise.currency)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+                </>
+              )}
+            </>
+          )}
+
+          {/* P13-05, lot B (19_CYCLE_FACTURE): clients, quotes, invoices,
+              credit notes, reminders, export. */}
+          {current === 'sales' && <InvoicingSection business={entreprise} documents={documents.data?.documents ?? []} can={can} run={run} />}
+
+          {current === 'stock' && <StockSection currency={entreprise.currency} canWrite={can('stock.write')} showValues={readsFinance} run={run} />}
+
+          {current === 'steer' && (
+            <>
+              <SteeringSection dashboard={dashboard.data} currency={entreprise.currency} />
+              <CashPlanSection currency={entreprise.currency} canWrite={can('cash.write')} run={run} />
+              <BudgetSection currency={entreprise.currency} canWrite={can('budget.write')} run={run} />
+
+              {/* Les états que le contrat annonce et que nous ne produisons pas,
+                  avec ce qui leur manque. Les taire les ferait passer pour
+                  oubliés ; les annoncer « bientôt » serait une promesse que rien
+                  ne permet de tenir. */}
+              <section aria-labelledby="business-blocked">
+                <h2 id="business-blocked">{t('business.blockedTitle')}</h2>
+                <p className="business-blocked-intro">{t('business.blockedIntro')}</p>
+                <ul className="business-blocked">
+                  {(dashboard.data?.etatsNonProduits ?? []).map((row) => (
+                    <li key={row.key}>
+                      <strong>{row.label}</strong>
+                      <span>{row.needs}</span>
                     </li>
                   ))}
                 </ul>
               </section>
-            )}
+            </>
+          )}
 
-            {/* Les états que le contrat annonce et que nous ne produisons pas,
-                avec ce qui leur manque. Les taire les ferait passer pour
-                oubliés ; les annoncer « bientôt » serait une promesse que rien
-                ne permet de tenir. */}
-            <section aria-labelledby="business-blocked">
-              <h2 id="business-blocked">{t('business.blockedTitle')}</h2>
-              <p className="business-blocked-intro">{t('business.blockedIntro')}</p>
-              <ul className="business-blocked">
-                {(dashboard.data?.etatsNonProduits ?? []).map((row) => (
-                  <li key={row.key}>
-                    <strong>{row.label}</strong>
-                    <span>{row.needs}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section aria-labelledby="business-documents">
-              <h2 id="business-documents">
-                <FileText size={18} aria-hidden="true" /> {t('business.documentsTitle')}
-              </h2>
-              <NewDocument
-                currency={entreprise.currency}
-                onCreate={(body) => run(() => api.post('/fin/entreprise/documents', body), 'business.documentCreated')}
-              />
-              {documents.data?.documents?.length > 0 ? (
-                <ul className="business-documents">
-                  {documents.data.documents.map((document) => (
-                    <li key={document.id} className={`business-document business-document-${document.reglement.state}`}>
-                      <div className="business-document-head">
-                        <strong>{document.number}</strong>
-                        <span>{document.label}</span>
-                        <span className="business-document-state">{t(`business.states.${document.reglement.state}`)}</span>
-                      </div>
-                      <div className="business-document-amounts">
-                        <span>{formatAmount(i18n.language, document.total, document.currency)}</span>
-                        <span className="business-document-outstanding">
-                          {t('business.outstanding')} {formatAmount(i18n.language, document.reglement.outstanding, document.currency)}
-                        </span>
-                      </div>
-                      {document.reglement.outstanding > 0 && (
-                        <NewPayment
-                          currency={document.currency}
-                          max={document.reglement.outstanding}
-                          onCreate={(body) =>
-                            run(() => api.post(`/fin/entreprise/documents/${document.id}/reglements`, body), 'business.paymentCreated')
-                          }
-                        />
-                      )}
-                      {/* Un règlement dans une autre devise n'est pas absorbé
-                          en silence : il est dit, parce que le document a
-                          l'air impayé sans cela. */}
-                      {document.reglement.devisesIgnorees.length > 0 && (
-                        <p className="business-document-warning">{t('business.foreignPayments')}</p>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="business-empty">{t('business.noDocuments')}</p>
-              )}
-            </section>
-          </>
-        )}
-      </div>
+          {/* P13-05, lot A: who works here, with which rights, and what was done. */}
+          {current === 'team' && (
+            <>
+              {can('members.manage') && <MembersSection />}
+              {can('journal.read') && <JournalSection />}
+            </>
+          )}
+        </>
+      )}
     </>
-  );
-}
-
-function CreateBusiness({ currency, onCreate }) {
-  const { t } = useTranslation();
-  const [name, setName] = useState('');
-
-  return (
-    <form
-      className="business-form business-create"
-      onSubmit={(event) => {
-        event.preventDefault();
-        if (name.trim()) onCreate({ name: name.trim(), currency });
-      }}
-    >
-      <h2>{t('business.createTitle')}</h2>
-      <p>{t('business.createIntro')}</p>
-      <label htmlFor="business-name">{t('business.nameLabel')}</label>
-      <input id="business-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={160} required />
-      <Button type="submit" variant="primary">
-        <Plus size={16} aria-hidden="true" />
-        {t('business.create')}
-      </Button>
-    </form>
-  );
-}
-
-function NewDocument({ currency, onCreate }) {
-  const { t } = useTranslation();
-  const [form, setForm] = useState({ kind: 'sale', number: '', label: '', issuedAt: '', dueAt: '', amountExcl: '', taxAmount: '' });
-  const set = (key) => (event) => setForm((previous) => ({ ...previous, [key]: event.target.value }));
-
-  return (
-    <form
-      className="business-form"
-      onSubmit={(event) => {
-        event.preventDefault();
-        onCreate({
-          kind: form.kind,
-          number: form.number.trim(),
-          label: form.label.trim(),
-          issuedAt: new Date(form.issuedAt).toISOString(),
-          ...(form.dueAt ? { dueAt: new Date(form.dueAt).toISOString() } : {}),
-          // `allowZero` : un document à zéro est une réponse (un geste
-          // gratuit facturé pour mémoire), pas une saisie manquante.
-          amountExcl: toMinorUnits(form.amountExcl, currency, { allowZero: true }),
-          // Le montant de taxe est SAISI, jamais calculé depuis un taux : le
-          // taux appartient au document réel, et ce projet n'invente aucune
-          // règle fiscale (voir P7-01).
-          taxAmount: form.taxAmount ? toMinorUnits(form.taxAmount, currency, { allowZero: true }) : 0,
-          currency,
-        });
-      }}
-    >
-      <div className="business-form-row">
-        <label>
-          {t('business.kind')}
-          <select value={form.kind} onChange={set('kind')}>
-            <option value="sale">{t('business.kinds.sale')}</option>
-            <option value="purchase">{t('business.kinds.purchase')}</option>
-          </select>
-        </label>
-        <label>
-          {t('business.number')}
-          <input value={form.number} onChange={set('number')} maxLength={40} required />
-        </label>
-        <label>
-          {t('business.label')}
-          <input value={form.label} onChange={set('label')} maxLength={200} required />
-        </label>
-      </div>
-      <div className="business-form-row">
-        <label>
-          {t('business.issuedAt')}
-          <input type="date" value={form.issuedAt} onChange={set('issuedAt')} required />
-        </label>
-        <label>
-          {t('business.dueAt')}
-          <input type="date" value={form.dueAt} onChange={set('dueAt')} />
-        </label>
-        <AmountField
-          id="business-amount"
-          label={t('business.amountExcl')}
-          currency={currency}
-          value={form.amountExcl}
-          onChange={(value) => setForm((previous) => ({ ...previous, amountExcl: value }))}
-          required
-        />
-        <AmountField
-          id="business-tax"
-          label={t('business.taxAmount')}
-          currency={currency}
-          value={form.taxAmount}
-          onChange={(value) => setForm((previous) => ({ ...previous, taxAmount: value }))}
-        />
-      </div>
-      <Button type="submit" variant="secondary">
-        <Plus size={16} aria-hidden="true" />
-        {t('business.addDocument')}
-      </Button>
-    </form>
-  );
-}
-
-function NewPayment({ currency, max, onCreate }) {
-  const { t } = useTranslation();
-  const [value, setValue] = useState('');
-  const [receivedAt, setReceivedAt] = useState('');
-
-  return (
-    <form
-      className="business-form business-payment"
-      onSubmit={(event) => {
-        event.preventDefault();
-        onCreate({ value: toMinorUnits(value, currency), currency, receivedAt: new Date(receivedAt).toISOString() });
-        setValue('');
-      }}
-    >
-      <AmountField
-        id={`payment-${max}`}
-        label={t('business.paymentAmount')}
-        currency={currency}
-        value={value}
-        onChange={setValue}
-        required
-      />
-      <label>
-        {t('business.paymentDate')}
-        <input type="date" value={receivedAt} onChange={(event) => setReceivedAt(event.target.value)} required />
-      </label>
-      <Button type="submit" variant="secondary">
-        <Receipt size={16} aria-hidden="true" />
-        {t('business.addPayment')}
-      </Button>
-    </form>
   );
 }

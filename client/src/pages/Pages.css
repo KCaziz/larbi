@@ -1345,3 +1345,30 @@
 .cta-band-gradient p {
   color: #dcebf3;
 }
+
+/* P13-03: the two waves of the home page, at the foot of the opening band and
+   at the foot of the last band. They replace the drawn wave of the light theme. */
+.hero-has-waves {
+  position: relative;
+  overflow: hidden;
+}
+[data-theme='light'] .hero-band.hero-has-waves::after {
+  display: none;
+}
+.waves.hero-waves,
+.waves.cta-waves {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 0;
+}
+.hero-has-waves .hero-inner,
+.cta-has-waves .cta-band-inner {
+  position: relative;
+  z-index: 1;
+}
+.cta-has-waves {
+  position: relative;
+  overflow: hidden;
+  padding-block-end: 128px;
+}

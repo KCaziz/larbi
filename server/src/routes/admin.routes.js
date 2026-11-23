@@ -109,6 +109,8 @@ import { getUser, listUsers, updateUser } from '../controllers/admin/users.contr
 import { updateUserSchema, usersQuerySchema } from '../validation/users.schemas.js';
 import { listSettings, upsertSettingRoute } from '../controllers/admin/settings.controller.js';
 import { upsertSettingSchema } from '../validation/settings.schemas.js';
+import { confirmRegulatory, listRegulatory } from '../controllers/admin/regulatory.controller.js';
+import { confirmRegulatorySchema } from '../validation/regulatoryParams.schemas.js';
 import {
   listCertificates,
   restoreCertificate,
@@ -291,6 +293,10 @@ router.patch('/users/:id', validateBody(updateUserSchema), asyncRoute(updateUser
 // Platform settings (P3-16)
 router.get('/settings', asyncRoute(listSettings));
 router.post('/settings', validateBody(upsertSettingSchema), asyncRoute(upsertSettingRoute));
+
+// P13-05: the regulatory values the client confirms (référentiel 25_PARAMETRES).
+router.get('/regulatory-params', asyncRoute(listRegulatory));
+router.put('/regulatory-params/:key', validateBody(confirmRegulatorySchema), asyncRoute(confirmRegulatory));
 
 // Certificates (P3-16)
 router.get('/certificates', validateQuery(certificatesQuerySchema), asyncRoute(listCertificates));

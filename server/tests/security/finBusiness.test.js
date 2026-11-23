@@ -118,12 +118,20 @@ describe('P7-02 — une entreprise n’appartient qu’à son compte', () => {
     assert.equal(res.body.error.details.reason, 'documentNotFound');
   });
 
-  test('un compte n’a qu’une entreprise', async () => {
+  // P13-05, lot A (2026-11-23): the client's organisations replace « une
+  // entreprise par compte ». Two organisations of one person stay two.
+  test('une personne peut avoir plusieurs organisations, et leurs données ne se mêlent pas', async () => {
     const user = await t.adult();
-    await withBusiness(user);
-    const again = await t.request('POST', '/fin/entreprise', { user, json: business });
-    assert.equal(again.status, 409);
-    assert.equal(again.body.error.details.reason, 'businessExists');
+    const first = await withBusiness(user);
+    const again = await t.request('POST', '/fin/entreprise', { user, json: { ...business, name: 'Cabinet Belkacem' } });
+    assert.equal(again.status, 201);
+    const second = again.body.entreprise;
+    const headers = { 'X-Organisation': second.id };
+    await t.request('POST', '/fin/entreprise/documents', { user, headers, json: sale });
+    const inSecond = await t.request('GET', '/fin/entreprise/documents', { user, headers });
+    const inFirst = await t.request('GET', '/fin/entreprise/documents', { user, headers: { 'X-Organisation': first.id } });
+    assert.equal(inSecond.body.documents.length, 1);
+    assert.equal(inFirst.body.documents.length, 0);
   });
 });
 

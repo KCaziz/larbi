@@ -278,8 +278,11 @@ export function breakdown(rows) {
  * `null` for both figures rather than converted or silently summed with the
  * rest — the same rule `buildSynthesis` itself applies within one month.
  */
-export async function monthlyMoneyHistory(prisma, userId, { months = 6, currency, accountId = null } = {}) {
-  const now = new Date();
+// Recette R19 (2026-11-22, « les graphes ne bougent pas »): `until`
+// (`YYYY-MM`) ends the window on the month the Synthèse shows, so choosing
+// another month moves the curves with the figures; the current month otherwise.
+export async function monthlyMoneyHistory(prisma, userId, { months = 6, currency, accountId = null, until = null } = {}) {
+  const now = until ? new Date(`${until}-01T00:00:00Z`) : new Date();
   const periods = Array.from({ length: months }, (_, index) => {
     const monthsAgo = months - 1 - index;
     return currentMonth(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - monthsAgo, 1)));
@@ -310,8 +313,8 @@ export async function stepMoneyHistory(prisma, userId, { step, count = HISTORY_S
 
 // R17-05: `accountId` — the history of one account, as the Accueil and the
 // Synthèse show it when an account is chosen; without it, the total.
-function historyOf(prisma, userId, periods, currency, name, accountId = null) {
-  return Promise.all(
+async function historyOf(prisma, userId, periods, currency, name, accountId = null) {
+  const points = await Promise.all(
     periods.map(async (period) => {
       const { incomes, movements, openings } = await loadSynthesisData(prisma, userId, period, { accountId });
       const synthesis = buildSynthesis({ incomes, movements, openings, previous: [], fallbackCurrency: currency, period });
@@ -321,6 +324,7 @@ function historyOf(prisma, userId, periods, currency, name, accountId = null) {
       const saved = inCurrency ? await markedSavingsInPeriod(prisma, userId, currency, { from: period.start, to: period.end }) : null;
       return {
         month: name(period),
+        inCurrency,
         revenus: inCurrency ? synthesis.revenus.resultat : null,
         depenses: inCurrency ? synthesis.depenses.resultat : null,
         // G-03: the net flow of the month, as the engine computed it.
@@ -329,6 +333,18 @@ function historyOf(prisma, userId, periods, currency, name, accountId = null) {
       };
     }),
   );
+  // Recette R19 (2026-11-22): once the person has started recording, a month
+  // with no income (or no spending) received NOTHING — 0, a point on the
+  // curve — not « not computed », which broke the line into lone dots and
+  // made the charts look still. Before the first recorded month, and for a
+  // month in another currency, it stays a gap.
+  const first = points.findIndex((point) => point.revenus !== null || point.depenses !== null);
+  return points.map(({ inCurrency, ...point }, index) => {
+    if (first === -1 || index < first || !inCurrency) return point;
+    const revenus = point.revenus ?? 0;
+    const depenses = point.depenses ?? 0;
+    return { ...point, revenus, depenses, fluxNet: point.fluxNet ?? revenus - depenses };
+  });
 }
 
 // The net monthly income a DEBT RATIO is divided by (PB-F020). A ratio of

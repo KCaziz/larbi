@@ -115,7 +115,9 @@ export async function exportAccountData(prisma, userId) {
   const tables = await Promise.all(
     FINANCIAL_TABLES.map(async (table) => ({
       label: table.label,
-      rows: await prisma[table.model].findMany({ where: liveFilter(table, userId) }),
+      // Lot B (P13-05): a document carries its lines and its reminders, which
+      // have no socle of their own but are the person's data all the same.
+      rows: await prisma[table.model].findMany({ where: liveFilter(table, userId), ...(table.exportInclude ? { include: table.exportInclude } : {}) }),
     })),
   );
   const consents = await listConsents(prisma, userId);

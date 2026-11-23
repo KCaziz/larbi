@@ -301,7 +301,7 @@ export async function getMoneySynthesisHistory(req, res) {
   const currency = req.user.finCurrency;
   const points =
     step === 'mois'
-      ? await monthlyMoneyHistory(prisma, req.user.id, { months: req.query.months ?? 6, currency, accountId: req.query.accountId ?? null })
+      ? await monthlyMoneyHistory(prisma, req.user.id, { months: req.query.months ?? 6, currency, accountId: req.query.accountId ?? null, until: req.query.fin ?? null })
       : await stepMoneyHistory(prisma, req.user.id, { step, currency, accountId: req.query.accountId ?? null });
   res.json({ currency, pas: step, points });
 }

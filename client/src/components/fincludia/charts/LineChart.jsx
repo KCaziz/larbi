@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatAmount, formatDate } from '../../../lib/format.js';
 import './Charts.css';
@@ -24,12 +24,57 @@ const HEIGHT = 230;
 const PAD = { left: 70, right: 16, top: 14, bottom: 30 };
 const TICKS = 4;
 
+// R19-01: the value axis on round figures (« 0, 10 k, 20 k »), not « 842,3 ».
+const niceStep = (raw) => {
+  const power = 10 ** Math.floor(Math.log10(raw));
+  const unit = raw / power;
+  return (unit <= 1 ? 1 : unit <= 2 ? 2 : unit <= 2.5 ? 2.5 : unit <= 5 ? 5 : 10) * power;
+};
+
+// P13-04 (2026-11-22, « tracer entre les points avec un petit effet vague, mais
+// lisible »): a smooth curve through the points — monotone cubic
+// interpolation (Fritsch–Carlson). It passes EXACTLY through every point and
+// never goes above or below the values on either side, so the wave invents no
+// peak and no hollow between two months.
+function smoothPath(points) {
+  if (points.length === 0) return '';
+  if (points.length === 1) return `M${points[0][0]},${points[0][1]}`;
+  const n = points.length;
+  const dx = [];
+  const slope = [];
+  for (let i = 0; i < n - 1; i += 1) {
+    dx.push(points[i + 1][0] - points[i][0]);
+    slope.push((points[i + 1][1] - points[i][1]) / (dx[i] || 1));
+  }
+  const tangent = [slope[0]];
+  for (let i = 1; i < n - 1; i += 1) {
+    if (slope[i - 1] * slope[i] <= 0) {
+      tangent.push(0);
+    } else {
+      const w1 = 2 * dx[i] + dx[i - 1];
+      const w2 = dx[i] + 2 * dx[i - 1];
+      tangent.push((w1 + w2) / (w1 / slope[i - 1] + w2 / slope[i]));
+    }
+  }
+  tangent.push(slope[n - 2]);
+  const round = (value) => Math.round(value * 100) / 100;
+  let d = `M${round(points[0][0])},${round(points[0][1])}`;
+  for (let i = 0; i < n - 1; i += 1) {
+    const [x0, y0] = points[i];
+    const [x1, y1] = points[i + 1];
+    const third = dx[i] / 3;
+    d += ` C${round(x0 + third)},${round(y0 + tangent[i] * third)} ${round(x1 - third)},${round(y1 - tangent[i + 1] * third)} ${round(x1)},${round(y1)}`;
+  }
+  return d;
+}
+
 // `fromZero` (default): the value axis starts at zero, so a bar of money is never
 // exaggerated. A PRICE path (the learning market, R8-12) sets it to false: its
 // story is how it moved, which a scale from zero flattens.
 export default function LineChart({ series, currency, caption, format, xLabel, fromZero = true }) {
   const { t, i18n } = useTranslation();
   const [hover, setHover] = useState(null);
+  const gradient = useId().replace(/:/g, '');
   const usable = series.filter((item) => item.points.filter((point) => point.value !== null).length >= 1);
   const months = [...new Set(series.flatMap((item) => item.points.map((point) => point.month)))].sort();
   // A point may say how its step is written (« Année 3 »); otherwise it is a month.
@@ -45,8 +90,11 @@ export default function LineChart({ series, currency, caption, format, xLabel, f
   const lowest = Math.min(...values);
   const highest = Math.max(...values);
   const margin = fromZero ? 0 : (highest - lowest) * 0.1 || Math.abs(highest) * 0.01 || 1;
-  const min = fromZero ? Math.min(lowest, 0) : lowest - margin;
-  const max = fromZero ? Math.max(highest, 0) : highest + margin;
+  const rawMin = fromZero ? Math.min(lowest, 0) : lowest - margin;
+  const rawMax = fromZero ? Math.max(highest, 0) : highest + margin;
+  const step = niceStep((rawMax - rawMin || Math.abs(rawMax) || 1) / TICKS);
+  const min = Math.floor(rawMin / step) * step;
+  const max = Math.max(Math.ceil(rawMax / step) * step, min + step);
   const span = max - min || 1;
   const innerW = WIDTH - PAD.left - PAD.right;
   const innerH = HEIGHT - PAD.top - PAD.bottom;
@@ -56,7 +104,7 @@ export default function LineChart({ series, currency, caption, format, xLabel, f
   // Short figures for the axis: « 120 k », not « 120 000,00 DZD ».
   const compact = (value) => (format ? format(value) : new Intl.NumberFormat(i18n.language, { notation: 'compact', maximumFractionDigits: 1 }).format(value / 100));
 
-  const ticks = Array.from({ length: TICKS + 1 }, (_, index) => min + (span * index) / TICKS);
+  const ticks = Array.from({ length: Math.round(span / step) + 1 }, (_, index) => min + step * index);
   const labelCount = Math.min(months.length, 4);
   const xTicks = [...new Set(Array.from({ length: labelCount }, (_, index) => months[Math.round((index * (months.length - 1)) / (labelCount - 1))]))];
 
@@ -127,17 +175,29 @@ export default function LineChart({ series, currency, caption, format, xLabel, f
             </text>
           ))}
           {hover && <line className="chart-guide" x1={x(hover)} x2={x(hover)} y1={PAD.top} y2={PAD.top + innerH} />}
-          {usable.map((item) => (
+          {usable.map((item, seriesIndex) => (
             <g key={item.key} className={`chart-series chart-tone-${item.tone ?? 0}`}>
-              {runs(item).map((run, index) => (
+              {/* P13-04: the water under the wave, fading downwards, in the series colour. */}
+              <defs>
+                <linearGradient id={`${gradient}-${seriesIndex}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="currentColor" stopOpacity="0.28" />
+                  <stop offset="100%" stopColor="currentColor" stopOpacity="0.02" />
+                </linearGradient>
+              </defs>
+              {runs(item).map((run, index) => {
+                const coords = run.map((point) => [x(point.month), y(point.value)]);
+                const base = y(Math.min(Math.max(min, 0), max));
+                const wave = smoothPath(coords);
+                return (
                 <g key={index}>
                   {usable.length === 1 && run.length > 1 && (
-                    <polygon className="chart-area" points={`${x(run[0].month)},${y(Math.max(min, 0))} ${run.map((point) => `${x(point.month)},${y(point.value)}`).join(' ')} ${x(run[run.length - 1].month)},${y(Math.max(min, 0))}`} />
+                    <path className="chart-area" fill={`url(#${gradient}-${seriesIndex})`} d={`${wave} L${coords[coords.length - 1][0]},${base} L${coords[0][0]},${base} Z`} />
                   )}
-                  {run.length > 1 && <polyline className="chart-line" points={run.map((point) => `${x(point.month)},${y(point.value)}`).join(' ')} />}
+                  {run.length > 1 && <path className="chart-line" d={wave} pathLength="1" />}
                   {months.length <= 40 && run.map((point) => <circle key={point.month} className="chart-dot" cx={x(point.month)} cy={y(point.value)} r={hover === point.month ? 5 : 3.5} />)}
                 </g>
-              ))}
+                );
+              })}
             </g>
           ))}
         </svg>

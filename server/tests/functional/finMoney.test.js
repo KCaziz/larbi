@@ -443,6 +443,30 @@ describe('the revenus/dépenses history (P6-23)', () => {
     assert.equal((await synthesisHistory('?months=13')).status, 400, 'above the maximum of 12');
   });
 
+  // Recette R19 (2026-11-22): « les graphes ne bougent pas ».
+  test('once recording has started, a month with nothing received is 0 — a point on the curve, not a gap', async () => {
+    await addMovement({ value: 300000, occurredAt: ago(65 * 24) });
+    await addMovement({ kind: 'income', value: 900000 });
+    const points = (await synthesisHistory()).body.points;
+    const first = points.findIndex((point) => point.depenses !== null);
+    assert.ok(first > 0 && first < points.length - 1, 'the old expense is inside the window');
+    assert.ok(points.slice(0, first).every((point) => point.revenus === null && point.depenses === null), 'before the first record: a gap');
+    assert.equal(points[first].revenus, 0, 'nothing received that month');
+    assert.equal(points[first].fluxNet, -300000);
+    assert.ok(points.slice(first).every((point) => point.revenus !== null && point.depenses !== null && point.fluxNet !== null), 'from then on, a point every month');
+    assert.equal(points.at(-1).revenus, 900000);
+  });
+
+  test('the window can end on the month the Synthèse shows (`fin`)', async () => {
+    const now = new Date();
+    const back = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 2, 1)).toISOString().slice(0, 7);
+    const res = await synthesisHistory(`?fin=${back}&months=3`);
+    assert.equal(res.status, 200);
+    assert.equal(res.body.points.at(-1).month, back);
+    assert.equal(res.body.points.length, 3);
+    assert.equal((await synthesisHistory('?fin=2026-13')).status, 400);
+  });
+
   test('a month resolved in another currency reports null rather than converting', async () => {
     await addMovement({ value: 1000, currency: 'EUR' });
     const res = await synthesisHistory();

@@ -38,7 +38,19 @@ function walkRoutes(stack, prefix, out) {
 }
 const serverRoutes = [];
 walkRoutes(createApp()._router.stack, '', serverRoutes);
-const patternToRegex = (pattern) => new RegExp(`^${pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/:[A-Za-z]+/g, '[^/]+').replace(/\*/g, '.*')}/?$`);
+// A parameter may restrict its values (`:step(envoyer|accepter)`, P13-05): the
+// client then calls one of them literally, or passes a variable (`:x`).
+const patternToRegex = (pattern) =>
+  new RegExp(
+    `^${pattern
+      .split(/(:[A-Za-z]+(?:\([^)]*\))?)/)
+      .map((part) => {
+        if (!part.startsWith(':')) return part.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+        const open = part.indexOf('(');
+        return open === -1 ? '[^/]+' : `(?:${part.slice(open + 1, -1)}|:x)`;
+      })
+      .join('')}/?$`,
+  );
 const normalise = (p) => p.split(/[?#]/)[0].replace(/\$\{[^}]*\}/g, ':x');
 
 // ---- React router paths ------------------------------------------------------

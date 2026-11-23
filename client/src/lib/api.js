@@ -8,6 +8,18 @@
 // production) unless VITE_API_URL says otherwise.
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
+// P13-05: the organisation of the business space (lib/organisation.js).
+const ORGANISATION_KEY = 'fincludia.organisation';
+function organisationHeader(path) {
+  if (!path.startsWith('/fin/entreprise')) return {};
+  try {
+    const id = window.localStorage.getItem(ORGANISATION_KEY);
+    return id ? { 'X-Organisation': id } : {};
+  } catch {
+    return {};
+  }
+}
+
 export class ApiError extends Error {
   constructor(status, message, details) {
     super(message);
@@ -22,7 +34,8 @@ export class ApiError extends Error {
 // `fin:data-changed`, nobody reloads on it straight away.
 export const WRITE_DONE_EVENT = 'fincludia:write-done';
 
-async function request(path, { method = 'GET', body, signal } = {}) {
+// `idempotencyKey` and `ifMatch` (P13-05, DEC-005): sent as the headers of the same names.
+async function request(path, { method = 'GET', body, signal, idempotencyKey, ifMatch } = {}) {
   const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
   let response;
   try {
@@ -33,7 +46,12 @@ async function request(path, { method = 'GET', body, signal } = {}) {
       // browser or by a cache on the way (the host's nginx did keep them).
       cache: 'no-store',
       // FormData sets its own multipart boundary header.
-      headers: body === undefined || isForm ? undefined : { 'Content-Type': 'application/json' },
+      headers: {
+        ...(body === undefined || isForm ? {} : { 'Content-Type': 'application/json' }),
+        ...(typeof window === 'undefined' ? {} : organisationHeader(path)),
+        ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
+        ...(ifMatch !== undefined && ifMatch !== null ? { 'If-Match': String(ifMatch) } : {}),
+      },
       body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
       signal,
     });

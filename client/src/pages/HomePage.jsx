@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../components/ui/Button.jsx';
+import Waves from '../components/ui/Waves.jsx';
 import Section from '../components/ui/Section.jsx';
 import Reveal from '../components/ui/Reveal.jsx';
 import desktopFr from '../assets/showcase/app-desktop-fr.webp';
@@ -73,7 +74,9 @@ export default function HomePage() {
 
   return (
     <>
-      <section className="hero hero-band">
+      <section className="hero hero-band hero-has-waves">
+        {/* P13-03: the wave at the head of the page (under the opening band)… */}
+        <Waves height={120} className="hero-waves" />
         <div className="hero-inner">
           <div className="hero-copy">
             <span className="hero-badge">{t('home.hero.badge')}</span>
@@ -224,7 +227,9 @@ export default function HomePage() {
         </Button>
       </Section>
 
-      <section className="cta-band cta-band-gradient">
+      <section className="cta-band cta-band-gradient cta-has-waves">
+        {/* …and the one at its foot; they cross as the page scrolls. */}
+        <Waves height={110} className="cta-waves" />
         <div className="cta-band-inner">
           <h2>{t('home.cta.title')}</h2>
           <p>{t('home.cta.body')}</p>

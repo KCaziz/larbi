@@ -1347,3 +1347,24 @@ Remarques notées par l'équipe en déroulant `SCENARIO_TEST_COMPLET.md` sur le 
   - Mouvements : les parties de la page (actions, compte, onglets, filtres, liste) sont espacées.
   - Nouveau budget : « Compter le solde de mes comptes comme une ressource » sort de la grille des champs. C'est maintenant un interrupteur sur toute la largeur, avec son titre et son explication lisibles d'un coup d'œil.
   - Synthèse : plus d'orange. Les dépenses sont en bleu, la couleur des dépenses dans l'application, sur la carte comme sur la courbe. Les bords des sections n'utilisent plus l'orange ni l'ocre.
+
+## R19 — Retours du 2026-11-22 (`test.txt`)
+
+### R19-01 — « Les graphes ne bougent pas, même quand on fait des mouvements »
+- Statut : `✅ done` (2026-11-23)
+- Priorité : `🟠 high`
+- Origine : `test.txt` l. 1 (épargne par mois, revenus et dépenses, etc.) : « teste les graphes et vois s'il y a réellement des mouvements »
+- Constat (vérifié le 2026-11-22, sans rien corriger) : le serveur suit bien les mouvements. Deux dépenses ajoutées en septembre et en novembre apparaissent aussitôt dans `/fin/argent/synthese/historique` et sur la courbe de la Synthèse. Ce qui donne l'impression de graphiques figés :
+  - **Synthèse** : les courbes montrent toujours les 6 derniers mois à partir d'aujourd'hui. Choisir un autre mois change les chiffres, pas les courbes. À faire : terminer la fenêtre sur le mois choisi.
+  - **Mois sans revenu ou sans dépense** : la valeur est « non calculée » (un trou), pas 0. Un utilisateur qui commence ce mois-ci ne voit donc qu'un point isolé, et une ligne s'interrompt dès qu'un mois n'a pas de revenu. À faire : à partir du premier mois saisi, un mois sans rien vaut 0 ; avant ce mois, on garde le trou.
+  - **Courbe des soldes (Mes comptes, page d'un compte)** : elle ne se recharge pas après un ajout fait depuis le bouton « + » de la barre du haut, contrairement aux autres blocs de la page (`AccountsBalanceChart` lit l'API directement, sans écouter l'événement de mise à jour). À faire : la recharger après chaque enregistrement.
+  - **Taux d'épargne de chaque mois** : il n'apparaît que si de l'argent a été explicitement mis de côté (règle F008). Sans épargne marquée, le graphique n'existe pas. À expliquer sur la page, ou à décider avec le client.
+  - Détail visuel : les graduations de l'axe tombent sur des valeurs non rondes (« 842,3 »). À arrondir.
+- Pour la recette : mon serveur de test sur le port 4210 tournait sur une version antérieure à R16. Il ne faut pas s'y fier pour juger la courbe des soldes.
+- Correction (2026-11-23) :
+  - Synthèse : au pas « mois », les courbes se terminent sur le mois affiché (`fin=AAAA-MM` sur `/fin/argent/synthese/historique`). Changer de mois déplace maintenant les courbes avec les chiffres.
+  - À partir du premier mois où quelque chose est saisi, un mois sans revenu ou sans dépense vaut 0 (un point sur la courbe), et le flux net est calculé. Avant ce mois, et pour un mois dans une autre devise, la courbe reste interrompue.
+  - Courbe des soldes (Mes comptes, page d'un compte) : relue après chaque enregistrement (ajout rapide, modification, suppression) et dès qu'un solde affiché change.
+  - Sans épargne mise de côté, la Synthèse explique en une phrase pourquoi la courbe du taux d'épargne n'apparaît pas encore, et comment la faire apparaître.
+  - L'axe des valeurs tombe sur des chiffres ronds (0, 50 k, 100 k…).
+  - Tests : `functional/finMoney.test.js` (2 nouveaux cas, 45/45). Parcours `e2e/fin-charts-journey.test.js` : il ne démarrait plus depuis P12-03 (son deuxième compte était refusé sans abonnement) ; il démarre maintenant en abonné, 6 cas sur 7 passent. Reste G-11 (page Dettes : le libellé « Emprunt bancaire » n'apparaît plus), sans lien avec ces changements, à reprendre.
