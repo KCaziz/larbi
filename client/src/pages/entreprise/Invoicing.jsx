@@ -46,6 +46,67 @@ const REASONS = [
   'duplicateItem',
   'moveBeforeLot',
   'futureBalance',
+  'operationNotFound',
+  'operationClosed',
+  'rateRequired',
+  'rateNotNeeded',
+  'namedPlaceRequired',
+  'receiveByReception',
+  'exportNotReceived',
+  'alreadyReceived',
+  'itemRequired',
+  'netQuantityZero',
+  'noCost',
+  'duplicateReference',
+  'projectNotFound',
+  'projectAccessForbidden',
+  'milestoneNotFound',
+  'expenseNotFound',
+  'proofRequired',
+  'secondPersonRequired',
+  'projectCancelled',
+  'memberNotFound',
+  'shareNotFound',
+  'holdingNotFound',
+  'simulatorNotFound',
+  // Lot G, second part: payroll and accounting.
+  'accountNotFound',
+  'overtimeAboveHours',
+  'timesheetDecided',
+  'timesheetNotFound',
+  'skillNotFound',
+  'trainingNotFound',
+  'vacancyNotFound',
+  'vacancyClosed',
+  'candidateNotFound',
+  'notAssetAccount',
+  'assetNotFound',
+  'yearClosed',
+  'bankLineNotFound',
+  'alreadyMatched',
+  'invalidYear',
+  'runExists',
+  'noEmployee',
+  'runNotFound',
+  'runLocked',
+  'slipNotFound',
+  'negativeSlip',
+  'unbalanced',
+  'periodClosed',
+  'draftsRemain',
+  'unknownAccount',
+  'debitOrCredit',
+  'entryLocked',
+  'entryNotFound',
+  'alreadyReversed',
+  'importInvalid',
+  'emptyFile',
+  'invalidAccount',
+  'accountExists',
+  'notCashAccount',
+  'reasonRequired',
+  'periodNotClosed',
+  'mappingNotFound',
 ];
 
 export function invoicingError(t, err) {
@@ -64,6 +125,9 @@ export function InvoicingSection({ business, documents, can, run }) {
   const [filter, setFilter] = useState('all');
   const contacts = useApi('/fin/entreprise/tiers');
   const list = contacts.data?.tiers ?? [];
+  // Lot D: a sale or a purchase may belong to an international operation.
+  const operations = useApi('/fin/entreprise/operations');
+  const openOperations = (operations.data?.operations ?? []).filter((op) => op.status !== 'cancelled');
   const runAndReload = async (action, okKey) => {
     const done = await run(action, okKey);
     if (done) contacts.reload();
@@ -99,7 +163,7 @@ export function InvoicingSection({ business, documents, can, run }) {
           </Button>
         </div>
         <p className="business-blocked-intro">{t('business.inv.intro')}</p>
-        {can('documents.write') && <NewDocument business={business} contacts={list} run={run} />}
+        {can('documents.write') && <NewDocument business={business} contacts={list} operations={openOperations} run={run} />}
 
         <div className="inv-filters" role="group" aria-label={t('business.inv.filter')}>
           {['all', 'quote', 'draft', 'sale', 'purchase'].map((key) => (
@@ -215,11 +279,11 @@ function Contacts({ contacts, canWrite, run }) {
 
 const emptyLine = () => ({ label: '', quantity: '1', unitPrice: '' });
 
-function NewDocument({ business, contacts, run }) {
+function NewDocument({ business, contacts, operations = [], run }) {
   const { t, i18n } = useTranslation();
   const currency = business.currency;
   const [type, setType] = useState('invoice');
-  const [form, setForm] = useState({ contactId: '', number: '', label: '', issuedAt: today(), dueAt: '', validUntil: '', taxAmount: '', costExcl: '', amountExcl: '', category: '', costNature: '', paidNow: false, method: 'especes' });
+  const [form, setForm] = useState({ contactId: '', number: '', label: '', issuedAt: today(), dueAt: '', validUntil: '', taxAmount: '', costExcl: '', amountExcl: '', category: '', costNature: '', paidNow: false, method: 'especes', operationId: '' });
   const [lines, setLines] = useState([emptyLine()]);
   const [key, setKey] = useState(newIdempotencyKey);
   const set = (field) => (event) => setForm((previous) => ({ ...previous, [field]: event.target.value }));
@@ -260,6 +324,7 @@ function NewDocument({ business, contacts, run }) {
       ...(!purchase && form.costExcl ? { costExcl: toMinorUnits(form.costExcl, currency, { allowZero: true }) } : {}),
       ...(draft ? { draft: true } : {}),
       // Lot C: the family and nature of a purchase; paid in full right away.
+      ...(!quote && form.operationId ? { operationId: form.operationId } : {}),
       ...(purchase && form.category ? { category: form.category } : {}),
       ...(purchase && form.costNature ? { costNature: form.costNature } : {}),
       ...(!quote && !draft && form.paidNow ? { reglement: { receivedAt: iso(form.issuedAt), method: form.method } } : {}),
@@ -397,6 +462,22 @@ function NewDocument({ business, contacts, run }) {
           <AmountField id="business-cost" label={t('business.inv.cost')} currency={currency} value={form.costExcl} onChange={(value) => setForm((p) => ({ ...p, costExcl: value }))} hint={t('business.inv.costHint')} />
         )}
       </div>
+
+      {!quote && operations.length > 0 && (
+        <div className="business-form-row">
+          <label>
+            {t('business.trade.linkOperation')}
+            <select id="document-operation" value={form.operationId} onChange={set('operationId')}>
+              <option value="">{t('business.trade.noOperation')}</option>
+              {operations.map((op) => (
+                <option key={op.id} value={op.id}>
+                  {op.reference} · {op.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
 
       {!quote && (
         <div className="business-form-row">

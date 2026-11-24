@@ -124,6 +124,10 @@ model User {
   finOrgInvitationsSent   FinOrganizationMember[]  @relation("OrgMemberInviter")
   finOrgMandatesGranted   FinOrganizationMandate[]
   finOrgJournal           FinOrganizationJournal[]
+  forumThreads            ForumThread[]
+  forumPosts              ForumPost[]
+  forumReports            ForumReport[]
+  employeeRecords         FinBusinessEmployee[]
   finIdempotencyKeys      FinIdempotencyKey[]
 
   // E-Learning (P2-01)
@@ -2601,6 +2605,23 @@ model FinBusiness {
   stockMoves           FinBusinessStockMove[]
   budgets              FinBusinessBudget[]
   cashPositions        FinBusinessCashPosition[]
+  operations           FinBusinessOperation[]
+  projects             FinBusinessProject[]
+  holdings             FinBusinessHolding[]
+  partnerRequests      FinPartnerRequest[]
+  employees            FinBusinessEmployee[]
+  campaigns            FinBusinessCampaign[]
+  payrollRuns          FinPayrollRun[]
+  ledgerAccounts       FinLedgerAccount[]
+  ledgerMappings       FinLedgerMapping[]
+  ledgerEntries        FinLedgerEntry[]
+  ledgerPeriods        FinLedgerPeriod[]
+  ledgerBankChecks     FinLedgerBankCheck[]
+  trainings            FinBusinessTraining[]
+  vacancies            FinBusinessVacancy[]
+  ledgerAssets         FinLedgerAsset[]
+  ledgerYears          FinLedgerYear[]
+  ledgerBankLines      FinLedgerBankLine[]
   members              FinOrganizationMember[]
   mandates             FinOrganizationMandate[]
   journal              FinOrganizationJournal[]
@@ -2612,23 +2633,24 @@ model FinBusiness {
 // A person in an organisation, with one role (tab 22_AUTORISATIONS). An
 // invitation is a member « invited » by e-mail; « revoked » is kept.
 model FinOrganizationMember {
-  id          String                   @id @default(uuid())
-  businessId  String
-  business    FinBusiness              @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  userId      String?
-  user        User?                    @relation("OrgMemberUser", fields: [userId], references: [id], onDelete: Cascade)
-  email       String                   @db.VarChar(254)
-  role        String                   @db.VarChar(40)
-  status      String                   @db.VarChar(12)
-  invitedById String?
-  invitedBy   User?                    @relation("OrgMemberInviter", fields: [invitedById], references: [id], onDelete: SetNull)
-  expiresAt   DateTime?
-  acceptedAt  DateTime?
-  revokedAt   DateTime?
-  version     Int                      @default(1)
-  createdAt   DateTime                 @default(now())
-  updatedAt   DateTime                 @updatedAt
-  mandates    FinOrganizationMandate[]
+  id            String                    @id @default(uuid())
+  businessId    String
+  business      FinBusiness               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?                     @relation("OrgMemberUser", fields: [userId], references: [id], onDelete: Cascade)
+  email         String                    @db.VarChar(254)
+  role          String                    @db.VarChar(40)
+  status        String                    @db.VarChar(12)
+  invitedById   String?
+  invitedBy     User?                     @relation("OrgMemberInviter", fields: [invitedById], references: [id], onDelete: SetNull)
+  expiresAt     DateTime?
+  acceptedAt    DateTime?
+  revokedAt     DateTime?
+  version       Int                       @default(1)
+  projectShares FinBusinessProjectShare[]
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  mandates      FinOrganizationMandate[]
 
   @@unique([businessId, email])
   @@index([userId, status])
@@ -2691,33 +2713,34 @@ model FinIdempotencyKey {
 }
 
 model FinBusinessContact {
-  id          String                @id @default(uuid())
+  id          String                 @id @default(uuid())
   businessId  String
-  business    FinBusiness           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business    FinBusiness            @relation(fields: [businessId], references: [id], onDelete: Cascade)
   // "client" | "supplier" (BUSINESS_CONTACT_KINDS). Un même tiers peut être
   // les deux : il est alors enregistré deux fois, parce qu'un client et un
   // fournisseur n'ont ni le même solde ni le même délai.
-  kind        String                @db.VarChar(10)
-  name        String                @db.VarChar(160)
-  taxId       String?               @db.VarChar(40)
-  email       String?               @db.VarChar(254)
-  phone       String?               @db.VarChar(40)
-  address     String?               @db.VarChar(300)
-  country     String?               @db.VarChar(2)
-  note        String?               @db.VarChar(300)
-  scope       String                @default("business") @db.VarChar(20)
-  source      String                @db.VarChar(20)
-  sourceRef   String?               @db.VarChar(200)
-  status      String                @db.VarChar(20)
-  consentUses Json                  @default("[]")
-  effectiveAt DateTime              @default(now())
-  collectedAt DateTime              @default(now())
-  version     Int                   @default(1)
+  kind        String                 @db.VarChar(10)
+  name        String                 @db.VarChar(160)
+  taxId       String?                @db.VarChar(40)
+  email       String?                @db.VarChar(254)
+  phone       String?                @db.VarChar(40)
+  address     String?                @db.VarChar(300)
+  country     String?                @db.VarChar(2)
+  note        String?                @db.VarChar(300)
+  scope       String                 @default("business") @db.VarChar(20)
+  source      String                 @db.VarChar(20)
+  sourceRef   String?                @db.VarChar(200)
+  status      String                 @db.VarChar(20)
+  consentUses Json                   @default("[]")
+  effectiveAt DateTime               @default(now())
+  collectedAt DateTime               @default(now())
+  version     Int                    @default(1)
   archivedAt  DateTime?
   deletedAt   DateTime?
-  createdAt   DateTime              @default(now())
-  updatedAt   DateTime              @updatedAt
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
   documents   FinBusinessDocument[]
+  operations  FinBusinessOperation[]
 
   @@index([businessId, kind])
   @@map("fin_business_contacts")
@@ -2746,6 +2769,9 @@ model FinBusinessDocument {
   // Lot C: what a purchase pays for (our families), and fixed or variable.
   category    String?                   @db.VarChar(30)
   costNature  String?                   @db.VarChar(10)
+  // Lot D: the international operation this document belongs to.
+  operationId String?
+  operation   FinBusinessOperation?     @relation(fields: [operationId], references: [id], onDelete: SetNull)
   // Null only for a draft invoice, numbered when issued.
   number      String?                   @db.VarChar(40)
   label       String                    @db.VarChar(200)
@@ -2782,6 +2808,7 @@ model FinBusinessDocument {
   @@unique([businessId, kind, docType, number])
   @@index([businessId, issuedAt])
   @@index([relatedId])
+  @@index([operationId])
   @@map("fin_business_documents")
 }
 
@@ -2814,6 +2841,7 @@ model FinBusinessItem {
   createdAt  DateTime               @default(now())
   updatedAt  DateTime               @updatedAt
   moves      FinBusinessStockMove[]
+  operations FinBusinessOperation[]
 
   @@unique([businessId, name])
   @@map("fin_business_items")
@@ -2821,29 +2849,437 @@ model FinBusinessItem {
 
 // P13-05, lot C (CNV-16): an entry is a lot; losses and exits name their lot.
 model FinBusinessStockMove {
-  id         String                 @id @default(uuid())
-  businessId String
-  business   FinBusiness            @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  itemId     String
-  item       FinBusinessItem        @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  lotId      String?
-  lot        FinBusinessStockMove?  @relation("StockLot", fields: [lotId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  drawn      FinBusinessStockMove[] @relation("StockLot")
-  kind       String                 @db.VarChar(10)
-  lotRef     String?                @db.VarChar(60)
-  quantity   Float
-  totalCost  Float?
-  movedAt    DateTime
-  documentId String?
-  document   FinBusinessDocument?   @relation(fields: [documentId], references: [id], onDelete: SetNull)
-  note       String?                @db.VarChar(300)
-  createdAt  DateTime               @default(now())
+  id          String                 @id @default(uuid())
+  businessId  String
+  business    FinBusiness            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  itemId      String
+  item        FinBusinessItem        @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  lotId       String?
+  lot         FinBusinessStockMove?  @relation("StockLot", fields: [lotId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  drawn       FinBusinessStockMove[] @relation("StockLot")
+  kind        String                 @db.VarChar(10)
+  lotRef      String?                @db.VarChar(60)
+  quantity    Float
+  totalCost   Float?
+  movedAt     DateTime
+  documentId  String?
+  document    FinBusinessDocument?   @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  note        String?                @db.VarChar(300)
+  // Lot D: the operation whose reception made this lot.
+  operationId String?
+  operation   FinBusinessOperation?  @relation(fields: [operationId], references: [id], onDelete: SetNull)
+  createdAt   DateTime               @default(now())
 
   @@index([businessId])
   @@index([itemId])
   @@index([lotId])
   @@index([documentId])
+  @@index([operationId])
   @@map("fin_business_stock_moves")
+}
+
+// P13-05, lot D: an international operation (micro-import, import, export).
+model FinBusinessOperation {
+  id              String                      @id @default(uuid())
+  businessId      String
+  business        FinBusiness                 @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  kind            String                      @db.VarChar(12)
+  reference       String                      @db.VarChar(40)
+  label           String                      @db.VarChar(200)
+  country         String                      @db.Char(2)
+  counterpartyId  String?
+  counterparty    FinBusinessContact?         @relation(fields: [counterpartyId], references: [id], onDelete: SetNull)
+  currency        String                      @db.Char(3)
+  incoterm        String?                     @db.VarChar(3)
+  incotermVersion String?                     @db.VarChar(4)
+  namedPlace      String?                     @db.VarChar(120)
+  itemId          String?
+  item            FinBusinessItem?            @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  quantityOrdered Float?
+  plannedAt       DateTime?
+  status          String                      @default("draft") @db.VarChar(12)
+  note            String?                     @db.VarChar(300)
+  version         Int                         @default(1)
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+  costs           FinBusinessOperationCost[]
+  pieces          FinBusinessOperationPiece[]
+  stockMoves      FinBusinessStockMove[]
+  documents       FinBusinessDocument[]
+
+  @@unique([businessId, reference])
+  @@index([counterpartyId])
+  @@index([itemId])
+  @@map("fin_business_operations")
+}
+
+// P13-05, lot D: a cost of an operation, in its own currency (DEC-015).
+model FinBusinessOperationCost {
+  id          String               @id @default(uuid())
+  operationId String
+  operation   FinBusinessOperation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  kind        String               @db.VarChar(20)
+  label       String?              @db.VarChar(200)
+  amount      Float
+  currency    String               @db.Char(3)
+  rate        Float?
+  rateDate    DateTime?
+  rateSource  String?              @db.VarChar(120)
+  paidAt      DateTime?
+  createdAt   DateTime             @default(now())
+
+  @@index([operationId])
+  @@map("fin_business_operation_costs")
+}
+
+// P13-05, lot D: a document of an operation's file (ECR-0356, ECR-0368).
+model FinBusinessOperationPiece {
+  id          String               @id @default(uuid())
+  operationId String
+  operation   FinBusinessOperation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  kind        String               @db.VarChar(30)
+  status      String               @default("missing") @db.VarChar(12)
+  reference   String?              @db.VarChar(80)
+  note        String?              @db.VarChar(300)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@unique([operationId, kind])
+  @@map("fin_business_operation_pieces")
+}
+
+// P13-05, lot E: a project in Algeria followed from abroad (ECR-0374).
+model FinBusinessProject {
+  id             String                        @id @default(uuid())
+  businessId     String
+  business       FinBusiness                   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name           String                        @db.VarChar(160)
+  nature         String                        @db.VarChar(20)
+  location       String?                       @db.VarChar(160)
+  managerName    String?                       @db.VarChar(160)
+  budget         Float
+  currency       String                        @db.Char(3)
+  fundsConfirmed Float                         @default(0)
+  targetAt       DateTime?
+  status         String                        @default("planned") @db.VarChar(12)
+  note           String?                       @db.VarChar(300)
+  version        Int                           @default(1)
+  createdAt      DateTime                      @default(now())
+  updatedAt      DateTime                      @updatedAt
+  milestones     FinBusinessProjectMilestone[]
+  expenses       FinBusinessProjectExpense[]
+  shares         FinBusinessProjectShare[]
+
+  @@index([businessId])
+  @@map("fin_business_projects")
+}
+
+// P13-05, lot E: a weighted milestone, declared then accepted (ECR-0375).
+model FinBusinessProjectMilestone {
+  id           String             @id @default(uuid())
+  projectId    String
+  project      FinBusinessProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  label        String             @db.VarChar(200)
+  weight       Int
+  dueAt        DateTime?
+  status       String             @default("planned") @db.VarChar(12)
+  proofRef     String?            @db.VarChar(160)
+  declaredById String?
+  decidedById  String?
+  decidedAt    DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([projectId])
+  @@map("fin_business_project_milestones")
+}
+
+// P13-05, lot E: an expense, justified then validated by another person (DEC-018).
+model FinBusinessProjectExpense {
+  id            String             @id @default(uuid())
+  projectId     String
+  project       FinBusinessProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  label         String             @db.VarChar(200)
+  supplier      String?            @db.VarChar(160)
+  amount        Float
+  currency      String             @db.Char(3)
+  rate          Float?
+  rateDate      DateTime?
+  rateSource    String?            @db.VarChar(120)
+  spentAt       DateTime
+  proofRef      String?            @db.VarChar(160)
+  status        String             @default("to_justify") @db.VarChar(12)
+  createdById   String
+  validatedById String?
+  validatedAt   DateTime?
+  rejectionNote String?            @db.VarChar(300)
+  paidAt        DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([projectId])
+  @@map("fin_business_project_expenses")
+}
+
+// P13-05, lot E: access to one project, for a purpose, until a date (CNV-14).
+model FinBusinessProjectShare {
+  id        String                @id @default(uuid())
+  projectId String
+  project   FinBusinessProject    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  memberId  String
+  member    FinOrganizationMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  access    String                @db.VarChar(12)
+  purpose   String                @db.VarChar(200)
+  endsAt    DateTime?
+  revokedAt DateTime?
+  createdAt DateTime              @default(now())
+
+  @@index([projectId])
+  @@index([memberId])
+  @@map("fin_business_project_shares")
+}
+
+// P13-05, lot E: an asset or a debt, in its country and currency (ECR-0372).
+model FinBusinessHolding {
+  id         String                    @id @default(uuid())
+  businessId String
+  business   FinBusiness               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  kind       String                    @db.VarChar(8)
+  category   String                    @db.VarChar(20)
+  label      String                    @db.VarChar(160)
+  country    String                    @db.Char(2)
+  currency   String                    @db.Char(3)
+  archivedAt DateTime?
+  createdAt  DateTime                  @default(now())
+  values     FinBusinessHoldingValue[]
+
+  @@index([businessId])
+  @@map("fin_business_holdings")
+}
+
+// P13-05, lot E: one dated valuation, never overwritten (ECR-0373).
+model FinBusinessHoldingValue {
+  id         String             @id @default(uuid())
+  holdingId  String
+  holding    FinBusinessHolding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  value      Float
+  valuedAt   DateTime
+  mode       String             @db.VarChar(10)
+  rate       Float?
+  rateDate   DateTime?
+  rateSource String?            @db.VarChar(120)
+  proofRef   String?            @db.VarChar(160)
+  createdAt  DateTime           @default(now())
+
+  @@index([holdingId])
+  @@map("fin_business_holding_values")
+}
+
+// P13-05, lot G: an offer of a partner, kept by the administration (ECR-0159, 0160).
+model FinPartnerOffer {
+  id            String              @id @default(uuid())
+  partnerName   String              @db.VarChar(160)
+  partnerType   String              @db.VarChar(20)
+  title         String              @db.VarChar(200)
+  description   String              @db.Text
+  authorization String?             @db.VarChar(160)
+  verifiedAt    DateTime?
+  wilayas       Json
+  publics       Json
+  conditions    String?             @db.Text
+  fees          String?             @db.VarChar(300)
+  sourceUrl     String?             @db.VarChar(300)
+  contactEmail  String?             @db.VarChar(254)
+  validUntil    DateTime?
+  active        Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  requests      FinPartnerRequest[]
+
+  @@map("fin_partner_offers")
+}
+
+// P13-05, lot G: a request of an organisation to a partner (ECR-0161).
+model FinPartnerRequest {
+  id          String          @id @default(uuid())
+  businessId  String
+  business    FinBusiness     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  offerId     String
+  offer       FinPartnerOffer @relation(fields: [offerId], references: [id], onDelete: Restrict)
+  motive      String          @db.VarChar(300)
+  amount      Float?
+  currency    String?         @db.Char(3)
+  message     String?         @db.Text
+  sharedItems Json
+  consentAt   DateTime
+  status      String          @default("sent") @db.VarChar(12)
+  history     Json
+  createdById String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([businessId])
+  @@index([offerId])
+  @@map("fin_partner_requests")
+}
+
+// P13-05, lot G: the forum of mutual help (ECR-0156 to 0158).
+model ForumThread {
+  id             String        @id @default(uuid())
+  authorId       String
+  author         User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category       String        @db.VarChar(20)
+  title          String        @db.VarChar(200)
+  body           String        @db.Text
+  status         String        @db.VarChar(12)
+  heldReason     String?       @db.VarChar(40)
+  replyCount     Int           @default(0)
+  lastActivityAt DateTime      @default(now())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  posts          ForumPost[]
+  reports        ForumReport[]
+
+  @@index([status, lastActivityAt])
+  @@index([authorId])
+  @@map("forum_threads")
+}
+
+model ForumPost {
+  id         String        @id @default(uuid())
+  threadId   String
+  thread     ForumThread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  authorId   String
+  author     User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body       String        @db.Text
+  status     String        @db.VarChar(12)
+  heldReason String?       @db.VarChar(40)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  reports    ForumReport[]
+
+  @@index([threadId])
+  @@index([authorId])
+  @@map("forum_posts")
+}
+
+model ForumReport {
+  id           String       @id @default(uuid())
+  threadId     String?
+  thread       ForumThread? @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  postId       String?
+  post         ForumPost?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reporterId   String
+  reporter     User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason       String       @db.VarChar(20)
+  note         String?      @db.VarChar(300)
+  status       String       @default("open") @db.VarChar(12)
+  decision     String?      @db.VarChar(12)
+  decisionNote String?      @db.VarChar(300)
+  decidedById  String?
+  decidedAt    DateTime?
+  createdAt    DateTime     @default(now())
+
+  @@index([status])
+  @@map("forum_reports")
+}
+
+// P13-05, lot G: the staff register, without payroll (ECR-0272).
+model FinBusinessEmployee {
+  id                 String                 @id @default(uuid())
+  businessId         String
+  business           FinBusiness            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  fullName           String                 @db.VarChar(160)
+  position           String                 @db.VarChar(120)
+  department         String?                @db.VarChar(120)
+  contract           String                 @db.VarChar(12)
+  managerName        String?                @db.VarChar(160)
+  startedAt          DateTime
+  endedAt            DateTime?
+  leaveRightsPerYear Float                  @default(0)
+  leaveCarryOver     Float                  @default(0)
+  // Lot G, second part: the payroll conditions (ECR-0265).
+  employeeNumber     String?                @db.VarChar(30)
+  baseSalary         Float?
+  partTime           Boolean                @default(false)
+  payslips           FinPayrollSlip[]
+  // Lot H: the employee's own account, to read their payslips; social security number.
+  userId             String?
+  user               User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  socialNumber       String?                @db.VarChar(30)
+  timesheets         FinBusinessTimesheet[]
+  skills             FinBusinessSkill[]
+  trainings          FinBusinessTraining[]
+  version            Int                    @default(1)
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  absences           FinBusinessAbsence[]
+
+  @@index([businessId])
+  @@map("fin_business_employees")
+}
+
+// P13-05, lot G: an absence, approved by another person (ECR-0273).
+model FinBusinessAbsence {
+  id          String              @id @default(uuid())
+  employeeId  String
+  employee    FinBusinessEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  kind        String              @db.VarChar(12)
+  startsAt    DateTime
+  endsAt      DateTime
+  days        Float
+  status      String              @default("requested") @db.VarChar(12)
+  note        String?             @db.VarChar(300)
+  createdById String
+  decidedById String?
+  decidedAt   DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([employeeId])
+  @@map("fin_business_absences")
+}
+
+// P13-05, lot G: a crowdfunding campaign, prepared only (ECR-0301 to 0306).
+model FinBusinessCampaign {
+  id                    String                          @id @default(uuid())
+  businessId            String
+  business              FinBusiness                     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name                  String                          @db.VarChar(160)
+  instrument            String                          @db.VarChar(12)
+  target                Float
+  currency              String                          @db.Char(3)
+  preMoney              Float?
+  startsAt              DateTime?
+  endsAt                DateTime?
+  platformName          String?                         @db.VarChar(160)
+  platformAuthorization String?                         @db.VarChar(160)
+  platformCheckedAt     DateTime?
+  risks                 String?                         @db.Text
+  checklist             Json
+  status                String                          @default("preparing") @db.VarChar(12)
+  version               Int                             @default(1)
+  createdAt             DateTime                        @default(now())
+  updatedAt             DateTime                        @updatedAt
+  commitments           FinBusinessCampaignCommitment[]
+
+  @@index([businessId])
+  @@map("fin_business_campaigns")
+}
+
+model FinBusinessCampaignCommitment {
+  id          String              @id @default(uuid())
+  campaignId  String
+  campaign    FinBusinessCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  amount      Float
+  declaredAt  DateTime
+  source      String              @db.VarChar(160)
+  confirmedAt DateTime?
+  cancelledAt DateTime?
+  createdAt   DateTime            @default(now())
+
+  @@index([campaignId])
+  @@map("fin_business_campaign_commitments")
 }
 
 // P13-05, lot C: a budget, one family and one month, excluding tax.
@@ -3166,4 +3602,301 @@ model FinExchangeRate {
 
   @@unique([currency, referenceDate])
   @@map("fin_exchange_rates")
+}
+
+// P13-05, lot G, second part: the monthly payroll run (ECR-0268), on default
+// rules until confirmed (provisional), validated by another person.
+model FinPayrollRun {
+  id            String           @id @default(uuid())
+  businessId    String
+  business      FinBusiness      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  period        String           @db.Char(7)
+  status        String           @default("draft") @db.VarChar(12)
+  provisional   Boolean          @default(true)
+  rules         Json
+  preparedById  String
+  validatedById String?
+  validatedAt   DateTime?
+  closedAt      DateTime?
+  version       Int              @default(1)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  slips         FinPayrollSlip[]
+
+  @@unique([businessId, period])
+  @@map("fin_payroll_runs")
+}
+
+// One bulletin: the month's variables and what the engine computed (ECR-0266, 0267).
+model FinPayrollSlip {
+  id               String              @id @default(uuid())
+  runId            String
+  run              FinPayrollRun       @relation(fields: [runId], references: [id], onDelete: Cascade)
+  employeeId       String
+  employee         FinBusinessEmployee @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  baseSalary       Float               @default(0)
+  overtime         Float               @default(0)
+  bonuses          Float               @default(0)
+  nonContributable Float               @default(0)
+  absenceDeduction Float               @default(0)
+  netDeductions    Float               @default(0)
+  irregularBonuses Float               @default(0)
+  irgIrregular     Float               @default(0)
+  overtimeHours    Float               @default(0)
+  gross            Float               @default(0)
+  contributionBase Float               @default(0)
+  employeeContrib  Float               @default(0)
+  taxable          Float               @default(0)
+  irg              Float               @default(0)
+  net              Float               @default(0)
+  employerContrib  Float               @default(0)
+  socialWorks      Float               @default(0)
+  employerCost     Float               @default(0)
+  anomalies        Json
+  note             String?             @db.VarChar(300)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@unique([runId, employeeId])
+  @@index([employeeId])
+  @@map("fin_payroll_slips")
+}
+
+// The organisation's own sub-accounts, under a root of the SCF (ECR-0243).
+model FinLedgerAccount {
+  id         String      @id @default(uuid())
+  businessId String
+  business   FinBusiness @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  code       String      @db.VarChar(10)
+  label      String      @db.VarChar(160)
+  createdAt  DateTime    @default(now())
+
+  @@unique([businessId, code])
+  @@map("fin_ledger_accounts")
+}
+
+// An account of another software and its SCF account (ECR-0243).
+model FinLedgerMapping {
+  id          String      @id @default(uuid())
+  businessId  String
+  business    FinBusiness @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  sourceCode  String      @db.VarChar(20)
+  sourceLabel String      @db.VarChar(200)
+  account     String?     @db.VarChar(10)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([businessId, sourceCode])
+  @@map("fin_ledger_mappings")
+}
+
+// An accounting entry (ECR-0244, 0247): manual, proposed or imported; draft then validated.
+model FinLedgerEntry {
+  id            String          @id @default(uuid())
+  businessId    String
+  business      FinBusiness     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  journal       String          @db.VarChar(4)
+  number        String          @db.VarChar(40)
+  date          DateTime
+  label         String          @db.VarChar(200)
+  status        String          @default("draft") @db.VarChar(12)
+  source        String          @default("manual") @db.VarChar(10)
+  sourceKey     String?         @db.VarChar(80)
+  createdById   String
+  validatedById String?
+  validatedAt   DateTime?
+  version       Int             @default(1)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  lines         FinLedgerLine[]
+
+  @@unique([businessId, sourceKey])
+  @@index([businessId, date])
+  @@map("fin_ledger_entries")
+}
+
+model FinLedgerLine {
+  id       String             @id @default(uuid())
+  entryId  String
+  entry    FinLedgerEntry     @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  position Int
+  account  String             @db.VarChar(10)
+  label    String?            @db.VarChar(200)
+  debit    Float              @default(0)
+  credit   Float              @default(0)
+  bankLine FinLedgerBankLine?
+
+  @@index([entryId])
+  @@map("fin_ledger_lines")
+}
+
+// A closed month (ECR-0248), reopened only with a reason.
+model FinLedgerPeriod {
+  id           String      @id @default(uuid())
+  businessId   String
+  business     FinBusiness @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  period       String      @db.Char(7)
+  status       String      @default("closed") @db.VarChar(8)
+  closedById   String
+  closedAt     DateTime
+  reopenReason String?     @db.VarChar(300)
+  reopenedById String?
+  reopenedAt   DateTime?
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([businessId, period])
+  @@map("fin_ledger_periods")
+}
+
+// A bank or cash reconciliation (ECR-0246).
+model FinLedgerBankCheck {
+  id               String      @id @default(uuid())
+  businessId       String
+  business         FinBusiness @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  account          String      @db.VarChar(10)
+  checkedAt        DateTime
+  statementBalance Float
+  bookBalance      Float
+  note             String?     @db.VarChar(300)
+  createdById      String
+  createdAt        DateTime    @default(now())
+
+  @@index([businessId])
+  @@map("fin_ledger_bank_checks")
+}
+
+// P13-05, lot H: hours worked by day, approved by another person (ECR-0274).
+model FinBusinessTimesheet {
+  id            String              @id @default(uuid())
+  employeeId    String
+  employee      FinBusinessEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  workedOn      DateTime
+  hours         Float
+  overtimeHours Float               @default(0)
+  note          String?             @db.VarChar(300)
+  status        String              @default("submitted") @db.VarChar(12)
+  createdById   String
+  decidedById   String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@unique([employeeId, workedOn])
+  @@map("fin_business_timesheets")
+}
+
+// A skill and its level, 1 to 4 (ECR-0275).
+model FinBusinessSkill {
+  id         String              @id @default(uuid())
+  employeeId String
+  employee   FinBusinessEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  skill      String              @db.VarChar(120)
+  level      Int
+  assessedAt DateTime
+  createdAt  DateTime            @default(now())
+
+  @@unique([employeeId, skill])
+  @@map("fin_business_skills")
+}
+
+// The training plan (ECR-0276).
+model FinBusinessTraining {
+  id         String               @id @default(uuid())
+  businessId String
+  business   FinBusiness          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  employeeId String?
+  employee   FinBusinessEmployee? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  title      String               @db.VarChar(160)
+  provider   String?              @db.VarChar(160)
+  plannedAt  DateTime
+  cost       Float?
+  status     String               @default("planned") @db.VarChar(12)
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+
+  @@index([businessId])
+  @@map("fin_business_trainings")
+}
+
+// Recruitment (ECR-0277): a position and its candidates.
+model FinBusinessVacancy {
+  id         String                 @id @default(uuid())
+  businessId String
+  business   FinBusiness            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  title      String                 @db.VarChar(160)
+  department String?                @db.VarChar(120)
+  contract   String                 @db.VarChar(12)
+  openedAt   DateTime
+  status     String                 @default("open") @db.VarChar(12)
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+  candidates FinBusinessCandidate[]
+
+  @@index([businessId])
+  @@map("fin_business_vacancies")
+}
+
+model FinBusinessCandidate {
+  id        String             @id @default(uuid())
+  vacancyId String
+  vacancy   FinBusinessVacancy @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  fullName  String             @db.VarChar(160)
+  stage     String             @default("applied") @db.VarChar(12)
+  note      String?            @db.VarChar(300)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([vacancyId])
+  @@map("fin_business_candidates")
+}
+
+// A fixed asset and its straight-line depreciation.
+model FinLedgerAsset {
+  id             String      @id @default(uuid())
+  businessId     String
+  business       FinBusiness @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  label          String      @db.VarChar(160)
+  category       String      @db.VarChar(20)
+  account        String      @db.VarChar(10)
+  acquiredAt     DateTime
+  cost           Float
+  durationMonths Int
+  disposedAt     DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([businessId])
+  @@map("fin_ledger_assets")
+}
+
+// A closed fiscal year.
+model FinLedgerYear {
+  id         String      @id @default(uuid())
+  businessId String
+  business   FinBusiness @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  year       Int
+  result     Float
+  closedById String
+  closedAt   DateTime    @default(now())
+
+  @@unique([businessId, year])
+  @@map("fin_ledger_years")
+}
+
+// A bank statement line, matched to at most one line of the books.
+model FinLedgerBankLine {
+  id            String         @id @default(uuid())
+  businessId    String
+  business      FinBusiness    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  account       String         @db.VarChar(10)
+  date          DateTime
+  label         String         @db.VarChar(200)
+  amount        Float
+  importKey     String         @db.VarChar(120)
+  matchedLineId String?        @unique
+  matchedLine   FinLedgerLine? @relation(fields: [matchedLineId], references: [id], onDelete: SetNull)
+  createdAt     DateTime       @default(now())
+
+  @@unique([businessId, importKey])
+  @@index([businessId, account])
+  @@map("fin_ledger_bank_lines")
 }

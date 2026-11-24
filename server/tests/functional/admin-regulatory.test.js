@@ -21,11 +21,11 @@ before(async () => {
 after(() => t.close());
 
 describe('regulatory values to confirm (P13-05)', () => {
-  test('all twelve are pending at first, with the workbook candidate shown, never applied', async () => {
+  test('all twenty are pending at first, with the workbook candidate shown, never applied', async () => {
     const res = await t.request('GET', '/admin/regulatory-params', { user: admin });
     assert.equal(res.status, 200);
-    assert.equal(res.body.params.length, 12);
-    assert.equal(res.body.pending, 12);
+    assert.equal(res.body.params.length, 20);
+    assert.equal(res.body.pending, 20);
     const ifu = res.body.params.find((param) => param.key === 'PARM-002');
     assert.equal(ifu.candidate, '0.005');
     assert.equal(ifu.status, 'pending');
@@ -37,7 +37,7 @@ describe('regulatory values to confirm (P13-05)', () => {
     assert.equal(res.status, 200);
     assert.equal(res.body.value, '0.005');
     const list = (await t.request('GET', '/admin/regulatory-params', { user: admin })).body;
-    assert.equal(list.pending, 11);
+    assert.equal(list.pending, 19);
     assert.equal(list.params.find((param) => param.key === 'PARM-002').status, 'confirmed');
     assert.equal(await confirmedValue('PARM-002', new Date('2026-06-01')), '0.005');
     assert.equal(await confirmedValue('PARM-002', new Date('2025-06-01')), null, 'not before its date');
@@ -49,7 +49,7 @@ describe('regulatory values to confirm (P13-05)', () => {
     await t.request('PUT', '/admin/regulatory-params/PARM-003', { user: admin, json: { value: '6000000', effectiveFrom: '2026-02-01' } });
     assert.equal(await confirmedValue('PARM-004'), 'Taux normal 19 %, réduit 9 %');
     assert.equal(await confirmedValue('PARM-003'), '6000000');
-    assert.equal((await t.request('GET', '/admin/regulatory-params', { user: admin })).body.pending, 9);
+    assert.equal((await t.request('GET', '/admin/regulatory-params', { user: admin })).body.pending, 17);
   });
 
   test('a wrong value, a missing date or an unknown parameter is refused', async () => {

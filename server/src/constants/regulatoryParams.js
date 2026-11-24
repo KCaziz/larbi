@@ -23,6 +23,29 @@ export const REGULATORY_PARAMS = [
   { key: 'PARM-029', group: 'import', kind: 'amount', candidate: null, source: 'https://www.joradp.dz/FTP/jo-francais/2025/F2025040.pdf' },
   { key: 'PARM-030', group: 'import', kind: 'text', candidate: null, source: 'https://www.douane.gov.dz/' },
   { key: 'PARM-031', group: 'import', kind: 'text', candidate: null, source: 'https://www.douane.gov.dz/' },
+  // Lot G, second part (2026-11-24): the defaults of payroll and accounting
+  // (constants/finEmployerRules.js). Used as « valeur provisoire » until confirmed.
+  { key: 'PAIE-001', group: 'payroll', kind: 'amount', candidate: '24000', source: 'https://www.joradp.dz/FTP/jo-francais/2026/F2026001.pdf' },
+  { key: 'PAIE-002', group: 'payroll', kind: 'rate', candidate: '0.09', source: 'https://www.joradp.dz/FTP/jo-francais/2015/F2015049.pdf' },
+  { key: 'PAIE-003', group: 'payroll', kind: 'rate', candidate: '0.25', source: 'https://www.joradp.dz/FTP/jo-francais/2015/F2015049.pdf' },
+  { key: 'PAIE-004', group: 'payroll', kind: 'rate', candidate: '0.005', source: 'https://www.joradp.dz/FTP/jo-francais/2015/F2015049.pdf' },
+  {
+    key: 'PAIE-005',
+    group: 'payroll',
+    kind: 'text',
+    candidate:
+      'Barème mensuel 0 % jusqu’à 20 000 DA, 23 % jusqu’à 40 000, 27 % jusqu’à 80 000, 30 % jusqu’à 160 000, 33 % jusqu’à 320 000, 35 % au-delà ; abattement de 40 % (entre 1 000 et 1 500 DA) ; exonération jusqu’à 30 000 DA ; lissage × 137/51 − 27 925/8 jusqu’à 35 000 DA ; base arrondie à la dizaine de dinars inférieure.',
+    source: 'https://mfdgi.gov.dz/fr/particuliers/irg-traitements-et-salaires',
+  },
+  {
+    key: 'PAIE-006',
+    group: 'payroll',
+    kind: 'text',
+    candidate: 'IRG retenu versé avant le 20 du mois suivant ; cotisations sociales dans les 30 jours après le mois (10 salariés ou plus) ou après le trimestre (moins de 10).',
+    source: 'https://cnas.dz/',
+  },
+  { key: 'SCF-001', group: 'accounting', kind: 'text', candidate: 'Nomenclature des comptes du SCF (classes 1 à 7), comptes principaux, sous-comptes libres sous ces racines.', source: 'https://www.joradp.dz/FTP/jo-francais/2009/F2009019.pdf' },
+  { key: 'SCF-002', group: 'accounting', kind: 'text', candidate: 'Bilan et compte de résultat simplifiés par classe de comptes, non certifiés.', source: 'https://www.joradp.dz/FTP/jo-francais/2009/F2009019.pdf' },
 ];
 
 export const REGULATORY_KEYS = REGULATORY_PARAMS.map((param) => param.key);

@@ -1,4 +1,4 @@
-import { Award, BookOpen, Coins, FileImage, GraduationCap, Landmark, LayoutDashboard, Mail, MessageCircleQuestion, Newspaper, Receipt, Settings, Users, Target } from 'lucide-react';
+import { Award, BookOpen, Coins, FileImage, GraduationCap, Handshake, Landmark, LayoutDashboard, Mail, MessageCircleQuestion, MessagesSquare, Newspaper, Receipt, Settings, Users, Target } from 'lucide-react';
 
 // Entries of the CMS side menu. The CMS base is shared: each module (articles,
 // newsletter, users, media, certificates, settings...) simply adds its own entry
@@ -20,6 +20,9 @@ export const adminNavItems = [
   { to: '/admin/comparateur', icon: Landmark, labelKey: 'admin.nav.comparator', section: 'finance' },
   // P10-05: the official exchange rates.
   { to: '/admin/cours-devises', icon: Coins, labelKey: 'admin.nav.rates', section: 'finance' },
+  // P13-05, lot G: the partners' offers and requests; the forum's moderation.
+  { to: '/admin/partenaires', icon: Handshake, labelKey: 'admin.nav.partners', section: 'finance' },
+  { to: '/admin/forum', icon: MessagesSquare, labelKey: 'admin.nav.forum', section: 'content' },
   { to: '/admin/users', icon: Users, labelKey: 'admin.nav.users', section: 'platform' },
   { to: '/admin/settings', icon: Settings, labelKey: 'admin.nav.settings', section: 'platform' },
 ];

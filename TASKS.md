@@ -4196,7 +4196,7 @@ Ce que cela change : ce sont les contenus de formation par profil que le client 
 - Réalisé (2026-11-23) : `LineChart` trace une courbe arrondie par interpolation cubique monotone (Fritsch–Carlson). Elle passe exactement par chaque point et ne dépasse jamais les valeurs voisines : aucun pic ni creux inventé. Sous une courbe seule, un remplissage en dégradé de la couleur de la série. La courbe se dessine une fois à l'affichage, sauf si le visiteur a demandé moins d'animations. Les points, l'axe (désormais sur des chiffres ronds), la légende, la phrase de lecture et le tableau restent.
 
 ### P13-05 — Référentiel unique : professionnels, commerce international et diaspora
-- Statut : `🚧 in-progress` (lots A, B et C faits le 2026-11-23 ; lots D à G à faire)
+- Statut : `🚧 in-progress` (lots A, B et C faits le 2026-11-23, lots D, E et F le 2026-11-24 ; lot G le 2026-11-24 : partenaires, forum, personnel, financement participatif, puis paie et comptabilité sur valeurs par défaut à confirmer, questions dans `QUESTIONS_CLIENT.md`)
 - Priorité : `🔴 high`
 - Dépendances : `P7-02` (socle livré), `P13-02` (les parcours de formation PRO, AE, LIB, START, BUS, DIA, MI et TR en sont le pendant pédagogique)
 - Durée cible : non estimée. C'est un produit entier, plusieurs fois la taille du budget personnel ; à chiffrer lot par lot.
@@ -4430,10 +4430,222 @@ Ce que cela change : ce sont les contenus de formation par profil que le client 
       - `e2e/fin-pilot-journey.test.js` (4) ;
       - `e2e/fin-invoicing-journey.test.js` vérifie aussi la feuille imprimée.
     - **Mise en ligne** : cette migration modifie la base. Elle est à ajouter à `mise-a-jour-base.sql` au prochain paquet, après celles des lots A et B.
-- **Lot D, micro-importation et commerce international** : opérations, coût rendu, Incoterms, change daté, documents.
-- **Lot E, diaspora** : projets en Algérie, budget, jalons, justificatifs à double validation, mandats, patrimoine multidevise.
-- **Lot F, simulateurs, comparateurs, recherches et copilote** du classeur, en réutilisant le moteur et l'assistant existants.
+- **Lot D, micro-importation et commerce international** — `✅ fait le 2026-11-24` : opérations, coût rendu, Incoterms, change daté, documents.
+  - **Réalisé** (`ECR-0350` à `ECR-0371`, `DEC-013` à `DEC-017`) :
+    - **Données** : migration `20261126120000_fin_trade`.
+      - Nouvelles tables :
+        - `fin_business_operations` : micro-importation, importation ou exportation ; pays, partenaire, devise, Incoterm avec version et lieu nommé, article, quantité, état ;
+        - `fin_business_operation_costs` : chaque coût dans SA devise, avec le cours, sa date et sa source ;
+        - `fin_business_operation_pieces` : le dossier.
+      - Un lot de stock et une facture peuvent être rattachés à une opération.
+    - **Règles** :
+      - aucun cours supposé (`DEC-015`, `CNV-10`) : un coût en devise exige son cours, sa date et sa source, sinon il est refusé. Sans cours, rien n'est additionné : « non calculable » ;
+      - les droits de douane sont saisis tels qu'ils figurent sur l'avis, jamais calculés (`DEC-014`). Sans eux, l'écran dit « hors droits » ;
+      - un Incoterm sans lieu nommé est refusé (`DEC-017`) ;
+      - un coût engagé n'est pas un coût payé (`CNV-09`) ;
+      - FINCLUDIA ne dépose rien à la douane et ne transfère aucun argent.
+    - **Coût rendu** total et unitaire (`E025`, `E026`) : marchandises converties + transport + assurance + droits + frais, divisés par les unités nettes reçues.
+    - **Réception** :
+      - les marchandises entrent en stock en un seul lot, au coût rendu ;
+      - les unités abîmées sont une perte de ce lot (`CNV-16`) ;
+      - une réception exige tous les cours, un article et une quantité nette positive ;
+      - une fois réceptionnée, une opération ne reçoit plus de coût : la valeur du stock resterait sinon fausse.
+    - **Marge de l'opération** (`E027`) : les ventes liées, nettes des avoirs, moins le coût rendu des seules unités vendues (ou le coût rendu total pour une exportation sans stock).
+    - **Dossier de pièces** (`E028`) : il s'ouvre avec les pièces attendues pour le type d'opération ; il est « prêt à déposer » seulement quand toutes sont acceptées.
+    - **Scénario de change** (`E029`, `ECR-0365`) : cours × (1 + variation) donne l'effet sur le coût rendu, le coût unitaire et la marge par unité. Il ne crée ni ne modifie rien (`CNV-12`).
+    - **Incoterms 2020** : matrice indicative des 11 règles (dédouanement export et import, transport principal, assurance obligatoire, passage du risque), présentée comme un repère, le contrat faisant foi.
+    - **Règles de micro-importation** (`PARM-026` à `PARM-031`) : affichées confirmées, ou « règle non publiée » tant que l'administration ne les a pas confirmées (`DEC-013`).
+    - **Écran** : onglet « Import-export » de Mon entreprise ; choix de l'opération sur une facture.
+    - **Tests** :
+      - `unit/finTrade.test.js` (15) reprend `30_TESTS_CALCUL` : 8 000 × 135 = 1 080 000, coût rendu 1 280 000 et 3 200 par unité, marge unitaire 1 600, stress de change 560 000, écart de change 200 000, marge export 450 000, pièces 75 %, cours inconnu et quantité nette nulle ;
+      - `functional/finTrade.test.js` (8) ;
+      - `e2e/fin-trade-journey.test.js` (4).
+    - **Pas fait dans ce lot** :
+      - `FAC-014` à `FAC-016` (facture d'exportation et créance en devise) : les factures restent dans la devise de l'organisation ;
+      - `ECR-0363` (comparateur des moyens de paiement internationaux) et `ECR-0370` (registre des risques pays et contrepartie) : prévus avec le lot F (comparateurs).
+    - **Mise en ligne** : cette migration modifie la base. Elle est à ajouter à `mise-a-jour-base.sql` au prochain paquet, après celles des lots A, B et C.
+- **Lot E, diaspora** — `✅ fait le 2026-11-24` (code ; recette à faire) : projets en Algérie, budget, jalons, justificatifs à double validation, mandats, patrimoine multidevise.
+  - **Réalisé** (`ECR-0372` à `ECR-0381`, `DEC-016`, `DEC-018`, `CNV-13`, `CNV-14`) :
+    - **Données** : migration `20261127120000_fin_diaspora`.
+      - Nouvelles tables :
+        - `fin_business_projects` : nature, localisation, responsable sur place, budget et devise, fonds confirmés, date cible, état ;
+        - `fin_business_project_milestones` : jalons pondérés, avec leur pièce ;
+        - `fin_business_project_expenses` : dépenses, avec leur cours daté si elles sont en devise ;
+        - `fin_business_project_shares` : un membre, un projet, un objet, une date de fin, révocable ;
+        - `fin_business_holdings` et `fin_business_holding_values` : le patrimoine, avec un historique des valeurs.
+      - La base refuse elle-même qu'une dépense soit validée par celle ou celui qui l'a déclarée, et qu'une dépense soit « à valider » ou « validée » sans pièce.
+    - **Dépenses** (`DEC-018`) :
+      - déclarée sans pièce : « à justifier » ;
+      - avec sa pièce : « à valider » ;
+      - validée seulement par un gestionnaire qui ne l'a pas déclarée ;
+      - refusée avec un motif, puis justifiable de nouveau ;
+      - déclaré, validé et payé restent trois faits distincts (`CNV-13`).
+    - **Jalons** : celui qui travaille sur le projet le déclare fait, avec sa pièce ; le gestionnaire l'accepte ou le refuse. L'avancement compte les seuls jalons acceptés, selon leur poids, jamais l'argent dépensé.
+    - **Accès par projet** (`CNV-14`) :
+      - titulaire, responsable financier et comptable interne gèrent tous les projets ;
+      - les autres membres n'accèdent qu'aux projets partagés avec eux, en lecture ou en contribution, jusqu'à la date de fin, et jusqu'à révocation ;
+      - un projet non partagé est « introuvable » ;
+      - le patrimoine n'est jamais partagé (titulaire et responsable financier seulement).
+    - **Nouveaux chiffres** (`E030` à `E035`) :
+      - dépenses validées ;
+      - budget restant ;
+      - part des dépenses justifiées ;
+      - avancement pondéré ;
+      - reste à financer (budget restant − fonds confirmés) ;
+      - patrimoine net consolidé.
+    - **Patrimoine multidevise** (`ECR-0372`, `ECR-0373`) :
+      - biens et dettes par pays et par devise ;
+      - fiabilité de chaque valeur : déclarée, estimée ou vérifiée ;
+      - une nouvelle valeur s'ajoute à l'historique, sans remplacer l'ancienne ;
+      - le total n'est consolidé qu'avec un cours daté pour chaque valeur en devise. Sinon il est « non calculable », et la ligne le dit.
+    - **Rapport de projet imprimable** (`ECR-0381`) : budget, réalisé, reste, avancement, part justifiée, jalons et dépenses avec leurs pièces, figé à sa date.
+    - **Écran** : onglet « Projets et patrimoine » de Mon entreprise.
+    - **Tests** : `functional/finDiaspora.test.js` (4), sur les cas du classeur : budget restant 1 550 000, patrimoine net 10 000 000, double validation, partage et révocation.
+    - **Pas fait dans ce lot** :
+      - `ECR-0378` (simulation de change sur un projet) : à faire avec le lot F ;
+      - `ECR-0379` (parcours administratif d'investissement) : il faut le contenu de référence du client ;
+      - la préparation de transfert (`DEC-016`) : FINCLUDIA ne transfère rien. Un comparateur des moyens de transfert relève du lot F.
+    - **Mise en ligne** : cette migration modifie la base. Elle est à ajouter à `mise-a-jour-base.sql` au prochain paquet, après celles des lots A à D.
+- **Lot F, simulateurs, comparateurs, recherches et copilote** du classeur, en réutilisant le moteur et l'assistant existants. — `✅ fait le 2026-11-24` (code ; recette à faire)
+  - **Réalisé** :
+    - **Simulateurs** (`14_SIMULATEURS`) :
+      - les 178 lignes du classeur se ramènent à 34 calculs de gestion distincts, écrits une seule fois côté serveur (`services/finBusinessSimulators.js`), chacun avec la description de ses entrées : l'écran construit son formulaire à partir d'elle ;
+      - chaque ligne du classeur est rattachée à l'un d'eux : 162 au total ;
+      - les autres sont affichées avec leur raison : paie (10, lot G), règles fiscales et sociales non confirmées (16 : TVA, IRG, IBS, CASNOS…), déjà dans Import-export (Incoterms), pas encore disponible (Monte-Carlo, tests A/B, cohortes, programme institutionnel, alerte de données anciennes) ;
+      - une simulation ne crée, ne modifie et n'enregistre rien (`CNV-12`) ;
+      - un calcul impossible donne « non calculé », jamais zéro ;
+      - la provision fiscale lit le taux confirmé par l'administration (fenêtre de confirmation de `P13-05`), sinon « règle non publiée » ;
+      - les cas du classeur sont justes : mensualité 19 332,80 pour 1 000 000 à 6 % sur 60 mois, financement de factures net de 6 320 000 (`TST-00037`), seuil de rentabilité 3 000 000.
+    - **Comparateurs** (`15_COMPARATEURS`) : le même simulateur sur deux ou trois options, côte à côte et sans recommandation :
+      - équipement comptant, à crédit ou en location ;
+      - deux prix ;
+      - deux fournisseurs ;
+      - deux offres de financement de factures ;
+      - deux crédits ;
+      - rénover, acquérir ou sous-traiter.
+      Le coût d'un paiement ou d'un transfert international (`ECR-0363`, `DEC-016`) est un simulateur : FINCLUDIA compare, ne transfère rien.
+    - **Recherche universelle** (`REC-001`) :
+      - porte sur les pièces, les tiers, les opérations, les articles, les projets et le patrimoine ;
+      - le classement est déterministe : identifiant exact, puis début de texte, puis texte contenu ;
+      - chacun ne trouve que ce que son rôle et ses partages lui ouvrent.
+    - **Copilote** (`17_COPILOTE`, `CNV-08`) :
+      - questions fermées, reconnues par leurs mots en français, anglais et arabe : ce que doit un client, état d'une facture, ce qui a été gagné ce mois (facturé et encaissé dits séparément), trésorerie, passage sous zéro, retards, stock, budget ;
+      - la réponse vient des chiffres du serveur, dans une phrase préparée ;
+      - une question non reconnue reçoit le menu des questions possibles, jamais une réponse inventée ;
+      - s'il manque une information (quel client, quelle facture), le copilote la demande par des choix.
+    - **Écran** : onglet « Outils » de Mon entreprise. Il réunit le copilote, la recherche, les simulateurs, les comparateurs et le catalogue des simulateurs par profil.
+    - **Tests** : `functional/finBusinessTools.test.js` (2).
 - **Lot G, modules lourds** selon le choix du client : comptabilité et import SCF, paie, RH, financement participatif, forum, partenaires.
+  - **Fait le 2026-11-24** (code ; recette à faire), sur la consigne « commence par ce qui peut être fait maintenant » : les quatre modules qui ne dépendent d'aucune valeur réglementaire.
+    - **Données** : migration `20261128120000_fin_lot_g`.
+      - Nouvelles tables :
+        - `fin_partner_offers` et `fin_partner_requests` (partenaires) ;
+        - `forum_threads`, `forum_posts` et `forum_reports` (forum) ;
+        - `fin_business_employees` et `fin_business_absences` (personnel) ;
+        - `fin_business_campaigns` et `fin_business_campaign_commitments` (financement participatif).
+    - **Partenaires** (`ECR-0159` à `0161`, `0288`, `23_PARTENAIRES`) :
+      - l'administration tient les offres (page « Partenaires » de l'administration) : type, agrément, date de vérification, wilayas, profils, conditions, frais, source, date de validité ;
+      - l'organisation les consulte, filtrées sur son profil (onglet « Financement et partenaires »), avec la mention « information commerciale, non garantie, non une recommandation » ;
+      - une demande n'est envoyée qu'avec un consentement explicite, et ne porte que ce que la personne coche ;
+      - l'administration fait avancer la demande (reçue, en étude, réponse donnée, close) avec une note, et l'historique est gardé ;
+      - l'organisation peut retirer sa demande ;
+      - FINCLUDIA ne transmet rien automatiquement et n'accorde rien.
+    - **Forum** (`ECR-0156` à `0158`), page « Forum » du menu du compte, réservée aux adultes :
+      - discussions et réponses par thème, recherche ;
+      - mention permanente « contenu non vérifié » ;
+      - consentement à la publication ;
+      - auteurs affichés par prénom et initiale ;
+      - un message qui semble contenir un téléphone, un e-mail ou un numéro de compte est retenu jusqu'à relecture. Ce sont des règles fixes, sans IA ;
+      - les signalements sont décidés par une personne (page « Modération du forum » de l'administration), et les décisions sont conservées.
+    - **Personnel, sans paie ni montant** (`ECR-0272`, `0273`, `0278`, `DRT-005`), onglet « Personnel » :
+      - registre du personnel (poste, service, contrat, responsable, entrée, sortie) ;
+      - absences validées par une autre personne que celle qui les a saisies (contrôlé en base) ;
+      - solde de congés = droits acquis au prorata + report − jours validés ;
+      - effectif, rotation sur 12 mois et absentéisme hors congés et formations (`E036` à `E038`) ;
+      - réservé au titulaire et au responsable RH ; le responsable financier lit.
+    - **Financement participatif, préparation seulement** (`ECR-0301` à `0306`) :
+      - campagne (don, prêt, capital, contrepartie), objectif, plateforme partenaire ;
+      - liste de contrôles de diligence ;
+      - la plateforme reste « non confirmée » tant que son agrément n'a pas été vérifié et noté ;
+      - la campagne ne s'ouvre qu'une fois les contrôles faits et la plateforme vérifiée ;
+      - les engagements sont déclarés, puis confirmés un par un ;
+      - reste à collecter et part financée confirmée (`E039`, `E040`), dilution à l'objectif pour une levée en capital ;
+      - FINCLUDIA ne collecte rien et ne promet aucun rendement.
+    - **Tests** : `functional/finLotG.test.js` (4).
+    - **Pas fait** :
+      - `ECR-0274` à `0277` (feuilles de temps, compétences, plan de formation, recrutement) ;
+      - `ECR-0287`, `0289` à `0294` (espace des partenaires et institutions : portefeuille de dossiers, cohortes, licences) ;
+      - `ECR-0307` (rapports COSOB : règles du régulateur à fournir) ;
+      - les messages du forum ne sont pas encore dans l'export des données du centre de confiance.
+    - **Mise en ligne** : cette migration modifie la base. Elle est à ajouter à `mise-a-jour-base.sql` au prochain paquet, après celles des lots A à E.
+  - **Paie et comptabilité, sur valeurs par défaut : fait le 2026-11-24** (code ; recette à faire).
+    - **Décision de l'utilisateur (2026-11-24)** : « mets des valeurs par défaut pour le moment et compile les questions à poser au client ». Elle prime, pour ces deux modules, sur la règle « aucune règle de paie inventée » :
+      - les valeurs par défaut viennent des textes publics déjà cités par le client (décrets 26-01 et 15-236, page IRG de la DGI) ;
+      - elles sont toutes déclarées dans la fenêtre « Valeurs réglementaires à confirmer », 8 valeurs de plus, soit 20 au total : `PAIE-001` à `PAIE-006`, `SCF-001` et `SCF-002` ;
+      - une valeur confirmée remplace la valeur par défaut, à partir de sa date. Un texte confirmé valide la règle par défaut telle qu'elle est écrite ;
+      - tant qu'une valeur n'est pas confirmée, l'écran dit « provisoire », le bulletin s'imprime « brouillon » et les états portent « non certifiés » (`DEC-001` reste tenu : rien de provisoire n'est caché).
+    - **Questions au client** : `QUESTIONS_CLIENT.md`, 33 questions (paie, comptabilité, valeurs en attente, modules à cadrer, autres choix par défaut).
+    - **Données** : migration `20261129120000_fin_payroll_ledger`.
+      - Le salarié reçoit un matricule, un salaire de base et le temps partiel.
+      - Nouvelles tables :
+        - `fin_payroll_runs` et `fin_payroll_slips` (paie) ;
+        - `fin_ledger_accounts`, `fin_ledger_mappings`, `fin_ledger_entries`, `fin_ledger_lines`, `fin_ledger_periods`, `fin_ledger_bank_checks` (comptabilité).
+      - Contrôles en base :
+        - validation de la paie par deux personnes ;
+        - une ligne d'écriture porte un débit ou un crédit ;
+        - format des mois ;
+        - motif obligatoire pour rouvrir un mois.
+    - **Valeurs par défaut** : `constants/finEmployerRules.js`.
+      - Paie :
+        - salaire minimum ;
+        - taux 9 %, 25 % et 0,5 % ;
+        - barème mensuel de l'IRG, abattement de 40 % entre 1 000 et 1 500 DA, exonération jusqu'à 30 000 DA, lissage entre 30 000 et 35 000 DA ;
+        - échéances : avant le 20 pour l'IRG, 30 jours après le mois ou le trimestre pour les cotisations.
+      - Comptabilité :
+        - plan de 98 comptes du SCF ;
+        - comptes des écritures automatiques ;
+        - correspondance entre les familles de dépenses et les comptes de charges ;
+        - journaux.
+    - **Paie** (`ECR-0265` à `0271`), onglet « Paie » :
+      - conditions de paie de chaque salarié ;
+      - simulation d'un bulletin sans enregistrement (`E041`, `E042`) ;
+      - lot mensuel préparé pour chaque personne sous contrat ce mois-là :
+        - prorata sur les jours de présence ;
+        - congé sans solde retenu à 1/30 par jour ;
+      - variables modifiables tant que le lot est en préparation ;
+      - points à vérifier : salaire sous le minimum, net négatif, salaire manquant ;
+      - « Recalculer » après une confirmation ;
+      - validation par une autre personne que celle qui a préparé le lot, rouvrir, clôturer, supprimer un brouillon ;
+      - bulletin imprimable, marqué « brouillon » tant que les barèmes sont provisoires ou que le lot n'est pas validé ;
+      - déclarations indicatives : assiette, cotisations, IRG retenu, échéances ;
+      - masse salariale des 12 derniers mois (`E043`).
+      - Droits :
+        - `payroll.read` : titulaire, RH, responsable financier, comptable interne ;
+        - `payroll.manage` : titulaire, RH, responsable financier ;
+        - le salaire n'est montré dans le registre du personnel qu'à ceux qui lisent la paie.
+    - **Comptabilité** (`ECR-0108`, `0243` à `0250`, `0330`), onglet « Comptabilité » :
+      - **écritures** : saisie équilibrée, brouillon, puis validation. Une écriture validée ne se modifie plus : on la contrepasse ;
+      - **écritures proposées** à partir des factures émises, avoirs, règlements et paies validées. Une écriture par événement, jamais deux (`sourceKey` unique) ;
+      - **balance et grand livre** sur les écritures validées ;
+      - **états simplifiés** par classe, non certifiés : bilan, compte de résultat, ventes, marge, résultat et besoin en fonds de roulement (`E046`, `E047`) ;
+      - **plan de comptes** : sous-comptes propres sous une racine du SCF. Import du plan d'un autre logiciel et correspondances, avec le taux de couverture (`E044`) ;
+      - **import CSV** des écritures : contrôle ligne par ligne et pièce par pièce, puis import en brouillon seulement si tout est valide, sans doublon ;
+      - **clôture mensuelle** : refusée s'il reste des brouillons ; réouverture avec motif ;
+      - **rapprochement** banque ou caisse : écart conservé (`E045`) ;
+      - **points à revoir** : écriture déséquilibrée, brouillon ancien, compte inconnu, compte d'attente non soldé.
+      - Droits : `ledger.read` et `ledger.write` pour le titulaire, le responsable financier, le comptable interne, et le comptable externe sous mandat « finance ».
+    - **Tests** :
+      - `functional/finPayrollLedger.test.js` (3) ;
+      - `functional/admin-regulatory.test.js` et `e2e/regulatory-confirm-journey.test.js` mis à 20 valeurs.
+    - **Pas fait** (questions Q11, Q12, Q20 à Q24 de `QUESTIONS_CLIENT.md`) :
+      - fichiers de déclaration annuelle ;
+      - accès des salariés à leurs bulletins ;
+      - clôture annuelle et à-nouveaux automatiques ;
+      - états au format officiel du SCF ;
+      - amortissements et valorisation des stocks ;
+      - lettrage et import des relevés bancaires.
+    - **Mise en ligne** : la migration `20261129120000_fin_payroll_ledger` est à ajouter à `mise-a-jour-base.sql` au prochain paquet, avec celles des lots A à G.
+  - **Piste notée le 2026-11-24** : l'administration tient déjà les cours officiels de la Banque d'Algérie (`P10-05`, « Cours des devises »). Les écrans des lots D et E pourraient proposer ce cours par défaut au lieu de le faire saisir à chaque coût. La personne garderait la main sur le cours retenu.
 - À chaque lot : ses cas de `27_RECETTES` et `30_TESTS_CALCUL` deviennent des tests automatisés.
 
 

@@ -45,6 +45,33 @@ const BUSINESS = {
   E022: 'businessBalance',
   E023: 'businessBalance',
   E024: 'businessBalance',
+  // Lot D.
+  E025: 'businessTradeCost',
+  E026: 'businessTradeReception',
+  E027: 'businessTradeSale',
+  E028: 'businessDocuments',
+  E029: 'businessTradeCost',
+  // Lot E.
+  E030: 'businessProjectExpense',
+  E031: 'businessProjectExpense',
+  E032: 'businessProjectExpense',
+  E033: 'businessProjectMilestone',
+  E034: 'businessProjectExpense',
+  E035: 'businessHoldingRate',
+  // Lot G.
+  E036: 'businessHr',
+  E037: 'businessHr',
+  E038: 'businessHr',
+  E039: 'businessCampaign',
+  E040: 'businessCampaign',
+  // Lot G, second part.
+  E041: 'businessPayroll',
+  E042: 'businessPayroll',
+  E043: 'businessPayroll',
+  E044: 'businessLedgerChart',
+  E045: 'businessLedger',
+  E046: 'businessLedger',
+  E047: 'businessLedger',
 };
 
 const isMissing = (value) => value === null || value === undefined || value === 0 || (Array.isArray(value) && value.length === 0);

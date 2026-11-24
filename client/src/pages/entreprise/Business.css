@@ -719,3 +719,224 @@
     font-weight: 700;
   }
 }
+
+/* P13-05, lot D: international operations. */
+.trade-figures {
+  margin-block-start: 10px;
+}
+.trade-op-cancelled {
+  opacity: 0.75;
+}
+.trade-details {
+  margin-block-start: 8px;
+  padding-block-start: 8px;
+  border-block-start: 1px dashed var(--border);
+}
+.trade-pieces {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+.trade-pieces li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-inline-start: 4px solid var(--warn);
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.9rem;
+}
+.trade-pieces .trade-piece-accepted {
+  border-inline-start-color: var(--green);
+}
+.trade-pieces .trade-piece-submitted {
+  border-inline-start-color: var(--blue);
+}
+.trade-pieces .trade-piece-rejected {
+  border-inline-start-color: var(--danger);
+}
+.trade-pieces select {
+  padding: 4px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+}
+.trade-incoterms summary {
+  cursor: pointer;
+}
+.trade-incoterms summary h2 {
+  display: inline;
+}
+.trade-matrix td,
+.trade-matrix th {
+  white-space: normal;
+  text-align: start;
+}
+.trade-rules {
+  margin-block-end: 16px;
+}
+
+/* P13-05, lot E: projects followed from abroad, patrimony. */
+.dia-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.dia-actions input {
+  padding: 4px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.85rem;
+}
+.trade-pieces .dia-status-accepted,
+.trade-pieces .dia-status-validated,
+.trade-pieces .dia-status-verified {
+  border-inline-start-color: var(--green);
+}
+.trade-pieces .dia-status-declared,
+.trade-pieces .dia-status-submitted,
+.trade-pieces .dia-status-estimated {
+  border-inline-start-color: var(--blue);
+}
+.trade-pieces .dia-status-rejected {
+  border-inline-start-color: var(--danger);
+}
+.trade-pieces .dia-status-planned,
+.trade-pieces .dia-status-to_justify {
+  border-inline-start-color: var(--warn);
+}
+.dia-project-cancelled {
+  opacity: 0.75;
+}
+.dia-shares {
+  margin-block-start: 14px;
+}
+.dia-value {
+  flex-basis: 100%;
+  margin-block-start: 8px;
+}
+
+/* P13-05, lot F: copilot, search, simulators, comparators. */
+.tools-ask {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block-end: 8px;
+}
+.tools-ask input,
+.tools-search {
+  flex: 1 1 260px;
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+}
+.tools-search {
+  inline-size: 100%;
+  box-sizing: border-box;
+  margin-block-end: 10px;
+}
+.tools-answer {
+  margin-block-start: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-inline-start: 4px solid var(--accent, var(--blue));
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface);
+}
+.tools-answer p {
+  margin: 0 0 6px;
+}
+.tools-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+.tools-options fieldset {
+  display: grid;
+  gap: 8px;
+}
+.tools-options label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+/* P13-05, lot G: forum. */
+.forum-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-h);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.forum-link:hover strong {
+  text-decoration: underline;
+}
+.forum-body {
+  margin: 8px 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* P13-05, lot G, second part: payroll and accounting tables. */
+.ledger-table {
+  inline-size: 100%;
+  margin-block: 8px 14px;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.ledger-table caption {
+  padding-block-end: 6px;
+  font-weight: 600;
+  text-align: start;
+}
+.ledger-table th,
+.ledger-table td {
+  padding: 6px 8px;
+  border-block-end: 1px solid var(--border);
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+.ledger-table th:first-child,
+.ledger-table td:first-child,
+.ledger-table td:nth-child(2):not(:last-child) {
+  text-align: start;
+}
+.ledger-total th,
+.ledger-total td {
+  font-weight: 700;
+  border-block-start: 1px solid var(--text-h);
+}
+.ledger-statements {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+.ledger-sample {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--bg-alt);
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.ledger-line {
+  align-items: end;
+}

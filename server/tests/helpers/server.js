@@ -123,7 +123,7 @@ export async function boot({ production = false, extra = {}, subscribers = false
     // the journeys (platform_settings is kept between tests). The tests of that
     // window remove this row first.
     const answered = Object.fromEntries(
-      ['PARM-002', 'PARM-003', 'PARM-004', 'PARM-005', 'PARM-006', 'PARM-007', 'PARM-026', 'PARM-027', 'PARM-028', 'PARM-029', 'PARM-030', 'PARM-031'].map((key) => [
+      ['PARM-002', 'PARM-003', 'PARM-004', 'PARM-005', 'PARM-006', 'PARM-007', 'PARM-026', 'PARM-027', 'PARM-028', 'PARM-029', 'PARM-030', 'PARM-031', 'PAIE-001', 'PAIE-002', 'PAIE-003', 'PAIE-004', 'PAIE-005', 'PAIE-006', 'SCF-001', 'SCF-002'].map((key) => [
         key,
         { value: 'test', effectiveFrom: '2000-01-01', confirmedAt: '2000-01-01T00:00:00.000Z', confirmedBy: null },
       ]),

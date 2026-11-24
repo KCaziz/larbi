@@ -111,6 +111,8 @@ import { listSettings, upsertSettingRoute } from '../controllers/admin/settings.
 import { upsertSettingSchema } from '../validation/settings.schemas.js';
 import { confirmRegulatory, listRegulatory } from '../controllers/admin/regulatory.controller.js';
 import { confirmRegulatorySchema } from '../validation/regulatoryParams.schemas.js';
+import { forumDecisionSchema, forumHeldSchema, partnerOfferSchema, partnerRequestStatusSchema, updatePartnerOfferSchema } from '../validation/finBusiness.schemas.js';
+import { getModeration, getPartnerOffers, getPartnerRequestsAdmin, patchPartnerOffer, patchPartnerRequest, postHeldDecision, postPartnerOffer, postReportDecision } from '../controllers/admin/lotG.controller.js';
 import {
   listCertificates,
   restoreCertificate,
@@ -378,5 +380,15 @@ router.get('/fin-assistant/audit-log', asyncRoute(listAuditLog));
 // P10-05 — the official exchange rates (Banque d'Algérie), by reference date.
 router.get('/fin/cours', asyncRoute(getCurrencies));
 router.post('/fin/cours', validateBody(exchangeRateSchema), asyncRoute(postRate));
+
+// P13-05, lot G — partners' offers, the requests sent to them, forum moderation.
+router.get('/partenaires/offres', asyncRoute(getPartnerOffers));
+router.post('/partenaires/offres', validateBody(partnerOfferSchema), asyncRoute(postPartnerOffer));
+router.patch('/partenaires/offres/:id', validateBody(updatePartnerOfferSchema), asyncRoute(patchPartnerOffer));
+router.get('/partenaires/demandes', asyncRoute(getPartnerRequestsAdmin));
+router.patch('/partenaires/demandes/:id', validateBody(partnerRequestStatusSchema), asyncRoute(patchPartnerRequest));
+router.get('/forum/moderation', asyncRoute(getModeration));
+router.post('/forum/signalements/:id/decision', validateBody(forumDecisionSchema), asyncRoute(postReportDecision));
+router.post('/forum/:kind(thread|post)/:id/decision', validateBody(forumHeldSchema), asyncRoute(postHeldDecision));
 
 export default router;

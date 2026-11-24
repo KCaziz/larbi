@@ -1,4 +1,6 @@
 import {
+  FileText,
+  MessagesSquare,
   ArrowLeftRight,
   Award,
   ListChecks,
@@ -93,6 +95,10 @@ export const SETTINGS_LINKS = [
   // The business space comes from the contract (annex 1, P7-02), not from the
   // client's navigation: it sits with the account, adults only.
   { to: '/app/entreprise', labelKey: 'nav.businessSpace', icon: Building2, adultsOnly: true },
+  // P13-05, lot G: the forum of mutual help between professionals.
+  { to: '/app/forum', labelKey: 'appNav.forum', icon: MessagesSquare, adultsOnly: true },
+  // Lot H: the payslips of an employee whose organisation gave them access.
+  { to: '/app/bulletins', labelKey: 'appNav.payslips', icon: FileText },
 ];
 
 // Where each address of the former connected space now lives. A bookmark, a

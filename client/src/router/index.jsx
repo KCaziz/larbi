@@ -120,6 +120,8 @@ const appRoutes = {
             // Gestion commune lives at `/partage` since P9-02.
             { path: 'espaces', element: <Navigate to="/partage" replace /> },
             { path: 'entreprise', lazy: lazyPage(() => import('../pages/entreprise/BusinessPage.jsx')) },
+            { path: 'forum', lazy: lazyPage(() => import('../pages/forum/ForumPage.jsx')) },
+            { path: 'bulletins', lazy: lazyPage(() => import('../pages/payslips/MyPayslipsPage.jsx')) },
             { path: 'parametres', lazy: lazyPage(() => import('../pages/parametres/SettingsPage.jsx')) },
             { path: 'parametres/profil', lazy: lazyPage(() => import('../pages/account/ProfilePage.jsx')) },
             { path: 'parametres/fincludia', lazy: lazyPage(() => import('../pages/account/FinProfilePage.jsx')) },
@@ -245,6 +247,14 @@ const adminRoutes = {
                 {
                   path: 'comparateur',
                   lazy: lazyPage(() => import('../pages/admin/comparator/ComparatorAdminPage.jsx')),
+                },
+                {
+                  path: 'partenaires',
+                  lazy: lazyPage(() => import('../pages/admin/partners/PartnersAdminPage.jsx')),
+                },
+                {
+                  path: 'forum',
+                  lazy: lazyPage(() => import('../pages/admin/forum/ForumModerationPage.jsx')),
                 },
                 {
                   path: 'cours-devises',

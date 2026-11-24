@@ -17,6 +17,13 @@ import { useOrganisation } from '../../lib/organisation.js';
 import { CreateOrganisation, JournalSection, MembersSection, OrganisationBar } from './Organisation.jsx';
 import { AgingSection, InvoicingSection, invoicingError } from './Invoicing.jsx';
 import { BudgetSection, CashPlanSection, SpecialisedHome, SteeringSection, StockSection } from './Pilot.jsx';
+import { TradeSection } from './Trade.jsx';
+import { PatrimonySection, ProjectsSection } from './Diaspora.jsx';
+import { ToolsSection } from './Tools.jsx';
+import { CampaignsSection, HrSection, PartnersSection } from './LotG.jsx';
+import { PayrollSection } from './Payroll.jsx';
+import { StaffSection } from './Staff.jsx';
+import { LedgerSection } from './Ledger.jsx';
 import '../../components/fincludia/Fincludia.css';
 import './Business.css';
 
@@ -136,6 +143,17 @@ function BusinessSpace() {
     readsFinance && 'home',
     readsFinance && 'sales',
     can('stock.read') && 'stock',
+    readsFinance && 'trade',
+    // Lot E: every member reaches the projects shared with them (CNV-14).
+    can('org.read') && 'projects',
+    // Lot G: partners and crowdfunding; human resources without payroll.
+    can('org.read') && 'funding',
+    can('hr.read') && 'hr',
+    // Lot G, second part: payroll and accounting, on default rules until confirmed.
+    can('payroll.read') && 'payroll',
+    can('ledger.read') && 'accounting',
+    // Lot F: copilot, search, simulators and comparators.
+    can('org.read') && 'tools',
     readsFinance && 'steer',
     (can('members.manage') || can('journal.read')) && 'team',
   ].filter(Boolean);
@@ -234,6 +252,34 @@ function BusinessSpace() {
           {/* P13-05, lot B (19_CYCLE_FACTURE): clients, quotes, invoices,
               credit notes, reminders, export. */}
           {current === 'sales' && <InvoicingSection business={entreprise} documents={documents.data?.documents ?? []} can={can} run={run} />}
+
+          {/* P13-05, lot D: micro-import and international trade. */}
+          {current === 'trade' && <TradeSection business={entreprise} can={can} run={run} />}
+
+          {/* P13-05, lot E: projects followed from abroad, and the patrimony. */}
+          {current === 'projects' && (
+            <>
+              <ProjectsSection business={entreprise} can={can} run={run} />
+              {can('patrimony.read') && <PatrimonySection business={entreprise} canWrite={can('patrimony.write')} run={run} />}
+            </>
+          )}
+
+          {current === 'funding' && (
+            <>
+              <PartnersSection business={entreprise} can={can} run={run} />
+              {can('finance.read') && <CampaignsSection business={entreprise} can={can} run={run} />}
+            </>
+          )}
+          {current === 'hr' && (
+            <>
+              <HrSection can={can} run={run} />
+              <StaffSection business={entreprise} can={can} run={run} />
+            </>
+          )}
+          {current === 'payroll' && <PayrollSection business={entreprise} can={can} run={run} />}
+          {current === 'accounting' && <LedgerSection business={entreprise} can={can} run={run} />}
+
+          {current === 'tools' && <ToolsSection business={entreprise} can={can} onOpen={(key) => key && setTab(key)} />}
 
           {current === 'stock' && <StockSection currency={entreprise.currency} canWrite={can('stock.write')} showValues={readsFinance} run={run} />}
 

@@ -47,7 +47,7 @@ describe('regulatory values to confirm, end to end', { skip: findChrome() ? fals
   test('the window opens in the administration, with the proposed values and no code on screen', async () => {
     await b.goto(`${site.url}/admin`);
     assert.ok(await b.waitFor("!!document.querySelector('.regulatory-dialog[open]')", 'the window', 15_000));
-    assert.equal(await b.ev("document.querySelectorAll('.regulatory-item').length"), 12);
+    assert.equal(await b.ev("document.querySelectorAll('.regulatory-item').length"), 20);
     const text = await b.ev("document.querySelector('.regulatory-dialog').textContent");
     assert.ok(text.includes(fr.admin.regulatory.params['PARM-002'].name));
     assert.ok(!/PARM-\d/.test(text), 'no internal code is shown');
@@ -57,7 +57,7 @@ describe('regulatory values to confirm, end to end', { skip: findChrome() ? fals
 
   test('« Je confirme » records the value and its date, and the item leaves the list', async () => {
     await b.ev("document.querySelector('.regulatory-confirm').click(); true");
-    assert.ok(await b.waitFor("document.querySelectorAll('.regulatory-item').length === 11", 'one less to confirm', 10_000));
+    assert.ok(await b.waitFor("document.querySelectorAll('.regulatory-item').length === 19", 'one less to confirm', 10_000));
     const stored = JSON.parse((await t.prisma.platformSetting.findUnique({ where: { key: 'regulatoryParams' } })).value);
     assert.equal(stored['PARM-002'].value, '0.005');
     assert.match(stored['PARM-002'].effectiveFrom, /^\d{4}-\d{2}-\d{2}$/);

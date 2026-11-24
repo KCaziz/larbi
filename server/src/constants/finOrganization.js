@@ -52,6 +52,26 @@ export const PERMISSIONS = {
   'budget.write': ['owner', 'finance_manager', 'accountant_internal'],
   // The opening cash balance of the 13-week plan: a fact about the bank, set by those who handle payments.
   'cash.write': ['owner', 'finance_manager', 'accountant_internal'],
+  // Lot D: international operations, their costs, file and reception.
+  'trade.write': ['owner', 'finance_manager', 'accountant_internal', 'collaborator'],
+  // Lot E (CNV-14): those who manage EVERY project; the others reach a project only through its share.
+  'project.manage': ['owner', 'finance_manager', 'accountant_internal'],
+  // The patrimony is never shared with a project's members (ECR-0374).
+  'patrimony.read': ['owner', 'finance_manager'],
+  'patrimony.write': ['owner', 'finance_manager'],
+  // Lot G. DRT-005: human resources see no amount; the HR manager keeps the register and decides absences.
+  'hr.read': ['owner', 'hr_manager', 'finance_manager'],
+  'hr.manage': ['owner', 'hr_manager'],
+  // A request to a partner shares the organisation's data: its managers decide (ECR-0161).
+  'partners.request': ['owner', 'finance_manager'],
+  'crowdfunding.manage': ['owner', 'finance_manager'],
+  // Lot G, second part. Payroll: amounts, so not every HR reader; a run is
+  // validated by another person than the one who prepared it.
+  'payroll.read': ['owner', 'hr_manager', 'finance_manager', 'accountant_internal'],
+  'payroll.manage': ['owner', 'hr_manager', 'finance_manager'],
+  // Accounting: the accountants, the external one under a « finance » mandate.
+  'ledger.read': ['owner', 'finance_manager', 'accountant_internal', 'accountant_external'],
+  'ledger.write': ['owner', 'finance_manager', 'accountant_internal', 'accountant_external'],
 };
 
 // The scope of mandate each action reaches, for a mandated role.
@@ -60,6 +80,8 @@ export const MANDATE_SCOPE_OF = {
   'journal.read': ['finance'],
   'org.read': ['finance', 'documents'],
   'stock.read': ['finance', 'documents'],
+  'ledger.read': ['finance'],
+  'ledger.write': ['finance'],
 };
 
 export const permissionsOf = (role) => Object.keys(PERMISSIONS).filter((action) => PERMISSIONS[action].includes(role));

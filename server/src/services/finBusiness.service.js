@@ -205,6 +205,10 @@ export async function createDocument(prisma, ctx, body) {
   if (fields.kind === 'purchase' && draft) throw new HttpError(422, 'A purchase is received, not drafted', { reason: 'purchaseIsReceived' });
   if (fields.contactId) await assertContactBelongs(prisma, business.id, fields.contactId, fields.kind);
   if (fields.number) await assertNumberFree(prisma, business.id, fields.kind, docType, fields.number);
+  if (fields.operationId) {
+    const operation = await prisma.finBusinessOperation.findFirst({ where: { id: fields.operationId, businessId: business.id } });
+    if (!operation) throw new HttpError(404, 'Operation not found', { reason: 'operationNotFound' });
+  }
   // Lot C : une famille de dépense classe un achat, et sa nature (fixe ou
   // variable) vient de la famille quand la personne ne la précise pas.
   if ((fields.category || fields.costNature) && fields.kind !== 'purchase') {
