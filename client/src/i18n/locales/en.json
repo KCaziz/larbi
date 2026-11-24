@@ -6839,7 +6839,8 @@
       "yearClosed": "Fiscal year {{year}} closed on {{date}} · result {{result}}",
       "yearConfirm": "Close fiscal year {{year}}? Its months will accept no more entries.",
       "yearDone": "Fiscal year closed: opening entry created.",
-      "closeYear": "Close the fiscal year"
+      "closeYear": "Close the fiscal year",
+      "notMatched": "Not matched"
     },
     "staff": {
       "timeTitle": "Working time",

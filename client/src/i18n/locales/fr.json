@@ -6840,7 +6840,8 @@
       "yearClosed": "Exercice {{year}} clôturé le {{date}} · résultat {{result}}",
       "yearConfirm": "Clôturer l’exercice {{year}} ? Ses mois ne pourront plus recevoir d’écriture.",
       "yearDone": "Exercice clôturé : à-nouveaux créés.",
-      "closeYear": "Clôturer l’exercice"
+      "closeYear": "Clôturer l’exercice",
+      "notMatched": "Non pointée"
     },
     "staff": {
       "timeTitle": "Temps de travail",
