@@ -940,3 +940,61 @@
 .ledger-line {
   align-items: end;
 }
+
+/* P13-01: InvestLab. */
+.investlab-table {
+  overflow-x: auto;
+}
+.investlab-section {
+  margin-block: 12px;
+}
+.investlab-bars {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  min-block-size: 190px;
+  margin-block: 12px;
+  overflow-x: auto;
+}
+.investlab-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-inline-size: 52px;
+  font-size: 0.8rem;
+}
+.investlab-bar-fill {
+  inline-size: 28px;
+  border-radius: 4px 4px 0 0;
+  background: var(--accent, #055686);
+}
+.investlab-bar-value {
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Lot D bis: risk register (ECR-0370) and exchange effect on a project (ECR-0378). */
+.risk-critical {
+  border-inline-start: 4px solid var(--danger, var(--border));
+}
+
+.risk-high {
+  border-inline-start: 4px solid var(--warning, var(--border));
+}
+
+.risk-closed {
+  opacity: 0.75;
+}
+
+.project-fx {
+  margin-block-start: 16px;
+}
+
+.inv-fx {
+  font-size: 0.92rem;
+}
+
+.ledger-scroll {
+  overflow-x: auto;
+}

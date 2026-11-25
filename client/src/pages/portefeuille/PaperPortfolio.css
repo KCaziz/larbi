@@ -487,3 +487,11 @@
 .paper-compound-table th:first-child {
   text-align: start;
 }
+
+/* 2026-11-25: a support carrying the reference document's real data. */
+.market-badge.market-badge-client {
+  border-style: solid;
+  border-color: var(--success, var(--border));
+  background: var(--success-bg, var(--surface));
+  color: var(--success, var(--text));
+}

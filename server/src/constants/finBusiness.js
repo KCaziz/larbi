@@ -231,6 +231,32 @@ export const BUSINESS_FORMULAS = [
   { id: 'E044', fn: 'mappingCoverage', unit: 'ratio', version: 1, label: 'Taux de couverture des correspondances', rule: 'comptes rattachés / comptes importés', condition: 'Un plan de comptes importé' },
   { id: 'E045', fn: 'bankGap', unit: 'money', version: 1, label: 'Écart de rapprochement', rule: 'solde du relevé - solde comptable à la même date', condition: 'Écritures validées du compte de trésorerie' },
   { id: 'E046', fn: 'netIncome', unit: 'money', version: 1, label: 'Résultat comptable', rule: 'produits (classe 7) - charges (classe 6), écritures validées', condition: 'Au moins une écriture validée ; présentation simplifiée, non certifiée' },
+  // Lot I (2026-11-25): partners' and institutions' space.
+  { id: 'E048', fn: 'cohortActivation', unit: 'ratio', version: 1, label: 'Activation de la cohorte', rule: 'apprenants actifs / apprenants invités', condition: 'Au moins une invitation' },
+  { id: 'E049', fn: 'cohortCompletion', unit: 'ratio', version: 1, label: 'Complétion', rule: 'formations terminées / formations démarrées', condition: 'Au-dessus du seuil d’anonymat de l’institution' },
+  { id: 'E050', fn: 'licenceUse', unit: 'ratio', version: 1, label: 'Utilisation des licences', rule: 'licences activées / licences disponibles', condition: 'Un nombre de licences défini' },
+  { id: 'E051', fn: 'programProgress', unit: 'ratio', version: 1, label: 'Avancement du programme', rule: 'jalons validés / jalons prévus', condition: 'Au moins un jalon prévu' },
+  { id: 'E052', fn: 'impactVariation', unit: 'points', version: 1, label: 'Variation des scores', rule: 'moyenne (dernier score - premier score) par apprenant', condition: 'Au moins deux quiz par apprenant, au-dessus du seuil d’anonymat' },
+  { id: 'E053', fn: 'responseTime', unit: 'days', version: 1, label: 'Délai de réponse', rule: 'moyenne (date de réponse - date de demande)', condition: 'Au moins une demande de pièce répondue' },
+  // P13-01 (2026-11-25): InvestLab, the client's market data 2020–2026.
+  { id: 'E054', fn: 'stockTotalReturn', unit: 'money', version: 1, label: 'Valeur finale action (dividendes compris)', rule: 'quantité ajustée des opérations sur titres × cours final + dividendes encaissés', condition: 'Titre coté à la date de départ ; sinon non coté, jamais zéro' },
+  { id: 'E055', fn: 'realValue', unit: 'money', version: 1, label: 'Valeur réelle', rule: 'valeur nominale / (1 + inflation cumulée)', condition: 'Inflation publiée pour chaque année couverte' },
+  { id: 'E056', fn: 'metalDzdValue', unit: 'money', version: 1, label: 'Valeur finale métal en DZD', rule: 'montant × (1 + rendement métal en USD) × (1 + effet de change USD/DZD)', condition: 'Prix et change de fin de période des deux dates' },
+  { id: 'E057', fn: 'indexValue', unit: 'money', version: 1, label: 'Valeur finale indice', rule: 'montant × indice final / indice de départ (indice prix, pas rendement total)', condition: 'Indice publié aux deux dates' },
+  // P13-02 (2026-11-25): FINCLUDIA Academy, rule V10 of the pedagogical referential.
+  { id: 'E058', fn: 'moduleMastery', unit: 'ratio', version: 1, label: 'Score de module', rule: '0,50 × QCM + 0,30 × exercice + 0,20 × mission', condition: 'Un QCM passé et un exercice corrigé' },
+  { id: 'E059', fn: 'pathMastery', unit: 'ratio', version: 1, label: 'Moyenne de maîtrise du parcours', rule: 'moyenne des scores des modules notés (hors modules dispensés)', condition: 'Au moins un module noté' },
+  // Lot D bis (2026-11-25): risk register and exchange effect on a project.
+  { id: 'E060', fn: 'guaranteeCoverage', unit: 'ratio', version: 1, label: 'Taux de couverture garantie', rule: 'montant garanti documenté / exposition retenue', condition: 'Une exposition et un montant garanti dans la même devise' },
+  { id: 'E061', fn: 'projectFxImpact', unit: 'money', version: 1, label: 'Impact change projet', rule: 'montant en devise × (cours scénario − cours de référence)', condition: 'Un cours de référence daté' },
+  { id: 'E062', fn: 'counterValue', unit: 'money', version: 1, label: 'Contre-valeur', rule: 'montant en devise × cours', condition: 'Un cours daté' },
+  // Lot F bis (2026-11-25): financial passport and receivables to finance.
+  { id: 'E063', fn: 'passportCompleteness', unit: 'ratio', version: 1, label: 'Indice de complétude du passeport', rule: 'contrôles remplis / contrôles (identité, historique, règlements, coûts, comptes, rapprochement, pièces)', condition: 'Aucune : chaque contrôle est expliqué' },
+  { id: 'E064', fn: 'financingNet', unit: 'money', version: 1, label: 'Trésorerie théorique nette de frais', rule: 'montant éligible × taux d’avance − montant éligible × taux de frais', condition: 'Au moins une facture éligible ; taux d’hypothèse, non une offre' },
+  { id: 'E065', fn: 'clientConcentration', unit: 'ratio', version: 1, label: 'Concentration clients', rule: 'CA hors taxe des premiers clients / CA hors taxe facturé', condition: 'Au moins une facture à un client nommé' },
+  // Lot I bis (2026-11-25): an institution's own training.
+  { id: 'E066', fn: 'sessionAttendance', unit: 'ratio', version: 1, label: 'Taux de présence', rule: 'participants présents / participants dont la présence est notée', condition: 'Au moins une présence notée' },
+  { id: 'E067', fn: 'trainingScore', unit: 'ratio', version: 1, label: 'Score de formation', rule: 'points obtenus / points possibles des évaluations validées (moyenne pondérée)', condition: 'Au-dessus du seuil d’anonymat, au moins une évaluation validée' },
   { id: 'E047', fn: 'workingCapitalNeed', unit: 'money', version: 1, label: 'Besoin en fonds de roulement', rule: 'stocks + créances clients - dettes fournisseurs', condition: 'Au moins une écriture validée ; présentation simplifiée, non certifiée' },
   { id: 'E010', fn: 'averageSettlementDays', unit: 'days', version: 1, label: 'Délai moyen de règlement', rule: 'moyenne(date_règlement - date_émission) pondérée par le montant réglé', condition: 'Documents soldés uniquement : un document en cours n’a pas de délai' },
 ];

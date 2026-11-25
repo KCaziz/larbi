@@ -87,6 +87,7 @@ const appRoutes = {
             { path: 'portefeuille', lazy: lazyPage(() => import('../pages/portefeuille/PaperPortfolioPage.jsx')) },
             // EP06, the pedagogical market (recette R8-12).
             { path: 'portefeuille/marche', lazy: lazyPage(() => import('../pages/portefeuille/MarketPage.jsx')) },
+            { path: 'investlab', lazy: lazyPage(() => import('../pages/portefeuille/InvestLabPage.jsx')) },
             // The single catalogue of the Tools (P8-15); the showcase keeps its presentation page.
             { path: 'outils', lazy: lazyPage(() => import('../pages/outils/ToolsCataloguePage.jsx')) },
             { path: 'outils/comparateur', lazy: lazyPage(() => import('../pages/outils/ComparatorPage.jsx')) },
@@ -122,6 +123,8 @@ const appRoutes = {
             { path: 'entreprise', lazy: lazyPage(() => import('../pages/entreprise/BusinessPage.jsx')) },
             { path: 'forum', lazy: lazyPage(() => import('../pages/forum/ForumPage.jsx')) },
             { path: 'bulletins', lazy: lazyPage(() => import('../pages/payslips/MyPayslipsPage.jsx')) },
+            { path: 'mes-cohortes', lazy: lazyPage(() => import('../pages/partner/MyCohortsPage.jsx')) },
+            { path: 'partenaire', lazy: lazyPage(() => import('../pages/partner/PartnerPortalPage.jsx')) },
             { path: 'parametres', lazy: lazyPage(() => import('../pages/parametres/SettingsPage.jsx')) },
             { path: 'parametres/profil', lazy: lazyPage(() => import('../pages/account/ProfilePage.jsx')) },
             { path: 'parametres/fincludia', lazy: lazyPage(() => import('../pages/account/FinProfilePage.jsx')) },

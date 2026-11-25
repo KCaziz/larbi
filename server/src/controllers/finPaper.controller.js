@@ -1,7 +1,8 @@
 import { prisma } from '../config/prisma.js';
 import { HttpError } from '../utils/httpError.js';
 import { MARKET_HYPOTHESES_DATE, MARKET_INFLATION, MARKET_START, MARKET_SUPPORTS, MARKET_VERSION } from '../constants/finPaperMarket.js';
-import { COMPOUND_CLASSES, compoundBreakdown, projection, realReturn, seriesMeasures, simulatedSeries } from '../services/finance/paperMarket.js';
+import { COMPOUND_CLASSES, compoundBreakdown, projection, realReturn, seriesMeasures } from '../services/finance/paperMarket.js';
+import { marketSupportByKey, marketSupports } from '../services/finance/realMarket.js';
 import {
   DEFAULT_PAPER_CAPITAL,
   DEFAULT_PAPER_FEE_RATE,
@@ -220,10 +221,15 @@ export function getMarket(req, res) {
     version: MARKET_VERSION,
     hypothesesDate: MARKET_HYPOTHESES_DATE,
     inflation: MARKET_INFLATION,
-    supports: MARKET_SUPPORTS.map((support) => {
-      const series = simulatedSeries(support, { version: MARKET_VERSION, start: MARKET_START, now });
+    // 2026-11-25: the client's real data join the archetypes; when both describe
+    // the same placement, the client's figures are the reference (realMarket.js).
+    supports: marketSupports(now).map((support) => {
+      const series = support.series;
       return {
         key: support.key,
+        source: support.source,
+        ...(support.name ? { name: support.name, description: support.description } : {}),
+        ...(support.source === 'client' ? { sourceLabel: support.sourceLabel, interpolated: support.interpolated, clientNote: support.clientNote ?? null } : {}),
         assetClass: support.assetClass,
         yearlyReturn: support.yearlyReturn,
         realReturn: realReturn(support.yearlyReturn, MARKET_INFLATION),
@@ -242,14 +248,14 @@ export function getMarket(req, res) {
 
 // P10-03: the part due to compound interest, for a support that yields.
 export function getMarketInterest(req, res) {
-  const support = MARKET_SUPPORTS.find((row) => row.key === req.params.key);
+  const support = marketSupportByKey(req.params.key);
   if (!support) throw new HttpError(404, 'Unknown support');
   if (!COMPOUND_CLASSES.includes(support.assetClass)) throw new HttpError(422, 'This support does not pay interest', { reason: 'noInterest' });
   res.json({ interets: compoundBreakdown(support, { amount: req.query.montant, months: req.query.mois }) });
 }
 
 export function getMarketProjection(req, res) {
-  const support = MARKET_SUPPORTS.find((row) => row.key === req.params.key);
+  const support = marketSupportByKey(req.params.key);
   if (!support) throw new HttpError(404, 'Unknown support');
   res.json({ projection: projection(support, { amount: req.query.montant, years: req.query.annees, inflation: MARKET_INFLATION }) });
 }

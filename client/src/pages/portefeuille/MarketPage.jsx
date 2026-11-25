@@ -43,7 +43,7 @@ export default function MarketPage() {
       <PageHeader icon={LineIcon} title={t('market.title')} subtitle={t('market.intro')} back={{ to: '/app/portefeuille', label: t('market.backToPortfolio') }} />
       <div className="market-page">
         <Notice variant="info">
-          <strong>{t('market.fictionTitle')}</strong> {t('market.fictionBody', { date: hypothesesDate, version, inflation: formatRatio(i18n.language, inflation) })}
+          <strong>{t('market.fictionTitle')}</strong> {t('market.fictionBody', { date: hypothesesDate, version, inflation: formatRatio(i18n.language, inflation) })} {t('market.mixedNote')}
         </Notice>
 
         <div className="postal-chips" role="group" aria-label={t('market.filter')}>
@@ -73,7 +73,7 @@ const percent = (language, value) => (value === null || value === undefined ? 'â
 
 function SupportCard({ support, compared, onCompare }) {
   const { t, i18n } = useTranslation();
-  const name = t(`market.supports.${support.key}.name`);
+  const name = support.name ?? t(`market.supports.${support.key}.name`);
   const m = support.measures;
   return (
     <li className="market-card">
@@ -82,9 +82,16 @@ function SupportCard({ support, compared, onCompare }) {
           <h2>{name}</h2>
           <p className="market-class">{t(`market.classes.${support.assetClass}`)}</p>
         </div>
-        <span className="market-badge">{t('market.badge')}</span>
+        <span className={support.source === 'client' ? 'market-badge market-badge-client' : 'market-badge'}>{t(support.source === 'client' ? 'market.badgeClient' : 'market.badge')}</span>
       </div>
-      <p>{t(`market.supports.${support.key}.description`)}</p>
+      <p>{support.description ?? t(`market.supports.${support.key}.description`)}</p>
+      {/* 2026-11-25: the client's real data, the reference when both describe the same placement. */}
+      {support.source === 'client' && (
+        <p className="market-class">
+          {t(support.clientNote ? 'market.clientReplaces' : 'market.clientAdded', { source: support.sourceLabel })}
+          {support.interpolated ? ` ${t('market.interpolated')}` : ''}
+        </p>
+      )}
 
       <RiskScale level={support.risk} />
 
@@ -248,7 +255,7 @@ function Comparison({ supports }) {
       <LineChart
         series={supports.map((support, index) => ({
           key: support.key,
-          label: t(`market.supports.${support.key}.name`),
+          label: support.name ?? t(`market.supports.${support.key}.name`),
           tone: index,
           points: support.series.map((point) => ({ month: point.month, value: Math.round((point.price / support.series[0].price) * 1000) / 10 })),
         }))}

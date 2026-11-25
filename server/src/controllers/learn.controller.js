@@ -1,4 +1,5 @@
 import { prisma } from '../config/prisma.js';
+import { canOpenOwnedFormation } from '../services/finInstitutionTraining.service.js';
 import { FORMATION_STATUS } from '../constants/elearning.js';
 import { hasAccessLevel } from '../constants/roles.js';
 import {
@@ -23,7 +24,7 @@ import { logSecurityEvent } from '../utils/securityLog.js';
 // Unknown / hidden formations answer 404, never 403, so their existence leaks nothing.
 
 const COURSES_ORDERED = { orderBy: [{ position: 'asc' }, { createdAt: 'asc' }] };
-const FORMATION_INCLUDE = { category: true, courses: COURSES_ORDERED, sections: { orderBy: [{ position: 'asc' }, { createdAt: 'asc' }] }, quizzes: { select: { id: true, scope: true, courseId: true, sectionId: true, title: true, isRequired: true, isComplete: true, passingScore: true, maxAttempts: true, _count: { select: { questions: true } } } } };
+const FORMATION_INCLUDE = { category: true, courses: COURSES_ORDERED, sections: { orderBy: [{ position: 'asc' }, { createdAt: 'asc' }] }, quizzes: { select: { id: true, scope: true, courseId: true, sectionId: true, title: true, isRequired: true, isComplete: true, passingScore: true, maxAttempts: true, drawCount: true, _count: { select: { questions: true } } } } };
 // `quizAttempts`: only the PASSED ones matter for the summary (which required quizzes are done).
 const ENROLLMENT_INCLUDE = { courseProgress: true, certification: true, quizAttempts: { where: { submittedAt: { not: null } }, select: { quizId: true, score: true, passed: true, submittedAt: true } } };
 
@@ -39,6 +40,8 @@ export async function findEnrollment(userId, formationId) {
 export async function loadForUser(slug, user) {
   const formation = await prisma.formation.findUnique({ where: { slug }, include: FORMATION_INCLUDE });
   if (!formation) throw new HttpError(404, 'Not found');
+  // Lot I bis: an institution's own course exists only for its members and its learners.
+  if (formation.ownerSpaceId && !(await canOpenOwnedFormation(prisma, user.id, formation))) throw new HttpError(404, 'Not found');
   const enrollment = await findEnrollment(user.id, formation.id);
   if (formation.status !== FORMATION_STATUS.PUBLISHED && !enrollment) throw new HttpError(404, 'Not found');
   return { formation, enrollment };
@@ -58,7 +61,7 @@ export function assertCanRead(user, formation, enrollment) {
 // is stable, so ties never reorder the underlying `publishedAt desc` list.
 export async function listCatalog(req, res) {
   const formations = await prisma.formation.findMany({
-    where: { status: FORMATION_STATUS.PUBLISHED },
+    where: { status: FORMATION_STATUS.PUBLISHED, ownerSpaceId: null },
     orderBy: { publishedAt: 'desc' },
     include: FORMATION_INCLUDE,
   });

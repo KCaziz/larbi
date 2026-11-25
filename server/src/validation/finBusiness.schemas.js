@@ -14,8 +14,11 @@ import { MANDATE_SCOPES, ORGANIZATION_PUBLICS, ORGANIZATION_ROLES } from '../con
 import { ABSENCE_KINDS, CAMPAIGN_CHECKS, CAMPAIGN_INSTRUMENTS, CAMPAIGN_STATUSES, CONTRACTS, PARTNER_REQUEST_STATUSES, PARTNER_TYPES, SHAREABLE_ITEMS } from '../services/finLotG.service.js';
 import { FORUM_CATEGORIES, REPORT_REASONS } from '../services/forum.service.js';
 import { ASSET_CATEGORIES, LEDGER_JOURNALS } from '../constants/finEmployerRules.js';
+import { SPACE_KINDS } from '../services/finPartnerPortal.service.js';
 import { CANDIDATE_STAGES, TRAINING_STATUSES, VACANCY_STATUSES } from '../services/finStaff.service.js';
 import { HOLDING_CATEGORIES, HOLDING_KINDS, PROJECT_NATURES, PROJECT_STATUSES, SHARE_ACCESS, VALUATION_MODES } from '../constants/finDiaspora.js';
+import { RISK_CATEGORIES } from '../services/finRisk.service.js';
+import { PASSPORT_ITEMS } from '../services/finPassport.service.js';
 import { INCOTERM_CODES, OPERATION_COST_KINDS, OPERATION_KINDS, OPERATION_STATUSES, PIECE_KINDS, PIECE_STATUSES } from '../constants/finTrade.js';
 
 // Entrées de l'espace entreprise (P7-02). Mêmes conventions que le reste du
@@ -146,6 +149,9 @@ export const createDocumentSchema = z
       .strict()
       .optional(),
     currency,
+    // Lot D bis (FAC-013, FAC-014): an invoice in another currency than the
+    // organisation's carries the dated rate it is converted at (1 unit = rate).
+    exchange: z.object({ rate: z.number().positive().max(1_000_000), rateDate: isoDate, rateSource: optionalText(120) }).strict().optional(),
     note: optionalText(300),
   })
   .strict()
@@ -220,6 +226,9 @@ export const createPaymentSchema = z
   .object({
     value: positiveAmount,
     currency,
+    // FAC-015: a payment of a foreign-currency invoice, and its dated rate.
+    rate: z.number().positive().max(1_000_000).optional(),
+    rateDate: isoDate.optional(),
     receivedAt: isoDate,
     method: z.enum(BUSINESS_PAYMENT_METHODS).optional().nullable(),
     note: optionalText(300),
@@ -535,6 +544,8 @@ export const partnerOfferSchema = z
     fees: optionalText(300),
     sourceUrl: z.string().trim().url().max(300).optional().nullable(),
     contactEmail: z.string().trim().email().max(254).optional().nullable(),
+    // Lot I: the financer's space that answers the requests.
+    spaceId: z.string().uuid().optional().nullable(),
     validUntil: isoDate.optional().nullable(),
     active: z.boolean().optional(),
   })
@@ -614,3 +625,125 @@ export const assetDisposalSchema = z.object({ disposedAt: day }).strict();
 export const bankQuerySchema = z.object({ account: accountCode.optional() }).strict();
 export const bankStatementSchema = z.object({ account: accountCode, content: fileContent }).strict();
 export const bankMatchSchema = z.object({ lineId: z.string().uuid().nullable() }).strict();
+
+// ---- lot I: partners' space, crowdfunding report ------------------------------------------------
+const isoDay = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+export const partnerSpaceSchema = z.object({ name: shortText(160), kind: z.enum(SPACE_KINDS), licences: z.number().int().min(0).max(1_000_000).optional(), anonymityThreshold: z.number().int().min(1).max(100).optional() }).strict();
+export const partnerSpaceUpdateSchema = z.object({ name: shortText(160).optional(), licences: z.number().int().min(0).max(1_000_000).optional(), anonymityThreshold: z.number().int().min(1).max(100).optional(), active: z.boolean().optional() }).strict();
+export const partnerSpaceMemberSchema = z.object({ email: z.string().trim().email().max(254) }).strict();
+export const platformLinkSchema = z.object({ spaceId: z.string().uuid().nullable() }).strict();
+export const campaignReportSchema = z.object({ from: isoDay, to: isoDay }).strict();
+export const partnerAnswerSchema = z.object({ body: z.string().trim().min(1).max(3000), replyToId: z.string().uuid().optional().nullable() }).strict();
+export const partnerFileStatusSchema = z.object({ status: z.enum(['received', 'in_review', 'answered', 'closed']), note: optionalText(300) }).strict();
+export const partnerMessageSchema = z.object({ kind: z.enum(['piece', 'comment']), body: z.string().trim().min(1).max(3000), dueAt: isoDay.optional().nullable() }).strict();
+export const programSchema = z
+  .object({ name: shortText(160), audience: optionalText(160), objective: z.string().trim().max(3000).optional().nullable(), startsAt: isoDay, endsAt: isoDay.optional().nullable(), budget: amount.optional().nullable(), currency: currency.optional(), milestones: z.array(shortText(160)).max(50).optional() })
+  .strict();
+export const programUpdateSchema = z.object({ addMilestone: shortText(160).optional(), milestone: z.object({ index: z.number().int().min(0), done: z.boolean() }).strict().optional() }).strict();
+export const cohortSchema = z.object({ name: shortText(160) }).strict();
+export const cohortFormationSchema = z.object({ formationId: z.string().uuid(), dueAt: isoDay.optional().nullable() }).strict();
+export const cohortInviteSchema = z.object({ emails: z.array(z.string().trim().email().max(254)).min(1).max(500) }).strict();
+
+// ---- lot D bis : registre des risques (ECR-0370), change d'un projet (ECR-0378) ----
+
+const scale = z.number().int().min(1).max(5);
+const currencyCode = z.string().regex(/^[A-Z]{3}$/);
+export const createRiskSchema = z
+  .object({
+    category: z.enum(RISK_CATEGORIES),
+    operationId: z.string().uuid().optional().nullable(),
+    country: optionalText(80),
+    counterparty: shortText(255),
+    description: optionalText(500),
+    probability: scale,
+    impact: scale,
+    exposure: amount.optional().nullable(),
+    guaranteedAmount: amount.optional().nullable(),
+    currency: currencyCode.optional().nullable(),
+    guarantee: optionalText(255),
+    evidenceRef: optionalText(255),
+    reviewAt: isoDate,
+  })
+  .strict();
+
+export const reassessRiskSchema = z
+  .object({
+    probability: scale.optional(),
+    impact: scale.optional(),
+    exposure: amount.optional().nullable(),
+    guaranteedAmount: amount.optional().nullable(),
+    currency: currencyCode.optional().nullable(),
+    guarantee: optionalText(255),
+    evidenceRef: optionalText(255),
+    reviewAt: isoDate.optional(),
+    note: optionalText(300),
+    close: z.boolean().optional(),
+  })
+  .strict()
+  .refine((b) => Object.keys(b).length > 0, { message: 'Nothing to change' });
+
+export const riskActionSchema = z.object({ label: shortText(255), ownerName: shortText(160), dueAt: isoDate.optional().nullable() }).strict();
+
+const fxBase = {
+  amount: z.number().int().positive().max(MAX_STORED_AMOUNT),
+  from: currencyCode,
+  to: currencyCode,
+  referenceRate: z.number().positive().max(1_000_000),
+  referenceDate: isoDate,
+  rateSource: optionalText(120),
+  rates: z.array(z.number().positive().max(1_000_000)).max(5).optional(),
+};
+export const projectFxSimulationSchema = z.object({ ...fxBase, variations: z.boolean().optional() }).strict();
+export const projectFxScenarioSchema = z.object({ ...fxBase, label: shortText(160) }).strict();
+
+// ---- lot F bis : passeport financier (FAC-010), créances à financer (FAC-011) ----
+
+export const passportSchema = z
+  .object({ from: isoDate, to: isoDate, items: z.array(z.enum(PASSPORT_ITEMS)).max(PASSPORT_ITEMS.length) })
+  .strict();
+export const consentSchema = z.object({ consent: z.literal(true) }).strict();
+export const disputeSchema = z.object({ disputed: z.boolean(), note: optionalText(300) }).strict();
+const rate01 = z.coerce.number().min(0).max(1);
+export const financingQuerySchema = z.object({ minAmount: z.coerce.number().int().min(0).max(MAX_STORED_AMOUNT).optional(), advanceRate: rate01.optional(), feeRate: rate01.optional() }).strict();
+export const batchSchema = z
+  .object({
+    label: shortText(160),
+    documentIds: z.array(z.string().uuid()).min(1).max(200),
+    advanceRate: z.number().gt(0).max(1),
+    feeRate: z.number().min(0).lt(1),
+  })
+  .strict();
+export const shareSchema = z
+  .object({ kind: z.enum(['passport', 'batch']), id: z.string().uuid(), spaceId: z.string().uuid(), expiresAt: isoDate, consent: z.literal(true) })
+  .strict();
+
+// ---- lot I bis : formations et sessions propres à une institution (ECR-0294) ----
+
+export const ownFormationSchema = z.object({ title: shortText(150), description: shortText(3000) }).strict();
+export const ownLessonSchema = z.object({ title: shortText(190), text: shortText(20000), minutes: z.number().int().min(1).max(600).optional() }).strict();
+export const ownQuizSchema = z
+  .object({
+    passingScore: z.number().int().min(1).max(100),
+    questions: z
+      .array(
+        z
+          .object({
+            prompt: shortText(1000),
+            choices: z.array(shortText(300)).min(2).max(6),
+            correct: z.number().int().min(0).max(5),
+            explanation: optionalText(1000),
+            critical: z.boolean().optional(),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(50),
+  })
+  .strict();
+export const ownPublishSchema = z.object({ publish: z.boolean() }).strict();
+export const sessionSchema = z
+  .object({ cohortId: z.string().uuid(), formationId: z.string().uuid().optional().nullable(), title: shortText(160), trainerName: shortText(160), startsAt: isoDate, endsAt: isoDate, location: optionalText(200) })
+  .strict();
+export const sessionStatusSchema = z.object({ status: z.enum(['planned', 'done', 'cancelled']) }).strict();
+export const attendanceSchema = z.object({ memberId: z.string().uuid(), present: z.boolean() }).strict();
+

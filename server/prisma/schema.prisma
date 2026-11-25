@@ -17,6 +17,9 @@ datasource db {
 }
 
 model User {
+  caseRecords          FinCaseRecord[]
+  pretests             FinPretest[]
+  skillRecords         FinSkillRecord[]
   finPushSubscriptions FinPushSubscription[]
   finMissionAttempts   FinMissionAttempt[]
   finSnapshots         FinSnapshot[]
@@ -145,7 +148,9 @@ model User {
   simulationScenarios SimulationScenario[]
 
   // Payment (P3-09)
-  paymentOrders PaymentOrder[]
+  paymentOrders     PaymentOrder[]
+  partnerSpaces     FinPartnerSpaceMember[]
+  cohortMemberships FinPartnerCohortMember[]
 
   @@map("users")
 }
@@ -1899,23 +1904,30 @@ model FormationCategory {
 // The number of courses is NOT stored: it is count(courses), so it can never
 // disagree with the real list (P2-02 "définir le nombre de cours").
 model Formation {
-  id                  String @id @default(uuid())
-  slug                String @unique
+  // P13-05, lot I bis: a course of an institution's own (never in the public catalogue).
+  ownerSpaceId        String?
+  ownerSpace          FinPartnerSpace?        @relation("SpaceFormations", fields: [ownerSpaceId], references: [id], onDelete: Cascade)
+  institutionSessions FinInstitutionSession[]
+  academyCase         FinAcademyCase?
+  pretests            FinPretest[]
+  academyModules      FinAcademyModule[]
+  id                  String                  @id @default(uuid())
+  slug                String                  @unique
   title               String
-  description         String @db.Text
+  description         String                  @db.Text
   // "draft" | "published". Only published formations are visible to learners.
-  status              String @default("draft")
+  status              String                  @default("draft")
   // "standard" | "premium": lowest access level allowed to enrol.
   // Checked server-side, never only in the UI (TASKS.md rule 1).
-  requiredAccessLevel String @default("standard")
+  requiredAccessLevel String                  @default("standard")
   // Account types this formation is suggested to first (client request: a
   // simple suggestion by account type, never a computed score). Empty = no
   // particular order. Same JSON-array shape as Article.targetAccountTypes,
   // same reason: no array column type on MySQL/MariaDB.
-  targetAccountTypes  Json   @default("[]")
+  targetAccountTypes  Json                    @default("[]")
   // The educational profiles it is recommended to (P8-17: LYC, ETU, JAC, SAL,
   // EPG, AUT). Empty = for everyone. A recommendation, never a restriction.
-  educationProfiles   Json   @default("[]")
+  educationProfiles   Json                    @default("[]")
 
   categoryId String?
   category   FormationCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -1954,8 +1966,9 @@ model Formation {
   enrollments Enrollment[]
 
   // Quizzes of the formation (P3-13); `finalQuiz` is the one at the end of the formation.
-  quizzes   Quiz[] @relation("FormationQuizzes")
-  finalQuiz Quiz?  @relation("FinalQuiz")
+  quizzes        Quiz[]                      @relation("FormationQuizzes")
+  finalQuiz      Quiz?                       @relation("FinalQuiz")
+  partnerCohorts FinPartnerCohortFormation[]
 
   @@index([status])
   @@map("formations")
@@ -1963,9 +1976,11 @@ model Formation {
 
 // One lesson of a formation.
 model Course {
-  id          String    @id @default(uuid())
-  formationId String
-  formation   Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  academyCase   FinAcademyCase?
+  academyModule FinAcademyModule?
+  id            String            @id @default(uuid())
+  formationId   String
+  formation     Formation         @relation(fields: [formationId], references: [id], onDelete: Cascade)
 
   title            String
   summary          String?  @db.Text
@@ -2359,9 +2374,10 @@ model LessonRevision {
 // server. A REQUIRED quiz must be passed to finish the formation (and get the certificate).
 // ---------------------------------------------------------------------------
 model Quiz {
-  id          String    @id @default(uuid())
-  formationId String
-  formation   Formation @relation("FormationQuizzes", fields: [formationId], references: [id], onDelete: Cascade)
+  academyModule FinAcademyModule?
+  id            String            @id @default(uuid())
+  formationId   String
+  formation     Formation         @relation("FormationQuizzes", fields: [formationId], references: [id], onDelete: Cascade)
 
   // "course" (a lesson) | "section" (a chapter) | "formation" (the end of it). CHECK in the migration.
   scope            String
@@ -2380,6 +2396,8 @@ model Quiz {
   // null = unlimited attempts.
   maxAttempts      Int?
   shuffleQuestions Boolean @default(false)
+  // P13-02: questions drawn at random from the bank for each attempt (null = all).
+  drawCount        Int?
   // A required quiz must be passed to finish the formation.
   isRequired       Boolean @default(false)
   // Show the right answers and the explanations after an attempt.
@@ -2412,13 +2430,15 @@ model QuizQuestion {
   // whose texts are "true" and "false" (the interface translates them).
   type            String
   position        Int
-  prompt          String @default("") @db.Text
+  prompt          String  @default("") @db.Text
   // Shown after the correction.
-  explanation     String @default("") @db.Text
-  points          Int    @default(1)
+  explanation     String  @default("") @db.Text
+  points          Int     @default(1)
   // "text" questions: the answers accepted (compared without case, accents or extra spaces).
   // JSON array (no array column type on MySQL/MariaDB).
-  acceptedAnswers Json   @default("[]")
+  acceptedAnswers Json    @default("[]")
+  // P13-02 (rule V10): a critical question must be answered right, whatever the score.
+  critical        Boolean @default(false)
 
   choices QuizChoice[]
 
@@ -2448,15 +2468,19 @@ model QuizAttempt {
   enrollmentId String
   enrollment   Enrollment @relation(fields: [enrollmentId, formationId], references: [id, formationId], onDelete: Cascade)
 
-  startedAt     DateTime  @default(now())
-  submittedAt   DateTime?
+  startedAt      DateTime  @default(now())
+  submittedAt    DateTime?
   // Order the questions were served in (fixed per attempt, so resuming shows the same order).
   // JSON array (no array column type on MySQL/MariaDB).
-  questionOrder Json      @default("[]")
-  score         Int?
-  earnedPoints  Int?
-  totalPoints   Int?
-  passed        Boolean?
+  questionOrder  Json      @default("[]")
+  // Order of the choices served, per question ({ questionId: [choiceId] }); null = as authored.
+  choiceOrder    Json?
+  // Critical questions answered wrong (rule V10); null before submission.
+  criticalErrors Int?
+  score          Int?
+  earnedPoints   Int?
+  totalPoints    Int?
+  passed         Boolean?
 
   answers QuizAttemptAnswer[]
 
@@ -2560,43 +2584,48 @@ model ComparatorMeta {
 // `userId` is the person who created it; who may do what is in its members
 // (roles), mandates and journal below — never in the public it declares.
 model FinBusiness {
-  id                   String                    @id @default(uuid())
+  passports            FinBusinessPassport[]
+  financingBatches     FinBusinessFinancingBatch[]
+  shares               FinBusinessShare[]
+  risks                FinBusinessRisk[]
+  fxScenarios          FinBusinessFxScenario[]
+  id                   String                      @id @default(uuid())
   userId               String
-  user                 User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name                 String                    @db.VarChar(160)
-  tradeName            String?                   @db.VarChar(160)
+  user                 User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                 String                      @db.VarChar(160)
+  tradeName            String?                     @db.VarChar(160)
   // PUB-01 to PUB-10 (tab 01_PUBLICS): which home, path and indicators fit.
-  publicKey            String?                   @db.VarChar(10)
-  sector               String?                   @db.VarChar(160)
-  wilaya               String?                   @db.VarChar(60)
-  timezone             String                    @default("Africa/Algiers") @db.VarChar(40)
+  publicKey            String?                     @db.VarChar(10)
+  sector               String?                     @db.VarChar(160)
+  wilaya               String?                     @db.VarChar(60)
+  timezone             String                      @default("Africa/Algiers") @db.VarChar(40)
   // Forme juridique DÉCLARÉE par le compte, pas déduite : les obligations
   // attachées à chaque forme relèvent du droit algérien, que nous ne
   // modélisons pas (P7-01).
-  legalForm            String?                   @db.VarChar(40)
+  legalForm            String?                     @db.VarChar(40)
   // Identifiants fiscaux et commerciaux : saisis tels quels, jamais validés
   // contre un format inventé. Un NIF refusé à tort empêche d'enregistrer une
   // entreprise réelle.
-  taxId                String?                   @db.VarChar(40)
-  tradeRegister        String?                   @db.VarChar(40)
-  statisticalId        String?                   @db.VarChar(40)
-  activity             String?                   @db.VarChar(160)
-  currency             String                    @db.VarChar(3)
+  taxId                String?                     @db.VarChar(40)
+  tradeRegister        String?                     @db.VarChar(40)
+  statisticalId        String?                     @db.VarChar(40)
+  activity             String?                     @db.VarChar(160)
+  currency             String                      @db.VarChar(3)
   // Début de l'exercice : un mois (1-12). Le client n'a fourni aucune règle
   // d'exercice, donc il est déclaré et non supposé janvier.
-  fiscalYearStartMonth Int                       @default(1)
-  scope                String                    @default("business") @db.VarChar(20)
-  source               String                    @db.VarChar(20)
-  sourceRef            String?                   @db.VarChar(200)
-  status               String                    @db.VarChar(20)
-  consentUses          Json                      @default("[]")
-  effectiveAt          DateTime                  @default(now())
-  collectedAt          DateTime                  @default(now())
-  version              Int                       @default(1)
+  fiscalYearStartMonth Int                         @default(1)
+  scope                String                      @default("business") @db.VarChar(20)
+  source               String                      @db.VarChar(20)
+  sourceRef            String?                     @db.VarChar(200)
+  status               String                      @db.VarChar(20)
+  consentUses          Json                        @default("[]")
+  effectiveAt          DateTime                    @default(now())
+  collectedAt          DateTime                    @default(now())
+  version              Int                         @default(1)
   archivedAt           DateTime?
   deletedAt            DateTime?
-  createdAt            DateTime                  @default(now())
-  updatedAt            DateTime                  @updatedAt
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
   contacts             FinBusinessContact[]
   documents            FinBusinessDocument[]
   payments             FinBusinessPayment[]
@@ -2747,60 +2776,73 @@ model FinBusinessContact {
 }
 
 model FinBusinessDocument {
-  id          String                    @id @default(uuid())
-  businessId  String
-  business    FinBusiness               @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  contactId   String?
-  contact     FinBusinessContact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  financingItems    FinBusinessFinancingItem[]
+  id                String                     @id @default(uuid())
+  businessId        String
+  business          FinBusiness                @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  contactId         String?
+  contact           FinBusinessContact?        @relation(fields: [contactId], references: [id], onDelete: SetNull)
   // "sale" | "purchase" (BUSINESS_DOCUMENT_KINDS) : ce que l'entreprise émet
   // et ce qu'elle reçoit. Le sens du montant en dépend entièrement.
-  kind        String                    @db.VarChar(10)
+  kind              String                     @db.VarChar(10)
   // P13-05, lot B: "quote" | "invoice" | "credit_note", and where it stands
   // in its cycle (19_CYCLE_FACTURE). Payment state stays deduced.
-  docType     String                    @default("invoice") @db.VarChar(12)
-  state       String                    @default("issued") @db.VarChar(12)
+  docType           String                     @default("invoice") @db.VarChar(12)
+  state             String                     @default("issued") @db.VarChar(12)
   // The quote an invoice comes from; the invoice a credit note corrects.
-  relatedId   String?
-  related     FinBusinessDocument?      @relation("DocumentRelated", fields: [relatedId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  derived     FinBusinessDocument[]     @relation("DocumentRelated")
-  validUntil  DateTime?
+  relatedId         String?
+  related           FinBusinessDocument?       @relation("DocumentRelated", fields: [relatedId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  derived           FinBusinessDocument[]      @relation("DocumentRelated")
+  validUntil        DateTime?
   // Direct costs excluding tax, declared: what the indicative margin needs.
-  costExcl    Float?
+  costExcl          Float?
   // Lot C: what a purchase pays for (our families), and fixed or variable.
-  category    String?                   @db.VarChar(30)
-  costNature  String?                   @db.VarChar(10)
+  category          String?                    @db.VarChar(30)
+  costNature        String?                    @db.VarChar(10)
   // Lot D: the international operation this document belongs to.
-  operationId String?
-  operation   FinBusinessOperation?     @relation(fields: [operationId], references: [id], onDelete: SetNull)
+  operationId       String?
+  operation         FinBusinessOperation?      @relation(fields: [operationId], references: [id], onDelete: SetNull)
   // Null only for a draft invoice, numbered when issued.
-  number      String?                   @db.VarChar(40)
-  label       String                    @db.VarChar(200)
-  issuedAt    DateTime
-  dueAt       DateTime?
+  number            String?                    @db.VarChar(40)
+  label             String                     @db.VarChar(200)
+  issuedAt          DateTime
+  dueAt             DateTime?
   // Montants en centimes, comme partout dans le moteur. Hors taxe et taxe sont
   // DÉCLARÉS tous les deux : le taux de TVA appliqué appartient au document
   // réel, et aucun taux n'est supposé ici (voir P7-01).
-  amountExcl  Float
-  taxAmount   Float                     @default(0)
-  currency    String                    @db.VarChar(3)
-  note        String?                   @db.VarChar(300)
-  scope       String                    @default("business") @db.VarChar(20)
-  source      String                    @db.VarChar(20)
-  sourceRef   String?                   @db.VarChar(200)
-  status      String                    @db.VarChar(20)
-  confidence  String?                   @db.VarChar(20)
-  consentUses Json                      @default("[]")
-  effectiveAt DateTime                  @default(now())
-  collectedAt DateTime                  @default(now())
-  version     Int                       @default(1)
-  archivedAt  DateTime?
-  deletedAt   DateTime?
-  createdAt   DateTime                  @default(now())
-  updatedAt   DateTime                  @updatedAt
-  payments    FinBusinessPayment[]
-  lines       FinBusinessDocumentLine[]
-  reminders   FinBusinessReminder[]
-  stockMoves  FinBusinessStockMove[]
+  amountExcl        Float
+  taxAmount         Float                      @default(0)
+  currency          String                     @db.VarChar(3)
+  // Lot D bis (FAC-013 to FAC-016): an invoice in a foreign currency keeps its own
+  // currency, amounts and dated rate; amountExcl / taxAmount / currency above are
+  // the conversion into the organisation's currency at that rate.
+  foreignCurrency   String?                    @db.VarChar(3)
+  foreignAmountExcl Float?
+  foreignTaxAmount  Float?
+  bookingRate       Float?
+  rateDate          DateTime?
+  rateSource        String?                    @db.VarChar(120)
+  // Lot F bis (FAC-011): a disputed invoice is never offered for financing.
+  disputedAt        DateTime?
+  disputeNote       String?                    @db.VarChar(300)
+  note              String?                    @db.VarChar(300)
+  scope             String                     @default("business") @db.VarChar(20)
+  source            String                     @db.VarChar(20)
+  sourceRef         String?                    @db.VarChar(200)
+  status            String                     @db.VarChar(20)
+  confidence        String?                    @db.VarChar(20)
+  consentUses       Json                       @default("[]")
+  effectiveAt       DateTime                   @default(now())
+  collectedAt       DateTime                   @default(now())
+  version           Int                        @default(1)
+  archivedAt        DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+  payments          FinBusinessPayment[]
+  lines             FinBusinessDocumentLine[]
+  reminders         FinBusinessReminder[]
+  stockMoves        FinBusinessStockMove[]
 
   // Un numéro de document est unique dans l'entreprise qui l'émet : deux
   // factures portant le même numéro sont une erreur de saisie, pas deux
@@ -2880,6 +2922,7 @@ model FinBusinessStockMove {
 
 // P13-05, lot D: an international operation (micro-import, import, export).
 model FinBusinessOperation {
+  risks           FinBusinessRisk[]
   id              String                      @id @default(uuid())
   businessId      String
   business        FinBusiness                 @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -2950,6 +2993,7 @@ model FinBusinessOperationPiece {
 
 // P13-05, lot E: a project in Algeria followed from abroad (ECR-0374).
 model FinBusinessProject {
+  fxScenarios    FinBusinessFxScenario[]
   id             String                        @id @default(uuid())
   businessId     String
   business       FinBusiness                   @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -3095,28 +3139,32 @@ model FinPartnerOffer {
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   requests      FinPartnerRequest[]
+  // Lot I: the financer's space that answers the requests.
+  spaceId       String?
+  space         FinPartnerSpace?    @relation(fields: [spaceId], references: [id], onDelete: SetNull)
 
   @@map("fin_partner_offers")
 }
 
 // P13-05, lot G: a request of an organisation to a partner (ECR-0161).
 model FinPartnerRequest {
-  id          String          @id @default(uuid())
+  id          String              @id @default(uuid())
   businessId  String
-  business    FinBusiness     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business    FinBusiness         @relation(fields: [businessId], references: [id], onDelete: Cascade)
   offerId     String
-  offer       FinPartnerOffer @relation(fields: [offerId], references: [id], onDelete: Restrict)
-  motive      String          @db.VarChar(300)
+  offer       FinPartnerOffer     @relation(fields: [offerId], references: [id], onDelete: Restrict)
+  motive      String              @db.VarChar(300)
   amount      Float?
-  currency    String?         @db.Char(3)
-  message     String?         @db.Text
+  currency    String?             @db.Char(3)
+  message     String?             @db.Text
   sharedItems Json
   consentAt   DateTime
-  status      String          @default("sent") @db.VarChar(12)
+  status      String              @default("sent") @db.VarChar(12)
   history     Json
   createdById String
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  messages    FinPartnerMessage[]
 
   @@index([businessId])
   @@index([offerId])
@@ -3262,6 +3310,10 @@ model FinBusinessCampaign {
   createdAt             DateTime                        @default(now())
   updatedAt             DateTime                        @updatedAt
   commitments           FinBusinessCampaignCommitment[]
+  // Lot I: the crowdfunding platform's space, which reads the validated reports.
+  platformSpaceId       String?
+  platformSpace         FinPartnerSpace?                @relation(fields: [platformSpaceId], references: [id], onDelete: SetNull)
+  reports               FinBusinessCampaignReport[]
 
   @@index([businessId])
   @@map("fin_business_campaigns")
@@ -3332,28 +3384,33 @@ model FinBusinessReminder {
 }
 
 model FinBusinessPayment {
-  id          String              @id @default(uuid())
-  businessId  String
-  business    FinBusiness         @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  documentId  String
-  document    FinBusinessDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  value       Float
-  currency    String              @db.VarChar(3)
-  receivedAt  DateTime
-  method      String?             @db.VarChar(20)
-  note        String?             @db.VarChar(300)
-  scope       String              @default("business") @db.VarChar(20)
-  source      String              @db.VarChar(20)
-  sourceRef   String?             @db.VarChar(200)
-  status      String              @db.VarChar(20)
-  consentUses Json                @default("[]")
-  effectiveAt DateTime            @default(now())
-  collectedAt DateTime            @default(now())
-  version     Int                 @default(1)
-  archivedAt  DateTime?
-  deletedAt   DateTime?
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
+  id           String              @id @default(uuid())
+  businessId   String
+  business     FinBusiness         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  documentId   String
+  document     FinBusinessDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  value        Float
+  currency     String              @db.VarChar(3)
+  // A payment of a foreign-currency invoice: the amount in that currency and the
+  // dated rate it was converted at (value / currency are the converted cash).
+  foreignValue Float?
+  rate         Float?
+  rateDate     DateTime?
+  receivedAt   DateTime
+  method       String?             @db.VarChar(20)
+  note         String?             @db.VarChar(300)
+  scope        String              @default("business") @db.VarChar(20)
+  source       String              @db.VarChar(20)
+  sourceRef    String?             @db.VarChar(200)
+  status       String              @db.VarChar(20)
+  consentUses  Json                @default("[]")
+  effectiveAt  DateTime            @default(now())
+  collectedAt  DateTime            @default(now())
+  version      Int                 @default(1)
+  archivedAt   DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
 
   @@index([businessId, receivedAt])
   @@index([documentId])
@@ -3899,4 +3956,500 @@ model FinLedgerBankLine {
   @@unique([businessId, importKey])
   @@index([businessId, account])
   @@map("fin_ledger_bank_lines")
+}
+
+// P13-05, lot I: the own space of a financer, an institution or a crowdfunding platform.
+model FinPartnerSpace {
+  ownFormations       Formation[]             @relation("SpaceFormations")
+  institutionSessions FinInstitutionSession[]
+  businessShares      FinBusinessShare[]
+  id                  String                  @id @default(uuid())
+  name                String                  @db.VarChar(160)
+  kind                String                  @db.VarChar(12)
+  licences            Int                     @default(0)
+  anonymityThreshold  Int                     @default(5)
+  active              Boolean                 @default(true)
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+  members             FinPartnerSpaceMember[]
+  offers              FinPartnerOffer[]
+  programs            FinPartnerProgram[]
+  campaigns           FinBusinessCampaign[]
+
+  @@map("fin_partner_spaces")
+}
+
+model FinPartnerSpaceMember {
+  id        String          @id @default(uuid())
+  spaceId   String
+  space     FinPartnerSpace @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now())
+
+  @@unique([spaceId, userId])
+  @@index([userId])
+  @@map("fin_partner_space_members")
+}
+
+// A request for a document, a comment, or an answer (ECR-0288).
+model FinPartnerMessage {
+  id        String              @id @default(uuid())
+  requestId String
+  request   FinPartnerRequest   @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  side      String              @db.VarChar(12)
+  kind      String              @db.VarChar(10)
+  body      String              @db.Text
+  dueAt     DateTime?
+  replyToId String?
+  replyTo   FinPartnerMessage?  @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  replies   FinPartnerMessage[] @relation("MessageReplies")
+  closedAt  DateTime?
+  authorId  String
+  createdAt DateTime            @default(now())
+
+  @@index([requestId])
+  @@map("fin_partner_messages")
+}
+
+model FinPartnerProgram {
+  id         String             @id @default(uuid())
+  spaceId    String
+  space      FinPartnerSpace    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  name       String             @db.VarChar(160)
+  audience   String?            @db.VarChar(160)
+  objective  String?            @db.Text
+  startsAt   DateTime
+  endsAt     DateTime?
+  budget     Float?
+  currency   String?            @db.Char(3)
+  milestones Json
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  cohorts    FinPartnerCohort[]
+
+  @@index([spaceId])
+  @@map("fin_partner_programs")
+}
+
+model FinPartnerCohort {
+  sessions   FinInstitutionSession[]
+  id         String                      @id @default(uuid())
+  programId  String
+  program    FinPartnerProgram           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  name       String                      @db.VarChar(160)
+  createdAt  DateTime                    @default(now())
+  formations FinPartnerCohortFormation[]
+  members    FinPartnerCohortMember[]
+
+  @@index([programId])
+  @@map("fin_partner_cohorts")
+}
+
+model FinPartnerCohortFormation {
+  id          String           @id @default(uuid())
+  cohortId    String
+  cohort      FinPartnerCohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  formationId String
+  formation   Formation        @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  dueAt       DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@unique([cohortId, formationId])
+  @@map("fin_partner_cohort_formations")
+}
+
+model FinPartnerCohortMember {
+  attendance FinInstitutionAttendance[]
+  id         String                     @id @default(uuid())
+  cohortId   String
+  cohort     FinPartnerCohort           @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  email      String                     @db.VarChar(254)
+  userId     String?
+  user       User?                      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  status     String                     @default("invited") @db.VarChar(10)
+  invitedAt  DateTime                   @default(now())
+  consentAt  DateTime?
+  updatedAt  DateTime                   @updatedAt
+
+  @@unique([cohortId, email])
+  @@index([userId])
+  @@index([email])
+  @@map("fin_partner_cohort_members")
+}
+
+// The regulatory report of a campaign, prepared then validated by another person (ECR-0307).
+model FinBusinessCampaignReport {
+  id            String              @id @default(uuid())
+  campaignId    String
+  campaign      FinBusinessCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  periodFrom    DateTime
+  periodTo      DateTime
+  content       Json
+  status        String              @default("draft") @db.VarChar(12)
+  createdById   String
+  validatedById String?
+  validatedAt   DateTime?
+  createdAt     DateTime            @default(now())
+
+  @@index([campaignId])
+  @@map("fin_business_campaign_reports")
+}
+
+// P13-02 (rule V10, Skills Passport): one row per module of FINCLUDIA Academy,
+// generated from the pedagogical referential (migration fin_academy_rules).
+model FinAcademyModule {
+  id             String    @id @default(uuid())
+  formationId    String
+  formation      Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  courseId       String    @unique
+  course         Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  quizId         String    @unique
+  quiz           Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  code           String    @db.VarChar(20)
+  title          String    @db.VarChar(190)
+  level          String    @default("") @db.VarChar(20)
+  exercise       String    @db.Text
+  correction     String    @db.Text
+  mission        String    @db.Text
+  challenge      String    @db.Text
+  tool           String    @default("") @db.VarChar(120)
+  proof          String    @db.Text
+  // budget | simulation | checklist | tableau | document | cas (CHECK).
+  evidenceType   String    @db.VarChar(12)
+  // Depends on a rule that changes: the competence is to be refreshed after a year.
+  regulatory     Boolean   @default(false)
+  contentVersion String    @db.VarChar(20)
+
+  records FinSkillRecord[]
+
+  @@index([formationId])
+  @@map("fin_academy_modules")
+}
+
+// One person's proof of competence for one module (Skills Passport).
+model FinSkillRecord {
+  id              String           @id @default(uuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleId        String
+  module          FinAcademyModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  exerciseAnswer  String           @default("") @db.Text
+  // The five steps of the corrected answer the person met ([0..4]).
+  exerciseSteps   Json?
+  exerciseScore   Int?
+  // Parameterised exercise (sections 2 and 21): the amounts drawn for the current
+  // attempt and its outcome; the grid's score and the numbered exercise's best
+  // score; exerciseScore is the better of the two.
+  exerciseVariant Json?
+  gridScore       Int?
+  autoScore       Int?
+  // todo | done (CHECK).
+  missionStatus   String           @default("todo") @db.VarChar(10)
+  evidenceRef     String           @default("") @db.VarChar(300)
+  qcmScore        Int?
+  criticalErrors  Int              @default(0)
+  masteryScore    Int?
+  validatedAt     DateTime?
+  refreshDue      DateTime?
+  contentVersion  String           @db.VarChar(20)
+  // Last time the exercise was written: a QCM under 60 % asks for it again before a new try.
+  exerciseSavedAt DateTime?
+  // Exempted by the entry test of the path (85 % or more, fundamental module).
+  exempt          Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@unique([userId, moduleId])
+  @@index([moduleId])
+  @@map("fin_skill_records")
+}
+
+// P13-02: the integrative case of a thematic path (one per Academy course), its
+// corrected answer and its weighted grid ([{ label, weight }], total 100).
+model FinAcademyCase {
+  id             String    @id @default(uuid())
+  formationId    String    @unique
+  formation      Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  courseId       String    @unique
+  course         Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title          String    @db.VarChar(190)
+  scenario       String    @db.Text
+  tasks          String    @db.Text
+  correction     String    @db.Text
+  criteria       Json
+  contentVersion String    @db.VarChar(20)
+
+  records FinCaseRecord[]
+
+  @@map("fin_academy_cases")
+}
+
+// One person's answer to an integrative case, graded on its grid after reading
+// the correction: each criterion met (1), partly (0.5) or not (0).
+model FinCaseRecord {
+  id            String         @id @default(uuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  caseId        String
+  academyCase   FinAcademyCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  answer        String         @db.Text
+  ratings       Json?
+  criticalError Boolean        @default(false)
+  score         Int?
+  validatedAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@unique([userId, caseId])
+  @@index([caseId])
+  @@map("fin_case_records")
+}
+
+// The entry test of a path: one question per module, drawn from its bank.
+// `questions`: [{ questionId, moduleId }]; `exempted`: the module ids exempted.
+model FinPretest {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  formationId String
+  formation   Formation @relation(fields: [formationId], references: [id], onDelete: Cascade)
+  questions   Json
+  score       Int?
+  exempted    Json?
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+
+  @@index([userId, formationId])
+  @@map("fin_pretests")
+}
+
+// P13-05, lot D bis: the register of international trade risks (ECR-0370).
+// level = probability × impact (1..5 each, scale version `scaleVersion`).
+model FinBusinessRisk {
+  id               String                  @id @default(uuid())
+  businessId       String
+  business         FinBusiness             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  operationId      String?
+  operation        FinBusinessOperation?   @relation(fields: [operationId], references: [id], onDelete: SetNull)
+  // country | counterparty | transport | payment | currency | other (CHECK).
+  category         String                  @db.VarChar(20)
+  country          String?                 @db.VarChar(80)
+  counterparty     String                  @db.VarChar(255)
+  description      String?                 @db.VarChar(500)
+  probability      Int
+  impact           Int
+  exposure         Float?
+  guaranteedAmount Float?
+  currency         String?                 @db.VarChar(3)
+  guarantee        String?                 @db.VarChar(255)
+  // The proof of the rating; without it the index is provisional.
+  evidenceRef      String?                 @db.VarChar(255)
+  reviewAt         DateTime
+  // open | closed (CHECK).
+  status           String                  @default("open") @db.VarChar(10)
+  scaleVersion     Int                     @default(1)
+  version          Int                     @default(1)
+  createdById      String?
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  actions          FinBusinessRiskAction[]
+  reviews          FinBusinessRiskReview[]
+
+  @@index([businessId, status])
+  @@index([operationId])
+  @@map("fin_business_risks")
+}
+
+model FinBusinessRiskAction {
+  id        String          @id @default(uuid())
+  riskId    String
+  risk      FinBusinessRisk @relation(fields: [riskId], references: [id], onDelete: Cascade)
+  label     String          @db.VarChar(255)
+  ownerName String          @db.VarChar(160)
+  dueAt     DateTime?
+  doneAt    DateTime?
+  createdAt DateTime        @default(now())
+
+  @@index([riskId])
+  @@map("fin_business_risk_actions")
+}
+
+// Every rating of a risk, kept (the initial one, each reassessment, the closing).
+model FinBusinessRiskReview {
+  id           String          @id @default(uuid())
+  riskId       String
+  risk         FinBusinessRisk @relation(fields: [riskId], references: [id], onDelete: Cascade)
+  probability  Int
+  impact       Int
+  level        Int
+  note         String?         @db.VarChar(300)
+  evidenceRef  String?         @db.VarChar(255)
+  reviewedById String?
+  reviewedAt   DateTime        @default(now())
+
+  @@index([riskId])
+  @@map("fin_business_risk_reviews")
+}
+
+// An exchange scenario kept on a diaspora project (ECR-0378), with its dated rate.
+model FinBusinessFxScenario {
+  id            String             @id @default(uuid())
+  businessId    String
+  business      FinBusiness        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  projectId     String
+  project       FinBusinessProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  label         String             @db.VarChar(160)
+  amount        Float
+  fromCurrency  String             @db.VarChar(3)
+  toCurrency    String             @db.VarChar(3)
+  referenceRate Float
+  referenceDate DateTime
+  rateSource    String?            @db.VarChar(120)
+  rates         Json
+  createdById   String?
+  createdAt     DateTime           @default(now())
+
+  @@index([projectId])
+  @@map("fin_business_fx_scenarios")
+}
+
+// P13-05, lot F bis: the financial passport of the organisation (FAC-010,
+// ECR-0107): a dated, numbered snapshot; `completeness` explains its index;
+// provisional without validated books. Never a credit rating.
+model FinBusinessPassport {
+  id            String             @id @default(uuid())
+  businessId    String
+  business      FinBusiness        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  number        Int
+  periodFrom    DateTime
+  periodTo      DateTime
+  items         Json
+  content       Json
+  completeness  Json
+  provisional   Boolean            @default(true)
+  // draft | published | revoked (CHECK).
+  status        String             @default("draft") @db.VarChar(10)
+  preparedById  String?
+  publishedById String?
+  publishedAt   DateTime?
+  revokedAt     DateTime?
+  createdAt     DateTime           @default(now())
+  shares        FinBusinessShare[]
+
+  @@unique([businessId, number])
+  @@map("fin_business_passports")
+}
+
+// FAC-011 (ECR-0104): invoices prepared for a financer. An invoice is in one
+// live batch at most (draft or shared), checked by the server.
+model FinBusinessFinancingBatch {
+  id          String                     @id @default(uuid())
+  businessId  String
+  business    FinBusiness                @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  label       String                     @db.VarChar(160)
+  advanceRate Float
+  feeRate     Float
+  // draft | shared | closed | cancelled (CHECK).
+  status      String                     @default("draft") @db.VarChar(10)
+  createdById String?
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+  items       FinBusinessFinancingItem[]
+  shares      FinBusinessShare[]
+
+  @@index([businessId])
+  @@map("fin_business_financing_batches")
+}
+
+model FinBusinessFinancingItem {
+  id         String                    @id @default(uuid())
+  batchId    String
+  batch      FinBusinessFinancingBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  documentId String
+  document   FinBusinessDocument       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  // What was still due when the invoice was added.
+  amount     Float
+
+  @@unique([batchId, documentId])
+  @@index([documentId])
+  @@map("fin_business_financing_items")
+}
+
+// A passport or a batch shared with a financer's space: with consent, until a
+// date, revocable; every opening is recorded (ECR-0012).
+model FinBusinessShare {
+  id          String                     @id @default(uuid())
+  businessId  String
+  business    FinBusiness                @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  // passport | batch (CHECK).
+  kind        String                     @db.VarChar(10)
+  passportId  String?
+  passport    FinBusinessPassport?       @relation(fields: [passportId], references: [id], onDelete: Cascade)
+  batchId     String?
+  batch       FinBusinessFinancingBatch? @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  spaceId     String
+  space       FinPartnerSpace            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  consentAt   DateTime
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdById String?
+  createdAt   DateTime                   @default(now())
+  accesses    FinBusinessShareAccess[]
+
+  @@index([businessId])
+  @@index([spaceId])
+  @@map("fin_business_shares")
+}
+
+model FinBusinessShareAccess {
+  id         String           @id @default(uuid())
+  shareId    String
+  share      FinBusinessShare @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  userId     String?
+  accessedAt DateTime         @default(now())
+
+  @@index([shareId])
+  @@map("fin_business_share_accesses")
+}
+
+// P13-05, lot I bis (ECR-0294): a training session of an institution, for one cohort.
+model FinInstitutionSession {
+  id          String                     @id @default(uuid())
+  spaceId     String
+  space       FinPartnerSpace            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  cohortId    String
+  cohort      FinPartnerCohort           @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  formationId String?
+  formation   Formation?                 @relation(fields: [formationId], references: [id], onDelete: SetNull)
+  title       String                     @db.VarChar(160)
+  trainerName String                     @db.VarChar(160)
+  startsAt    DateTime
+  endsAt      DateTime
+  location    String?                    @db.VarChar(200)
+  // planned | done | cancelled (CHECK).
+  status      String                     @default("planned") @db.VarChar(10)
+  createdById String?
+  createdAt   DateTime                   @default(now())
+  attendance  FinInstitutionAttendance[]
+
+  @@index([spaceId])
+  @@index([cohortId])
+  @@index([formationId])
+  @@map("fin_institution_sessions")
+}
+
+// Who attended a session: marked by the institution, which invited the person.
+model FinInstitutionAttendance {
+  id        String                 @id @default(uuid())
+  sessionId String
+  session   FinInstitutionSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  memberId  String
+  member    FinPartnerCohortMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  present   Boolean
+  markedAt  DateTime               @default(now())
+
+  @@unique([sessionId, memberId])
+  @@index([memberId])
+  @@map("fin_institution_attendance")
 }

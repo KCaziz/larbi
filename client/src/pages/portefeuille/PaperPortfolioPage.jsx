@@ -94,6 +94,7 @@ export default function PaperPortfolioPage() {
             </ol>
             <p className="paper-help">{t('paper.guide.why')}</p>
             <Button to="/app/portefeuille/marche">{t('market.open')}</Button>
+            <Button to="/app/investlab" variant="secondary">{t('investLab.open')}</Button>
           </section>
         )}
 
@@ -136,7 +137,7 @@ export default function PaperPortfolioPage() {
           formulas={formulas}
           currency={currency}
           run={run}
-          marketPrices={new Map((market.data?.supports ?? []).map((support) => [t(`market.supports.${support.key}.name`), support]))}
+          marketPrices={new Map((market.data?.supports ?? []).map((support) => [support.name ?? t(`market.supports.${support.key}.name`), support]))}
         />
         <ReadinessSection t={t} diagnostic={diagnostic.data} />
         <RiskSection t={t} references={references.data} />
@@ -211,6 +212,7 @@ function PositionsSection({ t, language, view, formulas, currency, run, marketPr
 
       <div className="paper-actions">
         <Button to="/app/portefeuille/marche">{t('market.open')}</Button>
+        <Button to="/app/investlab" variant="secondary">{t('investLab.open')}</Button>
         <Button type="button" variant="secondary" onClick={() => setAdding((value) => !value)}>
           <Plus size={16} aria-hidden="true" /> {t('paper.addInstrument')}
         </Button>

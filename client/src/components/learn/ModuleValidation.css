@@ -1,0 +1,179 @@
+/* P13-02 — validation of a FINCLUDIA Academy module, and the Skills Passport. Tokens only. */
+.academy-module {
+  margin-block: 24px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.academy-module h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+
+.academy-module h3 {
+  margin: 22px 0 8px;
+}
+
+.academy-rule,
+.academy-muted {
+  color: var(--text-muted, var(--text));
+  font-size: 0.9rem;
+}
+
+.academy-state {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 640px) {
+  .academy-state {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.academy-checks {
+  margin: 0;
+  padding-inline-start: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.academy-checks li.ok {
+  color: var(--success, var(--text));
+  font-weight: 600;
+}
+
+.academy-verdict {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-weight: 600;
+}
+
+.academy-text {
+  white-space: pre-line;
+  margin: 0 0 10px;
+}
+
+.academy-field {
+  display: grid;
+  gap: 6px;
+  margin-block: 8px 12px;
+}
+
+.academy-field textarea,
+.academy-field input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.academy-correction {
+  margin-block-start: 16px;
+  padding: 14px;
+  border-inline-start: 3px solid var(--primary, var(--border));
+  background: var(--surface-2, var(--surface));
+}
+
+.academy-correction h4 {
+  margin: 0 0 8px;
+}
+
+.academy-correction fieldset {
+  border: 0;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.academy-step {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.academy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+
+.skills-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.skills-table th,
+.skills-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.skills-scroll {
+  overflow-x: auto;
+}
+
+.skills-state-validated {
+  font-weight: 600;
+}
+
+.academy-remediation {
+  margin-block: 16px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.academy-remediation h3 {
+  margin-block-start: 0;
+}
+
+.academy-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.academy-badge-acquired,
+.academy-badge-mastered,
+.academy-badge-exempt {
+  border-color: var(--success, var(--border));
+}
+
+.academy-badge-blocked,
+.academy-badge-redo {
+  border-color: var(--danger, var(--border));
+}
+
+.academy-path {
+  margin-block: 20px;
+}
+
+.academy-pretest {
+  display: grid;
+  gap: 14px;
+}
+
+.academy-pretest-question {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.academy-verdict.academy-wrong {
+  color: var(--danger, var(--text));
+}

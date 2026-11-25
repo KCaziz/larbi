@@ -50,7 +50,7 @@ export async function educationView(prisma, user) {
   }
 
   const formations = await prisma.formation.findMany({
-    where: { status: 'published' },
+    where: { status: 'published', ownerSpaceId: null },
     select: { id: true, slug: true, title: true, subtitle: true, level: true, educationProfiles: true },
     orderBy: { publishedAt: 'desc' },
   });

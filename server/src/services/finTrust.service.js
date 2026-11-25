@@ -7,6 +7,7 @@ import { FIN_CONSENT_TEXTS } from '../constants/finPublics.js';
 import { COMPLETENESS_CHECKS, DELETION_POLICY } from '../constants/finTrust.js';
 import { SHAREABLE_KINDS } from '../constants/finSpace.js';
 import { eraseAccountReceipts } from './finMoney.service.js';
+import { myPayslips } from './finPayrollRun.service.js';
 import { normaliseSharing, updateMySharing } from './finSpace.service.js';
 import { hasCurrentConsents } from './finProfile.service.js';
 
@@ -106,7 +107,8 @@ export async function buildCompleteness(prisma, userId) {
 // The export: the account's profile fields plus every row FINANCIAL_TABLES
 // names, in full — not just the inventory's counts. Scoped to FINCLUDIA's own
 // data, which is what the privacy text promises; the platform's other
-// features (formations, articles...) are not financial data and stay out.
+// features (articles, course progress...) are not financial data and stay out,
+// except what the person wrote or obtained in FINCLUDIA (see below).
 export async function exportAccountData(prisma, userId) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -121,7 +123,27 @@ export async function exportAccountData(prisma, userId) {
     })),
   );
   const consents = await listConsents(prisma, userId);
-  return { compte: user, donnees: tables, consentements: consents, politiqueSuppression: DELETION_POLICY, exporteLe: new Date().toISOString() };
+  // Beyond the financial socle, what the person wrote or obtained themselves
+  // (lot G and P13-02): their forum messages, their own payslips (validated
+  // runs only, as they see them), and their FINCLUDIA Academy results.
+  const [threads, posts, payslips, skills, cases, pretests] = await Promise.all([
+    prisma.forumThread.findMany({ where: { authorId: userId }, select: { id: true, title: true, body: true, status: true, createdAt: true }, orderBy: { createdAt: 'asc' } }),
+    prisma.forumPost.findMany({ where: { authorId: userId }, select: { id: true, threadId: true, body: true, status: true, createdAt: true }, orderBy: { createdAt: 'asc' } }),
+    myPayslips(prisma, { id: userId }),
+    prisma.finSkillRecord.findMany({ where: { userId }, include: { module: { select: { code: true, title: true } } } }),
+    prisma.finCaseRecord.findMany({ where: { userId }, include: { academyCase: { select: { title: true } } } }),
+    prisma.finPretest.findMany({ where: { userId }, select: { formationId: true, score: true, exempted: true, startedAt: true, submittedAt: true } }),
+  ]);
+  return {
+    compte: user,
+    donnees: tables,
+    forum: { discussions: threads, messages: posts },
+    bulletinsDePaie: payslips,
+    academy: { modules: skills, casIntegrateurs: cases, pretests },
+    consentements: consents,
+    politiqueSuppression: DELETION_POLICY,
+    exporteLe: new Date().toISOString(),
+  };
 }
 
 // Complete, immediate deletion (P6-01 point 9, decided 2026-10-11: no

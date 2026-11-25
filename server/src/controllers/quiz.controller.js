@@ -1,7 +1,8 @@
 import { prisma } from '../config/prisma.js';
 import { toEnrollmentSummary, toQuizSummary } from '../serializers/learner.js';
-import { reevaluateEnrollment, withEnrollmentLock } from '../services/progress.service.js';
-import { gradeAttempt, shuffled, toCorrection, toLearnerQuestion } from '../services/quiz.service.js';
+import { reevaluateEnrollment, reissueAfterCompetence, withEnrollmentLock } from '../services/progress.service.js';
+import { choiceOrderFor, drawQuestions, gradeAttempt, shuffled, toCorrection, toLearnerQuestion, withChoiceOrder } from '../services/quiz.service.js';
+import { assertCanRetry, refreshSkillRecord } from '../services/finSkills.service.js';
 import { HttpError } from '../utils/httpError.js';
 import { assertCanRead, findEnrollment, loadForUser } from './learn.controller.js';
 
@@ -28,12 +29,13 @@ function summaryFor(quiz, attempts) {
   return toQuizSummary({ ...quiz, _count: { questions: quiz.questions.length } }, { quizAttempts: attempts });
 }
 
-const questionsInOrder = (quiz, order) => {
+const questionsInOrder = (quiz, order, choiceOrder = null) => {
   const byId = new Map(quiz.questions.map((q) => [q.id, q]));
-  // Questions added after the attempt started go last; deleted ones disappear.
+  // Questions added after the attempt started go last; deleted ones disappear. An attempt
+  // DRAWN from a bank (P13-02) keeps exactly the questions it was served.
   const listed = order.map((id) => byId.get(id)).filter(Boolean);
-  const rest = quiz.questions.filter((q) => !order.includes(q.id));
-  return [...listed, ...rest];
+  const rest = quiz.drawCount ? [] : quiz.questions.filter((q) => !order.includes(q.id));
+  return [...listed, ...rest].map((q) => withChoiceOrder(q, choiceOrder));
 };
 
 export async function getQuiz(req, res) {
@@ -55,16 +57,26 @@ export async function startAttempt(req, res) {
     if (quiz.maxAttempts !== null && used >= quiz.maxAttempts) {
       throw new HttpError(403, 'No attempt left for this quiz', { reason: 'no_attempts_left' });
     }
-    const ids = quiz.questions.map((q) => q.id);
+    // P13-02: under 60 % at an Academy module, the exercise is written again first.
+    await assertCanRetry(tx, req.user.id, quiz.id);
+    const previous = await tx.quizAttempt.findFirst({ where: { enrollmentId: enrollment.id, quizId: quiz.id, submittedAt: { not: null } }, orderBy: { submittedAt: 'desc' } });
+    const ids = drawQuestions(quiz.questions, quiz.drawCount, previous?.questionOrder ?? []);
+    const order = quiz.shuffleQuestions ? shuffled(ids) : ids;
     return tx.quizAttempt.create({
-      data: { quizId: quiz.id, formationId: quiz.formationId, enrollmentId: enrollment.id, questionOrder: quiz.shuffleQuestions ? shuffled(ids) : ids },
+      data: {
+        quizId: quiz.id,
+        formationId: quiz.formationId,
+        enrollmentId: enrollment.id,
+        questionOrder: order,
+        choiceOrder: quiz.shuffleQuestions ? choiceOrderFor(quiz.questions, order) : undefined,
+      },
     });
   });
   const attempts = await attemptsOf(enrollment.id, quiz.id);
   res.status(201).json({
     attempt: { id: attempt.id, startedAt: attempt.startedAt },
     quiz: { ...summaryFor(quiz, attempts), instructions: quiz.instructions },
-    questions: questionsInOrder(quiz, attempt.questionOrder).map(toLearnerQuestion),
+    questions: questionsInOrder(quiz, attempt.questionOrder, attempt.choiceOrder).map(toLearnerQuestion),
   });
 }
 
@@ -86,8 +98,10 @@ export async function submitAttempt(req, res) {
     if (attempt.submittedAt) throw new HttpError(409, 'This attempt was already submitted', { reason: 'already_submitted' });
 
     const given = new Map(req.body.answers.map((a) => [a.questionId, a]));
-    const answers = quiz.questions.map((q) => cleanAnswer(q, given.get(q.id)));
-    const graded = gradeAttempt(quiz.questions, answers, quiz.passingScore);
+    // Only the questions this attempt served are graded (a bank draws some of them).
+    const served = questionsInOrder(quiz, attempt.questionOrder);
+    const answers = served.map((q) => cleanAnswer(q, given.get(q.id)));
+    const graded = gradeAttempt(served, answers, quiz.passingScore);
 
     await tx.quizAttemptAnswer.createMany({
       data: graded.results.map((r) => ({
@@ -101,11 +115,14 @@ export async function submitAttempt(req, res) {
     });
     const saved = await tx.quizAttempt.update({
       where: { id: attempt.id },
-      data: { submittedAt: new Date(), score: graded.score, earnedPoints: graded.earnedPoints, totalPoints: graded.totalPoints, passed: graded.passed },
+      data: { submittedAt: new Date(), score: graded.score, earnedPoints: graded.earnedPoints, totalPoints: graded.totalPoints, passed: graded.passed, criticalErrors: graded.criticalErrors },
     });
     // A passed quiz can be the last thing missing: the formation is finished and the
     // certificate issued in this same locked transaction (same rule as the last lesson).
     if (graded.passed) await reevaluateEnrollment(tx, { user: req.user, formation, enrollmentId: enrollment.id });
+    // An Academy module: its Skills Passport line follows the QCM (P13-02).
+    const skill = await refreshSkillRecord(tx, req.user.id, { quizId: quiz.id });
+    if (skill) await reissueAfterCompetence(tx, req.user.id, formation.id);
     return { saved, graded };
   });
 
@@ -117,6 +134,7 @@ export async function submitAttempt(req, res) {
       attemptId: saved.id,
       score: graded.score,
       passed: graded.passed,
+      criticalErrors: graded.criticalErrors,
       earnedPoints: graded.earnedPoints,
       totalPoints: graded.totalPoints,
       passingScore: quiz.passingScore,
@@ -138,7 +156,7 @@ export async function getLastResult(req, res) {
   });
   if (!attempt) throw new HttpError(404, 'Not found');
   const byQuestion = new Map(attempt.answers.map((a) => [a.questionId, a]));
-  const results = quiz.questions
+  const results = questionsInOrder(quiz, attempt.questionOrder, attempt.choiceOrder)
     .filter((q) => byQuestion.has(q.id))
     .map((question) => {
       const a = byQuestion.get(question.id);
@@ -149,6 +167,7 @@ export async function getLastResult(req, res) {
       attemptId: attempt.id,
       score: attempt.score,
       passed: attempt.passed,
+      criticalErrors: attempt.criticalErrors ?? 0,
       earnedPoints: attempt.earnedPoints,
       totalPoints: attempt.totalPoints,
       passingScore: quiz.passingScore,

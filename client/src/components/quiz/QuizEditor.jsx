@@ -29,6 +29,7 @@ const toDraft = (q) => ({
   prompt: q.prompt,
   explanation: q.explanation,
   points: q.points,
+  critical: Boolean(q.critical),
   choices: q.choices.map((c) => ({ id: c.id, text: c.text, isCorrect: c.isCorrect })),
   correctTrue: q.type === 'true_false' ? Boolean(q.choices.find((c) => c.text === 'true')?.isCorrect) : true,
   acceptedAnswers: q.acceptedAnswers,
@@ -53,7 +54,7 @@ function QuestionCard({ question, index, onSaved, onDelete }) {
   const save = async () => {
     setSaving(true);
     setMessage(null);
-    const body = { prompt: draft.prompt, explanation: draft.explanation, points: Number(draft.points) || 1 };
+    const body = { prompt: draft.prompt, explanation: draft.explanation, points: Number(draft.points) || 1, critical: draft.critical };
     if (question.type === 'text') body.acceptedAnswers = draft.acceptedAnswers;
     else if (question.type === 'true_false') body.correctTrue = draft.correctTrue;
     else body.choices = draft.choices;
@@ -166,6 +167,13 @@ function QuestionCard({ question, index, onSaved, onDelete }) {
             <textarea id={`${id}-explanation`} rows={2} maxLength={1000} value={draft.explanation} onChange={(e) => set({ explanation: e.target.value })} aria-describedby={`${id}-explanation-hint`} />
           </Field>
         </div>
+        <label className="cms-check">
+          <input type="checkbox" checked={draft.critical} onChange={(e) => set({ critical: e.target.checked })} />
+          <span>
+            {t('admin.quiz.question.critical')}
+            <small className="form-hint">{t('admin.quiz.question.criticalHint')}</small>
+          </span>
+        </label>
 
         <div className="cms-course-actions">
           {message && (
@@ -207,6 +215,7 @@ export default function QuizEditor({ quizId, onChanged, onDeleted }) {
     passingScore: q.passingScore,
     maxAttempts: q.maxAttempts ?? '',
     shuffleQuestions: q.shuffleQuestions,
+    drawCount: q.drawCount ?? '',
     isRequired: q.isRequired,
     showCorrection: q.showCorrection,
   });
@@ -263,6 +272,7 @@ export default function QuizEditor({ quizId, onChanged, onDeleted }) {
         passingScore: Number(settings.passingScore),
         maxAttempts: settings.maxAttempts === '' ? null : Number(settings.maxAttempts),
         shuffleQuestions: settings.shuffleQuestions,
+        drawCount: settings.drawCount === '' ? null : Number(settings.drawCount),
         isRequired: settings.isRequired,
         showCorrection: settings.showCorrection,
       });
@@ -339,6 +349,9 @@ export default function QuizEditor({ quizId, onChanged, onDeleted }) {
           </Field>
           <Field label={t('admin.quiz.maxAttempts')} htmlFor={`quiz-attempts-${quiz.id}`} hint={t('admin.quiz.maxAttemptsHint')}>
             <input id={`quiz-attempts-${quiz.id}`} type="number" min="1" max="50" inputMode="numeric" value={settings.maxAttempts} placeholder={t('admin.quiz.unlimited')} onChange={(e) => setField({ maxAttempts: e.target.value })} aria-describedby={`quiz-attempts-${quiz.id}-hint`} />
+          </Field>
+          <Field label={t('admin.quiz.drawCount')} htmlFor={`quiz-draw-${quiz.id}`} hint={t('admin.quiz.drawCountHint')}>
+            <input id={`quiz-draw-${quiz.id}`} type="number" min="1" max="100" inputMode="numeric" value={settings.drawCount} placeholder={t('admin.quiz.drawAll')} onChange={(e) => setField({ drawCount: e.target.value })} aria-describedby={`quiz-draw-${quiz.id}-hint`} />
           </Field>
         </div>
         <label className="cms-check">

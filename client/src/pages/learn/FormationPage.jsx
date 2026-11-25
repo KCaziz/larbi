@@ -11,6 +11,7 @@ import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import ProgressBar from '../../components/learn/ProgressBar.jsx';
 import QuizCard from '../../components/quiz/QuizCard.jsx';
+import PathProgress from '../../components/learn/PathProgress.jsx';
 import { useCatalogueBase } from '../../lib/useToolsBase.js';
 import './Learn.css';
 import { track } from '../../lib/analytics.js';
@@ -73,8 +74,9 @@ export default function FormationPage() {
     try {
       await api.post(`/learn/formations/${slug}/certificate`);
       setData(await api.get(`/learn/formations/${slug}`));
-    } catch {
-      setClaimError(t('learn.certification.claimError'));
+    } catch (err) {
+      // P13-02: an Academy certificate also needs every competence of the path valid.
+      setClaimError(err?.details?.reason === 'competences_pending' ? t('learn.certification.competencesPending') : t('learn.certification.claimError'));
     } finally {
       setClaiming(false);
     }
@@ -149,6 +151,9 @@ export default function FormationPage() {
               )}
             </div>
           )}
+
+          {/* P13-02: an Academy path shows its entry test, levels and integrative case. */}
+          {canOpen && <PathProgress slug={slug} />}
 
           <h2>{t('learn.detail.lessonsTitle')}</h2>
           {!canOpen && !enrollment && f.canEnroll && <p className="cms-muted">{t('learn.detail.lockedLessons')}</p>}

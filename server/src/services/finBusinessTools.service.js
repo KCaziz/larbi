@@ -1,6 +1,11 @@
 import { HttpError } from '../utils/httpError.js';
 import { WORKBOOK_SIMULATORS } from '../constants/finSimulatorCatalogue.js';
 import { BUSINESS_COMPARATORS, BUSINESS_SIMULATORS, classifyWorkbookSimulator, runSimulator, simulatorByCode } from './finBusinessSimulators.js';
+import { employerRules, payslip } from './finPayrollEngine.js';
+import { OVERTIME } from '../constants/finEmployerRules.js';
+
+// Overtime pay: hourly rate (base / monthly hours) × hours × the default increase (lot H).
+const overtimeOf = (baseSalary, hours) => Math.round((baseSalary / OVERTIME.monthlyHours) * hours * (1 + OVERTIME.premium));
 import { confirmedValue } from './regulatoryParams.service.js';
 import { businessCashPlan, businessDashboard } from './finBusiness.service.js';
 import { documentSettlement, isIssuedInvoice } from './finBusinessView.service.js';
@@ -34,7 +39,9 @@ export async function simulate(code, inputs) {
   if (!simulator) throw new HttpError(404, 'Unknown simulator', { reason: 'simulatorNotFound' });
   // DEC-001: a regulatory rate is the confirmed one, or none.
   const rate = simulator.regulatory ? await confirmedValue(simulator.regulatory) : null;
-  return runSimulator(code, inputs, { rate: rate === null ? null : Number(rate) });
+  // Payroll simulators read the employer rules (default values until confirmed, lot G).
+  const payroll = simulator.payroll ? { rules: await employerRules(), payslip, overtimeOf } : null;
+  return runSimulator(code, inputs, { rate: rate === null ? null : Number(rate), payroll });
 }
 
 // ---- universal search (REC-001) ----------------------------------------------------

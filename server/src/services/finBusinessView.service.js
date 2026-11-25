@@ -46,6 +46,7 @@ export function documentTotal(document) {
  * devises serait un nombre sans unité. Ils sont comptés comme un avertissement.
  */
 export function documentSettlement(document, payments, documents = []) {
+  if (document.foreignCurrency) return foreignSettlement(document, payments, documents);
   const mine = payments.filter((p) => p.documentId === document.id && active(p));
   const sameCurrency = mine.filter((p) => p.currency === document.currency);
   const foreign = mine.filter((p) => p.currency !== document.currency);
@@ -74,6 +75,62 @@ export function documentSettlement(document, payments, documents = []) {
     // Signalé plutôt qu'absorbé : un règlement dans une autre devise est une
     // information, pas une erreur à taire.
     devisesIgnorees: foreign.map((p) => ({ id: p.id, currency: p.currency, value: p.value })),
+  };
+}
+
+// Lot D bis : ce que vaut une pièce en devise, dans sa devise.
+export const foreignTotal = (document) => (document.foreignAmountExcl ?? 0) + (document.foreignTaxAmount ?? 0);
+
+/**
+ * FAC-015 : le règlement d'une facture en devise se suit DANS SA DEVISE.
+ *
+ * - ce qui reste dû en devise = facture - avoirs - règlements, en devise ;
+ * - la créance, dans la devise de l'organisation, reste au cours de la facture
+ *   (ce qui a été facturé) : reste dû en devise × cours de facturation ;
+ * - l'encaissement est la contre-valeur au cours du jour du règlement ;
+ * - l'écart de change est la différence entre les deux, dit à part et jamais
+ *   mêlé à la créance.
+ */
+function foreignSettlement(document, payments, documents) {
+  const mine = payments.filter((p) => p.documentId === document.id && active(p) && p.foreignValue);
+  const credits = creditNotesOf(document, documents);
+  const fTotal = foreignTotal(document);
+  const fCredited = credits.reduce((sum, c) => sum + foreignTotal(c), 0);
+  const fSettled = mine.reduce((sum, p) => sum + p.foreignValue, 0);
+  const fNet = fTotal - fCredited;
+  const fOutstanding = fNet - fSettled;
+  const rate = document.bookingRate;
+  const total = documentTotal(document);
+  const credited = credits.reduce((sum, c) => sum + documentTotal(c), 0);
+  const settled = mine.reduce((sum, p) => sum + p.value, 0);
+
+  let state = 'unpaid';
+  if (fCredited > 0 && fNet <= 0 && fSettled === 0) state = 'cancelled';
+  else if (fSettled > 0 && fOutstanding > 0) state = 'partial';
+  else if (fOutstanding === 0 && fTotal > 0) state = 'paid';
+  else if (fOutstanding < 0) state = 'overpaid';
+  else if (fTotal === 0) state = 'paid';
+
+  return {
+    total,
+    credited,
+    net: total - credited,
+    settled,
+    outstanding: Math.round(fOutstanding * rate),
+    state,
+    devisesIgnorees: [],
+    devise: {
+      currency: document.foreignCurrency,
+      total: fTotal,
+      credited: fCredited,
+      settled: fSettled,
+      outstanding: fOutstanding,
+      rate,
+      rateDate: document.rateDate,
+      rateSource: document.rateSource,
+      // Gain (positif) ou perte (négatif) de change sur ce qui a été encaissé.
+      exchangeDifference: mine.reduce((sum, p) => sum + p.value - Math.round(p.foreignValue * rate), 0),
+    },
   };
 }
 

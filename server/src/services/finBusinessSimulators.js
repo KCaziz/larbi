@@ -277,11 +277,152 @@ export const BUSINESS_SIMULATORS = [
   },
 ];
 
+// ---- added 2026-11-25: the rows of 14_SIMULATEURS that were « not yet » --------------------
+
+// A seeded generator (mulberry32): the same inputs give the same simulation.
+function seeded(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const gauss = (random) => Math.sqrt(-2 * Math.log(Math.max(random(), 1e-12))) * Math.cos(2 * Math.PI * random());
+const quantile = (sorted, q) => sorted[Math.min(sorted.length - 1, Math.max(0, Math.floor(q * (sorted.length - 1))))];
+// The normal law's tail, to read a two-proportion test (Abramowitz-Stegun 26.2.17).
+function normalTail(z) {
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const d = 0.3989423 * Math.exp((-z * z) / 2);
+  const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return z > 0 ? p : 1 - p;
+}
+const MONTE_CARLO_RUNS = 1000;
+
+BUSINESS_SIMULATORS.push(
+  {
+    // « Monte Carlo simplifié (non IA) »: the monthly cash in and out drawn around
+    // their averages; how often the cash goes below zero, and the spread of the end.
+    code: 'monteCarlo',
+    inputs: [['openingCash', 'money'], ['monthlyInflow', 'money'], ['inflowVolatility', 'ratio'], ['monthlyOutflow', 'money'], ['outflowVolatility', 'ratio'], ['months', 'number']],
+    run: ({ openingCash, monthlyInflow, inflowVolatility, monthlyOutflow, outflowVolatility, months }) => {
+      const horizon = Math.max(1, Math.min(60, Math.round(months)));
+      const random = seeded(Math.round(openingCash + monthlyInflow * 3 + monthlyOutflow * 7 + horizon * 11 + inflowVolatility * 1e4 + outflowVolatility * 1e5));
+      const ends = [];
+      let belowZero = 0;
+      for (let run = 0; run < MONTE_CARLO_RUNS; run += 1) {
+        let cash = openingCash;
+        let negative = false;
+        for (let m = 0; m < horizon; m += 1) {
+          const inflow = Math.max(0, monthlyInflow * (1 + inflowVolatility * gauss(random)));
+          const outflow = Math.max(0, monthlyOutflow * (1 + outflowVolatility * gauss(random)));
+          cash += inflow - outflow;
+          if (cash < 0) negative = true;
+        }
+        if (negative) belowZero += 1;
+        ends.push(cash);
+      }
+      ends.sort((a, b) => a - b);
+      return [out('probabilityNegative', 'ratio', belowZero / MONTE_CARLO_RUNS), out('endP10', 'money', quantile(ends, 0.1)), out('endP50', 'money', quantile(ends, 0.5)), out('endP90', 'money', quantile(ends, 0.9))];
+    },
+  },
+  {
+    code: 'portfolioSensitivity',
+    inputs: [['portfolioValue', 'money'], ['exposedShare', 'ratio'], ['shock', 'ratio']],
+    run: ({ portfolioValue, exposedShare, shock }) => {
+      const impact = portfolioValue * exposedShare * shock;
+      return [out('impact', 'money', impact), out('valueAfter', 'money', portfolioValue + impact), out('portfolioChange', 'ratio', div(impact, portfolioValue))];
+    },
+  },
+  {
+    code: 'trainingCohort',
+    inputs: [['invited', 'number'], ['active', 'number'], ['completed', 'number']],
+    run: ({ invited, active, completed }) => [out('activation', 'ratio', div(active, invited)), out('cohortCompletion', 'ratio', div(completed, active))],
+  },
+  {
+    // A/B test: two proportions, the uplift and the two-sided p-value of the z-test.
+    code: 'abTest',
+    inputs: [['visitorsA', 'number'], ['conversionsA', 'number'], ['visitorsB', 'number'], ['conversionsB', 'number']],
+    run: ({ visitorsA, conversionsA, visitorsB, conversionsB }) => {
+      const pa = div(conversionsA, visitorsA);
+      const pb = div(conversionsB, visitorsB);
+      if (pa === null || pb === null) return [out('rateA', 'ratio', pa), out('rateB', 'ratio', pb), out('uplift', 'ratio', null), out('pValue', 'ratio', null)];
+      const pooled = (conversionsA + conversionsB) / (visitorsA + visitorsB);
+      const se = Math.sqrt(pooled * (1 - pooled) * (1 / visitorsA + 1 / visitorsB));
+      const p = se > 0 ? 2 * normalTail(Math.abs((pb - pa) / se)) : null;
+      return [out('rateA', 'ratio', pa), out('rateB', 'ratio', pb), out('uplift', 'ratio', div(pb - pa, pa)), out('pValue', 'ratio', p)];
+    },
+  },
+  {
+    code: 'institutionalProgram',
+    inputs: [['plannedMilestones', 'number'], ['doneMilestones', 'number'], ['budget', 'money'], ['spent', 'money']],
+    run: ({ plannedMilestones, doneMilestones, budget, spent }) => {
+      const progress = div(doneMilestones, plannedMilestones);
+      const used = div(spent, budget);
+      return [out('programProgress', 'ratio', progress), out('budgetUse', 'ratio', used), out('progressGap', 'ratio', progress === null || used === null ? null : progress - used)];
+    },
+  },
+  {
+    // « Alerte de données anciennes »: how far a figure is past its freshness limit.
+    code: 'dataFreshness',
+    inputs: [['ageDays', 'days'], ['maxAgeDays', 'days']],
+    run: ({ ageDays, maxAgeDays }) => [out('daysBeyond', 'days', Math.max(0, ageDays - maxAgeDays)), out('stale', 'number', ageDays > maxAgeDays ? 1 : 0)],
+  },
+  {
+    code: 'vatNet',
+    inputs: [['vatCollected', 'money'], ['vatDeductible', 'money']],
+    run: ({ vatCollected, vatDeductible }) => [out('vatDue', 'money', Math.max(0, vatCollected - vatDeductible)), out('vatCredit', 'money', Math.max(0, vatDeductible - vatCollected))],
+  },
+  {
+    code: 'entriesBalance',
+    inputs: [['totalDebit', 'money'], ['totalCredit', 'money']],
+    run: ({ totalDebit, totalCredit }) => [out('balanceGap', 'money', totalDebit - totalCredit), out('balanced', 'number', totalDebit === totalCredit ? 1 : 0)],
+  },
+  {
+    code: 'absenteeism',
+    inputs: [['absenceDays', 'days'], ['workingDays', 'days'], ['headcount', 'number']],
+    run: ({ absenceDays, workingDays, headcount }) => [out('absenteeismRate', 'ratio', div(absenceDays, workingDays * headcount))],
+  },
+  // Payroll, on the default rules of lot G until they are confirmed (said on screen).
+  {
+    code: 'payrollGrossToNet',
+    payroll: true,
+    inputs: [['baseSalary', 'money'], ['overtimeHours', 'number', true], ['bonuses', 'money', true], ['irregularBonuses', 'money', true]],
+    run: ({ baseSalary, overtimeHours = 0, bonuses = 0, irregularBonuses = 0 }, { rules, payslip, overtimeOf }) => {
+      if (!rules) return [out('gross', 'money', null), out('net', 'money', null), out('employerCost', 'money', null)];
+      const slip = payslip({ baseSalary, overtime: overtimeOf(baseSalary, overtimeHours ?? 0), bonuses: bonuses ?? 0, irregularBonuses: irregularBonuses ?? 0 }, rules);
+      return [out('gross', 'money', slip.gross), out('employeeContrib', 'money', slip.employeeContrib), out('irgTotal', 'money', slip.irg + slip.irgIrregular), out('net', 'money', slip.net), out('employerCost', 'money', slip.employerCost)];
+    },
+  },
+  {
+    code: 'payrollBudget',
+    payroll: true,
+    inputs: [['headcount', 'number'], ['averageGross', 'money'], ['months', 'number']],
+    run: ({ headcount, averageGross, months }, { rules, payslip }) => {
+      if (!rules) return [out('monthlyMass', 'money', null), out('periodMass', 'money', null)];
+      const slip = payslip({ baseSalary: averageGross }, rules);
+      return [out('monthlyMass', 'money', slip.employerCost * headcount), out('periodMass', 'money', slip.employerCost * headcount * months)];
+    },
+  },
+  {
+    code: 'hiringPlan',
+    payroll: true,
+    inputs: [['hires', 'number'], ['grossSalary', 'money'], ['monthsInPost', 'number']],
+    run: ({ hires, grossSalary, monthsInPost }, { rules, payslip }) => {
+      if (!rules) return [out('hiringCost', 'money', null)];
+      const slip = payslip({ baseSalary: grossSalary }, rules);
+      return [out('monthlyCostPerHire', 'money', slip.employerCost), out('hiringCost', 'money', slip.employerCost * hires * monthsInPost)];
+    },
+  },
+);
+
 export const SIMULATOR_CODES = BUSINESS_SIMULATORS.map((s) => s.code);
 export const simulatorByCode = (code) => BUSINESS_SIMULATORS.find((s) => s.code === code) ?? null;
 
 /** Runs one simulator on its inputs. Missing required inputs make every output `null`. */
-export function runSimulator(code, raw = {}, { rate = null } = {}) {
+export function runSimulator(code, raw = {}, { rate = null, payroll = null } = {}) {
   const simulator = simulatorByCode(code);
   if (!simulator) return null;
   const inputs = {};
@@ -292,14 +433,16 @@ export function runSimulator(code, raw = {}, { rate = null } = {}) {
     inputs[key] = value;
   }
   if (missing.length > 0) {
-    return { code, missing, outputs: simulator.run(Object.fromEntries(simulator.inputs.map(([k]) => [k, 0])), { rate }).map((o) => ({ ...o, value: null })) };
+    return { code, missing, outputs: simulator.run(Object.fromEntries(simulator.inputs.map(([k]) => [k, 0])), { rate, ...(payroll ?? {}) }).map((o) => ({ ...o, value: null })) };
   }
-  const outputs = simulator.run(inputs, { rate });
+  const outputs = simulator.run(inputs, { rate, ...(payroll ?? {}) });
   return {
     code,
     missing: [],
     outputs,
     ...(simulator.regulatory ? { regleNonPubliee: rate === null } : {}),
+    // Payroll: computed on the default rules while they are not confirmed.
+    ...(simulator.payroll ? { baremesProvisoires: Boolean(payroll?.rules?.paieProvisoire) } : {}),
   };
 }
 
@@ -321,6 +464,20 @@ export const BUSINESS_COMPARATORS = [
  * with its name, rather than silently dropped.
  */
 const MAPPING = [
+  // 2026-11-25: the rows that were « not yet », and payroll now that it exists.
+  [/monte carlo/i, 'monteCarlo'],
+  [/sensibilité portefeuille/i, 'portfolioSensitivity'],
+  [/cohorte formation/i, 'trainingCohort'],
+  [/a\/b test/i, 'abTest'],
+  [/programme institutionnel/i, 'institutionalProgram'],
+  [/données anciennes/i, 'dataFreshness'],
+  [/tva nette/i, 'vatNet'],
+  [/écritures et équilibre/i, 'entriesBalance'],
+  [/congés et absent/i, 'absenteeism'],
+  [/masse salariale/i, 'payrollBudget'],
+  [/recrutement/i, 'hiringPlan'],
+  [/plan de charge/i, 'capacity'],
+  [/paie brute|paie avec heures|coût de paie|cnas charges/i, 'payrollGrossToNet'],
   [/patrimoine/i, 'netWorth'],
   [/ifu|auto-entrepreneur activit/i, 'regulatoryProvision'],
   [/facture et règlement/i, 'invoiceBalance'],

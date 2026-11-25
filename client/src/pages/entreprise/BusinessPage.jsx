@@ -21,6 +21,7 @@ import { TradeSection } from './Trade.jsx';
 import { PatrimonySection, ProjectsSection } from './Diaspora.jsx';
 import { ToolsSection } from './Tools.jsx';
 import { CampaignsSection, HrSection, PartnersSection } from './LotG.jsx';
+import { PassportSection, ReceivablesFinancingSection } from './Financing.jsx';
 import { PayrollSection } from './Payroll.jsx';
 import { StaffSection } from './Staff.jsx';
 import { LedgerSection } from './Ledger.jsx';
@@ -267,6 +268,9 @@ function BusinessSpace() {
           {current === 'funding' && (
             <>
               <PartnersSection business={entreprise} can={can} run={run} />
+              {/* Lot F bis: the financial passport (FAC-010) and the receivables to finance (FAC-011). */}
+              {can('finance.read') && <PassportSection can={can} run={run} />}
+              {can('finance.read') && <ReceivablesFinancingSection business={entreprise} can={can} run={run} />}
               {can('finance.read') && <CampaignsSection business={entreprise} can={can} run={run} />}
             </>
           )}

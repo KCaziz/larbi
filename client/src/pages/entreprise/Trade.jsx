@@ -6,10 +6,12 @@ import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate, formatRatio } from '../../lib/format.js';
 import { toMinorUnits } from '../../lib/money.js';
 import { newIdempotencyKey } from '../../lib/organisation.js';
+import { useOfficialRate } from '../../lib/officialRate.js';
 import Button from '../../components/ui/Button.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
+import { RiskRegister } from './Risks.jsx';
 
 // P13-05, lot D (2026-11-24): micro-import and international trade — the
 // client's screens ECR-0350 to ECR-0371. FINCLUDIA prepares, computes and
@@ -66,6 +68,9 @@ export function TradeSection({ business, can, run }) {
           </ul>
         )}
       </section>
+
+      {/* Lot D bis: the register of country, counterparty and transport risks (ECR-0370). */}
+      <RiskRegister business={business} operations={list} write={write} run={run} />
 
       {refs.data && <IncotermsMatrix incoterms={refs.data.incoterms} version={refs.data.versionIncoterms} />}
     </>
@@ -338,6 +343,8 @@ function NewCost({ op, business, run }) {
   const [key, setKey] = useState(newIdempotencyKey);
   const set = (field) => (event) => setForm((p) => ({ ...p, [field]: event.target.value }));
   const foreign = form.currency.trim().toUpperCase() !== business.currency;
+  // The official rate of the Banque d'Algérie, proposed when the rate is empty.
+  const proposed = useOfficialRate(form.currency, business.currency, form.rate, (official) => setForm((p) => (p.rate === '' ? { ...p, ...official } : p)));
 
   return (
     <form
@@ -380,6 +387,7 @@ function NewCost({ op, business, run }) {
           <input value={form.label} onChange={set('label')} maxLength={200} />
         </label>
       </div>
+      {foreign && proposed && <p className="inv-muted inv-note">{t('business.trade.officialProposed')}</p>}
       {foreign && (
         <div className="business-form-row">
           <label>

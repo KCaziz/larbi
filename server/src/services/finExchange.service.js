@@ -47,3 +47,18 @@ export async function recordRate(prisma, { currency, rate, referenceDate, source
     select: { currency: true, rate: true, referenceDate: true, source: true },
   });
 }
+
+// P13-05 (2026-11-25): the official rate to propose by default in the
+// import-export and diaspora screens, from `from` to `to`, on or before `at`.
+// Through the dinar when neither is the dinar; null when a rate is missing.
+export async function officialRate(prisma, from, to, at = new Date()) {
+  if (from === to) return null;
+  const rates = await latestRates(prisma, at);
+  const toDinar = (currency) => (currency === OFFICIAL_CURRENCY ? { rate: 1, referenceDate: null, source: null } : (rates.get(currency) ?? null));
+  const a = toDinar(from);
+  const b = toDinar(to);
+  if (!a || !b) return null;
+  const dates = [a.referenceDate, b.referenceDate].filter(Boolean).map((d) => new Date(d));
+  const oldest = dates.length ? new Date(Math.min(...dates)) : null;
+  return { rate: Math.round((a.rate / b.rate) * 1e6) / 1e6, referenceDate: oldest, source: a.source ?? b.source };
+}

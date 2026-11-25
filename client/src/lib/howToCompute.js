@@ -72,6 +72,32 @@ const BUSINESS = {
   E045: 'businessLedger',
   E046: 'businessLedger',
   E047: 'businessLedger',
+  // Lot I.
+  E048: 'partnerCohort',
+  E049: 'partnerCohort',
+  E050: 'partnerCohort',
+  E051: 'partnerProgram',
+  E052: 'partnerCohort',
+  E053: 'partnerFiles',
+  // P13-01.
+  E054: 'investLab',
+  E055: 'investLab',
+  E056: 'investLab',
+  E057: 'investLab',
+  // P13-02.
+  E058: 'academyModule',
+  E059: 'academyModule',
+  // Lot D bis.
+  E060: 'businessRisk',
+  E061: 'businessFx',
+  E062: 'businessFx',
+  // Lot F bis.
+  E063: 'businessPassport',
+  E064: 'businessFinancing',
+  E065: 'businessPassport',
+  // Lot I bis.
+  E066: 'partnerTraining',
+  E067: 'partnerTraining',
 };
 
 const isMissing = (value) => value === null || value === undefined || value === 0 || (Array.isArray(value) && value.length === 0);
@@ -91,7 +117,7 @@ export function howToCompute(answer) {
   // P13-05, lot B: a business figure is computed from the business's own
   // documents, never from personal movements.
   const business = BUSINESS[answer?.formule_id];
-  if (business) return { key: business, to: '/app/entreprise' };
+  if (business) return { key: business, to: business.startsWith('partner') ? '/app/partenaire' : business === 'investLab' ? '/app/investlab' : business === 'academyModule' ? '/app/progression' : '/app/entreprise' };
   const known = BY_FORMULA[answer?.formule_id];
   if (known) return { key: known[0], to: known[1] };
   const inputs = answer?.entrees_snapshot ?? {};

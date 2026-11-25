@@ -1,5 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { HttpError } from '../utils/httpError.js';
+import { officialRate } from '../services/finExchange.service.js';
+import { backtest, investLabOverview, stockSheet } from '../services/investLab.service.js';
 import {
   BUSINESS_BLOCKED_STATEMENTS,
   BUSINESS_LEGAL_FORMS,
@@ -28,6 +30,35 @@ import {
   withdrawRequest,
 } from '../services/finLotG.service.js';
 import { createThread, getThread, listThreads, reply, report } from '../services/forum.service.js';
+import {
+  answerCohort,
+  answerMessage,
+  assignFormation,
+  cipReportCsv,
+  cipReports,
+  createCohort,
+  createProgram,
+  financerCloseMessage,
+  financerFile,
+  financerFiles,
+  financerMessage,
+  financerSetStatus,
+  institutionExport,
+  institutionView,
+  inviteLearners,
+  linkPlatform,
+  listPlatforms,
+  listReports,
+  myCohorts,
+  mySpaces,
+  ownReportCsv,
+  prepareReport,
+  removeLearner,
+  requestMessages,
+  unassignFormation,
+  updateProgram,
+  validateReport,
+} from '../services/finPartnerPortal.service.js';
 import { annualStatement, createRun, discardRun, getRun, linkEmployeeAccount, moveRun, myPayslips, payrollOverview, setConditions, simulatePayslip, updateSlip } from '../services/finPayrollRun.service.js';
 import { addCandidate, createTraining, createVacancy, decideTimesheet, moveCandidate, recordTimesheet, removeCandidate, removeSkill, setSkill, staffOverview, updateTraining, updateVacancy } from '../services/finStaff.service.js';
 import { autoMatch, bankView, closeYear, createAsset, disposeAsset, importBankStatement, listAssets, matchBankLine, proposeDepreciation } from '../services/finLedgerClose.service.js';
@@ -657,4 +688,151 @@ export async function postBankAutoMatch(req, res) {
 
 export async function putBankLine(req, res) {
   res.json({ ligne: await matchBankLine(prisma, await resolve(req, 'ledger.write'), req.params.id, req.body) });
+}
+
+// ---- lot I: partners' space, learner's invitations, crowdfunding report -------------------------------
+const sendCsv = (res, name, csv) => {
+  res.set('Content-Type', 'text/csv; charset=utf-8');
+  res.set('Content-Disposition', `attachment; filename="${name}"`);
+  res.send(csv);
+};
+
+export async function getPlatforms(req, res) {
+  await resolve(req, 'finance.read');
+  res.json({ plateformes: await listPlatforms(prisma) });
+}
+
+export async function putCampaignPlatform(req, res) {
+  res.json({ campagne: await linkPlatform(prisma, await resolve(req, 'crowdfunding.manage'), req.params.id, req.body) });
+}
+
+export async function getCampaignReports(req, res) {
+  res.json({ rapports: await listReports(prisma, await resolve(req, 'finance.read'), req.params.id) });
+}
+
+export async function postCampaignReport(req, res) {
+  res.status(201).json({ rapport: await prepareReport(prisma, await resolve(req, 'crowdfunding.manage'), req.params.id, req.body) });
+}
+
+export async function postCampaignReportValidation(req, res) {
+  res.json({ rapport: await validateReport(prisma, await resolve(req, 'crowdfunding.manage'), req.params.id, req.params.sub) });
+}
+
+export async function getCampaignReportCsv(req, res) {
+  sendCsv(res, 'fincludia-rapport-campagne.csv', await ownReportCsv(prisma, await resolve(req, 'finance.read'), req.params.id, req.params.sub));
+}
+
+export async function getRequestMessages(req, res) {
+  res.json({ messages: await requestMessages(prisma, await resolve(req, 'partners.request'), req.params.id) });
+}
+
+export async function postRequestMessage(req, res) {
+  res.status(201).json({ message: await answerMessage(prisma, await resolve(req, 'partners.request'), req.params.id, req.body) });
+}
+
+export async function getMySpaces(req, res) {
+  res.json({ espaces: await mySpaces(prisma, req.user) });
+}
+
+export async function getFinancerFiles(req, res) {
+  res.json(await financerFiles(prisma, req.user, req.params.id, req.query));
+}
+
+export async function getFinancerFile(req, res) {
+  res.json({ dossier: await financerFile(prisma, req.user, req.params.id, req.params.sub) });
+}
+
+export async function putFinancerFile(req, res) {
+  res.json({ dossier: await financerSetStatus(prisma, req.user, req.params.id, req.params.sub, req.body) });
+}
+
+export async function postFinancerMessage(req, res) {
+  res.status(201).json({ message: await financerMessage(prisma, req.user, req.params.id, req.params.sub, req.body) });
+}
+
+export async function postFinancerMessageClose(req, res) {
+  res.json({ message: await financerCloseMessage(prisma, req.user, req.params.id, req.params.sub, req.params.msg) });
+}
+
+export async function getInstitution(req, res) {
+  res.json(await institutionView(prisma, req.user, req.params.id));
+}
+
+export async function getInstitutionCsv(req, res) {
+  sendCsv(res, 'fincludia-institution.csv', await institutionExport(prisma, req.user, req.params.id));
+}
+
+export async function postProgram(req, res) {
+  res.status(201).json({ programme: await createProgram(prisma, req.user, req.params.id, req.body) });
+}
+
+export async function putProgram(req, res) {
+  res.json({ programme: await updateProgram(prisma, req.user, req.params.id, req.params.sub, req.body) });
+}
+
+export async function postCohort(req, res) {
+  res.status(201).json({ cohorte: await createCohort(prisma, req.user, req.params.id, req.params.sub, req.body) });
+}
+
+export async function postCohortFormation(req, res) {
+  res.status(201).json({ affectation: await assignFormation(prisma, req.user, req.params.id, req.params.sub, req.body) });
+}
+
+export async function deleteCohortFormation(req, res) {
+  res.json(await unassignFormation(prisma, req.user, req.params.id, req.params.sub, req.params.formation));
+}
+
+export async function postCohortInvites(req, res) {
+  res.status(201).json(await inviteLearners(prisma, req.user, req.params.id, req.params.sub, req.body));
+}
+
+export async function deleteCohortMember(req, res) {
+  res.json({ membre: await removeLearner(prisma, req.user, req.params.id, req.params.sub, req.params.member) });
+}
+
+export async function getCipReports(req, res) {
+  res.json({ rapports: await cipReports(prisma, req.user, req.params.id) });
+}
+
+export async function getCipReportCsv(req, res) {
+  sendCsv(res, 'fincludia-rapport-campagne.csv', await cipReportCsv(prisma, req.user, req.params.id, req.params.sub));
+}
+
+export async function getMyCohorts(req, res) {
+  res.json({ cohortes: await myCohorts(prisma, req.user) });
+}
+
+export async function postMyCohortAnswer(req, res) {
+  res.json({ membre: await answerCohort(prisma, req.user, req.params.id, req.params.step === 'accepter') });
+}
+
+// The official rate proposed by default in the import-export and diaspora screens.
+export async function getOfficialRate(req, res) {
+  await resolve(req, 'org.read');
+  const from = String(req.query.from ?? '').toUpperCase();
+  const to = String(req.query.to ?? '').toUpperCase();
+  if (!/^[A-Z]{3}$/.test(from) || !/^[A-Z]{3}$/.test(to)) throw new HttpError(400, 'Two currencies', { reason: 'invalidCurrency' });
+  const at = req.query.date && /^\d{4}-\d{2}-\d{2}$/.test(req.query.date) ? new Date(`${req.query.date}T23:59:59.999Z`) : new Date();
+  res.json({ cours: await officialRate(prisma, from, to, at) });
+}
+
+// P13-01: InvestLab — the client's market data 2020–2026, read only.
+export async function getInvestLab(req, res) {
+  res.json(investLabOverview());
+}
+
+export async function getInvestLabStock(req, res) {
+  const sheet = stockSheet(String(req.params.ticker).toUpperCase());
+  if (!sheet) throw new HttpError(404, 'Unknown share', { reason: 'stockNotFound' });
+  res.json({ action: sheet });
+}
+
+export async function getInvestLabBacktest(req, res) {
+  const amount = Number(req.query.amount ?? 1000000);
+  const from = Number(req.query.from ?? 2020);
+  const to = Number(req.query.to ?? 2026);
+  if (!Number.isInteger(amount) || amount <= 0 || amount > 1e13 || !Number.isInteger(from) || !Number.isInteger(to) || from < 2020 || to > 2026 || to <= from) {
+    throw new HttpError(400, 'Amount and two years between 2020 and 2026', { reason: 'invalidBacktest' });
+  }
+  res.json(backtest({ amount, from, to }));
 }

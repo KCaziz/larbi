@@ -4131,7 +4131,7 @@ Faire trouver le site par les moteurs de recherche, dans ses trois langues, et m
 Le client a envoyé, le 2026-11-21, deux documents « qui complètent la gestion du budget » : le référentiel du portefeuille fictif (`FINCLUDIA_Portefeuille.docx`) et celui des mini-formations par parcours (`FINCLUDIA Referentiel Pedagogique.docx`). Le 2026-11-23, il a ajouté le référentiel unique des publics professionnels, du commerce international et de la diaspora (`FINCLUDIA Referentiel Unique Professionnels Commerce Diaspora.xlsx`, `P13-05`). Les trois sont à la racine du projet. **Rien n'est encore développé** : cette phase les enregistre, dit ce qu'ils contiennent et ce qu'ils débloquent. Les tâches seront découpées plus finement au moment de les commencer.
 
 ### P13-01 — Portefeuille fictif : données de marché réelles 2020–2026 (« InvestLab »)
-- Statut : `❌ todo`
+- Statut : `✅ done` (2026-11-25 ; code, recette à faire)
 - Priorité : `🟡 medium`
 - Dépendances : `P6-12`, `P10-03`
 - Durée cible : à estimer (gros volume de données à saisir et vérifier)
@@ -4149,8 +4149,35 @@ Ce que contient le document :
 
 Ce que cela change : le portefeuille fictif reste séparé du patrimoine réel, de la santé financière et de toute décision de crédit (règle reprise du document). **Débloque en partie `P10-04`** (marchés et leur évolution) pour la Bourse d'Alger : la source manquante est désormais fournie, datée et sourcée ; les places étrangères restent sans source. Le marché pédagogique fictif de `R8-12` sera à remplacer ou à doubler par ces données réelles — à décider avec le client.
 
+
+**Réalisé (2026-11-25)** : InvestLab, page `/app/investlab`, ouverte depuis le portefeuille fictif (bouton « InvestLab »).
+- **Données** : `constants/investLabData.js`, GÉNÉRÉ depuis le document du client par un script (ne pas éditer à la main).
+  - Les 42 tableaux et les textes de ses 14 sections et annexes, tels que publiés ; N/C et « — » restent vides, jamais 0.
+  - Jeux typés : 10 actions et leurs cours 2020–2026, 37 dividendes, opérations sur titres, DZAIRINDEX, inflation, métaux et change, backtest de référence, 25 sources.
+- **Neuf vues** (section 13.5) :
+  - Marché Algérie ;
+  - Fiche action : courbe annuelle, variation, dividende et rendement par année, opérations sur titres ;
+  - Dette souveraine ; Épargne et DAT ; Devises ; Finance islamique ; Inflation et métaux ;
+  - Backtest ;
+  - Qualité des données : méthode, sources, statuts des données manquantes.
+- **Moteur** (`services/investLab.service.js`, conventions de l'annexe B) :
+  - montant et dates au choix (fin d'année 2020 à 2025, jusqu'à fin 2021 à 2026) ;
+  - actions : quantité ajustée des attributions gratuites, plus dividendes encaissés non réinvestis ;
+  - DZAIRINDEX en indice prix ;
+  - métaux : performance du métal × effet de change ;
+  - valeur réelle avec l'inflation cumulée ;
+  - un titre non coté au départ est « non coté », jamais zéro ;
+  - formules `E054` à `E057`, avec le contrat de calcul.
+- **Vérifié** : le moteur reproduit au dinar près les 9 lignes calculables du backtest du document (nominal et réel), et l'inflation cumulée 1,4233. Test : `unit/investLab.test.js` (5).
+- **Pas recalculé** : obligations, dépôts à terme et dépôts en devises. Le document les donne comme approximations (prix propre plus coupons, taux 1 an représentatifs) ; ils sont affichés comme valeurs de référence du document. TWR et XIRR ne servent qu'avec des flux réels : le portefeuille fictif n'en a pas encore.
+- **Décidé le 2026-11-25** : les données réelles s'ajoutent au marché pédagogique de `R8-12`. Quand les deux décrivent le même placement, les chiffres du document du client font référence. Fait le même jour (`services/finance/realMarket.js`) :
+  - **Ajoutés** au marché (`/app/portefeuille/marche`) : les 10 actions cotées, DZAIRINDEX, l'argent et le platine en DZD, avec leurs cours annuels réels. Entre deux cours publiés, les mois sont interpolés ; après le dernier, le prix reste fixe.
+  - **Remplacés** par les chiffres du document : l'or (or en dollars × cours USD/DZD), le livret (épargne DZD à 2,5 %) et l'obligation d'État (OAT O100230, rendement annuel tiré du backtest du document). Leur échelle de prix est conservée, pour que les positions déjà achetées gardent leur sens.
+  - **Inchangés** : les 5 supports fictifs sans équivalent dans le document (dépôt à terme, sukuk, fonds diversifié, deux actions types).
+  - Chaque carte porte son badge : « exemple fictif » ou « données réelles du document ».
+
 ### P13-02 — Formation : référentiel pédagogique et mini-formations par parcours (« FINCLUDIA Academy »)
-- Statut : `❌ todo`
+- Statut : `✅ done` (2026-11-25 ; contenu chargé, recette à faire)
 - Priorité : `🟡 medium`
 - Dépendances : `P8-17`, `P8-29`
 - Durée cible : à estimer (130 modules)
@@ -4164,6 +4191,65 @@ Ce que contient le document :
 - **Règles du site** : moteur de QCM et anti-mémorisation, algorithme de progression, statuts visibles dans l'interface, conditions de certification, schéma technique du module, gouvernance et contrôle qualité, guide du formateur.
 
 Ce que cela change : ce sont les contenus de formation par profil que le client avait dit fournir (réponse E, `P8-17`) et une partie de ce qu'attend **`P8-29`** (parcours de formation). Reste à confirmer avec lui si la vitrine et les compartiments de `P8-29` viennent aussi, ou si l'on construit la formation d'abord. Les montants, taux et seuils réglementaires cités dans les modules restent datés et versionnés (règle 17).
+
+
+**Réalisé (2026-11-25)** : « FINCLUDIA Academy » chargée dans les formations existantes.
+- **Chargement** : migration `20261202120000_fin_academy`, GÉNÉRÉE depuis le document par un script. Identifiants fixes et `INSERT IGNORE` : la rejouer n'ajoute rien deux fois.
+- **Contenu** :
+  - 13 formations publiées : une par parcours thématique (12), plus « Méthode, parcours et repères », qui reprend les sections 1 à 8 (niveaux N0 à N5, preuve de compétence, parcours par public, Budget Lab, dictionnaire des notions, sources) ;
+  - 149 leçons : chaque module, avec son cadre, ses notions, son mini-cours, ses cas, exercices et corrigés, sa mission et sa règle de validation, plus le cas intégrateur de chaque parcours ;
+  - 131 QCM, soit 666 questions à réponse unique, chacune avec sa correction expliquée, réussite à 80 % (règle du document).
+- **Rangement** :
+  - catégorie « FINCLUDIA Academy » ;
+  - niveau tiré des niveaux N des modules ;
+  - profils éducatifs tirés des publics de chaque module (LYC, ETU, JAC, SAL, EPG) ; les parcours professionnels n'en ont pas, ils ne sont pas proposés aux profils personnels ;
+  - certificat « pédagogique », dit comme n'étant ni une habilitation professionnelle ni une habilitation réglementaire.
+- **Vérifié** : les 2 399 blocs passent la validation des leçons du serveur, et les 131 quiz sont complets (une seule bonne réponse par question).
+- **Règles de validation** (section 2, règle V10, et section 3) — `✅ fait le 2026-11-25` (code ; recette à faire). Migration `20261203120000_fin_academy_rules`, GÉNÉRÉE depuis le document.
+  - **Banque de questions** : le QCM de renforcement d’un module rejoint sa banque quand le module a aussi un QCM d’évaluation (96 questions de plus, 30 modules). Chaque tentative tire alors 5 questions. Une nouvelle tentative prend d’abord des questions non posées la fois précédente. L’ordre des réponses est mélangé à chaque tentative. Le document vise 10 questions par module ; les 100 autres modules n’en ont que 5, donc toutes sont posées, dans un ordre et avec des réponses mélangés.
+  - **Questions critiques** : les 13 questions marquées « critique » dans le document doivent être justes. Une erreur fait échouer le QCM, quelle que soit la note. Elles sont toujours tirées.
+  - **Score de module** (`E058`) = 0,50 × QCM + 0,30 × exercice + 0,20 × mission. Le module est validé si :
+    - le score atteint 80 % ;
+    - le QCM atteint 80 %, sans erreur critique (on retient la meilleure tentative) ;
+    - l’exercice atteint 70 % ;
+    - la mission est réalisée.
+  - **Exercice** : la personne écrit sa réponse, puis voit le corrigé-type et coche les étapes de la grille du document que sa réponse respecte (diagnostic, méthode, résultat, interprétation, décision et contrôle), 20 points chacune. Choix par défaut : le corrigé ne donne pas toujours un nombre unique vérifiable, donc la correction automatique avec tolérance n’est pas faite.
+  - **Mission** : déclarée réalisée, avec la référence de ce qui a été produit. Choix par défaut : le site ne vérifie pas l’outil lié (environ 130 outils nommés, dont beaucoup n’existent pas sous ce nom).
+  - **Skills Passport** : une ligne par module commencé (QCM, erreurs critiques, exercice, mission, preuve, score, version du contenu « V10 », date de validation). Il apparaît dans le passeport de connaissances (`/app/progression`) ; chaque leçon de l’Academy a son bloc « Valider le module ». Les 20 modules qui dépendent d’une règle qui change (réglementation, fiscalité, change, douane, outils Reglo) passent « à actualiser » un an après leur validation.
+  - **Administration** : dans l’éditeur de quiz, un nombre de questions tirées par tentative, et une case « question critique » par question.
+- **Progression** (sections 22 et 23) — `✅ fait le 2026-11-25` (code ; recette à faire). Migration `20261204120000_fin_academy_progress`, GÉNÉRÉE depuis le document.
+  - **Statuts affichés** : à découvrir, en cours, à renforcer (QCM de 60 à 79 %, ou exercice sous 70 %), à reprendre (QCM sous 60 %), bloqué par une erreur critique, acquis, maîtrisé, à actualiser, dispensé.
+    - « Maîtrisé » demande au moins 90 %, la mission réalisée et le cas intégrateur du parcours réussi : c’est la « réutilisation réussie dans un cas ».
+  - **Remédiation** :
+    - le bloc du module liste les questions ratées au dernier QCM, avec leur explication ;
+    - sous 60 %, un nouveau QCM est refusé tant que l’exercice n’a pas été réécrit (contrôlé par le serveur).
+  - **Cas intégrateurs** : les 12 cas corrigés du document (scénario, travail demandé, corrigé-type, barème de 100 points en 5 critères) sont rattachés à leur leçon.
+    - La personne rédige sa réponse, puis voit le corrigé et évalue chaque critère : atteint, en partie (moitié des points) ou non.
+    - Le cas est réussi à 75 % au moins, sans erreur critique déclarée.
+    - Choix par défaut : c’est une auto-évaluation. Le document prévoit une revue humaine possible aux niveaux avancés ; elle n’est pas faite.
+  - **Niveaux par domaine** : chaque module compte au premier niveau de sa plage (« N2-N4 » compte en N2).
+    - Un niveau est atteint dans le parcours quand tous les modules de ce niveau et des niveaux inférieurs sont acquis ou dispensés, avec une moyenne de maîtrise d’au moins 80 % (`E059`).
+    - Le parcours entier est validé quand tous ses modules sont acquis et que son cas intégrateur est réussi.
+    - On peut donc être N1 dans un domaine et N3 dans un autre.
+    - Choix par défaut : rien n’est verrouillé ; les niveaux sont affichés, pas imposés.
+  - **Prétest** : le document décrit le diagnostic d’entrée mais ne fournit pas ses questions. Par défaut, il prend une question par module du parcours, tirée de sa banque (30 au plus), et ne se passe qu’une fois.
+    - À 85 % ou plus, les modules fondamentaux (N0 ou N1) dont la question a reçu une bonne réponse sont dispensés.
+    - Exception, comme le demande le document : la sécurité numérique, la fraude, la conformité et la réglementation (fiscalité, douane, change).
+  - **Écrans** :
+    - la page d’une formation de l’Academy montre « Mon parcours » (prétest, niveau atteint, cas, statut de chaque module) ;
+    - le passeport de connaissances montre les statuts et l’avancement par parcours.
+  - **Fait le 2026-11-25 : exercices chiffrés** (migration `20261208120000_fin_academy_variants`) :
+    - 49 modules ont un gabarit (`constants/academyExercises.js`) : le même énoncé avec d'autres montants, arrondis et plausibles, à chaque essai ;
+    - la réponse est corrigée par le serveur, avec une tolérance de 1 % et un minimum selon l'unité. La correction montre le calcul ;
+    - un énoncé ne se change pas avant d'avoir été répondu ;
+    - le score de l'exercice est le meilleur de la grille d'auto-correction et de l'exercice chiffré.
+  - **Fait le 2026-11-25 : certificat conditionné** (section 22, étape 7). Pour un parcours de l'Academy, le certificat n'est délivré que si :
+    - chaque module est acquis ou dispensé ;
+    - aucune compétence réglementaire n'est « à actualiser » ;
+    - le cas intégrateur est réussi.
+
+    Le serveur le délivre dès que la dernière compétence est validée, et l'écran explique un refus.
+  - **Mise en ligne** : les migrations `fin_academy_rules` et `fin_academy_progress` sont ajoutées à `mise-a-jour-base.sql`, après le bloc de l’Academy. Le fichier a été rejoué deux fois sur une base jetable : aucune erreur, schéma identique, 12 migrations notées.
 
 ### P13-03 — Vagues : accueil de l'application et accueil du site
 - Statut : `✅ done`
@@ -4196,7 +4282,7 @@ Ce que cela change : ce sont les contenus de formation par profil que le client 
 - Réalisé (2026-11-23) : `LineChart` trace une courbe arrondie par interpolation cubique monotone (Fritsch–Carlson). Elle passe exactement par chaque point et ne dépasse jamais les valeurs voisines : aucun pic ni creux inventé. Sous une courbe seule, un remplissage en dégradé de la couleur de la série. La courbe se dessine une fois à l'affichage, sauf si le visiteur a demandé moins d'animations. Les points, l'axe (désormais sur des chiffres ronds), la légende, la phrase de lecture et le tableau restent.
 
 ### P13-05 — Référentiel unique : professionnels, commerce international et diaspora
-- Statut : `🚧 in-progress` (lots A, B et C faits le 2026-11-23, lots D, E et F le 2026-11-24 ; lot G le 2026-11-24 : partenaires, forum, personnel, financement participatif, puis paie et comptabilité sur valeurs par défaut à confirmer, questions dans `QUESTIONS_CLIENT.md`)
+- Statut : `🚧 in-progress` (lots A, B et C faits le 2026-11-23, lots D, E et F le 2026-11-24 ; lot G le 2026-11-24 : partenaires, forum, personnel, financement participatif, puis paie et comptabilité sur valeurs par défaut ; lot H le 2026-11-25 : compléments de paie, comptabilité et RH sur nos choix par défaut)
 - Priorité : `🔴 high`
 - Dépendances : `P7-02` (socle livré), `P13-02` (les parcours de formation PRO, AE, LIB, START, BUS, DIA, MI et TR en sont le pendant pédagogique)
 - Durée cible : non estimée. C'est un produit entier, plusieurs fois la taille du budget personnel ; à chiffrer lot par lot.
@@ -4369,7 +4455,7 @@ Ce que cela change : ce sont les contenus de formation par profil que le client 
     - **Correction au passage** : sur une carte d'entreprise « non calculé », le conseil renvoyait vers les mouvements personnels. Il dit maintenant quoi faire dans l'espace entreprise.
     - **Tests** : `functional/finInvoicing.test.js` (15) reprend les cas chiffrés du classeur (`TST-00001`, `TST-00003`, `TST-00028`, `TST-00035`, « Solde après règlement partiel », « CA facturé net avoir », « Marge facture HT ») ; `e2e/fin-invoicing-journey.test.js` (6) déroule `TST-00028` dans le navigateur.
     - **Pas fait dans ce lot** :
-      - `FAC-010` (passeport financier) et `FAC-011` (créances à financer) : lot F, avec les dossiers de financement ;
+      - ~~`FAC-010` (passeport financier) et `FAC-011` (créances à financer)~~ : faits au lot F bis (2026-11-25, voir plus bas) ;
       - `FAC-013` à `FAC-016` (factures en devise, import et export) : lot D ;
       - `FAC-017` (dépense de projet diaspora) : lot E ;
       - ~~le devis ou la facture en PDF à envoyer au client~~ : fait avec le lot C (voir plus bas).
@@ -4461,8 +4547,8 @@ Ce que cela change : ce sont les contenus de formation par profil que le client 
       - `functional/finTrade.test.js` (8) ;
       - `e2e/fin-trade-journey.test.js` (4).
     - **Pas fait dans ce lot** :
-      - `FAC-014` à `FAC-016` (facture d'exportation et créance en devise) : les factures restent dans la devise de l'organisation ;
-      - `ECR-0363` (comparateur des moyens de paiement internationaux) et `ECR-0370` (registre des risques pays et contrepartie) : prévus avec le lot F (comparateurs).
+      - ~~`FAC-014` à `FAC-016` (facture d'exportation et créance en devise)~~ : fait au lot D bis (2026-11-25, voir plus bas) ;
+      - `ECR-0363` (comparateur des moyens de paiement internationaux) : fait au lot F ; ~~`ECR-0370` (registre des risques pays et contrepartie)~~ : fait au lot D bis.
     - **Mise en ligne** : cette migration modifie la base. Elle est à ajouter à `mise-a-jour-base.sql` au prochain paquet, après celles des lots A, B et C.
 - **Lot E, diaspora** — `✅ fait le 2026-11-24` (code ; recette à faire) : projets en Algérie, budget, jalons, justificatifs à double validation, mandats, patrimoine multidevise.
   - **Réalisé** (`ECR-0372` à `ECR-0381`, `DEC-016`, `DEC-018`, `CNV-13`, `CNV-14`) :
@@ -4502,7 +4588,7 @@ Ce que cela change : ce sont les contenus de formation par profil que le client 
     - **Écran** : onglet « Projets et patrimoine » de Mon entreprise.
     - **Tests** : `functional/finDiaspora.test.js` (4), sur les cas du classeur : budget restant 1 550 000, patrimoine net 10 000 000, double validation, partage et révocation.
     - **Pas fait dans ce lot** :
-      - `ECR-0378` (simulation de change sur un projet) : à faire avec le lot F ;
+      - ~~`ECR-0378` (simulation de change sur un projet)~~ : fait au lot D bis (2026-11-25) ;
       - `ECR-0379` (parcours administratif d'investissement) : il faut le contenu de référence du client ;
       - la préparation de transfert (`DEC-016`) : FINCLUDIA ne transfère rien. Un comparateur des moyens de transfert relève du lot F.
     - **Mise en ligne** : cette migration modifie la base. Elle est à ajouter à `mise-a-jour-base.sql` au prochain paquet, après celles des lots A à D.
@@ -4573,10 +4659,10 @@ Ce que cela change : ce sont les contenus de formation par profil que le client 
       - FINCLUDIA ne collecte rien et ne promet aucun rendement.
     - **Tests** : `functional/finLotG.test.js` (4).
     - **Pas fait** :
-      - `ECR-0274` à `0277` (feuilles de temps, compétences, plan de formation, recrutement) ;
-      - `ECR-0287`, `0289` à `0294` (espace des partenaires et institutions : portefeuille de dossiers, cohortes, licences) ;
-      - `ECR-0307` (rapports COSOB : règles du régulateur à fournir) ;
-      - les messages du forum ne sont pas encore dans l'export des données du centre de confiance.
+      - ~~`ECR-0274` à `0277` (feuilles de temps, compétences, plan de formation, recrutement)~~ : faits au lot H (2026-11-25) ;
+      - ~~`ECR-0287`, `0289` à `0294` (espace des partenaires et institutions : portefeuille de dossiers, cohortes, licences)~~ : faits au lot I (2026-11-25) ;
+      - ~~`ECR-0307` (rapports COSOB : règles du régulateur à fournir)~~ : fait au lot I, format par défaut (2026-11-25) ;
+      - ~~les messages du forum ne sont pas encore dans l'export des données du centre de confiance~~ : ajoutés le 2026-11-25, avec les bulletins de paie de la personne et ses résultats de l'Academy.
     - **Mise en ligne** : cette migration modifie la base. Elle est à ajouter à `mise-a-jour-base.sql` au prochain paquet, après celles des lots A à E.
   - **Paie et comptabilité, sur valeurs par défaut : fait le 2026-11-24** (code ; recette à faire).
     - **Décision de l'utilisateur (2026-11-24)** : « mets des valeurs par défaut pour le moment et compile les questions à poser au client ». Elle prime, pour ces deux modules, sur la règle « aucune règle de paie inventée » :
@@ -4584,7 +4670,7 @@ Ce que cela change : ce sont les contenus de formation par profil que le client 
       - elles sont toutes déclarées dans la fenêtre « Valeurs réglementaires à confirmer », 8 valeurs de plus, soit 20 au total : `PAIE-001` à `PAIE-006`, `SCF-001` et `SCF-002` ;
       - une valeur confirmée remplace la valeur par défaut, à partir de sa date. Un texte confirmé valide la règle par défaut telle qu'elle est écrite ;
       - tant qu'une valeur n'est pas confirmée, l'écran dit « provisoire », le bulletin s'imprime « brouillon » et les états portent « non certifiés » (`DEC-001` reste tenu : rien de provisoire n'est caché).
-    - **Questions au client** : `QUESTIONS_CLIENT.md`, 33 questions (paie, comptabilité, valeurs en attente, modules à cadrer, autres choix par défaut).
+    - **Questions au client** : abandonnées le 2026-11-25 sur consigne de l'utilisateur (« pas besoin, fais comme tu dis ») ; nos choix par défaut sont appliqués (lot H ci-dessous) et `QUESTIONS_CLIENT.md` est retiré.
     - **Données** : migration `20261129120000_fin_payroll_ledger`.
       - Le salarié reçoit un matricule, un salaire de base et le temps partiel.
       - Nouvelles tables :
@@ -4637,15 +4723,166 @@ Ce que cela change : ce sont les contenus de formation par profil que le client 
     - **Tests** :
       - `functional/finPayrollLedger.test.js` (3) ;
       - `functional/admin-regulatory.test.js` et `e2e/regulatory-confirm-journey.test.js` mis à 20 valeurs.
-    - **Pas fait** (questions Q11, Q12, Q20 à Q24 de `QUESTIONS_CLIENT.md`) :
-      - fichiers de déclaration annuelle ;
-      - accès des salariés à leurs bulletins ;
-      - clôture annuelle et à-nouveaux automatiques ;
-      - états au format officiel du SCF ;
-      - amortissements et valorisation des stocks ;
-      - lettrage et import des relevés bancaires.
     - **Mise en ligne** : la migration `20261129120000_fin_payroll_ledger` est à ajouter à `mise-a-jour-base.sql` au prochain paquet, avec celles des lots A à G.
-  - **Piste notée le 2026-11-24** : l'administration tient déjà les cours officiels de la Banque d'Algérie (`P10-05`, « Cours des devises »). Les écrans des lots D et E pourraient proposer ce cours par défaut au lieu de le faire saisir à chaque coût. La personne garderait la main sur le cours retenu.
+- **Lot H, compléments sur nos choix par défaut** — `✅ fait le 2026-11-25` (code ; recette à faire), sur la consigne « pas besoin de confirmations, fais comme tu dis ; ne demande que ce que tu ne sais vraiment pas ».
+  - **Données** : migration `20261130120000_fin_lot_h`.
+    - Bulletin : primes non mensuelles, IRG à part, heures supplémentaires.
+    - Salarié : compte FINCLUDIA lié et numéro de sécurité sociale.
+    - Nouvelles tables :
+      - RH : temps de travail, compétences, formations, postes, candidats ;
+      - comptabilité : immobilisations, exercices clôturés, lignes de relevé bancaire.
+  - **Choix par défaut appliqués** (`constants/finEmployerRules.js`) :
+    - primes non mensuelles soumises à cotisations, IRG à part au taux de 10 % ;
+    - heure supplémentaire payée au taux horaire (base / 173,33 h) majoré de 50 % ;
+    - exercice = année civile ;
+    - amortissement linéaire au mois, durées par catégorie :
+      - logiciel 3 ans, informatique 3 ans ;
+      - matériel et véhicule 5 ans ;
+      - mobilier 10 ans ;
+      - bâtiment 20 ans ;
+    - achat d'équipement d'au moins 30 000 DA HT : immobilisé en 218, sinon en charge ;
+    - stocks : chaque lot garde son coût (déjà en place) ;
+    - relevé bancaire en CSV, pointage au même montant à 7 jours près.
+  - **Paie** :
+    - primes non mensuelles ;
+    - heures supplémentaires validées reprises dans le lot du mois ;
+    - numéro de sécurité sociale ;
+    - état annuel des salaires en CSV (une ligne par salarié, lots validés) ;
+    - accès du salarié à ses bulletins validés : son employeur le lie par l'e-mail de son compte, et il les voit dans la page « Mes bulletins de paie » (`/app/bulletins`, menu du compte).
+  - **Comptabilité** :
+    - **États au format SCF** :
+      - bilan actif et passif par postes (immobilisations nettes, stocks, clients, impôts, autres débiteurs, trésorerie ; capital, réserves, report à nouveau, résultat, emprunts, provisions, fournisseurs, autres dettes) ;
+      - compte de résultat par nature (production, consommation, valeur ajoutée, EBE, résultats opérationnel, financier et ordinaire, éléments extraordinaires, résultat net) ;
+      - toujours « non certifiés ».
+    - **Immobilisations** :
+      - registre ;
+      - dotations de l'année proposées en brouillon au 31 décembre (681 / 28x), une par immobilisation et par an ;
+      - sortie d'une immobilisation.
+    - **Clôture d'exercice** :
+      - refusée s'il reste des brouillons ;
+      - ferme les 12 mois ;
+      - crée l'écriture d'à-nouveaux validée du 1er janvier suivant, avec le résultat en 120 ou 129 ;
+      - les vues postérieures repartent de cette écriture, sans double compte.
+    - **Banque** :
+      - import du relevé ;
+      - pointage automatique, puis manuel ou dépointage ;
+      - lignes du relevé et écritures non pointées.
+  - **RH** (`ECR-0274` à `0277`) :
+    - temps de travail par jour, validé par une autre personne ;
+    - compétences sur 4 niveaux ;
+    - plan de formation, dont le coût n'est visible que de ceux qui lisent la finance ou la paie ;
+    - recrutement : postes et candidats avec leur étape. Seuls le nom et l'étape sont gardés, effaçables ; « recruté » pourvoit le poste.
+  - **Tests** : `functional/finPayrollLedger.test.js`, 5 tests au total (2 de plus).
+  - Les deux points restés ouverts (espace partenaires, rapports COSOB) sont faits au lot I ci-dessous : le classeur les décrit (`02_ECRANS`, `22_AUTORISATIONS`, `23_PARTENAIRES`).
+- **Lot I, espace des partenaires et institutions, rapport réglementaire des plateformes** — `✅ fait le 2026-11-25` (code ; recette à faire).
+  - **Données** : migration `20261201120000_fin_partner_portal`.
+    - Espaces partenaires : financeur, institution ou plateforme de financement participatif. Leurs membres sont des comptes FINCLUDIA, nommés par l'administration.
+    - Une offre peut être rattachée à l'espace d'un financeur.
+    - Échanges sur une demande : demande de pièce, commentaire, réponse.
+    - Programmes, cohortes, formations affectées, apprenants invités.
+    - Plateforme rattachée à une campagne, et rapports de campagne.
+  - **Administration** (page « Partenaires ») : créer un espace, ajouter ou retirer ses membres par e-mail, fixer les licences et le seuil d'anonymat, le désactiver, rattacher une offre à un financeur.
+  - **Financeur** (`ECR-0287`, `0288`, `DRT-011`), page « Espace partenaire » (`/app/partenaire`, menu du compte) :
+    - il voit seulement les demandes adressées à ses offres ;
+    - pour chacune, seulement ce que l'organisation a choisi de partager, lu au moment de l'ouverture : profil, tableau de bord, plan de trésorerie, factures émises, projets ;
+    - il fait avancer l'état du dossier, demande des pièces avec une échéance, commente, et clôt ses demandes ;
+    - l'organisation répond depuis sa demande (onglet « Financement et partenaires ») ;
+    - délai moyen de réponse (`E053`).
+  - **Institution** (`ECR-0289` à `0294`, `DRT-012`, `DRT-024`, `PRT-007`, `PRT-020`) :
+    - programmes avec jalons et avancement (`E051`) ;
+    - cohortes, formations publiées affectées ;
+    - apprenants invités par e-mail. Chacun accepte ou refuse dans sa page « Formations proposées » (`/app/mes-cohortes`) : c'est son consentement, et il consomme une licence (0 = sans limite) ;
+    - chiffres agrégés seulement : activation (`E048`), complétion (`E049`), attestations, variation entre premier et dernier score de quiz (`E052`). Rien n'est montré en dessous du seuil d'anonymat (5 par défaut) ;
+    - utilisation des licences (`E050`) ;
+    - export CSV agrégé, sans aucune ligne individuelle.
+  - **Plateforme et rapport réglementaire** (`ECR-0307`, `DRT-010`) :
+    - l'organisation rattache sa campagne à l'espace de la plateforme ;
+    - elle prépare le rapport d'une période : engagements déclarés, confirmés et annulés, cumul, reste à collecter, contrôles, plateforme et agrément ;
+    - une autre personne le valide (contrôlé en base) ;
+    - export CSV ;
+    - la plateforme ne lit que les rapports validés de ses campagnes. Format par défaut : l'instruction COSOB n'est pas reproduite dans le classeur.
+  - **Tests** : `functional/finPartnerPortal.test.js` (3).
+  - ~~**Pas fait** : les sessions de formation propres à une institution~~ : fait au lot I bis (2026-11-25, ci-dessous).
+- **Lot I bis, formations et sessions d'une institution** (`ECR-0294`, `PRT-007`, `PRT-020`) — `✅ fait le 2026-11-25` (code ; recette à faire). Migration `20261209120000_fin_institution_training`.
+  - **Formations propres** :
+    - l'institution écrit ses leçons (texte, échappé) et son évaluation finale (questions à réponse unique, explications, questions critiques possibles, seuil) ;
+    - elle publie, puis affecte la formation à ses cohortes ;
+    - la formation n'est jamais au catalogue public, ni dans la recherche, le référencement ou les recommandations ;
+    - seuls les membres de l'institution et les apprenants actifs des cohortes concernées peuvent l'ouvrir : pour un autre compte, elle n'existe pas ;
+    - elle délivre une « attestation pédagogique », qui dit n'être ni une habilitation professionnelle ni une habilitation réglementaire.
+  - **Sessions** :
+    - une cohorte, un formateur, une date et des heures, un lieu, la formation suivie ;
+    - la feuille de présence est tenue par l'institution, sur ses propres invitations ;
+    - on voit le taux de présence (`E066`), la complétion (`E049`) et le score de formation (points obtenus / points possibles des évaluations validées, `E067`) ;
+    - progression et score restent des agrégats, au-dessus du seuil d'anonymat.
+- **Lot D bis, devises et risques** — `✅ fait le 2026-11-25` (code ; recette à faire).
+  - **Factures en devise** (`FAC-013` à `FAC-016`) : migration `20261205120000_fin_export_invoices`.
+    - Une facture de vente (export) ou d'achat (fournisseur étranger) peut être dans une autre devise que celle de l'organisation, avec son cours daté et sa source. Le cours officiel est proposé par défaut.
+    - Sans cours, rien n'est émis (« règle absente : aucune émission »). Une facture d'export nomme son client ; elle est émise directement, sans brouillon ni règlement comptant.
+    - La facture garde sa devise, ses montants et son cours. Ce que les tableaux de bord additionnent est sa contre-valeur au cours de la facture.
+    - **Encaissement partiel** (`FAC-015`) : dans la devise de la facture, avec le cours du jour. La créance est suivie en devise ; elle reste valorisée au cours de la facture, et l'écart de change (gain ou perte) est montré à part.
+    - **Avoir** (`FAC-016`) : dans la devise de la facture, au cours de la facture, sans la modifier.
+    - Le PDF d'une facture en devise est dans cette devise, avec la contre-valeur, le cours, sa date et sa source.
+    - **Comptabilité** : l'écriture d'un encaissement solde le compte du client ou du fournisseur au cours de la facture, et passe l'écart en 766 (gains de change) ou 666 (pertes de change).
+    - Vérifié par l'API : 3 000 € à 150 ; 1 000 € encaissés à 152, soit un gain de 2 000 DA en 766 ; avoir de 500 € ; solde de 1 500 € à 148, soit une perte de 3 000 DA en 666. Le trop-perçu en devise est refusé.
+  - **Registre des risques** (`ECR-0370`) : migration `20261206120000_fin_trade_risks`, dans l'onglet Import-export.
+    - Chaque risque porte son type (pays, contrepartie, transport, paiement, change), son pays et sa contrepartie, une opération si besoin.
+    - Le niveau vaut probabilité × impact, sur des échelles de 1 à 5 (version 1 des échelles). Il se range en bandes : faible jusqu'à 4, modéré jusqu'à 9, élevé jusqu'à 16, critique au-delà.
+    - Une cotation sans preuve est un « indice provisoire ».
+    - La couverture par la garantie vaut montant garanti / exposition (`E060`, `CAL-0728`).
+    - On peut associer des actions avec leur responsable et leur échéance, réévaluer (l'historique de chaque cotation est conservé) et clore le risque.
+    - Une revue en retard est signalée.
+    - Choix par défaut : les libellés et les bandes de l'échelle. Le classeur demande des « échelles versionnées » sans les donner.
+  - **Effet de change sur un projet diaspora** (`ECR-0378`), dans le détail du projet :
+    - un montant dans la devise de la personne est converti dans celle du projet au cours de référence daté, puis à des cours de scénario ou à ± 5 et ± 10 % ;
+    - l'impact vaut montant × (cours scénario − cours de référence) (`E061`, `CAL-0734`) ; on obtient aussi ce qu'il faudrait pour couvrir le reste à financer, et la fourchette des scénarios ;
+    - la simulation ne modifie rien ; un scénario peut être conservé (avec son cours, sa date et sa source).
+  - **Export des données personnelles** : il contient désormais les messages du forum de la personne, ses bulletins de paie validés et ses résultats de l'Academy.
+  - **Mise en ligne** : les deux migrations sont ajoutées à `mise-a-jour-base.sql`. Le fichier a été rejoué deux fois sur une base jetable : aucune erreur, schéma identique, 14 migrations notées.
+- **Lot F bis, passeport financier et factures à financer** — `✅ fait le 2026-11-25` (code ; recette à faire). Migration `20261207120000_fin_passport_financing`, onglet « Financement et partenaires ».
+  - **Passeport financier** (`FAC-010` ; `ECR-0012`, `0050`, `0107`, `0152`) :
+    - l'organisation le prépare pour une période, en choisissant son contenu : activité et trésorerie, créances et dettes, concentration des clients (parts du premier et des cinq premiers, jamais leurs noms), comptes (résultat et BFR, s'il y a des écritures validées), qualité des preuves ;
+    - c'est un instantané daté et numéroté. L'indice de complétude (`E063`) est expliqué contrôle par contrôle : identité fiscale, trois mois d'historique, règlements, coûts déclarés, comptes validés, rapprochement bancaire, pièces ;
+    - sans comptes validés ou avec moins de trois mois d'historique, c'est un « passeport provisoire de gestion » ;
+    - ses limites sont écrites dans le passeport : ni notation, ni décision de crédit, ni promesse ;
+    - publier fige le contenu (avec consentement explicite) ; révoquer arrête tous ses partages ; un brouillon se supprime.
+  - **Factures à financer** (`FAC-011` ; `ECR-0104`) :
+    - le serveur liste les factures de vente émises encore dues ;
+    - il exclut, avec la raison : déjà dans un lot en cours, en litige, sans client, client sans NIF, sans échéance, échue, sous le minimum ;
+    - une facture se marque « en litige » depuis sa fiche ;
+    - trésorerie théorique = éligible × taux d'avance − éligible × taux de frais (`E064`, même calcul que le simulateur, cas `TST-00037`), avec des taux d'hypothèse à remplacer par ceux de l'offre ;
+    - le lot est vérifié de nouveau par le serveur à sa création ; une facture n'est que dans un lot en cours à la fois ;
+    - le lot s'exporte en CSV (numéro, client, NIF, dates, montant dû), se clôt ou s'annule ; un lot annulé rend ses factures disponibles.
+  - **Partage avec un financeur** : un passeport publié ou un lot est partagé avec l'espace d'un financeur (lot I) :
+    - consentement explicite, date de fin (180 jours au plus), arrêt à tout moment ;
+    - le financeur le lit dans son espace partenaire ;
+    - chaque ouverture est enregistrée, et l'organisation voit combien de fois il a été ouvert ;
+    - expiré ou arrêté, il n'existe plus pour le financeur.
+  - **Défaut corrigé avant livraison** : la première version de la migration portait une contrainte CHECK sur des colonnes de clé étrangère, que MariaDB refuse (erreur 1901). La migration a échoué à mi-chemin sur la base de développement, qui a été nettoyée (tables vides) ; la règle est désormais vérifiée par le serveur. Le fichier livré est la version corrigée.
+  - **Vérifié par l'API** :
+    - exclusions motivées et trésorerie nette de 3 160 000 DA pour 4 000 000 à 80 % et 1 % ;
+    - une facture inéligible est refusée dans un lot ;
+    - une facture déjà dans un lot est exclue ensuite ;
+    - publication sans consentement refusée ;
+    - partage, ouverture par le financeur (comptée), refus pour un autre compte, plus d'accès après révocation.
+  - **Mise en ligne** : migration ajoutée à `mise-a-jour-base.sql`, rejoué deux fois sur une base jetable : aucune erreur, schéma identique, 15 migrations notées.
+- **Simulateurs complétés** (`14_SIMULATEURS`) — `✅ fait le 2026-11-25`. 167 lignes du classeur sur 180 ont désormais un calcul.
+  - **Nouveaux simulateurs** :
+    - trésorerie en Monte-Carlo : 1 000 trajectoires calculées de la même façon à chaque fois, la probabilité de passer sous zéro, les soldes finaux aux 1er, 5e et 9e déciles. C'est un calcul statistique, sans IA ;
+    - sensibilité d'un portefeuille ; cohorte de formation ; test A/B (taux, écart, p-valeur du test sur deux proportions) ; programme institutionnel ; ancienneté d'une donnée ;
+    - TVA nette (à partir des montants donnés, aucun taux supposé) ; équilibre des écritures ; absentéisme.
+  - **Paie** : du brut au net (heures supplémentaires et primes non mensuelles comprises), budget de masse salariale, plan de recrutement. Ils sont calculés par le moteur de paie du lot G, sur ses barèmes par défaut, et l'écran dit « à confirmer ».
+  - **Restent non simulés**, avec leur raison à l'écran :
+    - 12 calculs fiscaux sans taux confirmé (IBS, IRG des professions libérales, CASNOS, provisions et comparaison de régimes) ;
+    - la comparaison d'Incoterms, déjà dans l'onglet Import-export.
+- **Cours officiels par défaut** (piste du 2026-11-24) — `✅ fait le 2026-11-25` :
+  - dans l'import-export (coûts) et la diaspora (dépenses, valeurs), un cours vide est prérempli avec le cours officiel de la Banque d'Algérie (`GET /api/fin/entreprise/cours-officiel`), avec sa date et sa source, en passant par le dinar si aucune des deux devises n'est le dinar ;
+  - « Cours officiel proposé, à vérifier ou modifier » ;
+  - un cours déjà saisi n'est jamais remplacé.
+- **Mise en ligne** (2026-11-25) : `larbi-en-ligne/mise-a-jour-base.sql` contient les dix migrations du 2026-11-23 au 2026-12-02, de `fin_organizations` à `fin_academy`.
+  - Chaque instruction est rejouable : `IF NOT EXISTS`, ou suppression puis recréation des contraintes, `INSERT IGNORE`. Chaque migration est notée une fois.
+  - Vérifié sur une base jetable : `base-de-donnees.sql`, puis la mise à jour jouée deux fois. Aucune erreur ; colonnes et contraintes identiques à la base de développement ; 10 migrations notées.
+  - Le fichier pèse environ 3,2 Mo, à cause du contenu de l'Academy : si phpMyAdmin le refuse, l'importer en deux fois.
 - À chaque lot : ses cas de `27_RECETTES` et `30_TESTS_CALCUL` deviennent des tests automatisés.
 
 

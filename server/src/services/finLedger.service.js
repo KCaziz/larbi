@@ -271,15 +271,24 @@ export function proposalFor(event) {
     const label = `Règlement ${p.document.number ?? p.document.label}`.slice(0, 200);
     const money = settlementAccount(p.method);
     const third = sale ? AUTO_ACCOUNTS.customers : AUTO_ACCOUNTS.suppliers;
+    // Lot D bis (FAC-015): a payment in another currency settles the third party
+    // at the INVOICE's rate (what was booked); the gap with the cash at the day's
+    // rate is an exchange gain (766) or loss (666).
+    const booked = p.foreignValue && p.document.bookingRate ? Math.round(p.foreignValue * p.document.bookingRate) : p.value;
+    const gap = p.value - booked;
     const lines = sale
       ? [
           { account: money, label, debit: p.value, credit: 0 },
-          { account: third, label, debit: 0, credit: p.value },
+          { account: third, label, debit: 0, credit: booked },
         ]
       : [
-          { account: third, label, debit: p.value, credit: 0 },
+          { account: third, label, debit: booked, credit: 0 },
           { account: money, label, debit: 0, credit: p.value },
         ];
+    // Sale: more cash than booked is a gain. Purchase: paying more than booked is a loss.
+    const gain = sale ? gap : -gap;
+    if (gain > 0) lines.push({ account: '766', label, debit: 0, credit: gain });
+    if (gain < 0) lines.push({ account: '666', label, debit: -gain, credit: 0 });
     return { sourceKey: `pay:${p.id}`, journal: journalOfSettlement(p.method), date: p.receivedAt, label, lines };
   }
   if (event.type === 'payroll') {
@@ -312,7 +321,7 @@ export async function proposeEntries(prisma, ctx) {
   const businessId = ctx.business.id;
   const [documents, payments, runs, known, closed] = await Promise.all([
     prisma.finBusinessDocument.findMany({ where: { businessId, archivedAt: null, deletedAt: null, docType: { in: ['invoice', 'credit_note'] }, state: 'issued' }, include: { contact: { select: { name: true } } } }),
-    prisma.finBusinessPayment.findMany({ where: { businessId, archivedAt: null, deletedAt: null, status: 'active' }, include: { document: { select: { kind: true, number: true, label: true } } } }),
+    prisma.finBusinessPayment.findMany({ where: { businessId, archivedAt: null, deletedAt: null, status: 'active' }, include: { document: { select: { kind: true, number: true, label: true, bookingRate: true } } } }),
     prisma.finPayrollRun.findMany({ where: { businessId, status: { in: ['validated', 'closed'] } }, include: { slips: true } }),
     prisma.finLedgerEntry.findMany({ where: { businessId, sourceKey: { not: null } }, select: { sourceKey: true } }),
     closedPeriods(prisma, businessId),

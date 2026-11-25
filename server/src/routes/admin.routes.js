@@ -111,8 +111,8 @@ import { listSettings, upsertSettingRoute } from '../controllers/admin/settings.
 import { upsertSettingSchema } from '../validation/settings.schemas.js';
 import { confirmRegulatory, listRegulatory } from '../controllers/admin/regulatory.controller.js';
 import { confirmRegulatorySchema } from '../validation/regulatoryParams.schemas.js';
-import { forumDecisionSchema, forumHeldSchema, partnerOfferSchema, partnerRequestStatusSchema, updatePartnerOfferSchema } from '../validation/finBusiness.schemas.js';
-import { getModeration, getPartnerOffers, getPartnerRequestsAdmin, patchPartnerOffer, patchPartnerRequest, postHeldDecision, postPartnerOffer, postReportDecision } from '../controllers/admin/lotG.controller.js';
+import { forumDecisionSchema, forumHeldSchema, partnerOfferSchema, partnerRequestStatusSchema, partnerSpaceMemberSchema, partnerSpaceSchema, partnerSpaceUpdateSchema, updatePartnerOfferSchema } from '../validation/finBusiness.schemas.js';
+import { deletePartnerSpaceMember, getModeration, getPartnerOffers, getPartnerRequestsAdmin, getPartnerSpaces, patchPartnerOffer, patchPartnerRequest, patchPartnerSpace, postHeldDecision, postPartnerOffer, postPartnerSpace, postPartnerSpaceMember, postReportDecision } from '../controllers/admin/lotG.controller.js';
 import {
   listCertificates,
   restoreCertificate,
@@ -387,6 +387,12 @@ router.post('/partenaires/offres', validateBody(partnerOfferSchema), asyncRoute(
 router.patch('/partenaires/offres/:id', validateBody(updatePartnerOfferSchema), asyncRoute(patchPartnerOffer));
 router.get('/partenaires/demandes', asyncRoute(getPartnerRequestsAdmin));
 router.patch('/partenaires/demandes/:id', validateBody(partnerRequestStatusSchema), asyncRoute(patchPartnerRequest));
+// Lot I: the partners' own spaces and their members.
+router.get('/partenaires/espaces', asyncRoute(getPartnerSpaces));
+router.post('/partenaires/espaces', validateBody(partnerSpaceSchema), asyncRoute(postPartnerSpace));
+router.patch('/partenaires/espaces/:id', validateBody(partnerSpaceUpdateSchema), asyncRoute(patchPartnerSpace));
+router.post('/partenaires/espaces/:id/membres', validateBody(partnerSpaceMemberSchema), asyncRoute(postPartnerSpaceMember));
+router.delete('/partenaires/espaces/:id/membres/:member', asyncRoute(deletePartnerSpaceMember));
 router.get('/forum/moderation', asyncRoute(getModeration));
 router.post('/forum/signalements/:id/decision', validateBody(forumDecisionSchema), asyncRoute(postReportDecision));
 router.post('/forum/:kind(thread|post)/:id/decision', validateBody(forumHeldSchema), asyncRoute(postHeldDecision));

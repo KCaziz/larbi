@@ -8,7 +8,7 @@ import {
 } from '../constants/finBusiness.js';
 import { cashPlan, pilotFigures, stockLots } from './finBusinessPilot.service.js';
 import { HttpError } from '../utils/httpError.js';
-import { buildBusinessDashboard, creditNotesOf, documentSettlement, documentTotal, isIssuedInvoice } from './finBusinessView.service.js';
+import { buildBusinessDashboard, creditNotesOf, documentSettlement, documentTotal, foreignTotal, isIssuedInvoice } from './finBusinessView.service.js';
 import { checkVersion, journal } from './finOrganization.service.js';
 
 /**
@@ -182,7 +182,7 @@ async function assertNumberFree(prisma, businessId, kind, docType, number) {
 
 export async function createDocument(prisma, ctx, body) {
   const { business } = ctx;
-  const { docType = 'invoice', draft = false, lines, reglement, ...fields } = body;
+  const { docType = 'invoice', draft = false, lines, reglement, exchange, ...fields } = body;
   if (!BUSINESS_DOCUMENT_KINDS.includes(fields.kind)) {
     throw new HttpError(422, 'Unknown document kind', { reason: 'unknownKind' });
   }
@@ -190,11 +190,21 @@ export async function createDocument(prisma, ctx, body) {
   // jamais sans taux daté, et un tableau de bord mêlant deux devises ne
   // pourrait additionner rien du tout. Le refus le dit, plutôt que de laisser
   // une contrainte SQL parler à sa place.
+  // Lot D bis (FAC-013, FAC-014) : une facture dans une autre devise est
+  // acceptée AVEC son cours daté. Elle garde sa devise et ses montants ; ce que
+  // le moteur additionne est sa contre-valeur à ce cours. Sans cours, rien
+  // n'est émis (« règle absente : aucune émission »).
+  let foreign = null;
   if (fields.currency !== business.currency) {
-    throw new HttpError(422, 'A document uses the currency of its business', {
-      reason: 'currencyMismatch',
-      expected: business.currency,
-    });
+    if (!exchange) {
+      throw new HttpError(422, 'A document in another currency needs its dated rate', { reason: 'rateRequired', expected: business.currency });
+    }
+    if (docType !== 'invoice' || draft) throw new HttpError(422, 'Only an issued invoice is in another currency', { reason: 'foreignInvoiceOnly' });
+    if (reglement) throw new HttpError(422, 'A foreign-currency invoice is paid with its own rate', { reason: 'foreignPaidSeparately' });
+    if (fields.kind === 'sale' && !fields.contactId) throw new HttpError(422, 'An export invoice names its client', { reason: 'clientRequired' });
+    if (new Date(exchange.rateDate) > new Date(fields.issuedAt)) throw new HttpError(422, 'The rate cannot be later than the invoice', { reason: 'rateAfterIssue' });
+    foreign = { ...exchange, currency: fields.currency };
+    fields.currency = business.currency;
   }
   // FAC-001 : un devis s'adresse à un client et dit ce qu'il propose.
   if (docType === 'quote' && !fields.contactId) throw new HttpError(422, 'A quote needs its client', { reason: 'clientRequired' });
@@ -228,7 +238,24 @@ export async function createDocument(prisma, ctx, body) {
   // Une facture en brouillon attend son numéro jusqu'à l'émission ; un devis
   // en a un dès sa création (il s'envoie, il s'exporte).
   const numbered = !fields.number && !(docType === 'invoice' && state === 'draft');
-  const rows = lines ? linesData(lines) : null;
+  let rows = lines ? linesData(lines) : null;
+  let amounts = rows ? { amountExcl: linesTotal(rows) } : {};
+  if (foreign) {
+    const foreignExcl = rows ? linesTotal(rows) : fields.amountExcl;
+    const foreignTax = fields.taxAmount ?? 0;
+    const at = (value) => Math.round(value * foreign.rate);
+    if (rows) rows = rows.map((row) => ({ ...row, unitPrice: at(row.unitPrice), amount: at(row.amount) }));
+    amounts = {
+      amountExcl: rows ? linesTotal(rows) : at(foreignExcl),
+      taxAmount: at(foreignTax),
+      foreignCurrency: foreign.currency,
+      foreignAmountExcl: foreignExcl,
+      foreignTaxAmount: foreignTax,
+      bookingRate: foreign.rate,
+      rateDate: foreign.rateDate,
+      rateSource: foreign.rateSource ?? null,
+    };
+  }
 
   return withFreshNumber(
     () =>
@@ -241,7 +268,8 @@ export async function createDocument(prisma, ctx, body) {
             number,
             docType,
             state,
-            ...(rows ? { amountExcl: linesTotal(rows), lines: { create: rows } } : {}),
+            ...amounts,
+            ...(rows ? { lines: { create: rows } } : {}),
             source: 'declared',
             status: 'active',
           },
@@ -448,11 +476,18 @@ export async function createCreditNote(prisma, ctx, invoiceId, body) {
   if (body.number) await assertNumberFree(prisma, business.id, invoice.kind, 'credit_note', body.number);
 
   const previous = await prisma.finBusinessDocument.findMany({ where: { businessId: business.id, docType: 'credit_note', relatedId: invoice.id, ...activeFilter } });
-  const remaining = documentTotal(invoice) - previous.reduce((sum, c) => sum + documentTotal(c), 0);
+  // FAC-016 : l'avoir d'une facture en devise est dans cette devise, au cours
+  // de la facture, sans la modifier.
+  const valueOf = invoice.foreignCurrency ? foreignTotal : documentTotal;
+  const remaining = valueOf(invoice) - previous.reduce((sum, c) => sum + valueOf(c), 0);
   const amount = body.amountExcl + (body.taxAmount ?? 0);
   if (amount > remaining) {
     throw new HttpError(422, 'A credit note cannot exceed what the invoice is still worth', { reason: 'creditExceedsInvoice', max: remaining });
   }
+  const at = (value) => (invoice.foreignCurrency ? Math.round(value * invoice.bookingRate) : value);
+  const foreignFields = invoice.foreignCurrency
+    ? { foreignCurrency: invoice.foreignCurrency, foreignAmountExcl: body.amountExcl, foreignTaxAmount: body.taxAmount ?? 0, bookingRate: invoice.bookingRate, rateDate: invoice.rateDate, rateSource: invoice.rateSource }
+    : {};
 
   const numbered = !body.number;
   return withFreshNumber(
@@ -470,9 +505,10 @@ export async function createCreditNote(prisma, ctx, invoiceId, body) {
             contactId: invoice.contactId,
             label: body.label ?? invoice.label,
             issuedAt: body.issuedAt,
-            amountExcl: body.amountExcl,
-            taxAmount: body.taxAmount ?? 0,
+            amountExcl: at(body.amountExcl),
+            taxAmount: at(body.taxAmount ?? 0),
             currency: invoice.currency,
+            ...foreignFields,
             note: body.note ?? null,
             source: 'declared',
             status: 'active',
@@ -503,17 +539,51 @@ export async function createPayment(prisma, ctx, documentId, body) {
   // « Le règlement est dans la devise de son document » référence une colonne
   // de clé étrangère : MariaDB refuse une telle CHECK (erreur 1901). La règle
   // vit donc ici, et le test de sécurité la vérifie par l'API.
-  if (body.currency !== document.currency) {
+  // FAC-015 : une facture en devise se règle dans sa devise, avec le cours daté
+  // de la conversion ; l'encaissement est la contre-valeur à ce cours.
+  const expectedCurrency = document.foreignCurrency ?? document.currency;
+  if (body.currency !== expectedCurrency) {
     throw new HttpError(422, 'A payment uses the currency of its document', {
       reason: 'currencyMismatch',
-      expected: document.currency,
+      expected: expectedCurrency,
     });
+  }
+  if (document.foreignCurrency && (!body.rate || !body.rateDate)) {
+    throw new HttpError(422, 'A payment in another currency needs its dated rate', { reason: 'rateRequired' });
+  }
+  if (!document.foreignCurrency && (body.rate || body.rateDate)) {
+    throw new HttpError(422, 'A rate only applies to a foreign-currency invoice', { reason: 'rateNotApplicable' });
   }
   if (new Date(body.receivedAt) < new Date(document.issuedAt)) {
     throw new HttpError(422, 'A payment cannot predate its document', { reason: 'paymentBeforeIssue' });
   }
 
   const settlement = await settlementOf(prisma, business.id, document);
+  if (document.foreignCurrency) {
+    if (body.value > settlement.devise.outstanding) {
+      throw new HttpError(422, 'This payment exceeds what is still due', { reason: 'overpayment', outstanding: settlement.devise.outstanding, currency: document.foreignCurrency });
+    }
+    return prisma.$transaction(async (tx) => {
+      const payment = await tx.finBusinessPayment.create({
+        data: {
+          businessId: business.id,
+          documentId,
+          value: Math.round(body.value * body.rate),
+          currency: document.currency,
+          foreignValue: body.value,
+          rate: body.rate,
+          rateDate: body.rateDate,
+          receivedAt: body.receivedAt,
+          method: body.method ?? null,
+          note: body.note ?? null,
+          source: 'declared',
+          status: 'active',
+        },
+      });
+      await journal(tx, { businessId: business.id, actorId: ctx.member.userId, action: 'payment.created', objectType: 'payment', objectId: payment.id, details: { document: document.number, currency: document.foreignCurrency } });
+      return payment;
+    });
+  }
   // Le trop-perçu est refusé plutôt que toléré : il vient presque toujours
   // d'une saisie en double, et le laisser passer fausse les créances sans que
   // personne ne s'en aperçoive. Un vrai trop-perçu se traite par un avoir,

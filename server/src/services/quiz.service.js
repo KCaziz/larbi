@@ -93,7 +93,42 @@ export function gradeAttempt(questions, answers, passingScore) {
   const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
   const earnedPoints = results.reduce((sum, r) => sum + r.points, 0);
   const score = totalPoints === 0 ? 0 : Math.round((earnedPoints / totalPoints) * 100);
-  return { results, totalPoints, earnedPoints, score, passed: totalPoints > 0 && score >= passingScore };
+  // P13-02 (rule V10): a critical question answered wrong fails the attempt, whatever the score.
+  const criticalErrors = results.filter((r) => r.question.critical && !r.correct).length;
+  return { results, totalPoints, earnedPoints, score, criticalErrors, passed: totalPoints > 0 && score >= passingScore && criticalErrors === 0 };
+}
+
+// P13-02 (rule V10): the questions of one attempt. Without `drawCount`, all of them. With
+// it, the critical questions always, then the others at random, those NOT served in the
+// previous attempt first (a new session asks other questions when the bank allows it).
+export function drawQuestions(questions, drawCount, previousIds = []) {
+  const ids = questions.map((q) => q.id);
+  if (!drawCount || drawCount >= ids.length) return ids;
+  const seen = new Set(previousIds);
+  const critical = questions.filter((q) => q.critical).map((q) => q.id);
+  const others = questions.filter((q) => !q.critical).map((q) => q.id);
+  const pool = [...shuffled(others.filter((id) => !seen.has(id))), ...shuffled(others.filter((id) => seen.has(id)))];
+  return [...critical, ...pool].slice(0, Math.max(drawCount, critical.length));
+}
+
+// The order the choices of each question are served in, when the quiz mixes them (a
+// true / false question keeps its two answers in place).
+export function choiceOrderFor(questions, ids) {
+  const byId = new Map(questions.map((q) => [q.id, q]));
+  const out = {};
+  for (const id of ids) {
+    const q = byId.get(id);
+    if (q && q.type !== 'text' && q.type !== 'true_false') out[id] = shuffled(q.choices.map((c) => c.id));
+  }
+  return out;
+}
+
+// A question with its choices in the attempt's order (choices added since go last).
+export function withChoiceOrder(question, choiceOrder) {
+  const order = choiceOrder?.[question.id];
+  if (!order) return question;
+  const rank = new Map(order.map((id, i) => [id, i]));
+  return { ...question, choices: [...question.choices].sort((a, b) => (rank.get(a.id) ?? 1e9) - (rank.get(b.id) ?? 1e9)) };
 }
 
 // ---- what the learner is given ---------------------------------------------------------
@@ -120,6 +155,7 @@ export function toCorrection(result, quiz) {
     maxPoints: question.points,
     choiceIds: answer?.choiceIds ?? [],
     text: answer?.text ?? '',
+    critical: Boolean(question.critical),
   };
   if (quiz.showCorrection) {
     out.explanation = question.explanation;

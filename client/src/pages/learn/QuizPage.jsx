@@ -78,6 +78,7 @@ function Question({ question, index, answer, onChange, feedback }) {
       {feedback && (
         <div className={`quiz-feedback ${feedback.correct ? 'right' : 'wrong'}`} role="status">
           <strong>{feedback.correct ? t('quiz.correct') : t('quiz.incorrect')}</strong>
+          {feedback.critical && <span className="learn-chip">{t('quiz.critical')}</span>}
           {question.type === 'text' && !feedback.correct && feedback.acceptedAnswers?.length > 0 && (
             <span>{t('quiz.acceptedAnswers', { answers: feedback.acceptedAnswers.join(' / ') })}</span>
           )}
@@ -142,7 +143,7 @@ export default function QuizPage() {
       await action();
     } catch (err) {
       const reason = err instanceof ApiError ? err.details?.reason : null;
-      setError(reason === 'no_attempts_left' ? t('quiz.noAttemptsLeft') : reason === 'already_submitted' ? t('quiz.alreadySubmitted') : t(errorKey(err)));
+      setError(reason === 'no_attempts_left' ? t('quiz.noAttemptsLeft') : reason === 'already_submitted' ? t('quiz.alreadySubmitted') : reason === 'exercise_required' ? t('quiz.exerciseRequired') : t(errorKey(err)));
     } finally {
       setBusy(false);
     }
@@ -250,6 +251,7 @@ export default function QuizPage() {
             <span className="quiz-score">{result.score} %</span>
             <strong>{result.passed ? t('quiz.resultPassed') : t('quiz.resultFailed', { score: result.passingScore })}</strong>
             <span>{t('quiz.pointsEarned', { earned: result.earnedPoints, total: result.totalPoints })}</span>
+            {result.criticalErrors > 0 && <span>{t('quiz.criticalFailed', { count: result.criticalErrors })}</span>}
             {enrollment?.certification && (
               <span className="learn-chip learn-chip-done">
                 <Award size={13} strokeWidth={2} aria-hidden="true" />

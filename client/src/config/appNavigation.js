@@ -1,5 +1,7 @@
 import {
   FileText,
+  Handshake,
+  School,
   MessagesSquare,
   ArrowLeftRight,
   Award,
@@ -99,6 +101,9 @@ export const SETTINGS_LINKS = [
   { to: '/app/forum', labelKey: 'appNav.forum', icon: MessagesSquare, adultsOnly: true },
   // Lot H: the payslips of an employee whose organisation gave them access.
   { to: '/app/bulletins', labelKey: 'appNav.payslips', icon: FileText },
+  // Lot I: courses proposed by an institution, and the partners' own space.
+  { to: '/app/mes-cohortes', labelKey: 'appNav.cohorts', icon: School },
+  { to: '/app/partenaire', labelKey: 'appNav.partnerSpace', icon: Handshake },
 ];
 
 // Where each address of the former connected space now lives. A bookmark, a

@@ -85,7 +85,7 @@ export async function createQuestion(req, res) {
 // Replaces the content of a question. The TYPE of a question never changes (delete it and
 // make another one): each type has its own shape.
 export async function updateQuestion(req, res) {
-  const { prompt, explanation, points, choices, correctTrue, acceptedAnswers } = req.body;
+  const { prompt, explanation, points, critical, choices, correctTrue, acceptedAnswers } = req.body;
   const result = await prisma.$transaction(async (tx) => {
     const question = await tx.quizQuestion.findUnique({ where: { id: req.params.id }, include: { choices: { orderBy: { position: 'asc' } } } });
     if (!question) throw new HttpError(404, 'Not found');
@@ -94,6 +94,7 @@ export async function updateQuestion(req, res) {
     if (prompt !== undefined) data.prompt = prompt;
     if (explanation !== undefined) data.explanation = explanation;
     if (points !== undefined) data.points = points;
+    if (critical !== undefined) data.critical = critical;
 
     if (question.type === 'text') {
       if (choices !== undefined || correctTrue !== undefined) throw new HttpError(400, 'A free-text question has accepted answers, not choices');

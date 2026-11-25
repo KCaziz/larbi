@@ -331,6 +331,7 @@ function SimulatorForm({ spec, business }) {
       {result && (
         <div className="tools-answer" role="status">
           {result.regleNonPubliee && <Notice variant="info">{t('business.tools.sim.ruleNotPublished')}</Notice>}
+          {result.baremesProvisoires && <Notice variant="info">{t('business.tools.sim.payrollProvisional')}</Notice>}
           <table className="pilot-table">
             <tbody>
               {result.outputs.map((o) => (

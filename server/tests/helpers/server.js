@@ -88,7 +88,16 @@ export async function boot({ production = false, extra = {}, subscribers = false
   const KEEP_TABLES = new Set(['_prisma_migrations', 'account_types', 'platform_settings']);
   async function reset() {
     const tables = await prisma.$queryRaw`SELECT table_name AS tablename FROM information_schema.tables WHERE table_schema = DATABASE()`;
-    const toTruncate = tables.filter((r) => !KEEP_TABLES.has(r.tablename));
+    const candidates = tables.filter((r) => !KEEP_TABLES.has(r.tablename));
+    // 140+ tables: a TRUNCATE costs tens of milliseconds even on an empty table,
+    // which brought every test close to its time limit. One query finds the
+    // tables that hold at least one row; only those are emptied.
+    const filled = candidates.length
+      ? await prisma.$queryRawUnsafe(
+          candidates.map(({ tablename }) => `SELECT '${tablename}' AS tablename FROM (SELECT 1 FROM \`${tablename}\` LIMIT 1) AS x`).join(' UNION ALL '),
+        )
+      : [];
+    const toTruncate = filled;
     if (toTruncate.length) {
       // MySQL/MariaDB has no multi-table TRUNCATE: one statement per table, with
       // foreign key checks off (truncation order would otherwise matter). A

@@ -7,6 +7,7 @@ import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate } from '../../lib/format.js';
 import { toMinorUnits } from '../../lib/money.js';
 import { currentOrganisation, newIdempotencyKey } from '../../lib/organisation.js';
+import { useOfficialRate } from '../../lib/officialRate.js';
 import Button from '../../components/ui/Button.jsx';
 import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
@@ -50,6 +51,21 @@ const REASONS = [
   'operationClosed',
   'rateRequired',
   'rateNotNeeded',
+  'foreignInvoiceOnly',
+  'foreignPaidSeparately',
+  'rateAfterIssue',
+  'rateNotApplicable',
+  'exposureRequired',
+  'consentRequired',
+  'invalidExpiry',
+  'notPublished',
+  'notEligible',
+  'passportNotFound',
+  'batchNotFound',
+  'shareNotFound',
+  'riskClosed',
+  'riskNotFound',
+  'sameCurrency',
   'namedPlaceRequired',
   'receiveByReception',
   'exportNotReceived',
@@ -70,6 +86,9 @@ const REASONS = [
   'holdingNotFound',
   'simulatorNotFound',
   // Lot G, second part: payroll and accounting.
+  'reportNotFound',
+  'spaceNotFound',
+  'messageNotFound',
   'accountNotFound',
   'overtimeAboveHours',
   'timesheetDecided',
@@ -281,9 +300,14 @@ const emptyLine = () => ({ label: '', quantity: '1', unitPrice: '' });
 
 function NewDocument({ business, contacts, operations = [], run }) {
   const { t, i18n } = useTranslation();
-  const currency = business.currency;
   const [type, setType] = useState('invoice');
-  const [form, setForm] = useState({ contactId: '', number: '', label: '', issuedAt: today(), dueAt: '', validUntil: '', taxAmount: '', costExcl: '', amountExcl: '', category: '', costNature: '', paidNow: false, method: 'especes', operationId: '' });
+  const [form, setForm] = useState({ contactId: '', number: '', label: '', issuedAt: today(), dueAt: '', validUntil: '', taxAmount: '', costExcl: '', amountExcl: '', category: '', costNature: '', paidNow: false, method: 'especes', operationId: '', currency: business.currency, rate: '', rateDate: today(), rateSource: '' });
+  // Lot D bis (FAC-013, FAC-014): an invoice in another currency, with its dated
+  // rate; the official rate of the Banque d'Algérie is proposed when it is empty.
+  const currency = type === 'quote' ? business.currency : form.currency.trim().toUpperCase() || business.currency;
+  const foreign = type !== 'quote' && currency !== business.currency;
+  const proposed = useOfficialRate(foreign ? currency : '', business.currency, form.rate, (official) => setForm((p) => (p.rate === '' ? { ...p, ...official } : p)));
+  const rateValue = Number(String(form.rate).replace(',', '.'));
   const [lines, setLines] = useState([emptyLine()]);
   const [key, setKey] = useState(newIdempotencyKey);
   const set = (field) => (event) => setForm((previous) => ({ ...previous, [field]: event.target.value }));
@@ -321,19 +345,20 @@ function NewDocument({ business, contacts, operations = [], run }) {
             })),
           }),
       taxAmount: tax ?? 0,
-      ...(!purchase && form.costExcl ? { costExcl: toMinorUnits(form.costExcl, currency, { allowZero: true }) } : {}),
+      ...(!purchase && form.costExcl ? { costExcl: toMinorUnits(form.costExcl, business.currency, { allowZero: true }) } : {}),
       ...(draft ? { draft: true } : {}),
       // Lot C: the family and nature of a purchase; paid in full right away.
       ...(!quote && form.operationId ? { operationId: form.operationId } : {}),
       ...(purchase && form.category ? { category: form.category } : {}),
       ...(purchase && form.costNature ? { costNature: form.costNature } : {}),
-      ...(!quote && !draft && form.paidNow ? { reglement: { receivedAt: iso(form.issuedAt), method: form.method } } : {}),
+      ...(!quote && !draft && !foreign && form.paidNow ? { reglement: { receivedAt: iso(form.issuedAt), method: form.method } } : {}),
+      ...(foreign ? { exchange: { rate: rateValue, rateDate: iso(form.rateDate), ...(form.rateSource.trim() ? { rateSource: form.rateSource.trim() } : {}) } } : {}),
       currency,
     };
     const okKey = quote ? 'business.inv.quoteCreated' : draft ? 'business.inv.draftCreated' : 'business.documentCreated';
     if (await run(() => api.post('/fin/entreprise/documents', body, { idempotencyKey: key }), okKey)) {
       setKey(newIdempotencyKey());
-      setForm((previous) => ({ ...previous, number: '', label: '', dueAt: '', validUntil: '', taxAmount: '', costExcl: '', amountExcl: '', paidNow: false }));
+      setForm((previous) => ({ ...previous, number: '', label: '', dueAt: '', validUntil: '', taxAmount: '', costExcl: '', amountExcl: '', paidNow: false, rate: '', rateSource: '' }));
       setLines([emptyLine()]);
     }
   };
@@ -378,6 +403,33 @@ function NewDocument({ business, contacts, operations = [], run }) {
         </label>
       </div>
       {quote && choices.length === 0 && <p className="business-document-warning">{t('business.inv.addClientFirst')}</p>}
+
+      {!quote && (
+        <div className="business-form-row">
+          <label>
+            {t('business.inv.fx.currency')}
+            <input id="document-currency" value={form.currency} onChange={set('currency')} maxLength={3} minLength={3} required />
+          </label>
+          {foreign && (
+            <>
+              <label>
+                {t('business.trade.rateField', { from: currency, to: business.currency })}
+                <input id="document-rate" type="number" min="0.000001" step="any" value={form.rate} onChange={set('rate')} required />
+              </label>
+              <label>
+                {t('business.trade.rateDate')}
+                <input type="date" value={form.rateDate} max={form.issuedAt} onChange={set('rateDate')} required />
+              </label>
+              <label>
+                {t('business.trade.rateSource')}
+                <input value={form.rateSource} onChange={set('rateSource')} maxLength={120} placeholder={t('business.trade.rateSourceHint')} />
+              </label>
+            </>
+          )}
+        </div>
+      )}
+      {foreign && <p className="inv-muted inv-note">{t(purchase ? 'business.inv.fx.importNote' : 'business.inv.fx.exportNote', { currency, base: business.currency })}</p>}
+      {foreign && proposed && <p className="inv-muted inv-note">{t('business.trade.officialProposed')}</p>}
 
       <div className="business-form-row">
         <label>
@@ -459,7 +511,7 @@ function NewDocument({ business, contacts, operations = [], run }) {
       <div className="business-form-row">
         <AmountField id="business-tax" label={t('business.taxAmount')} currency={currency} value={form.taxAmount} onChange={(value) => setForm((p) => ({ ...p, taxAmount: value }))} hint={t('business.inv.taxHint')} />
         {!purchase && (
-          <AmountField id="business-cost" label={t('business.inv.cost')} currency={currency} value={form.costExcl} onChange={(value) => setForm((p) => ({ ...p, costExcl: value }))} hint={t('business.inv.costHint')} />
+          <AmountField id="business-cost" label={t('business.inv.cost')} currency={business.currency} value={form.costExcl} onChange={(value) => setForm((p) => ({ ...p, costExcl: value }))} hint={t('business.inv.costHint')} />
         )}
       </div>
 
@@ -479,7 +531,7 @@ function NewDocument({ business, contacts, operations = [], run }) {
         </div>
       )}
 
-      {!quote && (
+      {!quote && !foreign && (
         <div className="business-form-row">
           <label className="pilot-check">
             <input id="document-paid-now" type="checkbox" checked={form.paidNow} onChange={(e) => setForm((p) => ({ ...p, paidNow: e.target.checked }))} />
@@ -504,6 +556,12 @@ function NewDocument({ business, contacts, operations = [], run }) {
         {t('business.inv.totalExcl')} <strong>{excl === null ? '—' : formatAmount(i18n.language, excl, currency)}</strong>
         {' · '}
         {t('business.inv.total')} <strong>{excl === null || tax === null ? '—' : formatAmount(i18n.language, excl + tax, currency)}</strong>
+        {foreign && excl !== null && tax !== null && rateValue > 0 && (
+          <>
+            {' · '}
+            {t('business.inv.fx.counterValue')} <strong>{formatAmount(i18n.language, Math.round(excl * rateValue) + Math.round(tax * rateValue), business.currency)}</strong>
+          </>
+        )}
       </p>
 
       <div className="inv-actions">
@@ -511,7 +569,7 @@ function NewDocument({ business, contacts, operations = [], run }) {
           <Plus size={16} aria-hidden="true" />
           {t(quote ? 'business.inv.createQuote' : purchase ? 'business.addDocument' : 'business.inv.issueInvoice')}
         </Button>
-        {type === 'invoice' && (
+        {type === 'invoice' && !foreign && (
           <Button
             type="button"
             variant="ghost"
@@ -581,6 +639,7 @@ function DocumentCard({ doc, business, can, run }) {
         <span className="business-document-state">{stateLabel}</span>
       </div>
 
+      {doc.foreignCurrency && <ForeignSummary doc={doc} />}
       <div className="business-document-amounts">
         <span>{money(doc.total)}</span>
         <span className="inv-muted">{formatDate(i18n.language, doc.issuedAt)}</span>
@@ -697,8 +756,21 @@ function DocumentCard({ doc, business, can, run }) {
               {t('business.inv.remind')}
             </Button>
           )}
+          {/* Lot F bis (FAC-011): a disputed invoice is never offered for financing. */}
+          {issued && doc.kind === 'sale' && settlement.outstanding > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() =>
+                run(() => api.post(`/fin/entreprise/documents/${doc.id}/litige`, { disputed: !doc.disputedAt }), doc.disputedAt ? 'business.inv.disputeCleared' : 'business.inv.disputeMarked')
+              }
+            >
+              {doc.disputedAt ? t('business.inv.clearDispute') : t('business.inv.markDispute')}
+            </Button>
+          )}
         </div>
       )}
+      {doc.disputedAt && <p className="business-document-warning">{t('business.inv.disputed', { date: formatDate(i18n.language, doc.disputedAt) })}</p>}
 
       {issued && settlement.outstanding > 0 && can('payments.write') && (
         <NewPayment doc={doc} run={run} />
@@ -728,12 +800,19 @@ function PrintSheet({ doc, business, onDone }) {
     };
   }, [finish]);
 
-  const money = (value) => formatAmount(i18n.language, value, doc.currency);
+  // An invoice in another currency is printed in that currency (amounts back at
+  // its rate), with its counter-value in the organisation's currency.
+  const fx = doc.foreignCurrency ? { currency: doc.foreignCurrency, rate: doc.bookingRate } : null;
+  const money = (value) => (fx ? formatAmount(i18n.language, Math.round(value / fx.rate), fx.currency) : formatAmount(i18n.language, value, doc.currency));
+  // A total the invoice carries in its own currency is printed as it is, not converted back.
+  const exact = (base, inCurrency) => (fx ? formatAmount(i18n.language, inCurrency ?? 0, fx.currency) : formatAmount(i18n.language, base, doc.currency));
   const date = (value) => formatDate(i18n.language, value);
   const title = doc.docType === 'quote' ? t('business.inv.print.quote') : doc.kind === 'purchase' ? t('business.inv.types.purchaseInvoice') : t('business.inv.print.invoice');
   const draft = doc.state === 'draft' && doc.docType === 'invoice';
   const lines = doc.lines?.length > 0 ? doc.lines : [{ id: 'one', label: doc.label, quantity: 1, unitPrice: doc.amountExcl, amount: doc.amountExcl }];
   const settlement = doc.reglement;
+  // What is due in the invoice's own currency (FAC-015), else in the organisation's.
+  const due = settlement?.devise ?? settlement ?? { credited: 0, settled: 0, outstanding: 0 };
   const ids = [
     business.taxId && `${t('business.inv.print.taxId')} ${business.taxId}`,
     business.tradeRegister && `${t('business.inv.print.tradeRegister')} ${business.tradeRegister}`,
@@ -814,36 +893,48 @@ function PrintSheet({ doc, business, onDone }) {
           <tbody>
             <tr>
               <th scope="row">{t('business.inv.totalExcl')}</th>
-              <td>{money(doc.amountExcl)}</td>
+              <td>{exact(doc.amountExcl, doc.foreignAmountExcl)}</td>
             </tr>
             <tr>
               <th scope="row">{t('business.taxAmount')}</th>
-              <td>{money(doc.taxAmount)}</td>
+              <td>{exact(doc.taxAmount, doc.foreignTaxAmount)}</td>
             </tr>
             <tr className="print-grand">
               <th scope="row">{t('business.inv.total')}</th>
-              <td>{money(doc.total)}</td>
+              <td>{exact(doc.total, (doc.foreignAmountExcl ?? 0) + (doc.foreignTaxAmount ?? 0))}</td>
             </tr>
-            {settlement?.credited > 0 && (
+            {due.credited > 0 && (
               <tr>
                 <th scope="row">{t('business.inv.credited')}</th>
-                <td>{money(settlement.credited)}</td>
+                <td>{exact(settlement.credited, due.credited)}</td>
               </tr>
             )}
-            {settlement?.settled > 0 && (
+            {due.settled > 0 && (
               <tr>
                 <th scope="row">{t('business.inv.print.paid')}</th>
-                <td>{money(settlement.settled)}</td>
+                <td>{exact(settlement.settled, due.settled)}</td>
               </tr>
             )}
-            {settlement && (settlement.credited > 0 || settlement.settled > 0) && (
+            {settlement && (due.credited > 0 || due.settled > 0) && (
               <tr className="print-grand">
                 <th scope="row">{t('business.inv.print.left')}</th>
-                <td>{money(Math.max(0, settlement.outstanding))}</td>
+                <td>{exact(Math.max(0, settlement.outstanding), Math.max(0, due.outstanding))}</td>
               </tr>
             )}
           </tbody>
         </table>
+        {fx && (
+          <p className="print-small">
+            {t('business.inv.fx.printRate', {
+              amount: formatAmount(i18n.language, doc.total, doc.currency),
+              rate: doc.bookingRate,
+              currency: fx.currency,
+              base: doc.currency,
+              date: date(doc.rateDate),
+              source: doc.rateSource || '—',
+            })}
+          </p>
+        )}
 
         {doc.related?.number && <p className="print-small">{t('business.inv.fromQuote', { number: doc.related.number })}</p>}
         {doc.note && <p className="print-small">{doc.note}</p>}
@@ -853,7 +944,83 @@ function PrintSheet({ doc, business, onDone }) {
   );
 }
 
+// FAC-014 / FAC-015: an invoice in another currency, followed in that currency.
+// The counter-value stays at the rate of the invoice; what was collected is at
+// the rate of each payment; the difference is the exchange gain or loss.
+function ForeignSummary({ doc }) {
+  const { t, i18n } = useTranslation();
+  const fx = doc.reglement?.devise;
+  const inCurrency = (value) => formatAmount(i18n.language, value, doc.foreignCurrency);
+  const base = (value) => formatAmount(i18n.language, value, doc.currency);
+  const total = (doc.foreignAmountExcl ?? 0) + (doc.foreignTaxAmount ?? 0);
+  return (
+    <div className="business-document-amounts inv-fx">
+      <span>
+        <strong>{inCurrency(total)}</strong>
+      </span>
+      <span className="inv-muted">{t('business.inv.fx.rateLine', { rate: doc.bookingRate, currency: doc.foreignCurrency, base: doc.currency, date: formatDate(i18n.language, doc.rateDate), source: doc.rateSource || '—' })}</span>
+      {fx && fx.settled > 0 && <span className="business-document-outstanding">{t('business.inv.fx.settled', { amount: inCurrency(fx.settled) })}</span>}
+      {fx && fx.outstanding > 0 && <span className="business-document-outstanding">{t('business.inv.fx.outstanding', { amount: inCurrency(fx.outstanding) })}</span>}
+      {fx && fx.exchangeDifference !== 0 && (
+        <span className="inv-muted">{t(fx.exchangeDifference > 0 ? 'business.inv.fx.gain' : 'business.inv.fx.loss', { amount: base(Math.abs(fx.exchangeDifference)) })}</span>
+      )}
+    </div>
+  );
+}
+
 function NewPayment({ doc, run }) {
+  if (doc.foreignCurrency) return <NewForeignPayment doc={doc} run={run} />;
+  return <NewLocalPayment doc={doc} run={run} />;
+}
+
+// FAC-015: paid in the invoice's currency, converted at the dated rate of the day.
+function NewForeignPayment({ doc, run }) {
+  const { t } = useTranslation();
+  const [form, setForm] = useState({ value: '', receivedAt: today(), rate: '', rateDate: today(), rateSource: '' });
+  const [key, setKey] = useState(newIdempotencyKey);
+  const set = (field) => (event) => setForm((p) => ({ ...p, [field]: event.target.value }));
+  const proposed = useOfficialRate(doc.foreignCurrency, doc.currency, form.rate, (official) => setForm((p) => (p.rate === '' ? { ...p, ...official } : p)));
+  return (
+    <form
+      className="business-form business-payment"
+      onSubmit={async (event) => {
+        event.preventDefault();
+        const body = {
+          value: toMinorUnits(form.value, doc.foreignCurrency),
+          currency: doc.foreignCurrency,
+          receivedAt: iso(form.receivedAt),
+          rate: Number(String(form.rate).replace(',', '.')),
+          rateDate: iso(form.rateDate),
+        };
+        if (await run(() => api.post(`/fin/entreprise/documents/${doc.id}/reglements`, body, { idempotencyKey: key }), 'business.paymentCreated')) {
+          setKey(newIdempotencyKey());
+          setForm((p) => ({ ...p, value: '', rate: '' }));
+        }
+      }}
+    >
+      <AmountField id={`payment-${doc.id}`} label={t('business.paymentAmount')} currency={doc.foreignCurrency} value={form.value} onChange={(v) => setForm((p) => ({ ...p, value: v }))} required />
+      <label>
+        {t('business.paymentDate')}
+        <input type="date" value={form.receivedAt} min={doc.issuedAt.slice(0, 10)} onChange={set('receivedAt')} required />
+      </label>
+      <label>
+        {t('business.trade.rateField', { from: doc.foreignCurrency, to: doc.currency })}
+        <input type="number" min="0.000001" step="any" value={form.rate} onChange={set('rate')} required />
+      </label>
+      <label>
+        {t('business.trade.rateDate')}
+        <input type="date" value={form.rateDate} max={form.receivedAt} onChange={set('rateDate')} required />
+      </label>
+      {proposed && <p className="inv-muted inv-note">{t('business.trade.officialProposed')}</p>}
+      <Button type="submit" variant="secondary">
+        <Receipt size={16} aria-hidden="true" />
+        {t('business.addPayment')}
+      </Button>
+    </form>
+  );
+}
+
+function NewLocalPayment({ doc, run }) {
   const { t } = useTranslation();
   const [value, setValue] = useState('');
   const [receivedAt, setReceivedAt] = useState(today());
@@ -893,6 +1060,9 @@ function CreditNoteForm({ doc, run, onDone }) {
   const [label, setLabel] = useState('');
   const [key] = useState(newIdempotencyKey);
   const purchase = doc.kind === 'purchase';
+  // FAC-016: the credit note of a foreign-currency invoice is in that currency, at its rate.
+  const cur = doc.foreignCurrency ?? doc.currency;
+  const net = doc.foreignCurrency ? doc.reglement.devise.total - doc.reglement.devise.credited : doc.reglement.net;
 
   return (
     <form
@@ -901,15 +1071,15 @@ function CreditNoteForm({ doc, run, onDone }) {
         event.preventDefault();
         const body = {
           issuedAt: iso(issuedAt),
-          amountExcl: toMinorUnits(amountExcl, doc.currency, { allowZero: true }),
-          ...(taxAmount ? { taxAmount: toMinorUnits(taxAmount, doc.currency, { allowZero: true }) } : {}),
+          amountExcl: toMinorUnits(amountExcl, cur, { allowZero: true }),
+          ...(taxAmount ? { taxAmount: toMinorUnits(taxAmount, cur, { allowZero: true }) } : {}),
           ...(label.trim() ? { label: label.trim() } : {}),
           ...(purchase ? { number: number.trim() } : {}),
         };
         if (await run(() => api.post(`/fin/entreprise/documents/${doc.id}/avoirs`, body, { idempotencyKey: key }), 'business.inv.creditCreated')) onDone();
       }}
     >
-      <p className="inv-note">{t('business.inv.creditIntro', { amount: formatAmount(i18n.language, doc.reglement.net, doc.currency) })}</p>
+      <p className="inv-note">{t('business.inv.creditIntro', { amount: formatAmount(i18n.language, net, cur) })}</p>
       {purchase && (
         <label>
           {t('business.inv.supplierNumber')}
@@ -920,8 +1090,8 @@ function CreditNoteForm({ doc, run, onDone }) {
         {t('business.inv.reason')}
         <input value={label} onChange={(e) => setLabel(e.target.value)} maxLength={200} placeholder={doc.label} />
       </label>
-      <AmountField id={`credit-${doc.id}`} label={t('business.amountExcl')} currency={doc.currency} value={amountExcl} onChange={setAmountExcl} required />
-      <AmountField id={`credit-tax-${doc.id}`} label={t('business.taxAmount')} currency={doc.currency} value={taxAmount} onChange={setTaxAmount} />
+      <AmountField id={`credit-${doc.id}`} label={t('business.amountExcl')} currency={cur} value={amountExcl} onChange={setAmountExcl} required />
+      <AmountField id={`credit-tax-${doc.id}`} label={t('business.taxAmount')} currency={cur} value={taxAmount} onChange={setTaxAmount} />
       <label>
         {t('business.issuedAt')}
         <input type="date" value={issuedAt} min={doc.issuedAt.slice(0, 10)} onChange={(e) => setIssuedAt(e.target.value)} required />

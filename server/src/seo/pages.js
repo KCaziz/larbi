@@ -208,7 +208,7 @@ async function staticPage(lang, base, entry) {
 
   if (entry.id === 'formations') {
     const formations = await prisma.formation.findMany({
-      where: { status: FORMATION_STATUS.PUBLISHED },
+      where: { status: FORMATION_STATUS.PUBLISHED, ownerSpaceId: null },
       orderBy: { publishedAt: 'desc' },
       select: { title: true, description: true },
     });

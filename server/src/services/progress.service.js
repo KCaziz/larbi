@@ -108,7 +108,51 @@ async function issueCertificateIfEligible(tx, { user, formation, enrollmentId })
   if (enrollment.status !== ENROLLMENT_STATUS.COMPLETED || !finished) {
     return { certification: null, reason: 'not_completed' };
   }
+  // P13-02 (pedagogical referential, section 22, step 7): a FINCLUDIA Academy
+  // certificate is delivered when every competence of the path is valid and the
+  // regulatory ones are up to date — not on lessons read alone.
+  const gate = await academyCertificateGate(tx, user.id, formation.id);
+  if (!gate.ok) return { certification: null, reason: 'competences_pending', gate };
   return { certification: await createCertificate(tx, { user, formation, enrollmentId }), created: true };
+}
+
+/**
+ * The competences an Academy certificate needs: every module acquired (or
+ * exempted by the entry test), none of them « to refresh » (a regulatory
+ * competence past its review date), and the path's integrative case passed.
+ * A formation that is not an Academy path has no such condition.
+ */
+export async function academyCertificateGate(tx, userId, formationId, now = new Date()) {
+  const modules = await tx.finAcademyModule.findMany({ where: { formationId }, select: { id: true } });
+  if (!modules.length) return { ok: true, academy: false };
+  const records = await tx.finSkillRecord.findMany({ where: { userId, moduleId: { in: modules.map((m) => m.id) } } });
+  const byModule = new Map(records.map((r) => [r.moduleId, r]));
+  let pending = 0;
+  let toRefresh = 0;
+  for (const m of modules) {
+    const r = byModule.get(m.id);
+    if (r?.validatedAt) {
+      if (r.refreshDue && r.refreshDue < now) toRefresh += 1;
+    } else if (!r?.exempt) pending += 1;
+  }
+  const academyCase = await tx.finAcademyCase.findUnique({ where: { formationId }, include: { records: { where: { userId } } } });
+  const caseOk = !academyCase || Boolean(academyCase.records[0]?.validatedAt);
+  return { ok: pending === 0 && toRefresh === 0 && caseOk, academy: true, pending, toRefresh, caseOk };
+}
+
+/**
+ * After a competence changed (exercise, mission, case, QCM): the certificate of
+ * the path may now be due. Runs in the caller's transaction, which holds the
+ * enrolment lock.
+ */
+export async function reissueAfterCompetence(tx, userId, formationId) {
+  const enrollment = await tx.enrollment.findUnique({ where: { userId_formationId: { userId, formationId } } });
+  if (!enrollment) return null;
+  const [user, formation] = await Promise.all([
+    tx.user.findUnique({ where: { id: userId } }),
+    tx.formation.findUnique({ where: { id: formationId }, include: { courses: { orderBy: [{ position: 'asc' }, { createdAt: 'asc' }] } } }),
+  ]);
+  return reevaluateEnrollment(tx, { user, formation, enrollmentId: enrollment.id });
 }
 
 // Marks a course completed and, if that finishes the formation, issues the

@@ -5,7 +5,7 @@ import { api } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate, formatRatio } from '../../lib/format.js';
 import { toMinorUnits } from '../../lib/money.js';
-import { newIdempotencyKey } from '../../lib/organisation.js';
+import { currentOrganisation, newIdempotencyKey } from '../../lib/organisation.js';
 import Button from '../../components/ui/Button.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
@@ -116,6 +116,7 @@ export function PartnersSection({ business, can, run }) {
                     </Button>
                   )}
                 </span>
+                <RequestMessages request={r} run={run} />
               </li>
             ))}
           </ul>
@@ -246,6 +247,7 @@ export function CampaignsSection({ business, can, run }) {
                 ))}
               </ul>
               {manage && <CampaignActions campaign={c} business={business} run={reload} />}
+              <CampaignReports campaign={c} manage={manage} run={reload} />
             </li>
           ))}
         </ul>
@@ -622,5 +624,182 @@ function Employee({ e, manage, run, lang }) {
         </div>
       )}
     </li>
+  );
+}
+
+// Lot I (2026-11-25): the requests for documents and comments of the partner,
+// and the organisation's answers (ECR-0288).
+function RequestMessages({ request, run }) {
+  const { t, i18n } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const messages = useApi(open ? `/fin/entreprise/partenaires/demandes/${request.id}/messages` : null);
+  const [answer, setAnswer] = useState({ body: '', replyToId: '' });
+  const list = messages.data?.messages ?? [];
+  const closed = ['closed', 'withdrawn'].includes(request.status);
+  return (
+    <div className="trade-details">
+      <Button type="button" variant="ghost" aria-expanded={open} onClick={() => setOpen(!open)}>
+        {open ? t('business.g.hideMessages') : t('business.g.showMessages')}
+      </Button>
+      {open && (
+        <>
+          {list.length === 0 ? (
+            <p className="inv-muted inv-note">{t('business.g.noMessage')}</p>
+          ) : (
+            <ul className="trade-pieces">
+              {list.map((m) => (
+                <li key={m.id} className={m.side === 'partner' ? 'dia-status-submitted' : 'dia-status-validated'}>
+                  <span>
+                    <strong>{t(`business.g.messageKinds.${m.kind}`)}</strong> · {formatDate(i18n.language, m.createdAt)}
+                    {m.dueAt ? ` · ${t('business.g.dueOn', { date: formatDate(i18n.language, m.dueAt) })}` : ''}
+                    <br />
+                    {m.body}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {!closed && (
+            <form
+              className="business-form"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const body = { body: answer.body.trim(), ...(answer.replyToId ? { replyToId: answer.replyToId } : {}) };
+                if (await run(() => api.post(`/fin/entreprise/partenaires/demandes/${request.id}/messages`, body), 'business.g.answered')) {
+                  setAnswer({ body: '', replyToId: '' });
+                  messages.reload();
+                }
+              }}
+            >
+              <label>
+                {t('business.g.answerTo')}
+                <select value={answer.replyToId} onChange={(e) => setAnswer((p) => ({ ...p, replyToId: e.target.value }))}>
+                  <option value="">{t('business.g.generalAnswer')}</option>
+                  {list
+                    .filter((m) => m.side === 'partner')
+                    .map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.body.slice(0, 60)}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <label>
+                {t('business.g.answer')}
+                <textarea className="inv-preview" rows={3} value={answer.body} onChange={(e) => setAnswer((p) => ({ ...p, body: e.target.value }))} maxLength={3000} required />
+              </label>
+              <Button type="submit" variant="secondary">
+                {t('business.g.sendAnswer')}
+              </Button>
+            </form>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// Lot I (2026-11-25): the regulatory report of a campaign (ECR-0307), prepared,
+// validated by another person, exported; read by the linked platform once validated.
+function CampaignReports({ campaign, manage, run }) {
+  const { t, i18n } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const reports = useApi(open ? `/fin/entreprise/campagnes/${campaign.id}/rapports` : null);
+  const platforms = useApi(open && manage ? '/fin/entreprise/plateformes' : null);
+  const [period, setPeriod] = useState({ from: today().slice(0, 8) + '01', to: today() });
+  const act = async (action, okKey) => {
+    const done = await run(action, okKey);
+    if (done) reports.reload();
+    return done;
+  };
+  const base = `/fin/entreprise/campagnes/${campaign.id}`;
+  const exportCsv = async (reportId) => {
+    try {
+      const organisation = currentOrganisation();
+      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}${base}/rapports/${reportId}/export`, { credentials: 'include', cache: 'no-store', headers: organisation ? { 'X-Organisation': organisation } : {} });
+      if (!response.ok) throw new Error(String(response.status));
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'fincludia-rapport-campagne.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.alert(t('business.g.exportFailed'));
+    }
+  };
+  return (
+    <div className="trade-details">
+      <Button type="button" variant="ghost" aria-expanded={open} onClick={() => setOpen(!open)}>
+        {open ? t('business.g.hideReports') : t('business.g.showReports')}
+      </Button>
+      {open && (
+        <>
+          <p className="inv-muted inv-note">{t('business.g.reportsIntro')}</p>
+          {manage && (
+            <div className="inv-actions">
+              <label className="pilot-inline">
+                {t('business.g.platformSpace')}
+                <select value={campaign.platformSpaceId ?? ''} onChange={(e) => run(() => api.put(`${base}/plateforme`, { spaceId: e.target.value || null }), 'business.g.saved')}>
+                  <option value="">{t('business.g.noPlatformSpace')}</option>
+                  {(platforms.data?.plateformes ?? []).map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          )}
+          {manage && (
+            <form
+              className="business-form business-payment"
+              onSubmit={(e) => {
+                e.preventDefault();
+                act(() => api.post(`${base}/rapports`, period), 'business.g.reportPrepared');
+              }}
+            >
+              <label>
+                {t('business.g.from')}
+                <input type="date" value={period.from} onChange={(e) => setPeriod((p) => ({ ...p, from: e.target.value }))} required />
+              </label>
+              <label>
+                {t('business.g.to')}
+                <input type="date" value={period.to} min={period.from} onChange={(e) => setPeriod((p) => ({ ...p, to: e.target.value }))} required />
+              </label>
+              <Button type="submit" variant="secondary">
+                {t('business.g.prepareReport')}
+              </Button>
+            </form>
+          )}
+          {(reports.data?.rapports ?? []).length === 0 ? (
+            <p className="inv-muted inv-note">{t('business.g.noReport')}</p>
+          ) : (
+            <ul className="trade-pieces">
+              {reports.data.rapports.map((r) => (
+                <li key={r.id} className={r.status === 'validated' ? 'dia-status-validated' : 'dia-status-submitted'}>
+                  <span>
+                    {formatDate(i18n.language, r.periodFrom)} → {formatDate(i18n.language, r.periodTo)} · {t('business.g.reportOps', { declared: r.content.operations.declares.nombre, confirmed: r.content.operations.confirmes.nombre })}
+                  </span>
+                  <span className="dia-actions">
+                    <span className="business-document-state">{t(`business.g.reportStatuses.${r.status}`)}</span>
+                    {manage && r.peutValider && (
+                      <Button type="button" variant="ghost" onClick={() => act(() => api.post(`${base}/rapports/${r.id}/valider`, {}), 'business.g.reportValidated')}>
+                        <Check size={16} aria-hidden="true" />
+                        {t('business.g.validateReport')}
+                      </Button>
+                    )}
+                    {manage && r.status === 'draft' && !r.peutValider && <span className="inv-muted">{t('business.g.otherValidates')}</span>}
+                    <Button type="button" variant="ghost" onClick={() => exportCsv(r.id)}>
+                      {t('business.g.exportReport')}
+                    </Button>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+    </div>
   );
 }

@@ -118,10 +118,15 @@ describe('the charts, end to end', { skip: findChrome() ? false : 'no Chrome/Chr
     await b.shot('chart-gauge');
   });
 
-  test('G-11 — the debts are drawn by type, with the client’s own name for the type', async () => {
-    await chartsOn('/app/dettes', "!!document.querySelector('.home-ring')");
-    assert.ok((await b.ev("document.body.textContent")).includes('Emprunt bancaire'));
-    await b.ev("(document.querySelector('.chart, .home-ring') ?? document.body).scrollIntoView()");
+  // R8-06 (2026-11-05): the ring by type became « Où en sont mes dettes », one
+  // bar per debt (repaid / still owed) on one scale — a single debt was a 100 % ring.
+  test('G-11 — each debt is drawn with what is repaid and what is still owed', async () => {
+    await chartsOn('/app/dettes', "!!document.querySelector('.debts-progress')");
+    const text = await b.ev("document.querySelector('.debts-progress').textContent");
+    assert.ok(text.includes('Où en sont mes dettes'), 'the chart says what it shows');
+    assert.ok(text.includes('Prêt voiture'), 'each debt is named');
+    assert.ok(text.includes('Reste à rembourser'), 'the legend is written');
+    await b.ev("(document.querySelector('.debts-progress') ?? document.body).scrollIntoView()");
     await b.shot('chart-debts');
   });
 });

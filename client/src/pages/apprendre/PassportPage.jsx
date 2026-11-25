@@ -11,6 +11,7 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import EducationPanel from '../../components/fincludia/EducationPanel.jsx';
+import SkillsPassport from '../../components/learn/SkillsPassport.jsx';
 import { useCatalogueBase } from '../../lib/useToolsBase.js';
 import '../../components/fincludia/Fincludia.css';
 import './Passport.css';
@@ -120,6 +121,9 @@ export default function PassportPage() {
             ))}
           </ul>
         )}
+
+        {/* P13-02: the competences proven in FINCLUDIA Academy. */}
+        <SkillsPassport />
 
         <h2>{t('passport.quizzesTitle')}</h2>
         {p.quizReussis.length === 0 ? (

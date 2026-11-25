@@ -27,6 +27,7 @@ export function toAdminQuestion(question) {
     explanation: question.explanation,
     points: question.points,
     acceptedAnswers: question.acceptedAnswers ?? [],
+    critical: Boolean(question.critical),
     choices: (question.choices ?? []).map((c) => ({ id: c.id, text: c.text, isCorrect: c.isCorrect, position: c.position })),
     problems: questionProblems(question),
   };
@@ -59,6 +60,7 @@ export function toAdminQuiz(quiz) {
     passingScore: quiz.passingScore,
     maxAttempts: quiz.maxAttempts,
     shuffleQuestions: quiz.shuffleQuestions,
+    drawCount: quiz.drawCount ?? null,
     showCorrection: quiz.showCorrection,
     problems: quizProblems(quiz),
     questions: (quiz.questions ?? []).map(toAdminQuestion),

@@ -24,6 +24,7 @@ export default function PartnersAdminPage() {
   const { t, i18n } = useTranslation();
   const offers = useApi('/admin/partenaires/offres');
   const requests = useApi('/admin/partenaires/demandes');
+  const spaces = useApi('/admin/partenaires/espaces');
   const [form, setForm] = useState(empty);
   const [message, setMessage] = useState(null);
   const set = (f) => (e) => setForm((p) => ({ ...p, [f]: e.target.value }));
@@ -167,7 +168,24 @@ export default function PartnersAdminPage() {
                 {o.partnerName} <span className="inv-muted">· {t(`business.g.types.${o.partnerType}`)}</span>
               </td>
               <td>{o.title}</td>
-              <td>{o._count.requests}</td>
+              <td>
+                {o._count.requests}
+                {/* Lot I: the financer's space that answers this offer's requests. */}
+                <select
+                  aria-label={t('adminPartners.spaceOf', { name: o.partnerName })}
+                  value={o.spaceId ?? ''}
+                  onChange={(e) => run(() => api.patch(`/admin/partenaires/offres/${o.id}`, { spaceId: e.target.value || null }), 'adminPartners.saved', offers.reload)}
+                >
+                  <option value="">{t('adminPartners.noSpace')}</option>
+                  {(spaces.data?.espaces ?? [])
+                    .filter((sp) => sp.kind === 'financer')
+                    .map((sp) => (
+                      <option key={sp.id} value={sp.id}>
+                        {sp.name}
+                      </option>
+                    ))}
+                </select>
+              </td>
               <td>
                 <Button type="button" variant="ghost" onClick={() => run(() => api.patch(`/admin/partenaires/offres/${o.id}`, { active: !o.active }), 'adminPartners.saved', offers.reload)}>
                   {o.active ? t('adminPartners.deactivate') : t('adminPartners.activate')}
@@ -177,6 +195,8 @@ export default function PartnersAdminPage() {
           ))}
         </tbody>
       </table>
+
+      <Spaces spaces={spaces} run={run} />
 
       <h2>{t('adminPartners.requestsTitle')}</h2>
       {(requests.data?.demandes ?? []).length === 0 ? (
@@ -212,6 +232,111 @@ export default function PartnersAdminPage() {
                   </select>
                 )}
               </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+// Lot I (2026-11-25): the partners' own spaces (financer, institution,
+// crowdfunding platform), their members and licences.
+const KINDS = ['financer', 'institution', 'cip'];
+
+function Spaces({ spaces, run }) {
+  const { t } = useTranslation();
+  const [form, setForm] = useState({ name: '', kind: 'financer', licences: '0', anonymityThreshold: '5' });
+  const list = spaces.data?.espaces ?? [];
+  return (
+    <>
+      <h2>{t('adminPartners.spacesTitle')}</h2>
+      <p className="inv-muted inv-note">{t('adminPartners.spacesIntro')}</p>
+      <form
+        className="business-form business-payment"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          const body = { name: form.name.trim(), kind: form.kind, licences: Number(form.licences || 0), anonymityThreshold: Number(form.anonymityThreshold || 5) };
+          if (await run(() => api.post('/admin/partenaires/espaces', body), 'adminPartners.spaceCreated', spaces.reload)) setForm((p) => ({ ...p, name: '' }));
+        }}
+      >
+        <label>
+          {t('adminPartners.spaceName')}
+          <input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} maxLength={160} required />
+        </label>
+        <label>
+          {t('adminPartners.spaceKind')}
+          <select value={form.kind} onChange={(e) => setForm((p) => ({ ...p, kind: e.target.value }))}>
+            {KINDS.map((k) => (
+              <option key={k} value={k}>
+                {t(`adminPartners.kinds.${k}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        {form.kind === 'institution' && (
+          <>
+            <label>
+              {t('adminPartners.licences')}
+              <input type="number" min="0" value={form.licences} onChange={(e) => setForm((p) => ({ ...p, licences: e.target.value }))} />
+            </label>
+            <label>
+              {t('adminPartners.threshold')}
+              <input type="number" min="1" max="100" value={form.anonymityThreshold} onChange={(e) => setForm((p) => ({ ...p, anonymityThreshold: e.target.value }))} />
+            </label>
+          </>
+        )}
+        <Button type="submit" variant="secondary">
+          {t('adminPartners.createSpace')}
+        </Button>
+      </form>
+      {list.length > 0 && (
+        <ul className="business-documents">
+          {list.map((sp) => (
+            <li key={sp.id} className="business-document">
+              <div className="business-document-head">
+                <strong>{sp.name}</strong>
+                <span className="inv-badge">{t(`adminPartners.kinds.${sp.kind}`)}</span>
+                {sp.kind === 'institution' && <span className="inv-muted">{t('adminPartners.licencesOf', { n: sp.licences || t('adminPartners.unlimited') })}</span>}
+                <span className="business-document-state">{sp.active ? t('adminPartners.active') : t('adminPartners.inactive')}</span>
+              </div>
+              <ul className="trade-pieces">
+                {sp.members.map((m) => (
+                  <li key={m.id}>
+                    <span>{m.user.email}</span>
+                    <Button type="button" variant="ghost" onClick={() => run(() => api.delete(`/admin/partenaires/espaces/${sp.id}/membres/${m.id}`), 'adminPartners.saved', spaces.reload)}>
+                      {t('adminPartners.removeMember')}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              <div className="inv-actions">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    const email = window.prompt(t('adminPartners.memberPrompt'));
+                    if (email?.trim()) run(() => api.post(`/admin/partenaires/espaces/${sp.id}/membres`, { email: email.trim() }), 'adminPartners.memberAdded', spaces.reload);
+                  }}
+                >
+                  {t('adminPartners.addMember')}
+                </Button>
+                {sp.kind === 'institution' && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => {
+                      const value = window.prompt(t('adminPartners.licencesPrompt'), String(sp.licences));
+                      if (value !== null && /^\d+$/.test(value.trim())) run(() => api.patch(`/admin/partenaires/espaces/${sp.id}`, { licences: Number(value.trim()) }), 'adminPartners.saved', spaces.reload);
+                    }}
+                  >
+                    {t('adminPartners.changeLicences')}
+                  </Button>
+                )}
+                <Button type="button" variant="ghost" onClick={() => run(() => api.patch(`/admin/partenaires/espaces/${sp.id}`, { active: !sp.active }), 'adminPartners.saved', spaces.reload)}>
+                  {sp.active ? t('adminPartners.deactivate') : t('adminPartners.activate')}
+                </Button>
+              </div>
             </li>
           ))}
         </ul>

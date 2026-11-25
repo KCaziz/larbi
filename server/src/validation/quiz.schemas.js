@@ -21,6 +21,8 @@ export const updateQuizSchema = z
     passingScore: z.number().int().min(0).max(100),
     maxAttempts: z.number().int().min(1).max(50).nullable(),
     shuffleQuestions: z.boolean(),
+    // P13-02: questions drawn for each attempt (null = all of them).
+    drawCount: z.number().int().min(1).max(100).nullable(),
     isRequired: z.boolean(),
     showCorrection: z.boolean(),
   })
@@ -34,6 +36,8 @@ export const updateQuestionSchema = z
     prompt: z.string().trim().max(1000),
     explanation: z.string().trim().max(1000),
     points: z.number().int().min(1).max(100),
+    // P13-02: must be answered right, whatever the score.
+    critical: z.boolean(),
     // single / multiple: the whole list of choices, in order (an `id` keeps an existing choice)
     choices: z
       .array(z.object({ id: z.string().uuid().optional(), text: z.string().trim().max(300), isCorrect: z.boolean() }).strict())

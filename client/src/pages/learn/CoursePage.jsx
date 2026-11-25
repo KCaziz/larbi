@@ -11,6 +11,7 @@ import Notice from '../../components/ui/Notice.jsx';
 import ProgressBar from '../../components/learn/ProgressBar.jsx';
 import BlockRenderer from '../../components/blocks/BlockRenderer.jsx';
 import QuizCard from '../../components/quiz/QuizCard.jsx';
+import ModuleValidation from '../../components/learn/ModuleValidation.jsx';
 import RichContent from '../../components/ui/RichContent.jsx';
 import { useCatalogueBase } from '../../lib/useToolsBase.js';
 import './Learn.css';
@@ -170,6 +171,9 @@ export default function CoursePage() {
           {!hasContent && <Notice variant="info">{t('learn.course.noContent')}</Notice>}
 
           {lesson.data.quiz && <QuizCard quiz={lesson.data.quiz} slug={slug} canOpen />}
+
+          {/* P13-02: an Academy module is validated by its QCM, exercise and mission. */}
+          <ModuleValidation key={courseId} slug={slug} courseId={courseId} />
 
           <section className="learn-complete" aria-labelledby="complete-title">
             <h2 id="complete-title">{t('learn.course.progressTitle')}</h2>

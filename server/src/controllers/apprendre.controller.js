@@ -137,6 +137,7 @@ export async function search(req, res) {
     prisma.formation.findMany({
       where: {
         status: 'published',
+        ownerSpaceId: null,
         ...axes(req.query),
         ...(contains ? { OR: [{ title: contains }, { subtitle: contains }, { description: contains }] } : {}),
       },
@@ -227,7 +228,7 @@ export async function getGuide(req, res) {
 const LOADERS = {
   term: (ids) => prisma.glossaryTerm.findMany({ where: { id: { in: ids }, status: 'published' } }),
   guide: (ids) => prisma.miniGuide.findMany({ where: { id: { in: ids }, status: 'published' } }),
-  course: (ids) => prisma.formation.findMany({ where: { id: { in: ids }, status: 'published' }, include: { _count: { select: { quizzes: true } } } }),
+  course: (ids) => prisma.formation.findMany({ where: { id: { in: ids }, status: 'published', ownerSpaceId: null }, include: { _count: { select: { quizzes: true } } } }),
   article: (ids) => prisma.article.findMany({ where: { id: { in: ids }, status: 'published' } }),
 };
 

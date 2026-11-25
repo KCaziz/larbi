@@ -43,7 +43,7 @@ export function toQuizSummary(quiz, enrollment) {
     sectionId: quiz.sectionId,
     title: quiz.title,
     isRequired: quiz.isRequired,
-    questionCount: quiz._count?.questions ?? 0,
+    questionCount: quiz.drawCount ? Math.min(quiz.drawCount, quiz._count?.questions ?? 0) : (quiz._count?.questions ?? 0),
     passingScore: quiz.passingScore,
     maxAttempts: quiz.maxAttempts,
     attemptsUsed: submitted.length,

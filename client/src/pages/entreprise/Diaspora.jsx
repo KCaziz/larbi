@@ -7,10 +7,12 @@ import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate, formatRatio } from '../../lib/format.js';
 import { toMinorUnits } from '../../lib/money.js';
 import { newIdempotencyKey } from '../../lib/organisation.js';
+import { useOfficialRate } from '../../lib/officialRate.js';
 import Button from '../../components/ui/Button.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
+import { ProjectFx } from './ProjectFx.jsx';
 
 // P13-05, lot E (2026-11-24): the diaspora — projects in Algeria followed from
 // abroad (ECR-0374 to ECR-0381) and the patrimony across countries (ECR-0372,
@@ -28,9 +30,12 @@ const MODES = ['declared', 'estimated', 'verified'];
 // A rate with its date and source, asked only when the currency differs.
 function RateFields({ id, from, to, value, onChange }) {
   const { t } = useTranslation();
+  // The official rate of the Banque d'Algérie, proposed when the rate is empty.
+  const proposed = useOfficialRate(from, to, value.rate, (official) => value.rate === '' && onChange({ ...value, ...official }));
   if (!from || from.toUpperCase() === to) return null;
   return (
     <div className="business-form-row">
+      {proposed && <p className="inv-muted inv-note">{t('business.trade.officialProposed')}</p>}
       <label>
         {t('business.trade.rateField', { from: from.toUpperCase(), to })}
         <input id={`${id}-rate`} type="number" min="0.000001" step="any" value={value.rate} onChange={(e) => onChange({ ...value, rate: e.target.value })} required />
@@ -242,6 +247,9 @@ function ProjectCard({ project, business, members, run }) {
             </ul>
           )}
           {contribute && project.status !== 'cancelled' && <NewExpense project={project} base={base} run={run} />}
+
+          {/* Lot D bis: the exchange effect on the project (ECR-0378). */}
+          <ProjectFx project={project} base={base} contribute={contribute} run={run} />
 
           {manage && <Shares project={project} members={members} base={base} run={run} />}
         </div>

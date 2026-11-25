@@ -91,6 +91,7 @@ export async function searchFormations(prisma, query) {
   return prisma.formation.findMany({
     where: {
       status: 'published',
+      ownerSpaceId: null,
       OR: [...containsAny('title', terms), ...containsAny('description', terms), { courses: { some: { OR: containsAny('title', terms) } } }],
     },
     select: { id: true, slug: true, title: true },
