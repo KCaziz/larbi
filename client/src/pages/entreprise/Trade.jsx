@@ -12,6 +12,7 @@ import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import { RiskRegister } from './Risks.jsx';
+import { CurrencySelect, RateSourceSelect } from '../../components/fincludia/BusinessFields.jsx';
 
 // P13-05, lot D (2026-11-24): micro-import and international trade — the
 // client's screens ECR-0350 to ECR-0371. FINCLUDIA prepares, computes and
@@ -144,7 +145,7 @@ function NewOperation({ business, contacts, items, incoterms, run }) {
         </label>
         <label>
           {t('business.trade.currency')}
-          <input id="operation-currency" value={form.currency} onChange={set('currency')} maxLength={3} minLength={3} pattern="[A-Za-z]{3}" required />
+          <CurrencySelect id="operation-currency" value={form.currency} onChange={(v) => setForm((p) => ({ ...p, currency: v }))} />
         </label>
       </div>
       <div className="business-form-row">
@@ -379,7 +380,7 @@ function NewCost({ op, business, run }) {
         </label>
         <label>
           {t('business.trade.currency')}
-          <input id={`cost-currency-${op.id}`} value={form.currency} onChange={set('currency')} maxLength={3} minLength={3} required />
+          <CurrencySelect id={`cost-currency-${op.id}`} value={form.currency} onChange={(v) => setForm((p) => ({ ...p, currency: v }))} />
         </label>
         <AmountField id={`cost-amount-${op.id}`} label={t('business.trade.amount')} currency={form.currency.toUpperCase() || business.currency} value={form.amount} onChange={(v) => setForm((p) => ({ ...p, amount: v }))} required />
         <label>
@@ -400,7 +401,7 @@ function NewCost({ op, business, run }) {
           </label>
           <label>
             {t('business.trade.rateSource')}
-            <input id={`cost-source-${op.id}`} value={form.rateSource} onChange={set('rateSource')} maxLength={120} placeholder={t('business.trade.rateSourceHint')} required />
+            <RateSourceSelect id={`cost-source-${op.id}`} value={form.rateSource} onChange={(v) => setForm((p) => ({ ...p, rateSource: v }))} required />
           </label>
         </div>
       )}

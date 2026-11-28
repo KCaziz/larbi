@@ -10,6 +10,7 @@ import Button from '../../components/ui/Button.jsx';
 import Notice from '../../components/ui/Notice.jsx';
 import InvoiceSheet from './InvoiceSheet.jsx';
 import './Invoice.css';
+import { CurrencySelect } from '../../components/fincludia/BusinessFields.jsx';
 
 // Invoice generator (P4-03). The person fills in the invoice; the SERVER checks
 // it and computes every amount (integers, no floating point). The PDF is the
@@ -160,7 +161,7 @@ export default function InvoicePage() {
               </label>
               <label>
                 {t('invoice.currency')}
-                <input value={form.currency} maxLength={3} onChange={(e) => set('currency', e.target.value.toUpperCase())} aria-invalid={Boolean(errors.currency)} />
+                <CurrencySelect value={form.currency} onChange={(v) => set('currency', v)} offline aria-invalid={Boolean(errors.currency)} />
                 <small className="form-hint">{t('invoice.currencyHint')}</small>
                 {err('currency')}
               </label>

@@ -13,6 +13,7 @@ import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import { organisationError } from './Organisation.jsx';
 import { EXPENSE_CATEGORIES } from './Pilot.jsx';
+import { CurrencySelect, RateSourceSelect, RuledInput } from '../../components/fincludia/BusinessFields.jsx';
 
 // P13-05, lot B (2026-11-23): selling and collecting, as the client's tab
 // 19_CYCLE_FACTURE describes it. Quote → invoice (drafted, then issued with
@@ -231,7 +232,8 @@ async function exportCsv(t) {
 
 function Contacts({ contacts, canWrite, run }) {
   const { t } = useTranslation();
-  const [form, setForm] = useState({ kind: 'client', name: '', email: '', phone: '' });
+  const blank = (kind) => ({ kind, name: '', email: '', phone: '', taxId: '', tradeRegister: '' });
+  const [form, setForm] = useState(() => blank('client'));
   const [key, setKey] = useState(newIdempotencyKey);
   const set = (field) => (event) => setForm((previous) => ({ ...previous, [field]: event.target.value }));
 
@@ -243,6 +245,8 @@ function Contacts({ contacts, canWrite, run }) {
             <li key={contact.id}>
               <span className="inv-badge">{t(`business.inv.contactKinds.${contact.kind}`)}</span>
               <strong>{contact.name}</strong>
+              {contact.taxId && <span className="inv-muted">{t('business.inv.print.taxId')} {contact.taxId}</span>}
+              {contact.tradeRegister && <span className="inv-muted">{t('business.inv.print.tradeRegister')} {contact.tradeRegister}</span>}
               {contact.email && <span className="inv-muted">{contact.email}</span>}
               {contact.phone && <span className="inv-muted">{contact.phone}</span>}
             </li>
@@ -256,10 +260,11 @@ function Contacts({ contacts, canWrite, run }) {
           className="business-form inv-contact-form"
           onSubmit={async (event) => {
             event.preventDefault();
-            const body = { kind: form.kind, name: form.name.trim(), ...(form.email.trim() ? { email: form.email.trim() } : {}), ...(form.phone.trim() ? { phone: form.phone.trim() } : {}) };
+            const optional = ['email', 'phone', 'taxId', 'tradeRegister'].filter((field) => form[field].trim());
+            const body = { kind: form.kind, name: form.name.trim(), ...Object.fromEntries(optional.map((field) => [field, form[field].trim()])) };
             if (await run(() => api.post('/fin/entreprise/tiers', body, { idempotencyKey: key }), 'business.inv.contactCreated')) {
               setKey(newIdempotencyKey());
-              setForm({ kind: form.kind, name: '', email: '', phone: '' });
+              setForm(blank(form.kind));
             }
           }}
         >
@@ -281,7 +286,19 @@ function Contacts({ contacts, canWrite, run }) {
             </label>
             <label>
               {t('business.inv.phone')}
-              <input value={form.phone} onChange={set('phone')} maxLength={40} />
+              <RuledInput kind="phone" value={form.phone} onChange={(phone) => setForm((p) => ({ ...p, phone }))} placeholder="0550 12 34 56" />
+            </label>
+          </div>
+          <div className="business-form-row">
+            <label>
+              {t('business.org.identity.taxId')}
+              <RuledInput kind="nif" value={form.taxId} onChange={(taxId) => setForm((p) => ({ ...p, taxId }))} placeholder="000216001234567" />
+              <span className="fin-hint">{t('fields.rules.nif')}</span>
+            </label>
+            <label>
+              {t('business.org.identity.tradeRegister')}
+              <RuledInput kind="rc" value={form.tradeRegister} onChange={(tradeRegister) => setForm((p) => ({ ...p, tradeRegister }))} placeholder="16/00-0123456 B 12" />
+              <span className="fin-hint">{t('fields.rules.rc')}</span>
             </label>
           </div>
           <Button type="submit" variant="secondary">
@@ -408,7 +425,7 @@ function NewDocument({ business, contacts, operations = [], run }) {
         <div className="business-form-row">
           <label>
             {t('business.inv.fx.currency')}
-            <input id="document-currency" value={form.currency} onChange={set('currency')} maxLength={3} minLength={3} required />
+            <CurrencySelect id="document-currency" value={form.currency} onChange={(v) => setForm((p) => ({ ...p, currency: v }))} />
           </label>
           {foreign && (
             <>
@@ -422,7 +439,7 @@ function NewDocument({ business, contacts, operations = [], run }) {
               </label>
               <label>
                 {t('business.trade.rateSource')}
-                <input value={form.rateSource} onChange={set('rateSource')} maxLength={120} placeholder={t('business.trade.rateSourceHint')} />
+                <RateSourceSelect value={form.rateSource} onChange={(v) => setForm((p) => ({ ...p, rateSource: v }))} />
               </label>
             </>
           )}
@@ -706,6 +723,7 @@ function DocumentCard({ doc, business, can, run }) {
       </div>
       {printing && <PrintSheet doc={doc} business={business} onDone={() => setPrinting(false)} />}
 
+      {write && doc.docType === 'quote' && doc.state === 'draft' && <p className="fin-hint inv-note">{t('business.inv.sendHint')}</p>}
       {write && (
         <div className="inv-actions">
           {doc.docType === 'quote' && doc.state === 'draft' && (

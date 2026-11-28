@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BadgeCheck, Download, FileBadge, Plus, Share2, Undo2 } from 'lucide-react';
+import { BadgeCheck, Download, Eye, EyeOff, FileBadge, Plus, Share2, Trash2, Undo2 } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { formatAmount, formatDate } from '../../lib/format.js';
 import { currentOrganisation, newIdempotencyKey } from '../../lib/organisation.js';
 import Button from '../../components/ui/Button.jsx';
+import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 
@@ -199,6 +200,7 @@ export function PassportSection({ can, run }) {
         <FileBadge size={18} aria-hidden="true" /> {t('business.passport.title')}
       </h2>
       <p className="business-blocked-intro">{t('business.passport.intro')}</p>
+      <p className="fin-hint">{t('business.passport.identityWhere')}</p>
       {write && (
         <form
           className="business-form"
@@ -250,16 +252,25 @@ export function PassportSection({ can, run }) {
                 {p.provisional && <span className="inv-badge">{t('business.passport.provisionalShort')}</span>}
               </div>
               <div className="inv-actions">
-                <Button type="button" variant="ghost" aria-expanded={open === p.id} onClick={() => setOpen(open === p.id ? null : p.id)}>
+                <Button type="button" variant="secondary" aria-expanded={open === p.id} onClick={() => setOpen(open === p.id ? null : p.id)}>
+                  {open === p.id ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
                   {open === p.id ? t('business.trade.hide') : t('business.passport.preview')}
                 </Button>
                 {write && p.status === 'draft' && (
                   <>
-                    <Button type="button" variant="secondary" onClick={() => reload(() => api.post(`/fin/entreprise/passeports/${p.id}/publier`, { consent: true }, { idempotencyKey: newIdempotencyKey() }), 'business.passport.published')}>
+                    <Button type="button" variant="primary" onClick={() => reload(() => api.post(`/fin/entreprise/passeports/${p.id}/publier`, { consent: true }, { idempotencyKey: newIdempotencyKey() }), 'business.passport.published')}>
                       <BadgeCheck size={16} aria-hidden="true" />
                       {t('business.passport.publish')}
                     </Button>
-                    <Button type="button" variant="ghost" onClick={() => reload(() => api.delete(`/fin/entreprise/passeports/${p.id}`), 'business.passport.discarded')}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="inv-danger"
+                      onClick={async () => {
+                        if (await askConfirm(t('business.passport.discardConfirm', { n: p.number }))) reload(() => api.delete(`/fin/entreprise/passeports/${p.id}`), 'business.passport.discarded');
+                      }}
+                    >
+                      <Trash2 size={16} aria-hidden="true" />
                       {t('business.passport.discard')}
                     </Button>
                   </>

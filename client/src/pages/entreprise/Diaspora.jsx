@@ -13,6 +13,7 @@ import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
 import LoadingState from '../../components/ui/LoadingState.jsx';
 import { ProjectFx } from './ProjectFx.jsx';
+import { CurrencySelect, RateSourceSelect } from '../../components/fincludia/BusinessFields.jsx';
 
 // P13-05, lot E (2026-11-24): the diaspora — projects in Algeria followed from
 // abroad (ECR-0374 to ECR-0381) and the patrimony across countries (ECR-0372,
@@ -46,7 +47,7 @@ function RateFields({ id, from, to, value, onChange }) {
       </label>
       <label>
         {t('business.trade.rateSource')}
-        <input id={`${id}-source`} value={value.rateSource} onChange={(e) => onChange({ ...value, rateSource: e.target.value })} maxLength={120} placeholder={t('business.trade.rateSourceHint')} required />
+        <RateSourceSelect id={`${id}-source`} value={value.rateSource} onChange={(v) => onChange({ ...value, rateSource: v })} required />
       </label>
     </div>
   );
@@ -143,7 +144,7 @@ function NewProject({ business, run }) {
       <div className="business-form-row">
         <label>
           {t('business.trade.currency')}
-          <input id="project-currency" value={form.currency} onChange={set('currency')} maxLength={3} minLength={3} required />
+          <CurrencySelect id="project-currency" value={form.currency} onChange={(v) => setForm((p) => ({ ...p, currency: v }))} />
         </label>
         <AmountField id="project-budget" label={t('business.dia.budget')} currency={currency} value={form.budget} onChange={(v) => setForm((p) => ({ ...p, budget: v }))} required />
         <AmountField id="project-funds" label={t('business.dia.funds')} currency={currency} value={form.fundsConfirmed} onChange={(v) => setForm((p) => ({ ...p, fundsConfirmed: v }))} hint={t('business.dia.fundsHint')} />
@@ -419,7 +420,7 @@ function NewExpense({ project, base, run }) {
         </label>
         <label>
           {t('business.trade.currency')}
-          <input value={form.currency} onChange={set('currency')} maxLength={3} minLength={3} required />
+          <CurrencySelect value={form.currency} onChange={(v) => setForm((p) => ({ ...p, currency: v }))} />
         </label>
         <AmountField id={`expense-amount-${project.id}`} label={t('business.trade.amount')} currency={currency} value={form.amount} onChange={(v) => setForm((p) => ({ ...p, amount: v }))} required />
       </div>
@@ -828,7 +829,7 @@ function NewHolding({ business, run }) {
       <div className="business-form-row">
         <label>
           {t('business.trade.currency')}
-          <input value={form.currency} onChange={set('currency')} maxLength={3} minLength={3} required />
+          <CurrencySelect value={form.currency} onChange={(v) => setForm((p) => ({ ...p, currency: v }))} />
         </label>
         <AmountField id="holding-value" label={t('business.dia.value')} currency={currency} value={form.value} onChange={(v) => setForm((p) => ({ ...p, value: v }))} required />
         <label>
@@ -859,7 +860,7 @@ function NewHolding({ business, run }) {
           </label>
           <label>
             {t('business.trade.rateSource')}
-            <input value={rate.rateSource} onChange={(e) => setRate((r) => ({ ...r, rateSource: e.target.value }))} maxLength={120} required={Boolean(rate.rate)} />
+            <RateSourceSelect value={rate.rateSource} onChange={(v) => setRate((r) => ({ ...r, rateSource: v }))} required={Boolean(rate.rate)} />
           </label>
         </div>
       )}

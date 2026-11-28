@@ -32,6 +32,12 @@
   inset-block-start: 0;
   inset-inline: 0;
   z-index: -1;
+  /* R20 (2026-11-28): behind the title of the page, the sea stays a backdrop:
+     lighter, so the title and its sentence stay fully readable. */
+  opacity: 0.45;
+}
+.waves-page > .page-header :is(h1, p) {
+  text-shadow: 0 0 10px var(--bg), 0 0 2px var(--bg);
 }
 .waves-page > .waves-bottom {
   margin-block-start: var(--space-lg, 32px);

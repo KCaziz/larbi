@@ -19,15 +19,16 @@ import { CANDIDATE_STAGES, TRAINING_STATUSES, VACANCY_STATUSES } from '../servic
 import { HOLDING_CATEGORIES, HOLDING_KINDS, PROJECT_NATURES, PROJECT_STATUSES, SHARE_ACCESS, VALUATION_MODES } from '../constants/finDiaspora.js';
 import { RISK_CATEGORIES } from '../services/finRisk.service.js';
 import { PASSPORT_ITEMS } from '../services/finPassport.service.js';
+import { optionalNif, optionalNis, optionalPhone, optionalTradeRegister } from './fieldRules.js';
 import { INCOTERM_CODES, OPERATION_COST_KINDS, OPERATION_KINDS, OPERATION_STATUSES, PIECE_KINDS, PIECE_STATUSES } from '../constants/finTrade.js';
 
 // Entrées de l'espace entreprise (P7-02). Mêmes conventions que le reste du
 // moteur : montants entiers en centimes, devise obligatoire, champ inconnu
 // refusé plutôt qu'ignoré.
 //
-// Les identifiants fiscaux (NIF, RC, NIS) sont des chaînes libres bornées, et
-// c'est délibéré : nous n'avons pas la règle officielle de composition, et un
-// format inventé refuserait des entreprises réelles.
+// Les identifiants fiscaux (NIF, RC, NIS) et le téléphone suivent les règles
+// de forme de `fieldRules.js` (R20, 2026-11-28) : des chiffres là où il ne
+// peut y avoir que des chiffres, et une longueur plausible.
 
 const amount = z.number().int().min(0).max(MAX_STORED_AMOUNT);
 const positiveAmount = z.number().int().positive().max(MAX_STORED_AMOUNT);
@@ -45,9 +46,9 @@ export const createBusinessSchema = z
     sector: optionalText(160),
     wilaya: optionalText(60),
     legalForm: z.enum(BUSINESS_LEGAL_FORMS).optional().nullable(),
-    taxId: optionalText(40),
-    tradeRegister: optionalText(40),
-    statisticalId: optionalText(40),
+    taxId: optionalNif,
+    tradeRegister: optionalTradeRegister,
+    statisticalId: optionalNis,
     activity: optionalText(160),
     currency,
     fiscalYearStartMonth: z.number().int().min(1).max(12).optional(),
@@ -89,9 +90,10 @@ export const createContactSchema = z
   .object({
     kind: z.enum(BUSINESS_CONTACT_KINDS),
     name: shortText(160),
-    taxId: optionalText(40),
+    taxId: optionalNif,
+    tradeRegister: optionalTradeRegister,
     email: z.string().trim().email().max(254).optional().nullable(),
-    phone: optionalText(40),
+    phone: optionalPhone,
     address: optionalText(300),
     country: z.string().regex(/^[A-Z]{2}$/).optional().nullable(),
     note: optionalText(300),

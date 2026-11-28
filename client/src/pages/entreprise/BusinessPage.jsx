@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Building2, TrendingUp } from 'lucide-react';
+import { BadgeCent, Boxes, Briefcase, Building2, Calculator, FileBadge, FolderKanban, Gauge, Globe2, Handshake, House, ReceiptText, TrendingUp, UserCog, Users, Wallet, Wrench } from 'lucide-react';
 import { useApi } from '../../lib/useApi.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { formatAmount, formatDate } from '../../lib/format.js';
@@ -14,7 +15,7 @@ import AdultOnly from '../../components/fincludia/AdultOnly.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import { adultRefusalReason, isAdultRefusal } from '../../lib/adultRefusal.js';
 import { useOrganisation } from '../../lib/organisation.js';
-import { CreateOrganisation, JournalSection, MembersSection, OrganisationBar } from './Organisation.jsx';
+import { CreateOrganisation, IdentitySection, JournalSection, MembersSection, OrganisationBar } from './Organisation.jsx';
 import { AgingSection, InvoicingSection, invoicingError } from './Invoicing.jsx';
 import { BudgetSection, CashPlanSection, SpecialisedHome, SteeringSection, StockSection } from './Pilot.jsx';
 import { TradeSection } from './Trade.jsx';
@@ -103,10 +104,45 @@ export default function BusinessPage() {
 }
 
 // One organisation: what the person's role lets them see and do.
+// R20 (2026-11-28): the tabs, by theme, each with its icon. The tab chosen is
+// kept in the address (?onglet=), so « back » and a reload keep it.
+const TAB_GROUPS = [
+  { key: 'steer', tabs: ['home', 'steer', 'tools'] },
+  { key: 'trade', tabs: ['sales', 'stock', 'trade'] },
+  { key: 'funding', tabs: ['projects', 'funding'] },
+  { key: 'people', tabs: ['hr', 'payroll', 'accounting'] },
+  { key: 'organisation', tabs: ['company', 'team'] },
+];
+const TAB_ICONS = {
+  home: House,
+  steer: Wallet,
+  tools: Wrench,
+  sales: ReceiptText,
+  stock: Boxes,
+  trade: Globe2,
+  projects: FolderKanban,
+  funding: Handshake,
+  hr: Users,
+  payroll: BadgeCent,
+  accounting: Calculator,
+  company: FileBadge,
+  team: UserCog,
+};
+const GROUP_ICONS = { steer: Gauge, trade: Briefcase, funding: Handshake, people: Users, organisation: Building2 };
+
 function BusinessSpace() {
   const { t, i18n } = useTranslation();
   const [message, setMessage] = useState(null);
-  const [tab, setTab] = useState(null);
+  const [params, setParams] = useSearchParams();
+  const tab = params.get('onglet');
+  const setTab = (key) => {
+    setMessage(null);
+    setParams((previous) => {
+      const next = new URLSearchParams(previous);
+      next.set('onglet', key);
+      return next;
+    });
+  };
   const business = useApi('/fin/entreprise');
   const can = (action) => (business.data?.permissions ?? []).includes(action);
   // Only once the organisation is known, and only what the role may read
@@ -156,38 +192,69 @@ function BusinessSpace() {
     // Lot F: copilot, search, simulators and comparators.
     can('org.read') && 'tools',
     readsFinance && 'steer',
+    // R20: the company file (NIF, RC, NIS), read by every member, changed by the holder.
+    can('org.read') && 'company',
     (can('members.manage') || can('journal.read')) && 'team',
   ].filter(Boolean);
   const current = tabs.includes(tab) ? tab : tabs[0];
+  const groups = TAB_GROUPS.map((group) => ({ ...group, tabs: group.tabs.filter((key) => tabs.includes(key)) })).filter((group) => group.tabs.length > 0);
+
+  const notice = message && (
+    <p className={message.kind === 'ok' ? 'form-status business-message' : 'form-error business-message'} role="status">
+      {message.text}
+    </p>
+  );
 
   return (
     <>
-      {message && (
-        <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
-          {message.text}
-        </p>
-      )}
+      {!entreprise && notice}
 
       {entreprise && (
         <>
           {!readsFinance && <Notice variant="info">{t('business.org.noFigures')}</Notice>}
           {tabs.length > 1 && (
-            <div className="business-tabs" role="tablist" aria-label={t('business.pilot.tabsLabel')}>
-              {tabs.map((key) => (
-                <button
-                  key={key}
-                  id={`business-tab-${key}`}
-                  type="button"
-                  role="tab"
-                  aria-selected={current === key}
-                  className={current === key ? 'business-tab is-on' : 'business-tab'}
-                  onClick={() => setTab(key)}
-                >
-                  {t(`business.pilot.tabs.${key}`)}
-                </button>
-              ))}
-            </div>
+            <nav className="business-nav" aria-label={t('business.pilot.tabsLabel')}>
+              {groups.map((group) => {
+                const GroupIcon = GROUP_ICONS[group.key];
+                return (
+                  <div key={group.key} className="business-nav-group">
+                    <span className="business-nav-title">
+                      <GroupIcon size={14} aria-hidden="true" /> {t(`business.pilot.tabGroups.${group.key}`)}
+                    </span>
+                    <div className="business-nav-buttons" role="tablist">
+                      {group.tabs.map((key) => {
+                        const Icon = TAB_ICONS[key];
+                        return (
+                          <button
+                            key={key}
+                            id={`business-tab-${key}`}
+                            type="button"
+                            role="tab"
+                            aria-selected={current === key}
+                            className={current === key ? 'business-tab is-on' : 'business-tab'}
+                            onClick={() => setTab(key)}
+                          >
+                            <Icon size={17} aria-hidden="true" />
+                            <span>{t(`business.pilot.tabs.${key}`)}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </nav>
           )}
+          {tabs.length > 1 && (
+            <h2 className="business-current">
+              {(() => {
+                const Icon = TAB_ICONS[current];
+                return <Icon size={22} aria-hidden="true" />;
+              })()}
+              {t(`business.pilot.tabs.${current}`)}
+            </h2>
+          )}
+          {notice}
 
           {current === 'home' && (
             <>
@@ -289,8 +356,8 @@ function BusinessSpace() {
 
           {current === 'steer' && (
             <>
-              <SteeringSection dashboard={dashboard.data} currency={entreprise.currency} />
               <CashPlanSection currency={entreprise.currency} canWrite={can('cash.write')} run={run} />
+              <SteeringSection dashboard={dashboard.data} currency={entreprise.currency} />
               <BudgetSection currency={entreprise.currency} canWrite={can('budget.write')} run={run} />
 
               {/* Les états que le contrat annonce et que nous ne produisons pas,
@@ -311,6 +378,8 @@ function BusinessSpace() {
               </section>
             </>
           )}
+
+          {current === 'company' && <IdentitySection key={entreprise.version} business={entreprise} canWrite={can('org.update')} onSaved={business.reload} />}
 
           {/* P13-05, lot A: who works here, with which rights, and what was done. */}
           {current === 'team' && (

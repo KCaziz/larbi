@@ -11,6 +11,7 @@ import Field from '../../../components/cms/Field.jsx';
 import PageToolbar from '../../../components/cms/PageToolbar.jsx';
 import Notice from '../../../components/ui/Notice.jsx';
 import './Platform.css';
+import { RuledInput } from '../../../components/fincludia/BusinessFields.jsx';
 
 // The settings the rest of the application actually reads (P3-16): a fixed
 // form, not a free-form key/value store — a setting nothing reads is not worth
@@ -77,7 +78,7 @@ function CoreSettings({ settings, onSaved }) {
         <input id="s-email" type="email" maxLength={254} value={form.contactEmail} onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))} />
       </Field>
       <Field label={t('admin.settings.contactPhone')} htmlFor="s-phone">
-        <input id="s-phone" type="tel" maxLength={40} value={form.contactPhone} onChange={(e) => setForm((f) => ({ ...f, contactPhone: e.target.value }))} />
+        <RuledInput kind="phone" id="s-phone" value={form.contactPhone} onChange={(contactPhone) => setForm((f) => ({ ...f, contactPhone }))} />
       </Field>
       <Field label={t('admin.settings.contactAddress')} htmlFor="s-address">
         <textarea id="s-address" rows={2} maxLength={300} value={form.contactAddress} onChange={(e) => setForm((f) => ({ ...f, contactAddress: e.target.value }))} />

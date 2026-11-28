@@ -143,7 +143,7 @@ export default function HomePage() {
   return (
     // P13-03: a wave at the head of the page and one at its foot; they cross as the page scrolls.
     <div className="waves-page home-waves">
-      <Waves position="top" height={150} />
+      <Waves position="top" height={110} />
       <PageHeader icon={Home} title={t('appHome.title')} subtitle={t('appHome.intro')} maxWidth={1100} />
       <div className="home-page">
         {/* ACC-01 / ACC-02: the balance, total or one account, and the

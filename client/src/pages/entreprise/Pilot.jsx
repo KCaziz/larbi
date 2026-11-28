@@ -184,7 +184,14 @@ export function CashPlanSection({ currency, canWrite, run }) {
       </h2>
       <p className="business-blocked-intro">{t('business.pilot.planIntro')}</p>
 
-      {canWrite && (
+      <h3 className="pilot-subtitle pilot-step">
+        <span className="pilot-step-n" aria-hidden="true">1</span>
+        {t('business.pilot.stepStart')}
+      </h3>
+      {data?.depart && (
+        <p className="inv-muted">{t('business.pilot.startsFrom', { amount: money(data.depart.montant), date: formatDate(i18n.language, data.depart.constateLe) })}</p>
+      )}
+      {canWrite ? (
         <form
           className="business-form business-payment"
           onSubmit={async (event) => {
@@ -207,12 +214,18 @@ export function CashPlanSection({ currency, canWrite, run }) {
             {t('business.pilot.observedAt')}
             <input type="date" value={balance.observedAt} max={today()} onChange={(e) => setBalance((p) => ({ ...p, observedAt: e.target.value }))} required />
           </label>
-          <Button type="submit" variant="secondary">
+          <Button type="submit" variant="primary">
             {t('business.pilot.saveBalance')}
           </Button>
         </form>
+      ) : (
+        !data?.depart && <p className="fin-hint">{t('business.pilot.startReadOnly')}</p>
       )}
 
+      <h3 className="pilot-subtitle pilot-step">
+        <span className="pilot-step-n" aria-hidden="true">2</span>
+        {t('business.pilot.stepPlan')}
+      </h3>
       {plan.status === 'loading' && !data ? (
         <LoadingState />
       ) : !data?.depart ? (
@@ -220,9 +233,6 @@ export function CashPlanSection({ currency, canWrite, run }) {
       ) : (
         <>
           <div className="pilot-plan-head">
-            <p>
-              {t('business.pilot.startsFrom', { amount: money(data.depart.montant), date: formatDate(i18n.language, data.depart.constateLe) })}
-            </p>
             <label className="pilot-inline">
               {t('business.pilot.scenario')}
               <select id="cash-scenario" value={delay} onChange={(e) => setDelay(Number(e.target.value))}>
@@ -419,7 +429,8 @@ export function StockSection({ currency, canWrite, showValues, run }) {
                     <AmountField id="move-cost" label={t('business.pilot.lotCost')} currency={currency} value={move.totalCost} onChange={(v) => setMove((p) => ({ ...p, totalCost: v }))} hint={t('business.pilot.lotCostHint')} required />
                     <label>
                       {t('business.pilot.lotRef')}
-                      <input value={move.lotRef} onChange={(e) => setMove((p) => ({ ...p, lotRef: e.target.value }))} maxLength={60} />
+                      <input value={move.lotRef} onChange={(e) => setMove((p) => ({ ...p, lotRef: e.target.value }))} maxLength={60} placeholder={t('business.pilot.lotRefExample')} />
+                      <span className="fin-hint">{t('business.pilot.lotRefHint')}</span>
                     </label>
                   </>
                 ) : (

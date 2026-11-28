@@ -5307,6 +5307,34 @@
         "versionMismatch": "Someone changed this record in the meantime: reload the page.",
         "memberRevoked": "This person’s access was removed: invite them again.",
         "organisationNotFound": "This organisation is no longer accessible."
+      },
+      "identityLater": "The tax ID, trade register and statistical ID are filled in afterwards, in the « Company file » tab.",
+      "identityTitle": "Company identity",
+      "identityIntro": "These details appear on your quotes and invoices, and in the financial passport. Only the holder can change them; every change is written to the log.",
+      "identityMissing": "To complete: {{fields}}.",
+      "identitySaved": "Company file saved.",
+      "identitySave": "Save the file",
+      "identityReadOnly": "Only the holder of the organisation can change this file.",
+      "identity": {
+        "legalForm": "Legal form",
+        "notSaid": "Not stated",
+        "taxId": "Tax ID (NIF)",
+        "tradeRegister": "Trade register (RC)",
+        "statisticalId": "Statistical ID (NIS)",
+        "sector": "Sector",
+        "activity": "Main activity",
+        "fiscalYear": "Start of the financial year"
+      },
+      "legalForms": {
+        "auto_entrepreneur": "Self-employed",
+        "micro_entreprise": "Micro-enterprise",
+        "profession_liberale": "Liberal profession",
+        "micro_importateur": "Micro-importer",
+        "startup": "Startup",
+        "pme": "SME",
+        "pmi": "Small industry",
+        "entreprise": "Company",
+        "autre": "Other"
       }
     },
     "title": "My business",
@@ -5629,7 +5657,8 @@
       "clearDispute": "Clear the dispute",
       "disputeMarked": "Invoice marked as disputed.",
       "disputeCleared": "Dispute cleared.",
-      "disputed": "Disputed since {{date}}: this invoice is not offered for financing."
+      "disputed": "Disputed since {{date}}: this invoice is not offered for financing.",
+      "sendHint": "« Mark as sent » only records that you passed this quote on (by e-mail, by hand…): FINCLUDIA sends nothing itself. Print it or save it as a PDF to pass it on, then record the answer with « Accept » or « Refuse »."
     },
     "pilot": {
       "tabsLabel": "Parts of the business space",
@@ -5645,7 +5674,8 @@
         "steer": "Budget and cash",
         "team": "Team and journal",
         "payroll": "Payroll",
-        "accounting": "Accounting"
+        "accounting": "Accounting",
+        "company": "Company file"
       },
       "homes": {
         "PUB-01": "Liberal profession: fees, receivables, cash",
@@ -5731,7 +5761,7 @@
       "budgetSaved": "Budget saved.",
       "planTitle": "Cash over 13 weeks",
       "planIntro": "Starting from the money you really hold today: what should come in (sales invoices at their due date) and go out (purchase invoices at their due date and remaining budgets), week by week. Nothing is guaranteed: a client may pay late.",
-      "balance": "Observed balance of your accounts and till",
+      "balance": "Starting balance: what you have today in your accounts and till",
       "overdraft": "It is an overdraft",
       "observedAt": "Observed on",
       "saveBalance": "Save the balance",
@@ -5777,7 +5807,19 @@
       "lotRef": "Lot reference",
       "fromLot": "Lot concerned",
       "saveMove": "Record the movement",
-      "moveSaved": "Movement recorded."
+      "moveSaved": "Movement recorded.",
+      "tabGroups": {
+        "steer": "Steer",
+        "trade": "Sell and buy",
+        "funding": "Projects and funding",
+        "people": "Staff and accounts",
+        "organisation": "Organisation"
+      },
+      "stepStart": "Starting balance",
+      "stepPlan": "The plan, week by week",
+      "startReadOnly": "The starting balance is entered by a person who manages the cash.",
+      "lotRefExample": "E.g. DN-2026-041",
+      "lotRefHint": "Optional. The number that lets you recognise this lot: delivery note, supplier invoice, lot number printed on the box… It is shown when you choose which lot to take units from."
     },
     "trade": {
       "title": "International operations",
@@ -7282,7 +7324,9 @@
       "kindPassport": "Passport",
       "kindBatch": "Batch of invoices",
       "openShare": "Open",
-      "shareGone": "This share is no longer available."
+      "shareGone": "This share is no longer available.",
+      "identityWhere": "The tax ID and the trade register come from the « Company file » tab: fill them in there, then prepare a new passport.",
+      "discardConfirm": "Delete the draft of passport no. {{n}}?"
     },
     "financing": {
       "title": "Invoices to finance",
@@ -9092,7 +9136,7 @@
     },
     "stepsHint": {
       "diagnostic": "data, period, actors and notions correctly identified",
-      "method": "formula, classification or checklist applied without skipping a step",
+      "method": "calculation, classification or checklist applied without skipping a step",
       "result": "result given with its unit, period and convention",
       "interpretation": "what the result means and what it does not prove",
       "decision": "a consistent action, with source, risk or assumption checked"
@@ -9282,5 +9326,23 @@
     "noParticipant": "No learner has accepted the invitation yet.",
     "present": "present",
     "attendanceSaved": "Attendance recorded."
+  },
+  "fields": {
+    "chooseCurrency": "Choose a currency",
+    "chooseSource": "Choose the source",
+    "chooseWilaya": "Choose a wilaya",
+    "rateSources": {
+      "official": "Bank of Algeria (official rate)",
+      "bank": "My bank (rate applied)",
+      "exchangeOffice": "Licensed exchange office",
+      "contract": "Partner contract or invoice",
+      "other": "Other source"
+    },
+    "rules": {
+      "phone": "Digits only, with spaces, dots or dashes if you like, and « + » before a country code (6 to 15 digits).",
+      "nif": "The tax ID (NIF) has 15 digits (or 20 in the new format), no letters or spaces.",
+      "nis": "The statistical ID (NIS) has 15 digits, no letters or spaces.",
+      "rc": "The trade register number as it appears on the extract (letters, digits, « / » and « - »), for example 16/00-0123456 B 12."
+    }
   }
 }

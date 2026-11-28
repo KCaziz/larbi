@@ -2742,34 +2742,35 @@ model FinIdempotencyKey {
 }
 
 model FinBusinessContact {
-  id          String                 @id @default(uuid())
-  businessId  String
-  business    FinBusiness            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  id            String                 @id @default(uuid())
+  businessId    String
+  business      FinBusiness            @relation(fields: [businessId], references: [id], onDelete: Cascade)
   // "client" | "supplier" (BUSINESS_CONTACT_KINDS). Un même tiers peut être
   // les deux : il est alors enregistré deux fois, parce qu'un client et un
   // fournisseur n'ont ni le même solde ni le même délai.
-  kind        String                 @db.VarChar(10)
-  name        String                 @db.VarChar(160)
-  taxId       String?                @db.VarChar(40)
-  email       String?                @db.VarChar(254)
-  phone       String?                @db.VarChar(40)
-  address     String?                @db.VarChar(300)
-  country     String?                @db.VarChar(2)
-  note        String?                @db.VarChar(300)
-  scope       String                 @default("business") @db.VarChar(20)
-  source      String                 @db.VarChar(20)
-  sourceRef   String?                @db.VarChar(200)
-  status      String                 @db.VarChar(20)
-  consentUses Json                   @default("[]")
-  effectiveAt DateTime               @default(now())
-  collectedAt DateTime               @default(now())
-  version     Int                    @default(1)
-  archivedAt  DateTime?
-  deletedAt   DateTime?
-  createdAt   DateTime               @default(now())
-  updatedAt   DateTime               @updatedAt
-  documents   FinBusinessDocument[]
-  operations  FinBusinessOperation[]
+  kind          String                 @db.VarChar(10)
+  name          String                 @db.VarChar(160)
+  taxId         String?                @db.VarChar(40)
+  tradeRegister String?                @db.VarChar(40)
+  email         String?                @db.VarChar(254)
+  phone         String?                @db.VarChar(40)
+  address       String?                @db.VarChar(300)
+  country       String?                @db.VarChar(2)
+  note          String?                @db.VarChar(300)
+  scope         String                 @default("business") @db.VarChar(20)
+  source        String                 @db.VarChar(20)
+  sourceRef     String?                @db.VarChar(200)
+  status        String                 @db.VarChar(20)
+  consentUses   Json                   @default("[]")
+  effectiveAt   DateTime               @default(now())
+  collectedAt   DateTime               @default(now())
+  version       Int                    @default(1)
+  archivedAt    DateTime?
+  deletedAt     DateTime?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  documents     FinBusinessDocument[]
+  operations    FinBusinessOperation[]
 
   @@index([businessId, kind])
   @@map("fin_business_contacts")

@@ -1368,3 +1368,147 @@ Remarques notées par l'équipe en déroulant `SCENARIO_TEST_COMPLET.md` sur le 
   - Sans épargne mise de côté, la Synthèse explique en une phrase pourquoi la courbe du taux d'épargne n'apparaît pas encore, et comment la faire apparaître.
   - L'axe des valeurs tombe sur des chiffres ronds (0, 50 k, 100 k…).
   - Tests : `functional/finMoney.test.js` (2 nouveaux cas, 45/45). Parcours `e2e/fin-charts-journey.test.js` : il ne démarrait plus depuis P12-03 (son deuxième compte était refusé sans abonnement) ; il démarre maintenant en abonné, 6 cas sur 7 passent. Reste G-11 (page Dettes : le libellé « Emprunt bancaire » n'apparaît plus), sans lien avec ces changements, à reprendre. **Repris le 2026-11-25** : ce n'était pas un défaut de l'application. R8-06 (2026-11-05) a remplacé l'anneau par type par « Où en sont mes dettes » (une barre par dette : remboursé / reste dû), et le parcours vérifiait encore l'ancien anneau. Le cas G-11 vérifie maintenant le graphique actuel (titre, dette nommée, légende écrite) : `fin-charts-journey` 7/7.
+
+## R20 — Retours de recette du 2026-11-28 (`test.txt`, parcours 1 à 9)
+
+### R20-01 — Navigation de l'espace entreprise peu reconnaissable
+- Statut : `✅ done` (2026-11-28)
+- Priorité : `🟡 medium`
+- Origine : `test.txt`, l. 6 et 9.
+- Constat (reproduit) : 13 onglets en texte simple sur deux lignes ; rien ne montre que ce sont des boutons, et l'onglet ouvert est perdu au rechargement.
+- Correction :
+  - La navigation est un bloc de boutons, avec une icône, un fond et une bordure. Les boutons sont rangés en cinq thèmes : Piloter, Vendre et acheter, Projets et financement, Personnel et comptes, Organisation. Le bouton ouvert est plein, en couleur de la marque.
+  - Sous la navigation, le titre de la partie ouverte est rappelé avec son icône.
+  - La partie ouverte est gardée dans l'adresse (`?onglet=`) : le retour arrière et le rechargement la conservent.
+  - Sur téléphone, les thèmes s'affichent sur deux colonnes.
+
+### R20-02 — Formulaires étroits, boutons collés aux champs
+- Statut : `✅ done` (2026-11-28)
+- Priorité : `🟡 medium`
+- Origine : `test.txt`, l. 5.
+- Constat (reproduit) : le formulaire « Créer votre espace entreprise » est centré mais étroit. Ses champs ne prennent pas la largeur, et « Créer l'espace » touche le champ Wilaya.
+- Correction :
+  - Formulaire de création : 760 px de large, champs sur deux colonnes, bouton à 18 px du dernier champ.
+  - Dans tout l'espace entreprise, un champ prend toute la largeur de sa colonne, et les boutons d'un formulaire gardent 18 px de marge.
+  - La wilaya se choisit dans la liste des 58 wilayas (création et fiche de l'entreprise).
+
+### R20-03 — Messages collés à l'élément au-dessus
+- Statut : `✅ done` (2026-11-28)
+- Priorité : `🟢 low`
+- Origine : `test.txt`, l. 7 (par exemple « Il ne reste pas autant d'unités dans ce lot »).
+- Correction :
+  - Dans toute l'application, un message d'erreur, de confirmation ou d'avertissement garde 12 px au-dessus et au-dessous de ses voisins.
+  - Dans l'espace entreprise, le message d'une action s'affiche sous la navigation, et il disparaît quand on change de partie.
+  - Les avertissements des formulaires sont dans un encadré orange clair.
+
+### R20-04 — Pages trop uniformes
+- Statut : `✅ done` (2026-11-28)
+- Priorité : `🟢 low`
+- Origine : `test.txt`, l. 8.
+- Correction : dans l'espace entreprise, chaque section est un panneau blanc, avec sa bordure et son ombre.
+  - Les explications sont dans un encadré teinté, avec un liseré.
+  - « Ce que cet espace ne produit pas » est sur fond orange clair.
+  - Dans une rangée d'actions, chaque action est un bouton, jamais un mot souligné.
+
+### R20-05 — Accueil : texte caché par les vagues
+- Statut : `✅ done` (2026-11-28)
+- Priorité : `🟢 low`
+- Origine : `test.txt`, l. 4.
+- Constat (reproduit) : sur l'Accueil de l'application, la vague du haut passait sous le titre et sous la phrase d'introduction.
+- Correction : la vague est plus basse (110 px au lieu de 150) et plus transparente, et le titre et sa phrase ont un léger halo de la couleur du fond. Vérifié en thème clair et sombre.
+
+### R20-06 — Aucun contrôle sur les champs ; pas de NIF ni de RC pour les tiers et l'organisation
+- Statut : `✅ done` (2026-11-28)
+- Priorité : `🟠 high`
+- Origine : `test.txt`, parcours 2.1, 8.2 et l. 31.
+- Constat (reproduit) :
+  - Un téléphone « 05abc » était accepté.
+  - Le formulaire des clients et fournisseurs n'avait pas de NIF.
+  - Le NIF, le RC et le NIS de l'organisation n'étaient modifiables sur aucun écran : l'API les acceptait seulement à la création.
+- Correction :
+  - Règles de forme, communes au serveur (`validation/fieldRules.js`) et aux écrans (`components/fincludia/BusinessFields.jsx`) :
+    - téléphone : chiffres, espaces, points, tirets, « + » devant, de 6 à 15 chiffres ;
+    - NIF : 15 chiffres, ou 20 ;
+    - NIS : 15 chiffres ;
+    - RC : lettres, chiffres, « / » et « - », de 5 à 30 caractères, avec au moins un chiffre.
+  - À la saisie, une lettre ne s'écrit pas dans un numéro. Le navigateur explique la règle, et le serveur refuse ce qui ne la respecte pas.
+  - Clients et fournisseurs : NIF et RC ajoutés au formulaire et à la liste (migration `20261210120000_fin_contact_trade_register`, ajoutée à `mise-a-jour-base.sql` et rejouée deux fois sans écart). Le téléphone est contrôlé.
+  - Nouvelle partie « Fiche de l'entreprise » : nom, enseigne, forme juridique, NIF, RC, NIS, secteur, activité, wilaya, profil, début de l'exercice.
+    - Le titulaire la modifie ; les autres membres la lisent.
+    - Chaque modification va au journal.
+    - Les champs manquants sont signalés.
+  - Le passeport financier indique où se remplissent le NIF et le RC. Le formulaire de création l'indique aussi.
+  - Le téléphone de contact du site (administration) suit la même règle.
+  - Vérifié par l'API sur le serveur de test :
+    - téléphone avec lettres, NIF de 3 chiffres et RC « abc » sont refusés (400) ;
+    - un tiers complet est créé (201) ;
+    - la fiche est enregistrée (200).
+
+### R20-07 — Devise saisie librement
+- Statut : `✅ done` (2026-11-28)
+- Priorité : `🟠 high`
+- Origine : `test.txt`, parcours 2.2 et 5.1, l. 31.
+- Correction : partout où une devise se saisissait, elle se choisit maintenant dans la liste des devises de l'application (DZD, EUR, USD, GBP, CAD), la même que pour les comptes. Sont concernés :
+  - les factures et les devis ;
+  - l'import-export (opération et coûts) ;
+  - les projets diaspora (projet, dépense, patrimoine) ;
+  - l'effet de change d'un projet ;
+  - l'outil public de facture ;
+  - les offres de l'administration.
+
+  Une valeur enregistrée avant reste affichée.
+
+### R20-08 — « Source du cours » modifiable à la main
+- Statut : `✅ done` (2026-11-28)
+- Priorité : `🟡 medium`
+- Origine : `test.txt`, parcours 3.1.
+- Réponse : la source est demandée parce qu'un cours peut venir d'ailleurs que de la Banque d'Algérie, par exemple de la banque de l'entreprise ou d'un contrat. Elle ne devait pas pour autant être un texte libre.
+- Correction :
+  - La source se choisit dans une liste : Banque d'Algérie (cours officiel), ma banque, bureau de change agréé, contrat ou facture du partenaire, autre.
+  - Le cours officiel proposé sélectionne « Banque d'Algérie (cours officiel) ».
+  - Une source déjà enregistrée reste affichée.
+
+### R20-09 — Que veut dire « Envoyer » sur un devis ?
+- Statut : `✅ done` (2026-11-28)
+- Priorité : `🟢 low`
+- Origine : `test.txt`, parcours 2.3.
+- Correction : sous les actions d'un devis en brouillon, une phrase explique ce bouton. « Marquer comme envoyé » note seulement que le devis a été transmis : FINCLUDIA n'envoie rien. On l'imprime ou on l'enregistre en PDF, puis on note la réponse.
+
+### R20-10 — « Repère du lot » incompris
+- Statut : `✅ done` (2026-11-28)
+- Priorité : `🟢 low`
+- Origine : `test.txt`, parcours 4.2.
+- Correction : le champ a un exemple (« BL-2026-041 ») et une explication. C'est le numéro qui permet de reconnaître le lot (bon de livraison, facture du fournisseur, numéro imprimé), et on le retrouve au moment de choisir le lot d'une sortie.
+
+### R20-11 — « Pas de champ pour le solde de départ »
+- Statut : `✅ done` (2026-11-28)
+- Priorité : `🟡 medium`
+- Origine : `test.txt`, parcours 4.3.
+- Constat (reproduit) : le champ existait, sous le nom « Solde constaté de vos comptes et de votre caisse ». Il était placé sous les six cartes du pilotage, et rien ne le désignait comme le point de départ.
+- Correction :
+  - « Budget et trésorerie » commence par la trésorerie, avec deux étapes numérotées : 1. Solde de départ, 2. Le plan semaine par semaine.
+  - Le champ s'intitule « Solde de départ : ce que vous avez aujourd'hui sur vos comptes et en caisse ».
+  - Une personne qui ne peut pas le saisir est prévenue.
+
+### R20-12 — Passeport : boutons et liens mélangés
+- Statut : `✅ done` (2026-11-28)
+- Priorité : `🟢 low`
+- Origine : `test.txt`, parcours 8.1.
+- Correction :
+  - « Voir le contenu », « Publier » et « Supprimer le brouillon » sont trois boutons avec une icône. « Supprimer le brouillon » est en rouge et demande une confirmation.
+  - La règle vaut pour toutes les rangées d'actions de l'espace entreprise.
+
+### R20-13 — Accueil public : regrouper les parcours (outils, budget, professionnels, diaspora, commerce international ; puis formation, newsletter, veille)
+- Statut : `⏳ en attente`
+- Priorité : `🟡 medium`
+- Origine : `test.txt`, l. 1 et 2.
+- En attente du schéma annoncé dans `test.txt` avant de réorganiser la page.
+
+### Hors liste, corrigé au passage
+- `academy.stepsHint.method` disait « formule », un mot interdit à l'écran : il dit maintenant « calcul » (fr) et « calculation » (en).
+- `fin_skill_records.exerciseAnswer` : la valeur par défaut `''` est maintenant aussi dans la base, comme dans `schema.prisma` (même migration). Le test « no drift » repasse.
+- Vérifications :
+  - `tests/consistency/screens.test.js` et `project.test.js` : 41/41 ;
+  - build du client sans erreur ;
+  - captures de la fiche de l'entreprise, de la navigation, de l'onglet budget et trésorerie, des ventes et de l'Accueil (clair et sombre).
+  - La suite complète n'a pas été relancée.

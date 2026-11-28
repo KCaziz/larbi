@@ -14,6 +14,7 @@ import Field from '../../../components/cms/Field.jsx';
 import PageToolbar from '../../../components/cms/PageToolbar.jsx';
 import PaymentStatus from '../../../components/payments/PaymentStatus.jsx';
 import './PaymentsAdmin.css';
+import { CurrencySelect } from '../../../components/fincludia/BusinessFields.jsx';
 
 // Payment administration (P3-09): the offers people can buy (prices come from
 // the client and are typed in here) and the orders, READ-ONLY: an order's status
@@ -166,7 +167,7 @@ function OffersTab() {
               <input id="po-price" aria-describedby="po-price-hint" inputMode="decimal" value={form.price} onChange={(e) => set('price', e.target.value)} required />
             </Field>
             <Field label={t('payments.admin.currency')} htmlFor="po-currency" hint={t('payments.admin.currencyHint')}>
-              <input id="po-currency" aria-describedby="po-currency-hint" maxLength={3} value={form.currency} onChange={(e) => set('currency', e.target.value)} required />
+              <CurrencySelect id="po-currency" aria-describedby="po-currency-hint" value={form.currency} onChange={(v) => set('currency', v)} />
             </Field>
           </div>
           {amount !== null && <p className="form-hint">{t('payments.admin.preview', { price: formatMoney(i18n.language, amount, currency) })}</p>}

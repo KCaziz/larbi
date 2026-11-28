@@ -444,6 +444,20 @@ main {
   font-size: 0.88rem;
 }
 
+/* R20 (2026-11-28): a short message (error, confirmation, warning) is never
+   glued to the element above or below it. */
+.form-error:not(:first-child),
+.form-status:not(:first-child),
+.business-document-warning:not(:first-child),
+.notice:not(:first-child) {
+  margin-block-start: 12px;
+}
+.form-error:not(:last-child),
+.form-status:not(:last-child),
+.business-document-warning:not(:last-child) {
+  margin-block-end: 12px;
+}
+
 /* Tone modifiers: give any card/icon/chip its own accent colour by adding one
    of these classes — components read --tone / --tone-bg. */
 .tone-primary {

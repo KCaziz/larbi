@@ -39,7 +39,9 @@ Compte **PATRON**.
 
 Compte **PATRON**, onglet « Ventes et achats ».
 
-- [ ] Ajouter un client avec un NIF (par exemple « Société Atlas », NIF 000216001234567). Ajouter aussi un client sans NIF.
+- [ ] Ajouter un client avec un NIF et un RC (par exemple « Société Atlas », NIF 000216001234567, RC 16/00-0123456 B 12). Ajouter aussi un client sans NIF.
+- [ ] Essayer un téléphone avec des lettres, ou un NIF de 5 chiffres → les lettres ne s'écrivent pas, et le formulaire refuse un NIF incomplet en expliquant la règle.
+- [ ] La devise d'une facture se choisit dans une liste (DZD, EUR, USD, GBP, CAD).
 - [ ] Créer un **devis** pour « Société Atlas » avec 2 lignes → il reçoit un numéro, et aucune créance n'est créée.
 - [ ] L'envoyer, l'accepter, puis le facturer → une facture en brouillon apparaît. Émettez-la → elle reçoit son numéro, et le reste dû est égal au total.
 - [ ] Enregistrer un règlement partiel → l'état passe à « partiel » et le reste dû baisse.
@@ -71,7 +73,7 @@ Compte **PATRON**.
 
 - [ ] Onglet « Stock » → créer un article, puis faire une entrée de 10 unités → le stock vaut 10.
 - [ ] Faire une sortie de 15 → refus : stock insuffisant.
-- [ ] Onglet « Budget et trésorerie » → saisir le solde de départ → le plan sur 13 semaines s'affiche. Un chiffre manquant s'affiche « non calculé », jamais 0.
+- [ ] « Budget et trésorerie » → étape 1 « Solde de départ » → saisir le solde, puis « Enregistrer le solde » → l'étape 2 affiche le plan sur 13 semaines. Un chiffre manquant s'affiche « non calculé », jamais 0.
 
 ## 5. Import-export et registre des risques (lots D et D bis)
 
@@ -131,7 +133,7 @@ Compte **PATRON**, onglet « Financement et partenaires ».
   - activité, créances, concentration (en parts, **jamais de noms de clients**), comptes, qualité ;
   - l'indice de complétude, avec ses 7 contrôles cochés ou non ;
   - la mention « provisoire » si les comptes ne sont pas validés.
-- [ ] Remplir NIF et registre du commerce de l'organisation, puis préparer un passeport n° 2 → le contrôle « identité » est coché.
+- [ ] Navigation → « Fiche de l'entreprise » → remplir NIF, registre du commerce et NIS, puis « Enregistrer la fiche ». Revenir au passeport, puis préparer un passeport n° 2 → le contrôle « identité » est coché.
 - [ ] « Publier » le passeport n° 2 → « publié ».
 - [ ] « Supprimer le brouillon » du n° 1 → il disparaît.
 

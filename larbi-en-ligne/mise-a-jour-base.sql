@@ -8886,3 +8886,18 @@ ALTER TABLE `fin_institution_attendance` DROP FOREIGN KEY IF EXISTS `fin_institu
 ALTER TABLE `fin_institution_attendance` ADD CONSTRAINT `fin_institution_attendance_memberId_fkey` FOREIGN KEY (`memberId`) REFERENCES `fin_partner_cohort_members`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 SET FOREIGN_KEY_CHECKS = @OLD_FK;
 INSERT INTO `_prisma_migrations` (`id`, `checksum`, `finished_at`, `migration_name`, `logs`, `rolled_back_at`, `started_at`, `applied_steps_count`) SELECT UUID(), '3a5298ca0adff60d4bccd82f3871a1bba4adafdcdd883801c0b91694ecdd8e5b', NOW(3), '20261209120000_fin_institution_training', NULL, NULL, NOW(3), 1 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `_prisma_migrations` WHERE `migration_name` = '20261209120000_fin_institution_training' AND `rolled_back_at` IS NULL AND `finished_at` IS NOT NULL);
+
+
+
+-- =====================================================================================
+-- 2026-11-28 — Registre du commerce des clients et fournisseurs (R20).
+-- Rejouable sans risque.
+-- =====================================================================================
+SET @OLD_FK = @@FOREIGN_KEY_CHECKS; SET FOREIGN_KEY_CHECKS = 0;
+-- R20 (2026-11-28): the trade register number of a client or a supplier, next to its NIF.
+ALTER TABLE `fin_business_contacts` ADD COLUMN IF NOT EXISTS `tradeRegister` VARCHAR(40) NULL;
+
+-- The answer of a module exercise starts empty in the database too, as in schema.prisma.
+ALTER TABLE `fin_skill_records` ALTER COLUMN `exerciseAnswer` SET DEFAULT '';
+SET FOREIGN_KEY_CHECKS = @OLD_FK;
+INSERT INTO `_prisma_migrations` (`id`, `checksum`, `finished_at`, `migration_name`, `logs`, `rolled_back_at`, `started_at`, `applied_steps_count`) SELECT UUID(), 'f77cdcd9e5e1531a03950b3fde6ffd5994e877cb167bb64b1238ab86496d0c73', NOW(3), '20261210120000_fin_contact_trade_register', NULL, NULL, NOW(3), 1 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `_prisma_migrations` WHERE `migration_name` = '20261210120000_fin_contact_trade_register' AND `rolled_back_at` IS NULL AND `finished_at` IS NOT NULL);

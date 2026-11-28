@@ -5308,6 +5308,34 @@
         "versionMismatch": "Quelqu’un a modifié cette fiche entre-temps : rechargez la page.",
         "memberRevoked": "L’accès de cette personne a été retiré : invitez-la de nouveau.",
         "organisationNotFound": "Cette organisation n’est plus accessible."
+      },
+      "identityLater": "Le NIF, le registre du commerce et le NIS se remplissent ensuite dans « Fiche de l’entreprise », en haut de votre espace.",
+      "identityTitle": "Identité de l’entreprise",
+      "identityIntro": "Ces informations figurent sur vos devis et vos factures, et dans le passeport financier. Seul le titulaire peut les modifier ; chaque modification est inscrite au journal.",
+      "identityMissing": "À compléter : {{fields}}.",
+      "identitySaved": "Fiche de l’entreprise enregistrée.",
+      "identitySave": "Enregistrer la fiche",
+      "identityReadOnly": "Seul le titulaire de l’organisation peut modifier cette fiche.",
+      "identity": {
+        "legalForm": "Forme juridique",
+        "notSaid": "Non précisée",
+        "taxId": "NIF (numéro d’identification fiscale)",
+        "tradeRegister": "Registre du commerce (RC)",
+        "statisticalId": "NIS (numéro d’identification statistique)",
+        "sector": "Secteur",
+        "activity": "Activité principale",
+        "fiscalYear": "Début de l’exercice"
+      },
+      "legalForms": {
+        "auto_entrepreneur": "Auto-entrepreneur",
+        "micro_entreprise": "Micro-entreprise",
+        "profession_liberale": "Profession libérale",
+        "micro_importateur": "Micro-importateur",
+        "startup": "Startup",
+        "pme": "PME",
+        "pmi": "PMI",
+        "entreprise": "Entreprise",
+        "autre": "Autre"
       }
     },
     "title": "Mon entreprise",
@@ -5630,7 +5658,8 @@
       "clearDispute": "Lever le litige",
       "disputeMarked": "Facture marquée en litige.",
       "disputeCleared": "Litige levé.",
-      "disputed": "En litige depuis le {{date}} : cette facture n’est pas proposée au financement."
+      "disputed": "En litige depuis le {{date}} : cette facture n’est pas proposée au financement.",
+      "sendHint": "« Marquer comme envoyé » note seulement que vous avez transmis ce devis (par e-mail, en main propre…) : FINCLUDIA n’envoie rien lui-même. Imprimez-le ou enregistrez-le en PDF pour le transmettre, puis notez la réponse avec « Accepter » ou « Refuser »."
     },
     "pilot": {
       "tabsLabel": "Parties de l’espace entreprise",
@@ -5646,7 +5675,8 @@
         "steer": "Budget et trésorerie",
         "team": "Équipe et journal",
         "payroll": "Paie",
-        "accounting": "Comptabilité"
+        "accounting": "Comptabilité",
+        "company": "Fiche de l’entreprise"
       },
       "homes": {
         "PUB-01": "Profession libérale : honoraires, créances, trésorerie",
@@ -5732,7 +5762,7 @@
       "budgetSaved": "Budget enregistré.",
       "planTitle": "Trésorerie sur 13 semaines",
       "planIntro": "À partir de l’argent que vous avez réellement aujourd’hui, ce qui doit entrer (factures de vente à leur échéance) et sortir (factures d’achat à leur échéance et budgets restants), semaine par semaine. Rien n’est garanti : un client peut payer en retard.",
-      "balance": "Solde constaté de vos comptes et de votre caisse",
+      "balance": "Solde de départ : ce que vous avez aujourd’hui sur vos comptes et en caisse",
       "overdraft": "C’est un découvert",
       "observedAt": "Constaté le",
       "saveBalance": "Enregistrer le solde",
@@ -5778,7 +5808,19 @@
       "lotRef": "Repère du lot",
       "fromLot": "Lot concerné",
       "saveMove": "Enregistrer le mouvement",
-      "moveSaved": "Mouvement enregistré."
+      "moveSaved": "Mouvement enregistré.",
+      "tabGroups": {
+        "steer": "Piloter",
+        "trade": "Vendre et acheter",
+        "funding": "Projets et financement",
+        "people": "Personnel et comptes",
+        "organisation": "Organisation"
+      },
+      "stepStart": "Solde de départ",
+      "stepPlan": "Le plan semaine par semaine",
+      "startReadOnly": "Le solde de départ est saisi par une personne qui gère la trésorerie.",
+      "lotRefExample": "Ex. : BL-2026-041",
+      "lotRefHint": "Facultatif. Le numéro qui vous permet de reconnaître ce lot : bon de livraison, facture du fournisseur, numéro de lot imprimé sur le carton… Il apparaît ensuite quand vous choisissez de quel lot sortir des unités."
     },
     "trade": {
       "title": "Opérations internationales",
@@ -7283,7 +7325,9 @@
       "kindPassport": "Passeport",
       "kindBatch": "Lot de factures",
       "openShare": "Ouvrir",
-      "shareGone": "Ce partage n’est plus disponible."
+      "shareGone": "Ce partage n’est plus disponible.",
+      "identityWhere": "Le NIF et le registre du commerce viennent de « Fiche de l’entreprise » (bouton dans la navigation de votre espace) : remplissez-les là, puis préparez un nouveau passeport.",
+      "discardConfirm": "Supprimer le brouillon du passeport n° {{n}} ?"
     },
     "financing": {
       "title": "Factures à financer",
@@ -9093,7 +9137,7 @@
     },
     "stepsHint": {
       "diagnostic": "données, période, acteurs et notions identifiés correctement",
-      "method": "formule, classement ou checklist appliqués sans sauter d’étape",
+      "method": "calcul, classement ou checklist appliqués sans sauter d’étape",
       "result": "résultat présenté avec son unité, sa période et sa convention",
       "interpretation": "ce que le résultat signifie et ce qu’il ne prouve pas",
       "decision": "action cohérente, source, risque ou hypothèse vérifiés"
@@ -9283,5 +9327,23 @@
     "noParticipant": "Aucun apprenant n’a encore accepté l’invitation.",
     "present": "présent",
     "attendanceSaved": "Présence notée."
+  },
+  "fields": {
+    "chooseCurrency": "Choisir une devise",
+    "chooseSource": "Choisir la source",
+    "chooseWilaya": "Choisir une wilaya",
+    "rateSources": {
+      "official": "Banque d’Algérie (cours officiel)",
+      "bank": "Ma banque (cours appliqué)",
+      "exchangeOffice": "Bureau de change agréé",
+      "contract": "Contrat ou facture du partenaire",
+      "other": "Autre source"
+    },
+    "rules": {
+      "phone": "Chiffres uniquement, avec espaces, points ou tirets si vous voulez, et « + » devant un indicatif (6 à 15 chiffres).",
+      "nif": "Le NIF compte 15 chiffres (ou 20 pour le nouveau format), sans lettres ni espaces.",
+      "nis": "Le NIS compte 15 chiffres, sans lettres ni espaces.",
+      "rc": "Le numéro du registre du commerce, tel qu’il figure sur l’extrait (lettres, chiffres, « / » et « - »), par exemple 16/00-0123456 B 12."
+    }
   }
 }

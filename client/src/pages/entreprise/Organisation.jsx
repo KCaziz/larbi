@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, History, Plus, ShieldCheck, UserPlus, Users } from 'lucide-react';
+import { Building2, FileBadge, History, Plus, Save, ShieldCheck, UserPlus, Users } from 'lucide-react';
 import { api, ApiError, errorKey, WRITE_DONE_EVENT } from '../../lib/api.js';
 import { useApi } from '../../lib/useApi.js';
 import { formatDate } from '../../lib/format.js';
 import { newIdempotencyKey } from '../../lib/organisation.js';
 import Button from '../../components/ui/Button.jsx';
 import { askConfirm } from '../../components/ui/ConfirmDialog.jsx';
+import { RuledInput, WilayaSelect } from '../../components/fincludia/BusinessFields.jsx';
 
 // P13-05, lot A (2026-11-23): the organisations of the client's référentiel —
 // which one I work in, the invitations I received, the members and their
@@ -130,28 +131,41 @@ export function CreateOrganisation({ currency, onCreated, onCancel }) {
     <form className="business-form business-create" onSubmit={submit}>
       <h2>{t('business.createTitle')}</h2>
       <p>{t('business.createIntro')}</p>
-      <label htmlFor="business-name">{t('business.nameLabel')}</label>
-      <input id="business-name" value={form.name} onChange={set('name')} maxLength={160} required />
-      <label htmlFor="business-trade">{t('business.org.tradeName')}</label>
-      <input id="business-trade" value={form.tradeName} onChange={set('tradeName')} maxLength={160} />
-      <label htmlFor="business-public">{t('business.org.public')}</label>
-      <select id="business-public" value={form.publicKey} onChange={set('publicKey')}>
-        <option value="">{t('business.org.publicNone')}</option>
-        {PUBLICS.map((key) => (
-          <option key={key} value={key}>
-            {t(`business.org.publics.${key}`)}
-          </option>
-        ))}
-      </select>
+      <div className="business-form-row">
+        <label htmlFor="business-name">
+          {t('business.nameLabel')}
+          <input id="business-name" value={form.name} onChange={set('name')} maxLength={160} required />
+        </label>
+        <label htmlFor="business-trade">
+          {t('business.org.tradeName')}
+          <input id="business-trade" value={form.tradeName} onChange={set('tradeName')} maxLength={160} />
+        </label>
+      </div>
+      <div className="business-form-row">
+        <label htmlFor="business-public">
+          {t('business.org.public')}
+          <select id="business-public" value={form.publicKey} onChange={set('publicKey')}>
+            <option value="">{t('business.org.publicNone')}</option>
+            {PUBLICS.map((key) => (
+              <option key={key} value={key}>
+                {t(`business.org.publics.${key}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label htmlFor="business-wilaya">
+          {t('business.org.wilaya')}
+          <WilayaSelect id="business-wilaya" value={form.wilaya} onChange={(wilaya) => setForm((previous) => ({ ...previous, wilaya }))} />
+        </label>
+      </div>
       <p className="fin-hint">{t('business.org.publicHint')}</p>
-      <label htmlFor="business-wilaya">{t('business.org.wilaya')}</label>
-      <input id="business-wilaya" value={form.wilaya} onChange={set('wilaya')} maxLength={60} />
+      <p className="fin-hint">{t('business.org.identityLater')}</p>
       {error && (
         <p className="form-error" role="alert">
           {error}
         </p>
       )}
-      <div className="org-actions">
+      <div className="org-actions business-form-actions">
         <Button type="submit" variant="primary" disabled={busy}>
           <Plus size={16} aria-hidden="true" />
           {t('business.create')}
@@ -163,6 +177,151 @@ export function CreateOrganisation({ currency, onCreated, onCancel }) {
         )}
       </div>
     </form>
+  );
+}
+
+export const LEGAL_FORMS = ['auto_entrepreneur', 'micro_entreprise', 'profession_liberale', 'micro_importateur', 'startup', 'pme', 'pmi', 'entreprise', 'autre'];
+const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+const IDENTITY_FIELDS = ['name', 'tradeName', 'legalForm', 'publicKey', 'sector', 'activity', 'wilaya', 'taxId', 'tradeRegister', 'statisticalId'];
+
+/**
+ * R20 (2026-11-28): the company file — name, legal form, NIF, RC, NIS. They
+ * were only accepted at creation, by the API: no screen let anyone fill them.
+ * The holder changes them (org.update); the others read them.
+ */
+export function IdentitySection({ business, canWrite, onSaved }) {
+  const { t, i18n } = useTranslation();
+  const [form, setForm] = useState(() => ({
+    ...Object.fromEntries(IDENTITY_FIELDS.map((field) => [field, business[field] ?? ''])),
+    fiscalYearStartMonth: String(business.fiscalYearStartMonth ?? 1),
+  }));
+  const [message, setMessage] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const set = (field) => (event) => setForm((previous) => ({ ...previous, [field]: event.target.value }));
+  const setValue = (field) => (value) => setForm((previous) => ({ ...previous, [field]: value }));
+  const monthName = (month) => new Intl.DateTimeFormat(i18n.language === 'tzm' ? 'fr' : i18n.language, { month: 'long' }).format(new Date(2026, month - 1, 1));
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    setMessage(null);
+    const body = Object.fromEntries(IDENTITY_FIELDS.map((field) => [field, form[field].trim() === '' ? null : form[field].trim()]));
+    body.name = form.name.trim();
+    body.fiscalYearStartMonth = Number(form.fiscalYearStartMonth);
+    try {
+      await api.put('/fin/entreprise', body, { ifMatch: business.version });
+      setMessage({ kind: 'ok', text: t('business.org.identitySaved') });
+      onSaved?.();
+    } catch (err) {
+      setMessage({ kind: 'error', text: organisationError(t, err) });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const missing = ['taxId', 'tradeRegister', 'statisticalId'].filter((field) => !business[field]);
+  return (
+    <section aria-labelledby="org-identity">
+      <h2 id="org-identity">
+        <FileBadge size={18} aria-hidden="true" /> {t('business.org.identityTitle')}
+      </h2>
+      <p className="business-blocked-intro">{t('business.org.identityIntro')}</p>
+      {missing.length > 0 && <p className="business-document-warning">{t('business.org.identityMissing', { fields: missing.map((field) => t(`business.org.identity.${field}`)).join(', ') })}</p>}
+      <form className="business-form" onSubmit={submit}>
+        <fieldset disabled={!canWrite || busy} className="business-fieldset">
+          <div className="business-form-row">
+            <label>
+              {t('business.nameLabel')}
+              <input value={form.name} onChange={set('name')} maxLength={160} required />
+            </label>
+            <label>
+              {t('business.org.tradeName')}
+              <input value={form.tradeName} onChange={set('tradeName')} maxLength={160} />
+            </label>
+            <label>
+              {t('business.org.identity.legalForm')}
+              <select value={form.legalForm} onChange={set('legalForm')}>
+                <option value="">{t('business.org.identity.notSaid')}</option>
+                {LEGAL_FORMS.map((key) => (
+                  <option key={key} value={key}>
+                    {t(`business.org.legalForms.${key}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="business-form-row">
+            <label>
+              {t('business.org.identity.taxId')}
+              <RuledInput kind="nif" value={form.taxId} onChange={setValue('taxId')} placeholder="000216001234567" />
+              <span className="fin-hint">{t('fields.rules.nif')}</span>
+            </label>
+            <label>
+              {t('business.org.identity.tradeRegister')}
+              <RuledInput kind="rc" value={form.tradeRegister} onChange={setValue('tradeRegister')} placeholder="16/00-0123456 B 12" />
+              <span className="fin-hint">{t('fields.rules.rc')}</span>
+            </label>
+            <label>
+              {t('business.org.identity.statisticalId')}
+              <RuledInput kind="nis" value={form.statisticalId} onChange={setValue('statisticalId')} placeholder="000216010012345" />
+              <span className="fin-hint">{t('fields.rules.nis')}</span>
+            </label>
+          </div>
+          <div className="business-form-row">
+            <label>
+              {t('business.org.identity.sector')}
+              <input value={form.sector} onChange={set('sector')} maxLength={160} />
+            </label>
+            <label>
+              {t('business.org.identity.activity')}
+              <input value={form.activity} onChange={set('activity')} maxLength={160} />
+            </label>
+            <label>
+              {t('business.org.wilaya')}
+              <WilayaSelect value={form.wilaya} onChange={setValue('wilaya')} />
+            </label>
+          </div>
+          <div className="business-form-row">
+            <label>
+              {t('business.org.public')}
+              <select value={form.publicKey} onChange={set('publicKey')}>
+                <option value="">{t('business.org.publicNone')}</option>
+                {PUBLICS.map((key) => (
+                  <option key={key} value={key}>
+                    {t(`business.org.publics.${key}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {t('business.org.identity.fiscalYear')}
+              <select value={form.fiscalYearStartMonth} onChange={set('fiscalYearStartMonth')}>
+                {MONTHS.map((month) => (
+                  <option key={month} value={String(month)}>
+                    {monthName(month)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </fieldset>
+        {message && (
+          <p className={message.kind === 'ok' ? 'form-status' : 'form-error'} role="status">
+            {message.text}
+          </p>
+        )}
+        {canWrite ? (
+          <div className="business-form-actions">
+            <Button type="submit" variant="primary" disabled={busy}>
+              <Save size={16} aria-hidden="true" />
+              {t('business.org.identitySave')}
+            </Button>
+          </div>
+        ) : (
+          <p className="fin-hint">{t('business.org.identityReadOnly')}</p>
+        )}
+      </form>
+    </section>
   );
 }
 

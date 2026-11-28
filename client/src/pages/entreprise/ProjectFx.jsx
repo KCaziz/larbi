@@ -8,6 +8,7 @@ import { useOfficialRate } from '../../lib/officialRate.js';
 import Button from '../../components/ui/Button.jsx';
 import FigureCard from '../../components/fincludia/FigureCard.jsx';
 import AmountField from '../../components/fincludia/AmountField.jsx';
+import { CurrencySelect, RateSourceSelect } from '../../components/fincludia/BusinessFields.jsx';
 
 // P13-05, lot D bis (2026-11-25): the exchange effect on a diaspora project
 // (ECR-0378). An amount in the person's currency, converted into the project's
@@ -65,7 +66,7 @@ export function ProjectFx({ project, base, contribute, run }) {
         <div className="business-form-row">
           <label>
             {t('business.fx.from')}
-            <input value={form.from} onChange={set('from')} maxLength={3} minLength={3} required />
+            <CurrencySelect value={form.from} onChange={(v) => setForm((p) => ({ ...p, from: v }))} />
           </label>
           <AmountField id={`fx-amount-${project.id}`} label={t('business.fx.amount')} currency={from || 'EUR'} value={form.amount} onChange={(v) => setForm((x) => ({ ...x, amount: v }))} required />
           <label>
@@ -80,7 +81,7 @@ export function ProjectFx({ project, base, contribute, run }) {
         <div className="business-form-row">
           <label>
             {t('business.trade.rateSource')}
-            <input value={form.rateSource} onChange={set('rateSource')} maxLength={120} placeholder={t('business.trade.rateSourceHint')} />
+            <RateSourceSelect value={form.rateSource} onChange={(v) => setForm((p) => ({ ...p, rateSource: v }))} />
           </label>
           <label>
             {t('business.fx.scenarioRates')}

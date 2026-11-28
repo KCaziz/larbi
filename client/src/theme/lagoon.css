@@ -163,7 +163,7 @@
 }
 
 /* Boutons et onglets choisis (périodes, filtres) : menthe. */
-[data-theme='light'] :is(.app-main, .shared-main, .admin-main) :is([aria-pressed='true'], [aria-selected='true'], [aria-current='page']):is(button, a):not(.app-nav-link):not(.app-switcher-link):not(.movements-account-card) {
+[data-theme='light'] :is(.app-main, .shared-main, .admin-main) :is([aria-pressed='true'], [aria-selected='true'], [aria-current='page']):is(button, a):not(.app-nav-link):not(.app-switcher-link):not(.movements-account-card):not(.business-tab) {
   border-color: rgba(8, 118, 130, 0.45);
   background: #d4f6f1;
   color: #064e57;

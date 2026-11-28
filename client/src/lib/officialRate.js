@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import i18n from 'i18next';
 import { api } from './api.js';
 
 // P13-05 (2026-11-25): the official rate of the Banque d'Algérie, proposed by
@@ -23,7 +24,8 @@ export function useOfficialRate(from, to, currentRate, apply) {
         applyRef.current({
           rate: String(res.cours.rate),
           rateDate: res.cours.referenceDate ? String(res.cours.referenceDate).slice(0, 10) : new Date().toISOString().slice(0, 10),
-          rateSource: (res.cours.source ?? "Banque d'Algérie").slice(0, 120),
+          // R20: the source is chosen in a list; the official one has its own words there.
+          rateSource: i18n.t('fields.rateSources.official'),
         });
         setProposed(true);
       })

@@ -1,2 +1,33 @@
 - Nous devrions avoir par exemple les outils de comparaison comparateurs de banque et autres , le budget, les professionnels, diaspora et commerce international 
-Réparti et distincts et juste en bas la formation l'abonnement à la newsletter et le veille réglementaire. Je te ferai ça dans un schéma si tu veux
+Réparti et distincts et juste en bas la formation l'abonnement à la newsletter et le veille réglementaire. Je te ferai ça dans un schéma si tu veux 
+
+- dans acceuil l'ecriture est un peut caché par les vague en arriere plan 
+- dans /app/entreprise le formulaire est bien centrer mais je veut qu'il soit un peut plus large (je veut que tu formalise les formulaire comme celui ci pas tous mais j'aimerais bien qu'il n'y aient pas de formulaire non centrer ou qui sont etroit comme celui ci) aussi pour les bouttons comme ici il est coller avec le champ wilaya (plus de marge)
+- dans l'espace de mon entreprise je veut que les bouttons de navigations soit vraiment distinctible et que l'on reconnais que se sont des bouttons de navigation (bg, icone etc) tu est libre
+- les alerts sur les erreurs ou les modif ou les changement bref touts les petite alerte exp Il ne reste pas autant d’unités dans ce lot. et ben a chaque fois il est coller a l'element plus haut met un peut de marge
+- j'ai remarquer que les pages sont trop uniforme genre on a le fond puis de l'ecriture (je parle des grosses section d'explication ou de résumé) change au moins le BG de ses section exp /app/entreprise > budget trésorerie les sections Votre trésorerie ou Ce que cet espace ne produit pas
+- améliore les navigations dans l'onglet entreprise
+
+scenario:
+2.
+1- pas de nif dans le formulaires clients et fournisseurs et aussi truc trés important y'a pas de controlleur sur les champs exp le tel je peut mettre des lettre et ca passe ajoute des controlleurs sur les champs (generalise ceci a toutes l'app)
+2- dans ventes et achats (devis) pour la devise ne donne pas le choix au client de mettre n'importe quoi donne lui uniquement le choix avec les devises existantes dans l'app 
+3- que veut dire envoyer dans le devis ? 
+
+3.
+1- pourquoi la source du cours est un champs modifiable 
+
+4.
+2- explique c'est quoi Repère du lot
+3- je n'ai pas de champs saisir le solde de depart mais j'ai directement Trésorerie sur 13 semaines
+
+5. 
+1- pereil pour la devise ne donne pas le choix aux client de saisir les devises met juste les devises qu'il y'a sur le site 
+
+8.
+1- je n'aime pas le designe Voir le contenu Publier Supprimer le brouillon met tout en boutton ou en ecriture 
+2- ou remplir le NIF et registre du commerce je n'ai jamais croiser ceci 
+
+**generalise la correction pour les devises et pour le nif et le registe de commerce 
+
+arrivé a secion test 10 je vais continuer aprés
